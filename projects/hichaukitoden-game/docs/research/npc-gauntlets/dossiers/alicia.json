@@ -1,0 +1,61 @@
+{
+  "contractVersion": 1,
+  "id": "alicia",
+  "displayName": "Alicia",
+  "facts": [
+    {
+      "kind": "source",
+      "text": "(She fiddles with a loose thread on her apron, waiting for you to speak.)",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.15.commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "I sell things that keep you alive! It makes me happy. Watching people leave with full bags… it means they might come back. That’s nice.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.15.commands[2].options[1].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    }
+  ],
+  "privateKnowledge": [],
+  "goals": ["keep travelers supplied and willing to return"],
+  "behavioralTensions": ["wants to help but is shy about asking for attention"],
+  "canon": {
+    "core": "Creative, obsessive, depressed, and poorly functional.",
+    "voice": "Undemanding, pleasant, and quirky. She avoids doing anything she perceives as possibly letting others down, even when that fear is really projection.",
+    "wants": "Reassurance, physical intimacy, love, and affection from Laura. She projects onto Laura the possibility of lifting the burden of feeling gross and unlovable by proving that Alicia is lovable, including the parts of herself she hates.",
+    "fears": "She fears that Laura will perceive her yearning as false, manipulative, shallow, or otherwise not genuine—not merely that Laura will notice something true about her.",
+    "defenses": "When pressed, she usually makes the situation worse or retreats into deep, rambly intellectualization and matter-of-fact analysis in an attempt to make it feel palpable and controllable.",
+    "contradictions": "She longs intensely for reassurance and closeness while believing herself gross and unlovable; she wants to be known, but fears that expressing that want will make it look manipulative or false.",
+    "tags": ["creative", "obsessive", "depressed", "poorly functional", "undemanding", "pleasant", "quirky"],
+    "references": ["Rikku from Final Fantasy X", "Madoka from Madoka Magica", "Homura from Madoka Magica", "Sailor Venus"]
+  },
+  "metadata": {
+    "starsign": "Libra",
+    "colorPalette": ["pink", "orange", "deep dark desaturated green"]
+  },
+  "relationships": {
+    "laura": {
+      "dimensions": [
+        { "key": "familiarity", "initial": 0 },
+        { "key": "trust", "initial": 0 },
+        { "key": "irritation", "initial": 0 }
+      ]
+    },
+    "player_proxy": {
+      "dimensions": [
+        { "key": "familiarity", "initial": 0 }
+      ]
+    }
+  },
+  "routines": []
+}

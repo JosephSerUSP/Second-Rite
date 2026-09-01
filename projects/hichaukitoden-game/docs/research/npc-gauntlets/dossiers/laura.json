@@ -1,0 +1,381 @@
+{
+  "contractVersion": 1,
+  "id": "laura",
+  "displayName": "Laura",
+  "facts": [
+    {
+      "kind": "source",
+      "text": "(She wipes soot from her forehead, giving you a brief moment of attention.)",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "Alicia? She's... soft. Too soft for this place. But she makes good bread. And she doesn't ask stupid questions. I tolerate her.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[0].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "Fire purifies. Metal obeys. People... people lie. Steel never lies to you. It just is. That's why I like it.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[1].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "I'll need time to work on this. Check back later. And... thanks.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "Find that signet. Don't come back empty-handed.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[1].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "I'll need time to work on this. Check back later. And... thanks.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[1].commands[1].options[0].commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "You're going deep? Listen. Rumor says a rare undead down there wears a golden band. Unmarked, untarnished. I want that signet — new material for my forge, good pay for you. Interested?",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "Find that signet. Don't come back empty-handed.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[2].commands[0]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "I'll need time to work on this. Check back later. And... thanks.",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[2].commands[1].options[0].commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "Back again? Blade dull already? Or are you just looking for warmth?",
+      "sourceRefs": [
+        {
+          "path": "data/commonEvents.json",
+          "pointer": "$.31.commands[1]",
+          "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+        }
+      ]
+    }
+  ],
+  "privateKnowledge": [],
+  "goals": [],
+  "behavioralTensions": [],
+  "canon": {
+    "core": "She sees herself as manipulative—or at least wants to entertain that persona to preserve her own sanity. After a traumatic past, she uses extreme competence to buy status and credibility. She sees herself as exceptionally rational and practical, even if analysis might show otherwise.",
+    "voice": "Bright, joking, and capable of casual flirtation, but that is relationship-dependent rather than her default register with everyone. Flirting is a hobby when she chooses it; with people she is simply pleasant toward, she should be warm, practical, and easy to be around without performing romantic charge. With Alicia, interest is more embodied and destabilizing: touch, deliberate embarrassment, massages, awkward compliments, and other gestures that make the moment physically difficult to dismiss. The function of these behaviors is unresolved; they may be connected to her past trauma through reenactment.",
+    "wants": "Unknown whether she tends to Alicia from stewardship, harbors genuine attraction, or sees something useful in her. She has asked Alicia to kiss her in the past; the motive remains unresolved.",
+    "fears": "Unknown whether she fears Alicia misunderstanding her motives. Do not assume that she does, or that her uncertainty is secretly settled.",
+    "defenses": "When pressure gets through, she becomes practical and actional: concocts a plan and executes it. She has had to do this many times.",
+    "contradictions": "She is verbally committed to rationality and practicality, but her choices and emotional behavior often do not appear rational or practical.",
+    "tags": ["manipulative self-concept", "trauma-armored", "extremely competent", "status-seeking", "rationalist self-image", "bright", "joking", "casually flirtatious", "deliberately ambiguous"],
+    "references": [],
+    "antiTropes": ["stock flirtation as Laura's default with every NPC", "polished innuendo standing in for relationship specificity"]
+  },
+  "relationshipCanon": {
+    "alicia": {
+      "dynamic": "With Alicia, Laura is not simply generically flirtatious. She may initiate physical intimacy, create intentional embarrassment, offer or request massages, and give awkward compliments whose force comes from making the moment bodily and difficult to dismiss.",
+      "signals": "Let interest appear through touch, proximity, teasing that risks embarrassment, and practical acts of attention. Keep the motive unresolved; do not convert these gestures into a clean romantic declaration.",
+      "avoid": "Do not make Laura perform a stock charmer routine, stack polished innuendo in every turn, or treat every joke as evidence of uncomplicated attraction."
+    },
+    "the_gambler": {
+      "dynamic": "Laura is generally pleasant toward the Gambler, but the Gambler's usual practiced attitude becomes oddly awkward around her. Treat the awkwardness as an observable social mismatch, not as a confession or a settled explanation.",
+      "signals": "Laura can keep the exchange easy and lightly amused, giving him room to recover without interrogating the awkwardness. Her warmth should read as ordinary ease rather than a performance of seduction.",
+      "avoid": "Do not turn Laura into a stock flirt, make the Gambler's awkwardness vanish immediately, or decide whether his discomfort is attraction, intimidation, shame, or something else."
+    },
+    "npc_barkeep": {
+      "dynamic": "Laura is notably pleasant with the Barkeep without becoming text-book flirty. If she says something ambiguous or unusually personal, the Barkeep takes it as a joke in order not to offend her or make the room difficult.",
+      "signals": "Keep Laura warm, practical, and casually at ease. Let the Barkeep's protective joke-reading preserve social deniability rather than turning the moment into a romantic exchange.",
+      "avoid": "Do not make Laura use polished innuendo every turn, and do not make the Barkeep call her out, reject her, or openly diagnose what she meant."
+    }
+  },
+  "metadata": {
+    "starsign": "Leo",
+    "tropeCandidates": [
+      {
+        "name": "The Charmer",
+        "url": "https://tvtropes.org/pmwiki/pmwiki.php/Main/TheCharmer",
+        "fit": "partial",
+        "reading": "Her bright, casually flirtatious social ease fits; the article's sincerity distinction is deliberately unresolved for Laura."
+      },
+      {
+        "name": "Romantic Ribbing",
+        "url": "https://tvtropes.org/pmwiki/pmwiki.php/Main/RomanticRibbing",
+        "fit": "relationship candidate",
+        "reading": "Use for playful teasing with Alicia only if the exchange is genuinely mutual rather than treating flirtation as automatic romance."
+      },
+      {
+        "name": "Xanatos Speed Chess",
+        "url": "https://tvtropes.org/pmwiki/pmwiki.php/Main/XanatosSpeedChess",
+        "fit": "possible behavioral analogue",
+        "reading": "Use only for rapid practical adaptation when a plan fails; do not inflate her into an omniscient mastermind."
+      },
+      {
+        "name": "Bad Reason to Do Good",
+        "url": "https://tvtropes.org/pmwiki/pmwiki.php/Main/BadReasonToDoGood",
+        "fit": "question to test",
+        "reading": "Could frame the unresolved question of whether tending to Alicia is stewardship, attraction, utility, or a mixture."
+      }
+    ]
+  },
+  "relationships": {
+    "alicia": {
+      "dimensions": [
+        { "key": "familiarity", "initial": 0 },
+        { "key": "trust", "initial": 0 },
+        { "key": "irritation", "initial": 0 }
+      ]
+    },
+    "the_gambler": {
+      "dimensions": [
+        { "key": "familiarity", "initial": 0 },
+        { "key": "trust", "initial": 0 },
+        { "key": "irritation", "initial": 0 }
+      ]
+    },
+    "npc_barkeep": {
+      "dimensions": [
+        { "key": "familiarity", "initial": 0 },
+        { "key": "trust", "initial": 0 },
+        { "key": "irritation", "initial": 0 }
+      ]
+    }
+  },
+  "routines": [],
+  "sourceRefs": [
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[0].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[1].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[1].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].commands[1].commands[1].options[0].commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[2].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.17.commands[2].options[2].commands[0].elseCommands[0].elseCommands[1].options[0].commands[2].commands[1].options[0].commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.31.commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[2].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[2].commands[1]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[2].commands[5]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[3].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[3].elseCommands[0].commands[0].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[3].elseCommands[0].commands[0].elseCommands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[3].elseCommands[0].elseCommands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[4].options[1].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/commonEvents.json",
+      "pointer": "$.39.commands[4].options[2].commands[0]",
+      "sha256": "f5bd81690022cda4cc915b8190548ecda114e7efb2fa6e8d5f61fd5062b28477"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[4].commands[0].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[4].commands[0].commands[1].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[4].commands[0].commands[1].commands[1].options[0].commands[1]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[4].commands[0].elseCommands[0].elseCommands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[4].commands[0].elseCommands[0].elseCommands[1].options[1].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/23.json",
+      "pointer": "$.events[0].commands[0].commands[0]",
+      "sha256": "a1ae901415d21b4506783d8f4a0432ff9a9e3992c4bdeee2257d39e8301aaafb"
+    },
+    {
+      "path": "data/maps/23.json",
+      "pointer": "$.events[0].commands[0].commands[1].commands[0]",
+      "sha256": "a1ae901415d21b4506783d8f4a0432ff9a9e3992c4bdeee2257d39e8301aaafb"
+    },
+    {
+      "path": "data/maps/23.json",
+      "pointer": "$.events[0].commands[0].commands[1].commands[1].options[0].commands[1]",
+      "sha256": "a1ae901415d21b4506783d8f4a0432ff9a9e3992c4bdeee2257d39e8301aaafb"
+    },
+    {
+      "path": "data/maps/23.json",
+      "pointer": "$.events[0].commands[0].elseCommands[0].elseCommands[0]",
+      "sha256": "a1ae901415d21b4506783d8f4a0432ff9a9e3992c4bdeee2257d39e8301aaafb"
+    },
+    {
+      "path": "data/maps/23.json",
+      "pointer": "$.events[0].commands[0].elseCommands[0].elseCommands[1].options[1].commands[0]",
+      "sha256": "a1ae901415d21b4506783d8f4a0432ff9a9e3992c4bdeee2257d39e8301aaafb"
+    }
+  ],
+  "notes": "Candidate compiled from live Project dialogue. Add hypotheses explicitly; do not treat omissions as facts."
+}

@@ -1,0 +1,77 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_laura_full_day",
+  "title": "One ordinary day in St. Maria",
+  "slots": [
+    {
+      "time": "morning",
+      "location": "forge entrance",
+      "scenarioIds": ["alicia_laura_opening_inventory"],
+      "availableParticipantIds": ["alicia", "laura"],
+      "notes": "Start with a small errand and no declared emotional objective."
+    },
+    {
+      "time": "midday",
+      "location": "forge entrance",
+      "scenarioIds": ["alicia_laura_burnt_bread"],
+      "availableParticipantIds": ["alicia", "laura"],
+      "notes": "Use the accepted bread scene as the day's central pressure."
+    },
+    {
+      "time": "afternoon",
+      "location": "forge",
+      "scenarioIds": ["alicia_laura_missing_order"],
+      "availableParticipantIds": ["alicia", "laura"],
+      "notes": "Let practical competence and irritation carry the scene."
+    },
+    {
+      "time": "late afternoon",
+      "location": "Rusty Tankard",
+      "scenarioIds": ["laura_the_gambler_tankard"],
+      "availableParticipantIds": ["laura", "the_gambler"],
+      "notes": "Test the Gambler's oddly awkward response to Laura's ordinary pleasantness."
+    },
+    {
+      "time": "evening",
+      "location": "forge door",
+      "scenarioIds": ["alicia_laura_forge_closing"],
+      "availableParticipantIds": ["alicia", "laura"],
+      "notes": "End with an ordinary open question rather than a climax."
+    },
+    {
+      "time": "night",
+      "location": "Rusty Tankard",
+      "scenarioIds": ["laura_npc_barkeep_tankard"],
+      "availableParticipantIds": ["laura", "npc_barkeep"],
+      "notes": "Let the Barkeep preserve social ease by treating Laura's ambiguity as a joke."
+    }
+  ],
+  "routines": {
+    "alicia": [
+      { "time": "morning", "activity": "opens the shop and carries out supply errands" },
+      { "time": "midday", "activity": "moves between shop work and deliveries" },
+      { "time": "afternoon", "activity": "returns with supplies or unfinished errands" },
+      { "time": "evening", "activity": "winds down the shop and decides whether to linger" }
+    ],
+    "laura": [
+      { "time": "morning", "activity": "starts forge work and checks what the day requires" },
+      { "time": "midday", "activity": "keeps working around the forge despite needing food" },
+      { "time": "afternoon", "activity": "adapts the work when a supply is missing" },
+      { "time": "late afternoon", "activity": "passes through the Rusty Tankard and is unexpectedly pleasant to the Gambler" },
+      { "time": "evening", "activity": "closes the forge and puts tools away" },
+      { "time": "night", "activity": "stops at the Rusty Tankard for an easy exchange with the Barkeep" }
+    ],
+    "the_gambler": [
+      { "time": "late afternoon", "activity": "shuffles cards in his corner of the Rusty Tankard" }
+    ],
+    "npc_barkeep": [
+      { "time": "night", "activity": "serves drinks and keeps conversation from becoming needlessly uncomfortable" }
+    ]
+  },
+  "availability": {
+    "alicia": ["morning", "midday", "afternoon", "evening"],
+    "laura": ["morning", "midday", "afternoon", "late afternoon", "evening", "night"],
+    "the_gambler": ["late afternoon"],
+    "npc_barkeep": ["night"]
+  }
+}

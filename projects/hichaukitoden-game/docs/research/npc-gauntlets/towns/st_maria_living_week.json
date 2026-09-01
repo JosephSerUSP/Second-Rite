@@ -1,0 +1,136 @@
+{
+  "contractVersion": 1,
+  "id": "st_maria_living_week",
+  "title": "An ordinary week in St. Maria",
+  "timeBlocks": [
+    { "id": "mon_morning", "label": "Monday morning", "day": "Monday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "mon_afternoon", "label": "Monday afternoon", "day": "Monday", "phase": "afternoon" },
+    { "id": "mon_evening", "label": "Monday evening", "day": "Monday", "phase": "evening", "dayEnd": true },
+    { "id": "tue_morning", "label": "Tuesday morning", "day": "Tuesday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "tue_afternoon", "label": "Tuesday afternoon", "day": "Tuesday", "phase": "afternoon" },
+    { "id": "tue_evening", "label": "Tuesday evening", "day": "Tuesday", "phase": "evening", "dayEnd": true },
+    { "id": "wed_morning", "label": "Wednesday morning", "day": "Wednesday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "wed_afternoon", "label": "Wednesday afternoon", "day": "Wednesday", "phase": "afternoon" },
+    { "id": "wed_evening", "label": "Wednesday evening", "day": "Wednesday", "phase": "evening", "dayEnd": true },
+    { "id": "thu_morning", "label": "Thursday morning", "day": "Thursday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "thu_afternoon", "label": "Thursday afternoon", "day": "Thursday", "phase": "afternoon" },
+    { "id": "thu_evening", "label": "Thursday evening", "day": "Thursday", "phase": "evening", "dayEnd": true },
+    { "id": "fri_morning", "label": "Friday morning", "day": "Friday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "fri_afternoon", "label": "Friday afternoon", "day": "Friday", "phase": "afternoon" },
+    { "id": "fri_evening", "label": "Friday evening", "day": "Friday", "phase": "evening", "dayEnd": true },
+    { "id": "sat_morning", "label": "Saturday morning", "day": "Saturday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "sat_afternoon", "label": "Saturday afternoon", "day": "Saturday", "phase": "afternoon" },
+    { "id": "sat_evening", "label": "Saturday evening", "day": "Saturday", "phase": "evening", "dayEnd": true },
+    { "id": "sun_morning", "label": "Sunday morning", "day": "Sunday", "phase": "morning", "dayStart": true, "energyRecovery": 3 },
+    { "id": "sun_afternoon", "label": "Sunday afternoon", "day": "Sunday", "phase": "afternoon" },
+    { "id": "sun_evening", "label": "Sunday evening", "day": "Sunday", "phase": "evening", "dayEnd": true }
+  ],
+  "locations": [
+    { "id": "padaria", "name": "Alicia's padaria and attached home", "neighbors": ["market"] },
+    { "id": "market", "name": "St. Maria market and crossroads", "neighbors": ["padaria", "forge", "rusty_tankard", "chapel", "registry"] },
+    { "id": "forge", "name": "The formerly abandoned forge Laura has occupied", "neighbors": ["market", "rusty_tankard"] },
+    { "id": "rusty_tankard", "name": "The Rusty Tankard and its rooms", "neighbors": ["market", "forge"] },
+    { "id": "chapel", "name": "Sister Agnes's chapel", "neighbors": ["market", "registry"] },
+    { "id": "registry", "name": "Celina's registry office", "neighbors": ["market", "chapel"] }
+  ],
+  "npcIds": ["alicia", "laura", "the_gambler", "npc_barkeep", "registrar_celina", "sister_agnes"],
+  "initialNpcState": {
+    "alicia": {
+      "location": "padaria", "home": "padaria", "energy": 3, "cash": 3,
+      "obligations": [
+        { "id": "alicia_mon_shop", "description": "Bake and operate the padaria for Monday's customers", "location": "padaria", "startsAt": "mon_morning", "deadline": "mon_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_mon_meal", "description": "Prepare a nourishing supper and packed lunch for Laura", "location": "padaria", "startsAt": "mon_afternoon", "deadline": "mon_evening", "priority": 4, "effort": 1 },
+        { "id": "alicia_tue_shop", "description": "Bake and operate the padaria for Tuesday's customers", "location": "padaria", "startsAt": "tue_morning", "deadline": "tue_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_tue_meal", "description": "Prepare a nourishing supper and packed lunch for Laura", "location": "padaria", "startsAt": "tue_afternoon", "deadline": "tue_evening", "priority": 4, "effort": 1 },
+        { "id": "alicia_wed_shop", "description": "Bake and operate the padaria for Wednesday's customers", "location": "padaria", "startsAt": "wed_morning", "deadline": "wed_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_wed_gift", "description": "Use Laura's contribution to procure a small comfort for Laura", "location": "market", "startsAt": "wed_afternoon", "deadline": "thu_evening", "priority": 3, "effort": 1, "cashCost": 1 },
+        { "id": "alicia_thu_shop", "description": "Bake and operate the padaria for Thursday's customers", "location": "padaria", "startsAt": "thu_morning", "deadline": "thu_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_thu_meal", "description": "Prepare a nourishing supper and packed lunch for Laura", "location": "padaria", "startsAt": "thu_afternoon", "deadline": "thu_evening", "priority": 4, "effort": 1 },
+        { "id": "alicia_fri_shop", "description": "Bake and operate the padaria before Friday's feast", "location": "padaria", "startsAt": "fri_morning", "deadline": "fri_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_fri_feast", "description": "Attend Agnes's Friday feast", "location": "chapel", "startsAt": "fri_afternoon", "deadline": "fri_evening", "priority": 4, "effort": 1, "completion": "arrive" },
+        { "id": "alicia_sat_shop", "description": "Bake and operate the padaria for Saturday's customers", "location": "padaria", "startsAt": "sat_morning", "deadline": "sat_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_sat_meal", "description": "Prepare a nourishing supper and packed lunch for Laura", "location": "padaria", "startsAt": "sat_afternoon", "deadline": "sat_evening", "priority": 4, "effort": 1 },
+        { "id": "alicia_sun_shop", "description": "Keep a quiet Sunday counter at the padaria", "location": "padaria", "startsAt": "sun_morning", "deadline": "sun_afternoon", "priority": 3, "effort": 1, "cashReward": 1 },
+        { "id": "alicia_sun_meal", "description": "Make Sunday supper for the household", "location": "padaria", "startsAt": "sun_afternoon", "deadline": "sun_evening", "priority": 4, "effort": 1 },
+        { "id": "alicia_random_errand", "description": "Run an inconvenient errand a neighbor asked her to handle", "location": "market", "startsAt": "mon_afternoon", "deadline": "mon_evening", "priority": 3, "effort": 1, "triggeredBy": "neighbor_errand" }
+      ]
+    },
+    "laura": {
+      "location": "padaria", "home": "padaria", "energy": 4, "cash": 4,
+      "obligations": [
+        { "id": "laura_mon_commission", "description": "Fit and reinforce equipment for a new Labyrinth client", "location": "forge", "startsAt": "mon_morning", "deadline": "mon_evening", "priority": 5, "effort": 2, "cashReward": 4 },
+        { "id": "laura_tue_maintenance", "description": "Restore the occupied forge and maintain its tools", "location": "forge", "startsAt": "tue_morning", "deadline": "tue_evening", "priority": 3, "effort": 1 },
+        { "id": "laura_wed_commission", "description": "Adapt summoner equipment for a better-paying client", "location": "forge", "startsAt": "wed_morning", "deadline": "wed_evening", "priority": 5, "effort": 2, "cashReward": 4 },
+        { "id": "laura_wed_board", "description": "Give Alicia money toward the household", "location": "padaria", "startsAt": "wed_afternoon", "deadline": "thu_morning", "priority": 4, "effort": 1, "cashCost": 2, "payTo": "alicia" },
+        { "id": "laura_thu_open_forge", "description": "Keep the forge available for walk-in summoners", "location": "forge", "startsAt": "thu_morning", "deadline": "thu_evening", "priority": 3, "effort": 1, "cashReward": 2 },
+        { "id": "laura_fri_commission", "description": "Complete a lucrative repair before the weekend", "location": "forge", "startsAt": "fri_morning", "deadline": "fri_evening", "priority": 5, "effort": 2, "cashReward": 4 },
+        { "id": "laura_sat_open_forge", "description": "Keep the forge open for the weekend Labyrinth crowd", "location": "forge", "startsAt": "sat_morning", "deadline": "sat_evening", "priority": 4, "effort": 2, "cashReward": 3 },
+        { "id": "laura_random_rush", "description": "Repair a summoner's unexpectedly damaged equipment", "location": "forge", "startsAt": "tue_afternoon", "deadline": "tue_evening", "priority": 5, "effort": 1, "cashReward": 2, "triggeredBy": "rush_repair" },
+        { "id": "laura_random_oven", "description": "Repair the padaria oven hinge before Alicia loses a baking day", "location": "padaria", "startsAt": "sun_morning", "deadline": "sun_evening", "priority": 5, "effort": 1, "triggeredBy": "oven_hinge" }
+      ]
+    },
+    "the_gambler": {
+      "location": "rusty_tankard", "home": "rusty_tankard", "energy": 4, "cash": 2,
+      "obligations": [
+        { "id": "gambler_mon_freight", "description": "Bring a small parcel through St. Maria", "location": "market", "startsAt": "mon_morning", "deadline": "mon_evening", "priority": 3, "effort": 1, "cashReward": 2 },
+        { "id": "gambler_wed_freight", "description": "Exchange goods from his latest route", "location": "market", "startsAt": "wed_morning", "deadline": "wed_evening", "priority": 3, "effort": 1, "cashReward": 2 },
+        { "id": "gambler_fri_tab", "description": "Settle part of his running room and drink tab", "location": "rusty_tankard", "startsAt": "fri_morning", "deadline": "fri_evening", "priority": 4, "effort": 1, "cashCost": 2, "payTo": "npc_barkeep" },
+        { "id": "gambler_sat_freight", "description": "Pick up a profitable but unglamorous delivery", "location": "market", "startsAt": "sat_morning", "deadline": "sat_evening", "priority": 2, "effort": 1, "cashReward": 2 },
+        { "id": "gambler_random_tip", "description": "Act on a plausible freight tip before another carrier does", "location": "market", "startsAt": "sat_afternoon", "deadline": "sat_evening", "priority": 3, "effort": 1, "cashReward": 2, "triggeredBy": "freight_tip" }
+      ]
+    },
+    "npc_barkeep": {
+      "location": "rusty_tankard", "home": "rusty_tankard", "energy": 4, "cash": 5,
+      "obligations": [
+        { "id": "barkeep_mon_service", "description": "Prepare and run Monday evening service", "location": "rusty_tankard", "startsAt": "mon_afternoon", "deadline": "mon_evening", "priority": 5, "effort": 1, "cashReward": 2 },
+        { "id": "barkeep_tue_service", "description": "Prepare and run Tuesday evening service", "location": "rusty_tankard", "startsAt": "tue_afternoon", "deadline": "tue_evening", "priority": 5, "effort": 1, "cashReward": 2 },
+        { "id": "barkeep_wed_service", "description": "Prepare and run Wednesday evening service", "location": "rusty_tankard", "startsAt": "wed_afternoon", "deadline": "wed_evening", "priority": 5, "effort": 1, "cashReward": 2 },
+        { "id": "barkeep_thu_service", "description": "Prepare and run Thursday evening service", "location": "rusty_tankard", "startsAt": "thu_afternoon", "deadline": "thu_evening", "priority": 5, "effort": 1, "cashReward": 2 },
+        { "id": "barkeep_fri_service", "description": "Run the pub while part of town attends the Friday feast", "location": "rusty_tankard", "startsAt": "fri_afternoon", "deadline": "fri_evening", "priority": 5, "effort": 1, "cashReward": 2 },
+        { "id": "barkeep_sat_service", "description": "Prepare and run the busy Saturday service", "location": "rusty_tankard", "startsAt": "sat_afternoon", "deadline": "sat_evening", "priority": 5, "effort": 2, "cashReward": 3 },
+        { "id": "barkeep_sun_service", "description": "Keep a modest Sunday service", "location": "rusty_tankard", "startsAt": "sun_afternoon", "deadline": "sun_evening", "priority": 4, "effort": 1, "cashReward": 1 },
+        { "id": "barkeep_random_cask", "description": "Collect a replacement cask after a supplier mistake", "location": "market", "startsAt": "wed_afternoon", "deadline": "wed_evening", "priority": 5, "effort": 1, "triggeredBy": "supplier_mistake" }
+      ]
+    },
+    "registrar_celina": {
+      "location": "registry", "home": "registry", "energy": 4, "cash": 4,
+      "obligations": [
+        { "id": "celina_mon_registry", "description": "Process Monday's Labyrinth registrations", "location": "registry", "startsAt": "mon_morning", "deadline": "mon_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "celina_tue_registry", "description": "Process Tuesday's Labyrinth registrations", "location": "registry", "startsAt": "tue_morning", "deadline": "tue_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "celina_wed_registry", "description": "Reconcile the midweek registration ledger", "location": "registry", "startsAt": "wed_morning", "deadline": "wed_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "celina_thu_registry", "description": "Process Thursday's Labyrinth registrations", "location": "registry", "startsAt": "thu_morning", "deadline": "thu_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "celina_fri_registry", "description": "Close the week's registration records", "location": "registry", "startsAt": "fri_morning", "deadline": "fri_afternoon", "priority": 5, "effort": 1, "cashReward": 1 },
+        { "id": "celina_fri_feast", "description": "Make a brief appearance at Agnes's Friday feast with a small gift", "location": "chapel", "startsAt": "fri_afternoon", "deadline": "fri_evening", "priority": 3, "effort": 1, "cashCost": 1, "completion": "arrive" },
+        { "id": "celina_random_permits", "description": "Resolve a small surge of incomplete Labyrinth permits", "location": "registry", "startsAt": "thu_afternoon", "deadline": "thu_evening", "priority": 4, "effort": 1, "triggeredBy": "permit_surge" }
+      ]
+    },
+    "sister_agnes": {
+      "location": "chapel", "home": "chapel", "energy": 4, "cash": 2,
+      "obligations": [
+        { "id": "agnes_mon_chapel", "description": "Tend the chapel and receive whoever needs quiet", "location": "chapel", "startsAt": "mon_morning", "deadline": "mon_evening", "priority": 3, "effort": 1 },
+        { "id": "agnes_wed_chapel", "description": "Tend the chapel and check on ordinary town concerns", "location": "chapel", "startsAt": "wed_morning", "deadline": "wed_evening", "priority": 3, "effort": 1 },
+        { "id": "agnes_fri_feast", "description": "Prepare and host the church's small Friday feast", "location": "chapel", "startsAt": "fri_morning", "deadline": "fri_evening", "priority": 5, "effort": 2, "cashCost": 1 },
+        { "id": "agnes_sun_chapel", "description": "Keep the chapel open through a quiet Sunday", "location": "chapel", "startsAt": "sun_morning", "deadline": "sun_evening", "priority": 4, "effort": 1 },
+        { "id": "agnes_random_supplies", "description": "Replace a missing bundle of feast supplies", "location": "market", "startsAt": "fri_afternoon", "deadline": "fri_evening", "priority": 4, "effort": 1, "cashCost": 1, "triggeredBy": "feast_supplies_missing" }
+      ]
+    }
+  },
+  "ambientPressures": [
+    { "id": "neighbor_errand", "description": "A neighbor asks Alicia to handle an inconvenient market errand on their behalf.", "location": "padaria", "startsAt": "mon_afternoon", "deadline": "mon_evening", "stakes": "Accepting costs Alicia time she needs for the padaria and Laura's supper.", "satisfiedBy": "alicia_random_errand", "consequence": "Alicia did not complete the requested errand; the neighbor must make other arrangements.", "chance": 0.35 },
+    { "id": "rush_repair", "description": "A summoner arrives with equipment damaged sooner than expected.", "location": "forge", "startsAt": "tue_afternoon", "deadline": "tue_evening", "stakes": "Laura can take the extra paid work, but only by displacing her own plans.", "satisfiedBy": "laura_random_rush", "consequence": "The summoner leaves to seek a slower repair elsewhere.", "chance": 0.35 },
+    { "id": "supplier_mistake", "description": "The pub supplier delivers the wrong cask and leaves the replacement at the market.", "location": "rusty_tankard", "startsAt": "wed_afternoon", "deadline": "wed_evening", "stakes": "Barkeep must leave the pub or tolerate a thinner service.", "satisfiedBy": "barkeep_random_cask", "consequence": "Wednesday service proceeds with the less suitable cask.", "chance": 0.35 },
+    { "id": "permit_surge", "description": "Several aspiring summoners arrive with incomplete paperwork at once.", "location": "registry", "startsAt": "thu_afternoon", "deadline": "thu_evening", "stakes": "Celina can restore order at the cost of extending her workday.", "satisfiedBy": "celina_random_permits", "consequence": "The incomplete permits remain queued for the following morning.", "chance": 0.35 },
+    { "id": "feast_supplies_missing", "description": "A small bundle intended for Friday's feast fails to arrive.", "location": "chapel", "startsAt": "fri_afternoon", "deadline": "fri_evening", "stakes": "Agnes can replace it, or quietly make the feast smaller.", "satisfiedBy": "agnes_random_supplies", "consequence": "The Friday feast is a little plainer than Agnes intended.", "chance": 0.35 },
+    { "id": "freight_tip", "description": "Gambler hears of an unclaimed small delivery with credible pay.", "location": "rusty_tankard", "startsAt": "sat_afternoon", "deadline": "sat_evening", "stakes": "Taking it earns money but interrupts a pleasurable afternoon of gossip.", "satisfiedBy": "gambler_random_tip", "consequence": "Another carrier takes the unclaimed delivery.", "chance": 0.35 },
+    { "id": "oven_hinge", "description": "The padaria oven hinge begins to fail during Sunday baking.", "location": "padaria", "startsAt": "sun_morning", "deadline": "sun_evening", "stakes": "Laura can repair it on her quiet day, or Alicia may lose Monday's first batch.", "satisfiedBy": "laura_random_oven", "consequence": "Alicia must begin Monday with a temperamental oven hinge.", "chance": 0.35 }
+  ],
+  "publicFacts": [
+    "This is an ordinary week rather than a plot event; no relationship is required to progress.",
+    "Alicia operates the padaria and lives in its attached house with Laura.",
+    "Laura temporarily occupies an abandoned forge across town near the pub, tending equipment for the renewed Labyrinth trade.",
+    "Laura contributes money to Alicia's household; Alicia tends to spend it on comforts and gifts for Laura.",
+    "Barkeep lives at the Rusty Tankard. Gambler rents a room there when he is in town, and Barkeep is wary of extending him informal credit.",
+    "Alicia reliably attends Agnes's Friday feast. Celina attends briefly; Laura rarely; Barkeep is usually too tired; Gambler is unpredictable.",
+    "Chance pressures are mundane, seed-selected disruptions. Their absence is as valid as their occurrence."
+  ]
+}

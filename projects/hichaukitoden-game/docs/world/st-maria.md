@@ -284,10 +284,13 @@ deep skies, the horizon, and the sea visible from many screens.
 
 **[proposed]** Two consequences worth taking seriously before any layout work:
 
-- **The ring is the coastline.** Finding P1 called the 4-cycle a corridor bent
-  into a circle. On an island it is simply the rim, which is the correct shape.
-  What the town lacks may not be a branch point at all, but elevation and
-  outlook.
+- **The ring is the coastline.** **[canon]** Finding P1 called the 4-cycle a
+  corridor bent into a circle. On an island it is simply the rim, which is the
+  correct shape. **P1 is retired rather than fixed**: what the town lacks is not
+  a branch point but elevation and outlook.
+- **The town needs a working port.** **[canon]** Shipping, moored boats, and at
+  least one ship past its best. An island that was *stranded* by a war is a
+  place whose harbour matters and whose hulls show it.
 - **The tiers get their identity from the water.** Upper is sky, horizon and
   rooftops seen from above; lower is the water's edge, wet stone and hulls. The
   Churchyard is already "above the rooftops" and is the town's highest outlook.
@@ -373,22 +376,84 @@ inside a building that is, unknown to her, part of the lid.
 
 **[open]** How far this goes, and whether Agnes ever knows.
 
-### 5.5 Filler and population
+### 5.5 Filler buildings
 
-**[proposed]**
+**[canon]** Maps can and should carry **non-visitable buildings**.
 
-- Most buildings on a plate are **not visitable**, and that is the normal case
-  rather than a shortfall. A street of doors that all open is a menu.
-- A non-visitable building can still be somebody's authored address. The
-  population backlog holds minor residents — name, trade, tenure, where they
-  live and where they work — without any of them needing a room or a portrait.
-- **No generic instanced townsfolk.** The alternative to a named population is
-  not a crowd of interchangeable greeters; it is a smaller number of people who
-  are actually somewhere.
-- The schedule machinery for this already exists and is unfilled. The
-  living-week definition runs Monday–Sunday × morning/afternoon/evening with
-  per-NPC obligations, energy, cash and seeded ambient pressures. Every dossier
-  has a `routines` field and **every one of them is empty**.
+**[proposed]** That is the normal case rather than a shortfall: a street whose
+doors all open is a menu, not a town. Density of frontage is what makes a place
+look inhabited, and it is nearly free - a painted door costs a door.
+
+A non-visitable building is still somebody's address. It is where the register
+in §5.6 lives, and the two are the same design: the town's apparent size comes
+from buildings nobody enters, occupied by people nobody meets.
+
+### 5.6 The town register
+
+**[canon]** Alicia, Laura, the Barkeep, Celina, Agnes and the Gambler are the
+game's main and supporting cast; the PC is the player's stand-in. St. Maria also
+needs **minor townsfolk**, and they must not be "welcome to Coneria" - no
+generic instanced villager with no bearing on the world.
+
+**[canon]** Every minor NPC is tracked individually: a house, a job, a schedule.
+The **engine does not have to simulate this**. It is an authoring source of
+truth.
+
+#### **[proposed]** Derive the roster, do not invent it
+
+The town's population should follow from the work the town actually does, so the
+count is justified rather than picked. Every business implies labour it cannot
+perform alone:
+
+| Establishment | Implies |
+|---|---|
+| The Rusty Tankard | a cook, a cask-carrier from the quay, someone who does the laundry, a supplier |
+| Alicia's padaria | a flour supplier, and **firewood** - a wood-fired oven eats fuel every day, on an island |
+| Laura's forge | charcoal and iron, both imported, therefore somebody who lands them |
+| The port | boat crews, net menders, whoever keeps the moorings |
+| The churchyard | somebody digs. In a town whose trade sends people below, this is not a small job |
+
+The cortiço is where the people in that column live, because none of them hold
+a frontage. That is the link between §5.1's tenure axis and this register: the
+roster and the housing derive from each other rather than being authored
+separately.
+
+#### **[proposed]** The record
+
+Cheap by design. No dossier, no interiority - those belong to the cast. What a
+minor NPC needs is an **address and a reason to be somewhere**:
+
+    id, name
+    trade
+    workplace      - a building, which may be non-visitable
+    tenure         - owns frontage | occupies | rents a room | cortico household
+    home           - a building
+    routine        - where they are per time block
+    ties           - who they owe, work for, avoid, are related to
+
+The machinery already exists and is unused. The living-town definitions in
+`docs/research/npc-gauntlets/towns/` carry locations, `npcIds`, and an
+`initialNpcState` with home, location and obligations, over a Monday-to-Sunday
+x morning/afternoon/evening grammar. **Every dossier has a `routines` field and
+every one of them is empty.** The register is that slot, filled, and widened to
+people who will never need a dossier.
+
+#### **[proposed]** Three rules that keep it out of Coneria
+
+1. **No line without an address.** Anyone who speaks is on the register, with a
+   home and a workplace. If they are not on it, they do not talk.
+2. **What they say comes from their state, not from a lore pool.** Their day:
+   the boat, the price of charcoal, who owes whom, whether the oven was lit.
+   Never a rumour about somewhere the player will never go.
+3. **Most are never seen, and that is the point.** The register is mostly
+   invisible. It is cheap precisely because the majority need no sprite, no
+   dialogue and no room. It exists so that the handful the player does meet are
+   a *sample of something real* rather than the whole of it.
+
+Rule 3 is what makes the whole thing affordable. A register of forty people
+whose entries are six fields each costs almost nothing and can be authored in
+an afternoon; what it buys is that the six who speak are consistent with a town
+rather than decorating one.
 
 ---
 
@@ -412,7 +477,13 @@ inside a building that is, unknown to her, part of the lid.
    currently a hole. Every other layer can be drawn from something that exists;
    the oldest and strangest one has to be invented before an exterior plate can
    show reuse-without-recognition, because the reuse has to be *of* something
-   recognisable. This is the first blocker on the art work, ahead of the layout.
+   recognisable.
+
+   **This blocks aesthetic coherence, not spatial coherence.** They are separate
+   problems and only the first waits on Thestra. A layout whose screens make
+   sense as a place - where the port is, what sees the sea, where people live
+   and work - can be authored and walked now, and dressed later. Getting the
+   town walkable is the nearer priority.
 5. **How far does §5.4 go**, and does Agnes ever know?
 6. **What are the signs?** The town is oblivious "but there are signs." Those
    signs are the entire mechanism by which the reader gets ahead of the town,

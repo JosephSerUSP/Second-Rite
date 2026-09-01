@@ -23,6 +23,7 @@ DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets"
 MAP = ROOT / "projects" / "hichaukitoden-game" / "data" / "maps" / "17.json"
 GROUND_Z = -1.5
 LANE_X = 7.8
+EVENT_PREFIX = "st-maria-praca-"
 
 
 def collection(name, parent=None):
@@ -55,6 +56,35 @@ def empty(name, location, coll, display="PLAIN_AXES", size=0.45):
     obj.empty_display_size = size
     coll.objects.link(obj)
     return obj
+
+
+def read_anchors(map_data):
+    """The Praca's anchors, read from the map rather than a hardcoded list.
+
+    This used to name the seven anchors it wanted and index them out of the
+    map. The spiral rewiring then renamed two and removed two -- Alicia moved
+    over the padaria on Market Row and the registrar moved into the Lodging --
+    so the fixed list raised KeyError on `st-maria-praca-alicia_door` and the
+    scaffold could not run at all. Reading whatever the map actually declares
+    means the next rewiring moves the anchors instead of breaking the tool.
+
+    An event carrying a sprite is an NPC and keeps the `npc_` prefix that the
+    level-design guides colour by; everything else is a route anchor.
+    """
+    anchors = {"spawn_player": (LANE_X, 11.85, GROUND_Z)}
+    for event in map_data["events"]:
+        instance = event.get("instanceId", "")
+        if not instance.startswith(EVENT_PREFIX) or "worldPosition" not in event:
+            continue
+        name = instance[len(EVENT_PREFIX):]
+        if event.get("sprite"):
+            name = "npc_" + name
+        anchors[name] = tuple(event["worldPosition"])
+    if len(anchors) == 1:
+        raise SystemExit(
+            f"map {MAP.name} declares no {EVENT_PREFIX}* anchors with a worldPosition"
+        )
+    return anchors
 
 
 def build(output: Path):
@@ -97,20 +127,7 @@ def build(output: Path):
     lane["sr_movement_speed"] = 3.4
 
     map_data = json.loads(MAP.read_text(encoding="utf-8"))
-    positions = {
-        event["instanceId"]: event["worldPosition"]
-        for event in map_data["events"] if "worldPosition" in event
-    }
-    anchor_positions = {
-        "spawn_player": (LANE_X, 11.85, GROUND_Z),
-        "quay_stair": positions["st-maria-praca-quay_stair"],
-        "alicia_door": positions["st-maria-praca-alicia_door"],
-        "churchyard_stair": positions["st-maria-praca-churchyard_stair"],
-        "chapel_door": positions["st-maria-praca-chapel_door"],
-        "east_backstreet": positions["st-maria-praca-east_backstreet"],
-        "npc_child": positions["st-maria-praca-child"],
-        "npc_registrar": positions["st-maria-praca-registrar"],
-    }
+    anchor_positions = read_anchors(map_data)
     for name, position in anchor_positions.items():
         marker = empty(name, position, anchors, size=0.38)
         marker["sr_anchor"] = name
@@ -121,9 +138,15 @@ def build(output: Path):
     actor = box("SCALE_actor_1.75m", (0.35, 0.6, 1.75),
                 (LANE_X, 11.85, GROUND_Z + 0.875), scale, (0.15, 0.45, 1.0))
     actor.display_type = "WIRE"
-    for name, y in (("Alicia", 4.625), ("Chapel", 20.81)):
-        door = box(f"SCALE_{name}_door_1.05x2.15m", (0.28, 1.05, 2.15),
-                   (10.05, y, GROUND_Z + 1.075), scale, (0.95, 0.35, 0.08))
+    # Door proportion guides follow the doors the map declares. The Chapel is
+    # the Praca's only interior door now; the old Alicia door left the square
+    # with her when the padaria moved to Market Row.
+    for name, position in sorted(anchor_positions.items()):
+        if not name.endswith("_door"):
+            continue
+        label = name[:-len("_door")].capitalize()
+        door = box(f"SCALE_{label}_door_1.05x2.15m", (0.28, 1.05, 2.15),
+                   (10.05, position[1], GROUND_Z + 1.075), scale, (0.95, 0.35, 0.08))
         door.display_type = "WIRE"
 
     # Fresh architectural massing. Individual blocks remain independently

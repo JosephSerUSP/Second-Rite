@@ -213,6 +213,19 @@ jobs:
           }
           "THESTRA_GATE_ROOT=$gateRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      - name: towngen - the generator still owns what it writes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          python -m pip install --disable-pip-version-check --quiet pillow
+          if ($LASTEXITCODE -ne 0) { throw "pillow install failed (exit $LASTEXITCODE)" }
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          python tools/towngen/check_town.py
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "towngen check" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "towngen check failed (exit $__code)" }
+
       - name: G1 - data validation
         shell: pwsh
         run: |

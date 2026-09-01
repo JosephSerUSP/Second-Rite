@@ -168,6 +168,9 @@ SCREENS = {
             ("west_quay", "The Quay", 19, "east_market", 40, None),
             ("smith_door", "Weaponsmith", 20, "exit_door", 700, None),
             ("back_steps", "Up to the Backstreet", 26, "market_steps", 1010, None),
+            ("padaria_door", "Alicia's Padaria", 27, "exit_door", 801.2, None),
+            ("padaria_3d_door", "Alicia's Padaria (3D)", 28, "exit_door", 593.6, None),
+            ("smith_3d_door", "Laura's Smithy (3D)", 29, "exit_door", 956.9, None),
         ],
     ),
     # --- interiors ---
@@ -225,6 +228,21 @@ SCREENS = {
         doors=[("exit_door", "Out to the Backstreet", 26, "lodging_door", 120, None)],
     ),
 }
+
+# Maps this generator OWNS and will overwrite. Everything else in the town is
+# authored by hand and must survive a rebuild.
+#
+# `weaponsmith` stays in SCREENS because the market's door still needs its
+# anchor, but map 20 is no longer generated: it was converted in place to the
+# authored `lauras_smith` 3D room, whose lane (0.35-7.4167), depth (0.0) and
+# camera distance (18.6667, the interior number) are nothing like a flat
+# plate's. Regenerating it would silently revert that room to a plate.
+#
+# Maps 27, 28 and 29 - the Padaria and the two 3D bakes - were never generated.
+#
+# tools/towngen/check_town.py gates this boundary: a hand-edit to an owned map
+# now fails CI instead of surviving until the next rebuild deletes it.
+AUTHORED_NOT_GENERATED = {"weaponsmith"}
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
 # contradicting the authored dialogue that crosses over.
@@ -417,6 +435,10 @@ def main():
     map1 = load_map1_commands()
     build_stub()
     for key, screen in SCREENS.items():
+        if key in AUTHORED_NOT_GENERATED:
+            print("skipped %-12s map %d (authored, not generated)"
+                  % (key, screen["id"]))
+            continue
         build_environment(key, screen)
         build_map(key, screen, map1)
         print("built %-13s map %d" % (key, screen["id"]))

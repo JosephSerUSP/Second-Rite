@@ -252,13 +252,15 @@ reason for it to begin at the trapdoor.
 **[proposed]** Four strata follow from that, named by rupture rather than by
 culture, with one signature operation each:
 
-1. **Thestra** — limestone, and whatever its architecture was for. Present now
-   only as the thing everything else is built *on, against and out of*.
+1. **Thestra** — present now only as the thing everything else is built *on,
+   against and out of*. Its architecture is **undesigned**: there is no
+   authored material vocabulary for it anywhere in the Project, and inventing
+   one is a prerequisite for any exterior art. See open question 4.
 2. **The oblivious town** — reuse *without recognition*. This is the layer that
    carries the whole reading, and it is visually distinct from reverent reuse: a
-   shrine recess holding a flowerpot, a pillar serving as a mooring post, a
-   doorway too large for the house built into it. Nobody is being sacrilegious.
-   Nobody knows.
+   niche holding a flowerpot, a pillar serving as a mooring post, a doorway too
+   large for the house built into it. Nobody is being sacrilegious. Nobody
+   knows. **[open]** what those older forms actually look like.
 3. **The stranding** — the war's mark is *thrift*, not damage. Subdivision,
    blocking-up, patching in cheaper material, a second family in a house built
    for one. This is where the manors became cortiços: not a catastrophe, a
@@ -345,15 +347,18 @@ one — administrative, liturgical, patient, and obsessed with counting.
 The Sumerian register fits here rather than the Lovecraftian one: temple
 economies, ration lists, seals and scribes. A civilisation whose civic centre
 was an accounting office for something that could not be allowed to go
-unmeasured. Their idols may not be gods to worship but **tallies**; a shrine
-recess may be where a count was kept rather than where a prayer was said.
+unmeasured. The proposal worth testing is that their sacred objects are not
+gods to worship but **tallies**, and that the place a count was kept is the
+place a prayer would be said in any other culture. Nothing in the Project
+authors this yet - it is an invitation to design Thestra's forms around
+measurement rather than around worship.
 
 Their end need not be dramatic. A custodial culture fails by **dwindling and by
 failing to explain itself to whoever comes next** — which is precisely what
 happened, since St. Maria moved in without ever learning what it had moved into.
 
-That also gives layer 2 its best single image: St. Maria keeping flowers in a
-recess that held the tally of the taken.
+That also gives layer 2 its best single image, if the tally reading survives:
+St. Maria keeping flowers in a niche that held the count of the taken.
 
 #### Where the unease actually lives
 
@@ -400,12 +405,14 @@ inside a building that is, unknown to her, part of the lid.
    interior camera distance of 18.6667), and 27-29 were never generated. The
    market's three hand-added doors are now in `SCREENS`.
    `tools/towngen/check_town.py` gates the boundary from `gates (Windows)`.
-4. **Is `showcase_thestra` lore, or a naming convention?** The tileset
-   (`thestra_limestone`, `thestra_shrine_recess`, `thestra_idol`,
-   `thestra_pillar`) sits on map 9, the museum that hosts geometry experiments.
-   If those names are lore it is the only surviving material vocabulary for
-   layer 1 and the art brief starts there. If it is engineering shorthand for a
-   tech showcase, §5.3 must not lean on it.
+4. **Thestra has no visual language, and nothing in the Project supplies one.**
+   `showcase_thestra` (`thestra_limestone`, `thestra_shrine_recess`,
+   `thestra_idol`, `thestra_pillar`) is **engineering shorthand for a geometry
+   showcase on map 9, not lore** - confirmed by the owner. So layer 1 is
+   currently a hole. Every other layer can be drawn from something that exists;
+   the oldest and strangest one has to be invented before an exterior plate can
+   show reuse-without-recognition, because the reuse has to be *of* something
+   recognisable. This is the first blocker on the art work, ahead of the layout.
 5. **How far does §5.4 go**, and does Agnes ever know?
 6. **What are the signs?** The town is oblivious "but there are signs." Those
    signs are the entire mechanism by which the reader gets ahead of the town,

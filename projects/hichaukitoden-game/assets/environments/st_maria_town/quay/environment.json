@@ -20,10 +20,17 @@
         -1.5
       ]
     },
+    "west_market": {
+      "position": [
+        7.8,
+        0.0,
+        -1.5
+      ]
+    },
     "praca_stair": {
       "position": [
         7.8,
-        15.896,
+        10.405,
         -1.5
       ]
     },
@@ -34,7 +41,7 @@
         -1.5
       ]
     },
-    "east_market": {
+    "east_port": {
       "position": [
         7.8,
         29.48,

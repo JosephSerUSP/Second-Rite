@@ -20,35 +20,28 @@
         -1.5
       ]
     },
+    "west_churchyard": {
+      "position": [
+        7.8,
+        0.0,
+        -1.5
+      ]
+    },
     "quay_stair": {
       "position": [
         7.8,
-        0.434,
-        -1.5
-      ]
-    },
-    "alicia_door": {
-      "position": [
-        7.8,
-        4.625,
-        -1.5
-      ]
-    },
-    "churchyard_stair": {
-      "position": [
-        7.8,
-        9.827,
+        3.179,
         -1.5
       ]
     },
     "chapel_door": {
       "position": [
         7.8,
-        20.81,
+        16.763,
         -1.5
       ]
     },
-    "east_backstreet": {
+    "east_cortico": {
       "position": [
         7.8,
         23.7,
@@ -59,13 +52,6 @@
       "position": [
         7.8,
         12.717,
-        -1.5
-      ]
-    },
-    "npc_registrar": {
-      "position": [
-        7.8,
-        16.763,
         -1.5
       ]
     }

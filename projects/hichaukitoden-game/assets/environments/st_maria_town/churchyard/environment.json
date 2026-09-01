@@ -20,6 +20,13 @@
         -1.5
       ]
     },
+    "port_climb": {
+      "position": [
+        7.8,
+        2.312,
+        -1.5
+      ]
+    },
     "labyrinth_door": {
       "position": [
         7.8,
@@ -27,10 +34,10 @@
         -1.5
       ]
     },
-    "down_praca": {
+    "east_praca": {
       "position": [
         7.8,
-        1.012,
+        26.012,
         -1.5
       ]
     },

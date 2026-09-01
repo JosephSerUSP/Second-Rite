@@ -57,6 +57,35 @@ a plinth — never load-bearing composition.
 **The only fixed dimension is the floor LEVEL (z = 0).** Width, height and depth
 are free per map. A room may be far deeper than the player can walk.
 
+### View transform: bake under AgX
+
+**Bake plates under AgX. Do not bake under Standard and expect to grade it back.**
+
+The two differ in one way that matters and one that does not.
+
+- Below 1.0, the difference is a curve. Colour correction recovers it exactly,
+  and AgX's lower contrast and muted look can be graded to taste later.
+- **Above 1.0, Standard clips to white and the information is gone.** AgX rolls
+  highlights off instead, desaturating as they brighten. Nothing downstream can
+  recover what Standard already destroyed.
+
+Every interior in St. Maria has values above 1.0 — the padaria's oven and its
+window, the forge, a lantern, the sky over an exterior. Those are precisely the
+areas that look better under AgX, and precisely the ones a grade cannot rescue
+from a Standard bake. So the choice is not cosmetic, and "we will colour-correct
+later" is an argument *for* AgX rather than a reason to defer the decision.
+
+`st_maria_praca.blend` and the authored interiors are already set up under AgX.
+Photograph them with `tools/towngen/photograph_blend.py`, which renders both so
+the difference stays visible.
+
+**The one caveat is consistency at a seam.** A pre-rendered plate is a texture;
+the runtime does not tone map it. So if a live-rendered element is ever
+composited against a plate — an Effekseer effect, a 3D room, a lit prop — both
+sides must have been produced under the same transform, or their highlights will
+not match where they meet. Mixing AgX plates with Standard live content is the
+failure mode to watch for, not AgX itself.
+
 ### Scrolling is a promise
 
 A map wider than the view **scrolls**, and a scene that runs off the frame edge

@@ -27,6 +27,18 @@ Freshly created procedural assets, freshly generated material sources, and fresh
 - Representative projection-window checks around **-96 / 0 / +96 px** have been useful. Eye transform, pitch and lens must remain invariant.
 - Small approximately **±3° pitch** variants have been useful as optional composition studies. They are not the baseline and must not silently change actor scale or screen anchoring.
 
+### View transform
+
+- Bake under **AgX**, not Standard. Standard clips everything above 1.0 to white
+  permanently; AgX rolls it off. Below 1.0 the two differ by a curve a grade can
+  recover, so "we will colour-correct later" argues *for* AgX. The reasoning and
+  the one caveat — a live-rendered element composited against a plate must use
+  the same transform, or highlights mismatch at the seam — are in
+  [`st-maria-interior-authoring.md`](st-maria-interior-authoring.md), under
+  "View transform".
+- This is a **mechanism**, not a composition, so it is readable under the
+  sterile rule above (see issue #1016).
+
 ### Character floor limit
 
 - **Y = 144** is the **lowest a character may stand** before the engine would need Y camera scrolling. It derives from the 256 × 144 base projection frame.

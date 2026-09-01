@@ -33,6 +33,20 @@
         13.295,
         -1.5
       ]
+    },
+    "bedroom_door": {
+      "position": [
+        7.8,
+        11.0,
+        -1.5
+      ]
+    },
+    "shop_stair": {
+      "position": [
+        7.8,
+        11.0,
+        -1.5
+      ]
     }
   },
   "preRendered": {

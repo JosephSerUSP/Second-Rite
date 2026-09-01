@@ -54,6 +54,41 @@
         26.59,
         -1.5
       ]
+    },
+    "west_quay": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
+    },
+    "forge_door": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
+    },
+    "smith_3d_door": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
+    },
+    "cortico_stair": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
+    },
+    "climb_churchyard": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
     }
   },
   "preRendered": {

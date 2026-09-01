@@ -68,6 +68,20 @@
         16.763,
         -1.5
       ]
+    },
+    "west_churchyard": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
+    },
+    "east_cortico": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
     }
   },
   "preRendered": {

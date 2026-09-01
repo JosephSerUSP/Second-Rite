@@ -89,6 +89,20 @@
         26.5,
         -1.5
       ]
+    },
+    "west_cortico": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
+    },
+    "east_quay": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
     }
   },
   "preRendered": {

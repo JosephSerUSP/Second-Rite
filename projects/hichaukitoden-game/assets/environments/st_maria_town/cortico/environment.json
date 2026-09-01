@@ -47,6 +47,27 @@
         20.809,
         -1.5
       ]
+    },
+    "padaria_back": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
+    },
+    "port_stair": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
+    },
+    "east_market": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
     }
   },
   "preRendered": {

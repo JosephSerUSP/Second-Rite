@@ -9,77 +9,84 @@
     0.0,
     -2.5,
     8.8,
-    23.699,
+    29.48,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        11.85,
+        14.74,
         -1.5
       ]
     },
-    "quay_stair": {
+    "praca_stair": {
       "position": [
         7.8,
-        0.434,
+        15.896,
         -1.5
       ]
     },
-    "alicia_door": {
+    "pub_door": {
       "position": [
         7.8,
-        4.625,
+        21.098,
         -1.5
       ]
     },
-    "churchyard_stair": {
+    "east_market": {
       "position": [
         7.8,
-        9.827,
+        29.48,
         -1.5
       ]
     },
-    "chapel_door": {
+    "npc_fisherman": {
       "position": [
         7.8,
-        20.81,
+        2.601,
         -1.5
       ]
     },
-    "east_backstreet": {
+    "npc_sign": {
       "position": [
         7.8,
-        23.7,
+        26.59,
         -1.5
       ]
     },
-    "npc_child": {
+    "west_quay": {
       "position": [
         7.8,
-        12.717,
+        14.74,
         -1.5
       ]
     },
-    "npc_registrar": {
+    "forge_door": {
       "position": [
         7.8,
-        16.763,
+        14.74,
         -1.5
       ]
     },
-    "west_churchyard": {
+    "smith_3d_door": {
       "position": [
         7.8,
-        14.0,
+        14.74,
         -1.5
       ]
     },
-    "east_cortico": {
+    "cortico_stair": {
       "position": [
         7.8,
-        14.0,
+        14.74,
+        -1.5
+      ]
+    },
+    "climb_churchyard": {
+      "position": [
+        7.8,
+        14.74,
         -1.5
       ]
     }
@@ -87,26 +94,26 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      900,
+      1100,
       240
     ],
     "slicePositions": [
-      11.85
+      14.74
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_900.png"
+      "../stub/empty_1100.png"
     ],
     "lane": {
-      "runtimeCenterY": 11.85
+      "runtimeCenterY": 14.74
     },
     "playerProjection": {
-      "centerX": 450.0,
+      "centerX": 550.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

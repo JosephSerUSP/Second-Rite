@@ -9,74 +9,60 @@
     0.0,
     -2.5,
     8.8,
-    23.699,
+    22.254,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        11.85,
+        11.127,
         -1.5
       ]
     },
-    "quay_stair": {
+    "west_praca": {
       "position": [
         7.8,
-        0.434,
+        -0.0,
         -1.5
       ]
     },
-    "alicia_door": {
+    "laura_door": {
       "position": [
         7.8,
-        4.625,
+        2.601,
         -1.5
       ]
     },
-    "churchyard_stair": {
-      "position": [
-        7.8,
-        9.827,
-        -1.5
-      ]
-    },
-    "chapel_door": {
-      "position": [
-        7.8,
-        20.81,
-        -1.5
-      ]
-    },
-    "east_backstreet": {
-      "position": [
-        7.8,
-        23.7,
-        -1.5
-      ]
-    },
-    "npc_child": {
+    "lodging_door": {
       "position": [
         7.8,
         12.717,
         -1.5
       ]
     },
-    "npc_registrar": {
+    "market_steps": {
       "position": [
         7.8,
-        16.763,
+        20.809,
         -1.5
       ]
     },
-    "west_churchyard": {
+    "padaria_back": {
       "position": [
         7.8,
         14.0,
         -1.5
       ]
     },
-    "east_cortico": {
+    "port_stair": {
+      "position": [
+        7.8,
+        14.0,
+        -1.5
+      ]
+    },
+    "east_market": {
       "position": [
         7.8,
         14.0,
@@ -87,26 +73,26 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      900,
+      850,
       240
     ],
     "slicePositions": [
-      11.85
+      11.127
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_900.png"
+      "../stub/empty_850.png"
     ],
     "lane": {
-      "runtimeCenterY": 11.85
+      "runtimeCenterY": 11.127
     },
     "playerProjection": {
-      "centerX": 450.0,
+      "centerX": 425.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

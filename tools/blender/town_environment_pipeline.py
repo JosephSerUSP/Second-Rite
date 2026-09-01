@@ -54,7 +54,17 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
+                            bake_samples: int = 16, flat_bake: bool = False):
+    """Bake an authored .blend into a runtime environment package.
+
+    ``flat_bake`` selects the exterior profile: one sample, no light bounces
+    and no bake margin, for a street whose atlas already carries its lighting.
+    It defaults off so the interior rooms keep the multi-sample, bounced,
+    margin-4 bake their shipped atlases were made with -- the exterior pipeline
+    on PR #998 hardcoded the flat values, which would silently have re-baked
+    the Padaria and the smith at one sample.
+    """
     import bpy
     from mathutils import Vector, Matrix
 
@@ -78,7 +88,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     col_preview_only = collections.get("TH_PREVIEW_ONLY")
     col_camera = collections.get("TH_CAMERA_PREVIEW")
 
-    render_mesh_objects = [obj for obj in col_render.objects if obj.type == 'MESH']
+    render_mesh_objects = [obj for obj in col_render.all_objects if obj and obj.type == 'MESH']
     if not render_mesh_objects:
         raise RuntimeError("TH_RENDER contains no mesh objects")
 
@@ -86,17 +96,20 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     for col in (col_preview_actors, col_preview_only, col_collision, col_anchors, col_camera):
         if col:
             col.hide_render = True
-            for obj in col.objects:
-                obj.hide_render = True
+            for obj in col.all_objects:
+                if obj:
+                    obj.hide_render = True
 
     # Ensure source and render are visible in render for baking
     col_source.hide_render = False
-    for obj in col_source.objects:
-        obj.hide_render = False
+    for obj in col_source.all_objects:
+        if obj:
+            obj.hide_render = False
 
     col_render.hide_render = False
-    for obj in col_render.objects:
-        obj.hide_render = False
+    for obj in col_render.all_objects:
+        if obj:
+            obj.hide_render = False
 
     # 3. Setup Bake Target Image & Material on TH_RENDER
     target_obj = render_mesh_objects[0]
@@ -148,17 +161,24 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         scene.cycles.device = 'CPU'
     except Exception:
         pass
-    scene.cycles.samples = bake_samples
+    if flat_bake:
+        scene.cycles.samples = 1
+        scene.cycles.max_bounces = 0
+        scene.cycles.diffuse_bounces = 0
+        scene.cycles.glossy_bounces = 0
+        scene.cycles.transparent_max_bounces = 0
+    else:
+        scene.cycles.samples = bake_samples
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
     scene.render.bake.cage_extrusion = 0.15
     scene.render.bake.max_ray_distance = 1.0
-    scene.render.bake.margin = 4
+    scene.render.bake.margin = 0 if flat_bake else 4
 
     # Select all source objects as Selected, target_obj as Active
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.objects:
-        if obj.type in {'MESH', 'CURVE', 'SURFACE'}:
+    for obj in col_source.all_objects:
+        if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
             obj.select_set(True)
     target_obj.select_set(True)
     scene.view_layers[0].objects.active = target_obj
@@ -216,8 +236,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     # 6. Export TH_COLLISION if present
     collision_filename = None
-    if col_collision and len(col_collision.objects) > 0:
-        col_mesh_objects = [o for o in col_collision.objects if o.type == 'MESH']
+    if col_collision and len(col_collision.all_objects) > 0:
+        col_mesh_objects = [o for o in col_collision.all_objects if o and o.type == 'MESH']
         if col_mesh_objects:
             bpy.ops.object.select_all(action='DESELECT')
             for o in col_mesh_objects:
@@ -245,7 +265,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # Standard mapping matching obj_model:
     # Blender (x, y, z) -> Thestra world (x, y, z) directly when authoring in Z-up.
     anchors = {}
-    for obj in col_anchors.objects:
+    for obj in col_anchors.all_objects:
+        if not obj:
+            continue
         # Ignore preview actors or non-empty objects
         if obj.type not in {'EMPTY', 'LOCATOR'}:
             continue

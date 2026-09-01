@@ -49,8 +49,23 @@ WALKER_WORLD_HEIGHT = 1.75
 WALKER_NATIVE_PIXELS = 48.0
 
 
-def build(floor_limit: float, feet_y: float, horizon_y: float) -> dict:
+def build(floor_limit: float, feet_y: float, horizon_y: float,
+          pitch_degrees: float = 0.0) -> dict:
+    """Solve the record. `pitch_degrees` tips the camera DOWN.
+
+    Pitch is what makes vertical edges stop being parallel; no lens width and no
+    principal-point shift on a level camera can do it. It does not change what
+    the record has to guarantee: a 1.75 m actor at 48 native pixels, feet at
+    `feet_y`. Only how those are solved changes.
+
+    The actor is a VIEW-ALIGNED billboard - an axis-aligned rectangle that only
+    scales - so its pixel height depends solely on the SLANT distance to its
+    ground point, never on the pitch. That is why `distance` below is the slant,
+    and stays the same at every angle; the eye height and the principal point
+    absorb the rotation instead.
+    """
     fov_half_y = FOV_HALF_X * (BASE_H / BASE_W)
+    pitch = math.radians(pitch_degrees)
 
     # Preserve the lens, solve distance for the actor's fixed pixel height.
     distance = BASE_H * WALKER_WORLD_HEIGHT / (2.0 * fov_half_y * WALKER_NATIVE_PIXELS)
@@ -60,8 +75,20 @@ def build(floor_limit: float, feet_y: float, horizon_y: float) -> dict:
 
     head_y = feet_y - WALKER_NATIVE_PIXELS
 
-    # Feet sit (eye_height * px_per_unit) below the horizon; solve eye height.
-    eye_z = (feet_y - horizon_y) / px_per_unit
+    if pitch == 0.0:
+        # Feet sit (eye_height * px_per_unit) below the horizon.
+        eye_z = (feet_y - horizon_y) / px_per_unit
+        horiz_distance = distance
+    else:
+        # Pitched: the principal point carries the horizon, and the eye and the
+        # horizontal distance follow from where the feet must land at a fixed
+        # slant. K is the lens in pixels: px per unit of the camera-space ratio.
+        k = px_per_unit * distance
+        principal_y = horizon_y + k * math.tan(pitch)
+        y_c = distance * (principal_y - feet_y) / k
+        horiz_distance = distance * math.cos(pitch) + y_c * math.sin(pitch)
+        eye_z = distance * math.sin(pitch) - y_c * math.cos(pitch)
+        horizon_y = principal_y
 
     if head_y < 0.0:
         raise SystemExit(f"Walker head lands at y={head_y:.1f}, above the frame")
@@ -76,14 +103,16 @@ def build(floor_limit: float, feet_y: float, horizon_y: float) -> dict:
         "contract": "thestra.world-camera-calibration",
         "version": 1,
         "projection": "perspective",
-        "eye": {"x": -distance, "y": 0.0, "z": eye_z},
+        "eye": {"x": -horiz_distance, "y": 0.0, "z": eye_z},
+        "pitchDegrees": pitch_degrees,
+        "horizontalDistance": horiz_distance,
         "orientation": {
             # right = forward x up. With forward +X and up +Z that is -Y.
             # A +Y right vector makes a determinant -1 (mirrored) basis, which
             # create_actor_preview's to_quaternion() cannot represent. See #935.
             "forwardX": 1.0, "forwardY": 0.0,
             "rightX": 0.0, "rightY": -1.0,
-            "pitchRadians": 0.0,
+            "pitchRadians": pitch,
         },
         "projectionScale": {"x": 1.0, "y": 1.0},
         "fovHalfX": FOV_HALF_X,
@@ -126,10 +155,13 @@ def main() -> None:
                         help="native y of the Walker's feet (default limit - 16)")
     parser.add_argument("--horizon-y", type=float, default=66.0,
                         help="native y of the principal point / horizon")
+    parser.add_argument("--pitch-degrees", type=float, default=0.0,
+                        help="tip the camera down; this is what bends verticals")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
 
-    record = build(args.character_floor_limit, args.feet_y, args.horizon_y)
+    record = build(args.character_floor_limit, args.feet_y, args.horizon_y,
+                   args.pitch_degrees)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 

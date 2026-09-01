@@ -660,6 +660,16 @@ repository's former per-map `genMinRooms`/`genMaxRooms` and system `gen*` fields
 were migrated and have no compatibility read path. G1 validates profile ranges,
 the default reference, every map reference, and rejects the removed fields.
 
+Maps may author an optional `parentMapId` for Studio organisation. It places a
+Map beneath another Map in the **Map Hierarchy** outline and is deliberately
+presentation-only: it does not create a transfer, inherit music/tileset/safety/
+category, or otherwise change runtime Map loading. An unset parent stays at its
+category root. Studio supports arbitrary nesting, prevents authoring self/
+descendant cycles, keeps malformed orphan/cycle records visible at the root with
+a warning instead of hiding them, and refuses to delete a Map while authored
+children still reference it. Door events remain the sole authored transition
+authority.
+
 ### 1.8 Tileset Studio: variant pools, not cell painting (23.07.2026)
 
 `studio/editor/js/tileset-editor.js` (design doc §7) now treats the atlas

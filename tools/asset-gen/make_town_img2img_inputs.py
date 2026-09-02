@@ -37,6 +37,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+# The three screens worth generating against. Every other town screen is either a
+# plate the AI produced in the first place -- feeding a model its own output back
+# teaches it nothing and compounds whatever was wrong with it -- or an empty
+# blockout with no visual language to carry. These three are modelled
+# environments built from the .blend sources, so they are the only frames that
+# carry the grammar a new plate should inherit.
+REFERENCE_MAPS = (17, 28, 29)   # the Praca, Alicia's Padaria, Laura's Smithy
 CAPTURE = ROOT / "tools" / "golden" / "capture-town-proof.py"
 
 
@@ -56,6 +64,9 @@ def main() -> None:
     parser.add_argument("--scale", type=int, default=3,
                         help="integer upscale for the model's benefit; NEAREST, "
                              "so no interpolation invents detail the game lacks")
+    parser.add_argument("--maps", default=",".join(str(m) for m in REFERENCE_MAPS),
+                        help="comma-separated map ids to keep, or 'all'. Defaults "
+                             "to the three modelled screens; see REFERENCE_MAPS.")
     parser.add_argument("--keep-raw", action="store_true",
                         help="also keep the uncropped captures")
     args = parser.parse_args()
@@ -87,10 +98,17 @@ def main() -> None:
         except Exception:
             pass
 
+    keep = None
+    if args.maps.strip().lower() != "all":
+        keep = {int(m) for m in args.maps.split(",") if m.strip()}
+
     entries = []
     for png in sorted(raw.glob("*.png")):
         label = png.stem
         frame = by_label.get(label, {})
+        if keep is not None and frame.get("mapId") not in keep:
+            png.unlink()
+            continue
         image = Image.open(png)
         box = content_box(image)
         cropped = image.crop(box)
@@ -124,6 +142,9 @@ def main() -> None:
         for png in raw.glob("*.png"):
             png.unlink()
 
+    if keep is not None and {e["mapId"] for e in entries} != keep:
+        raise SystemExit("asked for maps %s but captured %s"
+                         % (sorted(keep), sorted({e["mapId"] for e in entries})))
     sizes = sorted({tuple(e["outputSize"]) for e in entries})
     print(f"TOWN IMG2IMG INPUTS OK frames={len(entries)} "
           f"surface={args.surface} scale={args.scale}x sizes={sizes}")

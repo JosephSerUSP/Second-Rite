@@ -350,7 +350,7 @@
           "cmd": "CHOICE"
         }
       ],
-      "sprite": "assets/character/town/npc_weaponsmith.png",
+      "sprite": "assets/character/npc_laura.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

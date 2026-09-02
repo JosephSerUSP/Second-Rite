@@ -351,9 +351,13 @@ def main() -> None:
                         help="world fill strength for the bake")
     parser.add_argument("--sun", type=float, default=2.5,
                         help="hard key energy; exteriors get one, interiors do not")
-    parser.add_argument("--ground-share", type=float, default=0.15,
+    parser.add_argument("--ground-share", type=float, default=0.03,
                         help="fraction of the atlas the ground may occupy; the "
-                             "rest goes to the buildings and foliage")
+                             "rest goes to the buildings and foliage. 3%% because "
+                             "at 15%% the ground took 114,747 texels and still "
+                             "measured 0.00 texels per screen pixel -- it is so "
+                             "large that six figures of texture buy it nothing, "
+                             "while the buildings were short by about that much")
     parser.add_argument("--cull-samples", type=int, default=24,
                         help="hemisphere rays per face when testing reachability")
     parser.add_argument("--cull-escape", type=float, default=0.0,
@@ -362,7 +366,11 @@ def main() -> None:
                         help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
-    parser.add_argument("--atlas-size", type=int, default=1024)
+    parser.add_argument("--atlas-size", type=int, default=2048,
+                        help="2048 because the buildings measured 0.66 texels "
+                             "per screen pixel at 1024, against the 1-3 a "
+                             "backdrop wants; they need ~983k texels for 1.0 "
+                             "and a 1024 atlas holds 1,049k in total")
     parser.add_argument("--samples", type=int, default=24)
     args = parser.parse_args(argv)
 

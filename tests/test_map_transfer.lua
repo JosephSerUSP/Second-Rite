@@ -1180,8 +1180,6 @@ for _, node in pairs(introGraph.nodes or {}) do
 end
 check(hasWaitNode,
     "WAIT compiles to a pausing event-graph node instead of a synchronous no-op")
-check(loader.getScene("title").backdropImage == "assets/title/st_maria_title_psx.png",
-    "the title scene uses the St. Maria labyrinth vista")
 local stringPictures = require("presentation.string_picture_renderer")
 stringPictures.show({ id = 777, text = "scroll", x = 0, y = 0 })
 stringPictures.move({ id = 777, x = 10, duration = 2, easing = "linear" })

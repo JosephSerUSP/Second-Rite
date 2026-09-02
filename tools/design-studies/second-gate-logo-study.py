@@ -4,7 +4,23 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'tools' / 'design-studies' / 'second-gate-logo-study'
 OUT.mkdir(parents=True, exist_ok=True)
-BG = ROOT / 'assets' / 'title' / 'st_maria_title_psx.png'
+# The backdrop this study previews logo candidates against.
+#
+# It used to be assets/title/st_maria_title_psx.png, which broke twice: #700
+# moved Second Gate under projects/hichaukitoden-game/ so the repo-root path
+# stopped resolving, and b68f4a9f then deleted the file outright when the title
+# became a looping Effekseer animation. The title has no backdrop image any
+# more -- the effect IS the title -- so the honest stand-in for "current title
+# art" is the committed golden of the real title screen at its fully-resolved
+# frame.
+BG = ROOT / 'tools' / 'golden' / 'screens' / 'menu' / 'title' / '07-after-escape.png'
+if not BG.exists():
+    raise SystemExit(
+        'backdrop missing: ' + str(BG) +
+        ' -- this study needs a picture of the current title screen; '
+        'recapture the golden screens or point BG at another image.')
+
+
 W, H = 1600, 720
 IVORY = (224, 216, 191, 255)
 SMOKE = (174, 181, 169, 255)

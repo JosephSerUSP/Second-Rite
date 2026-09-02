@@ -165,7 +165,7 @@
           "cmd": "CHOICE"
         }
       ],
-      "sprite": "assets/character/town/npc_auctioneer.png",
+      "sprite": "assets/character/npc_goustav.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

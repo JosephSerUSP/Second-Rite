@@ -2,8 +2,17 @@
 
 The existing `assets/sprites/NPC*.png` sheets are 48x64 nude placeholder
 figures - functional for a grid dungeon, wrong for a populated town. The
-walker and the owner's own `npc_female_redhead_dress.png` establish the real
-contract: a single 24x48 cell, hard alpha, limited palette.
+contract is a single 24x48 cell, hard alpha, limited palette.
+
+Take the STYLE and PROPORTION reference from the owner's hand-authored
+sprites in `assets/character/`: npc_alicia, npc_celina, npc_goustav,
+npc_laura, player. Those are drawn by hand and have `.gal` sources beside
+them; everything this script writes into `character/town/` is generated and
+is placeholder until an authored sprite replaces it.
+
+Do NOT use `npc_female_redhead_dress.png` as the reference. It is an early
+style study and its proportions are wrong, which this docstring previously
+cited as establishing the contract.
 
 Each sprite is painted large, keyed off a flat magenta field, cropped to its
 own silhouette and then downscaled into one 24x48 cell. Painting large and

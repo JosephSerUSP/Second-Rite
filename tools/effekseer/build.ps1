@@ -52,6 +52,29 @@ if (-not (Test-Path (Join-Path $EffekseerRoot "Dev\Cpp\Effekseer"))) {
     if ($LASTEXITCODE -ne 0) { throw "clone failed" }
 }
 
+# Effekseer file materials carry their texture filters on the node's basic
+# parameters. The upstream collector currently replaces those values with
+# Linear for every file-material slot, which defeats mixed nearest/linear
+# authoring. Patch that one assignment at build time so the native sampler
+# receives the authored value.
+$commonUtilsPath = Join-Path $EffekseerRoot "Dev\Cpp\EffekseerRendererCommon\EffekseerRendererCommon\EffekseerRenderer.CommonUtils.h"
+if (-not (Test-Path -LiteralPath $commonUtilsPath)) {
+    throw "Effekseer common renderer source not found: $commonUtilsPath"
+}
+$commonUtils = [System.IO.File]::ReadAllText($commonUtilsPath)
+$linearMaterialExpression = "TextureFilterTypes[i] = Effekseer::TextureFilterType::Linear;"
+$authoredMaterialExpression = "TextureFilterTypes[i] = param->TextureFilters[i]; // Hichaukitoden: preserve authored filter"
+$linearMaterialCount = ([regex]::Matches($commonUtils, [regex]::Escape($linearMaterialExpression))).Count
+$authoredMaterialCount = ([regex]::Matches($commonUtils, [regex]::Escape($authoredMaterialExpression))).Count
+if ($linearMaterialCount -gt 0) {
+    $commonUtils = $commonUtils.Replace($linearMaterialExpression, $authoredMaterialExpression)
+    [System.IO.File]::WriteAllText($commonUtilsPath, $commonUtils, [System.Text.UTF8Encoding]::new($false))
+    $authoredMaterialCount += $linearMaterialCount
+}
+if ($authoredMaterialCount -ne 1) {
+    throw "Expected one Effekseer file-material filter assignment; found $authoredMaterialCount. Review the upstream renderer before building."
+}
+
 # --- Configure --------------------------------------------------------------
 $buildDir = Join-Path $EffekseerRoot "build"
 if (-not (Test-Path (Join-Path $buildDir "CMakeCache.txt"))) {
@@ -103,7 +126,7 @@ if ($LASTEXITCODE -ne 0) { throw "shim link failed" }
 $exports = & (Join-Path $MinGWBin "nm.exe") --defined-only $out 2>$null |
     Select-String -Pattern "\befk_\w+" -AllMatches |
     ForEach-Object { $_.Matches.Value } | Sort-Object -Unique
-$declared = Select-String -Path (Join-Path $repoRoot "presentation\effekseer.lua") `
+$declared = Select-String -Path (Join-Path $repoRoot "runtime\presentation\effekseer.lua") `
     -Pattern "(efk_\w+)\s*\(" -AllMatches |
     ForEach-Object { $_.Matches } | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
 $missing = $declared | Where-Object { $exports -notcontains $_ }

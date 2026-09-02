@@ -3383,6 +3383,36 @@ elseif paramDef.type == "script" then
                     sceneDesc .. " references missing backdropImage '"
                     .. tostring(scene.backdropImage) .. "'")
             end
+            if scene.screenEffects ~= nil then
+                check(type(scene.screenEffects) == "table",
+                    sceneDesc .. ".screenEffects must be an array")
+                if type(scene.screenEffects) == "table" then
+                    for i, effect in ipairs(scene.screenEffects) do
+                        local effectDesc = sceneDesc .. ".screenEffects[" .. i .. "]"
+                        check(type(effect) == "table", effectDesc .. " must be an object")
+                        if type(effect) == "table" then
+                            check(type(effect.effect) == "string"
+                                    and effect.effect:match("%.efkefc$") ~= nil,
+                                effectDesc .. ".effect must name an .efkefc file")
+                            check(type(effect.effect) ~= "string"
+                                    or love.filesystem.getInfo(effect.effect) ~= nil,
+                                effectDesc .. ".effect is missing ("
+                                .. tostring(effect.effect) .. ")")
+                            check(type(effect.x) == "number", effectDesc .. ".x must be numeric")
+                            check(type(effect.y) == "number", effectDesc .. ".y must be numeric")
+                            check(effect.magnification == nil
+                                    or (type(effect.magnification) == "number"
+                                        and effect.magnification > 0),
+                                effectDesc .. ".magnification must be positive")
+                            for key in pairs(effect) do
+                                check(key == "effect" or key == "x" or key == "y"
+                                        or key == "magnification",
+                                    effectDesc .. " has unknown field '" .. tostring(key) .. "'")
+                            end
+                        end
+                    end
+                end
+            end
 
             -- One mock context per scene, its `v` seeded from what THIS
             -- scene assigns. Hooks share a single v for the scene's whole

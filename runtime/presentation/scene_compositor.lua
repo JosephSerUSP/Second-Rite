@@ -10,6 +10,31 @@ local surface = require("presentation.surface")
 
 local scene_compositor = {}
 
+-- Scene-owned screen-space Effekseer effects. Unlike battler animations, these
+-- are not anchored to a target rectangle: a scene declares their canvas
+-- position and owns them for its lifetime. This is intentionally a small
+-- lifecycle cache so a loop-forever title effect is started once, survives
+-- ordinary frames, and is stopped when the scene changes.
+local screenEffectSceneId
+local screenEffectHandles = {}
+
+local function syncScreenEffects(state, sceneData)
+    local sceneId = state and state.id
+    if sceneId == screenEffectSceneId then return end
+
+    local effekseer = require("presentation.effekseer")
+    for _, handle in ipairs(screenEffectHandles) do
+        effekseer.stop(handle)
+    end
+    screenEffectHandles = {}
+    screenEffectSceneId = sceneId
+
+    for _, spec in ipairs((sceneData and sceneData.screenEffects) or {}) do
+        local handle = effekseer.play(spec.effect, spec.x, spec.y, spec.magnification)
+        if handle then table.insert(screenEffectHandles, handle) end
+    end
+end
+
 -- Menu-style windows scenes reached from exploring (dialogue, shop, status,
 -- ...) can opt into showing the 3D map behind their windows instead of a
 -- blank canvas ("backdrop": "map" in scenes.json) — a VN-style overlay
@@ -92,6 +117,7 @@ end
 -- became an explicit world scene, so there is no host-side fallback left:
 -- a scene with an unrecognized draw mode is a data bug and says so.
 function scene_compositor.draw(state, sceneData, ctx)
+    syncScreenEffects(state, sceneData)
     if not sceneData then
         scene_transition.draw()
         return false

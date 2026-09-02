@@ -3,7 +3,14 @@
   "name": "Title Screen",
   "kind": "menu",
   "draw": "windows",
-  "backdropImage": "assets/title/st_maria_title_psx.png",
+  "screenEffects": [
+    {
+      "effect": "assets/effects/SecondRite/efk-title/title.efkefc",
+      "x": 128,
+      "y": 80,
+      "magnification": 8.5
+    }
+  ],
   "windows": [
     {
       "id": "title_menu",
@@ -99,18 +106,6 @@
         "cmd": "SET_VAR",
         "name": "loadIdx",
         "value": 1
-      },
-      {
-        "cmd": "SHOW_IMAGE_PICTURE",
-        "id": 900,
-        "path": "assets/title/second-gate-logo-g-ivory.png",
-        "x": 128,
-        "y": 67,
-        "anchor": "center",
-        "opacity": 1,
-        "scale": 0.12,
-        "layer": "screen",
-        "blend": "alpha"
       },
       {
         "cmd": "IF",

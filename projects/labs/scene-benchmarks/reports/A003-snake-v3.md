@@ -36,6 +36,7 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 - Scalar initializations (e.g. `gridWidth`, `dirX`, `stepTime`) were moved from SCRIPT into `on_enter` and `on_select` using `SET_VAR` assignments, satisfying automated preview requirements and increasing the declarative surface area.
 - 66% of raw SCRIPT logic remains factored into standard declarative hooks.
 - SCRIPT lines were further minimized due to moving scalar setup into declarative commands.
+- Retained the `terminal` block which ensures automated tests can cleanly determine the end of the scene.
 
 ## Improved
 

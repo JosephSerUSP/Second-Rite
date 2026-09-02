@@ -191,7 +191,17 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     scene.render.bake.use_clear = False
     scene.render.bake.cage_extrusion = 0.15
     scene.render.bake.max_ray_distance = 1.0
-    scene.render.bake.margin = 0 if flat_bake else 4
+    # One texel of dilation for the exterior, and only one.
+    #
+    # Zero was tried and is wrong, for a reason unrelated to filtering. The
+    # runtime samples nearest, so there is no filtering bleed to defend
+    # against -- but the baker RASTERISES a texel only when its centre falls
+    # inside the triangle, while the geometry SAMPLES whatever texel its UV
+    # coordinate lands on. At an island edge those two disagree, so a face can
+    # sample a texel the bake never filled. With margin 0 that showed as seams
+    # tracing every visible edge of the culled facades; margin 1 removed them
+    # completely, for one texel per island boundary.
+    scene.render.bake.margin = 1 if flat_bake else 4
 
     # Select all source objects as Selected, target_obj as Active
     bpy.ops.object.select_all(action='DESELECT')

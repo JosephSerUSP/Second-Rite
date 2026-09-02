@@ -85,6 +85,68 @@ def _areas(mesh, tag_index):
     return ground, other
 
 
+def cull_enclosed(target, samples, escape_ratio):
+    """Delete faces that are sealed inside the geometry.
+
+    These are what bakes black, and the reason is not the camera. The house
+    grammar builds closed bodies, so every wall has an inner face, every roof
+    an underside, every box a hidden back. Nothing reaches those surfaces --
+    no light, and no viewer either. They are not "offscreen" or "behind the
+    camera"; a free camera could orbit forever and never see them without
+    clipping through the building. They bake black because black is the honest
+    answer for a surface sealed in a solid.
+
+    So the test is reachability, not facing. From each face centre, fire a
+    hemisphere of rays along its own normal and ask how many escape the mesh.
+    A face on the outside of a wall has open sky in most directions; a face
+    sealed inside a body has none. Only faces where NO ray escapes -- or fewer
+    than ``escape_ratio`` of them -- are removed.
+
+    Facing is deliberately not used. Culling by normal direction against the
+    fixed side-view camera was tried and made things worse: it removed 1,306
+    faces and the baked-black fraction went UP, 35.6% to 38.9%, because the
+    back of a building is not the same set as the inside of one.
+    """
+    import mathutils
+    from mathutils.bvhtree import BVHTree
+    mesh = target.data
+    bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
+                               [tuple(p.vertices) for p in mesh.polygons],
+                               all_triangles=False)
+    directions = []
+    golden = math.pi * (3.0 - math.sqrt(5.0))
+    for i in range(samples):
+        z = 1.0 - (i + 0.5) / samples          # hemisphere, z in (0, 1]
+        r = math.sqrt(max(0.0, 1.0 - z * z))
+        theta = golden * i
+        directions.append(mathutils.Vector((math.cos(theta) * r,
+                                            math.sin(theta) * r, z)))
+    doomed = []
+    for poly in mesh.polygons:
+        normal = poly.normal.normalized()
+        up = mathutils.Vector((0.0, 0.0, 1.0))
+        rot = up.rotation_difference(normal).to_matrix()
+        origin = poly.center + normal * 1e-4
+        escaped = 0
+        for d in directions:
+            if bvh.ray_cast(origin, rot @ d, 200.0)[0] is None:
+                escaped += 1
+                if escaped / samples > escape_ratio:
+                    break
+        if escaped / samples <= escape_ratio:
+            doomed.append(poly)
+    if not doomed:
+        return 0
+    for poly in mesh.polygons:
+        poly.select = False
+    for poly in doomed:
+        poly.select = True
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.delete(type="FACE")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return len(doomed)
+
+
 def reallocate_ground(target, ground_share):
     """Stop a flat ground plane from spending the atlas on itself.
 
@@ -175,7 +237,7 @@ def in_square(obj, span, margin):
     return -margin <= centre.y <= span + margin
 
 
-def rebuild_render_mesh(span, margin, ground_share) -> None:
+def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -259,6 +321,13 @@ def rebuild_render_mesh(span, margin, ground_share) -> None:
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.remove_doubles(threshold=0.001)
     bpy.ops.mesh.dissolve_degenerate(threshold=0.001)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    if cull_samples:
+        culled = cull_enclosed(target, cull_samples, cull_escape)
+        if culled:
+            print(f"[exterior] culled {culled} sealed faces nothing can reach", flush=True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.0)
     bpy.ops.object.mode_set(mode="OBJECT")
     if ground_tagged:
@@ -285,6 +354,12 @@ def main() -> None:
     parser.add_argument("--ground-share", type=float, default=0.15,
                         help="fraction of the atlas the ground may occupy; the "
                              "rest goes to the buildings and foliage")
+    parser.add_argument("--cull-samples", type=int, default=24,
+                        help="hemisphere rays per face when testing reachability")
+    parser.add_argument("--cull-escape", type=float, default=0.0,
+                        help="keep a face if more than this fraction of its rays escape")
+    parser.add_argument("--keep-sealed", action="store_true",
+                        help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
     parser.add_argument("--atlas-size", type=int, default=1024)
@@ -294,7 +369,8 @@ def main() -> None:
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
-    rebuild_render_mesh(args.span, args.margin, args.ground_share)
+    rebuild_render_mesh(args.span, args.margin, args.ground_share,
+                        0 if args.keep_sealed else args.cull_samples, args.cull_escape)
 
     # Same reason export_room_environment.py stages lighting before baking: a
     # Cycles bake that just opens the file is lit by whatever the .blend last

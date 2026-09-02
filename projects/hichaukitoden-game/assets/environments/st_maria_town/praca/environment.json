@@ -1,29 +1,29 @@
 {
   "contractVersion": 1,
-  "environmentId": "st_maria_praca",
+  "environmentId": "st_maria_praca_modelled",
   "renderMesh": "environment.obj",
   "materialLibrary": "environment.mtl",
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    -75.8621,
-    -5.4839,
+    -100.0,
+    -100.0,
     -0.0008,
-    75.8621,
-    32.9032,
+    100.0,
+    100.0,
     10.75
   ],
   "stats": {
-    "triangleCount": 9304,
-    "vertexCount": 6217,
+    "triangleCount": 5854,
+    "vertexCount": 5084,
     "materialGroupCount": 1,
     "textureDimensions": [
-      1024,
-      1024
+      2048,
+      2048
     ],
-    "pngSizeBytes": 1417976,
-    "renderMeshSizeBytes": 934625,
-    "packageSizeBytes": 2353407
+    "pngSizeBytes": 4388421,
+    "renderMeshSizeBytes": 614595,
+    "packageSizeBytes": 5003822
   },
   "anchors": {
     "spawn_player": {
@@ -171,37 +171,8 @@
       ]
     }
   },
-  "preRendered": {
-    "mode": "layered_2d",
-    "imageSize": [
-      906,
-      240
-    ],
-    "slicePositions": [
-      11.85
-    ],
-    "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
-    ],
-    "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
-    ],
-    "foregrounds": [
-      "../stub/empty_900.png"
-    ],
-    "lane": {
-      "runtimeCenterY": 11.85
-    },
-    "playerProjection": {
-      "centerX": 453.0,
-      "screenY": 136,
-      "width": 24,
-      "height": 48,
-      "pixelsPerRuntimeY": 27.42857
-    }
-  },
   "provenance": {
     "generator": "town_environment_pipeline.py",
-    "sourceBlend": "st_maria_praca.blend"
+    "sourceBlend": "st_maria_praca_modelled.blend"
   }
 }

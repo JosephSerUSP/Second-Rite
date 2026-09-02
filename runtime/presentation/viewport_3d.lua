@@ -952,6 +952,24 @@ local function townEventWorldPosition(rawEv)
     return (rawEv.x or 0) + 1.5, (rawEv.y or 0) + 1.5, 0
 end
 
+-- The player's sprite is a function of what the player is DOING. walker.png is a
+-- walk cycle and reads as mid-stride even on its first frame, so a standing
+-- character was permanently caught walking on the spot -- most visible in
+-- captured reference frames, where nothing moves and every one of them showed a
+-- walk pose.
+--
+-- The state this needs already exists: bounded_lane keeps `moving`, and stops it
+-- on a bound or a blocked range. This is the first two states of the player's
+-- animation, not a general state machine; a real one would live beside the
+-- traversal state rather than being read off it here.
+local PLAYER_IDLE_SPRITE = "assets/character/player.png"
+local PLAYER_WALK_SPRITE = "assets/character/walker.png"
+
+local function playerSpritePath(state)
+    if state and (state.walking or state.moving) then return PLAYER_WALK_SPRITE end
+    return PLAYER_IDLE_SPRITE
+end
+
 local function drawTownPrerenderSprite(image, x, footY, width, height,
                                        frameWidth, frameHeight, frameIndex, facing)
     frameWidth = frameWidth or image:getWidth()
@@ -1158,7 +1176,7 @@ local function drawTownPrerender(session)
         end
     end
 
-    local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
+    local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
     if playerImage then
         drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
             screenFootY(actorY),
@@ -2810,9 +2828,9 @@ end
     end
 
     if session.townTraversal then
-        local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
+        local state = session.townTraversal
+        local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
         if playerImage then
-            local state = session.townTraversal
             local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
             addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
                 state.walkFrameIndex or 0)

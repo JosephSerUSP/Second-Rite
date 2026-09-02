@@ -42,12 +42,18 @@ local function reportNativeCoverage()
     -- and four ambient/screen-space/follow assertions. Hosted CI has no shim.
     -- Name that missing measurement explicitly so "0 failed" cannot be read as
     -- proof that those seven ran. A shim-equipped host enables the real
-    -- assertions; the Map Transfer suite's 155-pass result is the positive
+    -- assertions; the Map Transfer suite's 154-pass result is the positive
     -- evidence that they were actually reached and passed.
+    --
+    -- The count is a running total of the whole suite, so it moves whenever a
+    -- map-transfer test is added or removed for reasons unrelated to Effekseer.
+    -- It went 155 -> 154 when the title-scene backdrop assertion was deleted
+    -- (the title is an Effekseer animation now, not a backdrop image). Update
+    -- it with the suite; a stale number reads as lost native coverage.
     local ok, effekseer = pcall(require, "presentation.effekseer")
     local available = ok and effekseer and effekseer.available and effekseer.available()
     if available then
-        print("NATIVE COVERAGE: Effekseer available; 7 test_map_transfer world-effect assertions enabled (require 155 Map Transfer passes for proof)")
+        print("NATIVE COVERAGE: Effekseer available; 7 test_map_transfer world-effect assertions enabled (require 154 Map Transfer passes for proof)")
     else
         print("NATIVE COVERAGE UNAVAILABLE: Effekseer shim unavailable; 7 test_map_transfer world-effect assertions were NOT exercised")
     end

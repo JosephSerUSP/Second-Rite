@@ -127,6 +127,21 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     if image_name in bpy.data.images:
         bpy.data.images.remove(bpy.data.images[image_name])
     bake_image = bpy.data.images.new(image_name, width=atlas_size, height=atlas_size, alpha=True)
+    # Start the atlas OPAQUE black, not transparent black.
+    #
+    # The alpha channel was doing two unrelated jobs at once: material
+    # transparency (a gap between leaves on an alpha-cut foliage card) and
+    # "was this texel ever baked". A new image is transparent everywhere, so
+    # any texel the bake did not reach came out alpha 0 and was
+    # indistinguishable from a leaf gap. Honouring alpha then tore holes in the
+    # facades; ignoring it turned every foliage card into an opaque rectangle.
+    # There was no setting that was right for both.
+    #
+    # Filling with alpha 1 first means alpha 0 can only come from the bake
+    # itself -- that is, from real material transparency. Unreached texels stay
+    # opaque and stop pretending to be holes. Gutter is never sampled anyway:
+    # the runtime samples nearest with no mipmaps.
+    bake_image.generated_color = (0.0, 0.0, 0.0, 1.0)
 
     # Ensure target object has a material with active image node
     mat_name = "EnvironmentBakedAtlas"
@@ -171,6 +186,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         scene.cycles.samples = bake_samples
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
+    # Keep the opaque fill above; clearing would restore transparent black and
+    # reintroduce the ambiguity this pass exists to remove.
+    scene.render.bake.use_clear = False
     scene.render.bake.cage_extrusion = 0.15
     scene.render.bake.max_ray_distance = 1.0
     scene.render.bake.margin = 0 if flat_bake else 4

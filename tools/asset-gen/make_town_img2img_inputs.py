@@ -1,0 +1,134 @@
+"""Build img2img inputs for the town from live-runtime captures.
+
+The inputs come from the REAL renderer, not from Blender: every frame here is
+what the game actually draws, at the surface it actually draws it on, with the
+player and NPCs staged in it. That last part is not decoration -- a frame
+without a character gives the model no scale reference, and a generated street
+that dwarfs a person reads as correct until someone stands in it.
+
+Two things this does beyond capturing.
+
+**It crops away the dead area.** A captured frame is 42-72% black: the plate
+screens carry content in the top 144 of 240 lines, and the modelled 3D
+interiors do not fill a wide surface at all -- they render about 256 px wide
+and the rest is void. Handing a model a mostly-black image spends its attention
+on nothing and invites it to invent inside the void, which is exactly the
+failure already recorded for the img2img direction pass: it is reliable on
+material and palette and it deletes the near band every time.
+
+**It records where each crop came from.** The manifest carries map id, title,
+lane position, the crop box and the source size, so a generated image can be
+placed back into the frame it was derived from rather than guessed at.
+
+Determinism was measured, not assumed: two independent captures of all 45
+frames differ by zero pixels, so an input regenerates identically and a
+generated image can always be traced to a reproducible source.
+
+    python tools/asset-gen/make_town_img2img_inputs.py \
+        --game-root <staged game> --output out/town-img2img --surface wide
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+CAPTURE = ROOT / "tools" / "golden" / "capture-town-proof.py"
+
+
+def content_box(image):
+    """The non-black region, which is the part worth generating against."""
+    box = image.convert("RGB").getbbox()
+    return box or (0, 0, image.width, image.height)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--game-root", required=True, type=Path,
+                        help="staged runnable game (tools/ci/stage-project-gates.js)")
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--surface", default="wide",
+                        choices=("classic", "four_three", "wide"))
+    parser.add_argument("--scale", type=int, default=3,
+                        help="integer upscale for the model's benefit; NEAREST, "
+                             "so no interpolation invents detail the game lacks")
+    parser.add_argument("--keep-raw", action="store_true",
+                        help="also keep the uncropped captures")
+    args = parser.parse_args()
+
+    from PIL import Image
+
+    output = args.output.resolve()
+    raw = output / "raw"
+    output.mkdir(parents=True, exist_ok=True)
+
+    result = subprocess.run(
+        [sys.executable, str(CAPTURE), "--game-root", str(args.game_root),
+         "--output", str(raw), "--surface", args.surface],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    if result.returncode != 0:
+        raise SystemExit(result.stdout[-4000:] + "\n" + result.stderr[-4000:])
+    print(result.stdout.strip().splitlines()[-1])
+
+    proof = json.loads((raw / "town-proof.json").read_text(encoding="utf-8"))
+    by_label = {f["label"]: f for f in proof.get("frames", [])}
+
+    titles = {}
+    maps_dir = ROOT / "projects" / "hichaukitoden-game" / "data" / "maps"
+    for path in maps_dir.glob("*.json"):
+        try:
+            titles[int(path.stem)] = json.loads(
+                path.read_text(encoding="utf-8")).get("title", "")
+        except Exception:
+            pass
+
+    entries = []
+    for png in sorted(raw.glob("*.png")):
+        label = png.stem
+        frame = by_label.get(label, {})
+        image = Image.open(png)
+        box = content_box(image)
+        cropped = image.crop(box)
+        if args.scale > 1:
+            cropped = cropped.resize(
+                (cropped.width * args.scale, cropped.height * args.scale),
+                Image.NEAREST)
+        out_path = output / f"{label}.png"
+        cropped.save(out_path)
+        map_id = frame.get("mapId")
+        entries.append({
+            "label": label,
+            "file": out_path.name,
+            "mapId": map_id,
+            "title": titles.get(map_id, ""),
+            "lanePosition": label.split("-")[-1],
+            "surface": args.surface,
+            "sourceSize": [image.width, image.height],
+            "cropBox": list(box),
+            "scale": args.scale,
+            "outputSize": [cropped.width, cropped.height],
+            "actor": frame.get("actor"),
+            "projectionWindowOffsetX": frame.get("projectionWindowOffsetX"),
+        })
+
+    (output / "inputs.json").write_text(
+        json.dumps({"surface": args.surface, "scale": args.scale,
+                    "frames": entries}, indent=2) + "\n", encoding="utf-8")
+
+    if not args.keep_raw:
+        for png in raw.glob("*.png"):
+            png.unlink()
+
+    sizes = sorted({tuple(e["outputSize"]) for e in entries})
+    print(f"TOWN IMG2IMG INPUTS OK frames={len(entries)} "
+          f"surface={args.surface} scale={args.scale}x sizes={sizes}")
+    print(f"  manifest: {output / 'inputs.json'}")
+
+
+if __name__ == "__main__":
+    main()

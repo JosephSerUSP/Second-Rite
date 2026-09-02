@@ -760,6 +760,14 @@ function love.load(arg)
 
     if cli.isTownProofFramesMode then
         loader.init()
+        -- Honour surface=<id> here for the same reason the screenshot path
+        -- does: the proof photographs at whatever surface the Project plays
+        -- on, and without this there is no way to photograph the town on any
+        -- surface but Classic. The flag was accepted and silently ignored,
+        -- so a caller asking for Wide got 256x240 back and no warning.
+        if cli.requestedSurfaceProfile then
+            presentation_surface.setProfile(cli.requestedSurfaceProfile)
+        end
         cli_tools.runTownProofFrames(loader)
         love.event.quit(0)
         return

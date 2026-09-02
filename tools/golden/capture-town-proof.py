@@ -21,13 +21,22 @@ def main() -> None:
     parser.add_argument(
         "--lovec", default=r"C:\Program Files\LOVE\lovec.exe", type=Path
     )
+    parser.add_argument(
+        "--surface", default=None, choices=("classic", "four_three", "wide"),
+        help="presentation surface to photograph at; default is the Project's "
+             "own. 'wide' (426x240) is the widest the game actually renders, "
+             "which is what an img2img input wants -- a wider frame than the "
+             "game has would invite the model to invent outside it.",
+    )
     args = parser.parse_args()
     args.game_root = args.game_root.resolve()
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
 
     result = subprocess.run(
-        [str(args.lovec), str(args.game_root), "town-proof-frames"],
+        [str(args.lovec), str(args.game_root)]
+        + ([f"surface={args.surface}"] if args.surface else [])
+        + ["town-proof-frames"],
         cwd=args.game_root,
         capture_output=True,
         text=True,

@@ -48,24 +48,64 @@ REFERENCE_MAPS = (17, 28, 29)   # the Praca, Alicia's Padaria, Laura's Smithy
 CAPTURE = ROOT / "tools" / "golden" / "capture-town-proof.py"
 
 
-def uniform_box(box, target, size):
-    """A fixed-size window over the content, so every screen frames alike.
+PLAYER_SPRITE = ("projects", "hichaukitoden-game", "assets", "character",
+                 "player.png")
+# Where the player's feet sit inside the window, measured from its TOP. 129 of a
+# 146-tall window is where the interiors already stood, so they keep their
+# framing and every other screen is brought to them.
+FEET_FROM_TOP = 129
+# Detection is a real match, not a guess: an interior scores about 10 and the
+# Praca's plate about 29 (it is a flat painted figure over a painted street).
+# Anything far above that is not the player, and a silently wrong anchor would
+# misframe every crop, so it fails loudly instead.
+PLAYER_MATCH_LIMIT = 60.0
 
-    The screens do not fill the frame equally: an interior room occupies about
-    273x146 of the 426x240 surface, while the Praca's plate covers all of it. Fed
-    to a model side by side, that difference reads as subject matter -- one image
-    of a room and one of a whole street -- rather than as two views of the same
-    town at the same scale.
 
-    The window is centred on the content horizontally and sits on its FLOOR
-    vertically, because the ground line is the one landmark every town screen
-    shares and matching it is what makes the three look like one place.
+def find_player(image):
+    """Where the player stands, by searching for the actual sprite.
+
+    Anchoring on the content's floor was wrong: the screens' content ends at
+    different heights -- an interior at 146 rows, the Praca's plate at all 240 --
+    so a bottom-anchored window puts the character at a different height in each,
+    which is the one thing that must NOT vary. The character is the constant, so
+    the character is what the window is hung from.
+
+    Returns (centre x, feet y).
+    """
+    import numpy as np
+    from PIL import Image
+    sprite = Image.open(str(ROOT.joinpath(*PLAYER_SPRITE))).convert("RGBA")
+    sprite = sprite.crop(sprite.getbbox())
+    data = np.asarray(sprite)
+    mask = data[:, :, 3] > 128
+    reference = data[:, :, :3].astype(int)
+    height, width = data.shape[:2]
+    frame = np.asarray(image.convert("RGB")).astype(int)
+    rows, columns = frame.shape[:2]
+    best, at = None, None
+    for y in range(rows - height + 1):
+        for x in range(columns - width + 1):
+            error = np.abs(frame[y:y + height, x:x + width] - reference)[mask].mean()
+            if best is None or error < best:
+                best, at = error, (x, y)
+    if best is None or best > PLAYER_MATCH_LIMIT:
+        raise SystemExit("could not find the player in the frame (best match %.1f, "
+                         "limit %.1f); the anchor would be wrong"
+                         % (best if best is not None else -1, PLAYER_MATCH_LIMIT))
+    return at[0] + width // 2, at[1] + height
+
+
+def player_box(image, target):
+    """A fixed window hung from the player, so the character lands identically.
+
+    Horizontal centre and vertical feet both come from the figure, so the three
+    screens read as one town photographed the same way rather than three
+    different subjects.
     """
     width, height = target
-    left, top, right, bottom = box
-    centre = (left + right) // 2
-    x0 = max(0, min(size[0] - width, centre - width // 2))
-    y0 = max(0, min(size[1] - height, bottom - height))
+    centre_x, feet_y = find_player(image)
+    x0 = max(0, min(image.width - width, centre_x - width // 2))
+    y0 = max(0, min(image.height - height, feet_y - FEET_FROM_TOP))
     return (x0, y0, x0 + width, y0 + height)
 
 
@@ -87,8 +127,9 @@ def main() -> None:
                              "so no interpolation invents detail the game lacks")
     parser.add_argument("--uniform-crop", default="273x146",
                         help="crop every frame to this WxH window over its "
-                             "content, so the screens are comparable; 'off' "
-                             "keeps each frame's own content box")
+                             "content, hung from the player so the character "
+                             "lands in the same place; 'off' keeps each frame's "
+                             "own content box")
     parser.add_argument("--maps", default=",".join(str(m) for m in REFERENCE_MAPS),
                         help="comma-separated map ids to keep, or 'all'. Defaults "
                              "to the three modelled screens; see REFERENCE_MAPS.")
@@ -135,10 +176,11 @@ def main() -> None:
             png.unlink()
             continue
         image = Image.open(png)
-        box = content_box(image)
-        if args.uniform_crop.lower() != "off":
+        if args.uniform_crop.lower() == "off":
+            box = content_box(image)
+        else:
             width, height = (int(v) for v in args.uniform_crop.lower().split("x"))
-            box = uniform_box(box, (width, height), image.size)
+            box = player_box(image, (width, height))
         cropped = image.crop(box)
         if args.scale > 1:
             cropped = cropped.resize(

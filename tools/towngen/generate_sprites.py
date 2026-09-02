@@ -90,8 +90,8 @@ STYLE = (
 )
 
 # Only roles with no hand-authored sprite. alicia, laura (the smithy), registrar
-# (Celina) and auctioneer (Goustav) are drawn by the owner and live in
-# assets/character/;
+# (Celina), auctioneer (Goustav) and the child are drawn by the owner and live
+# in assets/character/;
 # leaving them here would regenerate a placeholder over the authored one the
 # moment their town/ file is absent, silently undoing the repointing.
 #
@@ -113,8 +113,6 @@ CAST = {
              "a rosary at her waist, gentle and stooped.",
     "fisherman": "A weathered fisherman in a dark blue wool coat and flat cap, grey beard, "
                  "heavy boots.",
-    "child": "A small village child in an oversized patched coat and bare feet, "
-             "unruly hair.",
 }
 
 

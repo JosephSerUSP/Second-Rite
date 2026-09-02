@@ -427,7 +427,7 @@ def dominant_downscale(figure, width, height, alpha):
 VENDOR_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor")
 
 
-def grid_align(figure):
+def grid_align(figure, step=None):
     """Rebuild the figure on the pixel grid it was actually drawn on.
 
     An image model does not draw pixel art, it draws smooth art that resembles
@@ -436,6 +436,15 @@ def grid_align(figure):
     the model's grid to ours is therefore non-integer, and a non-integer
     reduction smooths whatever resampler runs. Snapping to the source grid first
     makes the second step a clean ratio.
+
+    Pass `step` to force the grid instead of detecting one. Detection reads the
+    generated figures at ~4px, but that is the FINEST grid consistent with them,
+    not necessarily the one they were drawn on -- and 4 is exactly half of 8, so
+    the two are indistinguishable from the figure alone. Blanking the controls
+    off the page and re-detecting separated them: the controls alone come back at
+    8.00/8.00 at high confidence, so the page's grid is 8, and the generated
+    figures' 4 is a subharmonic of it. Forcing 8 lands them straight on the cell
+    with no second resample at all.
 
     Returns the figure unchanged if the detector cannot find a grid: no grid is a
     real answer for art that has none, and block-mode alone still handles it.
@@ -446,7 +455,9 @@ def grid_align(figure):
     buffer = io.BytesIO()
     figure.save(buffer, format="PNG")
     try:
-        result = process(buffer.getvalue(), mode="full", return_png=True)
+        result = (process(buffer.getvalue(), force_step=step, return_png=True)
+                  if step else
+                  process(buffer.getvalue(), mode="full", return_png=True))
     except Exception as error:                      # noqa: BLE001
         print("     note: grid detection declined (%s); using the raw figure"
               % error)
@@ -456,17 +467,28 @@ def grid_align(figure):
     return aligned.crop(box) if box else aligned
 
 
+# Ranked by eye, not by metric. A "crispness" score -- mean contrast between
+# neighbouring pixels -- says page 72.8, grid 63.7, mode 61.1, lanczos 48.7, and
+# it is the wrong instrument: it cannot tell a hard edge from noise, and
+# grid-snapping wins it by hardening every edge including the ones that should
+# stay soft. Judged by looking, the order inverts. Lanczos is the default.
+#
+# It is a fair fight now in a way it was not before: on the old page the model's
+# grid and ours were incommensurate and averaging smeared across the mismatch.
+# The page is sized so the reduction is exactly 8:1, and an area filter over
+# whole 8x8 blocks is no longer averaging across anything.
 DOWNSCALERS = {
-    "grid": None,                       # grid_align + dominant; the default
+    "lanczos": Image.LANCZOS,           # the default
+    "page": None,                       # grid forced to the page's own
+    "grid": None,                       # grid_align on a detected grid
     "mode": None,                       # dominant_downscale alone
-    "lanczos": Image.LANCZOS,
     "box": Image.BOX,
     "nearest": Image.NEAREST,
 }
-PALETTE_METHODS = ("grid", "mode")      # these already return a small palette
+PALETTE_METHODS = ("page", "grid", "mode")      # these already return a small palette
 
 
-def to_cell_at(cell_image, scale, method="grid"):
+def to_cell_at(cell_image, scale, method="lanczos"):
     """One 24x48 cell at the page's shared scale, feet on the bottom edge."""
     figure = cell_image
     # The target size is fixed by the PAGE's shared scale, measured before any
@@ -474,13 +496,26 @@ def to_cell_at(cell_image, scale, method="grid"):
     # relative heights the whole page is built on would drift apart.
     width = max(1, round(figure.width * scale))
     height = max(1, round(figure.height * scale))
-    if method == "grid":
+    if method == "page":
+        # The controls fix the page's grid exactly, so force it rather than
+        # detect per figure: the reconstruction then lands ON the target size and
+        # nothing is resampled a second time.
+        figure = grid_align(figure, step=1.0 / scale)
+    elif method == "grid":
         figure = grid_align(figure)
     # Alpha is resampled separately and hard-thresholded either way: a soft edge
     # shimmers against a pre-rendered plate.
     alpha_full = figure.getchannel("A").point(lambda v: 255 if v >= 128 else 0)
-    if method in PALETTE_METHODS:
+    # Only dominant_downscale returns a reduced palette. Forcing the grid can
+    # land the figure on the target size and skip it entirely, so track this
+    # rather than infer it from the method -- inferring it shipped sprites with
+    # 350-630 colours instead of 24.
+    palettised = False
+    if figure.size == (width, height):
+        small = figure                  # forced to the target grid; already there
+    elif method in PALETTE_METHODS:
         small = dominant_downscale(figure, width, height, alpha_full)
+        palettised = True
     else:
         small = figure.resize((width, height), DOWNSCALERS[method])
     cell = Image.new("RGBA", (CELL_W, CELL_H), (0, 0, 0, 0))
@@ -489,8 +524,8 @@ def to_cell_at(cell_image, scale, method="grid"):
     # shared scale -- the whole page is trimmed instead, in fit_page.
     cell.alpha_composite(small, ((CELL_W - width) // 2, CELL_H - height))
     alpha = cell.getchannel("A").point(lambda v: 255 if v >= 128 else 0)
-    if method in PALETTE_METHODS:
-        # Already palettised, and quantising again would re-average it.
+    if palettised:
+        # Already reduced, and quantising again would only re-average it.
         cell.putalpha(alpha)
         return cell, width, height
     # Quantise the COLOUR only. Quantising RGBA folds transparency into the
@@ -511,7 +546,7 @@ def main():
     force = "--force" in flags
     dry_run = "--dry-run" in flags
     method = next((f.split("=", 1)[1] for f in flags if f.startswith("--downscale=")),
-                  "grid")
+                  "lanczos")
     if method not in DOWNSCALERS:
         print("FAIL unknown --downscale=%s (have: %s)"
               % (method, ", ".join(DOWNSCALERS)))

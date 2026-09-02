@@ -48,6 +48,27 @@ REFERENCE_MAPS = (17, 28, 29)   # the Praca, Alicia's Padaria, Laura's Smithy
 CAPTURE = ROOT / "tools" / "golden" / "capture-town-proof.py"
 
 
+def uniform_box(box, target, size):
+    """A fixed-size window over the content, so every screen frames alike.
+
+    The screens do not fill the frame equally: an interior room occupies about
+    273x146 of the 426x240 surface, while the Praca's plate covers all of it. Fed
+    to a model side by side, that difference reads as subject matter -- one image
+    of a room and one of a whole street -- rather than as two views of the same
+    town at the same scale.
+
+    The window is centred on the content horizontally and sits on its FLOOR
+    vertically, because the ground line is the one landmark every town screen
+    shares and matching it is what makes the three look like one place.
+    """
+    width, height = target
+    left, top, right, bottom = box
+    centre = (left + right) // 2
+    x0 = max(0, min(size[0] - width, centre - width // 2))
+    y0 = max(0, min(size[1] - height, bottom - height))
+    return (x0, y0, x0 + width, y0 + height)
+
+
 def content_box(image):
     """The non-black region, which is the part worth generating against."""
     box = image.convert("RGB").getbbox()
@@ -64,6 +85,10 @@ def main() -> None:
     parser.add_argument("--scale", type=int, default=3,
                         help="integer upscale for the model's benefit; NEAREST, "
                              "so no interpolation invents detail the game lacks")
+    parser.add_argument("--uniform-crop", default="273x146",
+                        help="crop every frame to this WxH window over its "
+                             "content, so the screens are comparable; 'off' "
+                             "keeps each frame's own content box")
     parser.add_argument("--maps", default=",".join(str(m) for m in REFERENCE_MAPS),
                         help="comma-separated map ids to keep, or 'all'. Defaults "
                              "to the three modelled screens; see REFERENCE_MAPS.")
@@ -111,6 +136,9 @@ def main() -> None:
             continue
         image = Image.open(png)
         box = content_box(image)
+        if args.uniform_crop.lower() != "off":
+            width, height = (int(v) for v in args.uniform_crop.lower().split("x"))
+            box = uniform_box(box, (width, height), image.size)
         cropped = image.crop(box)
         if args.scale > 1:
             cropped = cropped.resize(
@@ -146,6 +174,8 @@ def main() -> None:
         raise SystemExit("asked for maps %s but captured %s"
                          % (sorted(keep), sorted({e["mapId"] for e in entries})))
     sizes = sorted({tuple(e["outputSize"]) for e in entries})
+    if args.uniform_crop.lower() != "off" and len(sizes) != 1:
+        raise SystemExit("uniform crop asked for one size, produced %s" % (sizes,))
     print(f"TOWN IMG2IMG INPUTS OK frames={len(entries)} "
           f"surface={args.surface} scale={args.scale}x sizes={sizes}")
     print(f"  manifest: {output / 'inputs.json'}")

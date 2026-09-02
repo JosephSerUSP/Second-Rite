@@ -123,7 +123,7 @@ def main():
 
     if args.walker_y is not None:
         actor = thestra_camera.create_actor_preview(
-            ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png",
+            ROOT / "projects/hichaukitoden-game/assets/character/town/npc_alicia.png",
             camera, anchor=(args.lane_x, args.walker_y, 0.0),
             world_height=1.75, name="WIDE_walker")
         actor.hide_render = False

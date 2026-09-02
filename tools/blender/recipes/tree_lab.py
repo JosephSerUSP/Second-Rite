@@ -179,7 +179,7 @@ def build(output: Path, render: Path):
     build_generation(exterior, lab, generation=0)
     record = json.loads((ROOT / "tools/blender/fixtures/town_sideview_camera.json").read_text())
     camera = thestra_camera.create_or_update_camera(record, make_active=True)
-    actor = thestra_camera.create_actor_preview(ROOT / "projects/hichaukitoden-game/assets/character/town/npc_alicia.png", camera, anchor=(0, exterior.y(6.0), 0), world_height=1.75, name="TREE_LAB_WALKER"); actor.hide_render = False
+    actor = thestra_camera.create_actor_preview(ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png", camera, anchor=(0, exterior.y(6.0), 0), world_height=1.75, name="TREE_LAB_WALKER"); actor.hide_render = False
     world = bpy.data.worlds.new("Tree lab world"); scene.world = world; world.use_nodes = True; world.node_tree.nodes["Background"].inputs["Color"].default_value = (.07,.09,.12,1); world.node_tree.nodes["Background"].inputs["Strength"].default_value = .5
     bpy.ops.object.light_add(type="AREA", location=(-8, 0, 9)); key = bpy.context.object; key.name = "TREE_LAB_SKY"; key.data.energy = 1500; key.data.size = 14
     key.rotation_euler = (Vector((3, 0, 2)) - key.location).to_track_quat('-Z','Y').to_euler()

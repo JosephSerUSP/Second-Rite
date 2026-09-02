@@ -117,17 +117,12 @@ ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_
                  "recover_object_mode"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
-# Staged preview actors, from the in-style town set. The five sprites that used
-# to sit loose in assets/character/ were placeholders in a brighter, higher
-# chroma register than the town, and were removed rather than restyled; the
-# town/ sheets are the vocabulary the game actually uses.
 PREVIEW_SPRITES = {
-    "alicia": "town/npc_alicia.png",
-    "laura": "town/npc_laura.png",
-    "agnes": "town/npc_agnes.png",
-    "child": "town/npc_child.png",
-    "registrar": "town/npc_registrar.png",
-    "scholar": "town/npc_scholar.png",
+    "alicia": "npc_alicia.png",
+    "celina": "npc_celina.png",
+    "female_redhead": "npc_female_redhead_dress.png",
+    "goustav": "npc_goustav.png",
+    "laura": "npc_laura.png",
 }
 
 METHOD_PARAMS = {
@@ -2120,7 +2115,7 @@ def _mutate(method, params):
             collection.objects.link(actor); actor["th_preview_actor"] = "walker"
             sprite_path = (_repo_tools_blender().parents[1] / "projects" /
                            "hichaukitoden-game" / "assets" / "character" /
-                           "town/npc_alicia.png")
+                           "npc_alicia.png")
             if not sprite_path.is_file():
                 raise ValueError(f"preview actor sprite is missing: {sprite_path}")
             material = bpy.data.materials.get("TH_PREVIEW_actor_sprite")

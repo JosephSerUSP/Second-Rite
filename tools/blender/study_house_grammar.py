@@ -57,7 +57,7 @@ from house_grammar.recipe import build  # noqa: E402
 DEFAULT_OUT = Path(r"C:\Users\josep\AppData\Local\Temp\claude"
                    r"\D--Antigravity-Hichaukitoden"
                    r"\90c12529-2230-45cd-8f00-3225f56c112a\scratchpad\house_study")
-WALKER_SHEET = ROOT / "projects/hichaukitoden-game/assets/character/town/npc_alicia.png"
+WALKER_SHEET = ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png"
 
 # The lane the study is authored on.  24 m is wide enough to hold the townhouse
 # plus a neighbour on each side without either neighbour reaching a lane end,

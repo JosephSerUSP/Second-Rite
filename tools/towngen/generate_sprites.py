@@ -2,11 +2,8 @@
 
 The existing `assets/sprites/NPC*.png` sheets are 48x64 nude placeholder
 figures - functional for a grid dungeon, wrong for a populated town. The
-walker and the `assets/character/town/npc_*.png` set establish the real
-contract: a single 24x48 cell, hard alpha, limited palette. (This used to
-cite `npc_female_redhead_dress.png`, one of five loose sprites in
-assets/character/ that were a brighter, higher chroma register than the town
-and have since been removed; the town/ sheets are the surviving vocabulary.)
+walker and the owner's own `npc_female_redhead_dress.png` establish the real
+contract: a single 24x48 cell, hard alpha, limited palette.
 
 Each sprite is painted large, keyed off a flat magenta field, cropped to its
 own silhouette and then downscaled into one 24x48 cell. Painting large and

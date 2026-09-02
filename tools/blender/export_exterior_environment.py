@@ -63,6 +63,101 @@ import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
 
 
+GROUND_NAMES = {"ARCH_square_ground", "ARCH_low_curb"}
+GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
+
+
+def _areas(mesh, tag_index):
+    """Per-face 3D area and UV area, split into ground and everything else."""
+    uv = mesh.uv_layers.active.data
+    ground = [0.0, 0.0]
+    other = [0.0, 0.0]
+    for poly in mesh.polygons:
+        world = poly.area
+        pts = [uv[i].uv for i in poly.loop_indices]
+        acc = 0.0
+        for i in range(len(pts)):
+            a, b = pts[i], pts[(i + 1) % len(pts)]
+            acc += a.x * b.y - b.x * a.y
+        bucket = ground if poly.material_index == tag_index else other
+        bucket[0] += world
+        bucket[1] += abs(acc) * 0.5
+    return ground, other
+
+
+def reallocate_ground(target, ground_share):
+    """Stop a flat ground plane from spending the atlas on itself.
+
+    ``smart_project`` allocates UV area in proportion to WORLD area, which is
+    the right default when every face matters equally. It is the wrong default
+    here: the Praca's ground is a single 200x200 m quad, 98.4% of the scene's
+    footprint in 12 triangles, so it claimed ~98% of the atlas and left the
+    forty-five buildings and trees sharing the rest. The bake then read as
+    1.1% written because that 98% is flat ground with nothing on it.
+
+    A ground plane seen at a glancing angle needs far fewer texels per metre
+    than a facade seen square-on, so this scales the ground islands down to a
+    fixed ``ground_share`` of the atlas and repacks the rest into the space it
+    releases. It does not delete the ground -- the shipped package
+    has ground, and culling is a separate decision from texel weighting.
+
+    This is the narrow, one-surface case of the camera-aware allocator in
+    docs/design/town-authoring-known-good.md. It weights by surface class
+    rather than by projected screen area, and reports its numbers so the
+    allocation is reviewable rather than an invisible consequence of packing.
+    """
+    mesh = target.data
+    tag_index = next((i for i, slot in enumerate(mesh.materials)
+                      if slot and slot.name.startswith(GROUND_TAG_MATERIAL)), None)
+    if tag_index is None:
+        return
+    ground, other = _areas(mesh, tag_index)
+    if ground[0] <= 0 or other[0] <= 0 or ground[1] <= 0:
+        return
+    share = min(max(float(ground_share), 0.001), 0.9)
+    # Solve for the scale that leaves the ground occupying `share` of the atlas
+    # after packing: ground_uv * s^2 / (ground_uv * s^2 + other_uv) == share.
+    #
+    # A density RATIO is the wrong control here and it is worth saying why. The
+    # ground is 94% of this scene's world area, so even at a quarter of the
+    # buildings' texel density it still takes ~80% of the atlas. Expressing the
+    # budget as a share of the texture is both intuitive and self-limiting: it
+    # holds whatever the ground's size happens to be, which matters because an
+    # authored ground plane is routinely far larger than the lane it serves.
+    scale = math.sqrt((share / (1.0 - share)) * other[1] / ground[1])
+    ground_uv_pct = 100 * ground[1] / (ground[1] + other[1])
+    print(f"[exterior] ground held {ground_uv_pct:.1f}% of UV area for "
+          f"{100 * ground[0] / (ground[0] + other[0]):.1f}% of world area; "
+          f"scaling ground UVs by {scale:.4f} toward a {100 * share:.0f}% atlas share",
+          flush=True)
+    if scale >= 0.999:
+        return
+
+    uv = mesh.uv_layers.active.data
+    loops = [i for poly in mesh.polygons if poly.material_index == tag_index
+             for i in poly.loop_indices]
+    cx = sum(uv[i].uv.x for i in loops) / len(loops)
+    cy = sum(uv[i].uv.y for i in loops) / len(loops)
+    for i in loops:
+        uv[i].uv.x = cx + (uv[i].uv.x - cx) * scale
+        uv[i].uv.y = cy + (uv[i].uv.y - cy) * scale
+
+    # Repack so the space the ground gave up is actually taken by the buildings
+    # rather than left as gutter. margin=0: no bleed, because the runtime
+    # samples nearest and every gutter pixel is resolution spent on nothing.
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.select_all(action="SELECT")
+    try:
+        bpy.ops.uv.pack_islands(margin=0.0, rotate=True)
+    except TypeError:
+        bpy.ops.uv.pack_islands(margin=0.0)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    ground, other = _areas(mesh, tag_index)
+    print(f"[exterior] ground now {100 * ground[1] / (ground[1] + other[1]):.1f}% of UV area",
+          flush=True)
+
+
 def in_square(obj, span, margin):
     """Is this object part of the authored square, or parked outside it?
 
@@ -80,7 +175,7 @@ def in_square(obj, span, margin):
     return -margin <= centre.y <= span + margin
 
 
-def rebuild_render_mesh(span, margin) -> None:
+def rebuild_render_mesh(span, margin, ground_share) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -106,6 +201,8 @@ def rebuild_render_mesh(span, margin) -> None:
     render.objects.link(seed)
     copies = [seed]
     skipped = []
+    ground_tagged = []
+    ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
     source_objects = list(source.all_objects)
     for obj in source_objects:
         if obj.type != "MESH" or obj.hide_render:
@@ -120,11 +217,20 @@ def rebuild_render_mesh(span, margin) -> None:
             continue
         print(f"[exterior] copying {obj.name}", flush=True)
         copy = obj.copy()
+        copy.data = obj.data.copy()
         copy.name = f"R_{obj.name}"
         copy.hide_viewport = False
         copy.hide_render = False
         render.objects.link(copy)
         copy.hide_set(False)
+        if obj.name in GROUND_NAMES:
+            # Tag with a dedicated material slot. Object identity is lost in the
+            # join, but material_index survives it, so this is how the allocator
+            # finds the ground faces afterwards.
+            copy.data.materials.append(ground_tag)
+            for polygon in copy.data.polygons:
+                polygon.material_index = len(copy.data.materials) - 1
+            ground_tagged.append(obj.name)
         copies.append(copy)
     if not copies:
         raise RuntimeError("TH_SOURCE contains no renderable meshes")
@@ -155,6 +261,8 @@ def rebuild_render_mesh(span, margin) -> None:
     bpy.ops.mesh.dissolve_degenerate(threshold=0.001)
     bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.0)
     bpy.ops.object.mode_set(mode="OBJECT")
+    if ground_tagged:
+        reallocate_ground(target, ground_share)
     target.data.calc_loop_triangles()
     if len(target.data.loop_triangles) < 100:
         raise RuntimeError(
@@ -174,6 +282,9 @@ def main() -> None:
                         help="world fill strength for the bake")
     parser.add_argument("--sun", type=float, default=2.5,
                         help="hard key energy; exteriors get one, interiors do not")
+    parser.add_argument("--ground-share", type=float, default=0.15,
+                        help="fraction of the atlas the ground may occupy; the "
+                             "rest goes to the buildings and foliage")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
     parser.add_argument("--atlas-size", type=int, default=1024)
@@ -183,7 +294,7 @@ def main() -> None:
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
-    rebuild_render_mesh(args.span, args.margin)
+    rebuild_render_mesh(args.span, args.margin, args.ground_share)
 
     # Same reason export_room_environment.py stages lighting before baking: a
     # Cycles bake that just opens the file is lit by whatever the .blend last

@@ -294,7 +294,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "west_churchyard"
+          "arrival": "churchyard_stair"
         }
       ]
     }

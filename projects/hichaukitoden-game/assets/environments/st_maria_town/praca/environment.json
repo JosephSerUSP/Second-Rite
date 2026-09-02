@@ -1,78 +1,190 @@
 {
   "contractVersion": 1,
-  "renderMesh": "../stub/quad.obj",
-  "materialLibrary": "../stub/quad.mtl",
-  "textureAtlas": "../stub/atlas.png",
-  "collisionMesh": "../stub/quad.obj",
+  "environmentId": "st_maria_praca",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
   "bounds": [
-    6.8,
-    0.0,
-    -2.5,
-    8.8,
-    23.699,
-    2.5
+    -75.8621,
+    -5.4839,
+    -0.0008,
+    75.8621,
+    32.9032,
+    10.75
   ],
-  "provenance": {
-    "plateSourceViewTransform": "Standard"
+  "stats": {
+    "triangleCount": 9304,
+    "vertexCount": 6217,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1417976,
+    "renderMeshSizeBytes": 934625,
+    "packageSizeBytes": 2353407
   },
   "anchors": {
     "spawn_player": {
+      "id": "spawn_player",
       "position": [
         7.8,
         11.85,
-        -1.5
-      ]
-    },
-    "west_churchyard": {
-      "position": [
-        7.8,
+        0.0
+      ],
+      "rotation": [
         0.0,
-        -1.5
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
       ]
     },
     "quay_stair": {
+      "id": "quay_stair",
       "position": [
         7.8,
-        3.179,
-        -1.5
+        0.434,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "alicia_door": {
+      "id": "alicia_door",
+      "position": [
+        7.8,
+        4.625,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "churchyard_stair": {
+      "id": "churchyard_stair",
+      "position": [
+        7.8,
+        9.827,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
       ]
     },
     "chapel_door": {
+      "id": "chapel_door",
       "position": [
         7.8,
-        16.763,
-        -1.5
+        20.81,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
       ]
     },
-    "east_cortico": {
+    "east_backstreet": {
+      "id": "east_backstreet",
       "position": [
         7.8,
-        23.699,
-        -1.5
+        23.7,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
       ]
     },
     "npc_child": {
+      "id": "npc_child",
       "position": [
         7.8,
         12.717,
-        -1.5
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_registrar": {
+      "id": "npc_registrar",
+      "position": [
+        7.8,
+        16.763,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
       ]
     }
   },
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      900,
+      906,
       240
     ],
     "slicePositions": [
       11.85
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
     ],
     "foregrounds": [
       "../stub/empty_900.png"
@@ -81,11 +193,15 @@
       "runtimeCenterY": 11.85
     },
     "playerProjection": {
-      "centerX": 450.0,
+      "centerX": 453.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.42857
     }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "st_maria_praca.blend"
   }
 }

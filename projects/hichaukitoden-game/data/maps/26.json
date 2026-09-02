@@ -235,7 +235,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "east_cortico"
+          "arrival": "east_backstreet"
         }
       ]
     },

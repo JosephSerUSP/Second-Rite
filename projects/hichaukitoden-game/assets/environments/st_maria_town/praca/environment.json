@@ -174,5 +174,34 @@
   "provenance": {
     "generator": "town_environment_pipeline.py",
     "sourceBlend": "st_maria_praca_modelled.blend"
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      906,
+      240
+    ],
+    "slicePositions": [
+      11.85
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_900.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 11.85
+    },
+    "playerProjection": {
+      "centerX": 453.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 27.42857
+    }
   }
 }

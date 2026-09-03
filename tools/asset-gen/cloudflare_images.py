@@ -43,6 +43,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import user_env
+
 BASE_URL = "https://api.cloudflare.com/client/v4"
 ACCOUNT_ENV = "CLOUDFLARE_ACCOUNT_ID"
 TOKEN_ENV = "CLOUDFLARE_API_KEY"
@@ -51,18 +54,13 @@ TEXT_TO_IMAGE = "@cf/black-forest-labs/flux-1-schnell"
 
 
 def credentials():
-    """Both values, or a message saying which is missing and why."""
-    account = os.environ.get(ACCOUNT_ENV)
-    token = os.environ.get(TOKEN_ENV)
-    missing = [name for name, value in ((ACCOUNT_ENV, account), (TOKEN_ENV, token))
-               if not value]
-    if missing:
-        raise SystemExit(
-            "missing %s.\n"
-            "If they were just set with setx, this process cannot see them: setx "
-            "reaches new processes only, so the shell (and any session started "
-            "before it) has to be restarted." % " and ".join(missing))
-    return account, token
+    """Both values, from the process or from the user environment behind it.
+
+    setx reaches new processes only, so a session started before the keys were
+    set inherits nothing. user_env reads the registry rather than demanding a
+    relaunch, which is why this works without one.
+    """
+    return user_env.require(ACCOUNT_ENV, TOKEN_ENV)
 
 
 def run(model, payload, account=None, token=None, timeout=300):

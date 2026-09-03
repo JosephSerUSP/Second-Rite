@@ -32,7 +32,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from town_projection import PlateCamera, self_check, ACTOR_HEIGHT
+from town_projection import (PlateCamera, self_check, ACTOR_HEIGHT,
+                             PIXELS_PER_UNIT, plate_width_for)
 
 ROOT = Path(__file__).resolve().parents[2]
 GAME = ROOT / "projects" / "hichaukitoden-game"
@@ -125,9 +126,16 @@ def main() -> None:
             # A modelled screen already IS the reference; it needs no plate.
             continue
         projection = pre["playerProjection"]
-        per_unit = float(projection["pixelsPerRuntimeY"])
-        centre_x = float(projection["centerX"])
-        width, height = pre["imageSize"]
+        lane = traversal["lane"]
+        # The guide describes the plate we WANT, not the one on disk. Ten plates
+        # are sized span*34.6 + 80, which is a width somebody chose with a scale
+        # back-solved to fit it, and 80px of margin cannot cover a 256-wide view
+        # at either end of the lane. The Praca is span*27.428571 + 256 exactly,
+        # which is the camera's own scale plus a full composition of margin.
+        per_unit = PIXELS_PER_UNIT
+        height = pre["imageSize"][1]
+        width = plate_width_for(float(lane["maxY"]) - float(lane["minY"]))
+        centre_x = width / 2.0
         anchors = package.get("anchors", {})
         centre_y = float((pre.get("lane") or {}).get("runtimeCenterY")
                          or anchors[traversal["spawnAnchor"]]["position"][1])
@@ -138,9 +146,9 @@ def main() -> None:
         def column(world_y):
             return int(round(centre_x + (world_y - centre_y) * per_unit))
 
-        cam = PlateCamera(traversal["lane"].get("depthX", 0.0), centre_y,
-                          pre["imageSize"],
-                          traversal["lane"].get("groundZ", 0.0), centre_x)
+        cam = PlateCamera(lane.get("depthX", 0.0), centre_y, (width, height),
+                          lane.get("groundZ", 0.0), centre_x,
+                          ground_row=float(projection["screenY"]))
         ok, _, ground_row, residual = self_check(cam, projection)
         if not ok:
             raise SystemExit("map %d: the camera puts the ground on row %.1f "
@@ -149,10 +157,7 @@ def main() -> None:
                                 projection["screenY"] + projection["height"],
                                 residual))
         horizon = int(round(cam.horizon_row()))
-        # The ground the SCREEN uses. playerProjection.screenY IS the foot line
-        # -- viewport_3d says so and draws upward from it -- so the sprite height
-        # is not added to it.
-        feet = int(projection["screenY"])
+        feet = int(round(cam.project(centre_y, 0.0)[1]))
 
         def lane_at(fraction):
             """Lane position at a fraction across the plate, on the lane plane."""
@@ -228,8 +233,10 @@ def main() -> None:
                         "intro": data.get("intro", ""),
                         "doorways": placed,
                         "plateSize": [width, height],
+                        "currentPlateSize": pre["imageSize"],
+                        "pixelsPerRuntimeY": PIXELS_PER_UNIT,
+                        "groundRow": feet,
                         "laneSpan": [traversal["lane"]["minY"], traversal["lane"]["maxY"]],
-                        "pixelsPerRuntimeY": per_unit,
                         "outputSize": [frame.width, frame.height]})
         print("  map %-3d %-38s doorways in view: %s"
               % (map_id, data.get("title", ""), ", ".join(placed) or "none"))

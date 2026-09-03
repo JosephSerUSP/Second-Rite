@@ -53,6 +53,19 @@ PITCH_DEGREES = 17.5                         # down from level
 EYE_HEIGHT = 2.260417
 HORIZONTAL_DISTANCE = 18.666667
 PLATE_ROWS = 240
+
+# Pixels per world unit along the lane: the focal length in pixels (half the
+# plate's rows over the vertical half extent) over the distance to the lane.
+PIXELS_PER_UNIT = (PLATE_ROWS / 2.0 / TAN_HALF_Y) / HORIZONTAL_DISTANCE   # 27.428571
+
+# A plate has to cover the lane AND a full view, so the window is still filled
+# when the player stands at either end: half a composition of margin at each.
+COMPOSITION_WIDTH = 256
+
+
+def plate_width_for(lane_span):
+    """The width a plate must be for this lane, at the camera's own scale."""
+    return int(round(lane_span * PIXELS_PER_UNIT)) + COMPOSITION_WIDTH
 ACTOR_HEIGHT = 1.75                          # metres; the contract's Walker
 
 
@@ -60,7 +73,7 @@ class PlateCamera:
     """The authored plate camera, for one screen's lane and plate width."""
 
     def __init__(self, lane_depth_x, lane_centre_y, plate_size,
-                 ground_z=0.0, centre_x=None):
+                 ground_z=0.0, centre_x=None, ground_row=None):
         self.plate_w, self.plate_h = plate_size
         self.ground_z = float(ground_z)
         self.centre_x = (self.plate_w * 0.5) if centre_x is None else float(centre_x)
@@ -76,6 +89,16 @@ class PlateCamera:
         self.tan_half_y = TAN_HALF_Y
         self.tan_half_x = TAN_HALF_Y * self.plate_w / self.plate_h
         self.shift_rows = PRINCIPAL_SHIFT_PX * (self.plate_h / PLATE_ROWS)
+
+        # Where the ground sits is an authoring choice, not a constant. The blend
+        # leaves it on row 128 -- make_town_camera.py's default --feet-y -- and
+        # the plates author 136, which is still above the 144 character floor
+        # limit and so perfectly legal. Shifting the principal point to the
+        # screen's own row is exactly what --feet-y does, and it turns an 8-row
+        # "discrepancy" back into the parameter it always was.
+        if ground_row is not None:
+            landed = self.project(self.lane_centre_y, 0.0)[1]
+            self.shift_rows += float(ground_row) - landed
 
     @staticmethod
     def _rotation(rx, ry, rz):
@@ -125,10 +148,17 @@ def self_check(camera, projection, tolerance=8.0):
     were the top of the figure, put the expected ground at 184 and made this
     camera look 50 rows wrong.
 
-    The residual is returned rather than hidden. It runs about 8 rows, which is
-    real and is most likely the lens: the packages imply 34.6 pixels per world
-    unit along the lane where this camera gives 27.43, and that gap is not
-    reconciled here.
+    Built with the screen's own ground row, the residual is zero: the 8 rows were
+    the difference between the blend's --feet-y of 128 and the plates' 136, which
+    is an authored parameter rather than an error.
+
+    The lane scale is reconciled separately, in PIXELS_PER_UNIT. The ten
+    placeholder plates declare 34.6 px per unit, which is not a rival
+    calibration: their widths are exactly span*34.6 + 80, so a width was picked
+    and a scale back-solved to fit it. The Praca's width is exactly
+    span*27.428571 + 256 -- the camera's scale plus a full composition of margin,
+    which is what lets the window stay filled at either end of the lane. 80 px of
+    margin cannot do that.
     """
     column, ground = camera.project(camera.lane_centre_y, 0.0)
     want_ground = float(projection["screenY"])

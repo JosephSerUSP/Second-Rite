@@ -201,7 +201,7 @@ SCREENS = {
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
-        npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 250),
+        npcs=[("auctioneer", "Auctioneer", "npc_goustav", 250),
               ("yukio", "Yukio", "npc_yukio", 380)],
         doors=[
             ("west_cortico", "The Cortico", 26, "east_market", 40, None),
@@ -317,7 +317,7 @@ SCREENS = {
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 420)],
+        npcs=[("registrar", "Registrar", "npc_celina", 420)],
         doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 120, None)],
     ),
 }
@@ -451,8 +451,15 @@ def build_map(key, screen, map1):
             "commands": commands,
         }
         if sprite:
+            import os as _os
+            # Determine correct path
+            _root = _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+            if _os.path.exists(_os.path.join(_root, "projects", "hichaukitoden-game", "assets", "character", "town", f"{sprite}.png")):
+                sprite_path = f"assets/character/town/{sprite}.png"
+            else:
+                sprite_path = f"assets/character/{sprite}.png"
             event.update({
-                "sprite": "assets/character/town/%s.png" % sprite,
+                "sprite": sprite_path,
                 "frameWidth": 24, "frameHeight": 48, "frameIndex": 0,
                 "worldHeight": 1.75,
             })

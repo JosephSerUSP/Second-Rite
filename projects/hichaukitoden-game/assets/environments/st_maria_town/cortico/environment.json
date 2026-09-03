@@ -20,56 +20,56 @@
       "position": [
         7.8,
         11.127,
-        -1.5
+        0.0
       ]
     },
     "west_praca": {
       "position": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ]
     },
     "lodging_door": {
       "position": [
         7.8,
         7.514,
-        -1.5
+        0.0
       ]
     },
     "padaria_back": {
       "position": [
         7.8,
         15.029,
-        -1.5
+        0.0
       ]
     },
     "port_stair": {
       "position": [
         7.8,
         18.786,
-        -1.5
+        0.0
       ]
     },
     "east_market": {
       "position": [
         7.8,
         22.254,
-        -1.5
+        0.0
       ]
     },
     "npc_scholar": {
       "position": [
         7.8,
         4.624,
-        -1.5
+        0.0
       ]
     },
     "npc_euler": {
       "position": [
         7.8,
         10.983,
-        -1.5
+        0.0
       ]
     }
   },

@@ -210,24 +210,27 @@ local arrivalExit = lane.interact(game)
 check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_door",
     "Up can reopen the shop exit from its arrival spawn")
 
--- The town mixes two ground conventions: the pre-rendered plate lanes stand at
--- groundZ -1.5 and the modelled rooms at 0.0. Market Row opens doors into both,
--- so a transit must re-derive height from the DESTINATION rather than carry the
--- departing lane's floor across, or the player arrives sunk or floating.
+-- The town stands on ONE floor now. The plate lanes used to sit at groundZ -1.5
+-- against the modelled rooms at 0.0, which was an authoring accident rather than
+-- a design: the Praca blend establishes z=0 as floor level, and it is the file
+-- the hand-authored assets and the placement calibration live in. Every screen
+-- was moved onto it.
+--
+-- The guarantee the old two-convention crossing existed to protect still holds
+-- and is still worth testing: a transit re-derives height from the DESTINATION.
+-- It is exercised on the synthetic lane above, which authors its own floor, so
+-- it no longer depends on the town disagreeing with itself.
+for _, screen in ipairs({ 16, 18, 19, 21, 22, 23, 24, 25, 26, 27, 31 }) do
+    exploration.loadMap(game, loader.getMapIndex(screen))
+    check(math.abs(game.townTraversal.groundZ) < 0.001,
+        "map " .. screen .. " stands on the town's single floor at z=0")
+    check(math.abs(game.townTraversal.z) < 0.001,
+        "map " .. screen .. " puts the player on that floor")
+end
 exploration.loadMap(game, loader.getMapIndex(18))
-check(math.abs(game.townTraversal.groundZ - (-1.5)) < 0.001,
-    "Market Row is a plate lane standing at -1.5")
-local plateZ = game.townTraversal.z
 exploration.loadMap(game, loader.getMapIndex(27), { arrival = "exit_door" })
-check(math.abs(game.townTraversal.groundZ - 0.0) < 0.001,
-    "arriving in the modelled bakery adopts its own 0.0 ground")
 check(math.abs(game.townTraversal.z - 0.0) < 0.001,
-    "and the player stands on that floor rather than 1.5m below it")
-check(math.abs(plateZ - game.townTraversal.z) > 1.0,
-    "the two conventions really do differ, so this transit is a real crossing")
-exploration.loadMap(game, loader.getMapIndex(18), { arrival = "padaria_door" })
-check(math.abs(game.townTraversal.z - (-1.5)) < 0.001,
-    "and returning to the plate lane restores its floor")
+    "a transit still lands the player on the destination's floor")
 
 -- Substituting real 3D for the plates must stay a data change, not a code
 -- change. The seam is the presence of `preRendered` in the environment

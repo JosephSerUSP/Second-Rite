@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 28.035,
       "depthX": 7.8,
-      "groundZ": -1.5,
+      "groundZ": 0.0,
       "speed": 3.4
     },
     "blockedRanges": [],

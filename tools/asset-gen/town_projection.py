@@ -134,6 +134,28 @@ class PlateCamera:
         return self.project_world((self.lane_depth_x + depth_behind, lane_y,
                                    self.ground_z + height_above_ground))
 
+    def depth_for_row(self, row, low=-14.0, high=400.0):
+        """The depth whose ground lands on this row.
+
+        Guessing depths and hoping they cover the frame does not work: the near
+        floor between the player and the camera spans a hundred rows but only ten
+        world units, and it turns to infinity a little past that -- so a list of
+        round numbers marks the far floor densely and leaves most of the near
+        floor, the part filling the bottom of the picture, blank. Asking for a ROW
+        and solving for the depth covers what is actually visible.
+        """
+        near = self.project(self.lane_centre_y, 0.0, low)
+        if near is None or near[1] < row:
+            return None
+        for _ in range(60):
+            mid = (low + high) * 0.5
+            here = self.project(self.lane_centre_y, 0.0, mid)
+            if here is None or here[1] > row:
+                low = mid
+            else:
+                high = mid
+        return (low + high) * 0.5
+
     def horizon_row(self):
         """Where the ground plane vanishes: the limit of the depth divide."""
         far = self.project(self.lane_centre_y, 0.0, 1.0e6)

@@ -72,13 +72,13 @@ RULE = 2
 # divides by pitched depth, so a line going away from the eye converges and a
 # world-vertical leans -- and only running the real transform puts that in.
 #
-# Depths are in world units, signed: negative is NEARER than the lane, which is
-# the floor between the player and the camera. Leaving those out left the bottom
-# quarter of every guide -- the most visible floor in the picture -- with no floor
-# marked on it at all.
-FLOOR_DEPTHS = (-4.0, -2.0, -0.8, 1.5, 4.0, 9.0, 18.0, 40.0)
+# Floor rulers are placed by ROW and their depth solved, not chosen as round
+# world numbers. The near floor -- between the player and the camera, filling the
+# bottom of the picture -- spans about a hundred rows in ten world units, so a
+# list of tidy depths marks the far floor densely and leaves most of the near
+# floor bare. Twice now that was the complaint.
+FLOOR_RULERS = 10           # rulers lying flat, spread down the visible floor
 DEPTH_LINES = 9             # lines running away from the eye, across the width
-DEPTH_RUN = (-5.0, -2.0, -0.5, 1.0, 3.0, 7.0, 14.0, 28.0, 60.0)
 WALL_HEIGHT = 6.0           # world units, about two and a half people
 WALL_UPRIGHTS = 7
 
@@ -187,7 +187,13 @@ def main() -> None:
         # Floor: rulers lying flat at fixed distances back, and lines running
         # away from the eye. The second family is the one that keystones -- they
         # converge, because the camera divides by depth.
-        for depth in FLOOR_DEPTHS:
+        # Rows from just under the horizon to the very bottom edge, so the floor
+        # is marked everywhere the floor is actually visible.
+        top = horizon + max(2, (feet - horizon) // 8)
+        rows = [top + (height - top) * step / (FLOOR_RULERS - 1)
+                for step in range(FLOOR_RULERS)]
+        depths = [d for d in (cam.depth_for_row(r) for r in rows) if d is not None]
+        for depth in depths:
             points = [cam.project(lane_at(i / 24.0), 0.0, depth)
                       for i in range(25)]
             points = [q for q in points if q]
@@ -195,7 +201,7 @@ def main() -> None:
                 draw.line([(int(a), int(b)) for a, b in points], fill=FLOOR_RULE)
         for step in range(DEPTH_LINES):
             lane_y = lane_at((step + 0.5) / DEPTH_LINES)
-            points = [cam.project(lane_y, 0.0, d) for d in DEPTH_RUN]
+            points = [cam.project(lane_y, 0.0, d) for d in depths]
             points = [q for q in points if q]
             if len(points) > 1:
                 draw.line([(int(a), int(b)) for a, b in points], fill=FLOOR_RULE)

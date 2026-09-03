@@ -30,7 +30,7 @@ Freshly created procedural assets, freshly generated material sources, and fresh
 - The base projection frame used by the current camera work is **256 × 144**.
 - `walker.png` is **144 × 48**, dimensionally six **24 × 48** cells.
 - A useful physical reference is a **1.75-world-unit** Walker projecting to approximately **48 native pixels** tall at the authored action plane.
-- The preferred baseline is a **level side view**: Thestra pitch **0°**.
+- The preferred baseline **was** a level side view at Thestra pitch **0°**. The authored plate camera is **pitched 17.5° down**, and it is the authority for anything painted — see "The plate coordinate contract" below. The level baseline still describes the *runtime* camera records of the plate screens, which all declare `pitchDegrees: 0`; those records do not set a plate's perspective, because a plate is blitted and never reprojected.
 - The preferred lens family is approximately **43.27 mm Blender-equivalent**, corresponding to approximately **28.07° horizontal FOV** / `fovHalfX = 0.25` under the current 426×240 / 256×144 contract.
 - Preserve the preferred lens and solve **camera distance** for actor scale. Do not widen the lens merely to make a sprite hit 48 px.
 - A principal-point / horizon placement around native **Y ≈ 66** is the current baseline: more architecture and less floor than a centered presentation render. (An earlier **Y ≈ 110** predates the character floor limit below.)
@@ -49,6 +49,52 @@ Freshly created procedural assets, freshly generated material sources, and fresh
   "View transform".
 - This is a **mechanism**, not a composition, so it is readable under the
   sterile rule above (see issue #1016).
+
+### The plate coordinate contract
+
+Five facts, each of which has been got wrong at least once. They are collected
+here because they only make sense together (issue #1016).
+
+**The floor is z = 0.** It used to be z = -1.5 on ten screens and 0 on the rest,
+which was an authoring accident rather than a convention: the Praca blend, where
+the hand-authored assets and the placement calibration live, establishes 0 as
+floor level. Every lane, anchor and ground profile now stands on it. Rebasing the
+floor is a *relabelling*, so anything measured against the floor — the eye height
+above all — moves with it; leaving the eye at its old absolute height lifts the
+whole picture by about 41 rows.
+
+**`playerProjection.screenY` is the ground row.** `viewport_3d` calls it "the
+authored foot line" and draws the figure upward from it. It is NOT the top of the
+sprite, and adding the 48-row sprite height to it puts the expected ground 48
+rows too low, which makes a correct camera look badly wrong.
+
+**The plate camera is the one in the .blend, not the one in the map.** A plate is
+paint: the runtime blits it and never reprojects it, so the map's camera record
+cannot govern its perspective — and every plate screen declares `pitchDegrees: 0`,
+so projecting through it yields an elevation with no keystoning at all. The
+authored camera in `st_maria_praca_modelled.blend` is location
+`(-10.8667, 11.8495, 2.2604)`, euler `(107.5, 0, -90)` — 17.5° down — 20.344 mm
+on a 36 mm sensor, `shift_y -0.247574`, rendering 906 × 240. It reproduces that
+package's declared `centerX` of 453 to a hundredth of a pixel.
+`tools/asset-gen/town_projection.py` carries it, with a self-check.
+
+**Pixels per world unit along the lane is 27.428571**, and it is derived, not
+chosen: the focal length in pixels (half the plate's 240 rows over the vertical
+half extent 0.234375, so 512) over the 18.6667-unit distance to the lane. Ten
+placeholder plates declare **34.6**, which is not a rival calibration — their
+widths are exactly `span x 34.6 + 80` in every case, so a width was picked and a
+scale back-solved to fit it.
+
+**A plate is `span x 27.428571 + 256` pixels wide.** The lane, plus a full
+composition of margin, so the 256-wide window is still filled when the player
+stands at either end. The Praca is exactly that; the 34.6 plates carry 80 px of
+margin, 40 per end, and cannot cover the view at the lane extremes. `imageSize`
+and `pixelsPerRuntimeY` must be updated *with* a regenerated plate and never
+before it, or the doorways slide off their anchors.
+
+The ground row itself is an authoring parameter, not a constant: the blend leaves
+it at `make_town_camera.py`'s default `--feet-y` of 128, the plates author 136,
+and both are legal above the 144 character floor limit.
 
 ### Character floor limit
 

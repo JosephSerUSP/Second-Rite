@@ -296,7 +296,7 @@
           "cmd": "CONDITIONAL_BRANCH"
         }
       ],
-      "sprite": "assets/character/town/npc_alicia.png",
+      "sprite": "assets/character/npc_alicia.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

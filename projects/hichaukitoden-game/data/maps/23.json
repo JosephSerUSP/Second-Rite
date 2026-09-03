@@ -264,7 +264,7 @@
           "cmd": "CONDITIONAL_BRANCH"
         }
       ],
-      "sprite": "assets/character/town/npc_laura.png",
+      "sprite": "assets/character/npc_laura.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

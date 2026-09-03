@@ -152,7 +152,7 @@
           "cmd": "CONDITIONAL_BRANCH"
         }
       ],
-      "sprite": "assets/character/town/npc_registrar.png",
+      "sprite": "assets/character/npc_celina.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

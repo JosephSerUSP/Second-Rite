@@ -103,7 +103,7 @@
           "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
         }
       ],
-      "sprite": "assets/character/town/npc_child.png",
+      "sprite": "assets/character/npc_child.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,

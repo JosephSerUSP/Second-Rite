@@ -125,6 +125,11 @@ def main() -> None:
     parser.add_argument("--scale", type=int, default=3,
                         help="integer upscale for the model's benefit; NEAREST, "
                              "so no interpolation invents detail the game lacks")
+    parser.add_argument("--positions", default="west,centre,east",
+                        help="lane positions to keep. A positional reference "
+                             "needs one frame per screen, not three of the same "
+                             "room, and locating the player in a frame is not "
+                             "free -- so 'centre' alone is the usual choice.")
     parser.add_argument("--uniform-crop", default="273x146",
                         help="crop every frame to this WxH window over its "
                              "content, hung from the player so the character "
@@ -164,6 +169,7 @@ def main() -> None:
         except Exception:
             pass
 
+    positions = {p.strip() for p in args.positions.split(",") if p.strip()}
     keep = None
     if args.maps.strip().lower() != "all":
         keep = {int(m) for m in args.maps.split(",") if m.strip()}
@@ -173,6 +179,9 @@ def main() -> None:
         label = png.stem
         frame = by_label.get(label, {})
         if keep is not None and frame.get("mapId") not in keep:
+            png.unlink()
+            continue
+        if label.split("-")[-1] not in positions:
             png.unlink()
             continue
         image = Image.open(png)
@@ -203,6 +212,32 @@ def main() -> None:
             "actor": frame.get("actor"),
             "projectionWindowOffsetX": frame.get("projectionWindowOffsetX"),
         })
+
+    # One sheet stacking the modelled screens, which is what a generator hands a
+    # model as "this is what this town looks like". Vertical, because the frames
+    # are wide and a horizontal strip would shrink each one to nothing; stacked,
+    # the shared ground line repeats down the page and the style reads as one
+    # place rather than three pictures.
+    #
+    # One panel per SCREEN. The three lane positions of a screen are the same
+    # room photographed three times, and a duplicate teaches a model nothing
+    # about style while spending input tokens on it.
+    style_frames = [e for e in entries if e["lanePosition"] == "centre"]
+    if style_frames:
+        panels = [Image.open(output / e["file"]).convert("RGB") for e in style_frames]
+        gap = 12
+        sheet = Image.new(
+            "RGB",
+            (max(p.width for p in panels) + gap * 2,
+             sum(p.height for p in panels) + gap * (len(panels) + 1)),
+            (16, 16, 20))
+        y = gap
+        for panel in panels:
+            sheet.paste(panel, ((sheet.width - panel.width) // 2, y))
+            y += panel.height + gap
+        sheet.save(output / "style-reference.png")
+        print(f"  style sheet: {output / 'style-reference.png'} "
+              f"({sheet.width}x{sheet.height}, {len(panels)} screens)")
 
     (output / "inputs.json").write_text(
         json.dumps({"surface": args.surface, "scale": args.scale,

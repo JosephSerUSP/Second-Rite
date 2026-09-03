@@ -1,0 +1,149 @@
+{
+  "id": "pixie",
+  "name": "Pixie",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 1,
+  "role": "Healer",
+  "smallBattler": "pixie[fps=15]",
+  "passives": [
+    "postBattleHeal",
+    "sense"
+  ],
+  "elements": [
+    "Green"
+  ],
+  "skills": [
+    "windBlade",
+    "soothingMote"
+  ],
+  "flavor": "A wandering mote-courier who got lost between shrines and never looked back.",
+  "expGrowth": 2,
+  "gold": 15,
+  "drops": [
+    {
+      "itemId": 1,
+      "chance": 0.3
+    }
+  ],
+  "evolutions": [
+    {
+      "level": 6,
+      "evolvesTo": "high_pixie",
+      "bonus": {
+        "maxHp": 8,
+        "mat": 5,
+        "mdf": 3
+      }
+    }
+  ],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A glowing Pixie flutters near you! 'You look exhausted! Let me soothe your wounds.'"
+    },
+    {
+      "cmd": "RECOVER_PARTY"
+    },
+    {
+      "cmd": "TEXT",
+      "text": "Pixie smiles warmly. 'May I travel with you?'"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Recruit Pixie",
+          "commands": [
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "pixie",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Leave",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You part ways peacefully."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [
+    {
+      "itemId": 1,
+      "chance": 0.8,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Ariel",
+    "Puck",
+    "Sparky",
+    "Tinker",
+    "Faye",
+    "Mote",
+    "Clover",
+    "Twinkle"
+  ],
+  "baseParams": {
+    "maxHp": 12,
+    "atk": 6,
+    "def": 10,
+    "mat": 15,
+    "mdf": 14,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 20,
+      "atk": 12,
+      "def": 18,
+      "mat": 31,
+      "mdf": 25
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 29,
+      "atk": 18,
+      "def": 26,
+      "mat": 46,
+      "mdf": 37
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 32,
+      "atk": 21,
+      "def": 29,
+      "mat": 50,
+      "mdf": 41
+    }
+  ],
+  "portrait": "pixie",
+  "bigBattler": "pixie",
+  "defaultGrowthSeed": 506952114
+}

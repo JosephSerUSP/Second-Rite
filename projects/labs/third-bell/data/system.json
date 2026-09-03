@@ -1,0 +1,263 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended-italic",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true,
+    "menuSlideDuration": 0.15,
+    "moveTransitionDuration": 0.15,
+    "turnTransitionDuration": 0.225,
+    "inputCooldown": 0.3,
+    "autoRepeatInitial": 0.3,
+    "autoRepeatInterval": 0.06,
+    "bumpDuration": 0.12,
+    "bumpCooldown": 0.5,
+    "bumpNudge": 0.12,
+    "textPalette": [
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        0.2,
+        0.6,
+        1,
+        1
+      ],
+      [
+        1,
+        0.3,
+        0.3,
+        1
+      ],
+      [
+        0.3,
+        0.8,
+        0.3,
+        1
+      ],
+      [
+        0.3,
+        0.8,
+        0.8,
+        1
+      ],
+      [
+        0.8,
+        0.3,
+        0.8,
+        1
+      ],
+      [
+        1,
+        0.8,
+        0.2,
+        1
+      ],
+      [
+        0.6,
+        0.6,
+        0.6,
+        1
+      ]
+    ],
+    "textRevealDelay": 0.02
+  },
+  "physics": {
+    "gravity": 480,
+    "bounceVelocityRetain": 0.45,
+    "horizontalScatter": 0
+  },
+  "battle_screen": {
+    "autoAdvanceDelay": 0.15,
+    "damagePopupLife": 1.5,
+    "popup": {
+      "font": "DotGothic16-Regular",
+      "fontSize": 16,
+      "numberFont": "DotGothic16-Regular",
+      "numberFontSize": 16,
+      "textFont": "04B_03__",
+      "textFontSize": 8,
+      "characterDelay": 0.04,
+      "damageFormat": "{0}",
+      "damageColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "healFormat": "{0}",
+      "healColor": [
+        0.44,
+        0.93,
+        0.44,
+        1
+      ],
+      "critFormat": "CRITICAL!",
+      "critColor": [
+        1,
+        0.8,
+        0.38,
+        1
+      ],
+      "deadFormat": "DEAD",
+      "deadColor": [
+        0.6,
+        0.6,
+        0.6,
+        1
+      ],
+      "stateFormat": "{0}",
+      "stateColor": [
+        0.77,
+        0.62,
+        1,
+        1
+      ]
+    },
+    "victoryExpPerSecond": 40
+  },
+  "combat": {
+    "baseFleeChance": 0.4,
+    "goldLossOnFleeMin": 5,
+    "goldLossOnFleeMax": 15,
+    "encounterChance": 0.1,
+    "minEnemies": 1,
+    "maxEnemies": 3,
+    "victoryGoldBase": 5,
+    "victoryGoldPerEnemy": 5,
+    "victoryExpBase": 10,
+    "victoryExpLevelScale": 0.5,
+    "criticalMultiplier": 1.5,
+    "baseSpeed": 10,
+    "speedPerLevel": 0.5,
+    "mpExhaustionDamage": 1,
+    "battleItem": 1,
+    "defendSkillId": "defend",
+    "attackSkillId": "attack",
+    "autoRedirect": false,
+    "wanderingTroop": "wandering",
+    "stateResistFromStat": {
+      "physical": "1 - b.base.def / 400",
+      "magical": "1 - b.base.mdf / 400",
+      "mental": "1 - b.base.mdf / 400"
+    }
+  },
+  "shopMaxStock": 20,
+  "growth": {
+    "statBase": 10,
+    "baseParams": {
+      "maxHp": 10,
+      "atk": 10,
+      "def": 10,
+      "mat": 10,
+      "mdf": 10,
+      "mpd": 2,
+      "mxa": 4,
+      "mxp": 2
+    }
+  },
+  "newGame": {
+    "shopProgression": 1,
+    "goldMin": 25,
+    "goldMax": 75,
+    "guaranteedItem": {
+      "id": 1,
+      "minQty": 1,
+      "maxQty": 3
+    },
+    "randomConsumables": 2,
+    "randomEquipment": 2,
+    "bonusItems": [
+      20,
+      6
+    ],
+    "party": {
+      "fixedMembers": [
+        {
+          "id": "moa",
+          "level": 3,
+          "name": "Saban",
+          "slot": 1
+        }
+      ]
+    }
+  },
+  "dungeon": {
+    "defaultLoot": 1,
+    "generationProfile": "standard",
+    "generationProfiles": {
+      "entry": {
+        "minRooms": 3,
+        "maxRooms": 4,
+        "minRoomSize": 3,
+        "maxRoomSize": 5
+      },
+      "standard": {
+        "minRooms": 4,
+        "maxRooms": 6,
+        "minRoomSize": 3,
+        "maxRoomSize": 5
+      },
+      "broad": {
+        "minRooms": 5,
+        "maxRooms": 7,
+        "minRoomSize": 3,
+        "maxRoomSize": 5
+      },
+      "deep": {
+        "minRooms": 7,
+        "maxRooms": 9,
+        "minRoomSize": 3,
+        "maxRoomSize": 5
+      }
+    },
+    "exitSprite": "assets/sprites/dungeon_stairs_down.png",
+    "exitScriptId": 1,
+    "entranceSprite": "assets/sprites/dungeon_stairs_up.png",
+    "entranceScriptId": 40,
+    "playerLight": {
+      "enabled": true,
+      "radius": 3.5,
+      "color": [
+        0.35,
+        0.3,
+        0.22
+      ],
+      "falloff": 1.5,
+      "onlyInDungeons": false
+    },
+    "psxRendering": {
+      "affineTextures": true,
+      "vertexSnapPixels": 1,
+      "cpuNearClip": false,
+      "fogBands": 8,
+      "ditherLevels": 31
+    }
+  },
+  "summoner": {
+    "startMp": 3000,
+    "maxMpCap": 9999,
+    "summonCostBase": 10,
+    "summonCostPerLevel": 5,
+    "summonCostPerTier": 15,
+    "sacrificeExpRate": 0,
+    "defaultSacrificeRewards": []
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 4,
+    "y": 8,
+    "dir": "N"
+  },
+  "permadeath": {
+    "reviveHpFraction": 0.25,
+    "defaultCharges": 1,
+    "breakOnLastCharge": true
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

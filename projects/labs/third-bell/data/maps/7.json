@@ -1,0 +1,378 @@
+{
+  "id": 7,
+  "title": "Floor 6: Stillnight Sanctum",
+  "intro": "A presence fills the air. The Eternal Warden awaits.",
+  "depth": 6,
+  "music": "event4_darkJester",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:bb60cf49-8077-4d48-9ccf-5d1b78ba9225",
+      "scriptId": 7,
+      "x": 8,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:9788dcc8-3b20-412f-b566-c5bbd1350f0a",
+      "scriptId": 13,
+      "x": 10,
+      "y": 10,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:78e9b6ce-b97d-4350-b229-577a1879fbb6",
+      "name": "Garden Without Wind",
+      "label": "Garden Without Wind",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "interact",
+      "minimapColor": [
+        0.38,
+        0.62,
+        0.72
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:found_stillnight_garden",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The paper leaves remain still. The one bearing Saban's name has grown a second stem."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "White trees grow from a floor of black water. Their leaves are slips cut from St. Maria's Summoner ledger."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Most names have become roots. Saban's is still a leaf."
+            },
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "hasItem:208",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "Agnes's leaf lifts out of your pack by itself and hangs among the others, at the height of your face, in the only part of the garden with any wind."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "It says, in ink that is not dry: THE THIRD BELL RINGS FOR WHOEVER IS NAMED. NOBODY HAS BEEN NAMED FOR ELEVEN YEARS."
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "garden_read_the_leaf",
+                  "value": true
+                }
+              ],
+              "elseCommands": []
+            },
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "hasItem:209",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "One root, older than the others, has a torn edge. It matches the half-contract in your pack the way a jaw matches a jaw."
+                }
+              ],
+              "elseCommands": []
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "found_stillnight_garden",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "instanceId": "event:d4a90f4b-2834-4c1d-a9e5-3a3e04975cf3",
+      "name": "The Empty Bridle",
+      "label": "The Empty Bridle",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.72,
+        0.72,
+        0.88
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_empty_bridle",
+          "commands": [
+            {
+              "text": "The bridle hangs motionless. Its bell rings once when you turn your back.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A traveller's bridle hangs from nothing. Its bit is warm, its leather worn to the shape of Saban's head.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "There is no contract attached—only a small bell engraved: WHAT ARRIVES TOGETHER MUST BE SEPARATED.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_empty_bridle",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "name": "Sanctum Stairs",
+      "scriptId": 40,
+      "x": 2,
+      "y": 2,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/dungeon_wall_lever.png",
+      "id": 5,
+      "instanceId": "event:third_bell-sanctum-stairs"
+    },
+    {
+      "name": "The Eternal Warden",
+      "label": "The Eternal Warden",
+      "spawn": "Fixed",
+      "x": 8,
+      "y": 6,
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "interact",
+      "minimapColor": [
+        0.9,
+        0.9,
+        1.0
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:warden_defeated",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "A coil of cut rope and a shape on the floor that is not quite a body and not quite a page."
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "Something is standing at the centre of the sanctum with its back to you. It is the size of a person who has been added to."
+            },
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "hasItem:209",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Half-Contract goes cold in your pack. That is not a figure of speech; you have to move it away from your ribs."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You have nothing to show it and nothing to ask it. You could still go back for both."
+                }
+              ]
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It is holding a rope that goes up into nothing. It has been holding it for eleven years and its arm has not moved."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Two small lights hang either side of it at head height. They are bells. They are also, in some way you would rather not have noticed, people."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Take the rope from it.",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "boss_eternal_warden",
+                      "onVictory": [
+                        {
+                          "cmd": "SET_FLAG",
+                          "flag": "warden_defeated",
+                          "value": true
+                        },
+                        {
+                          "cmd": "CHANGE_ITEM",
+                          "item": "210",
+                          "count": 1
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The Warden goes down without letting go of the rope, so the rope comes down with it."
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "Its other hand has been closed this whole time. Inside is an iron clapper, warm, worn smooth by a grip exactly the size of yours."
+                        },
+                        {
+                          "cmd": "FOR_EACH",
+                          "scope": "living_allies",
+                          "as": "ally",
+                          "do": [
+                            {
+                              "cmd": "RECORD_HISTORY",
+                              "target": "ally",
+                              "field": "stood_at_the_third_bell",
+                              "amount": 1
+                            }
+                          ]
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The two small lights go out politely, one after the other, like people leaving a room where somebody has died."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Back away.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You back out of the sanctum. The Warden does not follow. It has never followed anybody."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": 6,
+      "instanceId": "event:third_bell-the-eternal-warden"
+    },
+    {
+      "name": "The Third Bell",
+      "label": "The Third Bell",
+      "spawn": "Fixed",
+      "x": 8,
+      "y": 10,
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "interact",
+      "minimapColor": [
+        1.0,
+        0.95,
+        0.6
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:campaign_ending_reached",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The sanctum is empty in whichever way you left it empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "hasItem:210",
+              "commands": [
+                {
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 44
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "A bell the size of the room hangs from a rope that goes up into nothing. There is no clapper. There has never been a clapper."
+                },
+                {
+                  "cmd": "CONDITIONAL_BRANCH",
+                  "condition": "flag:warden_defeated",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You are missing the piece. You had it. Go and find where you put it."
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "It is ringing anyway. You can feel it in the flat of your teeth, and there is nothing inside it to ring with."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Somebody is holding the rope. Somebody has been holding it for eleven years."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": 7,
+      "instanceId": "event:third_bell-the-third-bell"
+    }
+  ],
+  "encounters": [
+    {
+      "actor": "crimson_lord",
+      "weight": 10
+    },
+    {
+      "actor": "demon",
+      "weight": 5
+    },
+    {
+      "actor": "salamander",
+      "weight": 2
+    },
+    {
+      "actor": "leviathan",
+      "weight": 2
+    },
+    {
+      "actor": "fafnir",
+      "weight": 2
+    },
+    {
+      "actor": "bahamut",
+      "weight": 2
+    },
+    {
+      "actor": "nidhogg",
+      "weight": 2
+    },
+    {
+      "actor": "surtr",
+      "weight": 1
+    },
+    {
+      "actor": "hyperion",
+      "weight": 1
+    }
+  ],
+  "recruits": []
+}

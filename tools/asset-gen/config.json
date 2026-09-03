@@ -161,6 +161,40 @@
           "prices": null, "note": "Local: no cost, no key." }
       ]
     },
+    "cloudflare": {
+      "label": "Cloudflare Workers AI",
+      "baseUrl": "https://api.cloudflare.com/client/v4",
+      "apiKeyEnv": "CLOUDFLARE_API_KEY",
+      "accountEnv": "CLOUDFLARE_ACCOUNT_ID",
+      "type": "cloudflare-workers-ai",
+      "model": "@cf/runwayml/stable-diffusion-v1-5-img2img",
+      "_comment": [
+        "Two variables, because the REST path carries the account:",
+        "POST {baseUrl}/accounts/{CLOUDFLARE_ACCOUNT_ID}/ai/run/{model}.",
+        "",
+        "These are Stable Diffusion models, which is a different instrument from",
+        "the GPT-image family and suits a different half of the plate pipeline.",
+        "They take ONE image, not several, so a style sheet and a layout guide",
+        "cannot both be sent -- they have to be composited into one picture. And",
+        "they follow an init image's STRUCTURE rather than prose about it, so",
+        "'put a door at each red arrow' is not a thing to ask them; a low",
+        "strength holding the guide's layout while the look is repainted is.",
+        "",
+        "Free daily allocation, then per-neuron billing. No per-image table."
+      ],
+      "models": [
+        { "id": "@cf/runwayml/stable-diffusion-v1-5-img2img",
+          "label": "SD 1.5 img2img -- repaints an init image, keeps its structure",
+          "default": true, "prices": null,
+          "note": "Takes image + prompt + strength. The guided path." },
+        { "id": "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+          "label": "SDXL base -- text to image, optional image and mask",
+          "prices": null, "note": "Higher fidelity than 1.5; heavier." },
+        { "id": "@cf/black-forest-labs/flux-1-schnell",
+          "label": "FLUX.1 schnell -- text to image only",
+          "prices": null, "note": "No init image, so no layout control." }
+      ]
+    },
     "openrouter": {
       "label": "OpenRouter (image-capable chat models)",
       "baseUrl": "https://openrouter.ai/api/v1",

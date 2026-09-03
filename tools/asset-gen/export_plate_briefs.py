@@ -28,10 +28,12 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import zipfile
 from pathlib import Path
 
 from PIL import Image
 
+NEWLINE = chr(10)
 UPSCALE = 3          # guides are 240 rows tall; NEAREST so no line is invented
 
 # Written in the owner's voice, because the owner's voice worked. Theirs was
@@ -76,12 +78,15 @@ def main() -> None:
     parser.add_argument("--positions", required=True, type=Path)
     parser.add_argument("--style", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--no-zips", action="store_true",
+                        help="skip the per-screen archives")
     args = parser.parse_args()
 
     manifest = json.loads((args.positions / "inputs.json").read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(args.style, args.output / "00-style-reference.png")
 
+    briefs = []
     lines = [
         "# Plate briefs",
         "",
@@ -122,7 +127,7 @@ def main() -> None:
 
         intro = (frame.get("intro") or "").strip()
         width, height = frame["plateSize"]
-        lines += [
+        screen = [
             "## %d. %s" % (frame["mapId"], frame["title"]),
             "",
             "- guide: `%s`" % name,
@@ -146,8 +151,41 @@ def main() -> None:
             "```",
             "",
         ]
+        lines += screen
+        briefs.append({
+            "mapId": frame["mapId"],
+            "slug": slug(frame["title"]),
+            "guide": name,
+            "brief": NEWLINE.join(
+                ["# %s" % frame["title"], "",
+                 "Upload `00-style-reference.png` first, then `%s`, then paste a "
+                 "prompt. When it looks right: `%s`" % (name, FOLLOW_UP), ""]
+                + screen[1:]),
+        })
 
-    (args.output / "PROMPTS.md").write_text("\n".join(lines), encoding="utf-8")
+    (args.output / "PROMPTS.md").write_text(NEWLINE.join(lines), encoding="utf-8")
+
+    if not args.no_zips:
+        # One archive per screen, each self-contained: the style sheet, that
+        # screen's guide, and only that screen's prompts. Handing over the whole
+        # folder invites generating the whole town as one picture -- which the
+        # web app will happily do, and which is interesting -- but a plate has to
+        # be its own image at its own size, so the unit of handoff is the plate.
+        archives = args.output / "zips"
+        archives.mkdir(exist_ok=True)
+        style = args.output / "00-style-reference.png"
+        for entry in briefs:
+            path = archives / ("%02d-%s.zip" % (entry["mapId"], entry["slug"]))
+            with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as bundle:
+                bundle.write(style, style.name)
+                bundle.write(args.output / entry["guide"], entry["guide"])
+                bundle.writestr("PROMPT.md", entry["brief"])
+        with zipfile.ZipFile(args.output / "all-plates.zip", "w",
+                             zipfile.ZIP_DEFLATED) as bundle:
+            for path in sorted(archives.glob("*.zip")):
+                bundle.write(path, path.name)
+        print("  %d per-screen archives + all-plates.zip" % len(briefs))
+
     print("PLATE BRIEFS OK screens=%d -> %s"
           % (len(manifest["frames"]), args.output))
 

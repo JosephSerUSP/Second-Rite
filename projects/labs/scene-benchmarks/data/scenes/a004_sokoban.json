@@ -1,9 +1,17 @@
 {
   "id": "a004_sokoban",
   "terminal": {
-    "reached": "v.win == true"
+    "reached": "v.win == true",
+    "script": [
+      { "key": "down" },
+      { "key": "up" },
+      { "key": "left" },
+      { "key": "right" },
+      { "key": "return" },
+      { "key": "escape" }
+    ]
   },
-  "name": "A004 \u2014 Sokoban",
+  "name": "A004 — Sokoban",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -12,7 +20,7 @@
       "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.win and 'A004 \u2014 YOU WIN!' or 'A004 \u2014 Push crates to goals'}" }
+        { "type": "text", "text": "{v.win and 'A004 — YOU WIN!' or 'A004 — Push crates to goals'}" }
       ]
     },
     {
@@ -35,13 +43,16 @@
   "hooks": {
     "on_enter": [
       { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SET_VAR", "name": "win", "value": false },
-      { "cmd": "SET_VAR", "name": "px", "value": 4 },
-      { "cmd": "SET_VAR", "name": "py", "value": 4 },
-      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
-      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
-      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
-      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
+      { "cmd": "SET_VAR", "assignments": [
+          { "name": "win", "value": false },
+          { "name": "px", "value": 4 },
+          { "name": "py", "value": 4 },
+          { "name": "c1x", "value": 3 },
+          { "name": "c1y", "value": 3 },
+          { "name": "c2x", "value": 5 },
+          { "name": "c2y", "value": 4 }
+        ]
+      },
       { "cmd": "SCRIPT", "ref": "render" }
     ],
     "on_up": [
@@ -50,8 +61,11 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": -1 },
+          { "cmd": "SET_VAR", "assignments": [
+              {"name": "dx", "value": 0},
+              {"name": "dy", "value": -1}
+            ]
+          },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -62,8 +76,11 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 1 },
+          { "cmd": "SET_VAR", "assignments": [
+              {"name": "dx", "value": 0},
+              {"name": "dy", "value": 1}
+            ]
+          },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -74,8 +91,11 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": -1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+          { "cmd": "SET_VAR", "assignments": [
+              {"name": "dx", "value": -1},
+              {"name": "dy", "value": 0}
+            ]
+          },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -86,20 +106,26 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+          { "cmd": "SET_VAR", "assignments": [
+              {"name": "dx", "value": 1},
+              {"name": "dy", "value": 0}
+            ]
+          },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
     ],
     "on_select": [
-      { "cmd": "SET_VAR", "name": "win", "value": false },
-      { "cmd": "SET_VAR", "name": "px", "value": 4 },
-      { "cmd": "SET_VAR", "name": "py", "value": 4 },
-      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
-      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
-      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
-      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
+      { "cmd": "SET_VAR", "assignments": [
+          { "name": "win", "value": false },
+          { "name": "px", "value": 4 },
+          { "name": "py", "value": 4 },
+          { "name": "c1x", "value": 3 },
+          { "name": "c1y", "value": 3 },
+          { "name": "c2x", "value": 5 },
+          { "name": "c2y", "value": 4 }
+        ]
+      },
       { "cmd": "SCRIPT", "ref": "render" }
     ],
     "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
@@ -107,13 +133,5 @@
   "scripts": {
     "move": "\nlocal v = ctx.v\nlocal nx = v.px + v.dx\nlocal ny = v.py + v.dy\n\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\n\nlocal nCellWall = isWall(nx, ny)\nlocal nCellCrate1 = (nx == v.c1x and ny == v.c1y)\nlocal nCellCrate2 = (nx == v.c2x and ny == v.c2y)\n\nif not nCellWall then\n    if nCellCrate1 then\n        local nnx = nx + v.dx\n        local nny = ny + v.dy\n        if not isWall(nnx, nny) and not (nnx == v.c2x and nny == v.c2y) then\n            v.c1x = nnx\n            v.c1y = nny\n            v.px = nx\n            v.py = ny\n        end\n    elseif nCellCrate2 then\n        local nnx = nx + v.dx\n        local nny = ny + v.dy\n        if not isWall(nnx, nny) and not (nnx == v.c1x and nny == v.c1y) then\n            v.c2x = nnx\n            v.c2y = nny\n            v.px = nx\n            v.py = ny\n        end\n    else\n        v.px = nx\n        v.py = ny\n    end\nend\n\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\n\nlocal c1OnGoal = (v.c1x == g1x and v.c1y == g1y) or (v.c1x == g2x and v.c1y == g2y)\nlocal c2OnGoal = (v.c2x == g1x and v.c2y == g1y) or (v.c2x == g2x and v.c2y == g2y)\nv.win = c1OnGoal and c2OnGoal\n\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif x == v.c1x and y == v.c1y then\n            row = row .. \"O\"\n        elseif x == v.c2x and y == v.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n",
     "render": "\nlocal v = ctx.v\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif x == v.c1x and y == v.c1y then\n            row = row .. \"O\"\n        elseif x == v.c2x and y == v.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n"
-  },
-  "goldenScript": [
-    { "key": "down" },
-    { "key": "up" },
-    { "key": "left" },
-    { "key": "right" },
-    { "key": "return" },
-    { "key": "escape" }
-  ]
+  }
 }

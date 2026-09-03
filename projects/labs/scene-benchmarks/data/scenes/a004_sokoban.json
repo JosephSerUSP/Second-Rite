@@ -43,16 +43,13 @@
   "hooks": {
     "on_enter": [
       { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SET_VAR", "assignments": [
-          { "name": "win", "value": false },
-          { "name": "px", "value": 4 },
-          { "name": "py", "value": 4 },
-          { "name": "c1x", "value": 3 },
-          { "name": "c1y", "value": 3 },
-          { "name": "c2x", "value": 5 },
-          { "name": "c2y", "value": 4 }
-        ]
-      },
+      { "cmd": "SET_VAR", "name": "win", "value": false },
+      { "cmd": "SET_VAR", "name": "px", "value": 4 },
+      { "cmd": "SET_VAR", "name": "py", "value": 4 },
+      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
+      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
       { "cmd": "SCRIPT", "ref": "render" }
     ],
     "on_up": [
@@ -61,11 +58,8 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "assignments": [
-              {"name": "dx", "value": 0},
-              {"name": "dy", "value": -1}
-            ]
-          },
+          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+          { "cmd": "SET_VAR", "name": "dy", "value": -1 },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -76,11 +70,8 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "assignments": [
-              {"name": "dx", "value": 0},
-              {"name": "dy", "value": 1}
-            ]
-          },
+          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 1 },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -91,11 +82,8 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "assignments": [
-              {"name": "dx", "value": -1},
-              {"name": "dy", "value": 0}
-            ]
-          },
+          { "cmd": "SET_VAR", "name": "dx", "value": -1 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
@@ -106,26 +94,20 @@
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "assignments": [
-              {"name": "dx", "value": 1},
-              {"name": "dy", "value": 0}
-            ]
-          },
+          { "cmd": "SET_VAR", "name": "dx", "value": 1 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
           { "cmd": "SCRIPT", "ref": "move" }
         ]
       }
     ],
     "on_select": [
-      { "cmd": "SET_VAR", "assignments": [
-          { "name": "win", "value": false },
-          { "name": "px", "value": 4 },
-          { "name": "py", "value": 4 },
-          { "name": "c1x", "value": 3 },
-          { "name": "c1y", "value": 3 },
-          { "name": "c2x", "value": 5 },
-          { "name": "c2y", "value": 4 }
-        ]
-      },
+      { "cmd": "SET_VAR", "name": "win", "value": false },
+      { "cmd": "SET_VAR", "name": "px", "value": 4 },
+      { "cmd": "SET_VAR", "name": "py", "value": 4 },
+      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
+      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
       { "cmd": "SCRIPT", "ref": "render" }
     ],
     "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]

@@ -14,7 +14,7 @@ Launch `npm run lab:benchmarks`, choose **A004 — Sokoban**, then use arrow key
 
 ## Current Implementation Shape
 
-The implementation is an authored Scene (`data/scenes/a004_sokoban.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It natively models the small domain state using discrete variables for the player (`v.px`, `v.py`) and two individual crates (`v.c1x`, `v.c1y`, `v.c2x`, `v.c2y`). State resets and multi-variable initialization in `on_enter` and `on_select` are now completely declarative using `SET_VAR` multi-assignments (`assignments` array), resolving some previous verbosity. Movement resolution and rendering is still left to SCRIPT.
+The implementation is an authored Scene (`data/scenes/a004_sokoban.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It natively models the small domain state using discrete variables for the player (`v.px`, `v.py`) and two individual crates (`v.c1x`, `v.c1y`, `v.c2x`, `v.c2y`). Movement resolution and rendering is still left to SCRIPT.
 
 ## Metrics
 
@@ -34,12 +34,11 @@ The implementation is an authored Scene (`data/scenes/a004_sokoban.json`) inside
 
 ## Changes Since Previous Attempt
 
-- Switched scene initialization and movement assignments to the native `SET_VAR` array-based multi-assignment syntax, reducing repetitive JSON nodes in `on_enter`, `on_select`, and movement hooks.
-- Preserved `terminal` blocks are fixed to correctly house `script` entries as expected by automated CI testing inputs.
+- Preserved `terminal` blocks are fixed to correctly house `script` entries as expected by automated CI testing inputs, fixing previous testing failures with the `goldenScript` tag at the root.
 
 ## Improved
 
-- Initialization lifecycle is noticeably cleaner due to `SET_VAR` multi-assignment usage.
+- Testing workflow integration is fixed.
 
 ## Regressed
 
@@ -51,11 +50,11 @@ Collision and presentation. While the state is stored as Scene variables, there 
 
 ## New Architectural Evidence
 
-This fresh reconstruction confirms the v2 findings: we can represent small puzzle state declaratively, and now initialize it much cleaner via multi-assignments, but evaluating it remains computationally out-of-bounds for the current `IF` primitives. The engine continues to need robust semantic tools for querying spatial state and evaluating collisions natively.
+This fresh reconstruction confirms the v2 findings: we can represent small puzzle state declaratively, but evaluating it remains computationally out-of-bounds for the current `IF` primitives. The engine continues to need robust semantic tools for querying spatial state and evaluating collisions natively.
 
 ## Verdict
 
-**Playable benchmark; architectural gap confirmed.** A004 completes successfully, utilizing the `SET_VAR` array multi-assignments to clean up the JSON state definition, but confirms that evaluating discrete coordinate data still requires SCRIPT escape hatches for grid puzzles.
+**Playable benchmark; architectural gap confirmed.** A004 completes successfully, but confirms that evaluating discrete coordinate data still requires SCRIPT escape hatches for grid puzzles.
 
 ## Owner Playtest
 

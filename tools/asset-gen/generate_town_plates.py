@@ -95,8 +95,15 @@ BASE_PROMPT = (
     + "The guide lines are scaffolding: follow where they go, and draw none of "
       "them. Nothing in the finished picture is a coloured line, and there is no "
       "lettering anywhere in it." + NL + NL
-    + "Draw no people."
+    # People stay IN. They anchor the image -- the model draws somewhere people
+    # live rather than an architectural render -- and a plate obviously cannot
+    # ship with the player painted into it, so they come out in a second pass
+    # over the finished picture instead of being forbidden in the first.
+    # Forbidding them is part of what made the early attempts read as blockouts.
+    + "Put people in it, going about the place."
 )
+
+REMOVE_PEOPLE_PROMPT = "Now remove the people, and change nothing else."
 
 CONTINUE_PROMPT = (
     NL + NL + "The third image is the finished left part of this same street, "

@@ -61,10 +61,10 @@
     },
     "playerProjection": {
       "centerX": 550.0,
-      "screenY": 136,
+      "screenY": 80,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571
     }
   }
 }

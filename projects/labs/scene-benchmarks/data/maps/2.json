@@ -1,0 +1,84 @@
+{
+  "id": 2,
+  "title": "D001 - Sokoban as Map Events",
+  "category": "town",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "########",
+    "#..G...#",
+    "#.###..#",
+    "#....#.#",
+    "###....#",
+    "#.G#...#",
+    "#....###",
+    "########"
+  ],
+  "spawn": {
+    "x": 4,
+    "y": 4,
+    "dir": "S"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Crate 1",
+      "x": 3,
+      "y": 3,
+      "sprite": "crate",
+      "pages": [
+        {
+          "conditions": {},
+          "trigger": "interact",
+          "program": [
+            {
+              "cmd": "SCRIPT",
+              "ref": "push"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Crate 2",
+      "x": 5,
+      "y": 4,
+      "sprite": "crate",
+      "pages": [
+        {
+          "conditions": {},
+          "trigger": "interact",
+          "program": [
+            {
+              "cmd": "SCRIPT",
+              "ref": "push"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Exit",
+      "x": 1,
+      "y": 1,
+      "sprite": "",
+      "pages": [
+        {
+          "conditions": {},
+          "trigger": "interact",
+          "program": [
+            {
+              "cmd": "SCENE_EVENT",
+              "kind": "pop"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "push": "\nlocal sess = ctx.session\nlocal evId = ctx.event.id\nlocal pDir = sess.playerDir\n\nlocal dx = (pDir == 'E' and 1) or (pDir == 'W' and -1) or 0\nlocal dy = (pDir == 'S' and 1) or (pDir == 'N' and -1) or 0\n\nlocal nx = ctx.event.x + dx\nlocal ny = ctx.event.y + dy\n\nlocal row = sess.mapGrid[ny + 1]\nlocal cell = row and row[nx + 1] or '#'\n\nif cell == '#' then\n    return\nend\n\nfor _, other in ipairs(sess.currentMapData.events) do\n    if other.x == nx and other.y == ny and other.name and other.name:find('Crate') then\n        return\n    end\nend\n\nctx.event.x = nx\nctx.event.y = ny\n\nlocal goals = { {3, 1}, {2, 5} }\nlocal cratesOnGoal = 0\n\nfor _, other in ipairs(sess.currentMapData.events) do\n    if other.name and other.name:find('Crate') then\n        for _, g in ipairs(goals) do\n            if other.x == g[1] and other.y == g[2] then\n                cratesOnGoal = cratesOnGoal + 1\n                break\n            end\n        end\n    end\nend\n\nif cratesOnGoal == 2 then\n    ctx.interpreter:queueCommand({ cmd = \"OPEN_WINDOW\" })\n    ctx.interpreter:queueCommand({ cmd = \"SET_TEXT\", text = \"YOU WIN!\" })\n    ctx.interpreter:queueCommand({ cmd = \"WAIT\", mode = \"input\" })\n    ctx.interpreter:queueCommand({ cmd = \"CLOSE_WINDOW\" })\n    ctx.interpreter:queueCommand({ cmd = \"SCENE_EVENT\", kind = \"pop\" })\nend\n"
+  }
+}

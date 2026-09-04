@@ -20,49 +20,49 @@
       "position": [
         7.8,
         14.74,
-        0.0
+        -1.5
       ]
     },
     "west_market": {
       "position": [
         7.8,
         0.0,
-        0.0
+        -1.5
       ]
     },
     "praca_stair": {
       "position": [
         7.8,
         10.405,
-        0.0
+        -1.5
       ]
     },
     "pub_door": {
       "position": [
         7.8,
         21.098,
-        0.0
+        -1.5
       ]
     },
     "east_port": {
       "position": [
         7.8,
         29.48,
-        0.0
+        -1.5
       ]
     },
     "npc_fisherman": {
       "position": [
         7.8,
         2.601,
-        0.0
+        -1.5
       ]
     },
     "npc_sign": {
       "position": [
         7.8,
         26.59,
-        0.0
+        -1.5
       ]
     }
   },

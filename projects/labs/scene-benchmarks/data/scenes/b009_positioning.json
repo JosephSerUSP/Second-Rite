@@ -3,7 +3,7 @@
   "terminal": {
     "reached": "v.ehp <= 0"
   },
-  "name": "B009 — Parasite-Eve-Like Positioning Proof",
+  "name": "B009 \u2014 Parasite-Eve-Like Positioning Proof",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -24,7 +24,7 @@
       "content": [
         {
           "type": "text",
-          "text": "B009 — Positioning Proof   State: {v.stateText}"
+          "text": "B009 \u2014 Positioning Proof   State: {v.stateText}"
         }
       ]
     },
@@ -49,7 +49,10 @@
       },
       "style": "panel",
       "content": [
-        { "type": "text", "text": "@" }
+        {
+          "type": "text",
+          "text": "@"
+        }
       ]
     },
     {
@@ -62,7 +65,10 @@
       },
       "style": "panel",
       "content": [
-        { "type": "text", "text": "E" }
+        {
+          "type": "text",
+          "text": "E"
+        }
       ]
     },
     {
@@ -94,8 +100,16 @@
           "label": "ATB",
           "value": "v.atb",
           "max": "100",
-          "color": [0.2, 0.2, 0.2],
-          "fill": [0.0, 1.0, 0.0]
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            0.0,
+            1.0,
+            0.0
+          ]
         }
       ]
     },
@@ -117,8 +131,16 @@
           "label": "Enemy HP",
           "value": "v.ehp",
           "max": "100",
-          "color": [0.2, 0.2, 0.2],
-          "fill": [1.0, 0.0, 0.0]
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            1.0,
+            0.0,
+            0.0
+          ]
         }
       ]
     }
@@ -126,37 +148,220 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "px",
+            "value": 10
+          },
+          {
+            "name": "py",
+            "value": 10
+          },
+          {
+            "name": "ex",
+            "value": 20
+          },
+          {
+            "name": "ey",
+            "value": 5
+          },
+          {
+            "name": "atb",
+            "value": 0
+          },
+          {
+            "name": "ehp",
+            "value": 100
+          },
+          {
+            "name": "stateText",
+            "value": "'Moving'"
+          },
+          {
+            "name": "range",
+            "value": 5
+          },
+          {
+            "name": "speed",
+            "value": 10.0
+          },
+          {
+            "name": "mode",
+            "value": "'move'"
+          },
+          {
+            "name": "actionTimer",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          }
+        ]
       }
     ],
     "on_frame": [
       {
-        "cmd": "SCRIPT",
-        "ref": "update"
+        "cmd": "IF",
+        "condition": "v.mode == 'move'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "atb",
+                "value": "min(100, v.atb + 20 * time.dt)"
+              },
+              {
+                "name": "px",
+                "value": "max(0, min(25, v.px + v.inputX * v.speed * time.dt))"
+              },
+              {
+                "name": "py",
+                "value": "max(0, min(13, v.py + v.inputY * v.speed * time.dt))"
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "SET_VAR",
+            "name": "actionTimer",
+            "value": "v.actionTimer - time.dt"
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.actionTimer <= 0",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "mode",
+                    "value": "'move'"
+                  },
+                  {
+                    "name": "stateText",
+                    "value": "'Moving'"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.ehp <= 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "stateText",
+            "value": "'VICTORY!'"
+          }
+        ]
       },
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "inputX", "value": 0 },
-          { "name": "inputY", "value": 0 }
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          }
         ]
       }
     ],
     "on_up": [
-      { "cmd": "SET_VAR", "name": "inputY", "value": -1 }
+      {
+        "cmd": "SET_VAR",
+        "name": "inputY",
+        "value": -1
+      }
     ],
     "on_down": [
-      { "cmd": "SET_VAR", "name": "inputY", "value": 1 }
+      {
+        "cmd": "SET_VAR",
+        "name": "inputY",
+        "value": 1
+      }
     ],
     "on_left": [
-      { "cmd": "SET_VAR", "name": "inputX", "value": -1 }
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": -1
+      }
     ],
     "on_right": [
-      { "cmd": "SET_VAR", "name": "inputX", "value": 1 }
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": 1
+      }
     ],
     "on_select": [
-      { "cmd": "SCRIPT", "ref": "action" }
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 'move' and v.atb >= 100",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "mode",
+                "value": "'action'"
+              },
+              {
+                "name": "atb",
+                "value": 0
+              },
+              {
+                "name": "actionTimer",
+                "value": 1.0
+              },
+              {
+                "name": "dist",
+                "value": "abs(v.px - v.ex) + abs(v.py - v.ey)"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.dist <= v.range",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "ehp",
+                    "value": "max(0, v.ehp - 30)"
+                  },
+                  {
+                    "name": "stateText",
+                    "value": "'HIT!'"
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "stateText",
+                "value": "'MISSED! (Out of range)'"
+              }
+            ]
+          }
+        ]
+      }
     ],
     "on_cancel": [
       {
@@ -165,16 +370,21 @@
       }
     ]
   },
-  "scripts": {
-    "init": "local v = ctx.v; v.px = 10; v.py = 10; v.ex = 20; v.ey = 5; v.atb = 0; v.ehp = 100; v.stateText = 'Moving'; v.range = 5; v.speed = 10.0; v.mode = 'move'; v.actionTimer = 0; v.inputX = 0; v.inputY = 0;",
-    "update": "local v = ctx.v; local dt = time.dt; if v.mode == 'move' then v.atb = math.min(100, v.atb + 20 * dt); v.px = math.max(0, math.min(25, v.px + v.inputX * v.speed * dt)); v.py = math.max(0, math.min(13, v.py + v.inputY * v.speed * dt)); else v.actionTimer = v.actionTimer - dt; if v.actionTimer <= 0 then v.mode = 'move'; v.stateText = 'Moving' end end; if v.ehp <= 0 then v.stateText = 'VICTORY!' end",
-    "action": "local v = ctx.v; if v.mode == 'move' and v.atb >= 100 then v.mode = 'action'; v.atb = 0; v.actionTimer = 1.0; v.stateText = 'Action Phase!'; local dist = math.abs(v.px - v.ex) + math.abs(v.py - v.ey); if dist <= v.range then v.ehp = math.max(0, v.ehp - 30); v.stateText = 'HIT!' else v.stateText = 'MISSED! (Out of range)' end end"
-  },
   "goldenScript": [
-    { "key": "right" },
-    { "key": "right" },
-    { "key": "return" },
-    { "key": "left" },
-    { "key": "b" }
+    {
+      "key": "right"
+    },
+    {
+      "key": "right"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "b"
+    }
   ]
 }

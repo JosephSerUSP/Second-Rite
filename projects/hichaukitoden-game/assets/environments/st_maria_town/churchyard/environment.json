@@ -20,35 +20,35 @@
       "position": [
         7.8,
         13.006,
-        0.0
+        -1.5
       ]
     },
     "port_climb": {
       "position": [
         7.8,
         2.312,
-        0.0
+        -1.5
       ]
     },
     "labyrinth_door": {
       "position": [
         7.8,
         8.382,
-        0.0
+        -1.5
       ]
     },
     "east_praca": {
       "position": [
         7.8,
         26.012,
-        0.0
+        -1.5
       ]
     },
     "npc_guard": {
       "position": [
         7.8,
         13.873,
-        0.0
+        -1.5
       ]
     }
   },

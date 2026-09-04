@@ -1,0 +1,33 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "foliage_card",
+  "status": "placeholder",
+  "worldSizeMetres": 1.1,
+  "maps": {
+    "albedo": "albedo.png"
+  },
+  "cards": [
+    "broadleaf",
+    "bush_mass",
+    "palm_frond",
+    "sprig"
+  ],
+  "notes": "Alpha cutout CARDS for retro vegetation: each slice is one leaf cluster with its twigs. Vegetation is built from these on crossed planes and domes, never from per-leaf geometry. Deliberately airy -- a crowded card mipmaps into a solid block, and the mesh is supposed to carry the silhouette.",
+  "provenance": {
+    "origin": "openai:gpt-image-1-mini + Kenney Foliage Sprites",
+    "generator": "tools/materials/make_foliage_cards.py",
+    "processing": "background=transparent, trimmed to alpha bounds, fitted to 512px, clear texels flooded with the cluster mean to stop a dark filtering fringe; packed one row",
+    "license": "generated; Kenney source CC0 1.0",
+    "source": "https://opengameart.org/content/foliage-sprites",
+    "kenneyAtlas": "kenney_branch_atlas.png",
+    "sha256": {
+      "albedo.png": "5e1134da5d82ae2bb7a44e94abb9527828d0d1a3b0515856fabef05c42ea9b48",
+      "kenney_branch_atlas.png": "6700716b39442ec5dea00efbe9b166bf0038269020a06b82f3cac4c8baefa1e6",
+      "kenney_grass_atlas.png": "66e2ede4bbdb10dceb2f0985a38f9d0dc0b2b98b4c4e9d36938490b7a7bfb3b0"
+    },
+    "kenneyGrassAtlas": "kenney_grass_atlas.png",
+    "grassGenerator": "tools/materials/make_grass_atlas.py",
+    "grassSprites": "Kenney Foliage Sprites 0002/0004/0012/0021, CC0 1.0"
+  }
+}

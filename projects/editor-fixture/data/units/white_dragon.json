@@ -1,0 +1,99 @@
+{
+  "id": "white_dragon",
+  "name": "White Dragon",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A white dragon radiant with disciplined force. It protects allies without abandoning draconic power.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "White",
+    "White"
+  ],
+  "skills": [
+    "holySmite",
+    "soothingMote"
+  ],
+  "passives": [
+    "sacredScale"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "bahamut",
+      "cost": {
+        "item": 53
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 98,
+    "atk": 23,
+    "def": 27,
+    "mat": 30,
+    "mdf": 32,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 96,
+      "atk": 21,
+      "def": 26,
+      "mat": 31,
+      "mdf": 33
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 112,
+      "atk": 25,
+      "def": 30,
+      "mat": 36,
+      "mdf": 39
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 114,
+      "atk": 26,
+      "def": 32,
+      "mat": 38,
+      "mdf": 41
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    179,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "WhiteDragon",
+  "bigBattler": "WhiteDragon",
+  "defaultGrowthSeed": 1457683851
+}

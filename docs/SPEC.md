@@ -2065,7 +2065,9 @@ and deciding that is an owner call, never a silent recapture. G6 is read-only by
 construction (no step saves), which matters because the editor writes form edits
 straight through to `data/*.json`; adding an editor tab or modal means adding a
 step to `STEPS` in `tools/golden/editor-screens.py`, and the gate reports an
-unclaimed reference as `ORPHANED`.
+unclaimed reference as `ORPHANED`. G6 boots against a frozen fixture Project
+(`projects/editor-fixture/`, via `SECOND_RITE_PROJECT`), decoupling editor
+health from game content churn.
 
 ---
 

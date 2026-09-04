@@ -1,0 +1,98 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    29.48,
+    2.5
+  ],
+  "provenance": {
+    "plateSourceViewTransform": "Standard"
+  },
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        14.74,
+        0.0
+      ]
+    },
+    "west_market": {
+      "position": [
+        7.8,
+        0.0,
+        0.0
+      ]
+    },
+    "praca_stair": {
+      "position": [
+        7.8,
+        10.405,
+        0.0
+      ]
+    },
+    "pub_door": {
+      "position": [
+        7.8,
+        21.098,
+        0.0
+      ]
+    },
+    "east_port": {
+      "position": [
+        7.8,
+        29.48,
+        0.0
+      ]
+    },
+    "npc_fisherman": {
+      "position": [
+        7.8,
+        2.601,
+        0.0
+      ]
+    },
+    "npc_sign": {
+      "position": [
+        7.8,
+        26.59,
+        0.0
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      1100,
+      240
+    ],
+    "slicePositions": [
+      14.74
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_1100.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 14.74
+    },
+    "playerProjection": {
+      "centerX": 550.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "undine",
+  "name": "Undine",
+  "names": [
+    "Nami",
+    "Nerissa",
+    "Maré",
+    "Azul",
+    "Rill",
+    "Yara",
+    "Luar",
+    "Mizu"
+  ],
+  "flavor": "A water spirit learning to shape cold into magic. Its adaptable spellwork rewards patient raising.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "undine",
+  "elements": [
+    "Blue",
+    "Blue"
+  ],
+  "skills": [
+    "iceShard"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "proteus"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 44,
+    "atk": 9,
+    "def": 12,
+    "mat": 19,
+    "mdf": 16,
+    "mpd": 2,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 64,
+      "atk": 18,
+      "def": 21,
+      "mat": 33,
+      "mdf": 26
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 75,
+      "atk": 21,
+      "def": 25,
+      "mat": 38,
+      "mdf": 31
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 77,
+      "atk": 22,
+      "def": 27,
+      "mat": 40,
+      "mdf": 32
+    }
+  ],
+  "favoriteFoods": [
+    184,
+    188,
+    181
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Undine",
+  "bigBattler": "Undine",
+  "defaultGrowthSeed": 922480387
+}

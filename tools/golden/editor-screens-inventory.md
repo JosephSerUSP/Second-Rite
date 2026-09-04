@@ -6,6 +6,10 @@ surfaces come from the editor JavaScript modules. G6 is representative coverage
 of durable Studio surfaces, not an exhaustive capture of every transient or
 nested interaction.
 
+G6 executes against `projects/editor-fixture/`, a frozen test Project decoupled
+from live game content. Adding or editing maps or records in shipping game
+projects does not shift the captured surfaces.
+
 Semantic classification, host policy, multiplicity, and migration rules for
 these surfaces live in `docs/design/studio/studio-editor-surfaces.md`. This file remains
 the **visual capture inventory**; it does not decide which durable UI becomes a

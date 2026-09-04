@@ -1,0 +1,387 @@
+{
+  "id": "items",
+  "name": "Items",
+  "kind": "menu",
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "tab",
+            "value": 1
+          },
+          {
+            "name": "targetIdx",
+            "value": 1
+          },
+          {
+            "name": "state",
+            "value": 1
+          },
+          {
+            "name": "popupText",
+            "value": "''"
+          },
+          {
+            "name": "popupTimer",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "targetIdx",
+            "value": "((v.targetIdx or 1) > 1 and ((v.targetIdx or 1) - 1) or max(1, party.count))"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and v.idx < session.itemCount",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "targetIdx",
+            "value": "((v.targetIdx or 1) < party.count and ((v.targetIdx or 1) + 1) or 1)"
+          }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "tab",
+                "value": "(v.tab or 1) > 1 and ((v.tab or 1) - 1) or 4"
+              },
+              {
+                "name": "idx",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "tab",
+                "value": "(v.tab or 1) < 4 and ((v.tab or 1) + 1) or 1"
+              },
+              {
+                "name": "idx",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1 and session.itemCount > 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "USE_ITEM",
+            "itemIndex": "v.idx",
+            "target": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "USE_ITEM",
+            "itemIndex": "v.idx",
+            "target": "v.targetIdx"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "state",
+                "value": 1
+              },
+              {
+                "name": "popupTimer",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "targetIdx",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "state",
+                "value": 1
+              },
+              {
+                "name": "popupTimer",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "IF",
+        "condition": "(v.popupTimer or 0) > 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "popupTimer",
+            "value": "max(0, (v.popupTimer or 0) - 0.016)"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "dock": {
+      "variant": "item_inspect",
+      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "cursor": "v.state == 2 and v.targetIdx or 0"
+    }
+  },
+  "scripts": {},
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "items_left_panel",
+      "rect": {
+        "x": 0.5,
+        "y": 4.5,
+        "w": 20,
+        "h": 13
+      },
+      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "style": "list",
+      "title": null,
+      "emptyText": "No items.",
+      "tabs": [
+        "All",
+        "Usable",
+        "Equip",
+        "Key"
+      ],
+      "tabVar": "v.tab",
+      "content": [
+        {
+          "type": "list",
+          "listId": "inventory",
+          "format": "{name}",
+          "formatRight": "{formatQty(qty)}",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "items_key_art",
+      "rect": {
+        "x": 20.5,
+        "y": 4.5,
+        "w": 11,
+        "h": 13
+      },
+      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "style": "itemModel",
+      "title": null,
+      "content": [
+        {
+          "type": "list",
+          "listId": "inventory",
+          "cursor": "v.idx",
+          "tabVar": "v.tab"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "content": [
+        {
+          "type": "text",
+          "text": "{((v.popupTimer or 0) > 0 and ('Used ' .. (sel('items_left_panel') and sel('items_left_panel').name or 'item') .. '!')) or (sel('items_left_panel') and sel('items_left_panel').description or '')}"
+        }
+      ]
+    },
+    {
+      "id": "items_popup",
+      "rect": {
+        "x": 8,
+        "y": 10,
+        "w": 16,
+        "h": 3
+      },
+      "visible": "v.popupTimer > 0",
+      "style": "frame",
+      "title": null,
+      "align": "center",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.popupText}"
+        }
+      ],
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    }
+  ],
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "escape"
+    }
+  ]
+}

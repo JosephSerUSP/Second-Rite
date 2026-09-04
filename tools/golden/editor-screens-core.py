@@ -852,6 +852,18 @@ class NodeService(object):
             pass
 
 
+def resolve_fixture_project(root=None):
+    """Locate the frozen G6 fixture project if present in the target worktree."""
+    configured = os.environ.get("SECOND_RITE_G6_PROJECT")
+    if configured:
+        return configured
+    target = root or ROOT
+    fixture = os.path.join(target, "projects", "editor-fixture")
+    if os.path.isdir(fixture) and os.path.isdir(os.path.join(fixture, "data")):
+        return fixture
+    return None
+
+
 class EditorServer(NodeService):
     """studio/editor/server.js -- ordinary editor HTTP and project data."""
 
@@ -861,7 +873,11 @@ class EditorServer(NodeService):
 
     @staticmethod
     def env_for(port):
-        return {"PORT": str(port)}
+        env = {"PORT": str(port)}
+        fixture = resolve_fixture_project()
+        if fixture:
+            env["SECOND_RITE_PROJECT"] = str(fixture)
+        return env
 
 
 class RuntimeBridge(NodeService):
@@ -883,7 +899,11 @@ class RuntimeBridge(NodeService):
 
     @staticmethod
     def env_for(port, editor_port):
-        return {"RUNTIME_BRIDGE_PORT": str(port), "EDITOR_PORT": str(editor_port)}
+        env = {"RUNTIME_BRIDGE_PORT": str(port), "EDITOR_PORT": str(editor_port)}
+        fixture = resolve_fixture_project()
+        if fixture:
+            env["SECOND_RITE_PROJECT"] = str(fixture)
+        return env
 
     def _probe(self):
         try:

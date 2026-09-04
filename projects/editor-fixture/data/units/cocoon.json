@@ -1,0 +1,95 @@
+{
+  "id": "cocoon",
+  "name": "Cocoon",
+  "names": [
+    "Luma",
+    "Seda",
+    "Vesper",
+    "Farol",
+    "Opala",
+    "Lux",
+    "Noct",
+    "Lua"
+  ],
+  "flavor": "Something enormous dreams behind the silk. Its patient light unsettles enemies even before it hatches.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "cocoon",
+  "elements": [
+    "Green",
+    "White"
+  ],
+  "skills": [
+    "sleepDust",
+    "attack"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "notiluca"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 38,
+    "atk": 8,
+    "def": 16,
+    "mat": 15,
+    "mdf": 18,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 45,
+      "atk": 8,
+      "def": 16,
+      "mat": 27,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 53,
+      "atk": 9,
+      "def": 19,
+      "mat": 31,
+      "mdf": 32
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 54,
+      "atk": 10,
+      "def": 21,
+      "mat": 32,
+      "mdf": 33
+    }
+  ],
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Cocoon",
+  "bigBattler": "Cocoon",
+  "defaultGrowthSeed": 1936384615
+}

@@ -79,7 +79,7 @@
       "worldPosition": [
         7.8,
         10.983,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -151,12 +151,7 @@
           ],
           "cmd": "CONDITIONAL_BRANCH"
         }
-      ],
-      "sprite": "assets/character/npc_celina.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
+      ]
     },
     {
       "id": 2502,
@@ -167,7 +162,7 @@
       "worldPosition": [
         7.8,
         2.312,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [

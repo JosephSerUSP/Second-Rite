@@ -82,196 +82,6 @@
   "events": [
     {
       "id": 2301,
-      "instanceId": "st-maria-house_laura-laura",
-      "name": "Laura",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        13.295,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "condition": "questStatus:golden_promise:active",
-          "commands": [
-            {
-              "text": "Find that signet. Don't come back empty-handed.",
-              "speaker": "Laura",
-              "cmd": "TEXT"
-            },
-            {
-              "condition": "hasItem:25",
-              "commands": [
-                {
-                  "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
-                  "speaker": "Laura",
-                  "cmd": "TEXT"
-                },
-                {
-                  "options": [
-                    {
-                      "label": "Hand it over.",
-                      "commands": [
-                        {
-                          "questId": "golden_promise",
-                          "cmd": "QUEST_COMPLETE"
-                        },
-                        {
-                          "text": "I'll need time to work on this. Check back later. And... thanks.",
-                          "speaker": "Laura",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "commonEventId": 17,
-                          "cmd": "CALL_COMMON_EVENT"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
-                }
-              ],
-              "elseCommands": [
-                {
-                  "options": [
-                    {
-                      "label": "Still looking.",
-                      "commands": [
-                        {
-                          "commonEventId": 17,
-                          "cmd": "CALL_COMMON_EVENT"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
-                }
-              ],
-              "cmd": "CONDITIONAL_BRANCH"
-            }
-          ],
-          "elseCommands": [
-            {
-              "condition": "flag:laura_met",
-              "commands": [
-                {
-                  "commonEventId": 31,
-                  "cmd": "CALL_COMMON_EVENT"
-                }
-              ],
-              "elseCommands": [
-                {
-                  "text": "Hmm? Oh. You're the new one. Eyes forward, don't drag your feet. The smithy is hot, and I don't have time for tourists.",
-                  "speaker": "Laura",
-                  "cmd": "TEXT"
-                },
-                {
-                  "options": [
-                    {
-                      "label": "I need weapons.",
-                      "commands": [
-                        {
-                          "flag": "laura_met",
-                          "value": true,
-                          "cmd": "SET_FLAG"
-                        },
-                        {
-                          "shopId": 8,
-                          "cmd": "OPEN_SHOP"
-                        },
-                        {
-                          "commonEventId": 31,
-                          "cmd": "CALL_COMMON_EVENT"
-                        }
-                      ]
-                    },
-                    {
-                      "label": "You seem busy.",
-                      "commands": [
-                        {
-                          "text": "Steel doesn't shape itself. If you're not buying or repairing, get out of the smoke.",
-                          "speaker": "Laura",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "options": [
-                            {
-                              "label": "Understood.",
-                              "commands": [
-                                {
-                                  "flag": "laura_met",
-                                  "value": true,
-                                  "cmd": "SET_FLAG"
-                                },
-                                {
-                                  "shopId": 8,
-                                  "cmd": "OPEN_SHOP"
-                                },
-                                {
-                                  "commonEventId": 31,
-                                  "cmd": "CALL_COMMON_EVENT"
-                                }
-                              ]
-                            },
-                            {
-                              "label": "Talk",
-                              "commands": [
-                                {
-                                  "flag": "laura_met",
-                                  "value": true,
-                                  "cmd": "SET_FLAG"
-                                },
-                                {
-                                  "commonEventId": 17,
-                                  "cmd": "CALL_COMMON_EVENT"
-                                }
-                              ]
-                            },
-                            {
-                              "label": "Leave",
-                              "commands": [
-                                {
-                                  "flag": "laura_met",
-                                  "value": true,
-                                  "cmd": "SET_FLAG"
-                                }
-                              ]
-                            }
-                          ],
-                          "cmd": "CHOICE"
-                        }
-                      ]
-                    },
-                    {
-                      "label": "Leave",
-                      "commands": [
-                        {
-                          "flag": "laura_met",
-                          "value": true,
-                          "cmd": "SET_FLAG"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
-                }
-              ],
-              "cmd": "CONDITIONAL_BRANCH"
-            }
-          ],
-          "cmd": "CONDITIONAL_BRANCH"
-        }
-      ],
-      "sprite": "assets/character/town/npc_laura.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 2302,
       "instanceId": "st-maria-house_laura-exit_door",
       "name": "Out to the Cortico",
       "x": 0,
@@ -291,7 +101,7 @@
       ]
     },
     {
-      "id": 2303,
+      "id": 2302,
       "instanceId": "st-maria-house_laura-bedroom_door",
       "name": "The room upstairs",
       "x": 0,
@@ -311,7 +121,7 @@
       ]
     },
     {
-      "id": 2304,
+      "id": 2303,
       "instanceId": "st-maria-house_laura-shop_stair",
       "name": "Down to the shop",
       "x": 0,

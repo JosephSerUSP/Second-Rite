@@ -87,30 +87,6 @@
   "events": [
     {
       "id": 1701,
-      "instanceId": "st-maria-praca-child",
-      "name": "Child",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        12.717,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
-        }
-      ],
-      "sprite": "assets/character/town/npc_child.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 1702,
       "instanceId": "st-maria-praca-west_churchyard",
       "name": "The Churchyard",
       "x": 0,
@@ -130,7 +106,7 @@
       ]
     },
     {
-      "id": 1703,
+      "id": 1702,
       "instanceId": "st-maria-praca-quay_stair",
       "name": "Down to the Quay",
       "x": 0,
@@ -150,7 +126,7 @@
       ]
     },
     {
-      "id": 1704,
+      "id": 1703,
       "instanceId": "st-maria-praca-chapel_door",
       "name": "Chapel",
       "x": 0,
@@ -170,7 +146,7 @@
       ]
     },
     {
-      "id": 1705,
+      "id": 1704,
       "instanceId": "st-maria-praca-east_cortico",
       "name": "The Cortico",
       "x": 0,

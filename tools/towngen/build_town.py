@@ -45,7 +45,7 @@ CENTER_X = 213.0
 # made a correctly photographed actor 26% too small against the architecture.
 PIXELS_PER_Y = 34.6
 DEPTH_X = 7.8
-GROUND_Z = -1.5
+GROUND_Z = 0.0
 FOV_DEGREES = 28.072486935852957
 
 

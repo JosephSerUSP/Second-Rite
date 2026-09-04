@@ -62,10 +62,10 @@ check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound
 -- The Praca is modelled geometry now, and its churchyard exit is a stair partway
 -- along the square rather than the west bound: the anchor is churchyard_stair,
 -- and the west end of the lane belongs to the quay.
-exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "churchyard_stair" })
+exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "west_churchyard" })
 local praca = game.townTraversal
-local stair = praca.environment.anchors["churchyard_stair"]
-check(stair ~= nil, "the praca package publishes its churchyard_stair anchor")
+local stair = praca.environment.anchors["west_churchyard"]
+check(stair ~= nil, "the praca package publishes its west_churchyard anchor")
 check(math.abs(praca.y - stair.position[2]) < 0.001,
     "arrival through a named door spawns on that door's anchor")
 check(math.abs(praca.y - (praca.minY + praca.maxY) / 2) > 0.5,

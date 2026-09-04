@@ -7,10 +7,10 @@
   "bounds": [
     6.8,
     0.0,
-    -2.5,
+    -1.0,
     8.8,
     15.029,
-    2.5
+    4.0
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -20,14 +20,14 @@
       "position": [
         7.8,
         7.514,
-        -1.5
+        0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
         2.312,
-        -1.5
+        0.0
       ]
     }
   },

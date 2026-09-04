@@ -317,12 +317,6 @@ function love.load(arg)
                 cli.isPreviewSceneMode = true
                 cli.previewSceneId = arg[i + 1]
                 i = i + 1
-            elseif val == "play-scene" then
-                -- #920: drive a scene's authored input script and report
-                -- whether it reached its declared terminal state.
-                cli.isPlaySceneMode = true
-                cli.playSceneId = arg[i + 1]
-                i = i + 1
             elseif val == "preview-window" then
                 -- mockSpecJSON is always passed (the server supplies "{}"
                 -- when there's no mock binding) so parsing never has to
@@ -682,14 +676,6 @@ function love.load(arg)
     if cli.isPreviewSceneMode then
         loader.init()
         cli_tools.runPreviewScene(cli.previewSceneId, loader, gameWidth, gameHeight)
-        love.event.quit(0)
-        return
-    end
-
-    -- #920 Rung 2: machine-play a scene to its declared terminal state.
-    if cli.isPlaySceneMode then
-        loader.init()
-        cli_tools.runPlayScene(cli.playSceneId, loader)
         love.event.quit(0)
         return
     end

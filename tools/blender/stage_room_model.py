@@ -473,6 +473,17 @@ def main() -> None:
             "means rightY = -1. Fix the calibration record."
         )
 
+    # A mirrored (determinant -1) camera basis cannot survive the
+    # to_quaternion() conversion inside create_actor_preview, and silently
+    # flips the actor. Refuse rather than render an upside-down character.
+    determinant = camera.matrix_world.to_3x3().determinant()
+    if determinant < 0.0:
+        raise SystemExit(
+            f"camera basis is mirrored (determinant {determinant:+.4f}). "
+            "right must equal forward x up; with forward +X and up +Z that "
+            "means rightY = -1. Fix the calibration record."
+        )
+
     if source_is_blend:
         meshes = [o for o in bpy.data.objects if o.type == "MESH"]
         if not meshes:

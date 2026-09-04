@@ -84,8 +84,8 @@
     },
     {
       "path": "vendor/materials.json",
-      "bytes": 9299,
-      "sha256": "d1dfde534eb68ed3dbb7ececcbc72dc0ea5db13b384463ea12a7dee41eb663d3"
+      "bytes": 7636,
+      "sha256": "225a128afb42871d7eb4a1d6a7e0dbbb07e50fd8ddc6ebfd5895603048f1bf3d"
     }
   ]
 }

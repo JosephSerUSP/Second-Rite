@@ -1,8 +1,5 @@
 {
   "id": "b009_positioning",
-  "terminal": {
-    "reached": "v.ehp <= 0"
-  },
   "name": "B009 — Parasite-Eve-Like Positioning Proof",
   "kind": "menu",
   "draw": "windows",

@@ -1,8 +1,5 @@
 {
   "id": "a001_pong",
-  "terminal": {
-    "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
-  },
   "name": "A001 \u2014 Pong",
   "kind": "menu",
   "draw": "windows",

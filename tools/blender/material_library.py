@@ -1,7 +1,7 @@
 """Second Gate material library: textures bound to semantic material IDs.
 
 The semantic layer already exists in `tools/asset-language/materials.json` --
-18 IDs like `dark_wood` and `rough_limestone`, each with a base colour and
+12 IDs like `dark_wood` and `rough_limestone`, each with a base colour and
 roughness hint. Recipes bind those IDs. This module adds an OPTIONAL texture
 set underneath each ID, so a recipe never changes when a texture arrives, is
 replaced by a hand-authored one, or is promoted from placeholder to final.

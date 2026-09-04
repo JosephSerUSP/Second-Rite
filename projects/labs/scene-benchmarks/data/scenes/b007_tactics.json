@@ -1,8 +1,5 @@
 {
   "id": "b007_tactics",
-  "terminal": {
-    "none": "spec requires 'alternating turns or equivalent lifecycle', which checkTurnEnd implements; no victory or defeat condition is required of this experiment"
-  },
   "name": "B007 — Tactics Microboard",
   "kind": "menu",
   "draw": "windows",

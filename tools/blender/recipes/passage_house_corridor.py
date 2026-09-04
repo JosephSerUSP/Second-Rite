@@ -84,7 +84,7 @@ def build():
     # status menu within a tread or two.
     hall.doorway("stair_head", STAIR_Y - STAIR_HALF, STAIR_Y + STAIR_HALF,
                  STAIR_TOP, recess=0.7, open_back=True)
-    furn.stair(hall, "stair", y=STAIR_Y, x_start=hall.back_x + 1.25,
+    furn.escada(hall, "stair", y=STAIR_Y, x_start=hall.back_x + 1.25,
                 steps=6, width=STAIR_HALF * 2 - 0.2, rise=0.2, run=0.34,
                 direction=1.0)
     # Daylight from the street, seen past the treads. Without an emissive
@@ -101,8 +101,8 @@ def build():
               hall.wood)
     hall.part("bench", (0.5, 2.2, 0.44), (hall.back_x - 0.45, -4.8, 0.22),
               hall.wood)
-    furn.chest(hall, "aisle_chest", (hall.back_x - 0.42, 8.4))
-    furn.jar(hall, "aisle_jar", (hall.back_x - 0.45, 3.6), height=0.55,
+    furn.arca(hall, "aisle_chest", (hall.back_x - 0.42, 8.4))
+    furn.pote(hall, "aisle_jar", (hall.back_x - 0.45, 3.6), height=0.55,
               radius=0.22)
     furn.azulejo_dado(hall, height=0.95)
 
@@ -119,7 +119,7 @@ def build():
 
     # Two weak wall lanterns, enough to walk by and no more.
     for index, y in enumerate((-2.2, 4.4)):
-        furn.lantern(hall, f"lantern_{index}", y=y, z=2.25, energy=12.0)
+        furn.lanterna(hall, f"lantern_{index}", y=y, z=2.25, energy=12.0)
 
     # Daylight climbing the stairwell from the street below. Cool against the
     # lamplight, so "outside" and "mine" never read as the same signal.

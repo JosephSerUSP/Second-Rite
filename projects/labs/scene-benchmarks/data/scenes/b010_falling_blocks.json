@@ -1,8 +1,5 @@
 {
   "id": "b010_falling_blocks",
-  "terminal": {
-    "reached": "v.lost == 1"
-  },
   "name": "B010 \u2014 Falling Blocks",
   "kind": "menu",
   "draw": "windows",

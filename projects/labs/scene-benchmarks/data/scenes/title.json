@@ -1,8 +1,5 @@
 {
   "id": "title",
-  "terminal": {
-    "none": "benchmark launcher menu: a dispatch surface into the specimens, with no loop of its own to finish"
-  },
   "name": "Benchmark Launcher",
   "kind": "menu",
   "draw": "windows",

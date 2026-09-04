@@ -1,8 +1,5 @@
 {
   "id": "b002_argument",
-  "terminal": {
-    "none": "conversation specimen, not a scored loop (#920 names this as the legitimate case)"
-  },
   "name": "B002 — Argument as Combat",
   "kind": "menu",
   "draw": "windows",

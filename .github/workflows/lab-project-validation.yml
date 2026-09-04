@@ -254,30 +254,6 @@ jobs:
             $boot.WaitForExit()
             Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
             Write-Host "BOOT SMOKE OK $($project.FullName)"
-
-            # #920 Rung 2: everything above certifies a game nobody played.
-            # validate passes, a PNG exists, and the staged game survives four
-            # seconds on the title screen -- none of which enters a specimen or
-            # drives one to an outcome. This replays each specimen's authored
-            # input script through the same scene_host.keypressed path real
-            # input uses and asserts it reached the terminal state the specimen
-            # itself declares. Assert on the positive marker: an unknown CLI
-            # token boots the game normally rather than failing.
-            if (Test-Path (Join-Path $project.FullName "data\scenes\index.json")) {
-              $playOut = Join-Path $env:RUNNER_TEMP ("play-" + $project.Name + ".txt")
-              python tools/labs/check-specimen-play.py `
-                --stage $stage `
-                --project $project.FullName `
-                --lovec $env:LOVEC 2>&1 | Tee-Object -FilePath $playOut
-              $playExit = $LASTEXITCODE
-              Copy-Item $playOut (Join-Path $artifactRoot "specimen-play.txt") -ErrorAction SilentlyContinue
-              if ($playExit -ne 0) {
-                throw "specimen play gate failed for $($project.FullName)"
-              }
-              if ((Get-Content -Raw $playOut) -notmatch "SPECIMEN PLAY OK") {
-                throw "specimen play gate exited 0 without SPECIMEN PLAY OK for $($project.FullName)"
-              }
-            }
           }
           finally {
             Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue

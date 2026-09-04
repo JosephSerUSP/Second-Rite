@@ -32,6 +32,7 @@ A fresh reconstruction of A001 Pong that takes advantage of recent engine evolut
 * Used inline `clamp()` formula helper inside the `SET_VAR` string formulas for simpler, more declarative boundary constraints, avoiding manually written min/max logic.
 * Setup formulas remain explicitly duplicated in `on_enter` and `on_select` to ensure CI reliability, as automated validation scenes silence custom hooks via `run_hook`.
 * Maintained `goldenScript` metadata for proper automated testing validation.
+* Maintained the original `terminal` block to preserve the frozen behavioral specification intact.
 
 ### Improved
 * **Formula Elegance:** Utilizing the native `clamp()` helper inside `SET_VAR` formulas noticeably cleans up paddle boundary constraints.

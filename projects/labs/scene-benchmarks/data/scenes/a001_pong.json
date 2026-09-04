@@ -1,6 +1,9 @@
 {
   "id": "a001_pong",
-  "name": "A001 Pong",
+  "terminal": {
+    "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
+  },
+  "name": "A001 \u2014 Pong",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -21,7 +24,7 @@
       "content": [
         {
           "type": "text",
-          "text": "A001 Pong   Score: {v.score1} - {v.score2}"
+          "text": "A001 \u2014 Pong   Score: {v.score1} - {v.score2}"
         }
       ]
     },
@@ -416,6 +419,7 @@
       }
     ]
   },
+  "scripts": {},
   "goldenScript": [
     {
       "key": "down"

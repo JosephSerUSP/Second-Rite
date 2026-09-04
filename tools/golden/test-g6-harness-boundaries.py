@@ -62,6 +62,8 @@ assert "THESTRA_RENDERABLE_URL" in g6 and "THESTRA_RENDERABLE_URL" in adapter
 assert "8082" not in g6, "G6 must never target the default bridge port"
 assert "runtime unavailable" in g6, "G6 must fail loud on the semantic fallback"
 assert "bridge.close()" in g6
+assert "def resolve_fixture_project" in g6, "G6 must resolve the decoupled fixture project"
+assert 'env["SECOND_RITE_PROJECT"] = str(fixture)' in g6, "G6 must propagate SECOND_RITE_PROJECT to host services"
 
 # The map workspace waits are now identity-based; keep positional selectors out
 # of the G6 harness rather than making the next toolbar extension reorder a test.

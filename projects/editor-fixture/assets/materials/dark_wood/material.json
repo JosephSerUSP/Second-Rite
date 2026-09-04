@@ -1,0 +1,29 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "dark_wood",
+  "status": "authored",
+  "worldSizeMetres": 2.0,
+  "maps": {
+    "albedo": "albedo.png",
+    "roughness": "roughness.png",
+    "height": "height.png",
+    "ao": "ao.png"
+  },
+  "notes": "Dark tropical hardwood: heavy, close-grained, the timber the joinery vocabulary is built on.",
+  "provenance": {
+    "origin": "https://ambientcg.com/view?id=Wood051",
+    "sourceAsset": "Wood051",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-30",
+    "sha256": {
+      "albedo.png": "3a8fd76971d1b2c73fe726cb771c1e2690bd2d58b586fc476e8aa97ea1e1eca6",
+      "roughness.png": "d5a93cad955b309c1609c10adbf0c5d913f5953b357a63b9e51ad516973ae061",
+      "height.png": "47a52ed2d068cf8f00f5d75aa60408bd629b3c875f21aec8a181f026226673f4",
+      "ao.png": "1c01bb0bc8a855cd4cad1146e9b3761ba09f6d4cd5507d6f879b3292b0fa6fa7"
+    }
+  }
+}

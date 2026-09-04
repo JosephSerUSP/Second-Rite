@@ -113,6 +113,12 @@ while paired-data coherence is a G1 failure.
   Like G5 it is a claim about one machine and one Chrome build: a font or browser
   update can legitimately shift it, and that is an owner call, not a silent
   recapture.
+- **G6 runs against a frozen fixture Project, not shipping game content.** G6
+  boots its host services with `SECOND_RITE_PROJECT` set to
+  `projects/editor-fixture/`. This decouples editor health from game content
+  authoring churn: adding or renaming maps, balancing units/items, or editing
+  dialogue in `projects/hichaukitoden-game/` never reddens G6. G6 turns red only
+  when Studio forms, 3D viewport integration, or styles actually change.
 - **G5/G6 have two deliberately different modes.**
   - **Absolute:** the commands in the gate table above compare against committed
     owner-signed references. G5 assumes the owner's real renderer and Effekseer

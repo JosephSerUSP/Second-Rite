@@ -1,0 +1,98 @@
+{
+  "id": "blue_dragon",
+  "name": "Blue Dragon",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A dragon steeped in cold blue currents. It favors magical pressure and water-aligned creation.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Blue",
+    "Blue"
+  ],
+  "skills": [
+    "iceShard"
+  ],
+  "passives": [
+    "deepCurrent"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "leviathan",
+      "cost": {
+        "item": 51
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 92,
+    "atk": 24,
+    "def": 25,
+    "mat": 31,
+    "mdf": 29,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 92,
+      "atk": 22,
+      "def": 24,
+      "mat": 32,
+      "mdf": 30
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 107,
+      "atk": 26,
+      "def": 28,
+      "mat": 38,
+      "mdf": 35
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 109,
+      "atk": 28,
+      "def": 28,
+      "mat": 39,
+      "mdf": 36
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "BlueDragon",
+  "bigBattler": "BlueDragon",
+  "defaultGrowthSeed": 1577359042
+}

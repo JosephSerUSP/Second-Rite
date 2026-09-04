@@ -1,0 +1,26 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "azulejo",
+  "status": "authored",
+  "worldSizeMetres": 1.3,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "ao": "ao.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Tin-glazed blue-and-white azulejo, 6x6 tiles per 1.3m (22cm tiles). Mean (178, 184, 192): cobalt at real strength so the band still reads as blue-and-white at the five pixels it gets on screen. Use as a dado band, never as a whole wall.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_azulejo.py",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "e781dda54428226be80e6b4d91fbc2ac9c6c70a2b338b303e9ab3187afcf6a2a",
+      "height.png": "fd5fd2926743f72b5de01ad76e10fef36001e6e0aea2fa0d1e299f13b7b5f7a2",
+      "ao.png": "c8085d89672396f2ee9a5ba10a4c8201b40bad83abc9ad396708036be4ef3963",
+      "roughness.png": "e85d37ce87a5b5fc3bd12cdeae4257199aa53cf97e68fa05e70e8f4fa6b2ee57"
+    }
+  }
+}

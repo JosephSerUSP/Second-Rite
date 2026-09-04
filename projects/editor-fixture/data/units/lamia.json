@@ -1,0 +1,95 @@
+{
+  "id": "lamia",
+  "name": "Lamia",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "names": [
+    "Serpenta",
+    "Vipera",
+    "Siren",
+    "Coila",
+    "Naga",
+    "Sylphira",
+    "Medusa",
+    "Sorsha"
+  ],
+  "flavor": "A creature of cold scales and hypnotic grace. Her seductive gaze and shadow magic weaken foes before her constriction.",
+  "level": 1,
+  "role": "Debuffer",
+  "discipline": "blacksmithing",
+  "smallBattler": "lamia",
+  "elements": [
+    "Black",
+    "Blue"
+  ],
+  "skills": [
+    "attack",
+    "defend",
+    "drain",
+    "alluringGaze",
+    "miasma"
+  ],
+  "passives": [
+    "mesmerizing"
+  ],
+  "expGrowth": 1,
+  "gold": 2,
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "lamia_queen",
+      "bonus": {
+        "maxHp": 16,
+        "mat": 8,
+        "mdf": 6,
+        "atk": 4
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "drops": [],
+  "foodReactions": [
+    "Cold and sweet, just how I like it.",
+    "Mmm... deliciously potent."
+  ],
+  "baseParams": {
+    "maxHp": 42,
+    "atk": 11,
+    "def": 9,
+    "mat": 15,
+    "mdf": 14,
+    "mpd": 2,
+    "mxa": 3,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 45,
+      "atk": 13,
+      "def": 11,
+      "mat": 22,
+      "mdf": 20
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 55,
+      "atk": 16,
+      "def": 14,
+      "mat": 28,
+      "mdf": 25
+    }
+  ],
+  "sacrificeRewards": [],
+  "portrait": "lamia",
+  "bigBattler": "lamia",
+  "defaultGrowthSeed": 1873212124
+}

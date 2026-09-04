@@ -1,0 +1,93 @@
+{
+  "id": "salamander",
+  "name": "Salamander",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A mythic fire dragon awakened by a branch-specific catalyst. It distills destruction into the finest red creations.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Red",
+    "Red",
+    "Red"
+  ],
+  "skills": [
+    "ember",
+    "eruption"
+  ],
+  "passives": [
+    "burningHeart"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 110,
+    "atk": 35,
+    "def": 27,
+    "mat": 29,
+    "mdf": 24,
+    "mpd": 7,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 108,
+      "atk": 36,
+      "def": 26,
+      "mat": 30,
+      "mdf": 22
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 125,
+      "atk": 42,
+      "def": 30,
+      "mat": 35,
+      "mdf": 26
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 127,
+      "atk": 42,
+      "def": 32,
+      "mat": 36,
+      "mdf": 28
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Salamander",
+  "bigBattler": "Salamander",
+  "defaultGrowthSeed": 1070406928
+}

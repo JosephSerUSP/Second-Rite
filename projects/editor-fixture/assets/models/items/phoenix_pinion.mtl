@@ -1,0 +1,34 @@
+# Blender 5.0.1 MTL File: 'phoenix_pinion.blend'
+# www.blender.org
+
+newmtl crystal
+Ns 640.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.352941 0.509804 0.588235
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 1 assets/models/matcaps/ruby.png
+newmtl ritual_gold
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.568627 0.466667 0.235294
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 1 assets/models/matcaps/gold.png
+newmtl wax
+Ns 176.400024
+Ka 1.000000 1.000000 1.000000
+Kd 0.607843 0.494118 0.274510
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

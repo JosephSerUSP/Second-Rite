@@ -1,0 +1,111 @@
+{
+  "id": "high_pixie",
+  "name": "High Pixie",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 6,
+  "role": "Healer",
+  "smallBattler": "highPixie[fps=15]",
+  "passives": [
+    "postBattleHeal"
+  ],
+  "elements": [
+    "Green",
+    "Green"
+  ],
+  "skills": [
+    "windBlade",
+    "soothingMote",
+    "holySmite"
+  ],
+  "flavor": "A pixie that has attained a higher state of being.",
+  "expGrowth": 3,
+  "gold": 30,
+  "evolutions": [
+    {
+      "level": 20,
+      "evolvesTo": "titania",
+      "bonus": {
+        "maxHp": 18,
+        "mat": 9,
+        "mdf": 7,
+        "def": 3
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 3,
+      "chance": 0.2
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [
+    {
+      "itemId": 3,
+      "chance": 0.6,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Ariel",
+    "Puck",
+    "Sparky",
+    "Tinker",
+    "Faye",
+    "Mote",
+    "Clover",
+    "Twinkle"
+  ],
+  "baseParams": {
+    "maxHp": 32,
+    "atk": 9,
+    "def": 15,
+    "mat": 23,
+    "mdf": 21,
+    "mpd": 5,
+    "mxa": 6,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 30,
+      "atk": 18,
+      "def": 27,
+      "mat": 48,
+      "mdf": 38
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 43,
+      "atk": 28,
+      "def": 39,
+      "mat": 70,
+      "mdf": 55
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 49,
+      "atk": 30,
+      "def": 44,
+      "mat": 78,
+      "mdf": 62
+    }
+  ],
+  "portrait": "highPixie",
+  "bigBattler": "highPixie",
+  "defaultGrowthSeed": 1013904228
+}

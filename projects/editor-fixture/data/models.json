@@ -1,0 +1,21 @@
+{
+  "system.placeholder_question": {
+    "id": "system.placeholder_question",
+    "source": {
+      "kind": "obj",
+      "path": "assets/models/items/placeholder_question.obj"
+    },
+    "sourceUnitsToMapCells": 1,
+    "materialSlots": {
+      "bright_gold": {
+        "sourceMaterials": ["MAT_BrightGold"]
+      },
+      "old_gold": {
+        "sourceMaterials": ["MAT_OldGold"]
+      },
+      "ruby": {
+        "sourceMaterials": ["MAT_Ruby"]
+      }
+    }
+  }
+}

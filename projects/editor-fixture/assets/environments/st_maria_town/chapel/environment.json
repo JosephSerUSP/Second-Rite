@@ -1,0 +1,70 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    28.035,
+    2.5
+  ],
+  "provenance": {
+    "plateSourceViewTransform": "Standard"
+  },
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        14.017,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        7.8,
+        2.312,
+        0.0
+      ]
+    },
+    "npc_agnes": {
+      "position": [
+        7.8,
+        24.277,
+        0.0
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      1050,
+      240
+    ],
+    "slicePositions": [
+      14.017
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/chapel_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/chapel_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_1050.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 14.017
+    },
+    "playerProjection": {
+      "centerX": 525.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "aged_cloth",
+  "status": "authored",
+  "worldSizeMetres": 1.8,
+  "maps": {
+    "albedo": "albedo.png",
+    "roughness": "roughness.png",
+    "height": "height.png",
+    "ao": "ao.png"
+  },
+  "notes": "Coarse undyed linen weave: sacking, aprons, the cloth a bundle is tied in.",
+  "provenance": {
+    "origin": "https://ambientcg.com/view?id=Fabric066",
+    "sourceAsset": "Fabric066",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-30",
+    "sha256": {
+      "albedo.png": "656247e8a2ca926b9e0f1b559cc382e6a6efb898a7e2be32f0760b5e3aa4c747",
+      "roughness.png": "d88db56b1ee0f9cf9b58f3f81666f7fb1d225e440dbb0a80a532fe1a6373db8b",
+      "height.png": "1828da48a0a7cb39d1dd0284acde9c68dbabf77656c117e82cc97fac78b74fb8",
+      "ao.png": "41a3b620a523244d23af44b9ed79ea795eadce94d8dc0c7a5a4b2a1fe8e3380f"
+    }
+  }
+}

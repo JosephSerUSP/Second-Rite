@@ -1,0 +1,491 @@
+{
+  "id": "reserve",
+  "name": "Reserve",
+  "kind": "menu",
+  "config": {
+    "terms": {
+      "title": "Expedition Reserve & Formation",
+      "help": "Choose expedition party slots (1-2 Front, 3-4 Back) & reserve.  Arrows: move  ESC: back"
+    }
+  },
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "mode",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "cursorIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "focusArea",
+        "value": "'party'"
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "statusText",
+        "value": "''"
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cursorIdx",
+            "value": "v.cursorIdx > 1 and v.cursorIdx - 1 or v.cursorIdx"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cursorIdx",
+            "value": "v.cursorIdx > 1 and v.cursorIdx - 1 or v.cursorIdx"
+          }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cursorIdx",
+            "value": "v.cursorIdx < 4 and v.cursorIdx + 1 or v.cursorIdx"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cursorIdx",
+            "value": "v.cursorIdx < 4 and v.cursorIdx + 1 or v.cursorIdx"
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.cursorIdx > 2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx - 2"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "focusArea",
+                "value": "'reserve'"
+              },
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx + 2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.cursorIdx > 2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx - 2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "popupIdx",
+            "value": "v.popupIdx > 1 and v.popupIdx - 1 or v.popupIdx"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.cursorIdx <= 2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx + 2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.cursorIdx <= 2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx + 2"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "focusArea",
+                "value": "'party'"
+              },
+              {
+                "cmd": "SET_VAR",
+                "name": "cursorIdx",
+                "value": "v.cursorIdx - 2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "popupIdx",
+            "value": "v.popupIdx < v.popupCount and v.popupIdx + 1 or v.popupIdx"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "mode",
+            "value": 2
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "popupIdx",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "setupReservePopup"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "executeReservePopup"
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ritualPush == 'summon'",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "ritualPush",
+                "value": "''"
+              },
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "push",
+                "scene": "ritual",
+                "vars": [
+                  {
+                    "name": "ritualMode",
+                    "value": "'summon'"
+                  },
+                  {
+                    "name": "targetIsReserve",
+                    "value": "v.popupTargetIsReserve"
+                  },
+                  {
+                    "name": "targetIndex",
+                    "value": "v.popupTargetIndex"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ritualPush == 'promote'",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "ritualPush",
+                "value": "''"
+              },
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "push",
+                "scene": "ritual",
+                "vars": [
+                  {
+                    "name": "ritualMode",
+                    "value": "'promote'"
+                  },
+                  {
+                    "name": "targetIsReserve",
+                    "value": "v.popupTargetIsReserve"
+                  },
+                  {
+                    "name": "targetIndex",
+                    "value": "v.popupTargetIndex"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ritualPush == 'sacrifice'",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "ritualPush",
+                "value": "''"
+              },
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "push",
+                "scene": "ritual",
+                "vars": [
+                  {
+                    "name": "ritualMode",
+                    "value": "'sacrifice'"
+                  },
+                  {
+                    "name": "targetIsReserve",
+                    "value": "v.popupTargetIsReserve"
+                  },
+                  {
+                    "name": "targetIndex",
+                    "value": "v.popupTargetIndex"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "executeSwap"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "mode",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "mode",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      }
+    ]
+  },
+  "scripts": {
+    "setupReservePopup": "\nlocal v = ctx.v\nlocal focusArea = v.focusArea\nlocal cursorIdx = v.cursorIdx\nlocal member = (focusArea == 'party') and api.party(cursorIdx) or api.reserve(cursorIdx)\nlocal options = {}\n\nif member and member.empty then member = nil end\n\nv.popupTargetIsReserve = (focusArea == 'reserve')\nv.popupTargetIndex = cursorIdx\nv.popupMemberName = member and (member.name or \"Unknown\") or nil\nv.popupMemberRef = member\n\n-- Summoning belongs to a town ritual site. Sacrifice is disabled while its\n-- inheritance-based replacement is designed. Expedition reserve only manages\n-- creatures the player already committed to bringing below.\ntable.insert(options, {name = \"Swap\"})\nif member and api.inDungeon() then\n    table.insert(options, {name = \"Dismiss\"})\nend\nif member and api.canPromote(v.popupTargetIsReserve, v.popupTargetIndex) then\n    table.insert(options, {name = \"Promote\"})\nend\ntable.insert(options, {name = \"Cancel\"})\n\nv.popupCount = #options\nv.popupOptions = options\n",
+    "executeReservePopup": "\nlocal v = ctx.v\nlocal opt = v.popupOptions[v.popupIdx].name\nif opt == \"Cancel\" then\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Swap\" then\n    v.mode = 4\n    v.swapSourceIsReserve = v.popupTargetIsReserve\n    v.swapSourceIndex = v.popupTargetIndex\n    v.swapSourceFocus = v.focusArea\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Dismiss\" then\n    local member, result = api.dismissToStorage(v.popupTargetIsReserve, v.popupTargetIndex)\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\n    if member then\n        v.statusText = member.name .. \" returned to town storage (slot \" .. result .. \").\"\n    else\n        v.statusText = result or \"Dismissal failed.\"\n    end\nelseif opt == \"Promote\" then\n    v.ritualPush = \"promote\"\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nend\n",
+    "executeSwap": "\nlocal v = ctx.v\napi.swap(v.swapSourceIndex, v.swapSourceIsReserve, v.cursorIdx, v.focusArea == 'reserve')\nif api.partyCount() <= 0 then\n    api.swap(v.cursorIdx, v.focusArea == 'reserve', v.swapSourceIndex, v.swapSourceIsReserve)\n    v.statusText = \"Cannot leave the party empty!\"\n    v.mode = 1\n    return\nend\nv.mode = 1\nv.statusText = \"\"\n"
+  },
+  "overlay": true,
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "help",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.mode == 4 and 'Select a target to swap with.  ESC: cancel' or ((v.statusText and v.statusText ~= '') and v.statusText or config.terms.help)}"
+        }
+      ]
+    },
+    {
+      "id": "reserve_party",
+      "content": [
+        {
+          "type": "list",
+          "listId": "party",
+          "format": "{name}",
+          "cursor": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party' and v.cursorIdx or 0"
+        }
+      ]
+    },
+    {
+      "id": "reserve_roster",
+      "content": [
+        {
+          "type": "list",
+          "listId": "reserve",
+          "format": "{name}",
+          "cursor": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve' and v.cursorIdx or 0"
+        }
+      ]
+    },
+    {
+      "id": "reserve_popup",
+      "visible": "v.mode == 2",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:popupOptions",
+          "format": "{name}",
+          "cursor": "v.popupIdx"
+        }
+      ]
+    }
+  ],
+  "goldenScript": [
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "e"
+    },
+    {
+      "key": "e"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
+  ]
+}

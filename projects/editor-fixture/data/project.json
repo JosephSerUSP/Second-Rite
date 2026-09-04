@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Studio Editor Fixture",
+  "identity": "StudioEditorFixture",
+  "productName": "Studio Editor Fixture",
+  "executableName": "Studio Editor Fixture",
+  "buildSlug": "editor-fixture",
+  "windowTitle": "Studio Editor Fixture",
+  "productVersion": "0.0.0-dev"
+}

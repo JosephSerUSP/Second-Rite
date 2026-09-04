@@ -1,0 +1,74 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    15.029,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        7.514,
+        0.0
+      ]
+    },
+    "labyrinth_door": {
+      "position": [
+        7.8,
+        7.369,
+        0.0
+      ]
+    },
+    "east_praca": {
+      "position": [
+        7.8,
+        15.028,
+        0.0
+      ]
+    },
+    "npc_guard": {
+      "position": [
+        7.8,
+        11.271,
+        0.0
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      600,
+      240
+    ],
+    "slicePositions": [
+      7.514
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/gate_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/gate_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_600.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 7.514
+    },
+    "playerProjection": {
+      "centerX": 300.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

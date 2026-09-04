@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 15.029,
       "depthX": 7.8,
-      "groundZ": -1.5,
+      "groundZ": 0.0,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -79,7 +79,7 @@
       "worldPosition": [
         7.8,
         10.983,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -162,7 +162,7 @@
       "worldPosition": [
         7.8,
         2.312,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [

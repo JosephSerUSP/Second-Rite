@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 17.919,
       "depthX": 7.8,
-      "groundZ": 0.0,
+      "groundZ": -1.5,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -295,12 +295,7 @@
           ],
           "cmd": "CONDITIONAL_BRANCH"
         }
-      ],
-      "sprite": "assets/character/npc_alicia.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
+      ]
     },
     {
       "id": 2402,

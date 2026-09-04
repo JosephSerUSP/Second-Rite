@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 29.48,
       "depthX": 7.8,
-      "groundZ": 0.0,
+      "groundZ": -1.5,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -164,12 +164,7 @@
           ],
           "cmd": "CHOICE"
         }
-      ],
-      "sprite": "assets/character/npc_goustav.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
+      ]
     },
     {
       "id": 1802,

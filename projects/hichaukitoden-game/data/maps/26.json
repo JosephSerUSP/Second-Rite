@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 22.254,
       "depthX": 7.8,
-      "groundZ": 0.0,
+      "groundZ": -1.5,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -235,7 +235,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "east_backstreet"
+          "arrival": "east_cortico"
         }
       ]
     },

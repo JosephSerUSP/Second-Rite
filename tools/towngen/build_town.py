@@ -166,7 +166,7 @@ SCREENS = {
         id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
         intro="The fountain never stops. Between the roofs, on every side, the sea.",
         screen_y=136, music="town1",
-        npcs=[("child", None, "npc_child", 480)],
+        npcs=[("child", None, None, 480)],
         doors=[
             ("west_churchyard", "The Churchyard", 16, "east_praca", 40, None),
             ("quay_stair", "Down to the Quay", 19, "praca_stair", 150, None),
@@ -201,7 +201,7 @@ SCREENS = {
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
-        npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 250),
+        npcs=[("auctioneer", "Auctioneer", None, 250),
               ("yukio", "Yukio", "npc_yukio", 380)],
         doors=[
             ("west_cortico", "The Cortico", 26, "east_market", 40, None),
@@ -291,7 +291,7 @@ SCREENS = {
         id=23, title="St. Maria - The padaria, the hearth", plate="house_laura_bg.png",
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs. The oven's back wall is warm through the plaster.",
         screen_y=136, music="town1",
-        npcs=[("laura", "Laura", "npc_laura", 500)],
+        npcs=[("laura", "Laura", None, 500)],
         doors=[
             ("exit_door", "Out to the Cortico", 26, "padaria_back", 110, None),
             ("bedroom_door", "The room upstairs", 24, "exit_door", 300, None),
@@ -304,7 +304,7 @@ SCREENS = {
         id=24, title="St. Maria - The padaria, the room upstairs", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
         screen_y=136, music="town1",
-        npcs=[("alicia", "Alicia", "npc_alicia", 640)],
+        npcs=[("alicia", "Alicia", None, 640)],
         doors=[("exit_door", "Down to the hearth", 23, "bedroom_door", 110, None)],
     ),
     # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
@@ -317,7 +317,7 @@ SCREENS = {
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 420)],
+        npcs=[("registrar", "Registrar", None, 420)],
         doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 120, None)],
     ),
 }

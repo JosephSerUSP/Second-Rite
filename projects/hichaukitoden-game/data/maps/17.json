@@ -1,7 +1,7 @@
 {
   "id": 17,
   "title": "St. Maria - The Praca",
-  "intro": "The fountain never stops. The churchyard stair goes up; the water stair goes down.",
+  "intro": "The fountain never stops. Between the roofs, on every side, the sea.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -34,11 +34,12 @@
       "target": {
         "x": 7.8,
         "y": 11.85,
-        "z": 2.2604
+        "z": 0.0
       },
-      "distance": 18.6667,
+      "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": -17.5,
+      "pitchDegrees": 0.0,
+      "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
@@ -47,16 +48,14 @@
         "y": 1.0
       },
       "projectionFrame": {
-        "compositionWidth": 256,
-        "compositionHeight": 144,
-        "canonicalCenterX": 128,
+        "canonicalCenterX": 213,
         "canonicalHorizonY": 66
       },
       "tracking": {
         "axis": "y",
         "center": 11.85,
-        "minOffsetX": -300,
-        "maxOffsetX": 300,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
         "movementInterpolationSpeed": 14.0,
         "animationFps": 8.0
@@ -64,18 +63,13 @@
     },
     "doorways": [
       {
+        "anchor": "west_churchyard",
+        "eventInstanceId": "st-maria-praca-west_churchyard",
+        "radius": 0.9
+      },
+      {
         "anchor": "quay_stair",
         "eventInstanceId": "st-maria-praca-quay_stair",
-        "radius": 0.9
-      },
-      {
-        "anchor": "alicia_door",
-        "eventInstanceId": "st-maria-praca-alicia_door",
-        "radius": 0.9
-      },
-      {
-        "anchor": "churchyard_stair",
-        "eventInstanceId": "st-maria-praca-churchyard_stair",
         "radius": 0.9
       },
       {
@@ -84,8 +78,8 @@
         "radius": 0.9
       },
       {
-        "anchor": "east_backstreet",
-        "eventInstanceId": "st-maria-praca-east_backstreet",
+        "anchor": "east_cortico",
+        "eventInstanceId": "st-maria-praca-east_cortico",
         "radius": 0.9
       }
     ]
@@ -93,166 +87,14 @@
   "events": [
     {
       "id": 1701,
-      "instanceId": "st-maria-praca-child",
-      "name": "Child",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        12.717,
-        0.0
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
-        }
-      ],
-      "sprite": "assets/character/npc_child.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 1702,
-      "instanceId": "st-maria-praca-registrar",
-      "name": "Registrar",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        16.763,
-        0.0
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "condition": "hasItem:198",
-          "commands": [
-            {
-              "text": "Celina glances at your pass. \"Still legible. A promising start.\"",
-              "speaker": "Registrar Celina",
-              "expression": 4,
-              "cmd": "TEXT"
-            },
-            {
-              "options": [
-                {
-                  "label": "Ask about St. Maria.",
-                  "commands": [
-                    {
-                      "text": "\"The village sells meals, beds, steel and funerals. Summoners bring demand for all four.\"",
-                      "speaker": "Registrar Celina",
-                      "expression": 2,
-                      "cmd": "TEXT"
-                    }
-                  ]
-                },
-                {
-                  "label": "Ask about the Labyrinth.",
-                  "commands": [
-                    {
-                      "text": "\"Return before your MP makes the decision for you. Pride is not accepted as payment at the infirmary.\"",
-                      "speaker": "Registrar Celina",
-                      "expression": 5,
-                      "cmd": "TEXT"
-                    }
-                  ]
-                },
-                {
-                  "label": "Leave.",
-                  "commands": []
-                }
-              ],
-              "cmd": "CHOICE"
-            }
-          ],
-          "elseCommands": [
-            {
-              "text": "Celina holds out one hand. \"Your Summoner's seal. Not your name. We keep those separate here.\"",
-              "speaker": "Registrar Celina",
-              "expression": 2,
-              "cmd": "TEXT"
-            },
-            {
-              "text": "She copies the seal into a narrow ledger. Most of the page is empty. The previous page is not.",
-              "speaker": "Registrar Celina",
-              "expression": 1,
-              "cmd": "TEXT"
-            },
-            {
-              "item": "198",
-              "count": 1,
-              "cmd": "CHANGE_ITEM"
-            },
-            {
-              "text": "Obtained Crossing Writ. \"The guard will let you descend now. Coming back remains your responsibility.\"",
-              "speaker": "Registrar Celina",
-              "expression": 5,
-              "cmd": "TEXT"
-            }
-          ],
-          "cmd": "CONDITIONAL_BRANCH"
-        }
-      ],
-      "sprite": "assets/character/npc_celina.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 1703,
-      "instanceId": "st-maria-praca-quay_stair",
-      "name": "Down to the Quay",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        0.434,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 19,
-          "arrival": "praca_stair"
-        }
-      ]
-    },
-    {
-      "id": 1704,
-      "instanceId": "st-maria-praca-alicia_door",
-      "name": "Alicia's door",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        4.625,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 24,
-          "arrival": "exit_door"
-        }
-      ]
-    },
-    {
-      "id": 1705,
-      "instanceId": "st-maria-praca-churchyard_stair",
+      "instanceId": "st-maria-praca-west_churchyard",
       "name": "The Churchyard",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        9.827,
-        -1.5
+        0.0,
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -264,15 +106,35 @@
       ]
     },
     {
-      "id": 1706,
+      "id": 1702,
+      "instanceId": "st-maria-praca-quay_stair",
+      "name": "Down to the Quay",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        3.179,
+        0.0
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 19,
+          "arrival": "praca_stair"
+        }
+      ]
+    },
+    {
+      "id": 1703,
       "instanceId": "st-maria-praca-chapel_door",
       "name": "Chapel",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        20.81,
-        -1.5
+        16.763,
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -284,15 +146,15 @@
       ]
     },
     {
-      "id": 1707,
-      "instanceId": "st-maria-praca-east_backstreet",
-      "name": "The Backstreet",
+      "id": 1704,
+      "instanceId": "st-maria-praca-east_cortico",
+      "name": "The Cortico",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        23.7,
-        -1.5
+        23.699,
+        0.0
       ],
       "trigger": "bump",
       "commands": [

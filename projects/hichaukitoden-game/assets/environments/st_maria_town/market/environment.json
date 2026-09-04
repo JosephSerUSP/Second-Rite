@@ -7,10 +7,10 @@
   "bounds": [
     6.8,
     0.0,
-    -2.5,
+    -1.0,
     8.8,
     29.48,
-    2.5
+    4.0
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -48,13 +48,6 @@
       "position": [
         7.8,
         29.48,
-        0.0
-      ]
-    },
-    "npc_auctioneer": {
-      "position": [
-        7.8,
-        6.069,
         0.0
       ]
     },

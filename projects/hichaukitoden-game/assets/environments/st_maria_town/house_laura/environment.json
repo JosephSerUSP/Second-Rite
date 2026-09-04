@@ -7,10 +7,10 @@
   "bounds": [
     6.8,
     0.0,
-    -2.5,
+    -1.0,
     8.8,
     17.919,
-    2.5
+    4.0
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -41,13 +41,6 @@
       "position": [
         7.8,
         15.029,
-        0.0
-      ]
-    },
-    "npc_laura": {
-      "position": [
-        7.8,
-        13.295,
         0.0
       ]
     }

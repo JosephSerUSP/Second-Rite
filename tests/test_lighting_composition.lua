@@ -15,7 +15,7 @@
 
 local lighting = require("engine.lighting")
 local validator = require("engine.validator_core")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 if not loader.maps then loader.init() end
 
 local failFast = require("tests.fail_fast")

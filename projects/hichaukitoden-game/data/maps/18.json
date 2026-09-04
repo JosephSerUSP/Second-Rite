@@ -87,92 +87,6 @@
   "events": [
     {
       "id": 1801,
-      "instanceId": "st-maria-market-auctioneer",
-      "name": "Auctioneer",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        6.069,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "name": "auctioneer_hub",
-          "cmd": "LABEL"
-        },
-        {
-          "text": "Rare finds! Highest bidder takes all! …Well. Fixed price for now. But the *spirit* is the same. Spend like you’re trying to forget something.",
-          "cmd": "TEXT"
-        },
-        {
-          "options": [
-            {
-              "label": "Browse",
-              "commands": [
-                {
-                  "shopId": 4,
-                  "cmd": "OPEN_SHOP"
-                },
-                {
-                  "label": "auctioneer_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ]
-            },
-            {
-              "label": "Ask what’s ‘unidentified’ mean",
-              "commands": [
-                {
-                  "text": "It means you pay first and ask questions later. Just like love. Just like the dungeon. Now— are you brave, or are you smart?",
-                  "cmd": "TEXT"
-                },
-                {
-                  "options": [
-                    {
-                      "label": "Browse",
-                      "commands": [
-                        {
-                          "shopId": 4,
-                          "cmd": "OPEN_SHOP"
-                        },
-                        {
-                          "label": "auctioneer_hub",
-                          "cmd": "JUMP_TO_LABEL"
-                        }
-                      ]
-                    },
-                    {
-                      "label": "Back",
-                      "commands": [
-                        {
-                          "label": "auctioneer_hub",
-                          "cmd": "JUMP_TO_LABEL"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
-                }
-              ]
-            },
-            {
-              "label": "Leave",
-              "commands": []
-            }
-          ],
-          "cmd": "CHOICE"
-        }
-      ],
-      "sprite": "assets/character/npc_goustav.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 1802,
       "instanceId": "st-maria-market-yukio",
       "name": "Yukio",
       "x": 0,
@@ -180,7 +94,7 @@
       "worldPosition": [
         7.8,
         9.827,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -196,7 +110,7 @@
       "worldHeight": 1.75
     },
     {
-      "id": 1803,
+      "id": 1802,
       "instanceId": "st-maria-market-west_cortico",
       "name": "The Cortico",
       "x": 0,
@@ -204,7 +118,7 @@
       "worldPosition": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -216,7 +130,7 @@
       ]
     },
     {
-      "id": 1804,
+      "id": 1803,
       "instanceId": "st-maria-market-padaria_3d_door",
       "name": "Alicia's Padaria (3D)",
       "x": 0,
@@ -224,7 +138,7 @@
       "worldPosition": [
         7.8,
         16.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -236,7 +150,7 @@
       ]
     },
     {
-      "id": 1805,
+      "id": 1804,
       "instanceId": "st-maria-market-padaria_door",
       "name": "Alicia's Padaria",
       "x": 0,
@@ -244,7 +158,7 @@
       "worldPosition": [
         7.8,
         22.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -256,7 +170,7 @@
       ]
     },
     {
-      "id": 1806,
+      "id": 1805,
       "instanceId": "st-maria-market-east_quay",
       "name": "The Quay",
       "x": 0,
@@ -264,7 +178,7 @@
       "worldPosition": [
         7.8,
         29.48,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [

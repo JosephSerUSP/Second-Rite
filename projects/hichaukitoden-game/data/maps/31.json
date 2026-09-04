@@ -99,7 +99,7 @@
       "worldPosition": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -119,7 +119,7 @@
       "worldPosition": [
         7.8,
         10.405,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -139,7 +139,7 @@
       "worldPosition": [
         7.8,
         16.185,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -159,7 +159,7 @@
       "worldPosition": [
         7.8,
         20.52,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -179,7 +179,7 @@
       "worldPosition": [
         7.8,
         24.855,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [

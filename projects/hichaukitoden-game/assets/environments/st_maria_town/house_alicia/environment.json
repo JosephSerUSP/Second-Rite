@@ -7,10 +7,10 @@
   "bounds": [
     6.8,
     0.0,
-    -2.5,
+    -1.0,
     8.8,
     17.919,
-    2.5
+    4.0
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -27,13 +27,6 @@
       "position": [
         7.8,
         2.023,
-        0.0
-      ]
-    },
-    "npc_alicia": {
-      "position": [
-        7.8,
-        17.341,
         0.0
       ]
     }

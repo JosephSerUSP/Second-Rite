@@ -160,7 +160,7 @@
         "assignments": [
           {
             "name": "paddle1Y",
-            "value": "max(0, min(v.gridH - v.paddleH, v.paddle1Y + v.inputY * 15.0 * v.time.dt))"
+            "value": "clamp(v.paddle1Y + v.inputY * 15.0 * v.time.dt, 0, v.gridH - v.paddleH)"
           },
           {
             "name": "inputY",
@@ -176,7 +176,7 @@
           },
           {
             "name": "paddle2Y",
-            "value": "max(0, min(v.gridH - v.paddleH, v.paddle2Y))"
+            "value": "clamp(v.paddle2Y, 0, v.gridH - v.paddleH)"
           },
           {
             "name": "ballX",

@@ -20,49 +20,49 @@
       "position": [
         7.8,
         14.74,
-        0.0
+        -1.5
       ]
     },
     "west_cortico": {
       "position": [
         7.8,
         0.0,
-        0.0
+        -1.5
       ]
     },
     "padaria_3d_door": {
       "position": [
         7.8,
         16.0,
-        0.0
+        -1.5
       ]
     },
     "padaria_door": {
       "position": [
         7.8,
         22.0,
-        0.0
+        -1.5
       ]
     },
     "east_quay": {
       "position": [
         7.8,
         29.48,
-        0.0
+        -1.5
       ]
     },
     "npc_auctioneer": {
       "position": [
         7.8,
         6.069,
-        0.0
+        -1.5
       ]
     },
     "npc_yukio": {
       "position": [
         7.8,
         9.827,
-        0.0
+        -1.5
       ]
     }
   },

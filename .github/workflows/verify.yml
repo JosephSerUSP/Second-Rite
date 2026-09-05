@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -80,7 +80,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -118,7 +118,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -144,7 +144,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -340,7 +340,7 @@ jobs:
 
       - name: Upload timing records
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: verify-timings-${{ github.run_id }}-${{ github.run_attempt }}
           path: out/timings/
@@ -381,7 +381,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -427,7 +427,7 @@ jobs:
 
       - name: Upload timing records
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reachability-timings-${{ github.run_id }}-${{ github.run_attempt }}
           path: out/timings/

@@ -44,7 +44,7 @@ runs:
     - name: Restore the pinned LOVE archive
       id: love-cache
       if: runner.os == 'Windows'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ runner.temp }}/love.zip
         key: love-archive-${{ inputs.windows-sha256 }}

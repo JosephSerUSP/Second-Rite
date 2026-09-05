@@ -54,7 +54,7 @@ jobs:
 
     steps:
       - name: Check out the commit under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -140,7 +140,7 @@ jobs:
           }
 
       - name: Upload representative Map 8 .blend
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: map-8-structured-blend-${{ github.sha }}
           path: projects/hichaukitoden-game/exports/maps/ci-map8.blend

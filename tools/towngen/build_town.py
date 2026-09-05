@@ -335,7 +335,7 @@ SCREENS = {
 #
 # tools/towngen/check_town.py gates this boundary: a hand-edit to an owned map
 # now fails CI instead of surviving until the next rebuild deletes it.
-AUTHORED_NOT_GENERATED = {"weaponsmith"}
+AUTHORED_NOT_GENERATED = {"weaponsmith", "churchyard", "praca", "cortico", "market", "quay", "port", "pub", "chapel", "house_laura", "house_alicia", "lodging"}
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
 # contradicting the authored dialogue that crosses over.

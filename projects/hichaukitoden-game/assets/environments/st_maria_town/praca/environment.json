@@ -1,194 +1,78 @@
 {
   "contractVersion": 1,
-  "environmentId": "st_maria_praca_modelled",
-  "renderMesh": "environment.obj",
-  "materialLibrary": "environment.mtl",
-  "textureAtlas": "environment.png",
-  "collisionMesh": "collision.obj",
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
   "bounds": [
-    -100.0,
-    -100.0,
-    -0.0008,
-    100.0,
-    100.0,
-    10.75
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    23.699,
+    2.5
   ],
-  "stats": {
-    "triangleCount": 5854,
-    "vertexCount": 5084,
-    "materialGroupCount": 1,
-    "textureDimensions": [
-      2048,
-      2048
-    ],
-    "pngSizeBytes": 4388421,
-    "renderMeshSizeBytes": 614595,
-    "packageSizeBytes": 5003822
+  "provenance": {
+    "plateSourceViewTransform": "Standard"
   },
   "anchors": {
     "spawn_player": {
-      "id": "spawn_player",
       "position": [
         7.8,
         11.85,
-        0.0
-      ],
-      "rotation": [
+        -1.5
+      ]
+    },
+    "west_churchyard": {
+      "position": [
+        7.8,
         0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
+        -1.5
       ]
     },
     "quay_stair": {
-      "id": "quay_stair",
       "position": [
         7.8,
-        0.434,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
-      ]
-    },
-    "alicia_door": {
-      "id": "alicia_door",
-      "position": [
-        7.8,
-        4.625,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
-      ]
-    },
-    "churchyard_stair": {
-      "id": "churchyard_stair",
-      "position": [
-        7.8,
-        9.827,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
+        3.179,
+        -1.5
       ]
     },
     "chapel_door": {
-      "id": "chapel_door",
-      "position": [
-        7.8,
-        20.81,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
-      ]
-    },
-    "east_backstreet": {
-      "id": "east_backstreet",
-      "position": [
-        7.8,
-        23.7,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
-      ]
-    },
-    "npc_child": {
-      "id": "npc_child",
-      "position": [
-        7.8,
-        12.717,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
-      ]
-    },
-    "npc_registrar": {
-      "id": "npc_registrar",
       "position": [
         7.8,
         16.763,
-        0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
+        -1.5
+      ]
+    },
+    "east_cortico": {
+      "position": [
+        7.8,
+        23.699,
+        -1.5
+      ]
+    },
+    "npc_child": {
+      "position": [
+        7.8,
+        12.717,
+        -1.5
       ]
     }
-  },
-  "provenance": {
-    "generator": "town_environment_pipeline.py",
-    "sourceBlend": "st_maria_praca_modelled.blend"
   },
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      906,
+      900,
       240
     ],
     "slicePositions": [
       11.85
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_plate.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
     ],
     "foregrounds": [
       "../stub/empty_900.png"
@@ -197,11 +81,11 @@
       "runtimeCenterY": 11.85
     },
     "playerProjection": {
-      "centerX": 453.0,
+      "centerX": 450.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 27.42857
+      "pixelsPerRuntimeY": 34.6
     }
   }
 }

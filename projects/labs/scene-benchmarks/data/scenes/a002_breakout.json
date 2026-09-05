@@ -61,8 +61,8 @@
           { "name": "score", "value": 0 },
           { "name": "moveInput", "value": 0 },
           { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          { "name": "gameOver", "value": false },
+          { "name": "gameWon", "value": false }
         ]
       },
       { "cmd": "SCRIPT", "ref": "setup_bricks" }
@@ -83,8 +83,8 @@
           { "name": "score", "value": 0 },
           { "name": "moveInput", "value": 0 },
           { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          { "name": "gameOver", "value": false },
+          { "name": "gameWon", "value": false }
         ]
       },
       { "cmd": "SCRIPT", "ref": "setup_bricks" }
@@ -97,10 +97,10 @@
           {
             "cmd": "SET_VAR",
             "assignments": [
-              { "name": "padX", "value": "clamp(v.padX + v.moveInput * 18.0 * v.time.dt, 0, v.fieldW - v.padW)" },
+              { "name": "padX", "value": "clamp(v.padX + v.moveInput * 18.0 * time.dt, 0, v.fieldW - v.padW)" },
               { "name": "moveInput", "value": 0 },
-              { "name": "ballX", "value": "v.ballX + v.ballVX * v.time.dt" },
-              { "name": "ballY", "value": "v.ballY + v.ballVY * v.time.dt" }
+              { "name": "ballX", "value": "v.ballX + v.ballVX * time.dt" },
+              { "name": "ballY", "value": "v.ballY + v.ballVY * time.dt" }
             ]
           },
           {
@@ -132,7 +132,7 @@
           {
             "cmd": "IF",
             "condition": "v.ballY >= v.fieldH",
-            "then": [ { "cmd": "SET_VAR", "name": "gameOver", "value": "true" } ]
+            "then": [ { "cmd": "SET_VAR", "name": "gameOver", "value": true } ]
           },
           {
             "cmd": "IF",

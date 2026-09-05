@@ -20,12 +20,12 @@ jobs:
       main_short: ${{ steps.census.outputs.main_short }}
     steps:
       - name: Check out complete history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -46,7 +46,7 @@ jobs:
           cat "$report"
 
       - name: Upload census evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: branch-hygiene-${{ github.run_id }}
           path: ${{ steps.census.outputs.report }}
@@ -63,7 +63,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Download verified census
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: branch-hygiene-${{ github.run_id }}
           path: census

@@ -30,7 +30,7 @@ runs:
     # stale entry.
     - name: Restore the pinned Mesa archive
       if: runner.os == 'Windows'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ runner.temp }}/mesa.7z
         key: mesa-archive-${{ inputs.sha256 }}

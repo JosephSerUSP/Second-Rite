@@ -94,7 +94,7 @@
       "worldPosition": [
         7.8,
         2.601,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -118,7 +118,7 @@
       "worldPosition": [
         7.8,
         26.59,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -141,7 +141,7 @@
       "worldPosition": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -161,7 +161,7 @@
       "worldPosition": [
         7.8,
         10.405,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -181,7 +181,7 @@
       "worldPosition": [
         7.8,
         21.098,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [
@@ -201,7 +201,7 @@
       "worldPosition": [
         7.8,
         29.48,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
       "commands": [

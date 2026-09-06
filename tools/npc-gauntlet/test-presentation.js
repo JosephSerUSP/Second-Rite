@@ -29,22 +29,39 @@ test('speakers resolve to the sprite the Project authors for them', () => {
     assert.strictEqual(agnes.ambiguous, null);
 });
 
-test('a speaker the Project authors two ways gets no sprite, and says why', () => {
-    // Real content state as of this commit: map 1 authors wall-mounted Alicia
-    // and Laura as bump events wearing a door placeholder, while maps
-    // 23/24/27/28 author them with their town sprites. The lab must report
-    // that rather than pick, so a researcher never judges a line against a
-    // face the game might not use.
-    const speakers = presentation.speakerSprites(PROJECT);
-    for (const name of ['Alicia', 'Laura']) {
-        const entry = speakers[name];
-        assert.ok(entry, `${name} is an authored map event`);
-        assert.strictEqual(entry.sprite, null, `${name} must get no default sprite while ambiguous`);
-        assert.ok(Array.isArray(entry.ambiguous) && entry.ambiguous.length > 1,
-            `${name} must report every authored candidate`);
-        assert.ok(entry.ambiguous.includes(`assets/character/town/npc_${name.toLowerCase()}.png`),
-            `${name}'s town sprite must be among the candidates`);
-    }
+test('a speaker authored two ways gets no sprite, and says why', () => {
+    // If an NPC is authored with conflicting sprites across maps, the lab
+    // must report every candidate rather than picking one, so a researcher
+    // never judges a line against a face the game might not use.
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'gauntlet-presentation-ambiguous-'));
+    const maps = path.join(root, 'data', 'maps');
+    fs.mkdirSync(maps, { recursive: true });
+    fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+    fs.writeFileSync(path.join(maps, '1.json'), JSON.stringify({
+        id: 1,
+        events: [{
+            name: 'Ambiguous', sprite: 'assets/character/town/npc_a.png',
+            commands: [{ cmd: 'TEXT', speaker: 'Ambiguous', text: 'x' }],
+        }],
+    }));
+    fs.writeFileSync(path.join(maps, '2.json'), JSON.stringify({
+        id: 2,
+        events: [{
+            name: 'Ambiguous', sprite: 'assets/character/town/npc_b.png',
+            commands: [{ cmd: 'TEXT', speaker: 'Ambiguous', text: 'y' }],
+        }],
+    }));
+
+    const speakers = presentation.speakerSprites(root);
+    const entry = speakers.Ambiguous;
+    assert.ok(entry, 'Ambiguous is an authored map event');
+    assert.strictEqual(entry.sprite, null, 'Ambiguous must get no default sprite while ambiguous');
+    assert.ok(Array.isArray(entry.ambiguous) && entry.ambiguous.length === 2,
+        'Ambiguous must report every authored candidate');
+    assert.deepStrictEqual(entry.ambiguous, [
+        'assets/character/town/npc_a.png',
+        'assets/character/town/npc_b.png',
+    ]);
 });
 
 test('nested command payloads are not mistaken for events', () => {

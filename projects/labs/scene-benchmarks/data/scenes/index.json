@@ -16,6 +16,7 @@
     "b009_positioning.json",
     "b007_tactics.json",
     "c002_splitting_pong.json",
-    "c003_moving_breakout.json"
+    "c003_moving_breakout.json",
+    "c001_four_paddle_pong.json"
   ]
 }

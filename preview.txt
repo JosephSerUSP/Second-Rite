@@ -1,0 +1,19 @@
+[W][02477.557066] pw.conf      | [          conf.c: 1031 try_load_conf()] can't load config client-rt.conf: No such file or directory
+[E][02477.557279] pw.conf      | [          conf.c: 1060 pw_conf_load_conf_for_context()] can't load config client-rt.conf: No such file or directory
+[ALSOFT] (EE) Failed to create PipeWire event context (errno: 2)
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5727:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+Could not open device.
+--------------------------------------------------
+SECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)
+--------------------------------------------------
+[formula] error in 'time.dt': [string "formula:time.dt"]:1: attempt to index global 'time' (a nil value)
+PREVIEW BEGIN
+{"frameKind":"windows","gameHeight":240,"gameWidth":256,"image":"iVBORw0KGgoAAAANSUhEUgAAAQAAAADwBAMAAAAduaf4AAAAElBMVEUAAAAOEyE/QVL///8DBAcNDRAGyeIPAAAEV0lEQVR4nO2cC27cIBRF0x2UwAYyoyyA8GYBqKygVfa/lb4PH89kWtljUrfqvbVS/HDwMR8HkHyfniAIgn6hL26qvm4GeD5N1cs/CPAyswWeAQCAxwB8GkdXT8cRcimNs5HaDRBL7Mcov6VphDKV0s9GfDcAOSIvR1iUSi4kqZNILtbaIMmOta5iSlMBohwuBS7F6pnvQlInDBZqbXB+4kusrgotqmsnQEqUghwuSJnB6rlEAXOUYuYLag2UTJlrhgTvTiM8WgP8mFmOuGxwvbsc31xter2lHHyqeBObwKdgRy/LS41wnEYf8BWAT5PmzgII/K/kenSVrPFSc0UcccGyLHdaH7gtyN+k4534PT3cB+JNQT5fp/uz3l44CUDaur4JUxvjPN6jtr5EYs26+/bZD8A9qr8JdewXXzLHGIwjnOb7WtYnAXDJSXp7sHEnVcH3zHYapAnIWdZnAPA86nK6XN7fL6c3SfDZ+9v5O/+n8ZOkJWVZl0+ZE3K553Q6p1c+OJ3S6ykxDEc4LumU3izr/DodQKbly/cAp3mM8+tYx3txltaEXJZ/3wQPTMshCIKwP3A8wN+wNgQAANz15L/LFkRtTyD6m3g/nQKwnPw3GFsUtz0BkmsW8b526PE9ADb510WBrAhs9kueXFs38SIxXcf5vmOjgHbXgE7+iWRpwCsCqw3ZMZDVetSnJrlmEWeA2BYRrfb2NYEAkCwQci1OVsB6Q2erp1bnFvfZ9UXEnD6gANzi1PoAZZLl2RKgxxuA46XTjD7gpCkj31+3PmqbynYBOds04D7A14y4/goneFnX47sAdPIfQtD5fxsR1ri2OcBjIZQR11+xjYIR37FPOEmP7xMeC2Dj+kiAeDBAG++HAdi4PhBguT14CMDV9uAhANMEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAg/4Dx37yeTTA4Z/9QhD0/2ryC2j7C2nyK3j7K/l4gKl/hm+14s8yAACw4XvjapZ3L8t/SNi3+isBVn5vbAYES6uyAZBvE+ZxthJAbL9SNRxUD7Joj9BOW5kaHN4E1x6F/DOmYe5mxl3rAVKIZjioHmTypOZBYJZkvVZJ7cmqN4EbHoUalEJ8+2w16Qe0KwHMa6AakEWyRxYLAPMlTNRqNdvH/92boHsUmgUAnz7YBIWq4aDd1iwnFMD70P0oqbkPVG+ChUdhBVj2gY1N0AwHA9/Rak89CIKLufcBMSYQe8hYvQkWHoUaJHWq6O21oQnEg6wZDrqsVgJ8qh4Ew3dALSPFkszsBizi3LAeKGphFkq7OK8HiG009cQsrW6C3nDHANgo1paNhwCYD6mMej/r6/eNANUJNKQ46+v3DQCn6j8oFoSXHwdMyfiqJI6EF3UefPvjADItlzHbnQfnCvsEEARBEARBEARBEARBEARBEAR90E9Mkm5hlCogJAAAAABJRU5ErkJggg==","sceneId":"a003_snake","sceneName":"A003 - Snake","tileSize":8,"windows":[{"hasLayout":false,"height":3,"id":"title","open":true,"style":"frame","text":"A003 - Snake (Fresh Reconstruction)","width":20,"x":6,"y":1},{"hasLayout":false,"height":15,"id":"board","open":true,"style":"frame","text":"GAME OVER\n............\n............\n..*.........\n............\n............\n.....O......\n.....O......\n.....O......\n............\n............\n............\n............\n","width":20,"x":6,"y":5},{"hasLayout":false,"height":3,"id":"help","open":true,"style":"frame","text":"Arrows move  Enter restart  B back","width":24,"x":4,"y":21}]}
+PREVIEW END

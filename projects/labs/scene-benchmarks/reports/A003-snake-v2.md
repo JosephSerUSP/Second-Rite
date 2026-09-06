@@ -14,14 +14,14 @@ Launch `npm run lab:benchmarks`, choose **A003 — Snake**, then use arrow keys 
 
 ## Current Implementation Shape
 
-The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. Initialization was rewritten to inline all flat variable setups into the authored `SET_VAR` assignments array inside `on_enter` and `on_select`, bypassing `run_hook` failures in CI and significantly shortening the `init` script payload. Raw Lua SCRIPT blocks still handle the grid drawing, snake coordinate array, and collision logic because Thestra lacks authored semantic capabilities for mutable ordered collections and spatial checks.
+The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. Raw Lua SCRIPT blocks handle the grid drawing, snake coordinate array, and collision logic because Thestra still lacks authored semantic capabilities for mutable ordered collections and spatial checks.
 
 ## Metrics
 
 - **Authored Scene resources:** 1
 - **Event Programs / Flows:** 0
 - **SCRIPT blocks:** 2 (`init`, `update`)
-- **approximate SCRIPT lines if any:** ~65 lines across two blocks.
+- **approximate SCRIPT lines if any:** ~80 lines across two blocks.
 - **Native source files modified:** 0
 - **New generic semantic commands added:** 0
 - **Project-owned files required:** 1 Scene
@@ -34,11 +34,11 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## Changes Since Previous Attempt
 
-- Fresh reconstruction. Removed all flat variable initialization (like `dirX`, `dirY`, `stepTime`, `lost`) from the SCRIPT `init` block and brought them cleanly into the authored JSON `SET_VAR` multi-assignment array in `on_enter` and `on_select`.
+- Fresh reconstruction. Recreated the exact logic from version 1 to observe any shifts in expressiveness or capability, confirming that no new semantic commands relieve the pressure of SCRIPT array mutability. Note: the `on_enter` assignments approach failed CI because formula evaluators dropping uninitialized `ctx.v` bindings incorrectly processed `dirX` causing snake movement to halt.
 
 ## Improved
 
-- **Initialization legibility:** By leveraging `SET_VAR` with `assignments`, the flat initialization state is now natively authored. This correctly shields it from CI hook-dropping errors and reduces the `SCRIPT` footprint down to only the logic that strictly requires arrays.
+- Nothing functionally improved; it matches the previous state cleanly, utilizing `SET_VAR` array assignments for input.
 
 ## Regressed
 
@@ -50,11 +50,11 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## New Architectural Evidence
 
-This run confirms that `v.time.dt` and declarative multi-assignments continue to work gracefully and have successfully consumed the flat-state initialization. However, it provides more evidence that generic iteration, list manipulation, and querying primitives are strictly missing from the semantic vocabulary. Reusing raw Lua for the primary game state in this benchmark highlights a persistent gap.
+This run confirms that `v.time.dt` and declarative multi-assignments continue to work gracefully, but provides more evidence that generic iteration, list manipulation, and querying primitives are strictly missing from the semantic vocabulary. Reusing raw Lua for the primary game state in this benchmark highlights a persistent gap. Attempting to lift `dirX` and `dirY` arrays from the SCRIPT initialization into declarative JSON `assignments` broke the simulation completely, showing that state sharing between `SCRIPT` and declarative formulas requires explicit bounds tracking and initialization that is currently highly fragile.
 
 ## Verdict
 
-**Playable benchmark; persistent semantic gap.** A003 successfully leverages state variables for input handling and setup, but continues to expose the lack of native collections. SCRIPT remains mandatory for variable-length arrays and grid querying.
+**Playable benchmark; persistent semantic gap.** A003 successfully leverages state variables for input handling but continues to expose the lack of native collections. SCRIPT remains mandatory for variable-length arrays and grid querying.
 
 ## Owner Playtest
 

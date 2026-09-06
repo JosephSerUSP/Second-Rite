@@ -1534,6 +1534,7 @@ function cli.runTownProofFrames(loader)
     end
 
     viewport_3d.init()
+    viewport_3d.showBounds = os.getenv("THESTRA_TOWN_PROOF_BOUNDS") == "1"
 
     -- Every map that declares the bounded-lane provider is part of the town,
     -- so the proof enumerates them rather than naming ids. A screen added to

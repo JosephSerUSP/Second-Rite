@@ -45,7 +45,7 @@ CENTER_X = 213.0
 # made a correctly photographed actor 26% too small against the architecture.
 PIXELS_PER_Y = 34.6
 DEPTH_X = 7.8
-GROUND_Z = -1.5
+GROUND_Z = 0.0
 FOV_DEGREES = 28.072486935852957
 
 
@@ -201,7 +201,7 @@ SCREENS = {
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
-        npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 250),
+        npcs=[("auctioneer", "Auctioneer", "npc_goustav", 250),
               ("yukio", "Yukio", "npc_yukio", 380)],
         doors=[
             ("west_cortico", "The Cortico", 26, "east_market", 40, None),
@@ -317,7 +317,7 @@ SCREENS = {
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 420)],
+        npcs=[("registrar", "Registrar", "npc_celina", 420)],
         doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 120, None)],
     ),
 }
@@ -335,7 +335,8 @@ SCREENS = {
 #
 # tools/towngen/check_town.py gates this boundary: a hand-edit to an owned map
 # now fails CI instead of surviving until the next rebuild deletes it.
-AUTHORED_NOT_GENERATED = {"weaponsmith"}
+ROOT_CHARACTER_SPRITES = {"npc_goustav", "npc_laura", "npc_alicia", "npc_celina"}
+AUTHORED_NOT_GENERATED = {"weaponsmith", "praca"}
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
 # contradicting the authored dialogue that crosses over.
@@ -451,8 +452,9 @@ def build_map(key, screen, map1):
             "commands": commands,
         }
         if sprite:
+            sprite_root = "assets/character" if sprite in ROOT_CHARACTER_SPRITES else "assets/character/town"
             event.update({
-                "sprite": "assets/character/town/%s.png" % sprite,
+                "sprite": "%s/%s.png" % (sprite_root, sprite),
                 "frameWidth": 24, "frameHeight": 48, "frameIndex": 0,
                 "worldHeight": 1.75,
             })

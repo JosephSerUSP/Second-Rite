@@ -72,7 +72,7 @@ def compare_bytes(actual: Path, expected: Path):
         )
 
 
-def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None):
+def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None, source_dir: Path | None = None):
     if not source.is_file():
         raise RuntimeError(f"item source does not exist: {source}")
     if model_dir is None:
@@ -86,6 +86,10 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, mo
 
     env = os.environ.copy()
     env["SECOND_RITE_ITEM_OUTPUT_DIR"] = str(output_dir)
+    if source_dir:
+        env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source_dir)
+    elif len(source.parents) >= 3:
+        env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source.parent)
     command = [blender, "--background", str(source), "--python", str(BLENDER_SCRIPT)]
     print("+", " ".join(command))
     subprocess.run(command, cwd=ROOT, env=env, check=True)
@@ -149,12 +153,12 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(prefix="second-rite-item-compile-") as temp:
             output_dir = Path(temp)
             for source in sources:
-                compile_one(args.blender, source, output_dir, check=True, model_dir=model_dir)
+                compile_one(args.blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir)
     else:
         output_dir = Path(args.output_dir).resolve() if args.output_dir else model_dir
         output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(args.blender, source, output_dir, check=False, model_dir=model_dir)
+            compile_one(args.blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

@@ -43,8 +43,19 @@ from item_mtl_runtime import RuntimePassError, inject_runtime_passes, normalize_
 from validate_item_obj_runtime import validate as validate_runtime_obj
 
 ROOT = SCRIPT_DIR.parents[1]
-SOURCE_DIR = ROOT / "assets" / "authoring" / "items"
-DEFAULT_MODEL_DIR = ROOT / "assets" / "models" / "items"
+DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
+SOURCE_DIR = (
+    (DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT)
+    / "assets"
+    / "authoring"
+    / "items"
+)
+DEFAULT_MODEL_DIR = (
+    (DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT)
+    / "assets"
+    / "models"
+    / "items"
+)
 
 
 def fail(message: str):
@@ -122,10 +133,21 @@ def main():
     source_path = Path(bpy.data.filepath).resolve()
     if not source_path.is_file():
         fail("Blender has no saved source file loaded")
+    source_dir = Path(os.environ.get("SECOND_RITE_ITEM_SOURCE_DIR", SOURCE_DIR)).resolve()
+    is_valid_source = False
     try:
-        source_path.relative_to(SOURCE_DIR.resolve())
+        source_path.relative_to(source_dir)
+        is_valid_source = True
     except ValueError:
-        fail(f"source must live under {relative(SOURCE_DIR)}; got {relative(source_path)}")
+        pass
+    if not is_valid_source:
+        parts = source_path.parts
+        for i in range(len(parts) - 2):
+            if parts[i] == "assets" and parts[i + 1] == "authoring" and parts[i + 2] == "items":
+                is_valid_source = True
+                break
+    if not is_valid_source:
+        fail(f"source must live under {relative(source_dir)}; got {relative(source_path)}")
 
     root = source_root()
     asset_core.validate_asset_metadata(root)

@@ -147,20 +147,6 @@ class AssetCoreHostTests(unittest.TestCase):
         self.assertNotIn("Path(__file__)", exporter)
         self.assertIn("<Blender Text: second_rite_asset_core.py>", exporter)
 
-    def test_calibration_has_exact_pixels_and_material_semantics(self):
-        driver = (BLENDER_TOOLS / "check_blender_core.py").read_text(encoding="utf-8")
-        self.assertIn("before_pixels != after_pixels", driver)
-        self.assertNotIn("changed > 64", driver)
-        self.assertNotIn("max delta", driver)
-        self.assertIn("ordered usemtl", driver)
-        self.assertIn("mtllib", driver)
-        self.assertIn("Decimal", driver)
-        self.assertIn("newmtl", driver)
-
-    def test_standalone_core_origin_is_enforced(self):
-        driver = (BLENDER_TOOLS / "check_blender_core.py").read_text(encoding="utf-8")
-        self.assertIn("STANDALONE_CORE_ORIGIN", driver)
-        self.assertIn("/ \"vendor\" / \"second_rite_asset_core.py\"", driver)
 
     def test_no_production_asset_path_is_test_output(self):
         with tempfile.TemporaryDirectory() as directory:

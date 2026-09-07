@@ -20,45 +20,38 @@
         -1.5
       ]
     },
-    "west_cortico": {
+    "west_quay": {
       "position": [
         7.8,
         0.0,
         -1.5
       ]
     },
-    "padaria_3d_door": {
+    "forge_door": {
       "position": [
         7.8,
-        16.0,
+        10.405,
         -1.5
       ]
     },
-    "padaria_door": {
+    "smith_3d_door": {
       "position": [
         7.8,
-        22.0,
+        16.185,
         -1.5
       ]
     },
-    "east_quay": {
+    "cortico_stair": {
       "position": [
         7.8,
-        29.48,
+        20.52,
         -1.5
       ]
     },
-    "npc_auctioneer": {
+    "climb_churchyard": {
       "position": [
         7.8,
-        6.069,
-        -1.5
-      ]
-    },
-    "npc_yukio": {
-      "position": [
-        7.8,
-        9.827,
+        24.856,
         -1.5
       ]
     }
@@ -73,10 +66,10 @@
       14.74
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/market_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/market_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "foregrounds": [
       "../stub/empty_1100.png"

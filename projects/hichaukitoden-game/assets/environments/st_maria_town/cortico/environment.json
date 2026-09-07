@@ -27,24 +27,45 @@
         -1.5
       ]
     },
-    "laura_door": {
-      "position": [
-        7.8,
-        2.601,
-        -1.5
-      ]
-    },
     "lodging_door": {
       "position": [
         7.8,
-        12.717,
+        7.514,
         -1.5
       ]
     },
-    "market_steps": {
+    "padaria_back": {
       "position": [
         7.8,
-        20.809,
+        15.029,
+        -1.5
+      ]
+    },
+    "port_stair": {
+      "position": [
+        7.8,
+        18.786,
+        -1.5
+      ]
+    },
+    "east_market": {
+      "position": [
+        7.8,
+        22.254,
+        -1.5
+      ]
+    },
+    "npc_scholar": {
+      "position": [
+        7.8,
+        4.624,
+        -1.5
+      ]
+    },
+    "npc_euler": {
+      "position": [
+        7.8,
+        10.982,
         -1.5
       ]
     }

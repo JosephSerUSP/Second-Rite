@@ -191,7 +191,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Continue"
           $__sw = [System.Diagnostics.Stopwatch]::StartNew()
-          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js studio/editor/test-project-root.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
+          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js studio/editor/test-project-root.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-encounter-cadence.js studio/editor/tests/test-map-hierarchy.js tools/campaign-gen/test-fixture-project.js
           $__code = $LASTEXITCODE
           $__sw.Stop()
           node tools/ci/time-step.js --record --label "tooling boundary suites" --ms $__sw.ElapsedMilliseconds --exit $__code

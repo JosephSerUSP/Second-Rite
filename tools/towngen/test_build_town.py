@@ -64,6 +64,22 @@ class ScreenScaleTests(unittest.TestCase):
                     "promote_repaint_v4 width for %s must match build_town.EXPECTED_PLATE_WIDTHS" % plate,
                 )
 
+    def test_build_map_emits_parent_map_id_when_declared(self):
+        written = {}
+        def fake_write_json(path, data):
+            written["path"] = path
+            written["data"] = data
+
+        dummy_screen = dict(build_town.SCREENS["chapel"])
+        dummy_screen["parentMapId"] = 17
+        dummy_screen["npcs"] = []
+
+        with mock.patch.object(build_town, "write_json", side_effect=fake_write_json):
+            build_town.build_map("chapel", dummy_screen, {})
+
+        self.assertIn("data", written)
+        self.assertEqual(17, written["data"].get("parentMapId"))
+
 
 if __name__ == "__main__":
     unittest.main()

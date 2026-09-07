@@ -20,7 +20,8 @@ authoring frame (``+X`` camera forward, ``-Y`` screen right, ``+Z`` up) through
 exactly one place and never leaks into the grammar.
 
 **Roles.**  A building resolves to exactly one ``body`` record, exactly one
-``roof`` record, and one record per opening assembly named ``door:<id>`` or
+``roof`` record when roofed, one ``attachment:<id>`` record per continuous
+attached structure, and one record per opening assembly named ``door:<id>`` or
 ``window:<id>``.  Wings do not each get an object: multiple wings fuse into the
 single body, and disconnected geometry islands inside one record are legal --
 the authored houses use them.
@@ -48,7 +49,7 @@ WELD = 1e-6
 # on 0.39999999999999997 and every fingerprint and JSON dump carries the noise.
 WELD_PLACES = 6
 
-VALID_ROLES = ("body", "roof")
+VALID_ROLES = ("body", "roof", "attachment")
 OPENING_ROLES = ("door", "window")
 
 
@@ -90,7 +91,7 @@ class ModifierSpec:
 
 @dataclass
 class MeshRecord:
-    """One semantic mesh: a body, a roof, or one opening assembly."""
+    """One semantic mesh: a body, roof, attachment, or opening assembly."""
 
     role: str
     name: str
@@ -105,12 +106,17 @@ class MeshRecord:
     # -- introspection ----------------------------------------------------
     @property
     def semantic(self):
-        """``body``, ``roof``, ``door`` or ``window`` -- the role without its id."""
+        """The semantic role without its id."""
         return self.role.split(":", 1)[0]
 
     @property
     def opening_id(self):
         return self.role.split(":", 1)[1] if ":" in self.role else None
+
+    @property
+    def attachment_id(self):
+        return self.role.split(":", 1)[1] if self.semantic == "attachment" \
+            and ":" in self.role else None
 
     def bounds(self):
         """Local-frame ``(min, max)`` corners.  Empty records raise."""
@@ -215,8 +221,10 @@ def validate(record):
         raise GrammarError(f"{record.name}: unknown role {record.role!r}")
     if record.semantic in OPENING_ROLES and not record.opening_id:
         raise GrammarError(f"{record.name}: role {record.role!r} needs an id")
-    if record.semantic in VALID_ROLES and record.opening_id:
+    if record.semantic in ("body", "roof") and record.opening_id:
         raise GrammarError(f"{record.name}: role {record.role!r} takes no id")
+    if record.semantic == "attachment" and not record.attachment_id:
+        raise GrammarError(f"{record.name}: role {record.role!r} needs an id")
     if len(record.faces) != len(record.face_materials):
         raise GrammarError(
             f"{record.name}: {len(record.faces)} faces but "

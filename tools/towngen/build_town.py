@@ -642,13 +642,17 @@ def build_map(key, screen, map1):
                  "radius": item[7] if len(item) > 7 and item[7] is not None else 0.9}
                 for item in screen["doors"]]
 
-    write_json(os.path.join(MAPS, "%d.json" % screen["id"]), {
+    map_data = {
         "id": screen["id"],
         "title": screen["title"],
         "intro": screen["intro"],
         "depth": 0,
         "safe": True,
         "category": "town",
+    }
+    if screen.get("parentMapId") is not None:
+        map_data["parentMapId"] = screen["parentMapId"]
+    map_data.update({
         "generation": "Fixed",
         "tileset": "town_default",
         "ceilingStyle": "sky",
@@ -700,6 +704,7 @@ def build_map(key, screen, map1):
         "encounters": [],
         "recruits": [],
     })
+    write_json(os.path.join(MAPS, "%d.json" % screen["id"]), map_data)
 
 
 def main():

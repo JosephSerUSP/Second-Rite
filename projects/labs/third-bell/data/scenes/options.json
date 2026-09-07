@@ -1,0 +1,354 @@
+{
+  "id": "options",
+  "name": "Options",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "options_help",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "style": "frame",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{sel('options_list').help}"
+        }
+      ]
+    },
+    {
+      "id": "options_list",
+      "rect": {
+        "x": 4,
+        "y": 5,
+        "w": 24,
+        "h": 9
+      },
+      "style": "list",
+      "visibleRows": 5,
+      "title": "Options",
+      "content": [
+        {
+          "type": "list",
+          "listId": "config:optionsCommands",
+          "formatRight": "{id == 'autoredirect' and (v.autoRedirect and 'ON' or 'OFF') or id == 'aspect' and (v.aspect == 'wide' and 'WIDE' or v.aspect == 'four_three' and '4:3' or 'CLASSIC') or id == 'font' and (v.font == 'monogram-extended' and 'REGULAR' or v.font == 'monogram-extended-italic' and 'ITALIC' or v.font) or ''}",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "options_confirm",
+      "rect": {
+        "x": 4,
+        "y": 6,
+        "w": 24,
+        "h": 8
+      },
+      "style": "confirm",
+      "title": "CONFIRM",
+      "visible": "v.mode == 'confirm'",
+      "content": [
+        {
+          "type": "text",
+          "text": "Quit Second Rite and exit to the desktop?"
+        },
+        {
+          "type": "list",
+          "listId": "config:exitOptions",
+          "format": "{name}",
+          "cursor": "v.confirmIdx"
+        }
+      ]
+    }
+  ],
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "mode",
+            "value": "'nav'"
+          },
+          {
+            "name": "confirmIdx",
+            "value": 2
+          },
+          {
+            "name": "autoRedirect",
+            "value": "(session and session.autoRedirect ~= nil) and session.autoRedirect or false"
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "code": "ctx.v.aspect = api.getRenderSurface(); ctx.v.font = api.getFont()"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 'nav' and v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 'confirm'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "confirmIdx",
+            "value": "v.confirmIdx == 1 and 2 or 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 'nav' and v.idx < 5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.mode == 'confirm'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "confirmIdx",
+            "value": "v.confirmIdx == 1 and 2 or 1"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav' and v.idx == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "controls"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav' and v.idx == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "autoRedirect",
+            "value": "not (v.autoRedirect or false)"
+          },
+          {
+            "cmd": "SCRIPT",
+            "code": "api.setAutoRedirect(ctx.v.autoRedirect)"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav' and v.idx == 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "code": "ctx.v.aspect = api.cycleRenderSurface()"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav' and v.idx == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "code": "ctx.v.font = api.cycleFont()"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav' and v.idx == 5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "mode",
+                "value": "'confirm'"
+              },
+              {
+                "name": "confirmIdx",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'confirm' and v.confirmIdx == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "QUIT_GAME"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'confirm' and v.confirmIdx == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "mode",
+            "value": "'nav'"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'confirm'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "mode",
+            "value": "'nav'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'nav'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {
+    "optionsCommands": [
+      {
+        "id": "controls",
+        "name": "CONTROLS",
+        "help": "View and rebind the SNES-style button layout."
+      },
+      {
+        "id": "autoredirect",
+        "name": "AUTO REDIRECT",
+        "help": "Toggle auto redirection when a target dies before skill execution."
+      },
+      {
+        "id": "aspect",
+        "name": "ASPECT",
+        "help": "Classic 256x240, 4:3 320x240, or Wide to see more of the world to either side."
+      },
+      {
+        "id": "font",
+        "name": "FONT",
+        "help": "Switch between Regular and Italic pixel typography."
+      },
+      {
+        "id": "exit",
+        "name": "EXIT",
+        "help": "Quit Second Rite and return to the desktop."
+      }
+    ],
+    "exitOptions": [
+      {
+        "name": "Yes"
+      },
+      {
+        "name": "No"
+      }
+    ],
+    "dock": {
+      "variant": "party_status",
+      "cursor": "0"
+    }
+  }
+}

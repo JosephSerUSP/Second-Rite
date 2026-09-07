@@ -1,0 +1,89 @@
+{
+  "id": "phoenix",
+  "name": "Phoenix",
+  "favoriteFoods": [
+    172,
+    179,
+    182
+  ],
+  "level": 10,
+  "role": "Reviver",
+  "smallBattler": "phoenix",
+  "passives": [
+    "rebirth"
+  ],
+  "elements": [
+    "Red",
+    "Red",
+    "White"
+  ],
+  "skills": [
+    "flameRebirth",
+    "divineFavor"
+  ],
+  "expGrowth": 10,
+  "gold": 100,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "traits": [],
+  "drops": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "names": [
+    "Blaze",
+    "Ember",
+    "Spark",
+    "Pyro",
+    "Flare",
+    "Cinder",
+    "Ignis",
+    "Sol"
+  ],
+  "flavor": "A sacred bird hatched from a Mystic Egg. Its tremendous power is matched by an exceptional MP burden.",
+  "baseParams": {
+    "maxHp": 85,
+    "atk": 19,
+    "def": 27,
+    "mat": 34,
+    "mdf": 32,
+    "mpd": 8,
+    "mxa": 10,
+    "mxp": 6
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 48,
+      "atk": 39,
+      "def": 49,
+      "mat": 71,
+      "mdf": 58
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 71,
+      "atk": 58,
+      "def": 71,
+      "mat": 103,
+      "mdf": 84
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 78,
+      "atk": 65,
+      "def": 79,
+      "mat": 116,
+      "mdf": 94
+    }
+  ],
+  "portrait": "phoenix",
+  "bigBattler": "phoenix",
+  "defaultGrowthSeed": 1668782883
+}

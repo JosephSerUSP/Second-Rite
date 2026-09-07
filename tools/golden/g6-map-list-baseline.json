@@ -1,0 +1,148 @@
+{
+  "provenance": {
+    "lastOwnerSignedCommit": "0ceb51ca",
+    "description": "Map list as photographed in tools/golden/editor-screens/ (pre-spiral naming)"
+  },
+  "maps": [
+    {
+      "id": 1,
+      "file": "1.json",
+      "title": "St. Maria"
+    },
+    {
+      "id": 2,
+      "file": "2.json",
+      "title": "Floor 1: Entry Hall"
+    },
+    {
+      "id": 3,
+      "file": "3.json",
+      "title": "Floor 2: Chasm Crossing"
+    },
+    {
+      "id": 4,
+      "file": "4.json",
+      "title": "Floor 3: Rusted Choir"
+    },
+    {
+      "id": 5,
+      "file": "5.json",
+      "title": "Floor 4: Cryptic Vault"
+    },
+    {
+      "id": 6,
+      "file": "6.json",
+      "title": "Floor 5: Blood Chapel"
+    },
+    {
+      "id": 7,
+      "file": "7.json",
+      "title": "Floor 6: Stillnight Sanctum"
+    },
+    {
+      "id": 8,
+      "file": "8.json",
+      "title": "Developer Room"
+    },
+    {
+      "id": 9,
+      "file": "9.json",
+      "title": "St. Maria Museum: Foundations"
+    },
+    {
+      "id": 12,
+      "file": "12.json",
+      "title": "FFXII Depth Explore Room"
+    },
+    {
+      "id": 13,
+      "file": "13.json",
+      "title": "FFXII Wall + Shrine Recess Compare"
+    },
+    {
+      "id": 14,
+      "file": "14.json",
+      "title": "Hand-authored Tileset Height Compare"
+    },
+    {
+      "id": 15,
+      "file": "15.json",
+      "title": "Stillnight: Bellroot Vigil Test"
+    },
+    {
+      "id": 16,
+      "file": "16.json",
+      "title": "St. Maria - The Churchyard"
+    },
+    {
+      "id": 17,
+      "file": "17.json",
+      "title": "St. Maria - The Praca"
+    },
+    {
+      "id": 18,
+      "file": "18.json",
+      "title": "St. Maria - Market Row"
+    },
+    {
+      "id": 19,
+      "file": "19.json",
+      "title": "St. Maria - The Quay"
+    },
+    {
+      "id": 20,
+      "file": "20.json",
+      "title": "St. Maria - Weaponsmith"
+    },
+    {
+      "id": 21,
+      "file": "21.json",
+      "title": "St. Maria - The Pub"
+    },
+    {
+      "id": 22,
+      "file": "22.json",
+      "title": "St. Maria - Chapel"
+    },
+    {
+      "id": 23,
+      "file": "23.json",
+      "title": "St. Maria - Laura's House"
+    },
+    {
+      "id": 24,
+      "file": "24.json",
+      "title": "St. Maria - Alicia's Room"
+    },
+    {
+      "id": 25,
+      "file": "25.json",
+      "title": "St. Maria - Passage House"
+    },
+    {
+      "id": 26,
+      "file": "26.json",
+      "title": "St. Maria - The Backstreet"
+    },
+    {
+      "id": 27,
+      "file": "27.json",
+      "title": "St. Maria - Alicia's Padaria"
+    },
+    {
+      "id": 28,
+      "file": "28.json",
+      "title": "St. Maria - Alicia's Padaria (3D)"
+    },
+    {
+      "id": 29,
+      "file": "29.json",
+      "title": "St. Maria - Laura's Smithy (3D)"
+    },
+    {
+      "id": 30,
+      "file": "30.json",
+      "title": "Gate Room"
+    }
+  ]
+}

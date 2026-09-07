@@ -154,7 +154,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 18,
-          "arrival": "padaria_3d_door"
+          "arrival": "padaria_door"
         }
       ]
     }

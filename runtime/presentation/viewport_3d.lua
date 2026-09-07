@@ -1034,80 +1034,207 @@ local function drawTownPrerenderSprite(image, x, footY, width, height,
         flip * width / frameWidth, height / frameHeight)
 end
 
--- Developer bounds overlay for the side-view town.
+-- Developer Navmesh, Collision, and Trigger visualizer for side-view town maps.
 --
--- A lane is invisible: the walkable span, a doorway's reach and the sprite's
--- own rectangle are all numbers with no picture. Drawing them is how a
--- half-width sprite offset or a door authored outside its bound stops being
--- something to reason about and becomes something to look at.
-local function drawTownBounds(session, state, screenXForTownY, groundScreenY,
-                              actorWidth, actorHeight, renderWidth, renderHeight)
+-- Projects the 3D ground geometry (walkable navmesh ribbon, blocked collision
+-- zones, doorway trigger disks, and actor footprints) through the camera's
+-- perspective and pitch (-17.5 degrees), aligning with the pre-rendered plate.
+local function drawTownBounds(session, state, toScreen, depthX, renderWidth, renderHeight)
     love.graphics.push("all")
+    love.graphics.setLineStyle("rough")
     love.graphics.setLineWidth(1)
-    local function vertical(x, r, g, b, a)
-        love.graphics.setColor(r, g, b, a or 1)
-        love.graphics.line(math.floor(x) + 0.5, 0, math.floor(x) + 0.5, renderHeight)
+    local lanes = require("engine.bounded_lane")
+
+    local envManifest = state.environment and state.environment.manifest
+    local bounds = envManifest and envManifest.bounds
+    local minX = (bounds and tonumber(bounds[1])) or (depthX - 1.0)
+    local maxX = (bounds and tonumber(bounds[4])) or (depthX + 1.0)
+    local laneMinY = state.minY
+    local laneMaxY = state.maxY
+
+    -- 1. Walkable Navmesh Ribbon (Perspective floor surface with depth in X)
+    local samples = 48
+    local stepY = (laneMaxY - laneMinY) / samples
+    for i = 0, samples - 1 do
+        local y0 = laneMinY + i * stepY
+        local y1 = (i == samples - 1) and laneMaxY or (laneMinY + (i + 1) * stepY)
+        local z0 = lanes.groundAt(session, y0) or state.groundZ or 0
+        local z1 = lanes.groundAt(session, y1) or state.groundZ or 0
+
+        local p1x, p1y = toScreen(minX, y0, z0)
+        local p2x, p2y = toScreen(maxX, y0, z0)
+        local p3x, p3y = toScreen(maxX, y1, z1)
+        local p4x, p4y = toScreen(minX, y1, z1)
+
+        -- Alternating subtle tint to visualize ground distance/ribbon flow
+        if i % 2 == 0 then
+            love.graphics.setColor(0.12, 0.55, 0.75, 0.20)
+        else
+            love.graphics.setColor(0.15, 0.65, 0.85, 0.28)
+        end
+        love.graphics.polygon("fill", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y)
+
+        -- Transverse rib line
+        love.graphics.setColor(0.2, 0.75, 0.95, 0.40)
+        love.graphics.line(p1x, p1y, p2x, p2y)
     end
 
-    -- Walkable span: where the lane ends, in red.
-    vertical(screenXForTownY(state.minY), 1, 0.25, 0.25, 0.9)
-    vertical(screenXForTownY(state.maxY), 1, 0.25, 0.25, 0.9)
+    -- Longitudinal edge wires (near edge, far edge, and walking centerline)
+    local nearLine = {}
+    local farLine = {}
+    local centerLine = {}
+    for i = 0, samples do
+        local y = (i == samples) and laneMaxY or (laneMinY + i * stepY)
+        local z = lanes.groundAt(session, y) or state.groundZ or 0
+        local nx, ny = toScreen(minX, y, z)
+        local fx, fy = toScreen(maxX, y, z)
+        local cx, cy = toScreen(depthX, y, z)
+        nearLine[#nearLine + 1] = nx
+        nearLine[#nearLine + 1] = ny
+        farLine[#farLine + 1] = fx
+        farLine[#farLine + 1] = fy
+        centerLine[#centerLine + 1] = cx
+        centerLine[#centerLine + 1] = cy
+    end
+    love.graphics.setColor(0.2, 0.85, 1.0, 0.75)
+    if #nearLine >= 4 then love.graphics.line(nearLine) end
+    if #farLine >= 4 then love.graphics.line(farLine) end
+    -- Walking path centerline
+    love.graphics.setColor(0.35, 1.0, 0.5, 0.9)
+    if #centerLine >= 4 then love.graphics.line(centerLine) end
+
+    -- Navmesh endcaps (East and West lane limits with portal threshold)
+    local zWest = lanes.groundAt(session, laneMinY) or state.groundZ or 0
+    local zEast = lanes.groundAt(session, laneMaxY) or state.groundZ or 0
+    local w1x, w1y = toScreen(minX, laneMinY, zWest)
+    local w2x, w2y = toScreen(maxX, laneMinY, zWest)
+    local e1x, e1y = toScreen(minX, laneMaxY, zEast)
+    local e2x, e2y = toScreen(maxX, laneMaxY, zEast)
+
+    love.graphics.setColor(1.0, 0.3, 0.3, 0.9)
+    love.graphics.line(w1x, w1y, w2x, w2y)
+    love.graphics.line(e1x, e1y, e2x, e2y)
+    -- Upright portal posts at the lane bounds
+    local w1px, w1py = toScreen(minX, laneMinY, zWest + 2.0)
+    local w2px, w2py = toScreen(maxX, laneMinY, zWest + 2.0)
+    local e1px, e1py = toScreen(minX, laneMaxY, zEast + 2.0)
+    local e2px, e2py = toScreen(maxX, laneMaxY, zEast + 2.0)
+    love.graphics.setColor(1.0, 0.3, 0.3, 0.6)
+    love.graphics.line(w1x, w1y, w1px, w1py)
+    love.graphics.line(w2x, w2y, w2px, w2py)
+    love.graphics.line(w1px, w1py, w2px, w2py)
+    love.graphics.line(e1x, e1y, e1px, e1py)
+    love.graphics.line(e2x, e2y, e2px, e2py)
+    love.graphics.line(e1px, e1py, e2px, e2py)
+
+    -- 2. Blocked Collision Ranges (3D ground zones with hazard cross)
     for _, range in ipairs(state.blockedRanges or {}) do
-        local x0 = screenXForTownY(tonumber(range.minY) or 0)
-        local x1 = screenXForTownY(tonumber(range.maxY) or 0)
-        love.graphics.setColor(1, 0.3, 0.1, 0.25)
-        love.graphics.rectangle("fill", x0, 0, math.max(1, x1 - x0), renderHeight)
+        local bMin = tonumber(range.minY) or 0
+        local bMax = tonumber(range.maxY) or 0
+        local z0 = lanes.groundAt(session, bMin) or state.groundZ or 0
+        local z1 = lanes.groundAt(session, bMax) or state.groundZ or 0
+        local p1x, p1y = toScreen(minX, bMin, z0)
+        local p2x, p2y = toScreen(maxX, bMin, z0)
+        local p3x, p3y = toScreen(maxX, bMax, z1)
+        local p4x, p4y = toScreen(minX, bMax, z1)
+
+        love.graphics.setColor(1.0, 0.2, 0.1, 0.45)
+        love.graphics.polygon("fill", p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y)
+        love.graphics.setColor(1.0, 0.25, 0.15, 0.95)
+        love.graphics.line(p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y, p1x, p1y)
+        love.graphics.line(p1x, p1y, p3x, p3y)
+        love.graphics.line(p2x, p2y, p4x, p4y)
     end
 
-    -- Doorways: the span within which the door actually answers, in cyan. A
-    -- door drawn on the plate outside its own band is a door that looks
-    -- reachable and is not.
+    -- 3. Doorways & Triggers (Elliptical floor proximity zones & door frames)
     local anchors = (state.environment and state.environment.anchors) or {}
     for _, doorway in ipairs(state.doorways or {}) do
         local anchor = anchors[doorway.anchor]
         if anchor then
-            local radius = tonumber(doorway.radius) or 0.65
-            local centre = tonumber(anchor.position[2]) or 0
-            local x0 = screenXForTownY(centre - radius)
-            local x1 = screenXForTownY(centre + radius)
-            love.graphics.setColor(0.3, 0.9, 1, 0.28)
-            love.graphics.rectangle("fill", x0, groundScreenY(centre) - actorHeight,
-                math.max(1, x1 - x0), actorHeight)
-            vertical(screenXForTownY(centre), 0.3, 0.9, 1, 0.9)
+            local radius = tonumber(doorway.radius) or 0.9
+            local centreY = tonumber(anchor.position[2]) or 0
+            local groundZ = lanes.groundAt(session, centreY) or state.groundZ or 0
+            local disk = {}
+            for a = 0, 15 do
+                local ang = a * (math.pi * 2 / 16)
+                local cx = depthX + radius * math.cos(ang)
+                local cy = centreY + radius * math.sin(ang)
+                local cz = lanes.groundAt(session, cy) or groundZ
+                local sx, sy = toScreen(cx, cy, cz)
+                disk[#disk + 1] = sx
+                disk[#disk + 1] = sy
+            end
+            love.graphics.setColor(0.2, 0.85, 1.0, 0.30)
+            if #disk >= 6 then love.graphics.polygon("fill", disk) end
+            love.graphics.setColor(0.3, 0.95, 1.0, 0.85)
+            if #disk >= 6 then love.graphics.line(disk) end
+
+            -- Vertical doorway portal arch at anchor depth
+            local doorX = tonumber(anchor.position[1]) or maxX
+            local halfW = math.min(radius, 2.2)
+            local d1x, d1y = toScreen(doorX, centreY - halfW * 0.5, groundZ)
+            local d2x, d2y = toScreen(doorX, centreY + halfW * 0.5, groundZ)
+            local d3x, d3y = toScreen(doorX, centreY + halfW * 0.5, groundZ + 2.0)
+            local d4x, d4y = toScreen(doorX, centreY - halfW * 0.5, groundZ + 2.0)
+            love.graphics.setColor(0.3, 0.95, 1.0, 0.75)
+            love.graphics.line(d1x, d1y, d4x, d4y, d3x, d3y, d2x, d2y)
         end
     end
 
-    -- Every other event's logical position, in yellow.
+    -- 4. Event Footprints & Position Markers
     for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         local position = rawEv.worldPosition
-        if type(position) == "table" then
-            vertical(screenXForTownY(tonumber(position[2]) or 0), 1, 0.95, 0.4, 0.7)
+        local isArrow = rawEv.model and rawEv.model:match("transition_arrow") ~= nil
+        if type(position) == "table" and not isArrow then
+            local evX = tonumber(position[1]) or depthX
+            local evY = tonumber(position[2]) or 0
+            local evZ = lanes.groundAt(session, evY) or state.groundZ or 0
+            local evH = tonumber(rawEv.worldHeight) or 1.75
+            local evDisk = {}
+            for a = 0, 11 do
+                local ang = a * (math.pi * 2 / 12)
+                local sx, sy = toScreen(evX + 0.25 * math.cos(ang), evY + 0.25 * math.sin(ang), evZ)
+                evDisk[#evDisk + 1] = sx
+                evDisk[#evDisk + 1] = sy
+            end
+            love.graphics.setColor(1.0, 0.9, 0.3, 0.75)
+            if #evDisk >= 6 then love.graphics.line(evDisk) end
+            local bx, by = toScreen(evX, evY, evZ)
+            local tx, ty = toScreen(evX, evY, evZ + evH)
+            love.graphics.setColor(1.0, 0.9, 0.3, 0.55)
+            love.graphics.line(bx, by, tx, ty)
         end
     end
 
-    -- The player: logical position as a line, drawn sprite rectangle as a box.
-    -- These two agreeing is the whole point of the overlay.
-    local px = screenXForTownY(state.visualY or state.y)
-    local pfoot = groundScreenY(state.visualY or state.y)
-    love.graphics.setColor(0.4, 1, 0.5, 0.9)
-    love.graphics.rectangle("line",
-        math.floor(px - actorWidth * 0.5) + 0.5,
-        math.floor(pfoot - actorHeight) + 0.5,
-        math.max(1, math.floor(actorWidth)), math.max(1, math.floor(actorHeight)))
-    vertical(px, 0.4, 1, 0.5, 1)
-    -- The floor itself, so a step or a slope is visible as a shape rather
-    -- than inferred from where a sprite happens to stand.
-    love.graphics.setColor(0.4, 1, 0.5, 1)
-    local points = {}
-    local samples = 96
-    for index = 0, samples do
-        local y = state.minY + (state.maxY - state.minY) * (index / samples)
-        points[#points + 1] = screenXForTownY(y)
-        points[#points + 1] = math.floor(groundScreenY(y)) + 0.5
+    -- 5. Player Footprint on Navmesh
+    local playerY = state.visualY or state.y
+    local playerZ = lanes.groundAt(session, playerY) or state.groundZ or 0
+    local pDisk = {}
+    for a = 0, 15 do
+        local ang = a * (math.pi * 2 / 16)
+        local sx, sy = toScreen(depthX + 0.32 * math.cos(ang), playerY + 0.32 * math.sin(ang), playerZ)
+        pDisk[#pDisk + 1] = sx
+        pDisk[#pDisk + 1] = sy
     end
-    if #points >= 4 then love.graphics.line(points) end
+    love.graphics.setColor(0.35, 1.0, 0.5, 0.40)
+    if #pDisk >= 6 then love.graphics.polygon("fill", pDisk) end
+    love.graphics.setColor(0.35, 1.0, 0.5, 0.95)
+    if #pDisk >= 6 then love.graphics.line(pDisk) end
+    -- Player cross marker
+    local c1x, c1y = toScreen(depthX - 0.25, playerY, playerZ)
+    local c2x, c2y = toScreen(depthX + 0.25, playerY, playerZ)
+    local c3x, c3y = toScreen(depthX, playerY - 0.25, playerZ)
+    local c4x, c4y = toScreen(depthX, playerY + 0.25, playerZ)
+    love.graphics.line(c1x, c1y, c2x, c2y)
+    love.graphics.line(c3x, c3y, c4x, c4y)
+    -- Height guide
+    local headX, headY = toScreen(depthX, playerY, playerZ + 1.75)
+    love.graphics.setColor(0.35, 1.0, 0.5, 0.5)
+    love.graphics.line(c1x, c1y, headX, headY)
+
     love.graphics.pop()
 end
+
 
 local function drawTownPrerender(session)
     local state = session.townTraversal
@@ -1137,11 +1264,55 @@ local function drawTownPrerender(session)
     local sceneIndex = centerBlend < 0.5 and centerFirst or centerSecond
     local sliceY = preRendered.slicePositions[sceneIndex]
     local projection = preRendered.playerProjection
+    local authoredTownCamera = session.townTraversal.camera or {}
+    local townCamera = worldCamera.resolve(session, {
+        profile = "town_sideview",
+        authoredCamera = authoredTownCamera,
+        projectionFrame = {
+            targetWidth = renderWidth,
+            targetHeight = renderHeight,
+            compositionWidth = surface.compositionWidth(),
+            canonicalCenterX = authoredTownCamera.projectionFrame
+                and authoredTownCamera.projectionFrame.canonicalCenterX,
+            canonicalHorizonY = authoredTownCamera.projectionFrame
+                and authoredTownCamera.projectionFrame.canonicalHorizonY,
+        },
+    })
+    local townPitch = authoredTownCamera.pitch
+    if townPitch == nil then
+        townPitch = math.rad(tonumber(authoredTownCamera.pitchDegrees) or 0)
+    end
     local centerX = (projection.centerX or imageWidth * 0.5) * scaleX
     local screenY = (projection.screenY or imageHeight) * scaleY
     local actorWidth = (projection.width or 24) * scaleX
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
+
+    local function projectTownPoint(worldX, worldY, worldZ)
+        local relativeX, relativeY = worldX - townCamera.x, worldY - townCamera.y
+        local depth = relativeX * townCamera.dirX + relativeY * townCamera.dirY
+        local horizontal = relativeX * townCamera.rightX + relativeY * townCamera.rightY
+        local vertical = worldZ - townCamera.z
+        local pitch = townCamera.pitch or 0
+        local cosP, sinP = math.cos(pitch), math.sin(pitch)
+        local pitchedDepth = depth * cosP - vertical * sinP
+        local pitchedVertical = vertical * cosP + depth * sinP
+        local safeDepth = math.max(pitchedDepth, 0.001)
+        local ndcX = townCamera.viewportCenterX * 2 / renderWidth - 1
+            + horizontal / (townCamera.fovHalfX * safeDepth)
+                * townCamera.projectionScaleX
+                * (townCamera.baseViewportWidth / renderWidth)
+        local ndcY = townCamera.viewportCenterY * 2 / renderHeight - 1
+            + pitchedVertical / (townCamera.fovHalfY * safeDepth)
+                * townCamera.projectionScaleY
+                * (townCamera.baseViewportHeight / renderHeight)
+        return (ndcX + 1) * renderWidth * 0.5,
+            (1 - ndcY) * renderHeight * 0.5
+    end
+    local depthX = lane.depthX or townCamera.targetX
+    local plateGroundX, plateGroundY = projectTownPoint(
+        depthX, sliceY, state.groundZ or 0)
+    local groundScreenOffsetY = screenY - plateGroundY
 
     -- Scroll the plate to follow the actor, then stop at its edges. The actor
     -- rides the middle of the window until the plate runs out, and walks the
@@ -1149,7 +1320,8 @@ local function drawTownPrerender(session)
     -- camera. When the window is as wide as the plate this clamps to zero and
     -- the whole plate is simply visible, which is the wide profile.
     local plateWidth = imageWidth * scaleX
-    local actorPlateX = (centerX + (actorY - sliceY) * pixelsPerRuntimeY)
+    local actorProjectedX = projectTownPoint(depthX, actorY, state.groundZ or 0)
+    local actorPlateX = centerX + (actorProjectedX - plateGroundX)
     local panX = renderWidth * 0.5 - actorPlateX
     panX = math.min(0, math.max(renderWidth - plateWidth, panX))
     panX = math.floor(panX + 0.5)
@@ -1171,8 +1343,14 @@ local function drawTownPrerender(session)
     -- and needs no underlay behind it.
     drawLayer(preRendered.scenes, sceneIndex, panX)
 
+    local function toScreen(worldX, worldY, worldZ)
+        local projectedX, projectedY = projectTownPoint(worldX, worldY, worldZ)
+        return panX + centerX + (projectedX - plateGroundX),
+            projectedY + groundScreenOffsetY
+    end
     local function screenXForTownY(y)
-        return panX + centerX + (y - sliceY) * pixelsPerRuntimeY
+        local x = projectTownPoint(depthX, y, state.groundZ or 0)
+        return panX + centerX + (x - plateGroundX)
     end
 
     -- Where the floor is at a given point along the lane. The camera looks
@@ -1222,9 +1400,143 @@ local function drawTownPrerender(session)
     -- after the live actors, preserving rail/statue occlusion.
     drawLayer(preRendered.foregrounds, sceneIndex, panX)
 
+    -- Town plates are a deliberately flat compositor, so they do not enter
+    -- the normal world-model queue below.  Transition events still carry the
+    -- authoritative OBJ presentation, however, and need a visible marker in
+    -- this path too.  Project the loaded OBJ's Z-up vertices into the plate's
+    -- authored screen plane; this keeps the marker model-driven without
+    -- inventing a second event representation or making the plate itself a
+    -- visual input for another asset.
+    local arrowModels = {}
+    local function townArrowModel(path)
+        if not arrowModels[path] then
+            arrowModels[path] = require("presentation.obj_model").load(path)
+        end
+        return arrowModels[path]
+    end
+    for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
+        if not rawEv.wallEvent then
+            local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
+            if presentation.visual == "model" and presentation.model then
+                local _, imageY = townEventWorldPosition(rawEv)
+                local model = townArrowModel(presentation.model)
+                -- OBJ vertices are runtime world units.  Do not multiply by
+                -- the plate's screen-pixel calibration; that would turn a
+                -- one-metre marker into a screen-sized polygon before the
+                -- authored camera ever sees it.
+                local modelScale = tonumber(rawEv.modelScale) or 1
+                local isTransitionArrow = presentation.model:match("transition_arrow") ~= nil
+                local arrowDirection = rawEv.direction
+                if not arrowDirection then
+                    local label = string.lower(tostring(rawEv.name or ""))
+                    local lane = require("engine.bounded_lane")
+                    local isEdge = false
+                    for _, doorway in ipairs((state.doorways or {})) do
+                        if doorway.eventInstanceId == rawEv.instanceId or doorway.eventId == rawEv.id then
+                            isEdge = lane.isEdgeDoorway(session, doorway)
+                            break
+                        end
+                    end
+                    local isInterior = (session.currentMapData and session.currentMapData.category == "interior")
+                        or (rawEv.instanceId and rawEv.instanceId:match("exit_door"))
+                        or label:match("out to")
+                    if isEdge and not isInterior then
+                        if imageY <= state.minY + 0.5 then
+                            arrowDirection = "left"
+                        else
+                            arrowDirection = "right"
+                        end
+                    elseif not isInterior and (label:match("%f[%a]west%f[%A]") or label:match("%f[%a]left%f[%A]")) then
+                        arrowDirection = "left"
+                    elseif not isInterior and (label:match("%f[%a]east%f[%A]") or label:match("%f[%a]right%f[%A]")) then
+                        arrowDirection = "right"
+                    else
+                        arrowDirection = "away"
+                    end
+                end
+
+                local lanes = require("engine.bounded_lane")
+                local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
+                local arrowLen = 1.04 * modelScale
+                local arrowRad = 0.22 * modelScale
+                local arrowY = math.min(state.maxY, math.max(state.minY, imageY))
+
+                for _, modelGroup in ipairs(model.groups or {}) do
+                    local color = modelGroup.color or { 1, 0.65, 0.08, 1 }
+                    local lineSegments = {}
+                    for index = 1, #(modelGroup.vertices or {}), 3 do
+                        local a, b, c = modelGroup.vertices[index],
+                            modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
+                        if a and b and c then
+                            local function arrowPoint(vertex)
+                                local lx = vertex[1] * modelScale
+                                local ly = vertex[2] * modelScale
+                                local lz = vertex[3] * modelScale
+                                local worldX, worldY, worldZ
+                                if isTransitionArrow then
+                                    if arrowDirection == "right" then
+                                        local tipY = math.min(arrowY, state.maxY - 0.15)
+                                        tipY = math.max(tipY, state.minY + 0.15 + arrowLen)
+                                        worldY = tipY - (arrowLen - lz)
+                                        worldX = depthX + lx
+                                        worldZ = groundZ + 0.35 + ly
+                                    elseif arrowDirection == "left" then
+                                        local tipY = math.max(arrowY, state.minY + 0.15)
+                                        tipY = math.min(tipY, state.maxY - 0.15 - arrowLen)
+                                        worldY = tipY + (arrowLen - lz)
+                                        worldX = depthX + lx
+                                        worldZ = groundZ + 0.35 + ly
+                                    else -- "away" (doors, gates, stairs into depth)
+                                        local clampedY = math.min(state.maxY - arrowRad, math.max(state.minY + arrowRad, arrowY))
+                                        local tiltAngle = math.rad(22)
+                                        local cosT, sinT = math.cos(tiltAngle), math.sin(tiltAngle)
+                                        worldY = clampedY + lx
+                                        worldX = depthX - 0.10 * modelScale + (lz * cosT - ly * sinT)
+                                        worldZ = groundZ + 0.15 + (lz * sinT + ly * cosT)
+                                    end
+                                else
+                                    worldX = depthX + lx
+                                    worldY = imageY + ly
+                                    worldZ = groundZ + lz
+                                end
+                                return toScreen(worldX, worldY, worldZ)
+                            end
+                            local ax, ay = arrowPoint(a)
+                            local bx, by = arrowPoint(b)
+                            local cx, cy = arrowPoint(c)
+                            if isTransitionArrow then
+                                local function addSegment(x1, y1, x2, y2)
+                                    local keyA = string.format("%.3f,%.3f", x1, y1)
+                                    local keyB = string.format("%.3f,%.3f", x2, y2)
+                                    local key = keyA < keyB and keyA .. ":" .. keyB
+                                        or keyB .. ":" .. keyA
+                                    lineSegments[key] = { x1, y1, x2, y2 }
+                                end
+                                addSegment(ax, ay, bx, by)
+                                addSegment(bx, by, cx, cy)
+                                addSegment(cx, cy, ax, ay)
+                            else
+                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
+                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
+                            end
+                        end
+                    end
+                    if isTransitionArrow then
+                        love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
+                        love.graphics.setLineStyle("rough")
+                        love.graphics.setLineWidth(1)
+                        for _, segment in pairs(lineSegments) do
+                            love.graphics.line(segment)
+                        end
+                        love.graphics.setLineWidth(1)
+                    end
+                end
+            end
+        end
+    end
+
     if viewport_3d.showBounds then
-        drawTownBounds(session, state, screenXForTownY, screenFootY,
-            actorWidth, actorHeight, renderWidth, renderHeight)
+        drawTownBounds(session, state, toScreen, depthX, renderWidth, renderHeight)
     end
     love.graphics.pop()
 
@@ -1625,7 +1937,6 @@ end
 local WORLD_SHADER_SOURCE = retroMeshShader.buildWorldShader()
 local worldShader = nil
 local worldShaderError = nil
-
 local function ensureWorldShader()
     if worldShader ~= nil then return worldShader or nil end
     local ok, shaderOrErr = pcall(love.graphics.newShader, WORLD_SHADER_SOURCE)

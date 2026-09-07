@@ -2239,6 +2239,13 @@ function love.keypressed(key, scancode, isrepeat)
         return
     end
 
+    if key == "f8" then
+        local v3d = require("presentation.viewport_3d")
+        v3d.showBounds = not v3d.showBounds
+        print("Town navmesh visualizer: " .. (v3d.showBounds and "ON" or "OFF"))
+        return
+    end
+
     -- F9 opens the developer menu. The hot-reload server it used to toggle
     -- directly is now an entry in that menu, so nothing was lost -- but a bare
     -- keypress no longer silently changes engine state.

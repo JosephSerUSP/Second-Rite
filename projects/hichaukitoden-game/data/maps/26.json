@@ -22,8 +22,8 @@
     "environmentPackage": "assets/environments/st_maria_town/cortico/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
-      "maxY": 22.254,
+      "minY": -2.844,
+      "maxY": 26.906,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 11.127,
+        "y": 12.031,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 11.127,
+        "center": 12.031,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -75,12 +75,12 @@
       {
         "anchor": "padaria_back",
         "eventInstanceId": "st-maria-cortico-padaria_back",
-        "radius": 0.9
+        "radius": 1.5
       },
       {
         "anchor": "port_stair",
         "eventInstanceId": "st-maria-cortico-port_stair",
-        "radius": 0.9
+        "radius": 1.2
       },
       {
         "anchor": "east_market",
@@ -98,8 +98,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.624,
-        -1.5
+        1.8958,
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -182,8 +182,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        10.983,
-        -1.5
+        8.4583,
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -227,17 +227,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        0.0,
-        -1.5
+        -2.8438,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
           "arrival": "east_backstreet"
         }
-      ]
+      ],
+      "direction": "left"
     },
     {
       "id": 2604,
@@ -247,17 +249,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.514,
-        -1.5
+        10.4635,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 25,
           "arrival": "exit_door"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 2605,
@@ -267,17 +271,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        15.029,
-        -1.5
+        13.7448,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 23,
           "arrival": "exit_door"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 2606,
@@ -287,17 +293,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        18.786,
-        -1.5
+        20.125,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 31,
           "arrival": "cortico_stair"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 2607,
@@ -307,17 +315,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        22.254,
-        -1.5
+        26.9062,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 18,
           "arrival": "west_cortico"
         }
-      ]
+      ],
+      "direction": "right"
     }
   ],
   "treasures": [],

@@ -5,6 +5,8 @@ on:
     paths:
       - assets/authoring/items/**
       - assets/models/items/**
+      - projects/hichaukitoden-game/assets/authoring/items/**
+      - projects/hichaukitoden-game/assets/models/items/**
       - tools/blender/**
       - tools/asset-language/contract.json
       - tools/asset-language/materials.json
@@ -16,6 +18,8 @@ on:
     paths:
       - assets/authoring/items/**
       - assets/models/items/**
+      - projects/hichaukitoden-game/assets/authoring/items/**
+      - projects/hichaukitoden-game/assets/models/items/**
       - tools/blender/**
       - tools/asset-language/contract.json
       - tools/asset-language/materials.json
@@ -50,6 +54,7 @@ jobs:
         run: |
           python -m unittest discover -s tools/blender/tests -p 'test_asset_core_host.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
+          python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blends_host.py' -v
 
       # Blender numbered backups are rejected repository-wide by the
       # repo-hygiene job in verify.yml (#671). The check that lived here
@@ -78,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          fixture=assets/authoring/items/ci_item_source_fixture.blend
+          fixture=projects/hichaukitoden-game/assets/authoring/items/ci_item_source_fixture.blend
           output=/tmp/second-rite-item-source-fixture
           rm -f "$fixture" "$fixture"[0-9]*
           rm -rf "$output"
@@ -93,11 +98,11 @@ jobs:
           test -s "$output/ci_item_source_fixture.obj"
           test -s "$output/ci_item_source_fixture.mtl"
           rm -f "$fixture" "$fixture"[0-9]*
-          git diff --exit-code -- assets/authoring/items
+          git diff --exit-code -- projects/hichaukitoden-game/assets/authoring/items
 
       - name: Compile committed sources read-only and compare runtime products
         shell: bash
         run: |
           set -euxo pipefail
           xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --check
-          git diff --exit-code -- assets/authoring/items
+          git diff --exit-code -- projects/hichaukitoden-game/assets/authoring/items

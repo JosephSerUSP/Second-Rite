@@ -26,8 +26,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parents[1]
-SOURCE_DIR = ROOT / "assets" / "authoring" / "items"
-MODEL_DIR = ROOT / "assets" / "models" / "items"
+DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
 BLENDER_SCRIPT = SCRIPT_DIR / "compile_item_blend.py"
 
 if str(SCRIPT_DIR) not in sys.path:
@@ -43,11 +42,11 @@ def digest(path: Path) -> str:
     return value.hexdigest()
 
 
-def sources_from_args(values: list[str]) -> list[Path]:
+def sources_from_args(values: list[str], source_dir: Path) -> list[Path]:
     if values:
         sources = [Path(value).resolve() for value in values]
-    elif SOURCE_DIR.is_dir():
-        sources = sorted(path.resolve() for path in SOURCE_DIR.glob("*.blend"))
+    elif source_dir.is_dir():
+        sources = sorted(path.resolve() for path in source_dir.glob("*.blend"))
     else:
         sources = []
     duplicates = {path for path in sources if sources.count(path) > 1}
@@ -56,19 +55,31 @@ def sources_from_args(values: list[str]) -> list[Path]:
     return sources
 
 
+def _format_rel(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def compare_bytes(actual: Path, expected: Path):
     if not expected.is_file():
-        raise RuntimeError(f"compiled product is missing from repository: {expected.relative_to(ROOT)}")
+        raise RuntimeError(f"compiled product is missing from repository: {_format_rel(expected)}")
     if actual.read_bytes() != expected.read_bytes():
         raise RuntimeError(
-            f"compiled product is stale: {expected.relative_to(ROOT)}; "
+            f"compiled product is stale: {_format_rel(expected)}; "
             "recompile the authoritative .blend and commit the runtime product"
         )
 
 
-def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool):
+def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None):
     if not source.is_file():
         raise RuntimeError(f"item source does not exist: {source}")
+    if model_dir is None:
+        if len(source.parents) >= 3:
+            model_dir = source.parents[2] / "models" / "items"
+        else:
+            model_dir = DEFAULT_PROJECT_DIR / "assets" / "models" / "items"
     before = digest(source)
     backup_candidates = [source.with_suffix(source.suffix + str(i)) for i in range(1, 10)]
     preexisting_backups = {path for path in backup_candidates if path.exists()}
@@ -81,7 +92,7 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool):
 
     after = digest(source)
     if after != before:
-        raise RuntimeError(f"compiler modified source document: {source.relative_to(ROOT)}")
+        raise RuntimeError(f"compiler modified source document: {_format_rel(source)}")
     new_backups = {path for path in backup_candidates if path.exists()} - preexisting_backups
     if new_backups:
         raise RuntimeError(f"compiler created Blender backup source(s): {sorted(map(str, new_backups))}")
@@ -89,9 +100,9 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool):
     obj = output_dir / f"{source.stem}.obj"
     validate(obj)
     if check:
-        compare_bytes(obj, MODEL_DIR / obj.name)
+        compare_bytes(obj, model_dir / obj.name)
         mtl = output_dir / f"{source.stem}.mtl"
-        canonical_mtl = MODEL_DIR / mtl.name
+        canonical_mtl = model_dir / mtl.name
         if mtl.exists() or canonical_mtl.exists():
             compare_bytes(mtl, canonical_mtl)
     return obj
@@ -100,6 +111,12 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--blender", default=os.environ.get("BLENDER_BIN") or shutil.which("blender"))
+    parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT,
+        help="Root directory of the project containing assets",
+    )
     parser.add_argument("--source", action="append", default=[], help="compile only this .blend; repeatable")
     parser.add_argument(
         "--output-dir",
@@ -116,21 +133,28 @@ def main(argv=None):
     if args.check and args.output_dir:
         raise SystemExit("--check and --output-dir are mutually exclusive")
 
-    sources = sources_from_args(args.source)
+    project_root = Path(args.project_root).resolve()
+    source_dir = project_root / "assets" / "authoring" / "items"
+    model_dir = project_root / "assets" / "models" / "items"
+
+    sources = sources_from_args(args.source, source_dir)
     if not sources:
-        print(f"No authoritative item .blend sources under {SOURCE_DIR.relative_to(ROOT)}; nothing to compile.")
+        rel = _format_rel(source_dir)
+        if args.check:
+            raise SystemExit(f"No authoritative item .blend sources found under {rel}; cannot verify.")
+        print(f"No authoritative item .blend sources under {rel}; nothing to compile.")
         return 0
 
     if args.check:
         with tempfile.TemporaryDirectory(prefix="second-rite-item-compile-") as temp:
             output_dir = Path(temp)
             for source in sources:
-                compile_one(args.blender, source, output_dir, check=True)
+                compile_one(args.blender, source, output_dir, check=True, model_dir=model_dir)
     else:
-        output_dir = Path(args.output_dir).resolve() if args.output_dir else MODEL_DIR
+        output_dir = Path(args.output_dir).resolve() if args.output_dir else model_dir
         output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(args.blender, source, output_dir, check=False)
+            compile_one(args.blender, source, output_dir, check=False, model_dir=model_dir)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

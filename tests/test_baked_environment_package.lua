@@ -108,6 +108,48 @@ function M.run()
     check(parsedCol.vertexCount > 0, "collision mesh has vertices")
     check(parsedCol.mtllib == nil, "collision mesh has no material library dependencies")
 
+    -- 8. Runtime environment_package loader optional collision contract (#1065)
+    local environment_package = require("engine.environment_package")
+    local pubPkg = environment_package.load("assets/environments/st_maria_town/pub/environment.json")
+    check(pubPkg ~= nil, "loaded shipping pub package")
+    check(pubPkg.collisionMesh ~= nil, "pub package has collisionMesh")
+
+    local originalRead = love.filesystem.read
+    local mockManifest = json.decode(manifestJson)
+    mockManifest.collisionMesh = nil
+    local mockJson = json.encode(mockManifest)
+
+    love.filesystem.read = function(p)
+        if p == "test/no_collision_env.json" then return mockJson end
+        return originalRead(p)
+    end
+
+    local okNoCol, noColPkg = pcall(environment_package.load, "test/no_collision_env.json")
+    check(okNoCol, "environment package without collisionMesh loads without error")
+    if okNoCol then
+        check(noColPkg.collisionMesh == nil, "noColPkg.collisionMesh is nil")
+    end
+
+    mockManifest.collisionMesh = json.null
+    mockJson = json.encode(mockManifest)
+    local okNullCol, nullColPkg = pcall(environment_package.load, "test/no_collision_env.json")
+    check(okNullCol, "environment package with json.null collisionMesh loads without error")
+    if okNullCol then
+        check(nullColPkg.collisionMesh == nil, "nullColPkg.collisionMesh is nil")
+    end
+
+    mockManifest.collisionMesh = ""
+    mockJson = json.encode(mockManifest)
+    local okEmptyCol = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okEmptyCol, "environment package with empty collisionMesh string fails loudly")
+
+    mockManifest.collisionMesh = 42
+    mockJson = json.encode(mockManifest)
+    local okBadType = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okBadType, "environment package with non-string collisionMesh fails loudly")
+
+    love.filesystem.read = originalRead
+
     failFast("test_baked_environment_package", failed, passed)
 end
 

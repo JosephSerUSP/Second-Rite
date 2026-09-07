@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -95,6 +97,38 @@ class SceneContractTests(unittest.TestCase):
         self.assertTrue(any(item["code"] == "invalid_transform" and
                             item.get("object") == "singular_render" for item in diagnostics))
 
+    def test_source_requires_bakeable_geometry_not_only_lights(self):
+        snapshot = good_snapshot()
+        snapshot["objects"] = [item for item in snapshot["objects"]
+                                if "TH_SOURCE" not in item["collections"]]
+        snapshot["objects"].append(obj("source_light", "LIGHT", ["TH_SOURCE"]))
+        report = inspect_snapshot(snapshot)
+        self.assertFalse(report["ok"])
+        self.assertTrue(any(item["code"] == "missing_source_geometry"
+                            for item in report["diagnostics"]))
+
+    def test_malformed_public_snapshot_boundary_is_structured(self):
+        malformed = good_snapshot()
+        malformed["objects"][0]["collections"] = None
+        malformed["objects"][1]["collections"] = [["TH_RENDER"]]
+        report = inspect_snapshot(malformed)
+        self.assertFalse(report["ok"])
+        codes = {item["code"] for item in report["diagnostics"]}
+        self.assertIn("malformed_memberships", codes)
+        self.assertIn("malformed_membership", codes)
+
+        report = inspect_snapshot(None)
+        self.assertFalse(report["ok"])
+        self.assertEqual(report["diagnostics"][0]["code"], "malformed_snapshot")
+
+    def test_malformed_collections_are_structured(self):
+        report = inspect_snapshot({"collections": None, "objects": []})
+        self.assertFalse(report["ok"])
+        self.assertEqual(report["diagnostics"][0]["code"], "malformed_collections")
+        report = inspect_snapshot({"collections": [{"name": None}], "objects": []})
+        self.assertFalse(report["ok"])
+        self.assertIn("malformed_collection", {item["code"] for item in report["diagnostics"]})
+
     def test_collision_is_optional_and_does_not_claim_walkability(self):
         snapshot = good_snapshot()
         snapshot["collections"] = [item for item in snapshot["collections"]
@@ -123,6 +157,54 @@ class SceneContractTests(unittest.TestCase):
             self.assertEqual(report["schemaVersion"], 1)
             self.assertFalse(report["ok"])
             self.assertGreater(report["summary"]["errorCount"], 0)
+
+    def test_external_blend_strict_and_blender_script_failures_propagate(self):
+        blender = os.environ.get("BLENDER") or shutil.which("blender")
+        if not blender:
+            blender_path = Path(r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe")
+            if blender_path.is_file():
+                blender = str(blender_path)
+        if not blender:
+            self.skipTest("Blender not available")
+
+        fixture = TOOLS / "fixtures" / "town_slice_synthetic.blend"
+        with tempfile.TemporaryDirectory(prefix="scene_contract_blender_") as directory:
+            root = Path(directory)
+            invalid_blend = root / "invalid.blend"
+            create_expression = (
+                "import bpy; "
+                "collection = bpy.data.collections.get('TH_RENDER'); "
+                "bpy.data.collections.remove(collection, do_unlink=True); "
+                # Blender's embedded Python parses this expression on Windows;
+                # forward slashes avoid turning a drive path into \u escapes.
+                f"bpy.ops.wm.save_as_mainfile(filepath={str(invalid_blend).replace(chr(92), '/')!r})"
+            )
+            created = subprocess.run(
+                [blender, "--background", str(fixture), "--python-expr", create_expression],
+                capture_output=True, text=True)
+            self.assertEqual(created.returncode, 0, created.stderr)
+
+            report_path = root / "invalid-report.json"
+            wrapper_environment = os.environ.copy()
+            wrapper_environment["BLENDER"] = blender
+            failed_validation = subprocess.run(
+                [sys.executable, str(TOOLS / "scene_contract.py"), "--blend",
+                 str(invalid_blend), "--output", str(report_path), "--strict"],
+                capture_output=True, text=True, env=wrapper_environment)
+            self.assertNotEqual(failed_validation.returncode, 0,
+                                failed_validation.stdout + failed_validation.stderr)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertFalse(report["ok"])
+            self.assertIn("missing_role", {item["code"] for item in report["diagnostics"]})
+
+            output_directory = root / "output-directory"
+            output_directory.mkdir()
+            failed_script = subprocess.run(
+                [sys.executable, str(TOOLS / "scene_contract.py"), "--blend",
+                 str(fixture), "--output", str(output_directory)],
+                capture_output=True, text=True, env=wrapper_environment)
+            self.assertNotEqual(failed_script.returncode, 0,
+                                failed_script.stdout + failed_script.stderr)
 
 
 if __name__ == "__main__":

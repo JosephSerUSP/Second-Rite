@@ -21,12 +21,17 @@ preview collections and are never export roles. An object linked to both a
 preview collection and an export role is reported as leakage. In particular,
 `TH_PREVIEW_ONLY` overlap is reported as `guide_leakage`.
 
+`TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights are
+valid source inputs for illumination but cannot be the only selected-to-active
+bake source. `TH_RENDER` must contain a mesh. If render mesh metadata is
+available, a missing UV layer or empty vertex/polygon count is also an error.
+
 Names are labels. A name such as `GUIDE_wall` does not make an object a guide;
 the collection membership does. An object in more than one export collection
 is an `ambiguous_role` error. The validator also reports missing required
 collections, empty required roles, unsupported object types, invalid/singular
-world transforms, duplicate anchor labels, and optional render-mesh UV/empty
-mesh metadata when supplied.
+world transforms, duplicate anchor labels, malformed snapshot input, and
+optional render-mesh UV/empty mesh metadata when supplied.
 
 The report has schema `thestra.scene-contract-report`, schema version `1`, and
 is suitable for a later Blender panel. Collision is intentionally described as
@@ -56,5 +61,7 @@ the source scene:
 blender -b path/to/scene.blend --python tools/blender/scene_contract.py -- --output report.json --pretty --strict
 ```
 
-The Blender invocation returns non-zero when `--strict` is present and the
-report contains errors. Warnings do not fail the strict result.
+The Blender invocation uses Blender's `--python-exit-code 1` so validator or
+report-writing exceptions propagate to the outer CLI. It returns non-zero when
+`--strict` is present and the report contains errors. Warnings do not fail the
+strict result.

@@ -152,9 +152,16 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     else:
         mat.use_nodes = True
 
-    # Setup shader nodes for bake receiving
+    # Setup shader nodes for bake receiving.
+    # Keep img_node UNLINKED from BSDF during the bake to avoid Cycles circular
+    # image dependency warnings (#1023). Link it only after bake completion.
     nodes = mat.node_tree.nodes
     links = mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+    if bsdf and bsdf.inputs.get("Base Color") and bsdf.inputs["Base Color"].links:
+        for link in list(bsdf.inputs["Base Color"].links):
+            links.remove(link)
+
     img_node = nodes.get("BakeTargetImg")
     if not img_node:
         img_node = nodes.new("ShaderNodeTexImage")
@@ -162,10 +169,6 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     img_node.image = bake_image
     nodes.active = img_node
     img_node.select = True
-
-    bsdf = nodes.get("Principled BSDF")
-    if bsdf:
-        links.new(img_node.outputs["Color"], bsdf.inputs["Base Color"])
 
     target_obj.data.materials.clear()
     target_obj.data.materials.append(mat)
@@ -203,16 +206,23 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # completely, for one texel per island boundary.
     scene.render.bake.margin = 1 if flat_bake else 4
 
-    # Select all source objects as Selected, target_obj as Active
+    # Select all source objects as Selected, target_obj as Active.
+    # target_obj must NOT be in the selected set during selected-to-active bake,
+    # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
+    # and circular dependency warnings (#1023).
     bpy.ops.object.select_all(action='DESELECT')
     for obj in col_source.all_objects:
         if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
             obj.select_set(True)
-    target_obj.select_set(True)
+    target_obj.select_set(False)
     scene.view_layers[0].objects.active = target_obj
 
     print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
     bpy.ops.object.bake(type='COMBINED')
+
+    # Connect baked texture to BSDF Base Color for material export and display
+    if bsdf:
+        links.new(img_node.outputs["Color"], bsdf.inputs["Base Color"])
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
@@ -394,6 +404,7 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
             print(res.stderr, file=sys.stderr)
             raise SystemExit(f"Pipeline execution failed in Blender (code {res.returncode})")
         print(res.stdout)
+        return res
     finally:
         if os.path.exists(temp_runner.name):
             os.unlink(temp_runner.name)

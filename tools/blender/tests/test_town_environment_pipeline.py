@@ -28,7 +28,7 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
         # 1. Build synthetic fixture
         build_synthetic_environment.generate_synthetic_blend(cls.fixture_blend)
         # 2. Run pipeline
-        town_environment_pipeline.export_environment_package(
+        cls.export_result = town_environment_pipeline.export_environment_package(
             cls.fixture_blend, cls.output_dir, atlas_size=256, bake_samples=4
         )
         manifest_path = cls.output_dir / "environment.json"
@@ -39,6 +39,11 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
     def tearDownClass(cls):
         if cls.temp_dir.exists():
             shutil.rmtree(cls.temp_dir, ignore_errors=True)
+
+    def test_bake_has_no_circular_dependency_warning(self):
+        # Asserts that Cycles selected-to-active bake completes without circular image dependency (#1023)
+        self.assertNotIn("Circular dependency for image", self.export_result.stdout)
+        self.assertNotIn("Circular dependency for image", self.export_result.stderr)
 
     def test_only_th_render_exports_as_render_mesh(self):
         obj_file = self.output_dir / "environment.obj"

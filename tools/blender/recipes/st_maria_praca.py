@@ -154,7 +154,7 @@ def build(output: Path):
     stone = (0.42, 0.40, 0.35)
     plaster = (0.72, 0.70, 0.61)
     roof = (0.30, 0.12, 0.08)
-    box("ARCH_square_ground", (5.8, 31.0, 0.35), (8.0, 11.85, GROUND_Z - 0.2), architecture, stone)
+    box("ARCH_square_ground", (5.8, 31.0, 0.35), (8.0, 11.85, GROUND_Z - 0.175), architecture, stone)
     for name, y, width, height in (
         ("west_house", 3.9, 7.0, 5.0),
         ("registrar_house", 14.6, 8.5, 5.8),
@@ -191,10 +191,10 @@ def build(output: Path):
     # Runtime collections begin as explicit, coarse placeholders; they are not
     # inferred from source naming when this scene is eventually promoted.
     render_proxy = box("RT_square_depth_proxy", (5.8, 31.0, 0.35),
-                       (8.0, 11.85, GROUND_Z - 0.2), render, stone)
+                       (8.0, 11.85, GROUND_Z - 0.175), render, stone)
     render_proxy.hide_render = True
     collision_proxy = box("COL_walkable_surface", (2.0, 23.699, 0.1),
-                          (LANE_X, 11.8495, GROUND_Z - 0.08), collision, (0.2, 0.8, 0.2))
+                          (LANE_X, 11.8495, GROUND_Z - 0.05), collision, (0.2, 0.8, 0.2))
     collision_proxy.display_type = "WIRE"
     collision_proxy.hide_render = True
 

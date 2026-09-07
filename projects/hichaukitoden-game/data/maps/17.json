@@ -66,7 +66,7 @@
       {
         "anchor": "quay_stair",
         "eventInstanceId": "st-maria-praca-quay_stair",
-        "radius": 0.9
+        "radius": 2.2
       },
       {
         "anchor": "alicia_door",
@@ -76,12 +76,12 @@
       {
         "anchor": "churchyard_stair",
         "eventInstanceId": "st-maria-praca-churchyard_stair",
-        "radius": 0.9
+        "radius": 1.5
       },
       {
         "anchor": "chapel_door",
         "eventInstanceId": "st-maria-praca-chapel_door",
-        "radius": 0.9
+        "radius": 1.2
       },
       {
         "anchor": "east_backstreet",
@@ -211,10 +211,12 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        0.434,
-        -1.5
+        0.0,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
       "commands": [
         {
           "cmd": "LOAD_MAP",
@@ -231,10 +233,12 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.625,
-        -1.5
+        2.881,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
       "commands": [
         {
           "cmd": "LOAD_MAP",
@@ -251,10 +255,12 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        9.827,
-        -1.5
+        8.751,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
       "commands": [
         {
           "cmd": "LOAD_MAP",
@@ -271,10 +277,12 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        20.81,
-        -1.5
+        17.756,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
       "commands": [
         {
           "cmd": "LOAD_MAP",
@@ -291,10 +299,12 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        23.7,
-        -1.5
+        23.699,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "right",
       "commands": [
         {
           "cmd": "LOAD_MAP",

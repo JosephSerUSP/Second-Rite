@@ -48,7 +48,7 @@
       "id": "quay_stair",
       "position": [
         7.8,
-        0.434,
+        0.0,
         0.0
       ],
       "rotation": [
@@ -66,7 +66,7 @@
       "id": "alicia_door",
       "position": [
         7.8,
-        4.625,
+        2.881,
         0.0
       ],
       "rotation": [
@@ -84,7 +84,7 @@
       "id": "churchyard_stair",
       "position": [
         7.8,
-        9.827,
+        8.751,
         0.0
       ],
       "rotation": [
@@ -102,7 +102,7 @@
       "id": "chapel_door",
       "position": [
         7.8,
-        20.81,
+        17.756,
         0.0
       ],
       "rotation": [
@@ -120,7 +120,7 @@
       "id": "east_backstreet",
       "position": [
         7.8,
-        23.7,
+        23.699,
         0.0
       ],
       "rotation": [

@@ -41,7 +41,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
-from make_blockout import spec, EXTERIORS, PLAYER_W, PLAYER_H  # noqa: E402
+from make_blockout import spec, PLATE_SCREENS, PLAYER_W, PLAYER_H  # noqa: E402
 from build_town import ENV_ROOT  # noqa: E402
 
 PLATES = os.path.join(ENV_ROOT, "plates")
@@ -77,16 +77,32 @@ def assertions(s, im):
 
 
 def overlay(s, im):
-    im = im.convert("RGB").copy()
-    d = ImageDraw.Draw(im)
+    im = im.convert("RGBA").copy()
+    d = ImageDraw.Draw(im, "RGBA")
     g = s["groundY"]
+    d.rectangle([0, s["visibleHeight"], im.size[0], im.size[1]],
+                fill=(88, 36, 120, 72))
+    d.line([(0, s["horizonY"]), (im.size[0], s["horizonY"])],
+           fill=(245, 220, 90), width=1)
     d.line([(0, g), (im.size[0], g)], fill=(255, 0, 96), width=1)
+    d.line([(0, s["visibleHeight"]), (im.size[0], s["visibleHeight"])],
+           fill=(188, 84, 255), width=2)
+    d.text((4, max(1, s["horizonY"] - 11)), "HORIZON", fill=(245, 220, 90))
+    d.text((4, s["visibleHeight"] + 4), "PERSISTENT UI", fill=(220, 170, 255))
     for o in s["openings"]:
         x = int(round(o["pixelX"]))
         colour = (86, 156, 214) if o["kind"] == "street" else (232, 126, 52)
         d.rectangle([x - PLAYER_W // 2, g - PLAYER_H,
                      x + PLAYER_W // 2, g], outline=colour, width=2)
-        d.text((max(2, x - 24), g - PLAYER_H - 11), o["label"][:16], fill=colour)
+        label = "%s (%dpx)" % (o["label"][:14], x)
+        d.text((max(2, x - 28), g - PLAYER_H - 11), label, fill=colour)
+    for n in s.get("npcs", []):
+        x = int(round(n["pixelX"]))
+        colour = (60, 220, 110)
+        d.rectangle([x - PLAYER_W // 2, g - PLAYER_H,
+                     x + PLAYER_W // 2, g], outline=colour, width=2)
+        label = "%s (%dpx)" % (n["anchor"][:14], x)
+        d.text((max(2, x - 28), g - PLAYER_H - 11), label, fill=colour)
     # The player, at three points along the lane. Scale is the whole question:
     # if the architecture does not read as architecture beside these, the plate
     # is wrong however good the material looks.
@@ -94,7 +110,7 @@ def overlay(s, im):
         x = int(im.size[0] * frac)
         d.rectangle([x - PLAYER_W // 2, g - PLAYER_H,
                      x + PLAYER_W // 2, g], fill=(20, 20, 24), outline=(255, 255, 255))
-    return im
+    return im.convert("RGB")
 
 
 def main():
@@ -103,7 +119,7 @@ def main():
     ap.add_argument("--candidates")
     ap.add_argument("--out", default=os.path.join("out", "towngen", "plate-check"))
     args = ap.parse_args()
-    keys = args.screen or list(EXTERIORS)
+    keys = args.screen or list(PLATE_SCREENS)
     os.makedirs(args.out, exist_ok=True)
 
     failed, rows = [], []
@@ -128,8 +144,11 @@ def main():
     for key, s, path, is_candidate, problems in rows:
         html.append("<h2>%s &mdash; map %d %s</h2>" % (
             key, s["mapId"], "(candidate)" if is_candidate else "(in tree)"))
-        html.append("<p class='m'>%s &middot; %dpx wide &middot; ground y=%d "
-                    "&middot; player 24x48</p>" % (path, s["plateWidth"], s["groundY"]))
+        html.append("<p class='m'>%s &middot; %dpx wide &middot; horizon y=%d "
+                    "&middot; ground y=%d &middot; persistent UI y=%d..239 "
+                    "&middot; player 24x48</p>" % (
+                        path, s["plateWidth"], s["horizonY"], s["groundY"],
+                        s["visibleHeight"]))
         for p in problems:
             html.append("<p class='bad'>%s</p>" % p)
         html.append("<img src='%s.png'>" % key)

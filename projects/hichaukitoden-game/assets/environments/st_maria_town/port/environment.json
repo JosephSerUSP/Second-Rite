@@ -9,7 +9,7 @@
     0.0,
     -1.0,
     8.8,
-    29.48,
+    29.604,
     4.0
   ],
   "provenance": {
@@ -19,7 +19,7 @@
     "spawn_player": {
       "position": [
         7.8,
-        14.74,
+        14.802,
         0.0
       ]
     },
@@ -33,59 +33,59 @@
     "forge_door": {
       "position": [
         7.8,
-        10.405,
+        8.4583,
         0.0
       ]
     },
     "smith_3d_door": {
       "position": [
         7.8,
-        16.185,
+        16.8073,
         0.0
       ]
     },
     "cortico_stair": {
       "position": [
         7.8,
-        20.52,
+        19.0312,
         0.0
       ]
     },
     "climb_churchyard": {
       "position": [
         7.8,
-        24.855,
-        0.0
+        28.6927,
+        0.4618
       ]
     }
   },
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      1100,
+      1065,
       240
     ],
     "slicePositions": [
-      14.74
+      14.802
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/port_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/port_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_1100.png"
+      "../stub/empty_1065.png"
     ],
     "lane": {
-      "runtimeCenterY": 14.74
+      "runtimeCenterY": 14.802
     },
     "playerProjection": {
-      "centerX": 550.0,
+      "centerX": 533.998,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

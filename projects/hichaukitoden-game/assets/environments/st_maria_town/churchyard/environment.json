@@ -9,7 +9,7 @@
     0.0,
     -1.0,
     8.8,
-    26.012,
+    29.021,
     4.0
   ],
   "provenance": {
@@ -19,35 +19,35 @@
     "spawn_player": {
       "position": [
         7.8,
-        13.006,
+        14.5105,
         0.0
       ]
     },
     "port_climb": {
       "position": [
         7.8,
-        2.312,
+        0.0,
         0.0
       ]
     },
     "labyrinth_door": {
       "position": [
         7.8,
-        8.382,
+        13.526,
         0.0
       ]
     },
     "east_praca": {
       "position": [
         7.8,
-        26.012,
+        29.0208,
         0.0
       ]
     },
     "npc_guard": {
       "position": [
         7.8,
-        13.873,
+        16.1146,
         0.0
       ]
     }
@@ -55,11 +55,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      980,
+      924,
       240
     ],
     "slicePositions": [
-      13.006
+      14.5105
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/churchyard_bg.png"
@@ -68,17 +68,17 @@
       "../../../../assets/environments/st_maria_town/plates/churchyard_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_980.png"
+      "../stub/empty_924.png"
     ],
     "lane": {
-      "runtimeCenterY": 13.006
+      "runtimeCenterY": 14.5105
     },
     "playerProjection": {
-      "centerX": 490.0,
+      "centerX": 526.002,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

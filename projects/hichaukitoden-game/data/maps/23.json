@@ -22,8 +22,8 @@
     "environmentPackage": "assets/environments/st_maria_town/house_laura/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
-      "maxY": 17.919,
+      "minY": -2.516,
+      "maxY": 18.3,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 8.96,
+        "y": 7.892,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 8.96,
+        "center": 7.892,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -88,7 +88,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        13.295,
+        12.1042,
         0.0
       ],
       "trigger": "interact",
@@ -278,17 +278,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        2.023,
+        -2.5156,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
           "arrival": "padaria_back"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 2303,
@@ -298,17 +300,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.514,
+        14.9844,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 24,
           "arrival": "exit_door"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 2304,
@@ -318,17 +322,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        15.029,
+        18.2656,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 27,
           "arrival": "home_stair"
         }
-      ]
+      ],
+      "direction": "away"
     }
   ],
   "treasures": [],

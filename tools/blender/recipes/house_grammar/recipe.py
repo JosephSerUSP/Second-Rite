@@ -261,7 +261,7 @@ class VerandaSpec:
                 positive=name not in ("lane_offset",)))
         try:
             support_count = int(self.support_count)
-        except (TypeError, ValueError):
+        except (OverflowError, TypeError, ValueError):
             support_count = -1
         if isinstance(self.support_count, bool) \
                 or support_count != self.support_count \

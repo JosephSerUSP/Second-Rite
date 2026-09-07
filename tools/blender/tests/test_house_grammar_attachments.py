@@ -50,6 +50,14 @@ class VerandaSchemaTests(unittest.TestCase):
                 "flat", "main", height=0.16, slab=0.16,
                 roof_thickness=0.02),)))
 
+    def test_rejects_non_finite_support_counts_with_grammar_error(self):
+        with self.assertRaisesRegex(GrammarError, "support_count"):
+            VerandaSpec("infinite", "main", support_count=float("inf"))
+
+    def test_rejects_malformed_attachments_before_reading_attachment_fields(self):
+        with self.assertRaisesRegex(GrammarError, "VerandaSpec"):
+            recipe_with((object(),))
+
 
 class VerandaGeometryTests(unittest.TestCase):
     def test_one_attachment_is_one_valid_parented_record(self):

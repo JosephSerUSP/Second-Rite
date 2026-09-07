@@ -54,6 +54,17 @@ class ScreenScaleTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 build_town.screen_scale({"id": "bad", "pixels_per_y": value})
 
+    def test_promote_repaint_v4_agrees_with_expected_widths(self):
+        import promote_repaint_v4
+        for key, plate, width in promote_repaint_v4.SCREENS:
+            with self.subTest(screen=key, plate=plate):
+                self.assertEqual(
+                    build_town.EXPECTED_PLATE_WIDTHS[plate],
+                    width,
+                    "promote_repaint_v4 width for %s must match build_town.EXPECTED_PLATE_WIDTHS" % plate,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
+

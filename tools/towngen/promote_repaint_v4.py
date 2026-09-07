@@ -6,13 +6,19 @@ fit into the authored visible-world frame; it never uses nearest-neighbour
 resampling for background plates.
 """
 
-from pathlib import Path
-import json
-import shutil
 import argparse
+import json
+from pathlib import Path
+import shutil
+import sys
 
 from PIL import Image, ImageDraw, ImageOps
 
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from build_town import EXPECTED_PLATE_WIDTHS
 
 ROOT = Path(__file__).resolve().parents[2]
 GEN = Path(r"C:/Users/josep/.codex/generated_images/01a06bd2-7b02-73d3-93f7-ff903d298166")
@@ -38,19 +44,26 @@ GENERATIONS = [
     "exec-fc373026-2501-4ed7-b6e3-841e131be1ba.png",
 ]
 
+# Plate widths are derived from build_town.EXPECTED_PLATE_WIDTHS as the single
+# authority, ensuring promotion cannot overwrite shipping assets with stale widths.
+SCREEN_SPECS = [
+    ("port", "port_bg.png"),
+    ("churchyard", "churchyard_bg.png"),
+    ("cortico", "backstreet_bg.png"),
+    ("market", "market_bg.png"),
+    ("quay", "quay_bg.png"),
+    ("weaponsmith", "lauras_smith_bg.png"),
+    ("alicias_padaria", "alicias_padaria_bg.png"),
+    ("pub", "pub_bg.png"),
+    ("chapel", "chapel_bg.png"),
+    ("house_laura", "house_laura_bg.png"),
+    ("house_alicia", "house_alicia_bg.png"),
+    ("lodging", "lodging_bg.png"),
+]
+
 SCREENS = [
-    ("port", "port_bg.png", 1065),
-    ("churchyard", "churchyard_bg.png", 924),
-    ("cortico", "backstreet_bg.png", 866),
-    ("market", "market_bg.png", 772),
-    ("quay", "quay_bg.png", 826),
-    ("weaponsmith", "lauras_smith_bg.png", 450),
-    ("alicias_padaria", "alicias_padaria_bg.png", 450),
-    ("pub", "pub_bg.png", 576),
-    ("chapel", "chapel_bg.png", 674),
-    ("house_laura", "house_laura_bg.png", 747),
-    ("house_alicia", "house_alicia_bg.png", 424),
-    ("lodging", "lodging_bg.png", 457),
+    (key, plate, EXPECTED_PLATE_WIDTHS[plate])
+    for key, plate in SCREEN_SPECS
 ]
 
 PROMPT_TEMPLATE = (
@@ -128,7 +141,14 @@ def main() -> None:
         (screen_dir / "calibration.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
         # Replacement source is kept under repaint-v4; promotion is explicit.
         if args.promote:
-            shutil.copy2(screen_dir / "calibrated-clean.png", PLATES / plate)
+            calibrated_plate = screen_dir / "calibrated-clean.png"
+            with Image.open(calibrated_plate) as check_img:
+                if check_img.size != (width, FRAME_H):
+                    raise SystemExit(
+                        f"Cannot promote {plate}: candidate dimensions {check_img.size} "
+                        f"do not match expected {(width, FRAME_H)} from EXPECTED_PLATE_WIDTHS"
+                    )
+            shutil.copy2(calibrated_plate, PLATES / plate)
     contact.save(OUT / "contact-sheet.png", optimize=True)
 
 

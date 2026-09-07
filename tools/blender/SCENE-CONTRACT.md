@@ -65,3 +65,12 @@ The Blender invocation uses Blender's `--python-exit-code 1` so validator or
 report-writing exceptions propagate to the outer CLI. It returns non-zero when
 `--strict` is present and the report contains errors. Warnings do not fail the
 strict result.
+
+## Compiler integration
+
+The environment compiler runs this preflight before changing scene data and
+includes the report in each successful candidate manifest. Validation errors
+abort the build; the external compiler propagates Blender script failures and
+removes its temporary candidate. Existing output directories are never replaced.
+Bake palette metrics remain diagnostic for production scenes; fixture tests
+assert their expected colours separately.

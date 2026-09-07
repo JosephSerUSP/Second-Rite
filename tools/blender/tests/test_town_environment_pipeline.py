@@ -41,6 +41,27 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
         if cls.temp_dir.exists():
             shutil.rmtree(cls.temp_dir, ignore_errors=True)
 
+    def test_preflight_rejects_invalid_source_before_candidate_publish(self):
+        invalid = self.temp_dir / "invalid_source.blend"
+        script = self.temp_dir / "invalidate.py"
+        script.write_text(
+            "import bpy\n"
+            "bpy.data.collections.remove(bpy.data.collections['TH_ANCHORS'])\n"
+            f"bpy.ops.wm.save_as_mainfile(filepath={str(invalid)!r})\n",
+            encoding="utf-8",
+        )
+        subprocess.run([
+            town_environment_pipeline.blender_executable(), "--background",
+            str(self.fixture_blend), "--python-exit-code", "1", "--python", str(script),
+        ], check=True, capture_output=True, text=True)
+        before = town_environment_pipeline.sha256_file(invalid)
+        output = self.temp_dir / "invalid_candidate"
+        with self.assertRaises(SystemExit):
+            town_environment_pipeline.export_environment_package(invalid, output, atlas_size=32, bake_samples=1)
+        self.assertFalse(output.exists())
+        self.assertEqual(list(self.temp_dir.glob(".invalid_candidate.candidate-*")), [])
+        self.assertEqual(before, town_environment_pipeline.sha256_file(invalid))
+
     def test_bake_has_no_circular_dependency_warning(self):
         # Asserts that Cycles selected-to-active bake completes without circular image dependency (#1023)
         self.assertNotIn("Circular dependency for image", self.export_result.stdout)

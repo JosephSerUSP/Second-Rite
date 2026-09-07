@@ -56,3 +56,12 @@ reverse face winding after reflection
 package. Do not guess a mirror centre and do not silently move existing map
 anchors. This slice intentionally does not modify either exporter until an
 adopted interior/exterior pair supplies the required rendered evidence.
+
+## Integration review limits
+
+The PNGs and ray-casts above are Blender evidence. The Lua assertion checks
+the resolved camera basis, not pixels from the runtime renderer. Several
+Python checks compare recorded fixture metadata, not live exporter output.
+This does not yet prove runtime occlusion, winding, or end-to-end camera parity.
+The adapter contract above remains a proposal until the same exported fixture
+is captured in the actual runtime and its orientation/occlusion are verified.

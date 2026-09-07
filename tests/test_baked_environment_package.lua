@@ -148,7 +148,67 @@ function M.run()
     local okBadType = pcall(environment_package.load, "test/no_collision_env.json")
     check(not okBadType, "environment package with non-string collisionMesh fails loudly")
 
+    -- 9. Runtime environment_package loader bakedLighting property (#1037)
+    check(pubPkg.bakedLighting == false, "pre-rendered pub package defaults to bakedLighting == false")
+
+    local aliciaPkg = environment_package.load("assets/environments/st_maria_town/alicias_padaria_3d/environment.json")
+    check(aliciaPkg ~= nil, "loaded alicias_padaria_3d environment package")
+    check(aliciaPkg.bakedLighting == true, "live-mesh alicias_padaria_3d defaults to bakedLighting == true")
+
+    mockManifest.collisionMesh = nil
+    mockManifest.bakedLighting = false
+    mockJson = json.encode(mockManifest)
+    local falseBakedPkg = environment_package.load("test/no_collision_env.json")
+    check(falseBakedPkg.bakedLighting == false, "explicit bakedLighting: false is preserved")
+
+    mockManifest.bakedLighting = true
+    mockJson = json.encode(mockManifest)
+    local trueBakedPkg = environment_package.load("test/no_collision_env.json")
+    check(trueBakedPkg.bakedLighting == true, "explicit bakedLighting: true is preserved")
+
     love.filesystem.read = originalRead
+
+    -- 10. viewport_3d getFogConfig respects baked town environments (#1037)
+    local viewport_3d = require("presentation.viewport_3d")
+    check(type(viewport_3d.getFogConfig) == "function", "viewport_3d.getFogConfig is exposed")
+    check(type(viewport_3d.isLiveBakedTown) == "function", "viewport_3d.isLiveBakedTown is exposed")
+
+    -- Case A: Dungeon / non-town session (townTraversal == nil)
+    local dungeonSession = {}
+    local dFogDef, dHasFog = viewport_3d.getFogConfig(dungeonSession, {})
+    check(not dHasFog, "map without fog returns hasFog == false")
+    check(math.abs(dFogDef.minFactor - 0.12) < 0.001, "dungeon default minFactor is 0.12 (fog attenuation active)")
+
+    local dFogExplicit = viewport_3d.getFogConfig(dungeonSession, { fog = { minFactor = 0.5 } })
+    check(math.abs(dFogExplicit.minFactor - 0.5) < 0.001, "dungeon honors explicit minFactor 0.5")
+
+    -- Case B: Live-mesh baked town environment session
+    local liveTownSession = {
+        townTraversal = {
+            environment = aliciaPkg,
+        },
+    }
+    check(viewport_3d.isLiveBakedTown(liveTownSession), "liveTownSession identified as live baked town")
+
+    local liveFogDef, liveHasFog = viewport_3d.getFogConfig(liveTownSession, {})
+    check(not liveHasFog, "live town map without fog returns hasFog == false")
+    check(math.abs(liveFogDef.minFactor - 1.0) < 0.001, "live baked town map without fog defaults to minFactor == 1.0 (no attenuation)")
+
+    local liveFogNoMin = viewport_3d.getFogConfig(liveTownSession, { fog = { color = { 0, 0, 0 }, distance = 10 } })
+    check(math.abs(liveFogNoMin.minFactor - 1.0) < 0.001, "live baked town map with fog but no minFactor defaults to minFactor == 1.0")
+
+    local liveFogExplicit = viewport_3d.getFogConfig(liveTownSession, { fog = { minFactor = 0.65 } })
+    check(math.abs(liveFogExplicit.minFactor - 0.65) < 0.001, "live baked town honors explicit author minFactor 0.65")
+
+    -- Case C: Pre-rendered town environment session
+    local preRenderTownSession = {
+        townTraversal = {
+            environment = pubPkg,
+        },
+    }
+    check(not viewport_3d.isLiveBakedTown(preRenderTownSession), "preRenderTownSession is not live baked mesh")
+    local preFogDef = viewport_3d.getFogConfig(preRenderTownSession, {})
+    check(math.abs(preFogDef.minFactor - 0.12) < 0.001, "pre-rendered town environment defaults to minFactor == 0.12")
 
     failFast("test_baked_environment_package", failed, passed)
 end

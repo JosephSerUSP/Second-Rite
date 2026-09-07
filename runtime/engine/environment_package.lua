@@ -126,6 +126,12 @@ function environment_package.load(path)
     if manifest.collisionMesh ~= nil and manifest.collisionMesh ~= json.null then
         collisionMesh = asset("collisionMesh", "collisionMesh")
     end
+    local bakedLighting = manifest.bakedLighting
+    if bakedLighting == nil then
+        bakedLighting = (preRendered == nil)
+    else
+        bakedLighting = (bakedLighting == true)
+    end
     return {
         manifestPath = path,
         manifest = manifest,
@@ -136,6 +142,7 @@ function environment_package.load(path)
         bounds = manifest.bounds,
         anchors = manifest.anchors,
         preRendered = preRendered,
+        bakedLighting = bakedLighting,
     }
 end
 

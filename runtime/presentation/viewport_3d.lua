@@ -82,9 +82,31 @@ end
 -- path each instead of branching per feature.
 local FOG_DEFAULTS = { color = { 0, 0, 0 }, startDist = 0.0, distance = 8.0, sharpness = 1.0, minFactor = 0.12, panorama = nil }
 
+local function isLiveBakedTown(session)
+    local env = session and session.townTraversal and session.townTraversal.environment
+    if not env then return false end
+    if env.bakedLighting ~= nil then return env.bakedLighting == true end
+    return not env.preRendered
+end
+
 local function getFogConfig(session, mapData)
     local fog = mapData and mapData.fog
-    if not fog then return FOG_DEFAULTS, false end
+    local liveBaked = isLiveBakedTown(session)
+    local defaultMinFactor = liveBaked and 1.0 or FOG_DEFAULTS.minFactor
+
+    if not fog then
+        if liveBaked then
+            return {
+                color     = FOG_DEFAULTS.color,
+                startDist = FOG_DEFAULTS.startDist,
+                distance  = FOG_DEFAULTS.distance,
+                sharpness = FOG_DEFAULTS.sharpness,
+                minFactor = 1.0,
+                panorama  = nil,
+            }, false
+        end
+        return FOG_DEFAULTS, false
+    end
 
     if fog.preset then
         local presets = session and session.loader and session.loader.engine and session.loader.engine.fogPresets
@@ -97,7 +119,19 @@ local function getFogConfig(session, mapData)
         -- An unresolvable preset id falls back to no-fog rather than
         -- erroring, matching how missing atlases/light grids degrade
         -- elsewhere in this renderer; the validator catches the typo.
-        if not resolved then return FOG_DEFAULTS, false end
+        if not resolved then
+            if liveBaked then
+                return {
+                    color     = FOG_DEFAULTS.color,
+                    startDist = FOG_DEFAULTS.startDist,
+                    distance  = FOG_DEFAULTS.distance,
+                    sharpness = FOG_DEFAULTS.sharpness,
+                    minFactor = 1.0,
+                    panorama  = nil,
+                }, false
+            end
+            return FOG_DEFAULTS, false
+        end
         fog = resolved
     end
 
@@ -109,7 +143,7 @@ local function getFogConfig(session, mapData)
         startDist = dStart,
         distance  = dDist,
         sharpness = (fog.sharpness ~= nil) and fog.sharpness or FOG_DEFAULTS.sharpness,
-        minFactor = (fog.minFactor ~= nil) and fog.minFactor or FOG_DEFAULTS.minFactor,
+        minFactor = (fog.minFactor ~= nil) and fog.minFactor or defaultMinFactor,
         psxBands  = fog.psxBands,
         panorama  = (fog.panorama and #fog.panorama > 0) and fog.panorama or nil,
     }, true
@@ -2004,7 +2038,7 @@ local function drawWorldSpace(session, authoredCamera)
         falloff = (pLightCfg and pLightCfg.falloff) or 1.5,
         onlyInDungeons = (pLightCfg == nil or pLightCfg.onlyInDungeons == nil) and true or pLightCfg.onlyInDungeons,
     }
-    playerLight.active = playerLight.enabled and (not playerLight.onlyInDungeons or not (mapData and mapData.safe)) and playerLight.radius > 0
+    playerLight.active = not session.townTraversal and playerLight.enabled and (not playerLight.onlyInDungeons or not (mapData and mapData.safe)) and playerLight.radius > 0
     local psxCfg = session.loader and session.loader.system and session.loader.system.dungeon
         and session.loader.system.dungeon.psxRendering or {}
     local affineTextures = psxCfg.affineTextures ~= false
@@ -3040,5 +3074,8 @@ function viewport_3d.draw(session, authoredCamera)
     -- `authoredCamera` is the current Scene's presentation default, never Map state.
     return drawWorldSpace(session, authoredCamera)
 end
+
+viewport_3d.getFogConfig = getFogConfig
+viewport_3d.isLiveBakedTown = isLiveBakedTown
 
 return viewport_3d

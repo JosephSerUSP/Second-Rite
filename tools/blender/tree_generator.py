@@ -143,7 +143,7 @@ def preset(name: str, *, seed_offset: int = 0, **overrides) -> TreeSpec:
     values.update(overrides)
     values["name"] = name
     values["seed"] = int(values.get("seed", 1)) + int(seed_offset)
-    return _validate_spec(TreeSpec(**values))
+    return _normalize_spec(TreeSpec(**values))
 
 
 def _rng(seed):
@@ -176,7 +176,7 @@ def _unit(a):
 def _validate_spec(spec):
     """Reject invalid authoring controls before they reach geometry math."""
     finite_fields = (
-        "height", "crown_radius", "crown_depth", "clear_trunk",
+        "height", "crown_radius", "crown_depth", "clear_trunk", "levels",
         "branch_frequency", "phyllotaxis_deg", "branch_angle_deg",
         "angle_variation_deg", "length_decay", "apical_dominance",
         "tropism", "attraction_weight", "attraction_points",
@@ -211,6 +211,13 @@ def _validate_spec(spec):
     if spec.segment_length <= 0 or spec.spray_length <= 0 or spec.taper_power <= 0:
         raise ValueError("segment_length, spray_length and taper_power must be positive")
     return spec
+
+
+def _normalize_spec(spec):
+    """Normalize integer-valued numeric inputs from JSON/CLI authoring."""
+    _validate_spec(spec)
+    integer_fields = ("levels", "branch_frequency", "attraction_points", "stems")
+    return replace(spec, **{field: int(getattr(spec, field)) for field in integer_fields})
 
 
 def crown_bias_vector(spec):
@@ -337,7 +344,7 @@ def foliage_card_budget(skeleton, lod="low"):
 
 def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
     if lod not in LOD_BUDGETS: raise ValueError(f"unknown tree LOD {lod!r}")
-    _validate_spec(spec)
+    spec = _normalize_spec(spec)
     max_segments, max_cards = LOD_BUDGETS[lod]
     rng = _rng(spec.seed)
     points = []

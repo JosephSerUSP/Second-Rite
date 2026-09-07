@@ -29,6 +29,15 @@ import tree_mesh  # noqa: E402
 
 VARIANTS = (
     ("baseline", {}),
+    ("crown_bias_only", {
+        "crown_bias": .65, "crown_bias_deg": 25,
+    }),
+    ("branch_sweep_only", {
+        "branch_sweep_deg": 48,
+    }),
+    ("branch_twist_only", {
+        "branch_twist_deg": 110,
+    }),
     ("biased_twist", {
         "crown_bias": .65, "crown_bias_deg": 25, "branch_twist_deg": 110,
     }),
@@ -67,13 +76,18 @@ def mesh_object(name, vertices, faces, material_data, uvs=None):
 
 def add_actor(x, actor_material, skin_material, y=-2.0):
     """Add a deliberately plain 1.75m scale reference figure."""
-    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=.22, depth=1.05,
-                                        location=(x, y, .525))
+    for leg_x in (x - .11, x + .11):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=.085, depth=.72,
+                                            location=(leg_x, y, .36))
+        bpy.context.object.name = "SCALE_ACTOR_LEG"
+        bpy.context.object.data.materials.append(actor_material)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=.22, depth=.85,
+                                        location=(x, y, 1.0))
     body = bpy.context.object
     body.name = "SCALE_ACTOR_BODY"
     body.data.materials.append(actor_material)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=.20,
-                                         location=(x, y, 1.28))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=.23,
+                                         location=(x, y, 1.52))
     head = bpy.context.object
     head.name = "SCALE_ACTOR_HEAD"
     head.data.materials.append(skin_material)
@@ -105,8 +119,8 @@ def setup_scene():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
-    scene.render.resolution_x = 900
-    scene.render.resolution_y = 700
+    scene.render.resolution_x = 1000
+    scene.render.resolution_y = 900
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.film_transparent = False
@@ -133,7 +147,7 @@ def setup_scene():
     scene.collection.objects.link(camera)
     scene.camera = camera
     camera_data.type = "ORTHO"
-    camera_data.ortho_scale = 9.5
+    camera_data.ortho_scale = 11.5
 
     wood = material("comparison_wood", (.25, .12, .055))
     foliage = tree_material.foliage_material(name="comparison_foliage")

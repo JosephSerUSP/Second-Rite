@@ -95,6 +95,18 @@ class TreeGeneratorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             trees.generate(trees.preset("round_shade", attraction_weight=1.01))
 
+    def test_integer_controls_normalize_json_numbers_but_reject_fractions(self):
+        spec = trees.preset("round_shade", levels=3.0, branch_frequency=4.0,
+                            attraction_points=90.0, stems=1.0)
+        self.assertTrue(all(type(getattr(spec, field)) is int for field in (
+            "levels", "branch_frequency", "attraction_points", "stems")))
+        for field in ("levels", "branch_frequency", "attraction_points", "stems"):
+            with self.assertRaises(ValueError, msg=field):
+                trees.preset("round_shade", **{field: 1.5})
+            for value in (float("nan"), float("inf"), float("-inf")):
+                with self.assertRaises(ValueError, msg=f"{field}={value}"):
+                    trees.preset("round_shade", **{field: value})
+
 
 if __name__ == "__main__":
     unittest.main()

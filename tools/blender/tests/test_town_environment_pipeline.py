@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -44,6 +45,76 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
         # Asserts that Cycles selected-to-active bake completes without circular image dependency (#1023)
         self.assertNotIn("Circular dependency for image", self.export_result.stdout)
         self.assertNotIn("Circular dependency for image", self.export_result.stderr)
+
+    def test_bake_integrity_proves_asymmetric_appearance_and_receiver_isolation(self):
+        provenance = self.manifest["provenance"]
+        bake = provenance["bake"]
+        appearance = bake["appearance"]
+
+        # This is intentionally separate from triangle/bounds checks: geometry
+        # can be healthy while the receiver gets a blank or self-fed atlas.
+        self.assertTrue(appearance["passed"])
+        self.assertGreater(appearance["nonBlackFraction"], 0.01)
+        self.assertGreaterEqual(appearance["distinctSourceColorCount"], 2)
+        self.assertGreaterEqual(appearance["uniqueColorBinCount"], 2)
+        self.assertIn([0.85, 0.65, 0.15], appearance["sourceBaseColors"])
+        coverage = appearance["paletteCoverage"]
+        self.assertTrue(any(item["dominantChannel"] == "red" and item["matched"] for item in coverage))
+        self.assertTrue(any(item["dominantChannel"] == "blue" and item["matched"] for item in coverage))
+        self.assertEqual(bake["receiver"]["preBakeNonBlackFraction"], 0.0)
+        self.assertFalse(bake["receiver"]["targetSelectedDuringBake"])
+        self.assertFalse(bake["receiver"]["targetImageLinkedDuringBake"])
+
+    def test_candidate_manifest_records_provenance_and_warning_evidence(self):
+        provenance = self.manifest["provenance"]
+        self.assertEqual(provenance["pipelineVersion"], town_environment_pipeline.PIPELINE_VERSION)
+        self.assertEqual(
+            provenance["source"]["blend"]["sha256"],
+            town_environment_pipeline.sha256_file(self.fixture_blend),
+        )
+        self.assertEqual(provenance["options"], {
+            "atlasSize": 256,
+            "bakeSamples": 4,
+            "flatBake": False,
+        })
+        self.assertTrue(provenance["tool"]["blenderVersion"])
+        self.assertIsInstance(provenance["warningEvidence"], list)
+        self.assertEqual(provenance["warningEvidence"], provenance["bake"]["warningEvidence"])
+        self.assertTrue(provenance["outputs"])
+        for output in provenance["outputs"]:
+            output_path = self.output_dir / output["path"]
+            self.assertTrue(output_path.is_file())
+            self.assertEqual(output["sha256"], town_environment_pipeline.sha256_file(output_path))
+
+    def test_failed_candidate_isolated_from_existing_files(self):
+        failed_output = self.temp_dir / "failed_candidate"
+        with mock.patch.object(town_environment_pipeline, "blender_executable", return_value="fake-blender"), \
+             mock.patch.object(
+                 town_environment_pipeline.subprocess,
+                 "run",
+                 return_value=subprocess.CompletedProcess(
+                     ["fake-blender"], 1, stdout="bake warning", stderr="bake error"
+                 ),
+             ):
+            with self.assertRaises(SystemExit):
+                town_environment_pipeline.export_environment_package(
+                    self.fixture_blend, failed_output, atlas_size=32, bake_samples=1
+                )
+
+        self.assertFalse(failed_output.exists())
+        self.assertEqual(list(self.temp_dir.glob(".failed_candidate.candidate-*")), [])
+
+    def test_existing_output_is_never_overwritten(self):
+        protected = self.temp_dir / "protected_package"
+        protected.mkdir()
+        marker = protected / "owner-file.txt"
+        marker.write_text("owner data", encoding="utf-8")
+
+        with self.assertRaises(FileExistsError):
+            town_environment_pipeline.export_environment_package(
+                self.fixture_blend, protected, atlas_size=32, bake_samples=1
+            )
+        self.assertEqual(marker.read_text(encoding="utf-8"), "owner data")
 
     def test_only_th_render_exports_as_render_mesh(self):
         obj_file = self.output_dir / "environment.obj"

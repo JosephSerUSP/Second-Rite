@@ -19,8 +19,8 @@ from distant_scenery import (  # noqa: E402
 )
 
 
-class BackgroundTopologyContractTests(unittest.TestCase):
-    def test_layout_is_full_model_and_overscanned(self):
+class BackgroundBillboardContractTests(unittest.TestCase):
+    def test_layout_is_source_topology_and_overscanned(self):
         self.assertTrue(validate_modules())
         self.assertGreaterEqual(len(DEFAULT_MODULES), 5)
         bounds = sorted(coverage_bounds(module) for module in DEFAULT_MODULES)
@@ -37,6 +37,12 @@ class BackgroundTopologyContractTests(unittest.TestCase):
         self.assertAlmostEqual(lane_to_blender_y(LANE_CENTRE_Y), 0.0)
         self.assertAlmostEqual(lane_to_blender_y(LANE_MIN_Y), 14.875)
         self.assertAlmostEqual(lane_to_blender_y(LANE_MAX_Y), -14.875)
+
+    def test_runtime_background_is_a_world_space_candidate(self):
+        from distant_scenery import BILLBOARD_X, FLOOR_NEAR_X, PLATE_HEIGHT, PLATE_WIDTH
+        self.assertEqual((PLATE_WIDTH, PLATE_HEIGHT), (866, 240))
+        self.assertGreater(BILLBOARD_X, 34.0)
+        self.assertLess(FLOOR_NEAR_X, -12.0)
 
     def test_invalid_module_fails_loudly(self):
         invalid = dict(DEFAULT_MODULES[0], span=0)

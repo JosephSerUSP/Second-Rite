@@ -25,7 +25,7 @@ SCHEMA_VERSION = 2
 LANE_MIN_Y = -2.844
 LANE_CENTRE_Y = 12.031
 LANE_MAX_Y = 26.906
-STUDY_MARGIN_Y = 30.0
+STUDY_MARGIN_Y = 20.0
 BACKGROUND_MIN_X = 22.0
 BACKGROUND_MAX_X = 34.0
 MAX_OPENING_Y = 5.0
@@ -39,56 +39,56 @@ DEFAULT_MODULES = (
         "id": "east_end_facade",
         "selectors": ("CORTICO_east_facade",),
         "anchor": (17.0, -12.875, 0.0),
-        "target": (28.0, -28.0, 0.0),
+        "target": (28.0, 17.5, 0.0),
         "span": 5.12,
     },
     {
         "id": "padaria_west",
         "selectors": ("CORTICO_padaria_house_",),
         "anchor": (15.3, -2.964, 0.0),
-        "target": (25.5, -21.5, 0.0),
+        "target": (25.5, 11.0, 0.0),
         "span": 6.2,
     },
     {
         "id": "lodging_west",
         "selectors": ("CORTICO_lodging_house_",),
         "anchor": (16.0, -0.233, 0.0),
-        "target": (24.5, -12.7, 0.0),
+        "target": (24.5, 5.5, 0.0),
         "span": 8.6,
     },
     {
         "id": "shrine_west",
         "selectors": ("CORTICO_shrine_facade", "CORTICO_shrine_door_"),
         "anchor": (16.7, 6.531, 0.0),
-        "target": (26.5, -5.8, 0.0),
+        "target": (26.5, 0.0, 0.0),
         "span": 4.35,
     },
     {
         "id": "shrine_east",
         "selectors": ("CORTICO_shrine_facade", "CORTICO_shrine_door_"),
         "anchor": (16.7, 6.531, 0.0),
-        "target": (26.5, 1.0, 0.0),
+        "target": (26.5, -3.0, 0.0),
         "span": 4.35,
     },
     {
         "id": "lodging_east",
         "selectors": ("CORTICO_lodging_house_",),
         "anchor": (16.0, -0.233, 0.0),
-        "target": (24.5, 9.0, 0.0),
+        "target": (24.5, -8.0, 0.0),
         "span": 8.6,
     },
     {
         "id": "padaria_east",
         "selectors": ("CORTICO_padaria_house_",),
         "anchor": (15.3, -2.964, 0.0),
-        "target": (25.5, 18.0, 0.0),
+        "target": (25.5, -13.0, 0.0),
         "span": 6.2,
     },
     {
         "id": "west_end_facade",
         "selectors": ("CORTICO_west_facade",),
         "anchor": (16.9, 13.175, 0.0),
-        "target": (28.0, 28.0, 0.0),
+        "target": (28.0, -19.5, 0.0),
         "span": 4.95,
     },
 )
@@ -239,6 +239,7 @@ def _copy_ground(collection):
     obj["sr_flatten_via_exterior_exporter"] = True
     obj["sr_source_object"] = source.name
     obj["sr_ground"] = True
+    obj["sr_representation"] = "full_model"
     return obj
 
 

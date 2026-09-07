@@ -11,6 +11,7 @@ from distant_scenery import (  # noqa: E402
     LANE_CENTRE_Y,
     LANE_MAX_Y,
     LANE_MIN_Y,
+    STUDY_MARGIN_Y,
     coverage_bounds,
     lane_to_blender_y,
     validate_module,
@@ -23,8 +24,8 @@ class BackgroundTopologyContractTests(unittest.TestCase):
         self.assertTrue(validate_modules())
         self.assertGreaterEqual(len(DEFAULT_MODULES), 5)
         bounds = sorted(coverage_bounds(module) for module in DEFAULT_MODULES)
-        self.assertLessEqual(bounds[0][0], -30.0)
-        self.assertGreaterEqual(bounds[-1][1], 30.0)
+        self.assertLessEqual(bounds[0][0], -STUDY_MARGIN_Y)
+        self.assertGreaterEqual(bounds[-1][1], STUDY_MARGIN_Y)
         self.assertTrue(all(module["span"] > 0 for module in DEFAULT_MODULES))
 
     def test_layout_has_no_unbounded_opening(self):

@@ -21,9 +21,9 @@
       1024,
       1024
     ],
-    "pngSizeBytes": 1246153,
+    "pngSizeBytes": 1253232,
     "renderMeshSizeBytes": 479722,
-    "packageSizeBytes": 1726677
+    "packageSizeBytes": 1733756
   },
   "anchors": {
     "spawn_player": {
@@ -1729,12 +1729,12 @@
             0.13
           ]
         ],
-        "nonBlackFraction": 0.417576,
-        "uniqueColorBinCount": 95,
+        "nonBlackFraction": 0.420386,
+        "uniqueColorBinCount": 96,
         "channelMean": [
-          0.128813,
-          0.111977,
-          0.095759
+          0.129079,
+          0.112359,
+          0.095983
         ],
         "channelRange": [
           1.0,
@@ -1760,8 +1760,8 @@
     "outputs": [
       {
         "path": "environment.png",
-        "sha256": "a2c0bdfdd5b6859c7e7cd6ceacf6340ffb23301012b43c75d4beba5e249b6744",
-        "sizeBytes": 1246153
+        "sha256": "05e0d8238f45528b8f71979932dc7306e58451339ab36aa89dce9f9052440761",
+        "sizeBytes": 1253232
       },
       {
         "path": "environment.obj",
@@ -1784,6 +1784,21 @@
       "mode": "lane_mirror",
       "laneCenterY": 12.030999999999999,
       "objFacesReversed": 4866
+    },
+    "floor": {
+      "mesh": "floor.obj",
+      "material": "floor.mtl",
+      "texture": "floor.png",
+      "bounds": [
+        -12.0153,
+        -8.844,
+        0.006,
+        22.0,
+        32.906,
+        0.006
+      ],
+      "textureSource": "projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\albedo.png"
     }
-  }
+  },
+  "floorMesh": "floor.obj"
 }

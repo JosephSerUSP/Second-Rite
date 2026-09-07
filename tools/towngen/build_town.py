@@ -278,6 +278,17 @@ SCREENS = {
         # leaves its manifest untouched rather than manufacturing a plate stub.
         modelled=True,
         environment_key="cortico_modelled",
+        # The adopted blend uses the shared level side-view fixture. Keep the
+        # canonical map pitch and express the optical correction through the
+        # authored target/eye/window values used by the projection tests.
+        camera_contract={
+            "targetZ": 2.2604,
+            "pitchDegrees": -17.5,
+            "eyeHeight": -1.4583333333,
+            "projectionScale": {"x": 0.94079629, "y": 0.9116197588},
+            "projectionWindowOffsetY": -107.16301268,
+            "tracking": {"minOffsetX": -300, "maxOffsetX": 300},
+        },
         intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
         npcs=[("scholar", "Scholar", "npc_scholar", 180.0),
@@ -649,6 +660,36 @@ def build_map(key, screen, map1):
                  "radius": item[7] if len(item) > 7 and item[7] is not None else 0.9}
                 for item in screen["doors"]]
 
+    camera_contract = screen.get("camera_contract", {})
+    tracking_contract = camera_contract.get("tracking", {})
+    projection_scale = camera_contract.get("projectionScale", {})
+    camera = {
+        "profile": "town_sideview",
+        "target": {"x": DEPTH_X, "y": lane["centre"],
+                   "z": camera_contract.get("targetZ", 0.0)},
+        "distance": 18.666666666666668,
+        "yawDegrees": 0.0,
+        "pitchDegrees": camera_contract.get("pitchDegrees", -17.5),
+        "eyeHeight": camera_contract.get("eyeHeight", 2.2604166666666665),
+        "fovDegrees": FOV_DEGREES,
+        "nearPlane": 0.05,
+        "farPlane": 128.0,
+        "projectionScale": {
+            "x": projection_scale.get("x", 1.0),
+            "y": projection_scale.get("y", 1.0),
+        },
+        "projectionFrame": {"canonicalCenterX": 213, "canonicalHorizonY": 66},
+        "tracking": {
+            "axis": "y", "center": lane["centre"],
+            "minOffsetX": tracking_contract.get("minOffsetX", 0),
+            "maxOffsetX": tracking_contract.get("maxOffsetX", 0),
+            "interpolationSpeed": 12.0,
+            "movementInterpolationSpeed": 14.0,
+            "animationFps": 8.0,
+        },
+    }
+    if "projectionWindowOffsetY" in camera_contract:
+        camera["projectionWindowOffsetY"] = camera_contract["projectionWindowOffsetY"]
     map_data = {
         "id": screen["id"],
         "title": screen["title"],
@@ -672,38 +713,7 @@ def build_map(key, screen, map1):
             "spawnAnchor": "spawn_player",
             "lane": lane_block(screen, lane),
             "blockedRanges": [],
-            "camera": {
-                "profile": "town_sideview",
-                "target": {"x": DEPTH_X, "y": lane["centre"], "z": 0.0},
-                # 18.6667 is solved from the actor - a 1.75 m Walker at 48
-                # native px - and is the number every authored blend uses.
-                # 21.1175 was a 2D-plate number the interior notes warn against
-                # inheriting for modelled work.
-                "distance": 18.666666666666668,
-                "yawDegrees": 0.0,
-                # All St. Maria side-view maps share the owner's downward
-                # pitched camera. Plates and world-space overlays must use the
-                # same contract or 3D event models will float against them.
-                "pitchDegrees": -17.5,
-                # Relative to target.z, so this is the contract's eye height.
-                # Without it the eye resolves onto the target plane, at the
-                # actor's feet.
-                "eyeHeight": 2.2604166666666665,
-                "fovDegrees": FOV_DEGREES,
-                "nearPlane": 0.05,
-                "farPlane": 128.0,
-                "projectionScale": {"x": 1.0, "y": 1.0},
-                # 110 predates the character floor limit; 66 is the current
-                # baseline in town-authoring-known-good.md.
-                "projectionFrame": {"canonicalCenterX": 213, "canonicalHorizonY": 66},
-                "tracking": {
-                    "axis": "y", "center": lane["centre"],
-                    "minOffsetX": 0, "maxOffsetX": 0,
-                    "interpolationSpeed": 12.0,
-                    "movementInterpolationSpeed": 14.0,
-                    "animationFps": 8.0,
-                },
-            },
+            "camera": camera,
             "doorways": doorways,
         },
         "events": events,

@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import shutil
 import sys
 from pathlib import Path
 
@@ -57,6 +58,7 @@ import stage_room_model as stager  # noqa: E402
 GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
 RUNTIME_Y_MODE = "sr_runtime_y_mode"
 LANE_CENTER = "sr_lane_center_y"
+FLOOR_TEXTURE_SOURCE = ROOT / "projects" / "hichaukitoden-game" / "assets" / "materials" / "old_limestone" / "albedo.png"
 
 
 def _areas(mesh, tag_index):
@@ -260,6 +262,43 @@ def runtime_bounds(bounds, scene):
     raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
 
 
+def configure_ground_tag(tag, source_material):
+    """Preserve the authored ground appearance on the allocation tag.
+
+    Ground faces temporarily use a semantic tag so the atlas allocator can
+    identify them after the source meshes are joined.  The tag is still a
+    real bake material, however: an empty material makes Cycles bake those
+    faces black.  Copy the source Principled surface values into the tag
+    before baking; the tag remains a semantic classifier without becoming an
+    appearance override.
+    """
+    tag.use_nodes = True
+    nodes = tag.node_tree.nodes
+    links = tag.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
+    source_bsdf = None
+    if source_material and source_material.use_nodes:
+        source_bsdf = source_material.node_tree.nodes.get("Principled BSDF")
+    if source_bsdf:
+        for name in ("Base Color", "Roughness", "Metallic", "IOR",
+                     "Specular IOR Level", "Emission Color",
+                     "Emission Strength"):
+            src = source_bsdf.inputs.get(name)
+            dst = bsdf.inputs.get(name)
+            if src is not None and dst is not None and not src.is_linked:
+                try:
+                    dst.default_value = src.default_value
+                except (TypeError, ValueError):
+                    pass
+    elif source_material:
+        bsdf.inputs["Base Color"].default_value = source_material.diffuse_color
+    tag.diffuse_color = (source_material.diffuse_color
+                         if source_material else (0.5, 0.5, 0.5, 1.0))
+
+
 def mirror_obj_file(path, centre):
     """Reflect the OBJ lane axis while preserving outward normals."""
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -282,6 +321,74 @@ def mirror_obj_file(path, centre):
             out.append(line)
     path.write_text("\n".join(out) + "\n", encoding="utf-8")
     return flipped
+
+
+def export_floor_mesh(output, scene):
+    """Export the walkable slab as a small, independently textured mesh.
+
+    The beauty atlas is for facades, roofs, foliage and props. A broad floor
+    plane consumes most of that UV space and its glancing-angle bake is not a
+    stable runtime surface. Keep the editable slab in the adopted blend, but
+    ship it as a separate tiled OBJ with the authored limestone albedo.
+    """
+    source = bpy.data.collections.get("TH_SOURCE")
+    grounds = [obj for obj in (source.all_objects if source else bpy.data.objects)
+               if obj.type == "MESH" and bool(obj.get("sr_ground", False))]
+    if not grounds:
+        raise RuntimeError("floor export requires an sr_ground mesh")
+    corners = [obj.matrix_world @ Vector(corner)
+               for obj in grounds for corner in obj.bound_box]
+    min_x = min(point.x for point in corners)
+    max_x = max(point.x for point in corners)
+    min_y = min(point.y for point in corners)
+    max_y = max(point.y for point in corners)
+    floor_z = max(point.z for point in corners) + 0.006
+    mode = scene.get(RUNTIME_Y_MODE, "direct")
+    if mode == "direct":
+        runtime_min_y, runtime_max_y = min_y, max_y
+    elif mode == "lane_mirror":
+        centre = float(scene[LANE_CENTER])
+        runtime_min_y, runtime_max_y = centre - max_y, centre - min_y
+    else:
+        raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
+
+    # The OBJ reader consumes (x, -z, y) and converts it to runtime (x, y, z).
+    vertices = [
+        (min_x, floor_z, -runtime_min_y),
+        (max_x, floor_z, -runtime_min_y),
+        (max_x, floor_z, -runtime_max_y),
+        (min_x, floor_z, -runtime_max_y),
+    ]
+    uvs = [
+        (0.0, 0.0), ((max_x - min_x) / 2.0, 0.0),
+        ((max_x - min_x) / 2.0, (runtime_max_y - runtime_min_y) / 2.0),
+        (0.0, (runtime_max_y - runtime_min_y) / 2.0),
+    ]
+    obj_lines = ["# Cortico walkable floor; generated from the adopted blend",
+                 "mtllib floor.mtl", "usemtl CorticoFloor"]
+    obj_lines.extend("v %.6f %.6f %.6f" % vertex for vertex in vertices)
+    obj_lines.extend("vt %.6f %.6f" % uv for uv in uvs)
+    # Blender's OBJ coordinates are x, z, -y.  A Blender +Z normal therefore
+    # becomes OBJ +Y, which the runtime reader maps back to world +Z.
+    obj_lines.extend(("vn 0.000000 1.000000 0.000000",
+                      "f 1/1/1 2/2/1 3/3/1",
+                      "f 1/1/1 3/3/1 4/4/1"))
+    (output / "floor.obj").write_text("\n".join(obj_lines) + "\n",
+                                      encoding="utf-8")
+    (output / "floor.mtl").write_text(
+        "newmtl CorticoFloor\n"
+        "Ka 1.000 1.000 1.000\n"
+        "Kd 1.000 1.000 1.000\n"
+        "map_Kd floor.png\n", encoding="utf-8")
+    if not FLOOR_TEXTURE_SOURCE.exists():
+        raise RuntimeError("floor texture source missing: %s" % FLOOR_TEXTURE_SOURCE)
+    shutil.copyfile(FLOOR_TEXTURE_SOURCE, output / "floor.png")
+    return {
+        "mesh": "floor.obj", "material": "floor.mtl", "texture": "floor.png",
+        "bounds": [round(min_x, 4), round(runtime_min_y, 4), round(floor_z, 4),
+                   round(max_x, 4), round(runtime_max_y, 4), round(floor_z, 4)],
+        "textureSource": str(FLOOR_TEXTURE_SOURCE.relative_to(ROOT)),
+    }
 
 
 def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
@@ -335,6 +442,9 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         render.objects.link(copy)
         copy.hide_set(False)
         if bool(obj.get("sr_ground", False)):
+            source_material = next((slot.material for slot in obj.material_slots
+                                    if slot.material), None)
+            configure_ground_tag(ground_tag, source_material)
             # Tag with a dedicated material slot. Object identity is lost in the
             # join, but material_index survives it, so this is how the allocator
             # finds the ground faces afterwards.
@@ -450,6 +560,7 @@ def main() -> None:
                                      bake_samples=args.samples,
                                      flat_bake=True)
     scene = bpy.context.scene
+    floor_report = export_floor_mesh(output, scene)
     if scene.get(RUNTIME_Y_MODE, "direct") == "lane_mirror":
         centre = float(scene[LANE_CENTER])
         obj_path = output / "environment.obj"
@@ -463,10 +574,19 @@ def main() -> None:
             "laneCenterY": centre,
             "objFacesReversed": flipped,
         }
+        manifest["floorMesh"] = floor_report["mesh"]
+        manifest.setdefault("provenance", {})["floor"] = floor_report
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n",
                                 encoding="utf-8")
         print(f"[exterior] mirrored {flipped} OBJ faces into engine lane space",
               flush=True)
+    else:
+        manifest_path = output / "environment.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["floorMesh"] = floor_report["mesh"]
+        manifest.setdefault("provenance", {})["floor"] = floor_report
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n",
+                                encoding="utf-8")
     print("EXTERIOR 3D EXPORT OK")
 
 

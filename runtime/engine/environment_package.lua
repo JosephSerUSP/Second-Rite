@@ -126,6 +126,10 @@ function environment_package.load(path)
     if manifest.collisionMesh ~= nil and manifest.collisionMesh ~= json.null then
         collisionMesh = asset("collisionMesh", "collisionMesh")
     end
+    local floorMesh = nil
+    if manifest.floorMesh ~= nil and manifest.floorMesh ~= json.null then
+        floorMesh = asset("floorMesh", "floorMesh")
+    end
     local bakedLighting = manifest.bakedLighting
     if bakedLighting == nil then
         bakedLighting = (preRendered == nil)
@@ -139,6 +143,7 @@ function environment_package.load(path)
         materialLibrary = asset("materialLibrary", "materialLibrary"),
         textureAtlas = asset("textureAtlas", "textureAtlas"),
         collisionMesh = collisionMesh,
+        floorMesh = floorMesh,
         bounds = manifest.bounds,
         anchors = manifest.anchors,
         preRendered = preRendered,

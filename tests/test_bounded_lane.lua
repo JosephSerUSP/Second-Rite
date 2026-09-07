@@ -57,6 +57,39 @@ check(state.y <= state.maxY + 0.001, "movement clamps at the authored east bound
 for _ = 1, 400 do lane.move(game, -1) end
 check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound")
 
+-- The adopted Cortico model is the first long, runtime-mesh lane. Its camera
+-- must agree with the Blender side-view fixture and follow the actor at both
+-- ends; otherwise the world can pass anchor validation while the player and
+-- floor are outside the rendered window.
+local CORTICO = 26
+exploration.loadMap(game, loader.getMapIndex(CORTICO))
+local cortico = game.townTraversal
+local corticoManifest = cortico.environment.manifest
+check(corticoManifest.preRendered == nil,
+    "Cortico uses the runtime mesh path, not a preRendered plate")
+check(corticoManifest.provenance.runtimeAdapter.mode == "lane_mirror",
+    "Cortico records the explicit lane mirror adapter")
+check(corticoManifest.floorMesh == "floor.obj",
+    "Cortico publishes a separate tiled floor mesh")
+check(math.abs(cortico.camera.pitchDegrees + 17.5) < 0.000001,
+    "Cortico preserves the canonical -17.5 degree map pitch")
+check(math.abs(cortico.camera.target.z - 2.2604) < 0.0001,
+    "Cortico camera uses the authored optical target height")
+check(math.abs(cortico.camera.eyeHeight + 1.4583333333) < 0.0001,
+    "Cortico camera uses the authored optical eye offset")
+check(math.abs(cortico.camera.projectionWindowOffsetY + 107.16301268) < 0.0001,
+    "Cortico camera uses the authored optical vertical shift")
+check(cortico.tracking.minOffsetX < 0 and cortico.tracking.maxOffsetX > 0,
+    "Cortico camera tracking follows the long lane")
+cortico.y = cortico.minY
+lane.update(game)
+check(cortico.camera.projectionWindowOffsetX > 0,
+    "Cortico west bound pans toward the actor")
+cortico.y = cortico.maxY
+lane.update(game)
+check(cortico.camera.projectionWindowOffsetX < 0,
+    "Cortico east bound pans toward the actor")
+
 -- Arrival anchors: entering a screen through a named door must land on that
 -- door, not on the destination's default spawn.
 -- The Praca is modelled geometry now, and its churchyard exit is a stair partway

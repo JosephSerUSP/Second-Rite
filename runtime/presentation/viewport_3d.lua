@@ -2860,7 +2860,16 @@ local function drawWorldSpace(session, authoredCamera)
             buildProfiler.add("materialize.placedVertices", #vertices)
             local gpuSpan = buildProfiler.span("materialize.placedGpuMeshCreate", "graphics")
             local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "static")
-            if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
+            if modelGroup.texture then
+                mesh:setTexture(modelGroup.texture)
+                if spec.textureWrap then
+                    -- The adopted town floor is a real tiled surface rather
+                    -- than an atlas island. Its UVs intentionally exceed
+                    -- [0,1]; keep repeat wrapping local to that placement so
+                    -- the shared beauty atlas remains clamped.
+                    modelGroup.texture:setWrap(spec.textureWrap, spec.textureWrap)
+                end
+            end
             gpuSpan()
             placed[#placed + 1] = {
                 mesh = mesh, model = true, vertices = vertices,
@@ -3009,6 +3018,12 @@ end
             { model = environment.renderMesh },
             "town-environment:" .. environment.manifestPath,
             0, 0, "x"))
+        if environment.floorMesh then
+            queuePlacedModels(ensurePlacedModel(
+                { model = environment.floorMesh, textureWrap = "repeat" },
+                "town-floor:" .. environment.manifestPath,
+                0, 0, "x"))
+        end
     end
 
     for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do

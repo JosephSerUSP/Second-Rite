@@ -6,8 +6,8 @@ def material(core, semantic_id):
     return core.make_material(f"sr_{semantic_id}", semantic_id=semantic_id)
 
 
-def box(name, parent, size, location, material_value, core, *, rotation=(0, 0, 0), bevel=0.0):
-    import bpy
+def box_geometry(size):
+    """Return (vertices, faces) for an axis-aligned box with outward-facing CCW quad winding."""
     sx, sy, sz = (float(value) for value in size)
     vertices = [
         (-sx / 2, -sy / 2, -sz / 2), (sx / 2, -sy / 2, -sz / 2),
@@ -15,10 +15,23 @@ def box(name, parent, size, location, material_value, core, *, rotation=(0, 0, 0
         (-sx / 2, -sy / 2, sz / 2), (sx / 2, -sy / 2, sz / 2),
         (sx / 2, sy / 2, sz / 2), (-sx / 2, sy / 2, sz / 2),
     ]
+    # Each face is ordered CCW when viewed from outside the box,
+    # ensuring outward-pointing surface normals:
+    # 0: bottom (-Z), 1: top (+Z), 2: front (-Y), 3: right (+X), 4: back (+Y), 5: left (-X)
     faces = [
-        (0, 1, 2, 3), (4, 7, 6, 5), (0, 4, 5, 1),
-        (1, 5, 6, 2), (2, 6, 7, 3), (4, 0, 3, 7),
+        (0, 3, 2, 1),
+        (4, 5, 6, 7),
+        (0, 1, 5, 4),
+        (1, 2, 6, 5),
+        (2, 3, 7, 6),
+        (3, 0, 4, 7),
     ]
+    return vertices, faces
+
+
+def box(name, parent, size, location, material_value, core, *, rotation=(0, 0, 0), bevel=0.0):
+    import bpy
+    vertices, faces = box_geometry(size)
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.update()

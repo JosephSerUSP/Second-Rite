@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import math
 
-from tree_generator import Skeleton
+from tree_generator import Skeleton, crown_bias_vector
 
 
 def _add(a, b): return tuple(x + y for x, y in zip(a, b))
@@ -185,6 +185,7 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
     corner, in face order -- the layout Blender's loop-indexed UV layer wants.
     """
     spec = skeleton.spec
+    crown_bias = crown_bias_vector(spec)
     by_index = {segment.index: segment for segment in skeleton.segments}
     # Always a crossed pair.  A single plane per carrier disappears edge-on,
     # which read as a sparse, gap-ridden crown rather than as a cheap one;
@@ -234,10 +235,13 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
                 # tree the vertex budget clamped the chain before that showed,
                 # but a shrub's short sprays permit a long chain and it ballooned
                 # to roughly three times the authored crown radius.
-                span = math.hypot(centre[0], centre[1])
+                span = math.hypot(centre[0] - crown_bias[0],
+                                  centre[1] - crown_bias[1])
                 if span > spec.crown_radius:
                     pull = spec.crown_radius / span
-                    centre = (centre[0] * pull, centre[1] * pull, centre[2])
+                    centre = (crown_bias[0] + (centre[0] - crown_bias[0]) * pull,
+                              crown_bias[1] + (centre[1] - crown_bias[1]) * pull,
+                              centre[2])
             for cross in range(crossings):
                 u = axis if not cross else _unit(_cross(tangent, axis))
                 base = len(verts)

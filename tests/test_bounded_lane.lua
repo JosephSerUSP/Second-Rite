@@ -7,6 +7,8 @@ local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
 local lane = require("engine.bounded_lane")
+local interpreter = require("engine.interpreter")
+local director = require("engine.director")
 
 local passed, failed = 0, 0
 local function check(condition, message)
@@ -131,6 +133,39 @@ local function findEvent(map, instanceId)
         if event.instanceId == instanceId then return event end
     end
     return nil
+end
+
+-- Both authored NPC interactions must be at their runtime anchors and compile
+-- through the same production interpreter/GraphWalker path as a real Up press.
+-- town-walk deliberately covers doorway transfers, not button-driven NPC
+-- interaction, so this is a separate focused proof rather than a metadata
+-- assertion.
+for _, npc in ipairs({
+    { instanceId = "st-maria-cortico-scholar", anchor = "npc_scholar" },
+    { instanceId = "st-maria-cortico-euler", anchor = "npc_euler" },
+}) do
+    local event = findEvent(loader.maps[loader.getMapIndex(CORTICO)], npc.instanceId)
+    local anchor = cortico.environment.anchors[npc.anchor]
+    check(event ~= nil and event.trigger == "interact",
+        npc.instanceId .. " is an interactable NPC")
+    check(anchor ~= nil and event ~= nil
+            and math.abs(event.worldPosition[1] - anchor.position[1]) < 0.001
+            and math.abs(event.worldPosition[2] - anchor.position[2]) < 0.001,
+        npc.instanceId .. " world position matches its environment anchor")
+    local graph = interpreter.runInteractive(event.commands, {
+        session = game, loader = loader, event = event,
+        eventTitle = event.name, recoverParty = function() end,
+    })
+    local walker = director.GraphWalker.new(game, graph)
+    local textNodes, steps = 0, 0
+    while walker:getCurrentNode() and steps < 200 do
+        local node = walker:getCurrentNode()
+        if node.type == "TEXT" then textNodes = textNodes + 1 end
+        walker:advance()
+        steps = steps + 1
+    end
+    check(textNodes > 0 and steps < 200,
+        npc.instanceId .. " interaction compiles and reaches dialogue")
 end
 
 for _, entry in ipairs(townMaps) do

@@ -39,6 +39,7 @@ reinterpret an older scene.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import shutil
@@ -59,6 +60,14 @@ GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
 RUNTIME_Y_MODE = "sr_runtime_y_mode"
 LANE_CENTER = "sr_lane_center_y"
 FLOOR_TEXTURE_SOURCE = ROOT / "projects" / "hichaukitoden-game" / "assets" / "materials" / "old_limestone" / "albedo.png"
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _areas(mesh, tag_index):
@@ -324,55 +333,81 @@ def mirror_obj_file(path, centre):
 
 
 def export_floor_mesh(output, scene):
-    """Export the walkable slab as a small, independently textured mesh.
+    """Export the authored walkable grid as an independently textured mesh.
 
     The beauty atlas is for facades, roofs, foliage and props. A broad floor
     plane consumes most of that UV space and its glancing-angle bake is not a
-    stable runtime surface. Keep the editable slab in the adopted blend, but
-    ship it as a separate tiled OBJ with the authored limestone albedo.
+    stable runtime surface. The adopted blend therefore carries a separate
+    ``sr_floor_mesh`` grid. Export its actual faces and vertex heights rather
+    than replacing it with a giant quad: future terrain edits remain visible
+    at the same world-unit resolution in the runtime package.
     """
     source = bpy.data.collections.get("TH_SOURCE")
     grounds = [obj for obj in (source.all_objects if source else bpy.data.objects)
-               if obj.type == "MESH" and bool(obj.get("sr_ground", False))]
-    if not grounds:
-        raise RuntimeError("floor export requires an sr_ground mesh")
-    corners = [obj.matrix_world @ Vector(corner)
-               for obj in grounds for corner in obj.bound_box]
-    min_x = min(point.x for point in corners)
-    max_x = max(point.x for point in corners)
-    min_y = min(point.y for point in corners)
-    max_y = max(point.y for point in corners)
-    floor_z = max(point.z for point in corners) + 0.006
+               if obj.type == "MESH" and bool(obj.get("sr_floor_mesh", False))]
+    if len(grounds) != 1:
+        raise RuntimeError("floor export requires exactly one sr_floor_mesh object")
+    terrain = grounds[0]
+    spacing = float(terrain.get("sr_floor_grid_spacing", 0.0))
+    if spacing <= 0.0:
+        raise RuntimeError("sr_floor_mesh requires positive sr_floor_grid_spacing")
+    texture_period = float(terrain.get("sr_floor_texture_period", 2.0))
+    if texture_period <= 0.0:
+        raise RuntimeError("sr_floor_mesh requires positive sr_floor_texture_period")
+    terrain.data.update()
+    world_matrix = terrain.matrix_world
+    normal_matrix = world_matrix.to_3x3().inverted().transposed()
+    points = [world_matrix @ vertex.co for vertex in terrain.data.vertices]
+    if not points or not terrain.data.polygons:
+        raise RuntimeError("sr_floor_mesh must contain vertices and faces")
+    min_x = min(point.x for point in points)
+    max_x = max(point.x for point in points)
+    min_y = min(point.y for point in points)
+    max_y = max(point.y for point in points)
     mode = scene.get(RUNTIME_Y_MODE, "direct")
-    if mode == "direct":
-        runtime_min_y, runtime_max_y = min_y, max_y
-    elif mode == "lane_mirror":
+    if mode == "lane_mirror":
         centre = float(scene[LANE_CENTER])
         runtime_min_y, runtime_max_y = centre - max_y, centre - min_y
+    elif mode == "direct":
+        runtime_min_y, runtime_max_y = min_y, max_y
     else:
         raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
 
     # The OBJ reader consumes (x, -z, y) and converts it to runtime (x, y, z).
-    vertices = [
-        (min_x, floor_z, -runtime_min_y),
-        (max_x, floor_z, -runtime_min_y),
-        (max_x, floor_z, -runtime_max_y),
-        (min_x, floor_z, -runtime_max_y),
-    ]
-    uvs = [
-        (0.0, 0.0), ((max_x - min_x) / 2.0, 0.0),
-        ((max_x - min_x) / 2.0, (runtime_max_y - runtime_min_y) / 2.0),
-        (0.0, (runtime_max_y - runtime_min_y) / 2.0),
-    ]
-    obj_lines = ["# Cortico walkable floor; generated from the adopted blend",
+    # Keep the source vertex heights, with a tiny clearance over the beauty
+    # mesh so the independent floor cannot z-fight with the baked ground.
+    clearance = 0.006
+    vertices = []
+    for point in points:
+        runtime_y = centre - point.y if mode == "lane_mirror" else point.y
+        vertices.append((point.x, point.z + clearance, -runtime_y))
+    uvs = []
+    for point in points:
+        runtime_y = centre - point.y if mode == "lane_mirror" else point.y
+        uvs.append(((point.x - min_x) / texture_period,
+                    (runtime_y - runtime_min_y) / texture_period))
+
+    normals = []
+    faces = []
+    for poly in terrain.data.polygons:
+        normal = (normal_matrix @ poly.normal).normalized()
+        if mode == "lane_mirror":
+            normal = Vector((normal.x, -normal.y, normal.z))
+        normals.append((normal.x, normal.z, -normal.y))
+        indices = list(poly.vertices)
+        if mode == "lane_mirror":
+            indices.reverse()
+        faces.append((indices, len(normals)))
+
+    obj_lines = ["# Cortico world-unit floor grid; generated from the adopted blend",
                  "mtllib floor.mtl", "usemtl CorticoFloor"]
     obj_lines.extend("v %.6f %.6f %.6f" % vertex for vertex in vertices)
     obj_lines.extend("vt %.6f %.6f" % uv for uv in uvs)
-    # Blender's OBJ coordinates are x, z, -y.  A Blender +Z normal therefore
-    # becomes OBJ +Y, which the runtime reader maps back to world +Z.
-    obj_lines.extend(("vn 0.000000 1.000000 0.000000",
-                      "f 1/1/1 2/2/1 3/3/1",
-                      "f 1/1/1 3/3/1 4/4/1"))
+    obj_lines.extend("vn %.6f %.6f %.6f" % normal for normal in normals)
+    for indices, normal_index in faces:
+        obj_lines.append("f " + " ".join(
+            "%d/%d/%d" % (index + 1, index + 1, normal_index)
+            for index in indices))
     (output / "floor.obj").write_text("\n".join(obj_lines) + "\n",
                                       encoding="utf-8")
     (output / "floor.mtl").write_text(
@@ -383,11 +418,20 @@ def export_floor_mesh(output, scene):
     if not FLOOR_TEXTURE_SOURCE.exists():
         raise RuntimeError("floor texture source missing: %s" % FLOOR_TEXTURE_SOURCE)
     shutil.copyfile(FLOOR_TEXTURE_SOURCE, output / "floor.png")
+    floor_files = {name: output / name for name in ("floor.obj", "floor.mtl", "floor.png")}
     return {
         "mesh": "floor.obj", "material": "floor.mtl", "texture": "floor.png",
-        "bounds": [round(min_x, 4), round(runtime_min_y, 4), round(floor_z, 4),
-                   round(max_x, 4), round(runtime_max_y, 4), round(floor_z, 4)],
-        "textureSource": str(FLOOR_TEXTURE_SOURCE.relative_to(ROOT)),
+        "sourceObject": terrain.name,
+        "gridSpacingWorld": spacing,
+        "texturePeriodWorld": texture_period,
+        "vertexCount": len(vertices), "faceCount": len(faces),
+        "bounds": [round(min_x, 4), round(runtime_min_y, 4),
+                   round(min(point.z for point in points) + clearance, 4),
+                   round(max_x, 4), round(runtime_max_y, 4),
+                   round(max(point.z for point in points) + clearance, 4)],
+        "textureSource": FLOOR_TEXTURE_SOURCE.relative_to(ROOT).as_posix(),
+        "textureSourceSha256": sha256_file(FLOOR_TEXTURE_SOURCE),
+        "sha256": {name: sha256_file(path) for name, path in floor_files.items()},
     }
 
 
@@ -561,6 +605,9 @@ def main() -> None:
                                      flat_bake=True)
     scene = bpy.context.scene
     floor_report = export_floor_mesh(output, scene)
+    source_visual_adjustment = scene.get("sr_visual_adjustment_cortico")
+    if source_visual_adjustment:
+        floor_report["sourceVisualAdjustment"] = str(source_visual_adjustment)
     if scene.get(RUNTIME_Y_MODE, "direct") == "lane_mirror":
         centre = float(scene[LANE_CENTER])
         obj_path = output / "environment.obj"

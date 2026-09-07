@@ -1408,6 +1408,7 @@ local function drawTownPrerender(session)
     -- inventing a second event representation or making the plate itself a
     -- visual input for another asset.
     local arrowModels = {}
+    local transition_marker = require("presentation.transition_marker")
     local function townArrowModel(path)
         if not arrowModels[path] then
             arrowModels[path] = require("presentation.obj_model").load(path)
@@ -1469,35 +1470,25 @@ local function drawTownPrerender(session)
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
                         if a and b and c then
                             local function arrowPoint(vertex)
-                                local lx = vertex[1] * modelScale
-                                local ly = vertex[2] * modelScale
-                                local lz = vertex[3] * modelScale
                                 local worldX, worldY, worldZ
                                 if isTransitionArrow then
-                                    if arrowDirection == "right" then
-                                        local tipY = math.min(arrowY, state.maxY - 0.15)
-                                        tipY = math.max(tipY, state.minY + 0.15 + arrowLen)
-                                        worldY = tipY - (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    elseif arrowDirection == "left" then
-                                        local tipY = math.max(arrowY, state.minY + 0.15)
-                                        tipY = math.min(tipY, state.maxY - 0.15 - arrowLen)
-                                        worldY = tipY + (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    else -- "away" (doors, gates, stairs into depth)
-                                        local clampedY = math.min(state.maxY - arrowRad, math.max(state.minY + arrowRad, arrowY))
-                                        local tiltAngle = math.rad(22)
-                                        local cosT, sinT = math.cos(tiltAngle), math.sin(tiltAngle)
-                                        worldY = clampedY + lx
-                                        worldX = depthX - 0.10 * modelScale + (lz * cosT - ly * sinT)
-                                        worldZ = groundZ + 0.15 + (lz * sinT + ly * cosT)
-                                    end
+                                    local clampedY = math.min(state.maxY - arrowRad,
+                                        math.max(state.minY + arrowRad, arrowY))
+                                    worldX, worldY, worldZ = transition_marker.worldPoint(
+                                        arrowDirection, vertex, {
+                                            scale = modelScale,
+                                            depthX = depthX,
+                                            laneY = clampedY,
+                                            arrowY = clampedY,
+                                            groundZ = groundZ,
+                                            arrowLength = arrowLen,
+                                            minY = state.minY,
+                                            maxY = state.maxY,
+                                        })
                                 else
-                                    worldX = depthX + lx
-                                    worldY = imageY + ly
-                                    worldZ = groundZ + lz
+                                    worldX = depthX + vertex[1] * modelScale
+                                    worldY = imageY + vertex[2] * modelScale
+                                    worldZ = groundZ + vertex[3] * modelScale
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end

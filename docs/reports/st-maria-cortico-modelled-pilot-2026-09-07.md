@@ -1,0 +1,111 @@
+# St. Maria Cortico modelled pilot — 2026-09-07
+
+## Result
+
+The Cortico pilot keeps the canonical map camera at `-17.5` degrees. The
+visible composition correction is authored geometry: the near parapets were
+lowered in the adopted source blend, while their lane spans and gameplay
+anchors were not moved. The floor is now an independent source-authored grid,
+not a giant atlas UV island. Flat doorway markers use the shared orientation
+contract and no longer pitch upward toward the sky.
+
+The source authority is:
+
+`projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend`
+
+The absolute workspace file is
+`C:/Users/josep/.codex/worktrees/6d7d/Hichaukitoden/projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend`.
+It was edited directly after adoption; the recipe is not used to regenerate
+over it.
+
+## Resolved contract
+
+The runtime package is
+`projects/hichaukitoden-game/assets/environments/st_maria_town/cortico_modelled/`
+and map 26 is `projects/hichaukitoden-game/data/maps/26.json`. Its camera keeps
+the authored `pitchDegrees=-17.5`, target Z `2.2604`, eye-height offset
+`-1.4583333333`, projection scale `{x=0.94079629,y=0.9116197588}`, vertical
+window offset `-107.16301268`, and west/east tracking of `-300/+300`.
+
+The floor source object is `CORTICO_floor_grid`. It exports 1 m world-unit
+spacing, a 2 m texture period, 1,548 vertices, and 1,470 faces, with authored
+vertex heights retained and a 0.006 m clearance above the beauty mesh. The
+package has a separate `floor.obj`, `floor.mtl`, and `floor.png`; its
+manifest records the source object, counts, source texture, and SHA-256 hashes.
+The runtime loader rejects a floor mesh with missing or malformed provenance.
+The former `CORTICO_ground` remains in the blend as an authoring reference but
+is no longer marked for beauty-atlas export, so the runtime floor is not
+duplicated inside the facade UV allocation.
+
+The floor diagnosis was not “the camera pitch is wrong.” The earlier runtime
+floor was one giant quad (four vertices, two faces) covering roughly 17 by 20
+world units. Its atlas-style UV treatment was then asked to represent a
+glancing, large surface, producing shearing/stripes and a visually uniform
+floor. A separate, explicitly spaced grid makes the interpolation and texture
+repeat visible at the authored resolution while leaving gameplay elevation
+flat in this pilot.
+
+The west/east readability issue had a separate cause: the source parapet body
+was 0.82 m high plus its coping, about 0.94 m total at this camera. The adopted
+blend now uses a 0.58 m body with the coping at a 0.70 m total top. The wall
+spans and anchors are unchanged. This leaves the player fully readable at the
+west and east bounds in both review surfaces.
+
+Doorway arrows are authored with explicit `direction` values (`left`,
+`right`, or `away`). The shared `presentation.transition_marker` contract
+maps the OBJ shaft to lane Y for side exits and world X for depth exits. A flat
+depth exit keeps its radial thickness at a fixed presentation height; it does
+not invent an elevation angle. The previous town compositor added a 22-degree
+depth/Z tilt, which made doors and flat depth exits point at the sky. The
+focused negative test rejects an upward-pointing flat-depth marker.
+
+## Runtime semantics
+
+`town-walk` starts at the system spawn, follows the authored bounded-lane
+doorway graph breadth-first, moves with production `lane.update` toward anchors,
+pushes to the appropriate bound for edge doors, calls production
+`lane.eventFor`, executes the authored `LOAD_MAP` commands, and logs each
+arrival. It proves transfer reachability and door paths. It does not press the
+NPC interaction button. The Scholar and Euler are therefore checked separately
+at their real Cortico anchors by compiling their authored command lists through
+`interpreter.runInteractive` and walking them with the production
+`director.GraphWalker`; both reach dialogue nodes. The visible proof frames
+also show the actors and continuous ground.
+
+The generated town graph currently reports 35 doorway edges/arrival anchors.
+The only town-walk unreachable map remains map 28, the pre-existing interior
+case outside this Cortico package; it is not treated as a Cortico transfer
+failure.
+
+## Verification and evidence
+
+The source-side floor exporter test passes its positive and negative cases:
+`tools/blender/tests/test_cortico_floor_export.py`. Runtime package tests cover
+OBJ parsing, manifest counts, all three floor-file hashes, missing provenance,
+and malformed hashes. The focused marker test is
+`tests/test_transition_marker.lua`.
+
+The current proof captures are:
+
+- Wide: `out/st-maria-cortico/wide-proof-final-grid/26-west.png`,
+  `26-centre.png`, and `26-east.png`.
+- Classic: `out/st-maria-cortico/classic-proof-final-grid/26-west.png`,
+  `26-centre.png`, and `26-east.png`.
+
+Those six frames show the corrected west/centre/east composition: the player
+is visible above the lowered parapets, the floor is continuous and no longer
+sheary, and the NPC/architecture placements remain readable. The town-walk
+log is `out/st-maria-cortico/town-walk-final-grid.log`.
+
+The live staged verification uses the canonical exporter boundary and the full
+LÖVE runtime. Native coverage remains limited where the local Effekseer shim is
+unavailable: the unit lane reports that seven `test_map_transfer` world-effect
+assertions were not exercised. That is an environment limitation, not a claim
+that those assertions passed natively.
+
+## Remaining scope
+
+The grid carries visual per-vertex heights, but the bounded-lane pilot still
+walks a flat authored `groundZ`; there is no full terrain-elevation traversal
+contract yet. The distant background/sky layer is a separate task and is not
+implemented here. No global sky or default background behavior was changed.

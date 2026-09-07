@@ -32,6 +32,10 @@ local function readFile(relPath)
     return content
 end
 
+local function sha256(data)
+    return love.data.encode("string", "hex", love.data.hash("sha256", data))
+end
+
 function M.run()
     local packageDir = "exports/environments/town_slice_spike"
 
@@ -155,6 +159,28 @@ function M.run()
     check(aliciaPkg ~= nil, "loaded alicias_padaria_3d environment package")
     check(aliciaPkg.bakedLighting == true, "live-mesh alicias_padaria_3d defaults to bakedLighting == true")
 
+    -- 9. Separate world-unit floor mesh contract (#1068)
+    local corticoRoot = "assets/environments/st_maria_town/cortico_modelled"
+    local corticoFilesRoot = "projects/hichaukitoden-game/" .. corticoRoot
+    local corticoPkg = environment_package.load(corticoRoot .. "/environment.json")
+    local floorProvenance = corticoPkg.manifest.provenance.floor
+    check(corticoPkg.floorMesh == corticoRoot .. "/floor.obj",
+        "Cortico resolves its separate floor mesh relative to the package")
+    check(corticoPkg.manifest.floorMesh == "floor.obj",
+        "Cortico manifest names floor.obj")
+    check(floorProvenance.sourceObject == "CORTICO_floor_grid",
+        "Cortico floor provenance names the source grid")
+    check(floorProvenance.gridSpacingWorld == 1,
+        "Cortico floor provenance records one-world-unit spacing")
+    check(floorProvenance.vertexCount == 1548 and floorProvenance.faceCount == 1470,
+        "Cortico floor provenance records the authored grid counts")
+    local floorModel = obj_model.parse(readFile(corticoFilesRoot .. "/floor.obj"), "cortico floor.obj")
+    check(floorModel.vertexCount > 0, "Cortico floor OBJ parses through the runtime loader")
+    for _, file in ipairs({ "floor.obj", "floor.mtl", "floor.png" }) do
+        check(sha256(readFile(corticoFilesRoot .. "/" .. file)) == floorProvenance.sha256[file],
+            "Cortico floor provenance hash matches " .. file)
+    end
+
     mockManifest.collisionMesh = nil
     mockManifest.bakedLighting = false
     mockJson = json.encode(mockManifest)
@@ -165,6 +191,30 @@ function M.run()
     mockJson = json.encode(mockManifest)
     local trueBakedPkg = environment_package.load("test/no_collision_env.json")
     check(trueBakedPkg.bakedLighting == true, "explicit bakedLighting: true is preserved")
+
+    mockManifest.floorMesh = "floor.obj"
+    mockManifest.provenance = nil
+    mockJson = json.encode(mockManifest)
+    local okMissingFloorProvenance = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okMissingFloorProvenance,
+        "floorMesh without provenance.floor fails loudly")
+
+    mockManifest.provenance = { floor = {
+        sourceObject = "CORTICO_floor_grid", gridSpacingWorld = 1,
+        texturePeriodWorld = 2, vertexCount = 1548, faceCount = 1470,
+        textureSource = "old_limestone/albedo.png",
+        sha256 = { ["floor.obj"] = string.rep("0", 64),
+            ["floor.mtl"] = string.rep("0", 64), ["floor.png"] = "bad" },
+    } }
+    mockJson = json.encode(mockManifest)
+    local okBadFloorHash = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okBadFloorHash,
+        "floorMesh with malformed provenance hash fails loudly")
+
+    mockManifest.floorMesh = nil
+    mockManifest.provenance = nil
+    mockManifest.bakedLighting = nil
+    mockJson = json.encode(mockManifest)
 
     love.filesystem.read = originalRead
 

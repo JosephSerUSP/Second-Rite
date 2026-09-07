@@ -31,6 +31,16 @@ and records the adapter in the package provenance. This keeps the lane
 conversion shared and explicit instead of embedding a map-specific exporter
 path.
 
+An object with `sr_floor_mesh=true` is a separate walkable-floor source, not a
+beauty-atlas surface. The exporter requires exactly one such mesh, positive
+`sr_floor_grid_spacing` and `sr_floor_texture_period` properties, and preserves
+its authored per-vertex Z values in `floor.obj`; the source grid must not also
+be marked `sr_export=true`. The package manifest points `floorMesh` at the
+separate OBJ and records `provenance.floor` with the source object, world-unit
+spacing, texture period, vertex/face counts, texture dependency, and SHA-256
+hashes for `floor.obj`, `floor.mtl`, and `floor.png`. The runtime package
+loader rejects a malformed floor contract rather than silently dropping it.
+
 `TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights are
 valid source inputs for illumination but cannot be the only selected-to-active
 bake source. `TH_RENDER` must contain a mesh. If render mesh metadata is

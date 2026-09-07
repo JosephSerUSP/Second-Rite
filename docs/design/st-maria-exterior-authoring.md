@@ -8,6 +8,17 @@ derived on paper.
 The interior counterpart is [`st-maria-interior-authoring.md`](st-maria-interior-authoring.md).
 The vocabulary is `tools/blender/recipes/exterior.py`.
 
+### Separate floor surface
+
+The modelled-exterior floor is authored as its own world-unit grid, separate
+from the facade/prop beauty atlas. The current Cortico source uses one-metre
+grid spacing and a two-metre limestone texture period; the exporter preserves
+the grid's vertex heights in a separate runtime OBJ/MTL/PNG package. This is
+the source-authority contract for terrain appearance, not permission to add
+full elevation traversal: the bounded-lane gameplay pilot remains flat at its
+authored `groundZ` until movement, collision, and arrival semantics are
+separately extended. Do not fold the floor back into a giant atlas UV island.
+
 > **There is no worked example, on purpose.** One screen (Market Row) was built
 > to derive these numbers and was not good enough to stand as a template, so it
 > was not landed. PRs #941 and #942 converged on one identical room because the

@@ -6,24 +6,24 @@
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    -12.0153,
-    -8.844,
-    -0.6,
+    3.1024,
+    -3.619,
+    -0.1102,
     23.3,
-    32.906,
+    27.681,
     7.57
   ],
   "stats": {
-    "triangleCount": 4866,
-    "vertexCount": 3299,
+    "triangleCount": 4854,
+    "vertexCount": 3291,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1253232,
-    "renderMeshSizeBytes": 479722,
-    "packageSizeBytes": 1733756
+    "pngSizeBytes": 1208625,
+    "renderMeshSizeBytes": 480907,
+    "packageSizeBytes": 1690334
   },
   "anchors": {
     "spawn_player": {
@@ -179,7 +179,7 @@
     "summary": {
       "errorCount": 0,
       "warningCount": 2,
-      "objectCount": 88
+      "objectCount": 89
     },
     "semantics": {
       "roleAssignment": "explicit_collection_membership",
@@ -190,10 +190,10 @@
     "collections": {
       "TH_SOURCE": {
         "present": true,
-        "objectCount": 58,
+        "objectCount": 59,
         "types": {
           "LIGHT": 3,
-          "MESH": 55
+          "MESH": 56
         },
         "required": true,
         "exported": true
@@ -373,6 +373,18 @@
         ]
       },
       {
+        "name": "CORTICO_floor_grid",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
         "name": "CORTICO_ground",
         "type": "MESH",
         "roles": [
@@ -489,7 +501,7 @@
         "worldLocation": [
           4.2,
           9.953,
-          0.41
+          0.29
         ]
       },
       {
@@ -501,7 +513,7 @@
         "worldLocation": [
           4.2,
           9.953,
-          0.88
+          0.64
         ]
       },
       {
@@ -789,7 +801,7 @@
         "worldLocation": [
           4.2,
           -10.172,
-          0.41
+          0.29
         ]
       },
       {
@@ -801,7 +813,7 @@
         "worldLocation": [
           4.2,
           -10.172,
-          0.88
+          0.64
         ]
       },
       {
@@ -1418,7 +1430,7 @@
         "code": "unassigned_object",
         "message": "object 'TH_SUN' is not in a known scene-contract collection and will not be exported",
         "object": "TH_SUN",
-        "path": "objects[78].collections"
+        "path": "objects[79].collections"
       }
     ]
   },
@@ -1429,8 +1441,8 @@
     "source": {
       "blend": {
         "path": "st_maria_cortico.blend",
-        "sha256": "c5ba29f3e1a018731cfc969ba3a1fd890fdf62142028a8b8424764f1e6ad0c36",
-        "sizeBytes": 192845
+        "sha256": "7ab39d4b399544ec3cfbf5ad07c9583ff14b3b9af1aac0d6e385bd113672428d",
+        "sizeBytes": 225556
       },
       "dependencies": [
         {
@@ -1480,18 +1492,6 @@
           "sha256": "4a0f341781dcb49698af98ac2055a5861d39a452bdad1fc6aa0133d2c6a133f1",
           "sizeBytes": 230612,
           "name": "albedo.png.007"
-        },
-        {
-          "path": "albedo.png",
-          "sha256": "656247e8a2ca926b9e0f1b559cc382e6a6efb898a7e2be32f0760b5e3aa4c747",
-          "sizeBytes": 704293,
-          "name": "albedo.png.008"
-        },
-        {
-          "path": "albedo.png",
-          "sha256": "3f34e96bab46e8a3c7570ab99a663006d8dffda4a6515af442d922eee0ac7824",
-          "sizeBytes": 626464,
-          "name": "albedo.png.009"
         },
         {
           "path": "albedo.png",
@@ -1548,18 +1548,6 @@
           "name": "ao.png.007"
         },
         {
-          "path": "ao.png",
-          "sha256": "41a3b620a523244d23af44b9ed79ea795eadce94d8dc0c7a5a4b2a1fe8e3380f",
-          "sizeBytes": 184719,
-          "name": "ao.png.008"
-        },
-        {
-          "path": "ao.png",
-          "sha256": "f38b7d7f933245513338265d7c28c933952193be2cefeb09dc83d20855c54d37",
-          "sizeBytes": 237164,
-          "name": "ao.png.009"
-        },
-        {
           "path": "height.png",
           "sha256": "ff9e29b536c507ed72cfdf409fc96a8cb23f1dbaab8662b1c0c59fde4e970a25",
           "sizeBytes": 173143,
@@ -1606,18 +1594,6 @@
           "sha256": "708d4012d5ccaaab13b4ee31784289fab070de4abe3113d8aa8a106174cee0a4",
           "sizeBytes": 124217,
           "name": "height.png.007"
-        },
-        {
-          "path": "height.png",
-          "sha256": "1828da48a0a7cb39d1dd0284acde9c68dbabf77656c117e82cc97fac78b74fb8",
-          "sizeBytes": 226212,
-          "name": "height.png.008"
-        },
-        {
-          "path": "height.png",
-          "sha256": "01c57a1f3a148568b907a9e1395c85001c0d36e77c5f9a6aade41ed3b5deea6f",
-          "sizeBytes": 249132,
-          "name": "height.png.009"
         },
         {
           "path": "kenney_branch_atlas.png",
@@ -1678,18 +1654,6 @@
           "sha256": "9622c7d6000c50f32a2b5d4d9ab8c0941d7e8e1c11f00ced1203e541a0a68970",
           "sizeBytes": 183665,
           "name": "roughness.png.007"
-        },
-        {
-          "path": "roughness.png",
-          "sha256": "d88db56b1ee0f9cf9b58f3f81666f7fb1d225e440dbb0a80a532fe1a6373db8b",
-          "sizeBytes": 137941,
-          "name": "roughness.png.008"
-        },
-        {
-          "path": "roughness.png",
-          "sha256": "6d484b5f63cdc271da53b4b90ad99933206e8efec6decd9643ac1dfd74070ca3",
-          "sizeBytes": 207523,
-          "name": "roughness.png.009"
         }
       ]
     },
@@ -1729,17 +1693,17 @@
             0.13
           ]
         ],
-        "nonBlackFraction": 0.420386,
-        "uniqueColorBinCount": 96,
+        "nonBlackFraction": 0.397257,
+        "uniqueColorBinCount": 93,
         "channelMean": [
-          0.129079,
-          0.112359,
-          0.095983
+          0.120337,
+          0.104028,
+          0.088857
         ],
         "channelRange": [
           1.0,
           1.0,
-          1.0
+          0.992157
         ],
         "paletteCoverage": [
           {
@@ -1749,7 +1713,7 @@
               0.13
             ],
             "dominantChannel": "red",
-            "matchedPixelCount": 93787,
+            "matchedPixelCount": 94329,
             "matched": true
           }
         ],
@@ -1760,13 +1724,13 @@
     "outputs": [
       {
         "path": "environment.png",
-        "sha256": "05e0d8238f45528b8f71979932dc7306e58451339ab36aa89dce9f9052440761",
-        "sizeBytes": 1253232
+        "sha256": "b15754dda4820149359232d1de554ed7b0d02d29fa02032f804d6785503990e6",
+        "sizeBytes": 1208625
       },
       {
         "path": "environment.obj",
-        "sha256": "0a5c7ff0c881e0fdc7daf05dec709630a007f71e19bcda84e935f1b33335b5f6",
-        "sizeBytes": 479722
+        "sha256": "83110aa6378f6f5f064dfe04f96fa3e31236cb9f1c0793738ead5cb1301e8360",
+        "sizeBytes": 480907
       },
       {
         "path": "environment.mtl",
@@ -1783,12 +1747,17 @@
     "runtimeAdapter": {
       "mode": "lane_mirror",
       "laneCenterY": 12.030999999999999,
-      "objFacesReversed": 4866
+      "objFacesReversed": 4854
     },
     "floor": {
       "mesh": "floor.obj",
       "material": "floor.mtl",
       "texture": "floor.png",
+      "sourceObject": "CORTICO_floor_grid",
+      "gridSpacingWorld": 1.0,
+      "texturePeriodWorld": 2.0,
+      "vertexCount": 1548,
+      "faceCount": 1470,
       "bounds": [
         -12.0153,
         -8.844,
@@ -1797,7 +1766,14 @@
         32.906,
         0.006
       ],
-      "textureSource": "projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\albedo.png"
+      "textureSource": "projects/hichaukitoden-game/assets/materials/old_limestone/albedo.png",
+      "textureSourceSha256": "2b232d0040b0f885b8616e0de0e3676aa08e63099628980bedf04671262e1e97",
+      "sha256": {
+        "floor.obj": "73b4fbbfdac4c5f5578ad42e9d3403b4c39c1403717a518176d0188f434d9957",
+        "floor.mtl": "dc20ee278ebd5938fcac3e07e01fe64b667338f03cb4ebd1b6956dcea6f549fc",
+        "floor.png": "2b232d0040b0f885b8616e0de0e3676aa08e63099628980bedf04671262e1e97"
+      },
+      "sourceVisualAdjustment": "Lowered near parapets to 0.70m total for actor readability; lane spans and gameplay anchors unchanged."
     }
   },
   "floorMesh": "floor.obj"

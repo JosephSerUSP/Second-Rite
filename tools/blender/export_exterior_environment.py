@@ -24,10 +24,9 @@ mostly empty atlas and far too few texels on each surface, which reads as a
 dark, muddy street.
 
 Lighting is staged below because an unlit bake is wrong regardless, and it does
-move the mean from 0.8 to 2.5. It is not the cause. The cause is the UV layout
-this rebuild hands the baker -- ``smart_project`` with ``island_margin=0.0`` on
-a 24-metre street -- and that is the thing to fix next. Do not tune the lights
-to chase the brightness; the atlas is empty, not dark.
+move the mean from 0.8 to 2.5. Note that per #1023, the atlas transfer defect is
+driven by a circular image dependency on the bake receiver rather than island
+margin. Do not tune the lights to chase brightness until the bake graph is resolved.
 
 ## Not yet generic, and not yet mirrored
 

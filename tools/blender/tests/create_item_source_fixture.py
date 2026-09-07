@@ -20,7 +20,14 @@ if str(SCRIPT_DIR) not in sys.path:
 import second_rite_asset_core as asset_core
 
 ROOT = SCRIPT_DIR.parents[1]
-DEFAULT_PATH = ROOT / "assets" / "authoring" / "items" / "ci_item_source_fixture.blend"
+DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
+DEFAULT_PATH = (
+    (DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT)
+    / "assets"
+    / "authoring"
+    / "items"
+    / "ci_item_source_fixture.blend"
+)
 
 
 def main():

@@ -118,22 +118,23 @@ class SourceContractTests(unittest.TestCase):
 
     def test_repo_tools_blender_prefers_override_then_checkout(self):
         from live_bridge import server
-        self.assertEqual(server._repo_tools_blender(), ROOT / "tools" / "blender")
-        with tempfile.TemporaryDirectory() as directory:
-            previous = os.environ.get("THESTRA_REPO")
-            os.environ["THESTRA_REPO"] = directory
-            try:
+        previous = os.environ.get("THESTRA_REPO")
+        os.environ.pop("THESTRA_REPO", None)
+        try:
+            self.assertEqual(server._repo_tools_blender(), ROOT / "tools" / "blender")
+            with tempfile.TemporaryDirectory() as directory:
+                os.environ["THESTRA_REPO"] = directory
                 # A THESTRA_REPO without the module must fall through to the
                 # working checkout rather than raise or poison sys.path.
                 self.assertEqual(server._repo_tools_blender(), ROOT / "tools" / "blender")
                 (Path(directory) / "tools" / "blender").mkdir(parents=True)
                 (Path(directory) / "tools" / "blender" / "material_library.py").write_text("", encoding="utf-8")
                 self.assertEqual(server._repo_tools_blender(), Path(directory) / "tools" / "blender")
-            finally:
-                if previous is None:
-                    del os.environ["THESTRA_REPO"]
-                else:
-                    os.environ["THESTRA_REPO"] = previous
+        finally:
+            if previous is not None:
+                os.environ["THESTRA_REPO"] = previous
+            else:
+                os.environ.pop("THESTRA_REPO", None)
 
     def test_repo_lookup_walks_past_a_nested_project_to_the_checkout(self):
         from live_bridge import server

@@ -24,12 +24,15 @@ DATA = os.path.join(PROJECT, "data")
 MAPS = os.path.join(DATA, "maps")
 ENV_ROOT = os.path.join(PROJECT, "assets", "environments", "st_maria_town")
 PLATE_REL = "assets/environments/st_maria_town/plates"
+TRANSITION_ARROW_MODEL = "assets/models/st_maria/transition_arrow.obj"
 
 NATIVE_W, NATIVE_H = 426, 240
-# Plates are no longer a fixed width: a street earns its length and a room does
-# not, and the runtime scrolls a window across whatever width the plate has.
-# Everything positional is therefore read from the plate rather than assumed.
-LANE_MARGIN_PX = 40
+# A plate carries the complete composition around the runtime lane. The current
+# contract is 128 px of composition on either side; the old plates used 40 px.
+# Keep both values because positions are authored in stable runtime lane units
+# and must be convertible while screens migrate one at a time.
+LANE_MARGIN_PX = 128
+LEGACY_LANE_MARGIN_PX = 40
 # Lane units per SECOND. Walking is continuous now, not one step per key event,
 # so this is a speed rather than a stride. At this rate the Praca - the widest
 # screen in the town - takes about seven seconds to cross end to end.
@@ -39,14 +42,33 @@ WALK_SPEED = 3.4
 # plates are composed with their ground strip running up to it.
 WORLD_H = 144
 CENTER_X = 213.0
-# Legacy plates were composed at 34.6 px per runtime lane unit. Modelled work
-# uses the camera contract's 48 px / 1.75 m = 27.4286 px per unit instead. The
-# scale therefore belongs to each screen beside its plate; keeping it global
-# made a correctly photographed actor 26% too small against the architecture.
-PIXELS_PER_Y = 34.6
+# The camera contract's 48 px / 1.75 m = 27.428571 px per runtime lane unit.
+# The scale belongs to each screen so an incremental migration can coexist with
+# any deliberately retained legacy plate.
+PIXELS_PER_Y = 48.0 / 1.75
+LEGACY_PIXELS_PER_Y = 34.6
 DEPTH_X = 7.8
 GROUND_Z = 0.0
 FOV_DEGREES = 28.072486935852957
+
+# These widths are calculated from the committed lane spans and the new
+# composition contract. They are explicit because a candidate plate must be
+# rejected before it can alter a map or manifest.
+EXPECTED_PLATE_WIDTHS = {
+    "churchyard_bg.png": 924,
+    "market_bg.png": 696,
+    "quay_bg.png": 826,
+    "lauras_smith_bg.png": 450,
+    "pub_bg.png": 576,
+    "chapel_bg.png": 674,
+    "house_laura_bg.png": 747,
+    "house_alicia_bg.png": 424,
+    "lodging_bg.png": 457,
+    "backstreet_bg.png": 866,
+    "alicias_padaria_bg.png": 450,
+    "port_bg.png": 1065,
+    "praca_plate.png": 906,
+}
 
 
 def plate_size(plate):
@@ -61,26 +83,66 @@ def screen_scale(screen):
     return float(value)
 
 
-def lane_of(plate, pixels_per_y=PIXELS_PER_Y):
+def screen_margin(screen):
+    value = screen.get("plate_margin_px", LANE_MARGIN_PX)
+    if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
+        raise ValueError("screen %r needs a non-negative plate_margin_px" % screen.get("id"))
+    return float(value)
+
+
+def plate_width(screen):
+    value = screen.get("plate_width")
+    if value is None:
+        value = EXPECTED_PLATE_WIDTHS.get(screen.get("plate"))
+    if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+        raise ValueError("screen %r needs an integer plate_width" % screen.get("id"))
+    return value
+
+
+def stable_lane_y(screen, legacy_pixel_x):
+    """Return the stable runtime coordinate behind an old pixel coordinate."""
+    margin = screen.get("legacy_plate_margin_px", LEGACY_LANE_MARGIN_PX)
+    scale = screen.get("legacy_pixels_per_y", LEGACY_PIXELS_PER_Y)
+    return round((legacy_pixel_x - margin) / scale, 4)
+
+
+def plate_pixel_x(screen, legacy_pixel_x):
+    """Project an authored legacy coordinate into this screen's plate."""
+    return round(screen_margin(screen) + stable_lane_y(screen, legacy_pixel_x) *
+                 screen_scale(screen), 3)
+
+
+def screen_lane(screen):
+    return lane_of(screen["plate"], screen_scale(screen), screen_margin(screen),
+                   plate_width(screen), screen.get("lane_min_y", 0.0),
+                   screen.get("lane_max_y"))
+
+
+def lane_of(plate, pixels_per_y=PIXELS_PER_Y, margin_px=LANE_MARGIN_PX,
+            width=None, min_y=0.0, max_y=None):
     """Lane bounds and projection for one plate, derived from its real width.
 
     A screen declares how many plate pixels equal one runtime unit. A longer
     plate at that screen's scale is more lane, not faster walking. The lane
     stops short of the plate edge so the actor never straddles it.
     """
-    width, _height = plate_size(plate)
-    centre_x = width / 2.0
-    span = (width - 2 * LANE_MARGIN_PX) / pixels_per_y
+    if width is None:
+        width, _height = plate_size(plate)
+    span = ((width - 2 * margin_px) / pixels_per_y
+            if max_y is None else max_y - min_y)
+    resolved_max_y = round(min_y + span, 3) if max_y is None else round(max_y, 3)
+    centre_y = round((min_y + resolved_max_y) / 2.0, 4)
+    centre_x = round(margin_px + (centre_y - min_y) * pixels_per_y, 3)
     return {
         "width": width,
         "centerX": centre_x,
-        "minY": 0.0,
-        "maxY": round(span, 3),
-        "centre": round(span / 2.0, 3),
+        "minY": round(min_y, 3),
+        "maxY": resolved_max_y,
+        "centre": centre_y,
     }
 
 
-def ground_profile(plate, authored, pixels_per_y=PIXELS_PER_Y):
+def ground_profile(screen, authored):
     """Author a floor in PLATE PIXELS; emit it in world units.
 
     An artist reads a step off the picture -- "the counter is 48 pixels above
@@ -94,34 +156,67 @@ def ground_profile(plate, authored, pixels_per_y=PIXELS_PER_Y):
     """
     if not authored:
         return None
-    return [{"y": lane_y_for(plate, pixel_x, pixels_per_y),
-             "z": round(GROUND_Z + rise / pixels_per_y, 4)}
+    scale = screen_scale(screen)
+    margin = screen_margin(screen)
+    return [{"y": lane_y_for(pixel_x, scale, margin),
+             "z": round(GROUND_Z + rise / scale, 4)}
             for pixel_x, rise in authored]
 
 
-def lane_y_for(plate, pixel_x, pixels_per_y=PIXELS_PER_Y):
+def profile_ground_at(profile, y):
+    if not profile:
+        return GROUND_Z
+    if y <= profile[0]["y"]:
+        return profile[0]["z"]
+    for i in range(1, len(profile)):
+        prev, curr = profile[i - 1], profile[i]
+        if y <= curr["y"]:
+            span = curr["y"] - prev["y"]
+            if span <= 0:
+                return curr["z"]
+            t = (y - prev["y"]) / span
+            return round(prev["z"] + (curr["z"] - prev["z"]) * t, 4)
+    return profile[-1]["z"]
+
+
+def lane_y_for(*args, **kwargs):
     """Plate pixel x -> lane y, for the plate's own width.
 
-    Measured from the west bound rather than from the centre. Algebraically
-    these are the same line - (x - W/2)/PPY + (W - 2*margin)/2/PPY reduces to
-    (x - margin)/PPY - but the centre form adds back a value `lane_of` has
-    already rounded, and that second rounding does not always cancel.
-
-    It did not cancel on the Praca. Its east exit is authored at pixel 860 of a
-    900px plate, which is the lane bound, but the centre form returned 23.700
-    against a maxY of 23.699. One thousandth off the bound is the difference
-    between a street the player walks through silently and a door that stops
-    them and asks for UP - so the Praca's east exit has been announcing itself
-    as a doorway since the two-level split. This form is exact at both bounds
-    for every plate width.
+    Supports:
+        lane_y_for(pixel_x)
+        lane_y_for(pixel_x, scale)
+        lane_y_for(pixel_x, scale, margin)
+        lane_y_for(plate, pixel_x, scale, margin)
     """
-    return round((pixel_x - LANE_MARGIN_PX) / pixels_per_y, 3)
+    if len(args) == 1:
+        px = args[0]
+        scale = kwargs.get("pixels_per_y", PIXELS_PER_Y)
+        margin = kwargs.get("margin_px", LANE_MARGIN_PX)
+    elif len(args) == 2:
+        if isinstance(args[0], str):
+            plate, px = args
+            scale = kwargs.get("pixels_per_y", PIXELS_PER_Y)
+            margin = kwargs.get("margin_px", LANE_MARGIN_PX)
+        else:
+            px, scale = args
+            margin = kwargs.get("margin_px", LANE_MARGIN_PX)
+    elif len(args) == 3:
+        if isinstance(args[0], str):
+            plate, px, scale = args
+            margin = kwargs.get("margin_px", LANE_MARGIN_PX)
+        else:
+            px, scale, margin = args
+    elif len(args) >= 4:
+        plate, px, scale, margin = args[:4]
+    else:
+        raise ValueError("lane_y_for requires at least pixel_x")
+    return round((px - margin) / scale, 4)
 
 
 # key: (map id, title, plate, intro, lane min/max, feet screenY, npcs, doors)
 #   npcs:  (anchor_name, source_event_name_in_map_1, sprite, pixel_x)
 #   doors: (anchor_name, label, target_map, arrival_anchor_on_target, pixel_x,
-#           source_event_name_or_None)
+#           source_event_name_or_None, direction)
 SCREENS = {
     # --- the spiral -------------------------------------------------------
     # St. Maria wraps a small island once, and the wrap DESCENDS: the sealed
@@ -143,56 +238,51 @@ SCREENS = {
     #                                                 street, the home backs
     #                                                 onto the high lane
     #
-    # A street exit must sit exactly on a lane bound, which is pixel 40 at the
-    # west and (plate width - 40) at the east. Anything else is a door.
+    # A street exit sits on a lane bound: pixel 128 at the west and (width - 128)
+    # at the east. Anything else is a door, gate, or stair.
     "churchyard": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
         id=16, title="St. Maria - The Churchyard", plate="churchyard_bg.png",
         intro="Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
         screen_y=136, music="town1",
-        npcs=[("guard", "Gate Guard", "npc_gate_guard", 520)],
+        npcs=[("guard", "Gate Guard", "npc_gate_guard", 570.0)],
         doors=[
             # The seaward bound is a cliff, not a street: the way down to the
             # water is the climb, and it is authored as a stair.
-            ("port_climb", "Down to the Port", 31, "climb_churchyard", 120, None),
-            ("labyrinth_door", "Labyrinth Gate", 2, None, 330, "Labyrinth Gate"),
-            ("east_praca", "The Praca", 17, "west_churchyard", 940, None),
+            ("port_climb", "Down to the Port", 31, "climb_churchyard", 128.0, None, "away", 1.8),
+            ("labyrinth_door", "Labyrinth Gate", 2, None, 499.0, "Labyrinth Gate", "away", 2.0),
+            ("east_praca", "The Praca", 17, "churchyard_stair", 924.0, None, "right"),
         ],
     ),
     "praca": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
-        id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
+        id=17, title="St. Maria - The Praca", plate="praca_plate.png",
         intro="The fountain never stops. Between the roofs, on every side, the sea.",
         screen_y=136, music="town1",
         npcs=[("child", None, "npc_child", 480)],
         doors=[
-            ("west_churchyard", "The Churchyard", 16, "east_praca", 40, None),
-            ("quay_stair", "Down to the Quay", 19, "praca_stair", 150, None),
-            ("chapel_door", "Chapel", 22, "exit_door", 620, None),
-            ("east_cortico", "The Cortico", 26, "west_praca", 860, None),
+            ("west_churchyard", "The Churchyard", 16, "east_praca", 40, None, "left"),
+            ("quay_stair", "Down to the Quay", 19, "praca_stair", 150, None, "away"),
+            ("chapel_door", "Chapel", 22, "exit_door", 620, None, "away"),
+            ("east_cortico", "The Cortico", 26, "west_praca", 860, None, "right"),
         ],
     ),
-    # The Backstreet was already the town's non-frontage face - laundry, back
-    # doors, a lit shrine - so it becomes the cortico rather than gaining a
-    # sixth screen. It is the address of everyone who holds no frontage, and of
-    # the Passage House, which belongs beside them because it is the one
-    # building in St. Maria that is nobody's home.
     "cortico": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
         id=26, title="St. Maria - The Cortico", plate="backstreet_bg.png",
         intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
-        npcs=[("scholar", "Scholar", "npc_scholar", 200),
-              ("euler", "Euler", "npc_euler", 420)],
+        npcs=[("scholar", "Scholar", "npc_scholar", 180.0),
+              ("euler", "Euler", "npc_euler", 360.0)],
         doors=[
-            ("west_praca", "The Praca", 17, "east_cortico", 40, None),
-            ("lodging_door", "Passage House", 25, "exit_door", 300, None),
-            ("padaria_back", "The padaria's back door", 23, "exit_door", 560, None),
-            ("port_stair", "Down to the Port", 31, "cortico_stair", 690, None),
-            ("east_market", "Market Row", 18, "west_cortico", 810, None),
+            ("west_praca", "The Praca", 17, "east_backstreet", 50.0, None, "left"),
+            ("lodging_door", "Passage House", 25, "exit_door", 415.0, None, "away", 0.9),
+            ("padaria_back", "The padaria's back door", 23, "exit_door", 505.0, None, "away", 1.5),
+            ("port_stair", "Down to the Port", 31, "cortico_stair", 680.0, None, "away", 1.2),
+            ("east_market", "Market Row", 18, "west_cortico", 866.0, None, "right"),
         ],
     ),
     "market": dict(
@@ -201,13 +291,12 @@ SCREENS = {
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
-        npcs=[("auctioneer", "Auctioneer", "npc_goustav", 250),
-              ("yukio", "Yukio", "npc_yukio", 380)],
+        npcs=[("auctioneer", "Auctioneer", "npc_goustav", 174.0),
+              ("yukio", "Yukio", "npc_yukio", 314.0)],
         doors=[
-            ("west_cortico", "The Cortico", 26, "east_market", 40, None),
-            ("padaria_3d_door", "Alicia's Padaria (3D)", 28, "exit_door", 593.6, None),
-            ("padaria_door", "Alicia's Padaria", 27, "exit_door", 801.2, None),
-            ("east_quay", "The Quay", 19, "west_market", 1060, None),
+            ("west_cortico", "The Cortico", 26, "east_market", 128.0, None, "left"),
+            ("padaria_door", "Alicia's Padaria", 27, "exit_door", 488.0, None, "away", 0.9),
+            ("east_quay", "The Quay", 19, "west_market", 696.0, None, "right"),
         ],
     ),
     "quay": dict(
@@ -216,47 +305,39 @@ SCREENS = {
         id=19, title="St. Maria - The Quay", plate="quay_bg.png",
         intro="Wet stone and the smell of the tide. The fog does not end where the town does.",
         screen_y=136, music="town1",
-        npcs=[("fisherman", None, "npc_fisherman", 130),
-              ("sign", "Sign", None, 960)],
+        npcs=[("fisherman", None, "npc_fisherman", 175.0)],
         doors=[
-            ("west_market", "Market Row", 18, "east_quay", 40, None),
-            ("praca_stair", "Up to the Praca", 17, "quay_stair", 400, None),
-            ("pub_door", "The Pub", 21, "exit_door", 770, None),
-            ("east_port", "The Port", 31, "west_quay", 1060, None),
+            ("west_market", "Market Row", 18, "east_quay", 128.0, None, "left"),
+            ("praca_stair", "Up to the Praca", 17, "quay_stair", 485.0, None, "away", 2.2),
+            ("pub_door", "The Pub", 21, "exit_door", 730.0, None, "away", 0.9),
+            ("east_port", "The Port", 31, "west_quay", 826.0, None, "right"),
         ],
     ),
-    # The sixth exterior, and the one the town has never had. Iron and charcoal
-    # are landed here, which is why Laura's occupied forge is here and not in
-    # the market: a forge belongs where its material arrives. It also puts her
-    # work a full three screens from where she sleeps, which is the point.
-    #
-    # PLACEHOLDER PLATE: reuses quay_bg.png until the Port has art of its own.
     "port": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
-        id=31, title="St. Maria - The Port", plate="quay_bg.png",
+        id=31, title="St. Maria - The Port", plate="port_bg.png",
         intro="Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon.",
         screen_y=136, music="town1",
+        ground=[(0.0, 0.0), (820.0, 0.0), (940.0, 16.0), (1065.0, 16.0)],
         npcs=[],
         doors=[
-            ("west_quay", "The Quay", 19, "east_port", 40, None),
-            ("forge_door", "The forge", 20, "exit_door", 400, None),
-            ("smith_3d_door", "Laura's Smithy (3D)", 29, "exit_door", 600, None),
-            ("cortico_stair", "Up to the Cortico", 26, "port_stair", 750, None),
-            ("climb_churchyard", "The long climb", 16, "port_climb", 900, None),
+            ("west_quay", "The Quay", 19, "east_port", 128.0, None, "left"),
+            ("forge_door", "The forge", 20, "exit_door", 360.0, None, "away", 1.2),
+            ("smith_3d_door", "Laura's Smithy (3D)", 29, "exit_door", 589.0, None, "away", 0.9),
+            ("cortico_stair", "Up to the Cortico", 26, "port_stair", 650.0, None, "away", 1.2),
+            ("climb_churchyard", "The long climb", 16, "port_climb", 915.0, None, "away", 3.0),
         ],
     ),
     # --- interiors ---
-    # Every room puts its way out in the left wall, so its west bound and its
-    # painted door are the same place: walking left leaves, and so does UP.
     "weaponsmith": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="AgX",
-        id=20, title="St. Maria - Laura's forge", plate="weaponsmith_bg.png",
-        intro="Somebody else's forge, banked low and working again. Everything in the room is either iron or waiting to be.",
+        id=20, title="St. Maria - Laura's forge", plate="lauras_smith_bg.png",
+        intro="The forge is banked low. Everything in the room is either iron or waiting to be.",
         screen_y=136, music="town1",
-        npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 560)],
-        doors=[("exit_door", "Out to the Port", 31, "forge_door", 110, None)],
+        npcs=[("smith", "Weapon Shop", "npc_laura", 200.0)],
+        doors=[("exit_door", "Out to the Port", 31, "forge_door", 245.0, None, "away")],
     ),
     "pub": dict(
         pixels_per_y=PIXELS_PER_Y,
@@ -264,12 +345,8 @@ SCREENS = {
         id=21, title="St. Maria - The Pub", plate="pub_bg.png",
         intro="Warm, low and smoke-dark. The only room in St. Maria that argues with the weather.",
         screen_y=136, music="town1",
-        # The one screen with a real step across the walking line: the tables
-        # are on the low floor by the door, and the bar stands on a platform
-        # up a short flight. Measured off the plate.
-        ground=[(0, 0), (640, 0), (730, 26), (1100, 26)],
-        npcs=[("owner", "Pub Owner", "npc_pub_owner", 850)],
-        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 130, None)],
+        npcs=[("owner", "Pub Owner", "npc_pub_owner", 130.0)],
+        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 459.0, None, "away")],
     ),
     "chapel": dict(
         pixels_per_y=PIXELS_PER_Y,
@@ -277,25 +354,20 @@ SCREENS = {
         id=22, title="St. Maria - Chapel", plate="chapel_bg.png",
         intro="Blue tiles, cold wax, and a door that is never locked.",
         screen_y=136, music="town1",
-        npcs=[("agnes", "EV012", "npc_agnes", 880)],
-        doors=[("exit_door", "Out to the Praca", 17, "chapel_door", 120, None)],
+        npcs=[("agnes", "EV012", "npc_agnes", 475.0)],
+        doors=[("exit_door", "Out to the Praca", 17, "chapel_door", 559.0, None, "away")],
     ),
-    # Maps 23 and 24 were Laura's House and Alicia's Room, on two different
-    # levels of the town, which contradicted the canon that they live together
-    # in the house attached to the padaria. They are now two rooms of that one
-    # building. 23 is its hearth and its back door onto the cortico lane; 24 is
-    # the room upstairs. The shop half is map 27, on Market Row, one level down.
     "house_laura": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
         id=23, title="St. Maria - The padaria, the hearth", plate="house_laura_bg.png",
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs. The oven's back wall is warm through the plaster.",
         screen_y=136, music="town1",
-        npcs=[("laura", "Laura", "npc_laura", 500)],
+        npcs=[("laura", "Laura", "npc_laura", 460.0)],
         doors=[
-            ("exit_door", "Out to the Cortico", 26, "padaria_back", 110, None),
-            ("bedroom_door", "The room upstairs", 24, "exit_door", 300, None),
-            ("shop_stair", "Down to the shop", 27, "home_stair", 560, None),
+            ("exit_door", "Out to the Cortico", 26, "padaria_back", 59.0, None, "away"),
+            ("bedroom_door", "The room upstairs", 24, "exit_door", 539.0, None, "away"),
+            ("shop_stair", "Down to the shop", 27, "home_stair", 629.0, None, "away"),
         ],
     ),
     "house_alicia": dict(
@@ -304,39 +376,111 @@ SCREENS = {
         id=24, title="St. Maria - The padaria, the room upstairs", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
         screen_y=136, music="town1",
-        npcs=[("alicia", "Alicia", "npc_alicia", 640)],
-        doors=[("exit_door", "Down to the hearth", 23, "bedroom_door", 110, None)],
+        npcs=[("alicia", "Alicia", "npc_alicia", 110.0)],
+        doors=[("exit_door", "Down to the hearth", 23, "bedroom_door", 180.0, None, "away")],
     ),
-    # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
-    # "this'll be home for both of you"). Celina works here rather than standing
-    # in the square: the Passage House is the Labyrinth trade's own building,
-    # and the registry is a room in it.
     "lodging": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_celina", 420)],
-        doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 120, None)],
+        npcs=[("registrar", "Registrar", "npc_celina", 260.0)],
+        doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 404.0, None, "away")],
+    ),
+    "alicias_padaria": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="AgX",
+        id=27, title="St. Maria - Alicia's Padaria", plate="alicias_padaria_bg.png",
+        intro="Warm flour and woodsmoke. The oven is the loudest thing in the room, and the counter is between you and it.",
+        screen_y=136, music="town1",
+        npcs=[("alicia", "Alicia", "npc_alicia", 215.0)],
+        doors=[
+            ("exit_door", "Out to Market Row", 18, "padaria_door", 50.0, None, "away"),
+            ("home_stair", "Up to the hearth", 23, "shop_stair", 395.0, None, "away"),
+        ],
     ),
 }
 
-# Maps this generator OWNS and will overwrite. Everything else in the town is
-# authored by hand and must survive a rebuild.
-#
-# `weaponsmith` stays in SCREENS because the market's door still needs its
-# anchor, but map 20 is no longer generated: it was converted in place to the
-# authored `lauras_smith` 3D room, whose lane (0.35-7.4167), depth (0.0) and
-# camera distance (18.6667, the interior number) are nothing like a flat
-# plate's. Regenerating it would silently revert that room to a plate.
-#
-# Maps 27, 28 and 29 - the Padaria and the two 3D bakes - were never generated.
+# Stable lane data is carried by the live maps/manifests, not by the current
+# plate pixels. These bounds let a screen migrate from the legacy 40/34.6
+# contract without moving its doors, NPCs, or walking distance in runtime.
+SCREEN_CONTRACTS = {
+    "churchyard": (0.0, 29.021, 924),
+    "praca": (0.0, 23.699, 906),
+    "cortico": (-2.844, 26.906, 866),
+    "market": (0.0, 20.708, 696),
+    "quay": (0.0, 25.448, 826),
+    "port": (0.0, 29.604, 1065),
+    "weaponsmith": (0.35, 7.4167, 450),
+    "alicias_padaria": (0.35, 7.4167, 450),
+    "pub": (0.0, 12.500, 576),
+    "chapel": (0.0, 16.000, 674),
+    "house_laura": (-2.516, 18.300, 747),
+    "house_alicia": (-0.700, 7.000, 424),
+    "lodging": (0.0, 10.400, 457),
+}
+
+# The original character sheets were authored in the shared character folder;
+# newer town-only sheets live under character/town. Keep the path decision in
+# the generator so every regenerated map resolves the same source asset.
+ROOT_CHARACTER_SPRITES = {"npc_goustav", "npc_laura", "npc_alicia", "npc_celina"}
+for _key, (_min_y, _max_y, _width) in SCREEN_CONTRACTS.items():
+    SCREENS[_key].update({
+        "plate_margin_px": LANE_MARGIN_PX,
+        "legacy_plate_margin_px": LEGACY_LANE_MARGIN_PX,
+        "legacy_pixels_per_y": LEGACY_PIXELS_PER_Y,
+        "plate_width": _width,
+        "lane_min_y": _min_y,
+        "lane_max_y": _max_y,
+    })
+
+# Maps this generator OWNS and will overwrite. The Praça is authored in its
+# modelled environment and must survive a rebuild. Maps 28/29 are modelled
+# reference screens and are outside this flat-plate table entirely.
 #
 # tools/towngen/check_town.py gates this boundary: a hand-edit to an owned map
 # now fails CI instead of surviving until the next rebuild deletes it.
-ROOT_CHARACTER_SPRITES = {"npc_goustav", "npc_laura", "npc_alicia", "npc_celina"}
-AUTHORED_NOT_GENERATED = {"weaponsmith", "praca"}
+AUTHORED_NOT_GENERATED = {"weaponsmith", "praca", "alicias_padaria"}
+AUTHORED_REFERENCE_MAPS = {17, 20, 27, 28, 29}
+
+# Written for NPCs that have no map-1 ancestor. Short, in register, and never
+# contradicting the authored dialogue that crosses over.
+INVENTED = {
+    "child": [{"cmd": "TEXT", "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."}],
+    "fisherman": [{"cmd": "TEXT", "text": "\"Nothing worth catching today.\" He does not stop coiling the rope. \"Nothing worth catching most days.\""}],
+}
+
+
+def load_map1_commands():
+    with io.open(os.path.join(MAPS, "1.json"), encoding="utf-8") as handle:
+        data = json.load(handle)
+    return {event.get("name"): event.get("commands", []) for event in data["events"]}
+
+
+def write_json(path, value):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with io.open(path, "w", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+
+def build_stub():
+    """The manifest requires mesh/material/atlas paths even for a flat screen."""
+    stub = os.path.join(ENV_ROOT, "stub")
+    os.makedirs(stub, exist_ok=True)
+    with io.open(os.path.join(stub, "quad.obj"), "w", encoding="utf-8", newline="\n") as handle:
+        handle.write("# Placeholder geometry for a pre-rendered screen.\n"
+                     "# Nothing draws this; the manifest contract requires a mesh path.\n"
+                     "mtllib quad.mtl\no th_render_stub\n"
+                     "v -1 0 -1\nv 1 0 -1\nv 1 0 1\nv -1 0 1\n"
+                     "vt 0 0\nvt 1 0\nvt 1 1\nvt 0 1\n"
+                     "usemtl stub\nf 1/1 2/2 3/3 4/4\n")
+    with io.open(os.path.join(stub, "quad.mtl"), "w", encoding="utf-8", newline="\n") as handle:
+        handle.write("newmtl stub\nKd 1.000 1.000 1.000\nd 1.0\nillum 1\n")
+    Image.new("RGBA", (NATIVE_W, NATIVE_H), (0, 0, 0, 0)).save(os.path.join(stub, "empty.png"))
+    Image.new("RGBA", (4, 4), (255, 255, 255, 255)).save(os.path.join(stub, "atlas.png"))
+
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
 # contradicting the authored dialogue that crosses over.
@@ -378,14 +522,19 @@ def build_stub():
 
 def build_environment(key, screen):
     scale = screen_scale(screen)
-    lane = lane_of(screen["plate"], scale)
-    anchors = {"spawn_player": {"position": [DEPTH_X, lane["centre"], GROUND_Z]}}
-    for anchor, _label, _target, _arrival, pixel_x, _source in screen["doors"]:
+    lane = screen_lane(screen)
+    profile = ground_profile(screen, screen.get("ground"))
+    spawn_z = profile_ground_at(profile, lane["centre"])
+    anchors = {"spawn_player": {"position": [DEPTH_X, lane["centre"], spawn_z]}}
+    for item in screen["doors"]:
+        anchor, _label, _target, _arrival, pixel_x, _source = item[:6]
+        pos_y = lane_y_for(pixel_x, scale)
         anchors[anchor] = {
-            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x, scale), GROUND_Z]}
+            "position": [DEPTH_X, pos_y, profile_ground_at(profile, pos_y)]}
     for anchor, _source, _sprite, pixel_x in screen["npcs"]:
+        pos_y = lane_y_for(pixel_x, scale)
         anchors["npc_" + anchor] = {
-            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x, scale), GROUND_Z]}
+            "position": [DEPTH_X, pos_y, profile_ground_at(profile, pos_y)]}
     manifest = {
         "contractVersion": 1,
         "renderMesh": "../stub/quad.obj",
@@ -425,7 +574,7 @@ def build_environment(key, screen):
 def lane_block(screen, lane):
     block = {"minY": lane["minY"], "maxY": lane["maxY"], "depthX": DEPTH_X,
              "groundZ": GROUND_Z, "speed": WALK_SPEED}
-    profile = ground_profile(screen["plate"], screen.get("ground"), screen_scale(screen))
+    profile = ground_profile(screen, screen.get("ground"))
     if profile:
         block["groundProfile"] = profile
     return block
@@ -433,8 +582,9 @@ def lane_block(screen, lane):
 
 def build_map(key, screen, map1):
     scale = screen_scale(screen)
-    lane = lane_of(screen["plate"], scale)
+    lane = screen_lane(screen)
     plate = screen["plate"]
+    profile = ground_profile(screen, screen.get("ground"))
     events = []
     next_id = screen["id"] * 100 + 1
 
@@ -442,12 +592,13 @@ def build_map(key, screen, map1):
         commands = map1.get(source) if source else INVENTED.get(anchor)
         if commands is None:
             raise SystemExit("no dialogue for %s/%s" % (key, anchor))
+        ev_y = lane_y_for(pixel_x, scale)
         event = {
             "id": next_id,
             "instanceId": "st-maria-%s-%s" % (key, anchor),
             "name": anchor.replace("_", " ").title(),
             "x": 0, "y": 0,
-            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x, scale), GROUND_Z],
+            "worldPosition": [DEPTH_X, ev_y, profile_ground_at(profile, ev_y)],
             "trigger": "interact",
             "commands": commands,
         }
@@ -461,7 +612,9 @@ def build_map(key, screen, map1):
         events.append(event)
         next_id += 1
 
-    for anchor, label, target, arrival, pixel_x, source in screen["doors"]:
+    for item in screen["doors"]:
+        anchor, label, target, arrival, pixel_x, source = item[:6]
+        direction = item[6] if len(item) > 6 else None
         if source and map1.get(source):
             commands = map1[source]
         else:
@@ -469,20 +622,25 @@ def build_map(key, screen, map1):
             if arrival:
                 command["arrival"] = arrival
             commands = [command]
-        events.append({
+        door_y = lane_y_for(pixel_x, scale)
+        event = {
             "id": next_id,
             "instanceId": "st-maria-%s-%s" % (key, anchor),
             "name": label,
             "x": 0, "y": 0,
-            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x, scale), GROUND_Z],
+            "worldPosition": [DEPTH_X, door_y, profile_ground_at(profile, door_y)],
             "trigger": "bump",
+            "model": TRANSITION_ARROW_MODEL,
             "commands": commands,
-        })
+        }
+        if direction:
+            event["direction"] = direction
+        events.append(event)
         next_id += 1
 
-    doorways = [{"anchor": anchor, "eventInstanceId": "st-maria-%s-%s" % (key, anchor),
-                 "radius": 0.9}
-                for anchor, _l, _t, _a, _p, _s in screen["doors"]]
+    doorways = [{"anchor": item[0], "eventInstanceId": "st-maria-%s-%s" % (key, item[0]),
+                 "radius": item[7] if len(item) > 7 and item[7] is not None else 0.9}
+                for item in screen["doors"]]
 
     write_json(os.path.join(MAPS, "%d.json" % screen["id"]), {
         "id": screen["id"],
@@ -512,12 +670,10 @@ def build_map(key, screen, map1):
                 # inheriting for modelled work.
                 "distance": 18.666666666666668,
                 "yawDegrees": 0.0,
-                # STILL ZERO, deliberately. Pitching the camera is what makes
-                # verticals converge, and the engine already reads this - but a
-                # pitched camera against an unpitched plate moves the actor
-                # relative to a picture that did not move. It flips when a
-                # screen has a plate rendered at the same pitch, and not before.
-                "pitchDegrees": 0.0,
+                # All St. Maria side-view maps share the owner's downward
+                # pitched camera. Plates and world-space overlays must use the
+                # same contract or 3D event models will float against them.
+                "pitchDegrees": -17.5,
                 # Relative to target.z, so this is the contract's eye height.
                 # Without it the eye resolves onto the target plane, at the
                 # actor's feet.

@@ -9,7 +9,7 @@
     0.0,
     -1.0,
     8.8,
-    29.48,
+    20.708,
     4.0
   ],
   "provenance": {
@@ -19,7 +19,7 @@
     "spawn_player": {
       "position": [
         7.8,
-        14.74,
+        10.354,
         0.0
       ]
     },
@@ -30,38 +30,31 @@
         0.0
       ]
     },
-    "padaria_3d_door": {
-      "position": [
-        7.8,
-        16.0,
-        0.0
-      ]
-    },
     "padaria_door": {
       "position": [
         7.8,
-        22.0,
+        13.125,
         0.0
       ]
     },
     "east_quay": {
       "position": [
         7.8,
-        29.48,
+        20.7083,
         0.0
       ]
     },
     "npc_auctioneer": {
       "position": [
         7.8,
-        6.069,
+        1.6771,
         0.0
       ]
     },
     "npc_yukio": {
       "position": [
         7.8,
-        9.827,
+        6.7812,
         0.0
       ]
     }
@@ -69,11 +62,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      1100,
+      696,
       240
     ],
     "slicePositions": [
-      14.74
+      10.354
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/market_bg.png"
@@ -82,17 +75,17 @@
       "../../../../assets/environments/st_maria_town/plates/market_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_1100.png"
+      "../stub/empty_696.png"
     ],
     "lane": {
-      "runtimeCenterY": 14.74
+      "runtimeCenterY": 10.354
     },
     "playerProjection": {
-      "centerX": 550.0,
+      "centerX": 411.995,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

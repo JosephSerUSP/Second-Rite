@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 26.012,
+      "maxY": 29.021,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 13.006,
+        "y": 14.5105,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 13.006,
+        "center": 14.5105,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -65,12 +65,12 @@
       {
         "anchor": "port_climb",
         "eventInstanceId": "st-maria-churchyard-port_climb",
-        "radius": 0.9
+        "radius": 1.8
       },
       {
         "anchor": "labyrinth_door",
         "eventInstanceId": "st-maria-churchyard-labyrinth_door",
-        "radius": 0.9
+        "radius": 2.0
       },
       {
         "anchor": "east_praca",
@@ -88,7 +88,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        13.873,
+        16.1146,
         0.0
       ],
       "trigger": "interact",
@@ -229,17 +229,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        2.312,
+        0.0,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 31,
           "arrival": "climb_churchyard"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 1603,
@@ -249,10 +251,11 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        8.382,
+        13.526,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "condition": "hasItem:198",
@@ -276,7 +279,8 @@
           ],
           "cmd": "CONDITIONAL_BRANCH"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
       "id": 1604,
@@ -286,17 +290,19 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        26.012,
+        29.0208,
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "west_churchyard"
+          "arrival": "churchyard_stair"
         }
-      ]
+      ],
+      "direction": "right"
     }
   ],
   "treasures": [],

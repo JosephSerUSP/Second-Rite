@@ -9,7 +9,7 @@
     0.0,
     -1.0,
     8.8,
-    15.029,
+    10.4,
     4.0
   ],
   "provenance": {
@@ -19,21 +19,21 @@
     "spawn_player": {
       "position": [
         7.8,
-        7.514,
+        5.2,
         0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        2.312,
+        10.0625,
         0.0
       ]
     },
     "npc_registrar": {
       "position": [
         7.8,
-        10.983,
+        4.8125,
         0.0
       ]
     }
@@ -41,11 +41,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      600,
+      457,
       240
     ],
     "slicePositions": [
-      7.514
+      5.2
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
@@ -54,17 +54,17 @@
       "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_600.png"
+      "../stub/empty_457.png"
     ],
     "lane": {
-      "runtimeCenterY": 7.514
+      "runtimeCenterY": 5.2
     },
     "playerProjection": {
-      "centerX": 300.0,
+      "centerX": 270.629,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

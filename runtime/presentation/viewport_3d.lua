@@ -1137,10 +1137,11 @@ local function drawTownBounds(session, state, toScreen, depthX, renderWidth, ren
 
             -- Vertical doorway portal arch at anchor depth
             local doorX = tonumber(anchor.position[1]) or maxX
-            local d1x, d1y = toScreen(doorX, centreY - 0.45, groundZ)
-            local d2x, d2y = toScreen(doorX, centreY + 0.45, groundZ)
-            local d3x, d3y = toScreen(doorX, centreY + 0.45, groundZ + 2.0)
-            local d4x, d4y = toScreen(doorX, centreY - 0.45, groundZ + 2.0)
+            local halfW = math.min(radius, 2.2)
+            local d1x, d1y = toScreen(doorX, centreY - halfW * 0.5, groundZ)
+            local d2x, d2y = toScreen(doorX, centreY + halfW * 0.5, groundZ)
+            local d3x, d3y = toScreen(doorX, centreY + halfW * 0.5, groundZ + 2.0)
+            local d4x, d4y = toScreen(doorX, centreY - halfW * 0.5, groundZ + 2.0)
             love.graphics.setColor(0.3, 0.95, 1.0, 0.75)
             love.graphics.line(d1x, d1y, d4x, d4y, d3x, d3y, d2x, d2y)
         end
@@ -1253,34 +1254,6 @@ local function drawTownPrerender(session)
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
 
-    -- Scroll the plate to follow the actor, then stop at its edges. The actor
-    -- rides the middle of the window until the plate runs out, and walks the
-    -- rest of the way to the edge after that - an ordinary side-scrolling
-    -- camera. When the window is as wide as the plate this clamps to zero and
-    -- the whole plate is simply visible, which is the wide profile.
-    local plateWidth = imageWidth * scaleX
-    local actorPlateX = (centerX + (actorY - sliceY) * pixelsPerRuntimeY)
-    local panX = renderWidth * 0.5 - actorPlateX
-    panX = math.min(0, math.max(renderWidth - plateWidth, panX))
-    panX = math.floor(panX + 0.5)
-
-    local function drawLayer(paths, index, x)
-        local image = getPrerenderImage(paths[index])
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(image, x, 0, 0, scaleX, scaleY)
-    end
-
-    love.graphics.push("all")
-    love.graphics.setShader()
-    -- The proof canvas carries a depth attachment, but this pass is a flat
-    -- 2D composition. Explicitly disable depth testing/writes so the
-    -- foreground image can replace the same-pixel background image.
-    love.graphics.setDepthMode("always", false)
-    love.graphics.setBlendMode("alpha")
-    -- The pan is clamped to the plate, so the plate always covers the window
-    -- and needs no underlay behind it.
-    drawLayer(preRendered.scenes, sceneIndex, panX)
-
     local function projectTownPoint(worldX, worldY, worldZ)
         local relativeX, relativeY = worldX - townCamera.x, worldY - townCamera.y
         local depth = relativeX * townCamera.dirX + relativeY * townCamera.dirY
@@ -1306,6 +1279,36 @@ local function drawTownPrerender(session)
     local plateGroundX, plateGroundY = projectTownPoint(
         depthX, sliceY, state.groundZ or 0)
     local groundScreenOffsetY = screenY - plateGroundY
+
+    -- Scroll the plate to follow the actor, then stop at its edges. The actor
+    -- rides the middle of the window until the plate runs out, and walks the
+    -- rest of the way to the edge after that - an ordinary side-scrolling
+    -- camera. When the window is as wide as the plate this clamps to zero and
+    -- the whole plate is simply visible, which is the wide profile.
+    local plateWidth = imageWidth * scaleX
+    local actorProjectedX = projectTownPoint(depthX, actorY, state.groundZ or 0)
+    local actorPlateX = centerX + (actorProjectedX - plateGroundX)
+    local panX = renderWidth * 0.5 - actorPlateX
+    panX = math.min(0, math.max(renderWidth - plateWidth, panX))
+    panX = math.floor(panX + 0.5)
+
+    local function drawLayer(paths, index, x)
+        local image = getPrerenderImage(paths[index])
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(image, x, 0, 0, scaleX, scaleY)
+    end
+
+    love.graphics.push("all")
+    love.graphics.setShader()
+    -- The proof canvas carries a depth attachment, but this pass is a flat
+    -- 2D composition. Explicitly disable depth testing/writes so the
+    -- foreground image can replace the same-pixel background image.
+    love.graphics.setDepthMode("always", false)
+    love.graphics.setBlendMode("alpha")
+    -- The pan is clamped to the plate, so the plate always covers the window
+    -- and needs no underlay behind it.
+    drawLayer(preRendered.scenes, sceneIndex, panX)
+
     local function toScreen(worldX, worldY, worldZ)
         local projectedX, projectedY = projectTownPoint(worldX, worldY, worldZ)
         return panX + centerX + (projectedX - plateGroundX),
@@ -1392,25 +1395,27 @@ local function drawTownPrerender(session)
                 local arrowDirection = rawEv.direction
                 if not arrowDirection then
                     local label = string.lower(tostring(rawEv.name or ""))
-                    local laneSpan = math.max(0.001, state.maxY - state.minY)
-                    local laneT = (imageY - state.minY) / laneSpan
-                    if label:match("%f[%a]west%f[%A]") or label:match("%f[%a]left%f[%A]") then
-                        arrowDirection = "left"
-                    elseif label:match("%f[%a]east%f[%A]") or label:match("%f[%a]right%f[%A]") then
-                        arrowDirection = "right"
-                    elseif laneT <= 0.08 and (label:match("out") or label:match("down") or label:match("exit")) then
-                        arrowDirection = "left"
-                    elseif laneT >= 0.92 and (label:match("out") or label:match("exit")) then
-                        arrowDirection = "right"
-                    elseif label:match("port") or label:match("quay") or label:match("praca")
-                            or label:match("market") or label:match("backstreet") or label:match("cortico") then
-                        if laneT <= 0.35 then
-                            arrowDirection = "left"
-                        elseif laneT >= 0.65 then
-                            arrowDirection = "right"
-                        else
-                            arrowDirection = "away"
+                    local lane = require("engine.bounded_lane")
+                    local isEdge = false
+                    for _, doorway in ipairs((state.doorways or {})) do
+                        if doorway.eventInstanceId == rawEv.instanceId or doorway.eventId == rawEv.id then
+                            isEdge = lane.isEdgeDoorway(session, doorway)
+                            break
                         end
+                    end
+                    local isInterior = (session.currentMapData and session.currentMapData.category == "interior")
+                        or (rawEv.instanceId and rawEv.instanceId:match("exit_door"))
+                        or label:match("out to")
+                    if isEdge and not isInterior then
+                        if imageY <= state.minY + 0.5 then
+                            arrowDirection = "left"
+                        else
+                            arrowDirection = "right"
+                        end
+                    elseif not isInterior and (label:match("%f[%a]west%f[%A]") or label:match("%f[%a]left%f[%A]")) then
+                        arrowDirection = "left"
+                    elseif not isInterior and (label:match("%f[%a]east%f[%A]") or label:match("%f[%a]right%f[%A]")) then
+                        arrowDirection = "right"
                     else
                         arrowDirection = "away"
                     end

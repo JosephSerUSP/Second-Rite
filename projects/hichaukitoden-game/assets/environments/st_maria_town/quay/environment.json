@@ -9,7 +9,7 @@
     0.0,
     -1.0,
     8.8,
-    29.48,
+    25.448,
     4.0
   ],
   "provenance": {
@@ -19,7 +19,7 @@
     "spawn_player": {
       "position": [
         7.8,
-        14.74,
+        12.724,
         0.0
       ]
     },
@@ -33,35 +33,28 @@
     "praca_stair": {
       "position": [
         7.8,
-        10.405,
+        13.0156,
         0.0
       ]
     },
     "pub_door": {
       "position": [
         7.8,
-        21.098,
+        21.9479,
         0.0
       ]
     },
     "east_port": {
       "position": [
         7.8,
-        29.48,
+        25.4479,
         0.0
       ]
     },
     "npc_fisherman": {
       "position": [
         7.8,
-        2.601,
-        0.0
-      ]
-    },
-    "npc_sign": {
-      "position": [
-        7.8,
-        26.59,
+        1.7135,
         0.0
       ]
     }
@@ -69,11 +62,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      1100,
+      826,
       240
     ],
     "slicePositions": [
-      14.74
+      12.724
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
@@ -82,17 +75,17 @@
       "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_1100.png"
+      "../stub/empty_826.png"
     ],
     "lane": {
-      "runtimeCenterY": 14.74
+      "runtimeCenterY": 12.724
     },
     "playerProjection": {
-      "centerX": 550.0,
+      "centerX": 477.001,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

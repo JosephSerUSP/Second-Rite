@@ -88,6 +88,15 @@ def build_synthetic_scene_in_blender(blend_output_path: Path):
         bsdf_wood.inputs["Base Color"].default_value = (0.35, 0.22, 0.12, 1.0)
         bsdf_wood.inputs["Roughness"].default_value = 0.7
 
+    # Deliberately asymmetric bake probes. These are not game art; they make
+    # the fixture prove that distinct source materials reach the receiver.
+    mat_probe_red = bpy.data.materials.new("BakeProbeRed")
+    mat_probe_red.use_nodes = True
+    mat_probe_red.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.9, 0.05, 0.05, 1.0)
+    mat_probe_blue = bpy.data.materials.new("BakeProbeBlue")
+    mat_probe_blue.use_nodes = True
+    mat_probe_blue.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.05, 0.2, 0.9, 1.0)
+
     # 2. Geometry in TH_SOURCE (Rich source details: high-poly bevels, reliefs, altar bowl)
     # Ground floor slab
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 2.5, -0.1))
@@ -114,14 +123,31 @@ def build_synthetic_scene_in_blender(blend_output_path: Path):
     col_source.objects.link(src_relic)
     root_col.objects.unlink(src_relic)
 
-    # Detailed Back Wall
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 5.0, 1.5))
-    src_wall = bpy.context.active_object
-    src_wall.name = "SRC_BackWall"
-    src_wall.scale = (6.0, 0.6, 3.0)
-    src_wall.data.materials.append(mat_stone)
-    col_source.objects.link(src_wall)
-    root_col.objects.unlink(src_wall)
+    # Detailed Back Wall. The right half is deliberately blue so the probe
+    # shares the exact wall surface that the target receives.
+    for name, x, material in (
+        ("SRC_BackWall_Left", -3.0, mat_stone),
+        ("SRC_BackWall_BlueRight", 3.0, mat_probe_blue),
+    ):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, 5.0, 1.5))
+        src_wall = bpy.context.active_object
+        src_wall.name = name
+        src_wall.scale = (3.0, 0.6, 3.0)
+        src_wall.data.materials.append(material)
+        col_source.objects.link(src_wall)
+        root_col.objects.unlink(src_wall)
+
+    # Source-only coloured panels sit just in front of the target wall. Their
+    # separated red/blue regions make a blank, wrong-material, or self-fed bake
+    # observable without changing the render mesh contract.
+    for name, x, material in (("SRC_BakeProbe_Red", -2.0, mat_probe_red),):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(x, 4.64, 2.2))
+        panel = bpy.context.active_object
+        panel.name = name
+        panel.scale = (1.2, 0.04, 0.7)
+        panel.data.materials.append(material)
+        col_source.objects.link(panel)
+        root_col.objects.unlink(panel)
 
     # Detailed Foreground Archway Pillar (Occluder)
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.35, depth=3.0, location=(-1.8, 1.0, 1.5))

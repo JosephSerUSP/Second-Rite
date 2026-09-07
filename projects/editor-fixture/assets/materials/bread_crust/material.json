@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "bread_crust",
+  "status": "placeholder",
+  "worldSizeMetres": 0.34,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Baked crust with scoring and flour-pale pores.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 8801,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "bfa27ac3b50438df687b6602013dff8f5a5e10e6b6a26606ecd2745f34e1d37b",
+      "height.png": "6364b9032a80477e3640ae6b24e849323af4efc1eaa80586ff6edb36f03435c9",
+      "roughness.png": "49c9fe97b6c82c5409ac46bc72b775834abca92fced609cf692acb7f7d1002db"
+    }
+  }
+}

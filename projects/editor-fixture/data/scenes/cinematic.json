@@ -1,0 +1,12 @@
+{
+  "id": "cinematic",
+  "name": "Cinematic",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [],
+  "hooks": {
+    "on_enter": [],
+    "on_cancel": []
+  },
+  "config": {}
+}

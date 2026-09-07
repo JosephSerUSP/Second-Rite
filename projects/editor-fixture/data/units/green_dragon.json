@@ -1,0 +1,98 @@
+{
+  "id": "green_dragon",
+  "name": "Green Dragon",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A green dragon shaped by wind and living earth. It is the swiftest and most expedition-minded of its siblings.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Green",
+    "Green"
+  ],
+  "skills": [
+    "windBlade"
+  ],
+  "passives": [
+    "ancientGrowth"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "fafnir",
+      "cost": {
+        "item": 52
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 105,
+    "atk": 25,
+    "def": 28,
+    "mat": 26,
+    "mdf": 28,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 103,
+      "atk": 25,
+      "def": 27,
+      "mat": 26,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 29,
+      "def": 32,
+      "mat": 31,
+      "mdf": 32
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 122,
+      "atk": 31,
+      "def": 33,
+      "mat": 32,
+      "mdf": 33
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    182,
+    190
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "GreenDragon",
+  "bigBattler": "GreenDragon",
+  "defaultGrowthSeed": 443779623
+}

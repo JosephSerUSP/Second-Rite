@@ -1,0 +1,52 @@
+{
+  "id": "_gate_room",
+  "name": "Gate Room (frozen G5 fixture)",
+  "texture": "assets/tilesets/_gate/gate_room.png",
+  "heightMap": "assets/tilesets/_gate/gate_room_heightmap.png",
+  "heightMapScale": {
+    "wall": 0.12,
+    "floor": 0.08,
+    "ceiling": 0.08
+  },
+  "heightMapMeshColumns": 24,
+  "heightMapMeshRows": 24,
+  "heightMapTriangleBudget": 384,
+  "tileWidth": 64,
+  "tileHeight": 64,
+  "base": {
+    "walls": [
+      {
+        "id": "gate_wall",
+        "role": "base_wall",
+        "middle": [1, 0],
+        "weight": 100
+      }
+    ],
+    "floors": [
+      {
+        "id": "gate_floor",
+        "role": "base_floor",
+        "atlas": [0, 1],
+        "weight": 100,
+        "heightOffset": 0
+      }
+    ],
+    "ceilings": [
+      {
+        "id": "gate_ceiling",
+        "role": "base_ceiling",
+        "atlas": [0, 0],
+        "weight": 100
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "gate_door",
+      "role": "door",
+      "atlas": [1, 1]
+    }
+  ],
+  "fixturePrefabs": [],
+  "features": []
+}

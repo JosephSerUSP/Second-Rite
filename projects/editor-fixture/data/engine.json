@@ -1,0 +1,1574 @@
+{
+  "metaKeys": [
+    {
+      "key": "tier",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "number",
+      "description": "Equipment/content tier from 1 to 5. Used for authoring, filtering and content placement; it does not directly add statistics."
+    },
+    {
+      "key": "disciplines",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "list",
+      "itemType": "string",
+      "enumFrom": "disciplines",
+      "description": "Which disciplines can PRODUCE this item. Ingredients are ungated -- this does not restrict what the item may be used to make. Absent means the default from disciplineDefaults, so only exceptions are authored. An item may belong to several; overlap is how a thin discipline is furnished without new content."
+    },
+    {
+      "key": "intensityGrade",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "string",
+      "enumFrom": "intensityGrades",
+      "description": "The one admitted crafting override. Intensity is derived from cost; a grade multiplies it, recording where the author disagrees with the price (a rare herb that costs nothing and does a lot). Enumerated and multiplicative on purpose -- an absolute field would fork the number and drift the way the old meta.potency did."
+    },
+    {
+      "key": "craftable",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "flag",
+      "description": "Set false to keep an item out of Item Creation entirely (quest and key items). Opt-out, because signatures are derived and every item otherwise acquires one."
+    },
+    {
+      "key": "craftIngredient",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "flag",
+      "description": "Set false to keep an item out of Item Creation INGREDIENT selection. Independent of `craftable`, which only excludes outputs: monster remains are ingredients that are never produced (craftable false, craftIngredient absent), while a promotion key is neither (both false). Opt-out for the same reason craftable is."
+    },
+    {
+      "key": "dungeonOnly",
+      "appliesTo": [
+        "items"
+      ],
+      "type": "flag",
+      "description": "When true, field-item usability rejects the item on safe maps before it can be consumed. Used by traversal tools such as Town Portal."
+    },
+    {
+      "key": "detect",
+      "appliesTo": [
+        "mapEvents",
+        "commonEvents",
+        "overrides"
+      ],
+      "type": "string",
+      "description": "Marks this event/cell as detectable: \"trap\" (checked against SEE_TRAPS) or \"secret\" (SEE_WALLS). Affects perception only -- a trap is still an ordinary event."
+    },
+    {
+      "key": "detectLevel",
+      "appliesTo": [
+        "mapEvents",
+        "commonEvents",
+        "overrides"
+      ],
+      "type": "number",
+      "description": "Difficulty of noticing this (default 1). The party's best sense rate must be >= this value."
+    }
+  ],
+  "disciplines": [
+    {
+      "kind": "blacksmithing",
+      "label": "Blacksmithing",
+      "stat": "atk",
+      "description": "Forge weapons and armor using ATK."
+    },
+    {
+      "kind": "tinkering",
+      "label": "Tinkering",
+      "stat": "mdf",
+      "description": "Assemble accessories using MDF."
+    },
+    {
+      "kind": "alchemy",
+      "label": "Alchemy",
+      "stat": "mat",
+      "description": "Brew potions and ink using MAT."
+    },
+    {
+      "kind": "cooking",
+      "label": "Cooking",
+      "stat": "maxHp",
+      "description": "Cook foods using Max HP."
+    }
+  ],
+  "elementRules": {
+    "skillStrongBonus": 0.5,
+    "skillStrongDecay": 0.7,
+    "skillWeakMultiplier": 0.65,
+    "userStrongBonus": 0.15,
+    "userStrongDecay": 0.8,
+    "userWeakMultiplier": 0.9,
+    "weakFloor": 0.3
+  },
+  "battleLayout": {
+    "enemyRowWidth": 220,
+    "enemyStartX": 22,
+    "popupAnchorPoint": "center",
+    "popupAnchorOffsetX": 0,
+    "popupAnchorOffsetY": 0,
+    "popupAnchorRelativeX": 0,
+    "popupAnchorRelativeY": 0,
+    "animationAnchorPoint": "center",
+    "consoleTileY": 18,
+    "headerTileOffset": 1,
+    "fallbackX": 128,
+    "fallbackY": 70,
+    "enemyY": 60,
+    "enemySpriteSize": 64,
+    "enemyInfoVisible": false,
+    "enemyInfoWidth": 48,
+    "enemyInfoClampToSlot": false,
+    "enemyInfoOffsetY": -7,
+    "enemyInfoBarOffsetY": 7,
+    "enemyInfoShowName": true,
+    "enemyInfoShowHpBar": true,
+    "enemyInfoShowElements": true,
+    "enemyFallbackSize": 50,
+    "viewportOverlayW": 256,
+    "viewportOverlayH": 240,
+    "logPanelX": 10,
+    "logPanelY": 6,
+    "logPanelWidth": 236,
+    "logPanelHeight": 32,
+    "logTextX": 16,
+    "logTextY": 12,
+    "logTextLimit": 224,
+    "logSpaceX": 200,
+    "logSpaceY": 23,
+    "consoleTileX": 0,
+    "consoleTileW": 32,
+    "consoleTileH": 12,
+    "consoleTextTileX": 1,
+    "menuChoiceSpacing": 8,
+    "partyGridColWidth": 68,
+    "partyGridRowHeight": 40,
+    "partyGridSpriteSize": 24,
+    "partyGridNameXOffset": 1,
+    "partyGridHpXOffset": 8,
+    "partyGridHpYOffset": 11,
+    "partyGridHpBarXOffset": 8,
+    "partyGridHpBarWidth": 52,
+    "partyGridEmptyYOffset": 8,
+    "partyMpRowOffsetY": 0,
+    "partyMpTextOffsetY": -3,
+    "partyMpGaugeReferenceMax": 9999,
+    "targetIndicatorDistance": 8,
+    "targetIndicatorBlinkSpeed": 0.25,
+    "targetIndicatorEnemyOffsetX": 0,
+    "targetIndicatorEnemyOffsetY": 0,
+    "targetIndicatorAllyOffsetX": 0,
+    "targetIndicatorAllyOffsetY": 0,
+    "logLineSpacing": 10,
+    "victoryPanelTileX": 6,
+    "victoryPanelTileY": 4,
+    "victoryPanelTileW": 20,
+    "victoryPanelTileH": 14,
+    "victoryLineSpacing": 12,
+    "victoryRowHeight": 18,
+    "victoryGaugeWidth": 120
+  },
+  "renderSurfaces": {
+    "_comment": "Player-selectable render surfaces, in the order the Options ASPECT entry cycles them. Deliberately an authored list rather than every profile presentation.surface has registered: test and debug profiles register at runtime and must never appear in a player's cycle.",
+    "options": [
+      "classic",
+      "four_three",
+      "wide"
+    ]
+  },
+  "fonts": {
+    "_comment": "Player-selectable UI fonts, in the order the Options FONT entry cycles them.",
+    "options": [
+      "monogram-extended-italic",
+      "monogram-extended"
+    ]
+  },
+  "effekseer": {
+    "magnification": 6.4,
+    "instanceMax": 8192,
+    "squareMaxCount": 16384
+  },
+  "windowLayout": {
+    "ingredient_panel": {
+      "x": 0,
+      "y": 3.5,
+      "width": 32,
+      "height": 5,
+      "style": "list",
+      "title": "Select Ingredients"
+    },
+    "inventory_list": {
+      "x": 0,
+      "y": 8.5,
+      "width": 20,
+      "height": 15.5,
+      "style": "list",
+      "title": "Inventory"
+    },
+    "detail_panel": {
+      "x": 20,
+      "y": 8.5,
+      "width": 12,
+      "height": 15.5,
+      "style": "panel",
+      "title": "Item Info",
+      "lineSpacing": 2
+    },
+    "confirm_panel": {
+      "x": 0,
+      "y": 3.5,
+      "width": 32,
+      "height": 20.5,
+      "style": "confirm",
+      "title": "Confirm Crafting"
+    },
+    "roulette_panel": {
+      "x": 4,
+      "y": 7,
+      "width": 24,
+      "height": 10,
+      "style": "roulette",
+      "title": "Crafting..."
+    },
+    "title_footer": {
+      "x": 0,
+      "y": 26.5,
+      "width": 32,
+      "height": 3.5,
+      "style": "frame",
+      "contentY": 1,
+      "title": null
+    },
+    "game_over_message": {
+      "x": 0,
+      "y": 13,
+      "width": 32,
+      "height": 3,
+      "style": "frame",
+      "contentY": 1,
+      "title": null
+    },
+    "dialogue_name": {
+      "x": 0,
+      "y": 16,
+      "width": 9.5,
+      "height": 2,
+      "style": "panel",
+      "title": null,
+      "contentY": 0.5,
+      "anim": {
+        "open": {
+          "duration": 0.18,
+          "effect": "slideUp",
+          "fromOffset": 16
+        },
+        "close": {
+          "duration": 0.12,
+          "effect": "slideDown",
+          "toOffset": 16
+        }
+      }
+    },
+    "status_name_header": {
+      "x": 0.5,
+      "y": 4.5,
+      "width": 20.5,
+      "height": 2,
+      "style": "creatureHeader",
+      "title": null,
+      "contentY": 0.5,
+      "member": "v.idx"
+    },
+    "status_skills": {
+      "x": 0.5,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 11,
+      "style": "list",
+      "title": "SKILLS",
+      "emptyText": "No skills."
+    },
+    "status_passives": {
+      "x": 0.5,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 11,
+      "style": "list",
+      "title": "PASSIVES",
+      "emptyText": "No passives."
+    },
+    "status_bio": {
+      "x": 0.5,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 11,
+      "style": "panel",
+      "title": "BIOGRAPHY",
+      "contentY": 2,
+      "lineSpacing": 1.5,
+      "text": "{sel('status_party').biography}\n\n{sel('status_party').historyText}"
+    },
+    "status_dock": {
+      "x": 0,
+      "y": 18,
+      "width": 15,
+      "height": 12,
+      "style": "battlerInfo",
+      "title": null,
+      "member": "v.idx",
+      "showExp": true
+    },
+    "equip_slots": {
+      "x": 0.5,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 5.5,
+      "style": "list",
+      "title": "EQUIP"
+    },
+    "equip_list_frame": {
+      "x": 15,
+      "y": 18,
+      "width": 17,
+      "height": 12,
+      "style": "frame",
+      "title": null
+    },
+    "equip_list": {
+      "x": 15,
+      "y": 18,
+      "width": 17,
+      "height": 12,
+      "style": "list",
+      "title": "SELECT"
+    },
+    "craft_header": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 3.5,
+      "style": "panel",
+      "title": "Item Creation"
+    },
+    "result_panel": {
+      "x": 4,
+      "y": 6,
+      "width": 24,
+      "height": 12,
+      "style": "frame",
+      "title": "Crafting Success!",
+      "contentY": 5
+    },
+    "help": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 4,
+      "style": "frame",
+      "title": null
+    },
+    "battle_help": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 4,
+      "style": "frame",
+      "title": null
+    },
+    "battle_log": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 4,
+      "style": "battleLog",
+      "title": null
+    },
+    "party": {
+      "x": 14,
+      "y": 18,
+      "width": 18,
+      "height": 12,
+      "style": "partyGrid",
+      "title": null,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "battle_levelup_head": {
+      "x": 3,
+      "y": 5,
+      "width": 26,
+      "height": 12,
+      "style": "panel",
+      "title": "LEVEL UP!",
+      "portrait": "v.levelUpPortrait",
+      "portraitX": 1,
+      "portraitY": 2,
+      "portraitW": 7.33,
+      "portraitH": 7.5,
+      "contentX": 9.5,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "battle_levelup_stats": {
+      "x": 3,
+      "y": 12,
+      "width": 26,
+      "height": 7,
+      "style": "levelUpStats",
+      "title": null,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "statusPortrait": {
+      "x": 21.5,
+      "y": 4.5,
+      "width": 10,
+      "height": 13,
+      "style": "panel",
+      "title": null,
+      "portrait": "sel('status_party').portraitKey",
+      "portraitX": 1.3,
+      "portraitW": 7.33,
+      "portraitH": 9
+    },
+    "recruit_header": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 3.5,
+      "style": "panel",
+      "title": "CREATURE RECRUITMENT"
+    },
+    "recruit_onboarding": {
+      "x": 0.5,
+      "y": 3.5,
+      "width": 31,
+      "height": 3,
+      "style": "frame",
+      "title": "TUTORIAL"
+    },
+    "recruit_profile": {
+      "x": 0.5,
+      "y": 6.5,
+      "width": 10,
+      "height": 11,
+      "style": "panel",
+      "title": null,
+      "portrait": "v.portraitKey",
+      "portraitX": 1.3,
+      "portraitW": 7.33,
+      "portraitH": 9
+    },
+    "recruit_stats": {
+      "x": 11,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 6,
+      "style": "panel",
+      "title": "CANDIDATE PROFILE"
+    },
+    "recruit_skills": {
+      "x": 11,
+      "y": 12.5,
+      "width": 10,
+      "height": 5,
+      "style": "list",
+      "title": "SKILLS"
+    },
+    "recruit_passives": {
+      "x": 21.5,
+      "y": 12.5,
+      "width": 10,
+      "height": 5,
+      "style": "list",
+      "title": "PASSIVES"
+    },
+    "recruit_equipment": {
+      "x": 11,
+      "y": 6.5,
+      "width": 20.5,
+      "height": 5.5,
+      "style": "list",
+      "title": "EQUIPMENT"
+    },
+    "recruit_requirement": {
+      "x": 0.5,
+      "y": 17.5,
+      "width": 31,
+      "height": 4.5,
+      "style": "frame",
+      "title": null
+    },
+    "recruit_formation": {
+      "x": 0.5,
+      "y": 3.5,
+      "width": 31,
+      "height": 13.5,
+      "style": "panel",
+      "title": "SELECT DESTINATION"
+    },
+    "recruit_confirm": {
+      "x": 5,
+      "y": 6,
+      "width": 22,
+      "height": 7,
+      "style": "frame",
+      "title": "CONFIRM CONTRACT"
+    },
+    "map_member_popup": {
+      "x": 10,
+      "y": 9,
+      "width": 12,
+      "height": 7,
+      "style": "list",
+      "title": null,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale",
+          "anchor": "cellOf:party"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "map_data_popup": {
+      "x": 10,
+      "y": 9,
+      "width": 12,
+      "height": 4,
+      "style": "list",
+      "title": null,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "map_party_popup": {
+      "x": 10,
+      "y": 8,
+      "width": 12,
+      "height": 6,
+      "style": "list",
+      "title": null,
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "map_confirm": {
+      "x": 4,
+      "y": 6,
+      "width": 24,
+      "height": 8,
+      "style": "confirm",
+      "title": "CONFIRM",
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      }
+    },
+    "reserve_party": {
+      "x": 0,
+      "y": 18,
+      "width": 32,
+      "height": 12,
+      "style": "partyGrid",
+      "gridColumns": 2
+    },
+    "reserve_roster": {
+      "x": 0,
+      "y": 4,
+      "width": 32,
+      "height": 14,
+      "style": "partyGrid",
+      "gridColumns": 4,
+      "hideMp": true
+    },
+    "reserve_popup": {
+      "x": 12,
+      "y": 12,
+      "width": 11,
+      "height": 9,
+      "style": "command",
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "rescale"
+        },
+        "close": {
+          "duration": 0.1,
+          "effect": "rescale"
+        }
+      },
+      "vertical": true
+    },
+    "battle_enemies": {
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 18,
+      "style": "enemyRow",
+      "title": null
+    },
+    "battle_command": {
+      "x": 0,
+      "y": 18,
+      "width": 15,
+      "height": 12,
+      "style": "command",
+      "vertical": true,
+      "title": null,
+      "slotGap": 0.5,
+      "slotHeight": 1.5,
+      "slotInset": 1,
+      "chrome": "none"
+    },
+    "battle_victory": {
+      "x": 6,
+      "y": 5,
+      "width": 20,
+      "height": 12,
+      "style": "victoryPanel",
+      "title": null
+    },
+    "battle_skill": {
+      "x": 0,
+      "y": 18,
+      "width": 15,
+      "height": 12,
+      "style": "list",
+      "title": "SKILLS",
+      "visibleRows": 5,
+      "chrome": "none"
+    },
+    "battle_item": {
+      "x": 0,
+      "y": 18,
+      "width": 15,
+      "height": 12,
+      "style": "list",
+      "title": "ITEMS",
+      "visibleRows": 5,
+      "chrome": "none"
+    },
+    "battle_target_info": {
+      "x": 0,
+      "y": 18,
+      "width": 15,
+      "height": 12,
+      "style": "targetInfo",
+      "title": null,
+      "chrome": "none"
+    },
+    "equip_stats": {
+      "x": 0.5,
+      "y": 11.5,
+      "width": 20.5,
+      "height": 6,
+      "style": "statBlock",
+      "title": null,
+      "member": "v.idx",
+      "slot": "v.slot",
+      "previewList": "equip_list",
+      "previewWhen": "v.state == 3",
+      "contentY": 0.5
+    },
+    "battle_inspector": {
+      "x": 0.5,
+      "y": 1.5,
+      "width": 31,
+      "height": 18,
+      "style": "battlerInspector",
+      "title": "Inspection",
+      "chrome": "dialogue"
+    }
+  },
+  "dock": {
+    "note": "The persistent bottom dock (SPEC 1.4). One surface owned by presentation/dock.lua, NOT a scene's window: its state survives scene changes, so moving between two scenes that want the same variant animates nothing at all. Scenes pick a variant with config.dock in scenes.json; geometry per window still comes from windowLayout above. Adding a variant is a data edit. Still outside the dock: reserve_party (read by name from Lua in window_renderer's drawSwapIndicator) and status_dock (binds sel('status_party'), a SCENE window, which a variant's list cache cannot see) — both need code changes first, not just data.",
+    "footprint": {
+      "x": 0,
+      "y": 18,
+      "w": 32,
+      "h": 12
+    },
+    "staticShell": true,
+    "transition": {
+      "clearDuration": 0.1,
+      "morphDuration": 0.16
+    },
+    "variants": {
+      "party_status": {
+        "primary": "party",
+        "shells": [
+          {
+            "x": 0,
+            "y": 18,
+            "w": 14,
+            "h": 12
+          },
+          {
+            "x": 14,
+            "y": 18,
+            "w": 18,
+            "h": 12
+          }
+        ],
+        "windows": [
+          {
+            "id": "dock_empty",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 14,
+              "h": 12
+            },
+            "style": "frame",
+            "content": [],
+            "chrome": "none"
+          },
+          {
+            "id": "party",
+            "content": [
+              {
+                "type": "list",
+                "listId": "party",
+                "format": "{name}"
+              }
+            ],
+            "chrome": "none"
+          }
+        ]
+      },
+      "item_inspect": {
+        "primary": "dock_item_info",
+        "shells": [
+          {
+            "x": 0,
+            "y": 18,
+            "w": 14,
+            "h": 12
+          },
+          {
+            "x": 14,
+            "y": 18,
+            "w": 18,
+            "h": 12
+          }
+        ],
+        "windows": [
+          {
+            "id": "dock_item_info",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 14,
+              "h": 12
+            },
+            "style": "itemInfo",
+            "title": "Effects / Traits",
+            "content": [
+              {
+                "type": "list",
+                "listId": "inventory",
+                "cursor": "v.idx",
+                "tabVar": "v.tab"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "party",
+            "content": [
+              {
+                "type": "list",
+                "listId": "party",
+                "format": "{name}"
+              }
+            ],
+            "chrome": "none"
+          }
+        ]
+      },
+      "dialogue": {
+        "primary": "dialogue_choices",
+        "shells": [
+          {
+            "x": 0,
+            "y": 18,
+            "w": 9.5,
+            "h": 12
+          },
+          {
+            "x": 9.5,
+            "y": 18,
+            "w": 22.5,
+            "h": 12
+          }
+        ],
+        "windows": [
+          {
+            "id": "dialogue_portrait",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 9.5,
+              "h": 12
+            },
+            "style": "frame",
+            "visible": "v.dialoguePortrait ~= nil and v.dialoguePortrait ~= ''",
+            "content": [
+              {
+                "type": "image",
+                "portraitField": "v.dialoguePortrait",
+                "portraitX": 1,
+                "portraitY": 1,
+                "portraitW": 7.5,
+                "portraitH": 10,
+                "portraitOverflow": 0.5,
+                "portraitFrame": "v.dialogueExpression",
+                "portraitName": "v.dialogueSpeaker"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "dialogue_message",
+            "rect": {
+              "x": 9.5,
+              "y": 18,
+              "w": 22.5,
+              "h": 12
+            },
+            "style": "frame",
+            "shiftWith": "dialogue_portrait",
+            "shiftWhenHidden": {
+              "x": 0,
+              "w": 32
+            },
+            "visible": "v.dialogueMode == 'text' or v.dialogueMode == 'choice'",
+            "align": "left",
+            "waitInput": "v.dialogueMode == 'text' and v.dialogueWaiting == true",
+            "content": [
+              {
+                "type": "text",
+                "text": "{v.dialogueText}",
+                "reveal": "v.dialogueRevealElapsed"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "dialogue_choices",
+            "rect": {
+              "x": 9.5,
+              "y": 18,
+              "w": 22.5,
+              "h": 12
+            },
+            "style": "list",
+            "chrome": "none",
+            "shiftWith": "dialogue_portrait",
+            "shiftWhenHidden": {
+              "x": 0,
+              "w": 32
+            },
+            "fitRows": "bottom",
+            "visible": "v.dialogueMode == 'choice'",
+            "content": [
+              {
+                "type": "list",
+                "listId": "v:dialogueOptions",
+                "format": "{name}",
+                "cursor": "v.dialogueCursorIdx"
+              }
+            ]
+          }
+        ]
+      },
+      "battle": {
+        "primary": "party",
+        "shells": [
+          {
+            "x": 0,
+            "y": 18,
+            "w": 14,
+            "h": 12
+          },
+          {
+            "x": 14,
+            "y": 18,
+            "w": 18,
+            "h": 12
+          }
+        ],
+        "windows": [
+          {
+            "id": "battle_dock_empty",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 14,
+              "h": 12
+            },
+            "style": "frame",
+            "visible": "v.combatState ~= 'levelup' and v.combatState ~= 'victory' and not (v.combatState == 'log' and (v.pendingRewardLog ~= nil or v.pendingLevelUpLog == true))",
+            "content": [],
+            "chrome": "none"
+          },
+          {
+            "id": "battle_spoils_dock",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 14,
+              "h": 12
+            },
+            "style": "frame",
+            "title": "Spoils",
+            "visible": "v.combatState == 'victory' or (v.combatState == 'log' and v.pendingRewardLog ~= nil)",
+            "content": [
+              {
+                "type": "text",
+                "text": "{v.victorySpoilsText}"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "battle_levelup_dock",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 14,
+              "h": 12
+            },
+            "style": "levelUpStats",
+            "title": "Level UP!",
+            "visible": "v.combatState == 'levelup' or (v.combatState == 'log' and v.pendingLevelUpLog == true)",
+            "content": [],
+            "chrome": "none"
+          },
+          {
+            "id": "party",
+            "content": [
+              {
+                "type": "list",
+                "listId": "party",
+                "format": "{name}"
+              }
+            ],
+            "chrome": "none"
+          }
+        ]
+      }
+    }
+  },
+  "fogPresets": [
+    {
+      "id": "blue_haze",
+      "label": "Blue Haze",
+      "color": [
+        0.53,
+        0.79,
+        1
+      ],
+      "startDist": 1.5,
+      "distance": 11,
+      "sharpness": 1.3,
+      "minFactor": 0,
+      "panorama": []
+    },
+    {
+      "id": "underground",
+      "label": "Underground",
+      "color": [
+        0.1,
+        0.1,
+        0.18
+      ],
+      "startDist": 0.5,
+      "distance": 3.5,
+      "sharpness": 1,
+      "minFactor": 0.05,
+      "panorama": []
+    },
+    {
+      "id": "purple_dusk",
+      "label": "Purple Dusk",
+      "color": [
+        0.29,
+        0.19,
+        0.4
+      ],
+      "startDist": 1,
+      "distance": 4,
+      "sharpness": 1,
+      "minFactor": 0.03,
+      "panorama": []
+    },
+    {
+      "id": "rolling_mist",
+      "label": "Rolling Mist",
+      "color": [
+        0.35,
+        0.32,
+        0.45
+      ],
+      "startDist": 0.5,
+      "distance": 5.5,
+      "sharpness": 1.2,
+      "minFactor": 0.1,
+      "panorama": [
+        {
+          "image": "fog_001",
+          "scrollX": 0.02,
+          "scrollY": 0,
+          "blendMode": "alpha",
+          "opacity": 0.6
+        }
+      ]
+    },
+    {
+      "id": "night fog",
+      "label": "Night fog",
+      "color": [
+        0.04,
+        0.16,
+        0.25
+      ],
+      "startDist": 1.5,
+      "distance": 7,
+      "sharpness": 1,
+      "minFactor": 0,
+      "panorama": [],
+      "psxBands": 8
+    }
+  ],
+  "foodTags": [
+    {
+      "tag": "sweet",
+      "label": "Sweet"
+    },
+    {
+      "tag": "savory",
+      "label": "Savory"
+    },
+    {
+      "tag": "spicy",
+      "label": "Spicy"
+    },
+    {
+      "tag": "meat",
+      "label": "Meat"
+    },
+    {
+      "tag": "fish",
+      "label": "Fish"
+    },
+    {
+      "tag": "vegetable",
+      "label": "Vegetable"
+    },
+    {
+      "tag": "grain",
+      "label": "Grain"
+    },
+    {
+      "tag": "dairy",
+      "label": "Dairy"
+    },
+    {
+      "tag": "fermented",
+      "label": "Fermented"
+    },
+    {
+      "tag": "fungus",
+      "label": "Fungus"
+    },
+    {
+      "tag": "mineral",
+      "label": "Mineral"
+    },
+    {
+      "tag": "spirit",
+      "label": "Spirit"
+    }
+  ],
+  "intensityGrades": [
+    {
+      "grade": "mundane",
+      "mult": 0.5,
+      "description": "Costs what it's worth, and no more"
+    },
+    {
+      "grade": "normal",
+      "mult": 1,
+      "description": "Price says it all -- the default, never authored"
+    },
+    {
+      "grade": "precious",
+      "mult": 2,
+      "description": "Cheap to buy, potent to work with"
+    },
+    {
+      "grade": "legendary",
+      "mult": 3,
+      "description": "Its price cannot express it"
+    }
+  ],
+  "craftRules": {
+    "crafterPull": 0.3,
+    "alpha": 0.5,
+    "intensityWeight": 0.7,
+    "scatter": 0.24,
+    "scatterFalloff": 1.2,
+    "reachBase": 14,
+    "reachPerStat": 14,
+    "beyondReachCost": 0.12,
+    "foreignIngredientWorth": 0.2,
+    "statDivisor": 20,
+    "intensityScale": 40,
+    "crafterIntensityScale": 10,
+    "coherenceRange": 1.2
+  },
+  "disciplineDefaults": {
+    "byEquipType": {
+      "Weapon": "blacksmithing",
+      "Armor": "blacksmithing",
+      "Accessory": "tinkering"
+    },
+    "byEffect": {
+      "mp_heal": "cooking"
+    },
+    "byType": {
+      "consumable": "alchemy"
+    }
+  },
+  "craftElementSources": {
+    "elementChangeWeight": 3,
+    "paramWeight": 0.7,
+    "nameWeight": 2,
+    "descriptionWeight": 0.5,
+    "effects": {
+      "hp": {
+        "Green": 1
+      },
+      "maxHp": {
+        "Green": 0.8
+      },
+      "mp_heal": {
+        "Red": 0.5
+      },
+      "remove_status": {
+        "White": 0.6
+      },
+      "xp": {
+        "White": 1
+      },
+      "learn_skill": {
+        "White": 1
+      }
+    },
+    "traits": {
+      "HRG": {
+        "Green": 0.6
+      },
+      "ON_PERMADEATH": {
+        "White": 1.4
+      }
+    },
+    "params": {
+      "atk": {
+        "Red": 1
+      },
+      "def": {
+        "Black": 0.4
+      },
+      "mat": {
+        "Blue": 0.8
+      },
+      "mdf": {
+        "White": 0.5
+      },
+      "maxHp": {
+        "Green": 0.8
+      }
+    }
+  },
+  "craftLexicon": {
+    "ember": "Red",
+    "flame": "Red",
+    "fire": "Red",
+    "blaze": "Red",
+    "ash": "Red",
+    "ashen": "Red",
+    "wax": "Red",
+    "molten": "Red",
+    "melted": "Red",
+    "crimson": "Red",
+    "scarlet": "Red",
+    "ruby": "Red",
+    "forge": "Red",
+    "coal": "Red",
+    "wine": "Red",
+    "ale": "Red",
+    "mars": "Red",
+    "whetstone": "Red",
+    "philosopher": "Red",
+    "wind": "Green",
+    "gale": "Green",
+    "breeze": "Green",
+    "leaf": "Green",
+    "herb": "Green",
+    "root": "Green",
+    "moss": "Green",
+    "verdant": "Green",
+    "emerald": "Green",
+    "vine": "Green",
+    "hermes": "Green",
+    "tonic": "Green",
+    "water": "Blue",
+    "aqua": "Blue",
+    "tide": "Blue",
+    "frost": "Blue",
+    "ice": "Blue",
+    "sea": "Blue",
+    "azure": "Blue",
+    "sapphire": "Blue",
+    "mist": "Blue",
+    "ectoplasm": "Blue",
+    "ink": "Blue",
+    "mirror": "Blue",
+    "mercury": "Blue",
+    "rain": "Blue",
+    "holy": "White",
+    "light": "White",
+    "sacred": "White",
+    "blessed": "White",
+    "divine": "White",
+    "silver": "White",
+    "pure": "White",
+    "angel": "White",
+    "saint": "White",
+    "halo": "White",
+    "gram": "White",
+    "ward": "White",
+    "warding": "White",
+    "breath": "White",
+    "dawn": "White",
+    "insight": "White",
+    "lesson": "White",
+    "lessons": "White",
+    "whispered": "White",
+    "ambrosia": "White",
+    "seraph": "White",
+    "dark": "Black",
+    "shadow": "Black",
+    "bone": "Black",
+    "obsidian": "Black",
+    "void": "Black",
+    "night": "Black",
+    "ebon": "Black",
+    "grave": "Black",
+    "curse": "Black",
+    "cursed": "Black",
+    "tomb": "Black",
+    "stout": "Black",
+    "meteorite": "Black",
+    "vile": "Black",
+    "lucille": "Black"
+  },
+  "battleCommands": [
+    {
+      "id": "attack",
+      "label": "Attack",
+      "help": "Strike with a basic attack.",
+      "resolve": "target",
+      "action": {
+        "type": "attack"
+      }
+    },
+    {
+      "id": "skill",
+      "label": "Skill",
+      "help": "Use one of this creature's skills.",
+      "resolve": "submenu",
+      "submenu": "skill"
+    },
+    {
+      "id": "defend",
+      "label": "Defend",
+      "help": "Brace to reduce incoming damage.",
+      "resolve": "commit",
+      "action": {
+        "type": "defend"
+      }
+    },
+    {
+      "id": "item",
+      "label": "Item",
+      "help": "Use an item from the inventory.",
+      "resolve": "submenu",
+      "submenu": "item"
+    },
+    {
+      "id": "flee",
+      "label": "Flee",
+      "help": "Attempt to escape the battle.",
+      "resolve": "commit",
+      "action": {
+        "type": "skill",
+        "id": "flee",
+        "target": "self"
+      }
+    },
+    {
+      "id": "wait",
+      "label": "Wait",
+      "help": "Do nothing this round.",
+      "resolve": "commit",
+      "action": {
+        "type": "skill",
+        "id": "wait",
+        "target": "self"
+      }
+    }
+  ],
+  "defaultBattleCommands": [
+    "attack",
+    "skill",
+    "defend",
+    "item",
+    "flee"
+  ],
+  "geometry": {
+    "topologies": [
+      {
+        "id": "plane",
+        "label": "Plane",
+        "description": "A displaced rectangular surface: walls, floors, ceilings, doors, shallow fixtures."
+      },
+      {
+        "id": "shell",
+        "label": "Shell",
+        "description": "One or two displaced surfaces joined around a shared silhouette."
+      },
+      {
+        "id": "radial",
+        "label": "Radial",
+        "description": "A surface storing radius over angle and height."
+      }
+    ],
+    "roles": [
+      {
+        "id": "surfaceFixture",
+        "label": "Surface fixture",
+        "description": "Composited into architectural albedo and height before meshing."
+      },
+      {
+        "id": "objectFixture",
+        "label": "Object fixture",
+        "description": "A separately placed mesh."
+      }
+    ],
+    "planeSurfaces": [
+      {
+        "id": "wall",
+        "label": "Wall",
+        "description": "Stands on a wall face; local +X is depth out of the wall."
+      },
+      {
+        "id": "floor",
+        "label": "Floor",
+        "description": "Lies on the cell floor; displacement is upward."
+      },
+      {
+        "id": "ceiling",
+        "label": "Ceiling",
+        "description": "Hangs from the cell ceiling; displacement is downward."
+      },
+      {
+        "id": "wallTop",
+        "label": "Wall Top",
+        "description": "Upward-facing cap of a solid wall cell; local +Z is outward."
+      }
+    ],
+    "heightOperations": [
+      {
+        "id": "none",
+        "label": "None",
+        "description": "Ignore height; composite albedo only."
+      },
+      {
+        "id": "add",
+        "label": "Add",
+        "description": "base + signedOverlay * alpha."
+      },
+      {
+        "id": "replace",
+        "label": "Replace",
+        "description": "mix(base, overlay, alpha)."
+      }
+    ],
+    "shellModes": [
+      {
+        "id": "frontOnly",
+        "label": "Front only",
+        "description": "One surface; a one-sided or compiler-thickened object."
+      },
+      {
+        "id": "mirrorDepth",
+        "label": "Mirrored depth",
+        "description": "One depth field reflected through the central plane."
+      },
+      {
+        "id": "frontBack",
+        "label": "Front / back",
+        "description": "Independent front and rear depth fields sharing one silhouette."
+      }
+    ],
+    "layouts": [
+      {
+        "id": "single",
+        "label": "Single",
+        "description": "One region covering the whole image."
+      },
+      {
+        "id": "frontBackHorizontal",
+        "label": "Front/back horizontal",
+        "description": "Front in the left half, back in the right half."
+      }
+    ],
+    "edgeModes": [
+      {
+        "id": "stitch",
+        "label": "Stitch",
+        "description": "Bridge front and rear contours with explicit side faces."
+      },
+      {
+        "id": "pinch",
+        "label": "Pinch",
+        "description": "Converge both depths near the silhouette into a thin edge."
+      }
+    ],
+    "edgeColors": [
+      {
+        "id": "blend",
+        "label": "Blend",
+        "description": "Average the front and rear boundary colours."
+      },
+      {
+        "id": "front",
+        "label": "Front",
+        "description": "Sample the front boundary colour."
+      },
+      {
+        "id": "back",
+        "label": "Back",
+        "description": "Sample the rear boundary colour."
+      },
+      {
+        "id": "darkenedBlend",
+        "label": "Darkened blend",
+        "description": "Darkened average; reinforces volume and separates the painted faces."
+      }
+    ],
+    "quality": {
+      "densityScale": 1,
+      "maxError": 0.0001
+    },
+    "materialBlendOps": [
+      {
+        "id": "add",
+        "label": "Add",
+        "description": "base + layer. PS1 semi-transparency mode B+F: sheen, glow, gem sparkle."
+      },
+      {
+        "id": "subtract",
+        "label": "Subtract",
+        "description": "base - layer. PS1 mode B-F: soot, tarnish, shadowing."
+      },
+      {
+        "id": "multiply",
+        "label": "Multiply",
+        "description": "base * layer: grime, staining, printed detail."
+      },
+      {
+        "id": "screen",
+        "label": "Screen",
+        "description": "1-(1-base)(1-layer): frost, bloom, dusting."
+      },
+      {
+        "id": "mix",
+        "label": "Mix",
+        "description": "Interpolate toward the layer: a plain overlay decal."
+      }
+    ],
+    "materialUvSources": [
+      {
+        "id": "uv",
+        "label": "Model UVs",
+        "description": "The model's authored texture coordinates, as the albedo uses."
+      },
+      {
+        "id": "sphere",
+        "label": "Sphere map",
+        "description": "Sphere-mapped from the screen-space normal: a matcap."
+      }
+    ]
+  },
+  "ui": {
+    "renderSurfaceProfile": "classic"
+  }
+}

@@ -1,0 +1,535 @@
+{
+  "id": "status",
+  "name": "Status",
+  "kind": "menu",
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "page",
+        "value": 1
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.idx == nil or v.idx == 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": 1
+          }
+        ],
+        "else": []
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "state",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "slot",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "eqIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "skillIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "passiveIdx",
+        "value": 1
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and (v.page or 1) == 2 and v.skillIdx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "skillIdx",
+            "value": "v.skillIdx - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and (v.page or 1) == 3 and v.passiveIdx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "passiveIdx",
+            "value": "v.passiveIdx - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and ((v.page or 1) == 1 or (v.page or 1) == 4) and v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "skillIdx",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "passiveIdx",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 2 and v.slot > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "slot",
+            "value": "v.slot - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 3 and v.eqIdx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "eqIdx",
+            "value": "v.eqIdx - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and (v.page or 1) == 2 and v.skillIdx < (session.skillCount[v.idx] or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "skillIdx",
+            "value": "v.skillIdx + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and (v.page or 1) == 3 and v.passiveIdx < (session.passiveCount[v.idx] or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "passiveIdx",
+            "value": "v.passiveIdx + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and ((v.page or 1) == 1 or (v.page or 1) == 4) and v.idx < party.count",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "skillIdx",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "passiveIdx",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 2 and v.slot < 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "slot",
+            "value": "v.slot + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.state == 3 and v.eqIdx < session.equipCount[v.slot] + 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "eqIdx",
+            "value": "v.eqIdx + 1"
+          }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "(v.page or 1) > 1",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "page",
+                "value": "(v.page or 1) - 1"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "page",
+                "value": 4
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "(v.page or 1) < 4",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "page",
+                "value": "(v.page or 1) + 1"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "page",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1 and (v.page or 1) == 1 and party.count > 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 2
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "slot",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 3
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "eqIdx",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "EQUIP_ITEM",
+            "slot": "v.slot",
+            "target": "v.idx",
+            "itemIndex": "v.eqIdx"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 2
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 3",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "state",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {},
+  "draw": "windows",
+  "backdrop": "map",
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "screenshotScript": [
+    {
+      "key": "right"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "right"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "windows": [
+    {
+      "id": "status_party",
+      "rect": {
+        "x": 0,
+        "y": 18,
+        "w": 32,
+        "h": 12
+      },
+      "style": "partyGrid",
+      "visible": "false",
+      "cursor": "v.idx",
+      "content": [
+        {
+          "type": "list",
+          "listId": "party",
+          "format": "{name}"
+        }
+      ]
+    },
+    {
+      "id": "status_name_header",
+      "content": []
+    },
+    {
+      "id": "help",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.state == 2 and 'UP/DOWN: choose slot    ENTER: change equipment    ESC: back' or (v.state == 3 and (sel('equip_list').description .. (sel('equip_list').preview ~= '' and ('\\n' .. sel('equip_list').preview) or '')) or ((v.page or 1) == 2 and sel('status_skills').description or ((v.page or 1) == 3 and sel('status_passives').description or 'UP/DOWN: select member    LEFT/RIGHT: page    ENTER: equip    ESC: back')))}"
+        }
+      ]
+    },
+    {
+      "id": "statusPortrait",
+      "content": []
+    },
+    {
+      "id": "equip_slots",
+      "visible": "(v.page or 1) == 1",
+      "content": [
+        {
+          "type": "list",
+          "listId": "equipSlots",
+          "format": "{item}",
+          "labelField": "name",
+          "cursor": "v.state == 1 and 0 or v.slot",
+          "member": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "equip_stats",
+      "visible": "(v.page or 1) == 1",
+      "content": []
+    },
+    {
+      "id": "status_dock",
+      "content": []
+    },
+    {
+      "id": "status_skills",
+      "visible": "(v.page or 1) == 2",
+      "content": [
+        {
+          "type": "list",
+          "listId": "memberSkills",
+          "format": "{name}",
+          "cursor": "v.skillIdx",
+          "member": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "status_passives",
+      "visible": "(v.page or 1) == 3",
+      "content": [
+        {
+          "type": "list",
+          "listId": "memberPassives",
+          "format": "{name}",
+          "cursor": "v.passiveIdx",
+          "member": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "status_bio",
+      "visible": "(v.page or 1) == 4",
+      "content": []
+    },
+    {
+      "id": "equip_list_frame",
+      "content": []
+    },
+    {
+      "id": "equip_list",
+      "visible": "v.state == 3",
+      "content": [
+        {
+          "type": "list",
+          "listId": "equipment",
+          "format": "{name}",
+          "cursor": "v.eqIdx",
+          "slot": "v.slot",
+          "member": "v.idx"
+        }
+      ]
+    }
+  ]
+}

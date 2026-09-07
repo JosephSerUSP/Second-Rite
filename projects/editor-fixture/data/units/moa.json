@@ -1,0 +1,91 @@
+{
+  "id": "moa",
+  "name": "Moa",
+  "names": [
+    "Momo",
+    "Rosa",
+    "Bico",
+    "Amano",
+    "Nuvem",
+    "Tori",
+    "Pompom",
+    "Pluma"
+  ],
+  "flavor": "A peculiar pink mount bird descended from an Egg. Its strange silhouette hides excellent expedition utility.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "moa",
+  "elements": [
+    "Green"
+  ],
+  "skills": [
+    "dartingPeck",
+    "windBlade"
+  ],
+  "passives": [
+    "wayfarer"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 60,
+    "atk": 18,
+    "def": 20,
+    "mat": 8,
+    "mdf": 15,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 72,
+      "atk": 18,
+      "def": 21,
+      "mat": 9,
+      "mdf": 16
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 84,
+      "atk": 21,
+      "def": 24,
+      "mat": 11,
+      "mdf": 19
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 84,
+      "atk": 22,
+      "def": 25,
+      "mat": 12,
+      "mdf": 20
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Moa",
+  "bigBattler": "Moa",
+  "defaultGrowthSeed": 859307896
+}

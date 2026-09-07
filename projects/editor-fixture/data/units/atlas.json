@@ -1,0 +1,99 @@
+{
+  "id": "atlas",
+  "name": "Atlas",
+  "names": [
+    "Brontes",
+    "Oto",
+    "Ymir",
+    "Goliath",
+    "Rocha",
+    "Bento",
+    "Colosso",
+    "Daisuke"
+  ],
+  "flavor": "A white-and-green giant built to bear impossible burdens. It is more physical, defensive, and reliable than Hill Gigas.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "giant",
+  "elements": [
+    "White",
+    "Green"
+  ],
+  "skills": [
+    "boulderToss",
+    "bulwark"
+  ],
+  "passives": [
+    "rearGuard"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "hyperion",
+      "cost": {
+        "item": 56
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 120,
+    "atk": 36,
+    "def": 34,
+    "mat": 14,
+    "mdf": 24,
+    "mpd": 6,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 108,
+      "atk": 29,
+      "def": 31,
+      "mat": 15,
+      "mdf": 24
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 125,
+      "atk": 34,
+      "def": 37,
+      "mat": 17,
+      "mdf": 28
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 127,
+      "atk": 36,
+      "def": 38,
+      "mat": 19,
+      "mdf": 29
+    }
+  ],
+  "favoriteFoods": [
+    173,
+    177,
+    184
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Atlas",
+  "bigBattler": "Atlas",
+  "defaultGrowthSeed": 711381355
+}

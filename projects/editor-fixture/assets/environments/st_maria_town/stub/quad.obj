@@ -1,0 +1,14 @@
+# Placeholder geometry for a pre-rendered screen.
+# Nothing draws this; the manifest contract requires a mesh path.
+mtllib quad.mtl
+o th_render_stub
+v -1 0 -1
+v 1 0 -1
+v 1 0 1
+v -1 0 1
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+usemtl stub
+f 1/1 2/2 3/3 4/4

@@ -436,23 +436,26 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         envelope, _ = _profile(spec.name, z, spec.height,
                                spec.crown_radius, spec.crown_depth)
         attach_t = (z - crown_base) / max(1e-6, spec.height - crown_base)
-        az = math.radians(ordinal * spec.phyllotaxis_deg
-                          + spec.branch_twist_deg * attach_t
-                          + rng(-18, 18))
+        azimuth_deg = ordinal * spec.phyllotaxis_deg + rng(-18, 18)
+        if spec.branch_twist_deg:
+            azimuth_deg += spec.branch_twist_deg * attach_t
+        az = math.radians(azimuth_deg)
         # Lower limbs on a broad crown reach outward before they climb.
         # Giving every limb the same departure angle is what pushed the
         # first foliage most of a metre above the authored crown base.
         spread_bias = max(0.0, 1.0 - attach_t) * spec.branch_angle_deg * .55
-        elevation = math.radians(90.0 - spec.branch_angle_deg - spread_bias
-                                 + spec.branch_sweep_deg * attach_t
-                                 + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
+        elevation_deg = (90.0 - spec.branch_angle_deg - spread_bias
+                         + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
+        if spec.branch_sweep_deg:
+            elevation_deg += spec.branch_sweep_deg * attach_t
+        elevation = math.radians(elevation_deg)
         if spec.name == "weeping": elevation -= math.radians(18)
         direction = _unit((math.cos(az) * math.cos(elevation),
                            math.sin(az) * math.cos(elevation),
                            math.sin(elevation)))
         attract = _attraction_direction(segments[attach].end, points, spec)
-        if attract is not None:
-            weight = max(0.0, min(1.0, spec.attraction_weight))
+        weight = max(0.0, min(1.0, spec.attraction_weight))
+        if attract is not None and weight:
             # Let attractors choose which side of the crown a limb serves,
             # while retaining the authored elevation habit.  Blending z as
             # well would make the existing lower-limb sweep unpredictable.
@@ -480,8 +483,11 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
             radial = math.hypot(end[0] - crown_bias[0], end[1] - crown_bias[1])
             if radial > max(rx, .08):
                 f = max(rx, .08) / radial
-                end = (crown_bias[0] + (end[0] - crown_bias[0]) * f,
-                       crown_bias[1] + (end[1] - crown_bias[1]) * f, end[2])
+                if crown_bias == (0.0, 0.0, 0.0):
+                    end = (end[0] * f, end[1] * f, end[2])
+                else:
+                    end = (crown_bias[0] + (end[0] - crown_bias[0]) * f,
+                           crown_bias[1] + (end[1] - crown_bias[1]) * f, end[2])
             limb_parent = append(limb_parent, end, 1, step >= first_foliage_step)
             limb_nodes.append(limb_parent)
 

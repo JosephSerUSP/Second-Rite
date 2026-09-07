@@ -29,7 +29,7 @@ import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
 
 
 REPORT_SCHEMA = "thestra.scene-contract-report"
@@ -52,12 +52,6 @@ PREVIEW_SPECS = {
 EXPORT_ROLES = tuple(ROLE_SPECS)
 PREVIEW_ROLES = tuple(PREVIEW_SPECS)
 ALL_KNOWN_ROLES = EXPORT_ROLES + PREVIEW_ROLES
-IDENTITY = [[1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0]]
-
-
 def _diag(severity: str, code: str, message: str, *, role: str | None = None,
           object_name: str | None = None, path: str | None = None) -> dict[str, Any]:
     result: dict[str, Any] = {
@@ -129,7 +123,50 @@ def _object_roles(record: Mapping[str, Any]) -> list[str]:
     memberships = record.get("collections", ())
     if isinstance(memberships, str):
         memberships = (memberships,)
-    return sorted({name for name in memberships if name in ALL_KNOWN_ROLES})
+    if not isinstance(memberships, (list, tuple, set)):
+        return []
+    return sorted({name for name in memberships if isinstance(name, str)
+                   and name in ALL_KNOWN_ROLES})
+
+
+def _collection_report(collection_name_set: set[str],
+                       names_by_role: Mapping[str, list[str]],
+                       counts_by_role: Mapping[str, Counter[str]]) -> dict[str, Any]:
+    return {
+        role: {
+            "present": role in collection_name_set,
+            "objectCount": len(names_by_role[role]),
+            "types": dict(sorted(counts_by_role[role].items())),
+            "required": ROLE_SPECS.get(role, {}).get("required", False),
+            "exported": role in EXPORT_ROLES,
+        }
+        for role in ALL_KNOWN_ROLES
+    }
+
+
+def _malformed_report(code: str, message: str, path: str = "$", *, source: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "schema": REPORT_SCHEMA,
+        "schemaVersion": REPORT_SCHEMA_VERSION,
+        "contractVersion": CONTRACT_VERSION,
+        "ok": False,
+        "summary": {"errorCount": 1, "warningCount": 0, "objectCount": 0},
+        "semantics": {
+            "roleAssignment": "explicit_collection_membership",
+            "objectNames": "labels_only",
+            "collision": "optional_export_only; does_not_claim_walkability",
+            "sourceInspection": "read_only_no_save",
+        },
+        "collections": _collection_report(set(),
+                                            {role: [] for role in ALL_KNOWN_ROLES},
+                                            {role: Counter() for role in ALL_KNOWN_ROLES}),
+        "objects": [],
+        "anchors": [],
+        "diagnostics": [_diag("error", code, message, path=path)],
+    }
+    if source:
+        report["source"] = dict(source)
+    return report
 
 
 def inspect_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
@@ -140,13 +177,35 @@ def inspect_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
     ``mesh`` metadata such as ``uvLayerCount`` is optional, but when present it
     is checked for render meshes.
     """
+    if not isinstance(snapshot, Mapping):
+        return _malformed_report("malformed_snapshot",
+                                 "scene snapshot must be a JSON object",
+                                 path="$")
+
     diagnostics: list[dict[str, Any]] = []
     collection_values = snapshot.get("collections", [])
+    if not isinstance(collection_values, (list, tuple)):
+        diagnostics.append(_diag("error", "malformed_collections",
+                                 "collections must be a list of names or objects",
+                                 path="collections"))
+        collection_values = []
     collection_names: list[str] = []
-    for value in collection_values:
-        name = value.get("name") if isinstance(value, Mapping) else value
-        if isinstance(name, str):
-            collection_names.append(name)
+    for index, value in enumerate(collection_values):
+        if isinstance(value, Mapping):
+            name = value.get("name")
+            if not isinstance(name, str) or not name:
+                diagnostics.append(_diag("error", "malformed_collection",
+                                         "collection entry requires a non-empty string name",
+                                         path=f"collections[{index}].name"))
+                continue
+        elif isinstance(value, str) and value:
+            name = value
+        else:
+            diagnostics.append(_diag("error", "malformed_collection",
+                                     "collection entry must be a non-empty string or object with a name",
+                                     path=f"collections[{index}]"))
+            continue
+        collection_names.append(name)
     collection_name_set = set(collection_names)
     for name in sorted({n for n in collection_names if collection_names.count(n) > 1}):
         diagnostics.append(_diag("error", "duplicate_collection",
@@ -170,6 +229,20 @@ def inspect_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
             continue
         name = str(raw.get("name", f"<object {index}>"))
         object_type = str(raw.get("type", "UNKNOWN")).upper()
+        memberships = raw.get("collections", ())
+        if memberships is None or not isinstance(memberships, (list, tuple, set, str)):
+            diagnostics.append(_diag(
+                "error", "malformed_memberships",
+                f"object '{name}' collections must be a list of string names",
+                object_name=name, path=f"objects[{index}].collections"))
+        elif not isinstance(memberships, str):
+            for membership_index, membership in enumerate(memberships):
+                if not isinstance(membership, str):
+                    diagnostics.append(_diag(
+                        "error", "malformed_membership",
+                        f"object '{name}' collection membership must be a string name",
+                        object_name=name,
+                        path=f"objects[{index}].collections[{membership_index}]"))
         roles = _object_roles(raw)
         normalized: dict[str, Any] = {"name": name, "type": object_type, "roles": roles}
         for role in roles:
@@ -266,6 +339,14 @@ def inspect_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
             "error", "missing_render_mesh",
             "TH_RENDER must contain at least one MESH object",
             role="TH_RENDER", path="collections.TH_RENDER.objects"))
+    if "TH_SOURCE" in collection_name_set and not any(
+            counts_by_role["TH_SOURCE"][object_type]
+            for object_type in ("MESH", "CURVE", "SURFACE")):
+        diagnostics.append(_diag(
+            "error", "missing_source_geometry",
+            "TH_SOURCE must contain at least one bakeable geometry object (MESH, CURVE, or SURFACE); "
+            "lights alone cannot provide selected-to-active bake sources",
+            role="TH_SOURCE", path="collections.TH_SOURCE.objects"))
     if "TH_ANCHORS" in collection_name_set:
         anchor_names = names_by_role["TH_ANCHORS"]
         for name in sorted({n for n in anchor_names if anchor_names.count(n) > 1}):
@@ -279,15 +360,7 @@ def inspect_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
         item.get("path", ""), item["code"], item.get("object", ""), item["message"]))
     error_count = sum(item["severity"] == "error" for item in diagnostics)
     warning_count = sum(item["severity"] == "warning" for item in diagnostics)
-    collection_report = {}
-    for role in ALL_KNOWN_ROLES:
-        collection_report[role] = {
-            "present": role in collection_name_set,
-            "objectCount": len(names_by_role[role]),
-            "types": dict(sorted(counts_by_role[role].items())),
-            "required": ROLE_SPECS.get(role, {}).get("required", False),
-            "exported": role in EXPORT_ROLES,
-        }
+    collection_report = _collection_report(collection_name_set, names_by_role, counts_by_role)
 
     return {
         "schema": REPORT_SCHEMA,
@@ -382,7 +455,8 @@ def main(argv: list[str] | None = None) -> int:
         blender = os.environ.get("BLENDER") or shutil.which("blender")
         if not blender:
             parser.error("Blender not found; set BLENDER or put blender on PATH")
-        command = [blender, "--background", str(blend_path), "--python", str(Path(__file__).resolve()), "--"]
+        command = [blender, "--background", str(blend_path), "--python-exit-code", "1",
+                   "--python", str(Path(__file__).resolve()), "--"]
         if args.output:
             command.extend(["--output", str(args.output.resolve())])
         if args.pretty:
@@ -391,7 +465,15 @@ def main(argv: list[str] | None = None) -> int:
             command.append("--strict")
         return subprocess.run(command, check=False).returncode
     if args.snapshot:
-        snapshot = json.loads(args.snapshot.read_text(encoding="utf-8"))
+        try:
+            snapshot = json.loads(args.snapshot.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            report = _malformed_report(
+                "malformed_snapshot_json",
+                f"snapshot is not valid JSON: {error.msg}",
+                path=f"{args.snapshot}:line {error.lineno}, column {error.colno}")
+            _write_report(report, args.output, args.pretty)
+            return 1 if args.strict else 0
     elif _inside_blender():
         snapshot = _snapshot_from_blender()
     else:

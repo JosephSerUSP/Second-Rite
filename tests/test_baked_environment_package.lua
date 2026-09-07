@@ -181,6 +181,29 @@ function M.run()
             "Cortico floor provenance hash matches " .. file)
     end
 
+    -- 10. Reusable world-space distant-layer contract
+    local backgroundLayer = corticoPkg.backgroundLayers[1]
+    check(#corticoPkg.backgroundLayers == 1, "Cortico has one distant background layer")
+    check(backgroundLayer.id == "cortico_distant_scenery",
+        "Cortico distant layer has stable semantic id")
+    check(backgroundLayer.renderMesh == corticoRoot .. "/background.obj",
+        "distant layer resolves its world-space OBJ relative to the package")
+    check(backgroundLayer.materialLibrary == corticoRoot .. "/background.mtl",
+        "distant layer resolves its material library relative to the package")
+    check(backgroundLayer.provenance.cameraSpace == false
+        and backgroundLayer.provenance.reactsToPitch == true,
+        "distant layer is depth-tested world space and reacts to pitch")
+    local backgroundModel = obj_model.parse(
+        readFile(corticoFilesRoot .. "/background.obj"), "cortico background.obj")
+    check(backgroundModel.vertexCount == 6, "distant layer card triangulates to two triangles")
+    for _, file in ipairs({ "background.obj", "background.mtl", "cortico_background.png" }) do
+        local key = file == "cortico_background.png" and "texture"
+            or (file == "background.obj" and "renderMesh" or "materialLibrary")
+        check(sha256(readFile(corticoFilesRoot .. "/" .. file))
+            == backgroundLayer.provenance.sha256[key],
+            "distant layer provenance hash matches " .. file)
+    end
+
     mockManifest.collisionMesh = nil
     mockManifest.bakedLighting = false
     mockJson = json.encode(mockManifest)
@@ -218,7 +241,26 @@ function M.run()
 
     love.filesystem.read = originalRead
 
-    -- 10. viewport_3d getFogConfig respects baked town environments (#1037)
+    mockManifest = json.decode(readFile(corticoFilesRoot .. "/environment.json"))
+    love.filesystem.read = function(p)
+        if p == "test/no_collision_env.json" then return json.encode(mockManifest) end
+        return originalRead(p)
+    end
+    mockManifest.backgroundLayers[1].provenance.cameraSpace = true
+    mockJson = json.encode(mockManifest)
+    local okCameraSpaceBackground = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okCameraSpaceBackground,
+        "camera-space background layers fail loudly")
+    mockManifest.backgroundLayers[1].provenance.cameraSpace = false
+    mockManifest.backgroundLayers[1].provenance.sha256.texture = "bad"
+    mockJson = json.encode(mockManifest)
+    local okBadBackgroundHash = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okBadBackgroundHash,
+        "background layers with malformed provenance hash fail loudly")
+    mockManifest.backgroundLayers = nil
+    mockJson = json.encode(mockManifest)
+
+    -- 11. viewport_3d getFogConfig respects baked town environments (#1037)
     local viewport_3d = require("presentation.viewport_3d")
     check(type(viewport_3d.getFogConfig) == "function", "viewport_3d.getFogConfig is exposed")
     check(type(viewport_3d.isLiveBakedTown) == "function", "viewport_3d.isLiveBakedTown is exposed")

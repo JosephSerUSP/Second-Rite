@@ -254,6 +254,16 @@ an export-role beauty surface. Visual height data does not imply elevation
 traversal: movement, collision, and arrival semantics remain the authority for
 walkability and must be extended together before a terrain becomes traversable.
 
+The same package may declare reusable `backgroundLayers` for distant,
+non-interactive scenery. Each layer is a depth-tested world-space OBJ/MTL
+asset, never a camera-space overlay; its provenance must state the source
+representation, `cameraSpace=false`, `reactsToPitch=true`, and hashes for the
+render mesh, material library, and texture. The renderer queues these layers
+through the normal placed-model path, so foreground architecture and actors
+occlude them by hardware depth. A background layer must not carry a duplicate
+floor bridge: the package's authoritative floor mesh remains the only walkable
+ground surface.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,

@@ -1459,7 +1459,7 @@ local function drawTownPrerender(session)
                 local lanes = require("engine.bounded_lane")
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 local arrowLen = 1.04 * modelScale
-                local arrowRad = 0.22 * modelScale
+                local arrowRad = 0.45 * modelScale
                 local arrowY = math.min(state.maxY, math.max(state.minY, imageY))
 
                 for _, modelGroup in ipairs(model.groups or {}) do
@@ -1506,6 +1506,13 @@ local function drawTownPrerender(session)
                                 addSegment(ax, ay, bx, by)
                                 addSegment(bx, by, cx, cy)
                                 addSegment(cx, cy, ax, ay)
+                                -- Transition markers are ground cues, not
+                                -- upright wire models. Fill each projected
+                                -- chevron triangle before its outline so the
+                                -- short depth path remains legible at the
+                                -- pitched town resolution.
+                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
+                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
                             else
                                 love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
                                 love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
@@ -2794,7 +2801,8 @@ local function drawWorldSpace(session, authoredCamera)
         buildProfiler.cache("materialize.placedModel", false)
         buildProfiler.add("materialize.uniqueSourcePlacements", 1)
         local bakedTownEnvironment = session.townTraversal
-            and tostring(cacheKey):match("^town%-environment:") ~= nil
+            and (tostring(cacheKey):match("^town%-environment:") ~= nil
+                or tostring(cacheKey):match("^town%-background:" ) ~= nil)
         -- A variant names either a hand-modelled OBJ or an image-authored
         -- geometry asset. Both compile to the same representation, so this is
         -- the only place the world renderer knows the difference.
@@ -3013,6 +3021,12 @@ end
             queuePlacedModels(ensurePlacedModel(
                 { model = environment.floorMesh, textureWrap = "repeat" },
                 "town-floor:" .. environment.manifestPath,
+                0, 0, "x"))
+        end
+        for _, layer in ipairs(environment.backgroundLayers or {}) do
+            queuePlacedModels(ensurePlacedModel(
+                { model = layer.renderMesh },
+                "town-background:" .. layer.id .. ":" .. environment.manifestPath,
                 0, 0, "x"))
         end
     end

@@ -48,16 +48,20 @@ flat in this pilot.
 The west/east readability issue had a separate cause: the source parapet body
 was 0.82 m high plus its coping, about 0.94 m total at this camera. The adopted
 blend now uses a 0.58 m body with the coping at a 0.70 m total top. The wall
-spans and anchors are unchanged. This leaves the player fully readable at the
-west and east bounds in both review surfaces.
+spans and anchors are unchanged. This leaves the player's upper body visible at
+the west and east bounds in both review surfaces; the parapets still occlude
+the lower legs.
 
 Doorway arrows are authored with explicit `direction` values (`left`,
 `right`, or `away`). The shared `presentation.transition_marker` contract
-maps the OBJ shaft to lane Y for side exits and world X for depth exits. A flat
-depth exit keeps its radial thickness at a fixed presentation height; it does
-not invent an elevation angle. The previous town compositor added a 22-degree
-depth/Z tilt, which made doors and flat depth exits point at the sky. The
-focused negative test rejects an upward-pointing flat-depth marker.
+maps the chevron shaft to lane Y for side exits and world X for depth exits.
+The shared OBJ is now a ground-hugging chevron, so the doorway cue reads as a
+floor direction instead of a vertical spear while retaining the true `+X`
+depth meaning. Under the canonical pitched camera the far-door direction still
+projects toward screen-up, but the cue is visibly a floor triangle and its
+world Z remains flat. The previous town compositor added a 22-degree depth/Z tilt;
+that path is gone, and the focused negative test rejects an upward-pointing
+flat-depth marker.
 
 ## Runtime semantics
 
@@ -70,7 +74,7 @@ NPC interaction button. The Scholar and Euler are therefore checked separately
 at their real Cortico anchors by compiling their authored command lists through
 `interpreter.runInteractive` and walking them with the production
 `director.GraphWalker`; both reach dialogue nodes. The visible proof frames
-also show the actors and continuous ground.
+also show the actors' upper bodies and continuous ground.
 
 The generated town graph currently reports 35 doorway edges/arrival anchors.
 The only town-walk unreachable map remains map 28, the pre-existing interior
@@ -87,15 +91,25 @@ and malformed hashes. The focused marker test is
 
 The current proof captures are:
 
-- Wide: `out/st-maria-cortico/wide-proof-final-grid/26-west.png`,
+- Wide: `out/st-maria-cortico/wide-proof-background-final/26-west.png`,
   `26-centre.png`, and `26-east.png`.
-- Classic: `out/st-maria-cortico/classic-proof-final-grid/26-west.png`,
+- Classic: `out/st-maria-cortico/classic-proof-background-final/26-west.png`,
   `26-centre.png`, and `26-east.png`.
 
 Those six frames show the corrected west/centre/east composition: the player
-is visible above the lowered parapets, the floor is continuous and no longer
-sheary, and the NPC/architecture placements remain readable. The town-walk
-log is `out/st-maria-cortico/town-walk-final-grid.log`.
+upper body is visible above the lowered parapets, the floor is continuous and
+no longer sheary, and the NPC/architecture placements remain readable. The
+town-walk log is `out/st-maria-cortico/town-walk-final-grid.log`. The final
+Classic and Wide proof runs each completed 45 frames.
+
+The distant scenery candidate is now installed as the package's reusable
+`backgroundLayers[0]` world-space OBJ/MTL card. It is derived from the adopted
+source topology rendered once at the canonical `-17.5` degree camera, then
+consumed by the normal depth-tested placed-model queue. It is not a
+camera-space overlay, and its candidate floor bridge was intentionally omitted
+so the authoritative `floor.obj` remains the sole floor surface. The package
+records the mesh/material/texture hashes and the `cameraSpace=false`,
+`reactsToPitch=true` provenance contract.
 
 The live staged verification uses the canonical exporter boundary and the full
 LÖVE runtime. Native coverage remains limited where the local Effekseer shim is
@@ -107,5 +121,6 @@ that those assertions passed natively.
 
 The grid carries visual per-vertex heights, but the bounded-lane pilot still
 walks a flat authored `groundZ`; there is no full terrain-elevation traversal
-contract yet. The distant background/sky layer is a separate task and is not
-implemented here. No global sky or default background behavior was changed.
+contract yet. The background card also remains non-interactive: it supplies
+depth/parallax scenery, not collision or traversal. No global sky or default
+background behavior was changed.

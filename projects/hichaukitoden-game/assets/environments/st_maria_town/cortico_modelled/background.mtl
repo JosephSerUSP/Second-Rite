@@ -1,0 +1,5 @@
+# Source-derived world-space distant scenery card.
+newmtl CorticoBackgroundBillboard
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+map_Kd cortico_background.png

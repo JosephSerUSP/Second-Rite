@@ -1776,5 +1776,25 @@
       "sourceVisualAdjustment": "Lowered near parapets to 0.70m total for actor readability; lane spans and gameplay anchors unchanged."
     }
   },
-  "floorMesh": "floor.obj"
+  "floorMesh": "floor.obj",
+  "backgroundLayers": [
+    {
+      "id": "cortico_distant_scenery",
+      "renderMesh": "background.obj",
+      "materialLibrary": "background.mtl",
+      "provenance": {
+        "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+        "sourceRepresentation": "source-topology-rendered-at-canon-pitch-to-world-space-card",
+        "cameraSpace": false,
+        "reactsToPitch": true,
+        "depthRangeX": [36.0, 36.0],
+        "floorBridge": false,
+        "sha256": {
+          "renderMesh": "eebf8e2fd87660de392892a2d80a33a7c9158f425c411faf5b83cde657da99a8",
+          "materialLibrary": "efb86026cdfcddb2e45878f98e85498415aff7ab4349f36208b04224448250ff",
+          "texture": "76c33305d37ab7808901469d4f9d8ec4c34b416f7b7370182f0256d24511527d"
+        }
+      }
+    }
+  ]
 }

@@ -21,6 +21,7 @@ import argparse
 import hashlib
 import json
 import math
+import shutil
 import sys
 from pathlib import Path
 
@@ -675,6 +676,64 @@ def _sha256(path):
     return digest.hexdigest()
 
 
+def _write_runtime_layer(out_dir, billboard_geometry, image_path):
+    """Emit the reusable depth-tested runtime card beside the study output.
+
+    Blender's card uses world coordinates. The runtime OBJ convention is the
+    inverse of obj_model.objToWorld: OBJ (x, z, -y) restores engine (x, y, z).
+    The image is already rendered through the canonical pitched camera once;
+    the runtime card must never render it through that camera a second time.
+    """
+    out_dir = Path(out_dir)
+    left_y = float(billboard_geometry["y"][1])
+    right_y = float(billboard_geometry["y"][0])
+    bottom_z = float(billboard_geometry["z"][0])
+    top_z = float(billboard_geometry["z"][1])
+    bottom_v = float(billboard_geometry["sourceBottomV"])
+    obj = out_dir / "background.obj"
+    obj.write_text(
+        "mtllib background.mtl\n"
+        "o distant_scenery_world_card\n"
+        "# Engine coordinates are authored as OBJ x,z,-y for obj_model.\n"
+        f"v 36.000000 {bottom_z:.6f} {-left_y:.6f}\n"
+        f"v 36.000000 {bottom_z:.6f} {-right_y:.6f}\n"
+        f"v 36.000000 {top_z:.6f} {-right_y:.6f}\n"
+        f"v 36.000000 {top_z:.6f} {-left_y:.6f}\n"
+        f"vt 0.000000 {bottom_v:.6f}\n"
+        f"vt 1.000000 {bottom_v:.6f}\n"
+        "vt 1.000000 1.000000\n"
+        "vt 0.000000 1.000000\n"
+        "usemtl DistantSceneryCard\n"
+        "f 1/1 2/2 3/3 4/4\n",
+        encoding="utf-8",
+    )
+    mtl = out_dir / "background.mtl"
+    mtl.write_text(
+        "# Source-derived world-space distant scenery card.\n"
+        "newmtl DistantSceneryCard\n"
+        "Ka 1.000 1.000 1.000\n"
+        "Kd 1.000 1.000 1.000\n"
+        "map_Kd cortico_background.png\n",
+        encoding="utf-8",
+    )
+    texture = out_dir / "cortico_background.png"
+    shutil.copyfile(image_path, texture)
+    return {
+        "renderMesh": obj.name,
+        "materialLibrary": mtl.name,
+        "texture": texture.name,
+        "sha256": {
+            "renderMesh": _sha256(obj),
+            "materialLibrary": _sha256(mtl),
+            "texture": _sha256(texture),
+        },
+        "cameraSpace": False,
+        "reactsToPitch": True,
+        "depthRangeX": [36.0, 36.0],
+        "floorBridge": False,
+    }
+
+
 def _manifest(source, studies, modules):
     return {
         "schemaVersion": SCHEMA_VERSION,
@@ -701,6 +760,7 @@ def _manifest(source, studies, modules):
             "reactsToPitch": True,
             "cameraSpaceActorBillboard": False,
             "floorBridge": modules["floorBridge"],
+            "assets": modules.get("runtimeAssets"),
         },
         "studies": studies,
         "outputs": {"libraryBlend": "cortico-background-topology-authoring.blend",
@@ -724,6 +784,7 @@ def build_study(source, out_dir):
     plate_image = bpy.data.images.load(str(plate_path.resolve()), check_existing=True)
     billboard, billboard_geometry = _make_world_billboard(collection, camera, plate_image)
     floor = _make_floor_bridge(collection)
+    runtime_assets = _write_runtime_layer(out_dir, billboard_geometry, plate_path)
     sky.hide_render = False
     study_dir = Path(out_dir) / "studies"
     study_dir.mkdir(parents=True, exist_ok=True)
@@ -736,6 +797,7 @@ def build_study(source, out_dir):
     return study_path, studies, {"modules": manifest_modules,
                                  "connectors": connectors,
                                  "billboard": billboard_geometry,
+                                 "runtimeAssets": runtime_assets,
                                  "floorBridge": {"nearX": FLOOR_NEAR_X,
                                                   "farX": BILLBOARD_X + 0.05,
                                                   "groundZ": 0.0}}

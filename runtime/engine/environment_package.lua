@@ -164,6 +164,59 @@ function environment_package.load(path)
             requiredSha256(floor.sha256[file], "provenance.floor.sha256." .. file)
         end
     end
+    local backgroundLayers = {}
+    if manifest.backgroundLayers ~= nil then
+        if type(manifest.backgroundLayers) ~= "table" then
+            error("environment package backgroundLayers must be an array", 0)
+        end
+        local seen = {}
+        for index, layer in ipairs(manifest.backgroundLayers) do
+            if type(layer) ~= "table" then
+                error("environment package backgroundLayers[" .. index .. "] must be an object", 0)
+            end
+            local id = requiredString(layer.id, "backgroundLayers[" .. index .. "].id")
+            if seen[id] then
+                error("environment package background layer id is duplicated: " .. id, 0)
+            end
+            seen[id] = true
+            local renderMesh = requiredString(layer.renderMesh,
+                "backgroundLayers[" .. index .. "].renderMesh")
+            local materialLibrary = requiredString(layer.materialLibrary,
+                "backgroundLayers[" .. index .. "].materialLibrary")
+            local provenance = layer.provenance
+            if type(provenance) ~= "table" then
+                error("environment package backgroundLayers[" .. index .. "].provenance is required", 0)
+            end
+            requiredString(provenance.sourceBlend,
+                "backgroundLayers[" .. index .. "].provenance.sourceBlend")
+            requiredString(provenance.sourceRepresentation,
+                "backgroundLayers[" .. index .. "].provenance.sourceRepresentation")
+            if provenance.cameraSpace ~= false then
+                error("environment package backgroundLayers[" .. index
+                    .. "].provenance.cameraSpace must be false", 0)
+            end
+            if provenance.reactsToPitch ~= true then
+                error("environment package backgroundLayers[" .. index
+                    .. "].provenance.reactsToPitch must be true", 0)
+            end
+            if type(provenance.sha256) ~= "table" then
+                error("environment package backgroundLayers[" .. index
+                    .. "].provenance.sha256 must be an object", 0)
+            end
+            requiredSha256(provenance.sha256["renderMesh"],
+                "backgroundLayers[" .. index .. "].provenance.sha256.renderMesh")
+            requiredSha256(provenance.sha256["materialLibrary"],
+                "backgroundLayers[" .. index .. "].provenance.sha256.materialLibrary")
+            requiredSha256(provenance.sha256["texture"],
+                "backgroundLayers[" .. index .. "].provenance.sha256.texture")
+            backgroundLayers[#backgroundLayers + 1] = {
+                id = id,
+                renderMesh = resolve(renderMesh),
+                materialLibrary = resolve(materialLibrary),
+                provenance = provenance,
+            }
+        end
+    end
     local bakedLighting = manifest.bakedLighting
     if bakedLighting == nil then
         bakedLighting = (preRendered == nil)
@@ -178,6 +231,7 @@ function environment_package.load(path)
         textureAtlas = asset("textureAtlas", "textureAtlas"),
         collisionMesh = collisionMesh,
         floorMesh = floorMesh,
+        backgroundLayers = backgroundLayers,
         bounds = manifest.bounds,
         anchors = manifest.anchors,
         preRendered = preRendered,

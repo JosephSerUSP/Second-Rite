@@ -24,17 +24,17 @@ function transition_marker.worldPoint(direction, vertex, spec)
     local depthX = tonumber(spec.depthX) or 0
     local laneY = tonumber(spec.laneY) or 0
     local groundZ = tonumber(spec.groundZ) or 0
-    local baseHeight = tonumber(spec.baseHeight) or 0.15
+    local baseHeight = tonumber(spec.baseHeight) or 0.02
     local arrowLength = tonumber(spec.arrowLength) or (1.04 * scale)
     local arrowY = tonumber(spec.arrowY) or laneY
     if direction == "left" then
         local tipY = math.max(arrowY, (tonumber(spec.minY) or arrowY) + 0.15)
         tipY = math.min(tipY, (tonumber(spec.maxY) or tipY) - 0.15 - arrowLength)
-        return depthX + lx, tipY + (arrowLength - lz), groundZ + 0.35 + ly
+        return depthX + lx, tipY + (arrowLength - lz), groundZ + baseHeight + ly
     elseif direction == "right" then
         local tipY = math.max(arrowY, (tonumber(spec.minY) or arrowY) + 0.15)
         tipY = math.max(tipY, (tonumber(spec.minY) or tipY) + 0.15 + arrowLength)
-        return depthX + lx, tipY - (arrowLength - lz), groundZ + 0.35 + ly
+        return depthX + lx, tipY - (arrowLength - lz), groundZ + baseHeight + ly
     end
     -- A flat depth exit points through the doorway at ground height. The
     -- local radial axis supplies the marker's small vertical thickness; the

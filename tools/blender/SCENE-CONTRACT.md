@@ -41,6 +41,16 @@ spacing, texture period, vertex/face counts, texture dependency, and SHA-256
 hashes for `floor.obj`, `floor.mtl`, and `floor.png`. The runtime package
 loader rejects a malformed floor contract rather than silently dropping it.
 
+A source-derived distant scenery card may be installed as a package
+`backgroundLayers` entry after review. It is a world-space, depth-tested
+OBJ/MTL layer rendered from the authored source at the canonical pitched
+camera; it must record `cameraSpace=false`, `reactsToPitch=true`, source
+representation, and SHA-256 hashes for mesh, material library, and texture.
+The card is non-interactive and must not include a second floor bridge: the
+separate `floorMesh` remains the only authoritative walkable surface. Runtime
+consumption uses the ordinary placed-model queue, preserving foreground
+occlusion and camera parallax.
+
 `TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights are
 valid source inputs for illumination but cannot be the only selected-to-active
 bake source. `TH_RENDER` must contain a mesh. If render mesh metadata is

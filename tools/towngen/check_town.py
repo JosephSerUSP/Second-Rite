@@ -62,8 +62,10 @@ def owned_map_files():
 
 def owned_environment_files():
     """Environment manifests are generator output too, not hand-editable data."""
-    return [os.path.join(ENV_REL, key, "environment.json")
-            for key in SCREENS if key not in AUTHORED_NOT_GENERATED]
+    return [os.path.join(ENV_REL, screen.get("environment_key", key),
+                         "environment.json")
+            for key, screen in SCREENS.items()
+            if key not in AUTHORED_NOT_GENERATED and not screen.get("modelled")]
 
 
 def read_normalised(path):

@@ -273,6 +273,11 @@ SCREENS = {
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
         id=26, title="St. Maria - The Cortico", plate="backstreet_bg.png",
+        # The map/events remain generator-owned, but the environment package is
+        # an adopted Blender source/export artifact. The generator binds it and
+        # leaves its manifest untouched rather than manufacturing a plate stub.
+        modelled=True,
+        environment_key="cortico_modelled",
         intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
         npcs=[("scholar", "Scholar", "npc_scholar", 180.0),
@@ -521,6 +526,8 @@ def build_stub():
 
 
 def build_environment(key, screen):
+    if screen.get("modelled"):
+        return
     scale = screen_scale(screen)
     lane = screen_lane(screen)
     profile = ground_profile(screen, screen.get("ground"))
@@ -661,7 +668,7 @@ def build_map(key, screen, map1):
         "spawn": {"x": 0, "y": 0, "dir": "E"},
         "traversal": {
             "provider": "bounded_lane",
-            "environmentPackage": "assets/environments/st_maria_town/%s/environment.json" % key,
+            "environmentPackage": "assets/environments/st_maria_town/%s/environment.json" % screen.get("environment_key", key),
             "spawnAnchor": "spawn_player",
             "lane": lane_block(screen, lane),
             "blockedRanges": [],

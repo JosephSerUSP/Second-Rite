@@ -21,6 +21,16 @@ preview collections and are never export roles. An object linked to both a
 preview collection and an export role is reported as leakage. In particular,
 `TH_PREVIEW_ONLY` overlap is reported as `guide_leakage`.
 
+The exterior exporter uses explicit object and scene properties in addition to
+collection membership. `sr_export=true` opts a source mesh into the runtime
+render mesh and `sr_ground=true` classifies its faces for ground atlas
+allocation. The supported adapter key is `sr_runtime_y_mode`, with `direct` as the
+default and `lane_mirror` requiring numeric `sr_lane_center_y`. In mirror mode
+the exporter reflects the authored lane axis, reverses OBJ winding/normals,
+and records the adapter in the package provenance. This keeps the lane
+conversion shared and explicit instead of embedding a map-specific exporter
+path.
+
 `TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights are
 valid source inputs for illumination but cannot be the only selected-to-active
 bake source. `TH_RENDER` must contain a mesh. If render mesh metadata is

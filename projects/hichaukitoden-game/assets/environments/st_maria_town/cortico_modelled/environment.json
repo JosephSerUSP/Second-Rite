@@ -1,0 +1,1789 @@
+{
+  "contractVersion": 1,
+  "environmentId": "st_maria_cortico",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -12.0153,
+    -8.844,
+    -0.6,
+    23.3,
+    32.906,
+    7.57
+  ],
+  "stats": {
+    "triangleCount": 4866,
+    "vertexCount": 3299,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1246153,
+    "renderMeshSizeBytes": 479722,
+    "packageSizeBytes": 1726677
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        7.8,
+        12.031,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_scholar": {
+      "id": "npc_scholar",
+      "position": [
+        7.8,
+        1.8958,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_euler": {
+      "id": "npc_euler",
+      "position": [
+        7.8,
+        8.4583,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "west_praca": {
+      "id": "west_praca",
+      "position": [
+        7.8,
+        -2.8438,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "lodging_door": {
+      "id": "lodging_door",
+      "position": [
+        7.8,
+        10.4635,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "padaria_back": {
+      "id": "padaria_back",
+      "position": [
+        7.8,
+        13.7448,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "port_stair": {
+      "id": "port_stair",
+      "position": [
+        7.8,
+        20.125,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "east_market": {
+      "id": "east_market",
+      "position": [
+        7.8,
+        26.9062,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "preflight": {
+    "schema": "thestra.scene-contract-report",
+    "schemaVersion": 1,
+    "contractVersion": 0,
+    "ok": true,
+    "summary": {
+      "errorCount": 0,
+      "warningCount": 2,
+      "objectCount": 88
+    },
+    "semantics": {
+      "roleAssignment": "explicit_collection_membership",
+      "objectNames": "labels_only",
+      "collision": "optional_export_only; does_not_claim_walkability",
+      "sourceInspection": "read_only_no_save"
+    },
+    "collections": {
+      "TH_SOURCE": {
+        "present": true,
+        "objectCount": 58,
+        "types": {
+          "LIGHT": 3,
+          "MESH": 55
+        },
+        "required": true,
+        "exported": true
+      },
+      "TH_RENDER": {
+        "present": true,
+        "objectCount": 1,
+        "types": {
+          "MESH": 1
+        },
+        "required": true,
+        "exported": true
+      },
+      "TH_COLLISION": {
+        "present": true,
+        "objectCount": 1,
+        "types": {
+          "MESH": 1
+        },
+        "required": false,
+        "exported": true
+      },
+      "TH_ANCHORS": {
+        "present": true,
+        "objectCount": 8,
+        "types": {
+          "EMPTY": 8
+        },
+        "required": true,
+        "exported": true
+      },
+      "TH_PREVIEW_ACTORS": {
+        "present": true,
+        "objectCount": 2,
+        "types": {
+          "MESH": 2
+        },
+        "required": false,
+        "exported": false
+      },
+      "TH_PREVIEW_ONLY": {
+        "present": true,
+        "objectCount": 15,
+        "types": {
+          "EMPTY": 15
+        },
+        "required": false,
+        "exported": false
+      },
+      "TH_CAMERA_PREVIEW": {
+        "present": true,
+        "objectCount": 1,
+        "types": {
+          "CAMERA": 1
+        },
+        "required": false,
+        "exported": false
+      }
+    },
+    "objects": [
+      {
+        "name": "COL_walkable_surface",
+        "type": "MESH",
+        "roles": [
+          "TH_COLLISION"
+        ],
+        "worldLocation": [
+          7.8,
+          12.031,
+          -0.06
+        ]
+      },
+      {
+        "name": "CORTICO",
+        "type": "EMPTY",
+        "roles": [],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_SKY",
+        "type": "LIGHT",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          -6.015326,
+          0.0,
+          16.0
+        ]
+      },
+      {
+        "name": "CORTICO_SUN",
+        "type": "LIGHT",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_TREE_BRANCHES",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          11.7,
+          5.231,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_TREE_CARDS",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          11.7,
+          5.231,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_east_facade",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          17.0,
+          -12.875,
+          2.8
+        ]
+      },
+      {
+        "name": "CORTICO_east_facade_dado",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.16,
+          -12.875,
+          0.825
+        ]
+      },
+      {
+        "name": "CORTICO_east_facade_eaves",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          17.0,
+          -12.875,
+          5.8
+        ]
+      },
+      {
+        "name": "CORTICO_east_facade_plinth",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          17.0,
+          -12.875,
+          0.175
+        ]
+      },
+      {
+        "name": "CORTICO_ground",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.992337,
+          0.0,
+          -0.3
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r0_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.044905,
+          -12.0315,
+          0.386612
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r0_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.13538,
+          -11.1565,
+          0.359688
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r0_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.125842,
+          -10.2815,
+          0.360966
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r0_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.052381,
+          -9.4065,
+          0.379091
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r1_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.33979,
+          -11.60742,
+          0.377062
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r1_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.351671,
+          -10.73242,
+          0.400943
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r1_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.268754,
+          -9.85742,
+          0.380074
+        ]
+      },
+      {
+        "name": "CORTICO_hedge_r1_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.366079,
+          -8.98242,
+          0.370849
+        ]
+      },
+      {
+        "name": "CORTICO_left_low_wall",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.2,
+          9.953,
+          0.41
+        ]
+      },
+      {
+        "name": "CORTICO_left_low_wall_coping",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.2,
+          9.953,
+          0.88
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_ROOT",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          16.0,
+          -0.2325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_attachment_front_veranda",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          -0.2325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_body",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          -0.2325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_door_door",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          1.5675,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_roof",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          -0.2325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_window_ground_window",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          -1.4325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_window_side_window",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          21.0,
+          -4.2325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_window_upper_left",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          1.5675,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_lodging_house_window_upper_right",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.0,
+          -1.4325,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_ROOT",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          15.3,
+          -2.9638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_body",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -2.9638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_door_canopied_door",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -1.7138,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_roof",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -2.9638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_window_ground_window",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -4.1638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_window_side_ground",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          17.9,
+          -0.1638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_window_side_upper",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          19.200001,
+          -5.7638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_window_upper_left",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -1.7138,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_padaria_house_window_upper_right",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.3,
+          -4.1638,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_planter_pot",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.0,
+          -4.969,
+          0.29
+        ]
+      },
+      {
+        "name": "CORTICO_planter_shell_card_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          3.717243,
+          -4.679464,
+          1.082471
+        ]
+      },
+      {
+        "name": "CORTICO_planter_shell_card_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          3.782764,
+          -4.602828,
+          1.084305
+        ]
+      },
+      {
+        "name": "CORTICO_planter_shell_card_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          3.713674,
+          -5.029331,
+          1.195114
+        ]
+      },
+      {
+        "name": "CORTICO_planter_shell_card_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          3.60078,
+          -4.956486,
+          0.897123
+        ]
+      },
+      {
+        "name": "CORTICO_right_low_wall",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.2,
+          -10.172,
+          0.41
+        ]
+      },
+      {
+        "name": "CORTICO_right_low_wall_coping",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.2,
+          -10.172,
+          0.88
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_drip",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.91,
+          6.531,
+          2.54
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_jamb_l",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.0,
+          5.866,
+          1.215
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_jamb_r",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.0,
+          7.196,
+          1.215
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_lamp",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.82,
+          7.406,
+          2.75
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_lamp_source",
+        "type": "LIGHT",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.82,
+          7.406,
+          2.75
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_leaf",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.105,
+          6.531,
+          1.125
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_lintel",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.96,
+          6.531,
+          2.37
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_door_threshold",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.9,
+          6.531,
+          0.08
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_facade",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.700001,
+          6.531,
+          2.9
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_facade_dado",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.16,
+          6.531,
+          0.825
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_facade_eaves",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.700001,
+          6.531,
+          6.0
+        ]
+      },
+      {
+        "name": "CORTICO_shrine_facade_plinth",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.700001,
+          6.531,
+          0.175
+        ]
+      },
+      {
+        "name": "CORTICO_west_facade",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.9,
+          13.175,
+          2.7
+        ]
+      },
+      {
+        "name": "CORTICO_west_facade_dado",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          15.16,
+          13.175,
+          0.825
+        ]
+      },
+      {
+        "name": "CORTICO_west_facade_eaves",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.9,
+          13.175,
+          5.6
+        ]
+      },
+      {
+        "name": "CORTICO_west_facade_plinth",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          16.9,
+          13.175,
+          0.175
+        ]
+      },
+      {
+        "name": "LD_east_market",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          -14.8752,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_lodging_door",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          1.5675,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_npc_euler",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          3.5727,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_npc_scholar",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          10.1352,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_padaria_back",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          -1.7138,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_port_stair",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          -8.094,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_spawn_player",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "LD_west_praca",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          14.8748,
+          0.0
+        ]
+      },
+      {
+        "name": "SCALE_actor_1.75m",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          7.8,
+          -12.031,
+          0.875
+        ]
+      },
+      {
+        "name": "SCALE_east_market",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          10.0,
+          -14.8752,
+          1.075
+        ]
+      },
+      {
+        "name": "SCALE_lodging_door",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          10.0,
+          1.5675,
+          1.075
+        ]
+      },
+      {
+        "name": "SCALE_port_stair",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          10.0,
+          -8.094,
+          1.075
+        ]
+      },
+      {
+        "name": "SCALE_west_praca",
+        "type": "EMPTY",
+        "roles": [
+          "TH_PREVIEW_ONLY"
+        ],
+        "worldLocation": [
+          10.0,
+          14.8748,
+          1.075
+        ]
+      },
+      {
+        "name": "TH_ACTOR_PREVIEW_npc_euler",
+        "type": "MESH",
+        "roles": [
+          "TH_PREVIEW_ACTORS"
+        ],
+        "worldLocation": [
+          7.8,
+          3.5727,
+          0.0
+        ]
+      },
+      {
+        "name": "TH_ACTOR_PREVIEW_npc_scholar",
+        "type": "MESH",
+        "roles": [
+          "TH_PREVIEW_ACTORS"
+        ],
+        "worldLocation": [
+          7.8,
+          10.1352,
+          0.0
+        ]
+      },
+      {
+        "name": "TH_CAMERA_PREVIEW",
+        "type": "CAMERA",
+        "roles": [
+          "TH_CAMERA_PREVIEW"
+        ],
+        "worldLocation": [
+          -18.666666,
+          0.0,
+          2.260417
+        ]
+      },
+      {
+        "name": "TH_SUN",
+        "type": "LIGHT",
+        "roles": [],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "east_market",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          26.9062,
+          0.0
+        ]
+      },
+      {
+        "name": "lodging_door",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          10.4635,
+          0.0
+        ]
+      },
+      {
+        "name": "npc_euler",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          8.4583,
+          0.0
+        ]
+      },
+      {
+        "name": "npc_scholar",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          1.8958,
+          0.0
+        ]
+      },
+      {
+        "name": "padaria_back",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          13.7448,
+          0.0
+        ]
+      },
+      {
+        "name": "port_stair",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          20.125,
+          0.0
+        ]
+      },
+      {
+        "name": "spawn_player",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          12.031,
+          0.0
+        ]
+      },
+      {
+        "name": "st_maria_exterior_TH_RENDER",
+        "type": "MESH",
+        "roles": [
+          "TH_RENDER"
+        ],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "west_praca",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          -2.8438,
+          0.0
+        ]
+      }
+    ],
+    "anchors": [
+      {
+        "name": "east_market",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          26.9062,
+          0.0
+        ]
+      },
+      {
+        "name": "lodging_door",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          10.4635,
+          0.0
+        ]
+      },
+      {
+        "name": "npc_euler",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          8.4583,
+          0.0
+        ]
+      },
+      {
+        "name": "npc_scholar",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          1.8958,
+          0.0
+        ]
+      },
+      {
+        "name": "padaria_back",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          13.7448,
+          0.0
+        ]
+      },
+      {
+        "name": "port_stair",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          20.125,
+          0.0
+        ]
+      },
+      {
+        "name": "spawn_player",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          12.031,
+          0.0
+        ]
+      },
+      {
+        "name": "west_praca",
+        "type": "EMPTY",
+        "roles": [
+          "TH_ANCHORS"
+        ],
+        "worldLocation": [
+          7.8,
+          -2.8438,
+          0.0
+        ]
+      }
+    ],
+    "diagnostics": [
+      {
+        "severity": "warning",
+        "code": "unassigned_object",
+        "message": "object 'CORTICO' is not in a known scene-contract collection and will not be exported",
+        "object": "CORTICO",
+        "path": "objects[1].collections"
+      },
+      {
+        "severity": "warning",
+        "code": "unassigned_object",
+        "message": "object 'TH_SUN' is not in a known scene-contract collection and will not be exported",
+        "object": "TH_SUN",
+        "path": "objects[78].collections"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "pipelineVersion": "town-environment-pipeline-v2",
+    "sourceBlend": "st_maria_cortico.blend",
+    "source": {
+      "blend": {
+        "path": "st_maria_cortico.blend",
+        "sha256": "c5ba29f3e1a018731cfc969ba3a1fd890fdf62142028a8b8424764f1e6ad0c36",
+        "sizeBytes": 192845
+      },
+      "dependencies": [
+        {
+          "path": "albedo.png",
+          "sha256": "4ede5175c1f2ad7a5fb067bdf8b9751bf6b24c35635ac1adbde092c5e6526088",
+          "sizeBytes": 484241,
+          "name": "albedo.png"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "e781dda54428226be80e6b4d91fbc2ac9c6c70a2b338b303e9ab3187afcf6a2a",
+          "sizeBytes": 162437,
+          "name": "albedo.png.001"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "2b753b7ff88f92294c148d0bc7a43756349dd015970bcf221b6029034a0c6c28",
+          "sizeBytes": 557575,
+          "name": "albedo.png.002"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "d13e45f19494c2351121b7f4e79feaa63dcd8a03a10c296d9849e912b18ac749",
+          "sizeBytes": 447791,
+          "name": "albedo.png.003"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "3a8fd76971d1b2c73fe726cb771c1e2690bd2d58b586fc476e8aa97ea1e1eca6",
+          "sizeBytes": 384604,
+          "name": "albedo.png.004"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "ad33a373c7966fb46a5745ec873c4488de4fe2e7b6f7893222417feec902ec53",
+          "sizeBytes": 650732,
+          "name": "albedo.png.005"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "2b232d0040b0f885b8616e0de0e3676aa08e63099628980bedf04671262e1e97",
+          "sizeBytes": 491031,
+          "name": "albedo.png.006"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "4a0f341781dcb49698af98ac2055a5861d39a452bdad1fc6aa0133d2c6a133f1",
+          "sizeBytes": 230612,
+          "name": "albedo.png.007"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "656247e8a2ca926b9e0f1b559cc382e6a6efb898a7e2be32f0760b5e3aa4c747",
+          "sizeBytes": 704293,
+          "name": "albedo.png.008"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "3f34e96bab46e8a3c7570ab99a663006d8dffda4a6515af442d922eee0ac7824",
+          "sizeBytes": 626464,
+          "name": "albedo.png.009"
+        },
+        {
+          "path": "albedo.png",
+          "sha256": "5e1134da5d82ae2bb7a44e94abb9527828d0d1a3b0515856fabef05c42ea9b48",
+          "sizeBytes": 1079330,
+          "name": "albedo.png.010"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "49390d84731833bd87d81e106d8ea0002a1da9a04c8221b9bb703f842aab2ad3",
+          "sizeBytes": 212147,
+          "name": "ao.png"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "c8085d89672396f2ee9a5ba10a4c8201b40bad83abc9ad396708036be4ef3963",
+          "sizeBytes": 1635,
+          "name": "ao.png.001"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "00b49b050ed3af55e25a0349dc73e239ad27c90c582a9698ebcc426cb149edb3",
+          "sizeBytes": 201157,
+          "name": "ao.png.002"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "2ea159e07b3c91dc7554546f399c1f2f91bd360c18ef3802bba1d8b9f7e27745",
+          "sizeBytes": 133708,
+          "name": "ao.png.003"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "1c01bb0bc8a855cd4cad1146e9b3761ba09f6d4cd5507d6f879b3292b0fa6fa7",
+          "sizeBytes": 109804,
+          "name": "ao.png.004"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "1c88d7ac7c550d117a98e08462ec07112e3f1ceb3938205b7def39565852e18e",
+          "sizeBytes": 154463,
+          "name": "ao.png.005"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "535525a6a78936f0f26c62a4707260ce05218fd11d7403d552de3cfd432691a1",
+          "sizeBytes": 197193,
+          "name": "ao.png.006"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "925972b6dd7be15ef2fd312a25e8b831ea377d16d259013237ef4affd9eb309b",
+          "sizeBytes": 101002,
+          "name": "ao.png.007"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "41a3b620a523244d23af44b9ed79ea795eadce94d8dc0c7a5a4b2a1fe8e3380f",
+          "sizeBytes": 184719,
+          "name": "ao.png.008"
+        },
+        {
+          "path": "ao.png",
+          "sha256": "f38b7d7f933245513338265d7c28c933952193be2cefeb09dc83d20855c54d37",
+          "sizeBytes": 237164,
+          "name": "ao.png.009"
+        },
+        {
+          "path": "height.png",
+          "sha256": "ff9e29b536c507ed72cfdf409fc96a8cb23f1dbaab8662b1c0c59fde4e970a25",
+          "sizeBytes": 173143,
+          "name": "height.png"
+        },
+        {
+          "path": "height.png",
+          "sha256": "fd5fd2926743f72b5de01ad76e10fef36001e6e0aea2fa0d1e299f13b7b5f7a2",
+          "sizeBytes": 1749,
+          "name": "height.png.001"
+        },
+        {
+          "path": "height.png",
+          "sha256": "685e719e6b6e6963c9921b7b2ae1b297ff18cc92390bcf21faa081c1b4e19ec5",
+          "sizeBytes": 134171,
+          "name": "height.png.002"
+        },
+        {
+          "path": "height.png",
+          "sha256": "f631499d56fb8906c398874f7852eeca2743c2a1c96b2fb19255772b94949867",
+          "sizeBytes": 113621,
+          "name": "height.png.003"
+        },
+        {
+          "path": "height.png",
+          "sha256": "47a52ed2d068cf8f00f5d75aa60408bd629b3c875f21aec8a181f026226673f4",
+          "sizeBytes": 167240,
+          "name": "height.png.004"
+        },
+        {
+          "path": "height.png",
+          "sha256": "913263bdb80fd2280ca19d5badad832511a835127298fe5e4b15d39f83d7718e",
+          "sizeBytes": 127032,
+          "name": "height.png.005"
+        },
+        {
+          "path": "height.png",
+          "sha256": "8b81b6b40e40b5f45ede6424a45d5dc46d462b705d95eec7a7193bec85ec4fd7",
+          "sizeBytes": 153920,
+          "name": "height.png.006"
+        },
+        {
+          "path": "height.png",
+          "sha256": "708d4012d5ccaaab13b4ee31784289fab070de4abe3113d8aa8a106174cee0a4",
+          "sizeBytes": 124217,
+          "name": "height.png.007"
+        },
+        {
+          "path": "height.png",
+          "sha256": "1828da48a0a7cb39d1dd0284acde9c68dbabf77656c117e82cc97fac78b74fb8",
+          "sizeBytes": 226212,
+          "name": "height.png.008"
+        },
+        {
+          "path": "height.png",
+          "sha256": "01c57a1f3a148568b907a9e1395c85001c0d36e77c5f9a6aade41ed3b5deea6f",
+          "sizeBytes": 249132,
+          "name": "height.png.009"
+        },
+        {
+          "path": "kenney_branch_atlas.png",
+          "sha256": "6700716b39442ec5dea00efbe9b166bf0038269020a06b82f3cac4c8baefa1e6",
+          "sizeBytes": 147903,
+          "name": "kenney_branch_atlas.png"
+        },
+        {
+          "path": "npc_scholar.png",
+          "sha256": "742e4e7d2cf6c8e59fcda94a7aebc45f1b960ec22204a7c97ac6f6a48c30f0dc",
+          "sizeBytes": 1506,
+          "name": "npc_scholar.png"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "b63021d5dc69b1a75c1490d351bc9a4f39a15498916af1ef6ffedd56aaf48026",
+          "sizeBytes": 175778,
+          "name": "roughness.png"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "e85d37ce87a5b5fc3bd12cdeae4257199aa53cf97e68fa05e70e8f4fa6b2ee57",
+          "sizeBytes": 20448,
+          "name": "roughness.png.001"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "3b99344911bb5d7684c4dfc585e38e9e31b4531b70a1bef836b00b6b4a02651f",
+          "sizeBytes": 191367,
+          "name": "roughness.png.002"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "080d486712e6d4e684633427f80e6f266e8d8603b7096905e34df7e7d0468cd0",
+          "sizeBytes": 151090,
+          "name": "roughness.png.003"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "d5a93cad955b309c1609c10adbf0c5d913f5953b357a63b9e51ad516973ae061",
+          "sizeBytes": 160908,
+          "name": "roughness.png.004"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "8aec543a06057d597d72d547461cde0683927ffb97ed72e400234e19e6b2a16b",
+          "sizeBytes": 153945,
+          "name": "roughness.png.005"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "64a375c403cf8fb9148892e24294227c9e0ce73cfd84c20efac17644d7c6c56c",
+          "sizeBytes": 173039,
+          "name": "roughness.png.006"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "9622c7d6000c50f32a2b5d4d9ab8c0941d7e8e1c11f00ced1203e541a0a68970",
+          "sizeBytes": 183665,
+          "name": "roughness.png.007"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "d88db56b1ee0f9cf9b58f3f81666f7fb1d225e440dbb0a80a532fe1a6373db8b",
+          "sizeBytes": 137941,
+          "name": "roughness.png.008"
+        },
+        {
+          "path": "roughness.png",
+          "sha256": "6d484b5f63cdc271da53b4b90ad99933206e8efec6decd9643ac1dfd74070ca3",
+          "sizeBytes": 207523,
+          "name": "roughness.png.009"
+        }
+      ]
+    },
+    "tool": {
+      "blenderVersion": "5.1.2",
+      "blenderExecutable": null,
+      "pipelineScript": {
+        "path": "town_environment_pipeline.py",
+        "sha256": "05221a210aa4de56f4df3266863cd5c36fc04eb60dfb4f5c24840f03646ba8ea",
+        "sizeBytes": 29136
+      }
+    },
+    "options": {
+      "atlasSize": 1024,
+      "bakeSamples": 8,
+      "flatBake": true
+    },
+    "bake": {
+      "receiver": {
+        "targetObject": "st_maria_exterior_TH_RENDER",
+        "targetSelectedDuringBake": false,
+        "targetImageLinkedDuringBake": false,
+        "preBakeNonBlackFraction": 0.0
+      },
+      "appearance": {
+        "sourceMaterialCount": 12,
+        "distinctSourceColorCount": 2,
+        "sourceBaseColors": [
+          [
+            0.1961,
+            0.2392,
+            0.2353
+          ],
+          [
+            0.46,
+            0.28,
+            0.13
+          ]
+        ],
+        "nonBlackFraction": 0.417576,
+        "uniqueColorBinCount": 95,
+        "channelMean": [
+          0.128813,
+          0.111977,
+          0.095759
+        ],
+        "channelRange": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "paletteCoverage": [
+          {
+            "sourceColor": [
+              0.46,
+              0.28,
+              0.13
+            ],
+            "dominantChannel": "red",
+            "matchedPixelCount": 93787,
+            "matched": true
+          }
+        ],
+        "passed": true
+      },
+      "warningEvidence": []
+    },
+    "outputs": [
+      {
+        "path": "environment.png",
+        "sha256": "a2c0bdfdd5b6859c7e7cd6ceacf6340ffb23301012b43c75d4beba5e249b6744",
+        "sizeBytes": 1246153
+      },
+      {
+        "path": "environment.obj",
+        "sha256": "0a5c7ff0c881e0fdc7daf05dec709630a007f71e19bcda84e935f1b33335b5f6",
+        "sizeBytes": 479722
+      },
+      {
+        "path": "environment.mtl",
+        "sha256": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
+        "sizeBytes": 134
+      },
+      {
+        "path": "collision.obj",
+        "sha256": "f63b94725c8c1f8b5bb96e2c401a20170386a45b6a211d0b2cc7f476624b6707",
+        "sizeBytes": 668
+      }
+    ],
+    "warningEvidence": [],
+    "runtimeAdapter": {
+      "mode": "lane_mirror",
+      "laneCenterY": 12.030999999999999,
+      "objFacesReversed": 4866
+    }
+  }
+}

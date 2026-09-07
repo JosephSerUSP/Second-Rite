@@ -19,7 +19,7 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/cortico/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/cortico_modelled/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": -2.844,

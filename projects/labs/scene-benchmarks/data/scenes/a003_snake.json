@@ -141,7 +141,7 @@
       "content": [
         {
           "type": "text",
-          "text": "A003 - Snake"
+          "text": "A003 - Snake (Fresh Reconstruction)"
         }
       ]
     },
@@ -304,6 +304,11 @@
       }
     ],
     "on_select": [
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
       {
         "cmd": "SET_VAR",
         "name": "timer",

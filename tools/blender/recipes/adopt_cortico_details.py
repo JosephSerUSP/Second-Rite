@@ -110,6 +110,35 @@ def box(name, location, size, mat, target, role):
     return tag(obj, role)
 
 
+def ranked_box(name, location, size, mat, target, role, depth_rank):
+    """Create an exported source mesh with an explicit exterior depth rank."""
+    obj = box(name, location, size, mat, target, role)
+    obj["sr_depth_rank"] = depth_rank
+    return obj
+
+
+def foliage_cluster(name, x, runtime_y, z, scale, mat, target, role,
+                    depth_rank="BACKGROUND"):
+    """Use a few faceted foliage masses instead of a continuous green wall."""
+    objects = []
+    for index, (dy, dz, sx) in enumerate((
+            (-.42, 0.0, .78), (0.0, .18, 1.0), (.42, -.04, .72))):
+        bpy.ops.mesh.primitive_ico_sphere_add(
+            subdivisions=1,
+            radius=1.0,
+            location=(x, by(runtime_y + dy * scale), z + dz * scale))
+        obj = bpy.context.object
+        obj.name = f"{name}_{index}"
+        obj.scale = (scale * sx, scale * .58, scale * .82)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        link_only(obj, target)
+        obj.data.materials.append(mat)
+        tag(obj, role)
+        obj["sr_depth_rank"] = depth_rank
+        objects.append(obj)
+    return objects
+
+
 def face(name, x, y0, y1, z0, z1, mat, target, role):
     mesh = bpy.data.meshes.new(name + "_MESH")
     mesh.from_pydata([(x, y0, z0), (x, y1, z0), (x, y1, z1), (x, y0, z1)],
@@ -213,6 +242,65 @@ def build(blend: Path):
     laundry["sr_floor_bridge"] = False
     laundry["sr_source_representation"] = "image-authored-alpha-world-space-quad"
 
+    # Near rank: low, broken roof and masonry edges at the documented real
+    # depths. They interrupt the paving foreground without becoming a broad
+    # board that hides the actor. The central lane (runtime Y 4..19) remains
+    # open, while west/east fragments create parallax in the three reviews.
+    near_fragments = (
+        ("WEST_LEFT", -8.2, -1.05, 1.05, .40),
+        ("WEST_RIGHT", -6.8, 1.15, .95, .34),
+        ("CENTRE_LEFT", -8.0, 10.35, 1.10, .34),
+        ("CENTRE_RIGHT", -7.2, 13.70, 1.10, .34),
+        ("EAST_LEFT", -8.2, 22.85, 1.05, .40),
+        ("EAST_RIGHT", -6.8, 25.20, 1.15, .34),
+    )
+    for label, x, runtime_y, width, height in near_fragments:
+        ranked_box(f"CORTICO_AUTHORED_NEAR_ROOF_EDGE_{label}",
+                   (x, by(runtime_y), height * .5),
+                   (.38, width, height), old_stone, foreground,
+                   "near_broken_roof_edge", "NEAR")
+        ranked_box(f"CORTICO_AUTHORED_NEAR_MASONRY_{label}",
+                   (x + .24, by(runtime_y), height * .36),
+                   (.24, width * .52, height * .52), stone, foreground,
+                   "near_broken_masonry", "NEAR")
+    for index, runtime_y in enumerate((1.55, 24.65)):
+        foliage_cluster(f"CORTICO_AUTHORED_NEAR_FOLIAGE_{index}", -8.4,
+                        runtime_y, .72, .62, plant, foreground,
+                        "near_fragmented_foliage", "NEAR")
+
+    # Background rank: occupied, staggered household roofs and terraces at
+    # both ends of the town. Each module is deliberately separated so sky
+    # gaps survive, while the west/east camera views no longer read as a lone
+    # blank wall. These are source geometry, not a replacement for the
+    # exported pitch-reactive background cards.
+    background_modules = (
+        ("WEST_LOW", 23.5, -7.4, 5.0, 3.1, roof),
+        ("WEST_HIGH", 27.4, -1.0, 4.2, 4.0, whitewash),
+        ("WEST_SIDE", 31.0, 4.4, 3.8, 3.3, roof),
+        ("EAST_LOW", 23.5, 21.4, 5.2, 3.2, whitewash),
+        ("EAST_HIGH", 27.8, 27.0, 4.4, 4.2, roof),
+        ("EAST_SIDE", 31.3, 32.2, 4.0, 3.5, whitewash),
+        ("CENTRE_TERRACE", 25.4, 12.0, 3.8, 3.6, old_stone),
+    )
+    for label, x, runtime_y, width, height, wall_mat in background_modules:
+        ranked_box(f"CORTICO_AUTHORED_BACKGROUND_WALL_{label}",
+                   (x, by(runtime_y), height * .5),
+                   (2.7, width, height), wall_mat, architecture,
+                   "staggered_background_household", "BACKGROUND")
+        ranked_box(f"CORTICO_AUTHORED_BACKGROUND_ROOF_{label}",
+                   (x - .35, by(runtime_y), height + .22),
+                   (3.5, width + .35, .34), roof, architecture,
+                   "staggered_background_roofline", "BACKGROUND")
+        ranked_box(f"CORTICO_AUTHORED_BACKGROUND_DOOR_{label}",
+                   (x - 1.38, by(runtime_y), 1.05),
+                   (.10, min(1.1, width * .30), 2.1), wood, architecture,
+                   "background_household_threshold", "BACKGROUND")
+    for index, (x, runtime_y, scale) in enumerate(
+            ((29.8, -5.8, 1.35), (32.0, 29.2, 1.55), (27.0, 7.0, 1.05))):
+        foliage_cluster(f"CORTICO_AUTHORED_BACKGROUND_TREE_{index}", x,
+                        runtime_y, 3.0, scale, plant, architecture,
+                        "staggered_background_vegetation", "BACKGROUND")
+
     # Interrupt the paving with shallow masonry, drains and planting at
     # several depths. The central run stays open for the authored lane.
     fragments = (
@@ -256,9 +344,10 @@ def build(blend: Path):
             architecture, "padaria_service_canopy")
 
     bpy.context.scene["sr_cortico_authored_detail_pass"] = (
-        "subdivided thresholds, shared laundry, interrupted edges, "
-        "workers stair and padaria service approach")
-    bpy.context.scene["sr_cortico_authored_detail_version"] = 1
+        "subdivided thresholds, shared laundry, interrupted near edges, "
+        "staggered background households, vegetation, workers stair and "
+        "padaria service approach")
+    bpy.context.scene["sr_cortico_authored_detail_version"] = 2
     bpy.ops.wm.save_as_mainfile(filepath=str(blend.resolve()))
     print("CORTICO DETAILS ADOPTED", blend)
 

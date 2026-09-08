@@ -7,23 +7,23 @@
   "collisionMesh": "collision.obj",
   "bounds": [
     3.1024,
-    -3.619,
+    -8.175,
     -0.1102,
     23.3,
     27.681,
     7.57
   ],
   "stats": {
-    "triangleCount": 4854,
-    "vertexCount": 3291,
+    "triangleCount": 3400,
+    "vertexCount": 3023,
     "materialGroupCount": 1,
     "textureDimensions": [
-      1024,
-      1024
+      512,
+      512
     ],
-    "pngSizeBytes": 1208625,
-    "renderMeshSizeBytes": 480907,
-    "packageSizeBytes": 1690334
+    "pngSizeBytes": 384564,
+    "renderMeshSizeBytes": 360458,
+    "packageSizeBytes": 745824
   },
   "anchors": {
     "spawn_player": {
@@ -178,8 +178,8 @@
     "ok": true,
     "summary": {
       "errorCount": 0,
-      "warningCount": 2,
-      "objectCount": 89
+      "warningCount": 5,
+      "objectCount": 139
     },
     "semantics": {
       "roleAssignment": "explicit_collection_membership",
@@ -190,10 +190,10 @@
     "collections": {
       "TH_SOURCE": {
         "present": true,
-        "objectCount": 59,
+        "objectCount": 106,
         "types": {
           "LIGHT": 3,
-          "MESH": 56
+          "MESH": 103
         },
         "required": true,
         "exported": true
@@ -277,6 +277,570 @@
         ]
       },
       {
+        "name": "CORTICO_AUTHORED_DRAIN_EAST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.04,
+          -9.769,
+          0.035
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_DRAIN_MID_EAST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          6.24,
+          0.031,
+          0.035
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_DRAIN_MID_WEST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          6.04,
+          10.031,
+          0.035
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_DRAIN_WEST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.24,
+          13.531,
+          0.035
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_EDGE_EAST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          4.8,
+          -9.769,
+          0.31
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_EDGE_MID_EAST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          6.0,
+          0.031,
+          0.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_EDGE_MID_WEST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.8,
+          10.031,
+          0.23
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_EDGE_WEST",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.0,
+          13.531,
+          0.31
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_FRAME_POST_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          6.25,
+          7.031,
+          0.88
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_FRAME_POST_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          6.25,
+          -6.669,
+          0.88
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LAUNDRY_QUAD",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_ROOF_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.55,
+          16.231001,
+          4.45
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_ROOF_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.55,
+          4.031,
+          4.45
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_ROOF_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.55,
+          -4.969,
+          4.45
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_WALL_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.05,
+          16.231001,
+          2.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_WALL_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.05,
+          4.031,
+          2.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_LEANTO_WALL_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.05,
+          -4.969,
+          2.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PADARIA_BACK_CANOPY",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.35,
+          -1.7138,
+          3.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PADARIA_BACK_POST_-1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.15,
+          -2.5638,
+          2.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PADARIA_BACK_POST_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.15,
+          -0.8638,
+          2.25
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PLANTER_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.4,
+          13.231,
+          0.32
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PLANTER_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.4,
+          -3.969,
+          0.32
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PLANT_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.4,
+          13.231,
+          0.9
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_PLANT_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          5.4,
+          -3.969,
+          0.9
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_DOOR_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.35,
+          19.531,
+          1.1
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_DOOR_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.35,
+          13.031,
+          1.1
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_DOOR_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.35,
+          5.531,
+          1.1
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_DOOR_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.35,
+          -1.969,
+          1.1
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_DOOR_4",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.35,
+          -9.469,
+          1.1
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_LINTEL_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.25,
+          19.531,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_LINTEL_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.25,
+          13.031,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_LINTEL_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.25,
+          5.531,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_LINTEL_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.25,
+          -1.969,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_LINTEL_4",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.25,
+          -9.469,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_PIER_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.55,
+          19.531,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_PIER_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.55,
+          13.031,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_PIER_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.55,
+          5.531,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_PIER_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.55,
+          -1.969,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_SUBDIVISION_PIER_4",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          14.55,
+          -9.469,
+          2.35
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WASH_BASIN",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          8.15,
+          4.631,
+          0.28
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WASH_INNER",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          7.78,
+          4.631,
+          0.58
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_0",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          10.4,
+          -8.094,
+          0.08
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_1",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          10.92,
+          -8.094,
+          0.18
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_2",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          11.44,
+          -8.094,
+          0.28
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_3",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          11.96,
+          -8.094,
+          0.38
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_4",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          12.48,
+          -8.094,
+          0.48
+        ]
+      },
+      {
+        "name": "CORTICO_AUTHORED_WORKERS_STEP_5",
+        "type": "MESH",
+        "roles": [
+          "TH_SOURCE"
+        ],
+        "worldLocation": [
+          13.0,
+          -8.094,
+          0.58
+        ]
+      },
+      {
         "name": "CORTICO_SKY",
         "type": "LIGHT",
         "roles": [
@@ -321,6 +885,36 @@
         "worldLocation": [
           11.7,
           5.231,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_background_centre",
+        "type": "MESH",
+        "roles": [],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_background_east",
+        "type": "MESH",
+        "roles": [],
+        "worldLocation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "CORTICO_background_west",
+        "type": "MESH",
+        "roles": [],
+        "worldLocation": [
+          0.0,
+          0.0,
           0.0
         ]
       },
@@ -1421,6 +2015,13 @@
       {
         "severity": "warning",
         "code": "unassigned_object",
+        "message": "object 'TH_SUN' is not in a known scene-contract collection and will not be exported",
+        "object": "TH_SUN",
+        "path": "objects[129].collections"
+      },
+      {
+        "severity": "warning",
+        "code": "unassigned_object",
         "message": "object 'CORTICO' is not in a known scene-contract collection and will not be exported",
         "object": "CORTICO",
         "path": "objects[1].collections"
@@ -1428,9 +2029,23 @@
       {
         "severity": "warning",
         "code": "unassigned_object",
-        "message": "object 'TH_SUN' is not in a known scene-contract collection and will not be exported",
-        "object": "TH_SUN",
-        "path": "objects[79].collections"
+        "message": "object 'CORTICO_background_centre' is not in a known scene-contract collection and will not be exported",
+        "object": "CORTICO_background_centre",
+        "path": "objects[53].collections"
+      },
+      {
+        "severity": "warning",
+        "code": "unassigned_object",
+        "message": "object 'CORTICO_background_east' is not in a known scene-contract collection and will not be exported",
+        "object": "CORTICO_background_east",
+        "path": "objects[54].collections"
+      },
+      {
+        "severity": "warning",
+        "code": "unassigned_object",
+        "message": "object 'CORTICO_background_west' is not in a known scene-contract collection and will not be exported",
+        "object": "CORTICO_background_west",
+        "path": "objects[55].collections"
       }
     ]
   },
@@ -1441,8 +2056,8 @@
     "source": {
       "blend": {
         "path": "st_maria_cortico.blend",
-        "sha256": "7ab39d4b399544ec3cfbf5ad07c9583ff14b3b9af1aac0d6e385bd113672428d",
-        "sizeBytes": 225556
+        "sha256": "90e14e91f0f79a94e0e9132c000b1a418c7650d53f5452e351c31a85e6004f8e",
+        "sizeBytes": 3008990
       },
       "dependencies": [
         {
@@ -1667,8 +2282,8 @@
       }
     },
     "options": {
-      "atlasSize": 1024,
-      "bakeSamples": 8,
+      "atlasSize": 512,
+      "bakeSamples": 1,
       "flatBake": true
     },
     "bake": {
@@ -1679,7 +2294,7 @@
         "preBakeNonBlackFraction": 0.0
       },
       "appearance": {
-        "sourceMaterialCount": 12,
+        "sourceMaterialCount": 13,
         "distinctSourceColorCount": 2,
         "sourceBaseColors": [
           [
@@ -1693,17 +2308,17 @@
             0.13
           ]
         ],
-        "nonBlackFraction": 0.397257,
-        "uniqueColorBinCount": 93,
+        "nonBlackFraction": 0.51104,
+        "uniqueColorBinCount": 84,
         "channelMean": [
-          0.120337,
-          0.104028,
-          0.088857
+          0.155884,
+          0.133322,
+          0.115274
         ],
         "channelRange": [
-          1.0,
-          1.0,
-          0.992157
+          0.972549,
+          0.968628,
+          0.984314
         ],
         "paletteCoverage": [
           {
@@ -1713,7 +2328,7 @@
               0.13
             ],
             "dominantChannel": "red",
-            "matchedPixelCount": 94329,
+            "matchedPixelCount": 30831,
             "matched": true
           }
         ],
@@ -1724,13 +2339,13 @@
     "outputs": [
       {
         "path": "environment.png",
-        "sha256": "b15754dda4820149359232d1de554ed7b0d02d29fa02032f804d6785503990e6",
-        "sizeBytes": 1208625
+        "sha256": "b40ff5036425f4ab1ef8452e1c04df9330fe02a50886c9f384c0692eb54f4048",
+        "sizeBytes": 384564
       },
       {
         "path": "environment.obj",
-        "sha256": "83110aa6378f6f5f064dfe04f96fa3e31236cb9f1c0793738ead5cb1301e8360",
-        "sizeBytes": 480907
+        "sha256": "a899545ac8497aaf5c376f9bcb0c489caf1dc722cefcff8ca0b2f3ad06986cc9",
+        "sizeBytes": 360458
       },
       {
         "path": "environment.mtl",
@@ -1747,7 +2362,7 @@
     "runtimeAdapter": {
       "mode": "lane_mirror",
       "laneCenterY": 12.030999999999999,
-      "objFacesReversed": 4854
+      "objFacesReversed": 3400
     },
     "floor": {
       "mesh": "floor.obj",
@@ -1779,20 +2394,90 @@
   "floorMesh": "floor.obj",
   "backgroundLayers": [
     {
-      "id": "cortico_distant_scenery",
-      "renderMesh": "background.obj",
-      "materialLibrary": "background.mtl",
+      "id": "centre",
+      "renderMesh": "background_centre.obj",
+      "materialLibrary": "background_centre.mtl",
       "provenance": {
         "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+        "sourceObject": "CORTICO_background_centre",
         "sourceRepresentation": "source-topology-rendered-at-canon-pitch-to-world-space-card",
         "cameraSpace": false,
         "reactsToPitch": true,
-        "depthRangeX": [36.0, 36.0],
+        "depthRangeX": [
+          36.0,
+          36.0
+        ],
         "floorBridge": false,
         "sha256": {
-          "renderMesh": "eebf8e2fd87660de392892a2d80a33a7c9158f425c411faf5b83cde657da99a8",
-          "materialLibrary": "efb86026cdfcddb2e45878f98e85498415aff7ab4349f36208b04224448250ff",
-          "texture": "76c33305d37ab7808901469d4f9d8ec4c34b416f7b7370182f0256d24511527d"
+          "renderMesh": "922e1d5e1faf94cdf8b3d4d2d0d48da21e8e7edbdff5ed7d8cd36f5fcf4f812b",
+          "materialLibrary": "6cf055b679c1e8dd90215da1aba497b379138d537de683c456b3470bd6a24db2",
+          "texture": "2ca84c7b3f78914f3768ab82e8d2773e17f735b4c210324663343c1a9a8ac66f"
+        }
+      }
+    },
+    {
+      "id": "east",
+      "renderMesh": "background_east.obj",
+      "materialLibrary": "background_east.mtl",
+      "provenance": {
+        "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+        "sourceObject": "CORTICO_background_east",
+        "sourceRepresentation": "source-topology-rendered-at-canon-pitch-to-world-space-card",
+        "cameraSpace": false,
+        "reactsToPitch": true,
+        "depthRangeX": [
+          36.0,
+          36.0
+        ],
+        "floorBridge": false,
+        "sha256": {
+          "renderMesh": "53e594557a133efc38208c94d675c9edb4eb428174813c972543cda491588873",
+          "materialLibrary": "01f8568032922c045a792b3f87e530c45c8e20ff03ca37538f9baba3f620ee1d",
+          "texture": "e408ebb843e32ccfb25b6240325f085430e305023fb5eeddbbd0141a61ecd750"
+        }
+      }
+    },
+    {
+      "id": "laundry_quad",
+      "renderMesh": "background_laundry_quad.obj",
+      "materialLibrary": "background_laundry_quad.mtl",
+      "provenance": {
+        "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+        "sourceObject": "CORTICO_AUTHORED_LAUNDRY_QUAD",
+        "sourceRepresentation": "image-authored-alpha-world-space-quad",
+        "cameraSpace": false,
+        "reactsToPitch": true,
+        "depthRangeX": [
+          4.25,
+          4.25
+        ],
+        "floorBridge": false,
+        "sha256": {
+          "renderMesh": "9f0c85ece62a4a9dc512ee03e236fab1998dacb42d2311b9927b8804a430ed66",
+          "materialLibrary": "8f082a9548ec64357d41f8f8ef76682a2c34f4e5710d2dd6c32017687e8d337e",
+          "texture": "5bb0ef1b63d175c73a5f0d38f404fe3235cb6813b486a4e5e4225fead8243595"
+        }
+      }
+    },
+    {
+      "id": "west",
+      "renderMesh": "background_west.obj",
+      "materialLibrary": "background_west.mtl",
+      "provenance": {
+        "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+        "sourceObject": "CORTICO_background_west",
+        "sourceRepresentation": "source-topology-rendered-at-canon-pitch-to-world-space-card",
+        "cameraSpace": false,
+        "reactsToPitch": true,
+        "depthRangeX": [
+          36.0,
+          36.0
+        ],
+        "floorBridge": false,
+        "sha256": {
+          "renderMesh": "91e764a86c815adc97705bcf2cb44bc7f0f09e1575ff580200500ab848f985c6",
+          "materialLibrary": "990ed54bc843e8d4cbd1cdcc965ef36bc9f9274b9adcfe728ba33259db0e23d5",
+          "texture": "3a276e6bf0213cefa39f4dcdc180cf9b591050d8b778fffae819b3843ff8e237"
         }
       }
     }

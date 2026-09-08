@@ -12,7 +12,10 @@ The floor is not painted into a floating card. A grounded bridge extends from
 the action plane to the billboard's base so the visible floor reaches the
 background instead of stopping at a depth seam.
 
-The adopted source is opened read-only and is never saved by this script.
+The adopted source is opened read-only by default. ``--adopt-source`` is the
+explicit owner action that installs the reviewed cards and packed textures in
+that source document; the exterior exporter then emits the runtime package
+from those source objects.
 """
 
 from __future__ import annotations
@@ -102,6 +105,27 @@ DEFAULT_MODULES = (
         "anchor": (16.9, 13.175, 0.0),
         "target": (28.0, -19.5, 0.0),
         "span": 4.95,
+    },
+    {
+        "id": "household_gallery",
+        "selectors": ("CORTICO_AUTHORED_SUBDIVISION_", "CORTICO_AUTHORED_LEANTO_"),
+        "anchor": (14.55, 13.031, 0.0),
+        "target": (27.0, -1.5, 0.0),
+        "span": 9.5,
+    },
+    {
+        "id": "courtyard_laundry",
+        "selectors": ("CORTICO_AUTHORED_WASH_", "CORTICO_AUTHORED_LAUNDRY_"),
+        "anchor": (8.15, 4.631, 0.0),
+        "target": (29.0, 8.0, 0.0),
+        "span": 6.0,
+    },
+    {
+        "id": "distant_vegetation",
+        "selectors": ("CORTICO_TREE_",),
+        "anchor": (11.7, 5.231, 0.0),
+        "target": (30.0, -8.0, 0.0),
+        "span": 4.0,
     },
 )
 
@@ -452,7 +476,7 @@ def _bisect_for_screen_x(scene, camera, x, z, target_x, low=-64.0, high=64.0):
     return (low + high) * 0.5
 
 
-def _render_background_plate(out_dir, camera):
+def _render_background_plate(out_dir, camera, label):
     """Render the real distant topology once, as the billboard's texture."""
     import bpy
 
@@ -473,7 +497,7 @@ def _render_background_plate(out_dir, camera):
     # pitched background layer instead of becoming part of the architecture
     # texture or the floor.
     scene.render.film_transparent = True
-    scene.render.filepath = str(Path(out_dir) / "cortico-background-billboard.png")
+    scene.render.filepath = str(Path(out_dir) / f"cortico-background-{label}.png")
 
     # The floor is deliberately separate. It is a world-space bridge in the
     # study, not a painted lower edge that can float above the action plane.
@@ -545,7 +569,7 @@ def _make_sky_backdrop(collection):
     return obj
 
 
-def _make_world_billboard(collection, camera, image):
+def _make_world_billboard(collection, camera, image, label):
     """Create a constant-depth card whose corners match the pitched camera frame."""
     import bpy
 
@@ -582,7 +606,7 @@ def _make_world_billboard(collection, camera, image):
     for loop, coord in zip(mesh.loops, ((0.0, bottom_v), (1.0, bottom_v),
                                         (1.0, 1.0), (0.0, 1.0))):
         uv.data[loop.index].uv = coord
-    obj = bpy.data.objects.new("CORTICO_BACKGROUND_BILLBOARD", mesh)
+    obj = bpy.data.objects.new(f"CORTICO_BACKGROUND_BILLBOARD_{label.upper()}", mesh)
     collection.objects.link(obj)
     mesh.materials.append(_billboard_material(image))
     obj["sr_export"] = False
@@ -600,6 +624,7 @@ def _make_world_billboard(collection, camera, image):
         "sourceContactRow": round(contact_row, 4),
         "sourceBottomV": round(bottom_v, 6),
         "imageSize": [PLATE_WIDTH, PLATE_HEIGHT],
+        "label": label,
     }
 
 
@@ -633,7 +658,7 @@ def _make_floor_bridge(collection):
     return obj
 
 
-def _render_studies(out_dir, camera, actor, billboard, floor):
+def _render_studies(out_dir, camera, actor, billboards, floor):
     import bpy
 
     scene = bpy.context.scene
@@ -648,7 +673,8 @@ def _render_studies(out_dir, camera, actor, billboard, floor):
             obj.hide_render = True
         if obj.get("sr_study_actor"):
             obj.hide_render = False
-    billboard.hide_render = False
+    for billboard in billboards:
+        billboard.hide_render = False
     floor.hide_render = False
     original_camera_y = camera.location.y
     original_actor_location = actor.location.copy()
@@ -676,7 +702,7 @@ def _sha256(path):
     return digest.hexdigest()
 
 
-def _write_runtime_layer(out_dir, billboard_geometry, image_path):
+def _write_runtime_layer(out_dir, billboard_geometry, image_path, *, layer_id):
     """Emit the reusable depth-tested runtime card beside the study output.
 
     Blender's card uses world coordinates. The runtime OBJ convention is the
@@ -690,35 +716,42 @@ def _write_runtime_layer(out_dir, billboard_geometry, image_path):
     bottom_z = float(billboard_geometry["z"][0])
     top_z = float(billboard_geometry["z"][1])
     bottom_v = float(billboard_geometry["sourceBottomV"])
-    obj = out_dir / "background.obj"
+    stem = f"background_{layer_id}"
+    obj = out_dir / f"{stem}.obj"
+    # Blender authoring Y is lane-mirrored. The runtime OBJ convention stores
+    # engine Y as the negated third coordinate, so this is the inverse of the
+    # adopted source adapter: engineY = laneCenter - blenderY.
+    left_runtime_y = LANE_CENTRE_Y - left_y
+    right_runtime_y = LANE_CENTRE_Y - right_y
     obj.write_text(
-        "mtllib background.mtl\n"
-        "o distant_scenery_world_card\n"
+        f"mtllib {stem}.mtl\n"
+        f"o distant_scenery_world_card_{layer_id}\n"
         "# Engine coordinates are authored as OBJ x,z,-y for obj_model.\n"
-        f"v 36.000000 {bottom_z:.6f} {-left_y:.6f}\n"
-        f"v 36.000000 {bottom_z:.6f} {-right_y:.6f}\n"
-        f"v 36.000000 {top_z:.6f} {-right_y:.6f}\n"
-        f"v 36.000000 {top_z:.6f} {-left_y:.6f}\n"
+        f"v 36.000000 {bottom_z:.6f} {-left_runtime_y:.6f}\n"
+        f"v 36.000000 {bottom_z:.6f} {-right_runtime_y:.6f}\n"
+        f"v 36.000000 {top_z:.6f} {-right_runtime_y:.6f}\n"
+        f"v 36.000000 {top_z:.6f} {-left_runtime_y:.6f}\n"
         f"vt 0.000000 {bottom_v:.6f}\n"
         f"vt 1.000000 {bottom_v:.6f}\n"
         "vt 1.000000 1.000000\n"
         "vt 0.000000 1.000000\n"
-        "usemtl DistantSceneryCard\n"
+        "usemtl CorticoBackgroundBillboard\n"
         "f 1/1 2/2 3/3 4/4\n",
         encoding="utf-8",
     )
-    mtl = out_dir / "background.mtl"
+    mtl = out_dir / f"{stem}.mtl"
     mtl.write_text(
         "# Source-derived world-space distant scenery card.\n"
-        "newmtl DistantSceneryCard\n"
+        "newmtl CorticoBackgroundBillboard\n"
         "Ka 1.000 1.000 1.000\n"
         "Kd 1.000 1.000 1.000\n"
-        "map_Kd cortico_background.png\n",
+        f"map_Kd cortico_background_{layer_id}.png\n",
         encoding="utf-8",
     )
-    texture = out_dir / "cortico_background.png"
+    texture = out_dir / f"cortico_background_{layer_id}.png"
     shutil.copyfile(image_path, texture)
     return {
+        "id": layer_id,
         "renderMesh": obj.name,
         "materialLibrary": mtl.name,
         "texture": texture.name,
@@ -731,6 +764,7 @@ def _write_runtime_layer(out_dir, billboard_geometry, image_path):
         "reactsToPitch": True,
         "depthRangeX": [36.0, 36.0],
         "floorBridge": False,
+        "blenderGeometry": billboard_geometry,
     }
 
 
@@ -765,7 +799,11 @@ def _manifest(source, studies, modules):
         "studies": studies,
         "outputs": {"libraryBlend": "cortico-background-topology-authoring.blend",
                     "studyBlend": "cortico-background-billboard-study.blend",
-                    "billboardTexture": "cortico-background-billboard.png"},
+                    "billboardTextures": [
+                        "cortico-background-west.png",
+                        "cortico-background-centre.png",
+                        "cortico-background-east.png",
+                    ]},
     }
 
 
@@ -780,15 +818,24 @@ def build_study(source, out_dir):
     camera = _canon_camera(collection)
     actor = _study_actor(collection)
     sky = _make_sky_backdrop(collection)
-    plate_path = _render_background_plate(out_dir, camera)
-    plate_image = bpy.data.images.load(str(plate_path.resolve()), check_existing=True)
-    billboard, billboard_geometry = _make_world_billboard(collection, camera, plate_image)
+    billboards = []
+    runtime_assets = []
+    for label, lane_y in (("west", LANE_MIN_Y), ("centre", LANE_CENTRE_Y),
+                          ("east", LANE_MAX_Y)):
+        camera.location.y = lane_to_blender_y(lane_y)
+        plate_path = _render_background_plate(out_dir, camera, label)
+        plate_image = bpy.data.images.load(str(plate_path.resolve()), check_existing=True)
+        billboard, billboard_geometry = _make_world_billboard(
+            collection, camera, plate_image, label)
+        billboards.append(billboard)
+        runtime_assets.append(_write_runtime_layer(
+            out_dir, billboard_geometry, plate_path, layer_id=label))
+    camera.location.y = lane_to_blender_y(LANE_CENTRE_Y)
     floor = _make_floor_bridge(collection)
-    runtime_assets = _write_runtime_layer(out_dir, billboard_geometry, plate_path)
     sky.hide_render = False
     study_dir = Path(out_dir) / "studies"
     study_dir.mkdir(parents=True, exist_ok=True)
-    studies = _render_studies(study_dir, camera, actor, billboard, floor)
+    studies = _render_studies(study_dir, camera, actor, billboards, floor)
     study_path = Path(out_dir) / "cortico-background-billboard-study.blend"
     bpy.ops.wm.save_as_mainfile(filepath=str(study_path))
     manifest_modules = [{"id": item["id"], "coverageY": item["coverageY"],
@@ -796,11 +843,91 @@ def build_study(source, out_dir):
                         for item in modules]
     return study_path, studies, {"modules": manifest_modules,
                                  "connectors": connectors,
-                                 "billboard": billboard_geometry,
+                                 "billboards": [asset["blenderGeometry"]
+                                                for asset in runtime_assets],
                                  "runtimeAssets": runtime_assets,
                                  "floorBridge": {"nearX": FLOOR_NEAR_X,
                                                   "farX": BILLBOARD_X + 0.05,
                                                   "groundZ": 0.0}}
+
+
+def _background_material(image, name):
+    """Create the source-owned texture binding used by a background card."""
+    import bpy
+
+    material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    material.use_nodes = True
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    shader = nodes.new("ShaderNodeBsdfPrincipled")
+    texture = nodes.new("ShaderNodeTexImage")
+    texture.image = image
+    texture.interpolation = "Closest"
+    texture.extension = "CLIP"
+    shader.inputs["Roughness"].default_value = 1.0
+    links.new(texture.outputs["Color"], shader.inputs["Base Color"])
+    links.new(texture.outputs["Alpha"], shader.inputs["Alpha"])
+    links.new(shader.outputs[0], output.inputs[0])
+    return material
+
+
+def _adopt_source_layers(source, out_dir, runtime_assets):
+    """Install reviewed cards and packed images in the adopted source blend."""
+    import bpy
+
+    source = Path(source).resolve()
+    bpy.ops.wm.open_mainfile(filepath=str(source))
+    collection = bpy.data.collections.get("22_BACKGROUND")
+    if collection is None:
+        collection = bpy.data.collections.new("22_BACKGROUND")
+        bpy.context.scene.collection.children.link(collection)
+    for obj in list(collection.objects):
+        bpy.data.objects.remove(obj, do_unlink=True)
+    for asset in runtime_assets:
+        geometry = asset["blenderGeometry"]
+        right_y, left_y = geometry["y"]
+        z = geometry["z"]
+        mesh = bpy.data.meshes.new(f"{asset['id'].upper()}_MESH")
+        mesh.from_pydata([
+            (BILLBOARD_X, left_y, z[0]),
+            (BILLBOARD_X, right_y, z[0]),
+            (BILLBOARD_X, right_y, z[1]),
+            (BILLBOARD_X, left_y, z[1]),
+        ], [], [(0, 1, 2, 3)])
+        mesh.update()
+        uv = mesh.uv_layers.new(name="UVMap")
+        bottom_v = float(geometry["sourceBottomV"])
+        for loop, coord in zip(mesh.loops, ((0.0, bottom_v), (1.0, bottom_v),
+                                            (1.0, 1.0), (0.0, 1.0))):
+            uv.data[loop.index].uv = coord
+        image = bpy.data.images.load(
+            str((Path(out_dir) / f"cortico-background-{asset['id']}.png").resolve()),
+            check_existing=False)
+        image.name = f"CORTICO_BACKGROUND_IMAGE_{asset['id'].upper()}"
+        image.pack()
+        material = _background_material(
+            image, f"CORTICO_BACKGROUND_MATERIAL_{asset['id'].upper()}")
+        mesh.materials.append(material)
+        obj = bpy.data.objects.new(
+            f"CORTICO_background_{asset['id']}", mesh)
+        collection.objects.link(obj)
+        obj["sr_background_layer"] = True
+        obj["sr_background_layer_id"] = asset["id"]
+        obj["sr_export"] = False
+        obj["sr_noninteractive"] = True
+        obj["sr_camera_space"] = False
+        obj["sr_reacts_to_pitch"] = True
+        obj["sr_floor_bridge"] = False
+        obj["sr_source_representation"] = \
+            "source-topology-rendered-at-canon-pitch-to-world-space-card"
+        obj["sr_depth_range_x"] = [BILLBOARD_X, BILLBOARD_X]
+        obj["sr_texture_image"] = image.name
+    bpy.context.scene["sr_background_layer_contract"] = \
+        "source-owned packed cards exported by export_exterior_environment"
+    bpy.context.scene["sr_background_layer_count"] = len(runtime_assets)
+    bpy.ops.wm.save_as_mainfile(filepath=str(source))
+    return source
 
 
 def build_library(source, out_dir):
@@ -822,6 +949,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--adopt-source", action="store_true",
+                        help="install the reviewed cards and packed textures in the source blend")
     args = parser.parse_args(argv)
     if not args.source.is_file():
         raise SystemExit(f"source blend not found: {args.source}")
@@ -830,6 +959,8 @@ def main(argv=None):
     args.out_dir.mkdir(parents=True, exist_ok=True)
     library = build_library(args.source, args.out_dir)
     study, studies, modules = build_study(args.source, args.out_dir)
+    if args.adopt_source:
+        _adopt_source_layers(args.source, args.out_dir, modules["runtimeAssets"])
     manifest = _manifest(args.source, studies, modules)
     manifest["outputs"]["libraryBlend"] = library.name
     manifest["outputs"]["studyBlend"] = study.name

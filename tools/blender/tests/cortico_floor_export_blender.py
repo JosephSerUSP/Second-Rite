@@ -23,6 +23,21 @@ def main():
         report = export_exterior_environment.export_floor_mesh(output, bpy.context.scene)
         result["report"] = report
         result["files"] = sorted(path.name for path in output.iterdir())
+        background_output = output.parent / "background"
+        background_output.mkdir(parents=True, exist_ok=True)
+        background = export_exterior_environment.export_background_layers(
+            background_output, bpy.context.scene)
+        result["background"] = background
+        result["backgroundFiles"] = sorted(
+            path.name for path in background_output.iterdir())
+        if [layer["id"] for layer in background] != [
+                "centre", "east", "laundry_quad", "west"]:
+            raise RuntimeError("background export did not return canonical layer ids")
+        for layer in background:
+            if layer["provenance"]["cameraSpace"] is not False:
+                raise RuntimeError("background layer unexpectedly uses camera space")
+            if layer["provenance"]["reactsToPitch"] is not True:
+                raise RuntimeError("background layer lost pitch-reactive provenance")
         grid = bpy.data.objects.get("CORTICO_floor_grid")
         if grid is None:
             raise RuntimeError("positive probe lost CORTICO_floor_grid")

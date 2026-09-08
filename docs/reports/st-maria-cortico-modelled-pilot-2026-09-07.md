@@ -45,6 +45,16 @@ floor. A separate, explicitly spaced grid makes the interpolation and texture
 repeat visible at the authored resolution while leaving gameplay elevation
 flat in this pilot.
 
+The adopted source also now carries the Cortiço composition pass: visible
+household thresholds and patched subdivision piers along the grand-house
+gallery, irregular lean-to masses, the shared wash basin, interrupted edge
+masonry/drains, planters, the workers' stair and the padaria back-service
+canopy. The laundry is intentionally one image-authored quad,
+`CORTICO_AUTHORED_LAUNDRY_QUAD`, with the poles, wire and folded cloth in one
+generated alpha texture. It is exported as one world-space placed model rather
+than baked into the opaque atlas, so transparent pixels discard cleanly and do
+not create a rectangular slab.
+
 The west/east readability issue had a separate cause: the source parapet body
 was 0.82 m high plus its coping, about 0.94 m total at this camera. The adopted
 blend now uses a 0.58 m body with the coping at a 0.70 m total top. The wall
@@ -91,25 +101,26 @@ and malformed hashes. The focused marker test is
 
 The current proof captures are:
 
-- Wide: `out/st-maria-cortico/wide-proof-background-final/26-west.png`,
+- Wide: `out/st-maria-cortico/wide-proof-final/26-west.png`,
   `26-centre.png`, and `26-east.png`.
-- Classic: `out/st-maria-cortico/classic-proof-background-final/26-west.png`,
+- Classic: `out/st-maria-cortico/classic-proof-final/26-west.png`,
   `26-centre.png`, and `26-east.png`.
 
 Those six frames show the corrected west/centre/east composition: the player
 upper body is visible above the lowered parapets, the floor is continuous and
-no longer sheary, and the NPC/architecture placements remain readable. The
-town-walk log is `out/st-maria-cortico/town-walk-final-grid.log`. The final
-Classic and Wide proof runs each completed 45 frames.
+no longer sheary, the laundry quad has visible alpha-cut poles/wire/cloth, and
+the NPC/architecture placements remain readable. The final Classic and Wide
+proof runs each completed 45 frames.
 
-The distant scenery candidate is now installed as the package's reusable
-`backgroundLayers[0]` world-space OBJ/MTL card. It is derived from the adopted
-source topology rendered once at the canonical `-17.5` degree camera, then
-consumed by the normal depth-tested placed-model queue. It is not a
-camera-space overlay, and its candidate floor bridge was intentionally omitted
-so the authoritative `floor.obj` remains the sole floor surface. The package
-records the mesh/material/texture hashes and the `cameraSpace=false`,
-`reactsToPitch=true` provenance contract.
+The distant scenery candidate is now installed as four reusable
+`backgroundLayers` world-space OBJ/MTL cards: west, centre, east, and the
+alpha-bearing `laundry_quad`. They are derived from the adopted source at the
+canonical `-17.5` degree camera, then consumed by the normal depth-tested
+placed-model queue. They are not camera-space overlays, and their candidate
+floor bridges were intentionally omitted so the authoritative `floor.obj`
+remains the sole floor surface. The package records mesh/material/texture
+hashes and the `cameraSpace=false`, `reactsToPitch=true` provenance contract;
+the laundry texture retains RGBA alpha through export.
 
 The live staged verification uses the canonical exporter boundary and the full
 LÖVE runtime. Native coverage remains limited where the local Effekseer shim is

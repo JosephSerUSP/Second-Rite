@@ -163,6 +163,7 @@ function M.run()
     local corticoRoot = "assets/environments/st_maria_town/cortico_modelled"
     local corticoFilesRoot = "projects/hichaukitoden-game/" .. corticoRoot
     local corticoPkg = environment_package.load(corticoRoot .. "/environment.json")
+    local corticoManifest = json.decode(readFile(corticoFilesRoot .. "/environment.json"))
     local floorProvenance = corticoPkg.manifest.provenance.floor
     check(corticoPkg.floorMesh == corticoRoot .. "/floor.obj",
         "Cortico resolves its separate floor mesh relative to the package")
@@ -182,27 +183,36 @@ function M.run()
     end
 
     -- 10. Reusable world-space distant-layer contract
-    local backgroundLayer = corticoPkg.backgroundLayers[1]
-    check(#corticoPkg.backgroundLayers == 1, "Cortico has one distant background layer")
-    check(backgroundLayer.id == "cortico_distant_scenery",
-        "Cortico distant layer has stable semantic id")
-    check(backgroundLayer.renderMesh == corticoRoot .. "/background.obj",
-        "distant layer resolves its world-space OBJ relative to the package")
-    check(backgroundLayer.materialLibrary == corticoRoot .. "/background.mtl",
-        "distant layer resolves its material library relative to the package")
-    check(backgroundLayer.provenance.cameraSpace == false
-        and backgroundLayer.provenance.reactsToPitch == true,
-        "distant layer is depth-tested world space and reacts to pitch")
-    local backgroundModel = obj_model.parse(
-        readFile(corticoFilesRoot .. "/background.obj"), "cortico background.obj")
-    check(backgroundModel.vertexCount == 6, "distant layer card triangulates to two triangles")
-    for _, file in ipairs({ "background.obj", "background.mtl", "cortico_background.png" }) do
-        local key = file == "cortico_background.png" and "texture"
-            or (file == "background.obj" and "renderMesh" or "materialLibrary")
-        check(sha256(readFile(corticoFilesRoot .. "/" .. file))
-            == backgroundLayer.provenance.sha256[key],
-            "distant layer provenance hash matches " .. file)
+    local expectedBackgroundIds = {
+        centre = true, east = true, laundry_quad = true, west = true,
+    }
+    check(#corticoManifest.backgroundLayers == 4,
+        "Cortico has west, centre, east and laundry-quad world layers")
+    for _, backgroundLayer in ipairs(corticoManifest.backgroundLayers) do
+        check(expectedBackgroundIds[backgroundLayer.id] == true,
+            "distant layer has a stable west/centre/east semantic id")
+        expectedBackgroundIds[backgroundLayer.id] = nil
+        check(backgroundLayer.provenance.cameraSpace == false
+            and backgroundLayer.provenance.reactsToPitch == true,
+            "distant layer is depth-tested world space and reacts to pitch")
+        local backgroundModel = obj_model.parse(
+            readFile(corticoFilesRoot .. "/" .. backgroundLayer.renderMesh),
+            "cortico " .. backgroundLayer.id .. " background.obj")
+        check(backgroundModel.vertexCount == 6,
+            "distant layer card triangulates to two triangles")
+        local files = {
+            { name = backgroundLayer.renderMesh, key = "renderMesh" },
+            { name = backgroundLayer.materialLibrary, key = "materialLibrary" },
+            { name = "cortico_background_" .. backgroundLayer.id .. ".png", key = "texture" },
+        }
+        for _, file in ipairs(files) do
+            check(sha256(readFile(corticoFilesRoot .. "/" .. file.name))
+                == backgroundLayer.provenance.sha256[file.key],
+                "distant layer provenance hash matches " .. file.name)
+        end
     end
+    check(next(expectedBackgroundIds) == nil,
+        "all four world-space layer ids are present")
 
     mockManifest.collisionMesh = nil
     mockManifest.bakedLighting = false

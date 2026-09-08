@@ -1,0 +1,13 @@
+mtllib background_centre.mtl
+o CORTICO_background_centre
+# Source-owned world-space card; engine Y is lane-mirrored.
+v 36.000000 0.000000 1.096300
+v 36.000000 0.000000 -25.158300
+v 36.000000 8.000000 -25.158300
+v 36.000000 8.000000 1.096300
+vt 0.000000 0.191867
+vt 1.000000 0.191867
+vt 1.000000 1.000000
+vt 0.000000 1.000000
+usemtl CorticoBackgroundBillboard
+f 4/4 3/3 2/2 1/1

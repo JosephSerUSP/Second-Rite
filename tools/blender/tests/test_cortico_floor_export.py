@@ -33,6 +33,20 @@ class CorticoFloorExportTests(unittest.TestCase):
         self.assertEqual(probe["report"]["vertexCount"], 1548)
         self.assertEqual(probe["report"]["faceCount"], 1470)
         self.assertEqual(sorted(["floor.obj", "floor.mtl", "floor.png"]), probe["files"])
+        self.assertEqual([layer["id"] for layer in probe["background"]],
+                         ["centre", "east", "laundry_quad", "west"])
+        self.assertEqual(sorted([
+            "background_centre.obj", "background_centre.mtl",
+            "cortico_background_centre.png", "background_east.obj",
+            "background_east.mtl", "cortico_background_east.png",
+            "background_laundry_quad.obj", "background_laundry_quad.mtl",
+            "cortico_background_laundry_quad.png",
+            "background_west.obj", "background_west.mtl",
+            "cortico_background_west.png",
+        ]), probe["backgroundFiles"])
+        self.assertTrue(all(layer["provenance"]["cameraSpace"] is False
+                            and layer["provenance"]["reactsToPitch"] is True
+                            for layer in probe["background"]))
         self.assertIn("exactly one sr_floor_mesh", probe["negativeError"])
 
 

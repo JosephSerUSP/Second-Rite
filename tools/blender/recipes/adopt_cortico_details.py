@@ -20,7 +20,7 @@ from mathutils import Vector
 LANE_CENTRE = 12.031
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LAUNDRY_TEXTURE = REPO_ROOT / (
-    "projects/hichaukitoden-game/assets/materials/cortico_laundry_quad.png")
+    "projects/hichaukitoden-game/assets/materials/cortico_laundry_quad_v2.png")
 
 
 def by(runtime_y: float) -> float:
@@ -150,6 +150,45 @@ def face(name, x, y0, y1, z0, z1, mat, target, role):
     return tag(obj, role)
 
 
+def edge_strip(name, x, runtime_y0, runtime_y1, depth, top_profile,
+               body_mat, top_mat, target, role):
+    """Build one connected, irregular low edge that can leave the frame."""
+    if len(top_profile) < 3:
+        raise ValueError("edge strip needs at least three profile points")
+    step = (runtime_y1 - runtime_y0) / (len(top_profile) - 1)
+    ys = [by(runtime_y0 + step * index)
+          for index in range(len(top_profile))]
+    vertices = []
+    for y, top in zip(ys, top_profile):
+        vertices.extend(((x, y, 0.0), (x + depth, y, 0.0),
+                         (x, y, top), (x + depth, y, top)))
+    faces = []
+    material_indices = []
+    for index in range(len(top_profile) - 1):
+        a = index * 4
+        b = (index + 1) * 4
+        faces.extend(((a, b, b + 2, a + 2),
+                      (a + 1, a + 3, b + 3, b + 1),
+                      (a + 2, b + 2, b + 3, a + 3)))
+        material_indices.extend((0, 0, 1))
+    faces.extend(((0, 2, 3, 1),
+                  ((len(top_profile) - 1) * 4,
+                   (len(top_profile) - 1) * 4 + 1,
+                   (len(top_profile) - 1) * 4 + 3,
+                   (len(top_profile) - 1) * 4 + 2)))
+    material_indices.extend((0, 0))
+    mesh = bpy.data.meshes.new(name + "_MESH")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    mesh.materials.append(body_mat)
+    mesh.materials.append(top_mat)
+    for polygon, material_index in zip(mesh.polygons, material_indices):
+        polygon.material_index = material_index
+    obj = bpy.data.objects.new(name, mesh)
+    target.objects.link(obj)
+    return tag(obj, role)
+
+
 def laundry_quad(name, x, runtime_y0, runtime_y1, z0, z1, mat, target):
     """One camera-facing quad carrying poles, wire and hanging laundry."""
     y0 = by(runtime_y0)
@@ -242,29 +281,27 @@ def build(blend: Path):
     laundry["sr_floor_bridge"] = False
     laundry["sr_source_representation"] = "image-authored-alpha-world-space-quad"
 
-    # Near rank: low, broken roof and masonry edges at the documented real
-    # depths. They interrupt the paving foreground without becoming a broad
-    # board that hides the actor. The central lane (runtime Y 4..19) remains
-    # open, while west/east fragments create parallax in the three reviews.
-    near_fragments = (
-        ("WEST_LEFT", -8.2, -1.05, 1.05, .40),
-        ("WEST_RIGHT", -6.8, 1.15, .95, .34),
-        ("CENTRE_LEFT", -8.0, 10.35, 1.10, .34),
-        ("CENTRE_RIGHT", -7.2, 13.70, 1.10, .34),
-        ("EAST_LEFT", -8.2, 22.85, 1.05, .40),
-        ("EAST_RIGHT", -6.8, 25.20, 1.15, .34),
+    # Near rank: four connected edge fragments, intentionally longer than a
+    # proof frame. They frame corners/bottom margins and carry a soil cap, so
+    # the eye reads a rooted courtyard edge rather than floating blocks. The
+    # centre opening from runtime Y 8.8..15.2 stays clear for traversal.
+    near_strips = (
+        ("WEST_FRAME", 4.85, -8.5, -2.0, .72,
+         (.28, .38, .32, .48, .35, .43)),
+        ("CENTRE_LEFT", 5.10, 8.3, 11.0, .58,
+         (.22, .30, .25, .36, .27)),
+        ("CENTRE_RIGHT", 5.30, 13.0, 15.8, .58,
+         (.24, .33, .27, .39, .29)),
+        ("EAST_FRAME", 4.85, 24.0, 31.6, .76,
+         (.30, .40, .34, .46, .38, .31)),
     )
-    for label, x, runtime_y, width, height in near_fragments:
-        ranked_box(f"CORTICO_AUTHORED_NEAR_ROOF_EDGE_{label}",
-                   (x, by(runtime_y), height * .5),
-                   (.38, width, height), old_stone, foreground,
-                   "near_broken_roof_edge", "NEAR")
-        ranked_box(f"CORTICO_AUTHORED_NEAR_MASONRY_{label}",
-                   (x + .24, by(runtime_y), height * .36),
-                   (.24, width * .52, height * .52), stone, foreground,
-                   "near_broken_masonry", "NEAR")
-    for index, runtime_y in enumerate((1.55, 24.65)):
-        foliage_cluster(f"CORTICO_AUTHORED_NEAR_FOLIAGE_{index}", -8.4,
+    for label, x, runtime_y0, runtime_y1, depth, profile in near_strips:
+        edge = edge_strip(f"CORTICO_AUTHORED_NEAR_EDGE_{label}", x,
+                          runtime_y0, runtime_y1, depth, profile, old_stone,
+                          stone, foreground, "near_connected_masonry_soil_edge")
+        edge["sr_depth_rank"] = "NEAR"
+    for index, runtime_y in enumerate((-1.5, 28.0)):
+        foliage_cluster(f"CORTICO_AUTHORED_NEAR_FOLIAGE_{index}", 5.0,
                         runtime_y, .72, .62, plant, foreground,
                         "near_fragmented_foliage", "NEAR")
 
@@ -274,12 +311,12 @@ def build(blend: Path):
     # blank wall. These are source geometry, not a replacement for the
     # exported pitch-reactive background cards.
     background_modules = (
-        ("WEST_LOW", 23.5, -7.4, 5.0, 3.1, roof),
-        ("WEST_HIGH", 27.4, -1.0, 4.2, 4.0, whitewash),
-        ("WEST_SIDE", 31.0, 4.4, 3.8, 3.3, roof),
-        ("EAST_LOW", 23.5, 21.4, 5.2, 3.2, whitewash),
-        ("EAST_HIGH", 27.8, 27.0, 4.4, 4.2, roof),
-        ("EAST_SIDE", 31.3, 32.2, 4.0, 3.5, whitewash),
+        ("WEST_REAR_BAND", 21.4, -13.0, 5.8, 5.0, old_stone),
+        ("WEST_FAR_TERRACE", 28.8, -7.0, 5.0, 5.6, roof),
+        ("WEST_OPEN_EDGE", 32.0, -1.2, 3.8, 4.8, whitewash),
+        ("EAST_REAR_BAND", 21.4, 30.0, 5.8, 4.9, whitewash),
+        ("EAST_FAR_TERRACE", 28.8, 36.0, 5.2, 5.7, roof),
+        ("EAST_OPEN_EDGE", 32.0, 42.0, 4.1, 5.0, old_stone),
         ("CENTRE_TERRACE", 25.4, 12.0, 3.8, 3.6, old_stone),
     )
     for label, x, runtime_y, width, height, wall_mat in background_modules:
@@ -296,37 +333,12 @@ def build(blend: Path):
                    (.10, min(1.1, width * .30), 2.1), wood, architecture,
                    "background_household_threshold", "BACKGROUND")
     for index, (x, runtime_y, scale) in enumerate(
-            ((29.8, -5.8, 1.35), (32.0, 29.2, 1.55), (27.0, 7.0, 1.05))):
+            ((22.2, -12.0, 1.65), (29.8, -6.0, 1.35),
+             (22.2, 32.0, 1.60), (30.8, 38.5, 1.65),
+             (27.0, 7.0, 1.05))):
         foliage_cluster(f"CORTICO_AUTHORED_BACKGROUND_TREE_{index}", x,
-                        runtime_y, 3.0, scale, plant, architecture,
+                        runtime_y, 4.15, scale, plant, architecture,
                         "staggered_background_vegetation", "BACKGROUND")
-
-    # Interrupt the paving with shallow masonry, drains and planting at
-    # several depths. The central run stays open for the authored lane.
-    fragments = (
-        ("WEST", 5.0, -1.5, 2.8, .62),
-        ("MID_WEST", 5.8, 2.0, 1.55, .46),
-        ("MID_EAST", 6.0, 12.0, 1.75, .50),
-        ("EAST", 4.8, 21.8, 2.3, .62),
-    )
-    for label, x, runtime_y, width, height in fragments:
-        box(f"CORTICO_AUTHORED_EDGE_{label}",
-            (x, by(runtime_y), height * .5), (.42, width, height), stone,
-            foreground, "interrupted_edge_masonry")
-        box(f"CORTICO_AUTHORED_DRAIN_{label}",
-            (x + .24, by(runtime_y), .035), (.05, width * .78, .07), iron,
-            foreground, "drainage_edge")
-    for index, runtime_y in enumerate((-1.2, 16.0)):
-        box(f"CORTICO_AUTHORED_PLANTER_{index}",
-            (5.4, by(runtime_y), .32), (.75, 1.10, .64), old_stone,
-            foreground, "interrupted_planting")
-        box(f"CORTICO_AUTHORED_PLANT_{index}",
-            (5.4, by(runtime_y), .90), (.24, .72, 1.05), plant,
-            foreground, "interrupted_planting")
-    for index, runtime_y in enumerate((5.0, 18.7)):
-        box(f"CORTICO_AUTHORED_FRAME_POST_{index}",
-            (6.25, by(runtime_y), .88), (.24, .26, 1.76), wood,
-            foreground, "near_vertical_frame")
 
     # A shallow, visibly utilitarian workers' stair at its existing exit, plus
     # the padaria back-service canopy at its existing door.

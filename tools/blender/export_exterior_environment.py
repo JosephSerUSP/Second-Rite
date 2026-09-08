@@ -602,7 +602,13 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
             continue
         if not bool(obj.get("sr_export", False)):
             continue
-        if not in_lane(obj, lane_min, lane_max, margin, scene):
+        # Gameplay and near geometry remain bounded by the authored traversal
+        # lane. Explicit background-ranked scenery is different: the fixed
+        # town camera tracks by projection-window offset, so the west/east
+        # skyline needs authored depth beyond the walkable lane to appear in
+        # the actual open-end frusta.
+        is_background = obj.get("sr_depth_rank") == "BACKGROUND"
+        if not in_lane(obj, lane_min, lane_max, margin, scene) and not is_background:
             print(f"[exterior] SKIPPING off-lane {obj.name}", flush=True)
             skipped.append(obj.name)
             continue

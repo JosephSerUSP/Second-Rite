@@ -56,12 +56,20 @@ than baked into the opaque atlas, so transparent pixels discard cleanly and do
 not create a rectangular slab.
 
 The follow-up composition pass also adds explicit depth-ranked source geometry:
-small limestone near fragments at runtime-visible `x=-8.2..-6.8` around the
-actual map-26 west/centre/east camera lanes, plus separated background
-household rooflines, terraces, doors, and vegetation at both ends of the
-street. The near fragments are intentionally discontinuous and keep the
-central actor corridor open; they are not a replacement for the separate
-floor mesh or for the pitch-reactive background cards.
+four connected, irregular limestone/soil edge strips at the actual foreground
+depth, with west/east spans cropped by the frame and two centre strips leaving
+the actor corridor open. Their attached foliage is rooted at the strip ends;
+they no longer read as isolated concrete blocks. Separated background
+household rooflines, terraces, doors, and vegetation occupy two rear-depth
+bands at both ends of the street.
+
+The placement was verified against the production tracking contract: map 26
+keeps the fixed eye and canonical `-17.5` pitch while west/centre/east move the
+projection window by `+300/0/-300` native pixels. The exporter now preserves
+explicitly `sr_depth_rank=BACKGROUND` meshes beyond the gameplay lane; near
+and gameplay geometry remains lane-bounded. This was necessary because the
+open-end skyline is outside the walkable lane even though it is inside the
+runtime frustum.
 
 The west/east readability issue had a separate cause: the source parapet body
 was 0.82 m high plus its coping, about 0.94 m total at this camera. The adopted
@@ -109,9 +117,9 @@ and malformed hashes. The focused marker test is
 
 The current proof captures are:
 
-- Wide: `out/st-maria-cortico/wide-proof-final2/26-west.png`,
+- Wide: `out/st-maria-cortico/wide-proof-final4/26-west.png`,
   `26-centre.png`, and `26-east.png`.
-- Classic: `out/st-maria-cortico/classic-proof-final2/26-west.png`,
+- Classic: `out/st-maria-cortico/classic-proof-final4/26-west.png`,
   `26-centre.png`, and `26-east.png`.
 
 Those six frames show the corrected west/centre/east composition: the player
@@ -134,10 +142,15 @@ The live staged verification uses the canonical exporter boundary and the full
 LÖVE runtime. Native coverage remains limited where the local Effekseer shim is
 unavailable: the unit lane reports that seven `test_map_transfer` world-effect
 assertions were not exercised. That is an environment limitation, not a claim
-that those assertions passed natively. The post-export G5 check was not green:
-classic matched 131/144 frames and wide matched 24/34; the differing frames
-were battle/title (plus the developer-menu frames in Classic), not the map
-frames. No golden references were recaptured.
+that those assertions passed natively. The post-export G5 check was not green,
+but the differences are outside the map proof set: Classic matched 131/144
+frames and Wide matched 24/34. The eight title frames and battle 98/99 differ
+only in the effect region because the local native Effekseer shim is
+unavailable; the title's red effect is absent and the battle effect pixels are
+missing. Classic developer-menu frames differ in a small 345-pixel
+text/backdrop region (`x=74..169`, `y=64..71`); no map frame differs. The crop
+invariant passed (`5/61440` RGB pixels, alpha exact), and no golden references
+were recaptured.
 
 ## Remaining scope
 

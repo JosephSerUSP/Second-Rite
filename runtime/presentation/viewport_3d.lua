@@ -1408,6 +1408,7 @@ local function drawTownPrerender(session)
     -- inventing a second event representation or making the plate itself a
     -- visual input for another asset.
     local arrowModels = {}
+    local transition_marker = require("presentation.transition_marker")
     local function townArrowModel(path)
         if not arrowModels[path] then
             arrowModels[path] = require("presentation.obj_model").load(path)
@@ -1458,7 +1459,7 @@ local function drawTownPrerender(session)
                 local lanes = require("engine.bounded_lane")
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 local arrowLen = 1.04 * modelScale
-                local arrowRad = 0.22 * modelScale
+                local arrowRad = 0.45 * modelScale
                 local arrowY = math.min(state.maxY, math.max(state.minY, imageY))
 
                 for _, modelGroup in ipairs(model.groups or {}) do
@@ -1469,35 +1470,25 @@ local function drawTownPrerender(session)
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
                         if a and b and c then
                             local function arrowPoint(vertex)
-                                local lx = vertex[1] * modelScale
-                                local ly = vertex[2] * modelScale
-                                local lz = vertex[3] * modelScale
                                 local worldX, worldY, worldZ
                                 if isTransitionArrow then
-                                    if arrowDirection == "right" then
-                                        local tipY = math.min(arrowY, state.maxY - 0.15)
-                                        tipY = math.max(tipY, state.minY + 0.15 + arrowLen)
-                                        worldY = tipY - (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    elseif arrowDirection == "left" then
-                                        local tipY = math.max(arrowY, state.minY + 0.15)
-                                        tipY = math.min(tipY, state.maxY - 0.15 - arrowLen)
-                                        worldY = tipY + (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    else -- "away" (doors, gates, stairs into depth)
-                                        local clampedY = math.min(state.maxY - arrowRad, math.max(state.minY + arrowRad, arrowY))
-                                        local tiltAngle = math.rad(22)
-                                        local cosT, sinT = math.cos(tiltAngle), math.sin(tiltAngle)
-                                        worldY = clampedY + lx
-                                        worldX = depthX - 0.10 * modelScale + (lz * cosT - ly * sinT)
-                                        worldZ = groundZ + 0.15 + (lz * sinT + ly * cosT)
-                                    end
+                                    local clampedY = math.min(state.maxY - arrowRad,
+                                        math.max(state.minY + arrowRad, arrowY))
+                                    worldX, worldY, worldZ = transition_marker.worldPoint(
+                                        arrowDirection, vertex, {
+                                            scale = modelScale,
+                                            depthX = depthX,
+                                            laneY = clampedY,
+                                            arrowY = clampedY,
+                                            groundZ = groundZ,
+                                            arrowLength = arrowLen,
+                                            minY = state.minY,
+                                            maxY = state.maxY,
+                                        })
                                 else
-                                    worldX = depthX + lx
-                                    worldY = imageY + ly
-                                    worldZ = groundZ + lz
+                                    worldX = depthX + vertex[1] * modelScale
+                                    worldY = imageY + vertex[2] * modelScale
+                                    worldZ = groundZ + vertex[3] * modelScale
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end
@@ -1515,6 +1506,13 @@ local function drawTownPrerender(session)
                                 addSegment(ax, ay, bx, by)
                                 addSegment(bx, by, cx, cy)
                                 addSegment(cx, cy, ax, ay)
+                                -- Transition markers are ground cues, not
+                                -- upright wire models. Fill each projected
+                                -- chevron triangle before its outline so the
+                                -- short depth path remains legible at the
+                                -- pitched town resolution.
+                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
+                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
                             else
                                 love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
                                 love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
@@ -2803,7 +2801,8 @@ local function drawWorldSpace(session, authoredCamera)
         buildProfiler.cache("materialize.placedModel", false)
         buildProfiler.add("materialize.uniqueSourcePlacements", 1)
         local bakedTownEnvironment = session.townTraversal
-            and tostring(cacheKey):match("^town%-environment:") ~= nil
+            and (tostring(cacheKey):match("^town%-environment:") ~= nil
+                or tostring(cacheKey):match("^town%-background:" ) ~= nil)
         -- A variant names either a hand-modelled OBJ or an image-authored
         -- geometry asset. Both compile to the same representation, so this is
         -- the only place the world renderer knows the difference.
@@ -2860,7 +2859,16 @@ local function drawWorldSpace(session, authoredCamera)
             buildProfiler.add("materialize.placedVertices", #vertices)
             local gpuSpan = buildProfiler.span("materialize.placedGpuMeshCreate", "graphics")
             local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "static")
-            if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
+            if modelGroup.texture then
+                mesh:setTexture(modelGroup.texture)
+                if spec.textureWrap then
+                    -- The adopted town floor is a real tiled surface rather
+                    -- than an atlas island. Its UVs intentionally exceed
+                    -- [0,1]; keep repeat wrapping local to that placement so
+                    -- the shared beauty atlas remains clamped.
+                    modelGroup.texture:setWrap(spec.textureWrap, spec.textureWrap)
+                end
+            end
             gpuSpan()
             placed[#placed + 1] = {
                 mesh = mesh, model = true, vertices = vertices,
@@ -3009,6 +3017,18 @@ end
             { model = environment.renderMesh },
             "town-environment:" .. environment.manifestPath,
             0, 0, "x"))
+        if environment.floorMesh then
+            queuePlacedModels(ensurePlacedModel(
+                { model = environment.floorMesh, textureWrap = "repeat" },
+                "town-floor:" .. environment.manifestPath,
+                0, 0, "x"))
+        end
+        for _, layer in ipairs(environment.backgroundLayers or {}) do
+            queuePlacedModels(ensurePlacedModel(
+                { model = layer.renderMesh },
+                "town-background:" .. layer.id .. ":" .. environment.manifestPath,
+                0, 0, "x"))
+        end
     end
 
     for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do

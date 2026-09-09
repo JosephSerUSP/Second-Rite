@@ -169,6 +169,18 @@ class FoliageMeshTests(unittest.TestCase):
         self.assertGreater(tree_mesh.sprays_per_carrier(spec_wide, 40),
                            tree_mesh.sprays_per_carrier(spec_narrow, 40))
 
+    def test_biased_crown_cards_stay_inside_the_biased_envelope(self):
+        skeleton = trees.reduce_lod(trees.generate(trees.preset(
+            "round_shade", crown_bias=.7, crown_bias_deg=90), "authoring"), "low")
+        verts, faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
+        bias = trees.crown_bias_vector(skeleton.spec)
+        for face in faces:
+            corners = [verts[index] for index in face]
+            centre = [sum(axis) / 4 for axis in zip(*corners)]
+            self.assertLessEqual(math.hypot(centre[0] - bias[0],
+                                             centre[1] - bias[1]),
+                                 skeleton.spec.crown_radius + 1e-6)
+
 
 class CrownAndBoleShapeTests(unittest.TestCase):
     """Shape assertions.

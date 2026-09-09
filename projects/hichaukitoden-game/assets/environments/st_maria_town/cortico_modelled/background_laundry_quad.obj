@@ -1,0 +1,13 @@
+mtllib background_laundry_quad.mtl
+o CORTICO_AUTHORED_LAUNDRY_QUAD
+# Source-owned world-space card; engine Y is lane-mirrored.
+v 11.800000 1.647500 -6.591000
+v 11.800000 3.352500 -6.591000
+v 11.800000 3.352500 -9.671000
+v 11.800000 1.647500 -9.671000
+vt 0.000000 0.000000
+vt 0.000000 1.000000
+vt 1.000000 1.000000
+vt 1.000000 0.000000
+usemtl CorticoBackgroundBillboard
+f 4/4 3/3 2/2 1/1

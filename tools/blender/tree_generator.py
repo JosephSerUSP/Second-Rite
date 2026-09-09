@@ -46,6 +46,16 @@ class TreeSpec:
     trunk_taper: float = .58
     #: Radius multiplier at the ground contact, for the basal flare.
     root_flare: float = 1.5
+    #: Fraction of the crown radius by which the crown centre is displaced.
+    #: ``crown_bias_deg`` gives its azimuth, making asymmetry intentional and
+    #: repeatable instead of another random seed.
+    crown_bias: float = 0.0
+    crown_bias_deg: float = 0.0
+    #: Additional elevation given to upper branches. Positive values create a
+    #: rising, vase-like habit while zero preserves the original fan.
+    branch_sweep_deg: float = 0.0
+    #: Azimuthal twist accumulated from the lower to the upper crown.
+    branch_twist_deg: float = 0.0
     seed: int = 1
 
 
@@ -133,7 +143,7 @@ def preset(name: str, *, seed_offset: int = 0, **overrides) -> TreeSpec:
     values.update(overrides)
     values["name"] = name
     values["seed"] = int(values.get("seed", 1)) + int(seed_offset)
-    return TreeSpec(**values)
+    return _normalize_spec(TreeSpec(**values))
 
 
 def _rng(seed):
@@ -163,6 +173,88 @@ def _unit(a):
     return (0.0, 0.0, 1.0) if n < 1e-8 else _scale(a, 1.0 / n)
 
 
+def _validate_spec(spec):
+    """Reject invalid authoring controls before they reach geometry math."""
+    finite_fields = (
+        "height", "crown_radius", "crown_depth", "clear_trunk", "levels",
+        "branch_frequency", "phyllotaxis_deg", "branch_angle_deg",
+        "angle_variation_deg", "length_decay", "apical_dominance",
+        "tropism", "attraction_weight", "attraction_points",
+        "influence_radius", "kill_radius", "segment_length", "taper_power",
+        "stems", "stem_spread_deg", "spray_length", "trunk_taper",
+        "root_flare", "crown_bias", "crown_bias_deg", "branch_sweep_deg",
+        "branch_twist_deg",
+    )
+    for field in finite_fields:
+        if not math.isfinite(float(getattr(spec, field))):
+            raise ValueError(f"tree control {field} must be finite")
+    if spec.height <= 0 or spec.crown_radius <= 0 or spec.crown_depth <= 0:
+        raise ValueError("tree dimensions must be positive")
+    if not 0 <= spec.clear_trunk <= 1:
+        raise ValueError("clear_trunk must be between 0 and 1")
+    for field in ("levels", "branch_frequency", "attraction_points"):
+        value = getattr(spec, field)
+        if value < 1 or int(value) != value:
+            raise ValueError(f"{field} must be a positive integer")
+    if spec.stems < 1 or int(spec.stems) != spec.stems:
+        raise ValueError("stems must be a positive integer")
+    if not 0 <= spec.apical_dominance <= 1:
+        raise ValueError("apical_dominance must be between 0 and 1")
+    if spec.crown_bias < 0 or spec.crown_bias > 1:
+        raise ValueError("crown_bias must be between 0 and 1")
+    if spec.branch_sweep_deg < 0 or spec.branch_sweep_deg > 90:
+        raise ValueError("branch_sweep_deg must be between 0 and 90")
+    if spec.attraction_weight < 0 or spec.attraction_weight > 1:
+        raise ValueError("attraction_weight must be between 0 and 1")
+    if spec.influence_radius <= 0 or spec.kill_radius < 0:
+        raise ValueError("attraction radii must be positive and non-negative")
+    if spec.segment_length <= 0 or spec.spray_length <= 0 or spec.taper_power <= 0:
+        raise ValueError("segment_length, spray_length and taper_power must be positive")
+    return spec
+
+
+def _normalize_spec(spec):
+    """Normalize integer-valued numeric inputs from JSON/CLI authoring."""
+    _validate_spec(spec)
+    integer_fields = ("levels", "branch_frequency", "attraction_points", "stems")
+    return replace(spec, **{field: int(getattr(spec, field)) for field in integer_fields})
+
+
+def crown_bias_vector(spec):
+    distance = spec.crown_radius * spec.crown_bias
+    angle = math.radians(spec.crown_bias_deg)
+    return (math.cos(angle) * distance, math.sin(angle) * distance, 0.0)
+
+
+def _attraction_direction(start, points, spec):
+    """Return a deterministic direction toward nearby crown attractors.
+
+    This is intentionally a small, bounded steering pass rather than a second
+    tree-growth implementation.  ``influence_radius`` chooses the local
+    neighbourhood and ``kill_radius`` treats already-reached points as
+    satisfied.  The result is blended with the authored branch direction by
+    the caller, so zero weight remains the historical generator.
+    """
+    eligible = []
+    for index, point in enumerate(points):
+        delta = _add(point, _scale(start, -1.0))
+        distance = _length(delta)
+        if spec.kill_radius < distance <= spec.influence_radius:
+            eligible.append((distance, index, point))
+    if not eligible:
+        return None
+    eligible.sort(key=lambda item: (item[0], item[1]))
+    selected = eligible[:max(1, min(8, int(spec.attraction_points)))]
+    total_weight = 0.0
+    target = (0.0, 0.0, 0.0)
+    for distance, _index, point in selected:
+        weight = 1.0 / max(.05, distance)
+        target = _add(target, _scale(point, weight))
+        total_weight += weight
+    target = _scale(target, 1.0 / total_weight)
+    return _unit(_add(target, _scale(start, -1.0)))
+
+
 def _spread_foliage(segments, candidates, limit, spec):
     """Select carriers across limb families and crown volume."""
     candidates = list(dict.fromkeys(candidates))
@@ -170,10 +262,11 @@ def _spread_foliage(segments, candidates, limit, spec):
     if len(candidates) <= limit:
         return candidates
     crown_base = spec.height * spec.clear_trunk
+    bias = crown_bias_vector(spec)
     def position(index):
         p = by_index[index].end
-        return (p[0] / max(.1, spec.crown_radius),
-                p[1] / max(.1, spec.crown_radius),
+        return ((p[0] - bias[0]) / max(.1, spec.crown_radius),
+                (p[1] - bias[1]) / max(.1, spec.crown_radius),
                 (p[2] - crown_base) / max(.1, spec.height - crown_base))
     def primary_family(index):
         node = by_index[index]
@@ -251,15 +344,18 @@ def foliage_card_budget(skeleton, lod="low"):
 
 def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
     if lod not in LOD_BUDGETS: raise ValueError(f"unknown tree LOD {lod!r}")
+    spec = _normalize_spec(spec)
     max_segments, max_cards = LOD_BUDGETS[lod]
     rng = _rng(spec.seed)
     points = []
     crown_base = spec.height * spec.clear_trunk
+    crown_bias = crown_bias_vector(spec)
     for _ in range(spec.attraction_points):
         z = crown_base + rng() * (spec.height - crown_base)
         rx, ry = _profile(spec.name, z, spec.height, spec.crown_radius, spec.crown_depth)
         theta = rng(0, math.tau); rr = math.sqrt(rng())
-        points.append([math.cos(theta) * rx * rr, math.sin(theta) * ry * rr, z])
+        points.append([crown_bias[0] + math.cos(theta) * rx * rr,
+                       crown_bias[1] + math.sin(theta) * ry * rr, z])
 
     segments = []
 
@@ -324,8 +420,14 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         # carry fewer than a single trunk would.
         wanted = max(2, wanted // max(1, len(leaders)))
         count = min(len(usable), wanted)
+        # Strong apical dominance leaves the lower bole clear by moving the
+        # same authored branch budget toward the crown tip.  At zero the
+        # historical even spacing is unchanged.
+        dominance = max(0.0, min(1.0, spec.apical_dominance))
+        spacing_power = max(.35, 1.0 - dominance * .65)
         attachments.extend(
-            nodes[usable[round(i * (len(usable) - 1) / max(1, count - 1))]]
+            nodes[usable[round((i / max(1, count - 1)) ** spacing_power
+                               * (len(usable) - 1))]]
             for i in range(count))
 
     for ordinal, attach in enumerate(attachments):
@@ -333,18 +435,33 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         z = segments[attach].end[2]
         envelope, _ = _profile(spec.name, z, spec.height,
                                spec.crown_radius, spec.crown_depth)
-        az = math.radians(ordinal * spec.phyllotaxis_deg + rng(-18, 18))
+        attach_t = (z - crown_base) / max(1e-6, spec.height - crown_base)
+        azimuth_deg = ordinal * spec.phyllotaxis_deg + rng(-18, 18)
+        if spec.branch_twist_deg:
+            azimuth_deg += spec.branch_twist_deg * attach_t
+        az = math.radians(azimuth_deg)
         # Lower limbs on a broad crown reach outward before they climb.
         # Giving every limb the same departure angle is what pushed the
         # first foliage most of a metre above the authored crown base.
-        attach_t = (z - crown_base) / max(1e-6, spec.height - crown_base)
         spread_bias = max(0.0, 1.0 - attach_t) * spec.branch_angle_deg * .55
-        elevation = math.radians(90.0 - spec.branch_angle_deg - spread_bias
-                                 + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
+        elevation_deg = (90.0 - spec.branch_angle_deg - spread_bias
+                         + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
+        if spec.branch_sweep_deg:
+            elevation_deg += spec.branch_sweep_deg * attach_t
+        elevation = math.radians(elevation_deg)
         if spec.name == "weeping": elevation -= math.radians(18)
         direction = _unit((math.cos(az) * math.cos(elevation),
                            math.sin(az) * math.cos(elevation),
                            math.sin(elevation)))
+        attract = _attraction_direction(segments[attach].end, points, spec)
+        weight = max(0.0, min(1.0, spec.attraction_weight))
+        if attract is not None and weight:
+            # Let attractors choose which side of the crown a limb serves,
+            # while retaining the authored elevation habit.  Blending z as
+            # well would make the existing lower-limb sweep unpredictable.
+            direction = _unit((direction[0] * (1.0 - weight) + attract[0] * weight,
+                               direction[1] * (1.0 - weight) + attract[1] * weight,
+                               direction[2]))
         limb_steps = max(2, min(5, int(envelope / max(.15, spec.segment_length * .62)) + 1))
         limb_parent = attach
         limb_nodes = []
@@ -363,9 +480,14 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
             end = _add(start, _scale(direction, length))
             rx, _ = _profile(spec.name, end[2], spec.height,
                              spec.crown_radius, spec.crown_depth)
-            radial = math.hypot(end[0], end[1])
+            radial = math.hypot(end[0] - crown_bias[0], end[1] - crown_bias[1])
             if radial > max(rx, .08):
-                f = max(rx, .08) / radial; end = (end[0] * f, end[1] * f, end[2])
+                f = max(rx, .08) / radial
+                if crown_bias == (0.0, 0.0, 0.0):
+                    end = (end[0] * f, end[1] * f, end[2])
+                else:
+                    end = (crown_bias[0] + (end[0] - crown_bias[0]) * f,
+                           crown_bias[1] + (end[1] - crown_bias[1]) * f, end[2])
             limb_parent = append(limb_parent, end, 1, step >= first_foliage_step)
             limb_nodes.append(limb_parent)
 

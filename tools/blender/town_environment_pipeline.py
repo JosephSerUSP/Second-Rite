@@ -15,13 +15,20 @@ Produces a self-contained runtime package usable without Blender:
 - environment.png
 - collision.obj (optional)
 - environment.json
+
+The pipeline records candidate bake evidence and provenance; it does not become
+the scene-contract preflight validator. An independent preflight can consume
+``environment.json`` (especially ``provenance.bake.appearance`` and ``stats``)
+at the candidate boundary before any owner-controlled promotion.
 """
 
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -29,6 +36,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_VERSION = "town-environment-pipeline-v2"
+WARNING_PATTERN = re.compile(r"\b(?:warning|warn|error|circular dependency|unsupported)\b", re.IGNORECASE)
 BLENDER_SEARCH = [
     os.environ.get("BLENDER"),
     r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe",
@@ -54,8 +63,166 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
+def sha256_file(path: Path) -> str:
+    """Return the SHA-256 of a file without loading it all into memory."""
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _file_record(path: Path, display_name: str | None = None):
+    path = Path(path)
+    if not path.is_file():
+        return None
+    return {
+        "path": display_name or path.name,
+        "sha256": sha256_file(path),
+        "sizeBytes": path.stat().st_size,
+    }
+
+
+def _warning_evidence(result):
+    evidence = []
+    for stream_name, text in (("stdout", result.stdout or ""), ("stderr", result.stderr or "")):
+        for line in text.splitlines():
+            if WARNING_PATTERN.search(line):
+                evidence.append({"stream": stream_name, "line": line.strip()})
+    return evidence
+
+
+def _display_dependency_path(path: Path, blend_path: Path):
+    try:
+        return path.resolve().relative_to(blend_path.parent.resolve()).as_posix()
+    except ValueError:
+        return path.name
+
+
+def _finalize_manifest_provenance(manifest_path: Path, blend_path: Path, output_dir: Path,
+                                  script_path: Path, blender: str, atlas_size: int,
+                                  bake_samples: int, flat_bake: bool, result):
+    """Add host-owned provenance after a successful isolated Blender run."""
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    provenance = manifest.setdefault("provenance", {})
+    source = provenance.setdefault("source", {})
+    source["blend"] = _file_record(blend_path, blend_path.name)
+    provenance["pipelineVersion"] = PIPELINE_VERSION
+    provenance["pipelineScript"] = _file_record(script_path, script_path.name)
+    provenance["options"] = {
+        "atlasSize": atlas_size,
+        "bakeSamples": bake_samples,
+        "flatBake": bool(flat_bake),
+        "device": "CPU",
+    }
+    tool = provenance.setdefault("tool", {})
+    tool["blenderExecutable"] = Path(blender).name
+    tool.setdefault("blenderVersion", None)
+    provenance["warningEvidence"] = _warning_evidence(result)
+    bake_provenance = provenance.get("bake")
+    if isinstance(bake_provenance, dict):
+        bake_provenance["warningEvidence"] = provenance["warningEvidence"]
+
+    outputs = []
+    for name in ("environment.obj", "environment.mtl", "environment.png", "collision.obj"):
+        record = _file_record(output_dir / name)
+        if record:
+            outputs.append(record)
+    provenance["outputs"] = outputs
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return manifest
+
+
+def _material_base_color(material):
+    """Read a constant Principled base colour when one is actually authored."""
+    if not material or not getattr(material, "use_nodes", False):
+        return None
+    nodes = material.node_tree.nodes
+    bsdf = nodes.get("Principled BSDF")
+    if not bsdf or not bsdf.inputs.get("Base Color"):
+        return None
+    socket = bsdf.inputs["Base Color"]
+    if socket.is_linked:
+        return None
+    value = socket.default_value
+    return [round(float(value[index]), 4) for index in range(3)]
+
+
+def _bake_appearance_metrics(image, source_objects):
+    """Measure the bake result, keeping appearance evidence separate from mesh stats."""
+    pixels = list(image.pixels)
+    pixel_count = len(pixels) // 4
+    non_black = 0
+    channel_min = [1.0, 1.0, 1.0]
+    channel_max = [0.0, 0.0, 0.0]
+    channel_sum = [0.0, 0.0, 0.0]
+    bins = set()
+    for offset in range(0, len(pixels), 4):
+        rgb = pixels[offset:offset + 3]
+        if max(rgb) > 0.02:
+            non_black += 1
+        for index, value in enumerate(rgb):
+            channel_min[index] = min(channel_min[index], float(value))
+            channel_max[index] = max(channel_max[index], float(value))
+            channel_sum[index] += float(value)
+        if max(rgb) > 0.02:
+            bins.add(tuple(max(0, min(7, int(value * 8))) for value in rgb))
+
+    source_colors = []
+    source_materials = set()
+    for obj in source_objects:
+        for material in getattr(getattr(obj, "data", None), "materials", []):
+            if material:
+                source_materials.add(material.name)
+                color = _material_base_color(material)
+                if color and color not in source_colors:
+                    source_colors.append(color)
+
+    palette_coverage = []
+    for color in source_colors:
+        dominant = max(range(3), key=lambda index: color[index])
+        saturation = max(color) - min(color)
+        if saturation < 0.2:
+            continue
+        matching_pixels = 0
+        for offset in range(0, len(pixels), 4):
+            rgb = pixels[offset:offset + 3]
+            other_channels = [rgb[index] for index in range(3) if index != dominant]
+            if rgb[dominant] - max(other_channels) > 0.04:
+                matching_pixels += 1
+        palette_coverage.append({
+            "sourceColor": color,
+            "dominantChannel": ["red", "green", "blue"][dominant],
+            "matchedPixelCount": matching_pixels,
+            "matched": matching_pixels > 0,
+        })
+
+    mean = [round(total / pixel_count, 6) if pixel_count else 0.0 for total in channel_sum]
+    ranges = [round(channel_max[i] - channel_min[i], 6) for i in range(3)]
+    distinct_source_colors = len(source_colors)
+    transfer_proof = {
+        "sourceMaterialCount": len(source_materials),
+        "distinctSourceColorCount": distinct_source_colors,
+        "sourceBaseColors": source_colors,
+        "nonBlackFraction": round(non_black / pixel_count, 6) if pixel_count else 0.0,
+        "uniqueColorBinCount": len(bins),
+        "channelMean": mean,
+        "channelRange": ranges,
+        "paletteCoverage": palette_coverage,
+        "passed": bool(
+            non_black
+            and (distinct_source_colors < 2 or len(bins) >= 2)
+            and all(entry["matched"] for entry in palette_coverage)
+        ),
+    }
+    # Palette retention is a synthetic-fixture assertion, not a production rule.
+    # Lighting and occlusion can legitimately alter or hide source colours.
+    return transfer_proof
+
+
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
-                            bake_samples: int = 16, flat_bake: bool = False):
+                            bake_samples: int = 16, flat_bake: bool = False,
+                            bake_device: str = "CPU", batch_sources: bool = False):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -73,13 +240,15 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     scene = bpy.context.scene
 
-    # 1. Validate Collections
-    collections = {col.name: col for col in bpy.data.collections}
-    required = ["TH_RENDER", "TH_SOURCE", "TH_ANCHORS"]
-    for req in required:
-        if req not in collections:
-            raise RuntimeError(f"V0 contract violation: missing required collection '{req}'")
+    # Validate the same contract exposed to CLI and future authoring UI before
+    # changing visibility, materials or mesh data in this temporary process.
+    import scene_contract
+    preflight = scene_contract.inspect_snapshot(scene_contract._snapshot_from_blender())
+    if not preflight["ok"]:
+        raise RuntimeError("Scene preflight failed: " + json.dumps(preflight["diagnostics"]))
 
+    # 1. Resolve validated collections
+    collections = {col.name: col for col in bpy.data.collections}
     col_render = collections["TH_RENDER"]
     col_source = collections["TH_SOURCE"]
     col_anchors = collections["TH_ANCHORS"]
@@ -89,8 +258,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     col_camera = collections.get("TH_CAMERA_PREVIEW")
 
     render_mesh_objects = [obj for obj in col_render.all_objects if obj and obj.type == 'MESH']
-    if not render_mesh_objects:
-        raise RuntimeError("TH_RENDER contains no mesh objects")
+    source_objects = [obj for obj in col_source.all_objects if obj]
 
     # 2. Exclude preview and non-render collections from bake
     for col in (col_preview_actors, col_preview_only, col_collision, col_anchors, col_camera):
@@ -158,6 +326,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     nodes = mat.node_tree.nodes
     links = mat.node_tree.links
     bsdf = nodes.get("Principled BSDF")
+    target_image_was_linked = bool(
+        bsdf and bsdf.inputs.get("Base Color") and bsdf.inputs["Base Color"].is_linked
+    )
     if bsdf and bsdf.inputs.get("Base Color") and bsdf.inputs["Base Color"].links:
         for link in list(bsdf.inputs["Base Color"].links):
             links.remove(link)
@@ -175,10 +346,19 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
     scene.render.engine = 'CYCLES'
-    try:
+    if bake_device == "CPU":
         scene.cycles.device = 'CPU'
-    except Exception:
-        pass
+    else:
+        preferences = bpy.context.preferences.addons['cycles'].preferences
+        preferences.compute_device_type = bake_device
+        preferences.get_devices()
+        selected = [device for device in preferences.devices if device.type == bake_device]
+        if not selected:
+            raise RuntimeError("requested bake device unavailable: " + bake_device)
+        for device in preferences.devices:
+            device.use = device in selected
+        scene.cycles.device = 'GPU'
+    print("[pipeline] bake device: " + bake_device, flush=True)
     if flat_bake:
         scene.cycles.samples = 1
         scene.cycles.max_bounces = 0
@@ -206,19 +386,90 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # completely, for one texel per island boundary.
     scene.render.bake.margin = 1 if flat_bake else 4
 
+    # Batch coordinate-independent materials in temporary evaluated copies.
+    # Cycles otherwise repeats selected-to-active setup for every shutter slat.
+    # Object/Generated coordinates and Object Info must retain their objects.
+    def batch_safe(obj):
+        for material in obj.data.materials:
+            if not material or not material.use_nodes:
+                continue
+            for node in material.node_tree.nodes:
+                # Alpha cards require independent projection; joining stacked
+                # cutouts changes which surface a selected-to-active ray hits.
+                if 'Alpha' in node.inputs and (node.inputs['Alpha'].is_linked or node.inputs['Alpha'].default_value < 1):
+                    return False
+                if node.type in {'BSDF_TRANSPARENT', 'BSDF_GLASS'}:
+                    return False
+                if node.type in {'GROUP', 'OBJECT_INFO', 'UVMAP'}:
+                    return False
+                if node.type == 'TEX_COORD' and any(
+                        socket.is_linked and socket.name != 'UV'
+                        for socket in node.outputs):
+                    return False
+                # An unconnected Image Texture uses UV; procedural textures
+                # use Generated coordinates, whose bounds change when joined.
+                if node.type.startswith('TEX_') and node.type != 'TEX_IMAGE' and 'Vector' in node.inputs and not node.inputs['Vector'].is_linked:
+                    return False
+        return True
+
+    bake_sources = [o for o in col_source.all_objects
+                    if o.type in {'MESH', 'CURVE', 'SURFACE'}]
+    batch_originals = [o for o in bake_sources if o.type == 'MESH' and batch_safe(o)]
+    temporary_batch = None
+    if batch_sources and len(batch_originals) > 1:
+        bpy.ops.object.select_all(action='DESELECT')
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        copies = []
+        for original in batch_originals:
+            mesh = bpy.data.meshes.new_from_object(original.evaluated_get(depsgraph),
+                                                   preserve_all_data_layers=True, depsgraph=depsgraph)
+            # Implicit UV inputs follow the active render layer. Different
+            # source layer names must not become separate, empty layers on join.
+            active_uv = next((uv for uv in mesh.uv_layers if uv.active_render), mesh.uv_layers.active)
+            for uv in list(mesh.uv_layers):
+                if uv != active_uv:
+                    mesh.uv_layers.remove(uv)
+            if active_uv:
+                active_uv.name = 'TH_BAKE_SOURCE_UV'
+            copy = bpy.data.objects.new('TH_TEMP_BAKE_SOURCE', mesh)
+            scene.collection.objects.link(copy)
+            copy.matrix_world = original.matrix_world.copy()
+            copy.select_set(True)
+            copies.append(copy)
+        scene.view_layers[0].objects.active = copies[0]
+        bpy.ops.object.join()
+        temporary_batch = copies[0]
+        for original in batch_originals:
+            original.hide_render = True
+        bake_sources = [o for o in bake_sources if o not in batch_originals] + [temporary_batch]
+        print(f'[pipeline] Batched {len(batch_originals)} coordinate-independent sources; {len(bake_sources)} bake objects', flush=True)
+
     # Select all source objects as Selected, target_obj as Active.
     # target_obj must NOT be in the selected set during selected-to-active bake,
     # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
     # and circular dependency warnings (#1023).
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.all_objects:
+    for obj in bake_sources:
         if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
             obj.select_set(True)
     target_obj.select_set(False)
     scene.view_layers[0].objects.active = target_obj
+    target_selected_during_bake = target_obj.select_get()
+    pre_bake_pixels = list(bake_image.pixels)
+    pre_bake_non_black = sum(
+        1 for offset in range(0, len(pre_bake_pixels), 4)
+        if max(pre_bake_pixels[offset:offset + 3]) > 0.02
+    )
 
-    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...", flush=True)
     bpy.ops.object.bake(type='COMBINED')
+
+    if temporary_batch:
+        bpy.data.objects.remove(temporary_batch, do_unlink=True)
+        for original in batch_originals:
+            original.hide_render = False
+
+    appearance = _bake_appearance_metrics(bake_image, source_objects)
 
     # Connect baked texture to BSDF Base Color for material export and display
     if bsdf:
@@ -346,6 +597,16 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     package_size = png_size + obj_size + mtl_size + col_size
 
+    known_dependencies = []
+    for image in bpy.data.images:
+        if image == bake_image or not image.filepath or image.packed_file:
+            continue
+        dependency = Path(bpy.path.abspath(image.filepath))
+        record = _file_record(dependency, _display_dependency_path(dependency, blend_path))
+        if record:
+            record["name"] = image.name
+            known_dependencies.append(record)
+
     manifest = {
         "contractVersion": 1,
         "environmentId": blend_path.stem,
@@ -365,9 +626,47 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "packageSizeBytes": package_size,
         },
         "anchors": anchors,
+        "preflight": preflight,
         "provenance": {
             "generator": "town_environment_pipeline.py",
+            "pipelineVersion": PIPELINE_VERSION,
             "sourceBlend": str(blend_path.name),
+            "source": {
+                "blend": _file_record(blend_path, blend_path.name),
+                "dependencies": known_dependencies,
+            },
+            "tool": {
+                "blenderVersion": getattr(bpy.app, "version_string", None),
+                "blenderExecutable": None,
+                "pipelineScript": _file_record(Path(__file__).resolve(), Path(__file__).name),
+            },
+            "options": {
+                "atlasSize": atlas_size,
+                "bakeSamples": bake_samples,
+                "flatBake": bool(flat_bake),
+                "device": bake_device,
+            },
+            "bake": {
+                "receiver": {
+                    "targetObject": target_obj.name,
+                    "targetSelectedDuringBake": target_selected_during_bake,
+                    "targetImageLinkedDuringBake": target_image_was_linked,
+                    "preBakeNonBlackFraction": round(
+                        pre_bake_non_black / (len(pre_bake_pixels) // 4), 6
+                    ) if pre_bake_pixels else 0.0,
+                },
+                "appearance": appearance,
+                "warningEvidence": [],
+            },
+            "outputs": [
+                record for record in (
+                    _file_record(texture_path),
+                    _file_record(obj_path),
+                    _file_record(mtl_path),
+                    _file_record(output_dir / "collision.obj"),
+                ) if record
+            ],
+            "warningEvidence": [],
         }
     }
 
@@ -377,13 +676,29 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512,
+                               bake_samples: int = 16, flat_bake: bool = False):
+    """Build a candidate package and promote it only after the bake succeeds.
+
+    An existing output directory is deliberately not replaced. Callers that
+    need a new candidate must choose a new path; promotion into shipping asset
+    locations remains an explicit owner action outside this exporter.
+    """
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
 
     if not blend_path.is_file():
         raise FileNotFoundError(f"Source blend file not found: {blend_path}")
+    if output_dir.exists():
+        raise FileExistsError(
+            f"Refusing to overwrite existing environment package: {output_dir}; "
+            "export to a new candidate directory"
+        )
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    candidate_dir = Path(tempfile.mkdtemp(
+        prefix=f".{output_dir.name}.candidate-", dir=str(output_dir.parent)
+    ))
 
     script_path = Path(__file__).resolve()
     temp_runner = tempfile.NamedTemporaryFile(prefix="run_env_pipe_", suffix=".py", delete=False, mode="w", encoding="utf-8")
@@ -392,19 +707,33 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(candidate_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples}, flat_bake={flat_bake})\n"
     )
     temp_runner.close()
 
     try:
-        cmd = [blender, "--background", str(blend_path), "--python", temp_runner.name]
+        cmd = [blender, "--background", "--factory-startup", str(blend_path), "--python-exit-code", "1", "--python", temp_runner.name]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
             print(res.stdout)
             print(res.stderr, file=sys.stderr)
             raise SystemExit(f"Pipeline execution failed in Blender (code {res.returncode})")
+        manifest_path = candidate_dir / "environment.json"
+        if not manifest_path.is_file():
+            print(res.stdout)
+            print(res.stderr, file=sys.stderr)
+            raise RuntimeError("Pipeline completed without environment.json")
+        _finalize_manifest_provenance(
+            manifest_path, blend_path, candidate_dir, script_path, blender,
+            atlas_size, bake_samples, flat_bake, res
+        )
+        candidate_dir.rename(output_dir)
         print(res.stdout)
         return res
+    except BaseException:
+        if candidate_dir.exists():
+            shutil.rmtree(candidate_dir, ignore_errors=True)
+        raise
     finally:
         if os.path.exists(temp_runner.name):
             os.unlink(temp_runner.name)

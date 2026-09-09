@@ -7,6 +7,8 @@ local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
 local lane = require("engine.bounded_lane")
+local interpreter = require("engine.interpreter")
+local director = require("engine.director")
 
 local passed, failed = 0, 0
 local function check(condition, message)
@@ -57,6 +59,39 @@ check(state.y <= state.maxY + 0.001, "movement clamps at the authored east bound
 for _ = 1, 400 do lane.move(game, -1) end
 check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound")
 
+-- The adopted Cortico model is the first long, runtime-mesh lane. Its camera
+-- must agree with the Blender side-view fixture and follow the actor at both
+-- ends; otherwise the world can pass anchor validation while the player and
+-- floor are outside the rendered window.
+local CORTICO = 26
+exploration.loadMap(game, loader.getMapIndex(CORTICO))
+local cortico = game.townTraversal
+local corticoManifest = cortico.environment.manifest
+check(corticoManifest.preRendered == nil,
+    "Cortico uses the runtime mesh path, not a preRendered plate")
+check(corticoManifest.provenance.runtimeAdapter.mode == "lane_mirror",
+    "Cortico records the explicit lane mirror adapter")
+check(corticoManifest.floorMesh == "floor.obj",
+    "Cortico publishes a separate tiled floor mesh")
+check(math.abs(cortico.camera.pitchDegrees + 17.5) < 0.000001,
+    "Cortico preserves the canonical -17.5 degree map pitch")
+check(math.abs(cortico.camera.target.z - 2.2604) < 0.0001,
+    "Cortico camera uses the authored optical target height")
+check(math.abs(cortico.camera.eyeHeight + 1.4583333333) < 0.0001,
+    "Cortico camera uses the authored optical eye offset")
+check(math.abs(cortico.camera.projectionWindowOffsetY + 107.16301268) < 0.0001,
+    "Cortico camera uses the authored optical vertical shift")
+check(cortico.tracking.minOffsetX < 0 and cortico.tracking.maxOffsetX > 0,
+    "Cortico camera tracking follows the long lane")
+cortico.y = cortico.minY
+lane.update(game)
+check(cortico.camera.projectionWindowOffsetX > 0,
+    "Cortico west bound pans toward the actor")
+cortico.y = cortico.maxY
+lane.update(game)
+check(cortico.camera.projectionWindowOffsetX < 0,
+    "Cortico east bound pans toward the actor")
+
 -- Arrival anchors: entering a screen through a named door must land on that
 -- door, not on the destination's default spawn.
 -- The Praca is modelled geometry now, and its churchyard exit is a stair partway
@@ -98,6 +133,39 @@ local function findEvent(map, instanceId)
         if event.instanceId == instanceId then return event end
     end
     return nil
+end
+
+-- Both authored NPC interactions must be at their runtime anchors and compile
+-- through the same production interpreter/GraphWalker path as a real Up press.
+-- town-walk deliberately covers doorway transfers, not button-driven NPC
+-- interaction, so this is a separate focused proof rather than a metadata
+-- assertion.
+for _, npc in ipairs({
+    { instanceId = "st-maria-cortico-scholar", anchor = "npc_scholar" },
+    { instanceId = "st-maria-cortico-euler", anchor = "npc_euler" },
+}) do
+    local event = findEvent(loader.maps[loader.getMapIndex(CORTICO)], npc.instanceId)
+    local anchor = cortico.environment.anchors[npc.anchor]
+    check(event ~= nil and event.trigger == "interact",
+        npc.instanceId .. " is an interactable NPC")
+    check(anchor ~= nil and event ~= nil
+            and math.abs(event.worldPosition[1] - anchor.position[1]) < 0.001
+            and math.abs(event.worldPosition[2] - anchor.position[2]) < 0.001,
+        npc.instanceId .. " world position matches its environment anchor")
+    local graph = interpreter.runInteractive(event.commands, {
+        session = game, loader = loader, event = event,
+        eventTitle = event.name, recoverParty = function() end,
+    })
+    local walker = director.GraphWalker.new(game, graph)
+    local textNodes, steps = 0, 0
+    while walker:getCurrentNode() and steps < 200 do
+        local node = walker:getCurrentNode()
+        if node.type == "TEXT" then textNodes = textNodes + 1 end
+        walker:advance()
+        steps = steps + 1
+    end
+    check(textNodes > 0 and steps < 200,
+        npc.instanceId .. " interaction compiles and reaches dialogue")
 end
 
 for _, entry in ipairs(townMaps) do

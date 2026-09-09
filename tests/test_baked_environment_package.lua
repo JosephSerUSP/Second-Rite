@@ -32,6 +32,10 @@ local function readFile(relPath)
     return content
 end
 
+local function sha256(data)
+    return love.data.encode("string", "hex", love.data.hash("sha256", data))
+end
+
 function M.run()
     local packageDir = "exports/environments/town_slice_spike"
 
@@ -155,6 +159,61 @@ function M.run()
     check(aliciaPkg ~= nil, "loaded alicias_padaria_3d environment package")
     check(aliciaPkg.bakedLighting == true, "live-mesh alicias_padaria_3d defaults to bakedLighting == true")
 
+    -- 9. Separate world-unit floor mesh contract (#1068)
+    local corticoRoot = "assets/environments/st_maria_town/cortico_modelled"
+    local corticoFilesRoot = "projects/hichaukitoden-game/" .. corticoRoot
+    local corticoPkg = environment_package.load(corticoRoot .. "/environment.json")
+    local corticoManifest = json.decode(readFile(corticoFilesRoot .. "/environment.json"))
+    local floorProvenance = corticoPkg.manifest.provenance.floor
+    check(corticoPkg.floorMesh == corticoRoot .. "/floor.obj",
+        "Cortico resolves its separate floor mesh relative to the package")
+    check(corticoPkg.manifest.floorMesh == "floor.obj",
+        "Cortico manifest names floor.obj")
+    check(floorProvenance.sourceObject == "CORTICO_floor_grid",
+        "Cortico floor provenance names the source grid")
+    check(floorProvenance.gridSpacingWorld == 1,
+        "Cortico floor provenance records one-world-unit spacing")
+    check(floorProvenance.vertexCount == 1548 and floorProvenance.faceCount == 1470,
+        "Cortico floor provenance records the authored grid counts")
+    local floorModel = obj_model.parse(readFile(corticoFilesRoot .. "/floor.obj"), "cortico floor.obj")
+    check(floorModel.vertexCount > 0, "Cortico floor OBJ parses through the runtime loader")
+    for _, file in ipairs({ "floor.obj", "floor.mtl", "floor.png" }) do
+        check(sha256(readFile(corticoFilesRoot .. "/" .. file)) == floorProvenance.sha256[file],
+            "Cortico floor provenance hash matches " .. file)
+    end
+
+    -- 10. Reusable world-space distant-layer contract
+    local expectedBackgroundIds = {
+        centre = true, east = true, laundry_quad = true, sky = true, west = true,
+    }
+    check(#corticoManifest.backgroundLayers == 5,
+        "Cortico has scenery, laundry and bespoke sky world layers")
+    for _, backgroundLayer in ipairs(corticoManifest.backgroundLayers) do
+        check(expectedBackgroundIds[backgroundLayer.id] == true,
+            "distant layer has a stable west/centre/east semantic id")
+        expectedBackgroundIds[backgroundLayer.id] = nil
+        check(backgroundLayer.provenance.cameraSpace == false
+            and backgroundLayer.provenance.reactsToPitch == true,
+            "distant layer is depth-tested world space and reacts to pitch")
+        local backgroundModel = obj_model.parse(
+            readFile(corticoFilesRoot .. "/" .. backgroundLayer.renderMesh),
+            "cortico " .. backgroundLayer.id .. " background.obj")
+        check(backgroundModel.vertexCount == 6,
+            "distant layer card triangulates to two triangles")
+        local files = {
+            { name = backgroundLayer.renderMesh, key = "renderMesh" },
+            { name = backgroundLayer.materialLibrary, key = "materialLibrary" },
+            { name = "cortico_background_" .. backgroundLayer.id .. ".png", key = "texture" },
+        }
+        for _, file in ipairs(files) do
+            check(sha256(readFile(corticoFilesRoot .. "/" .. file.name))
+                == backgroundLayer.provenance.sha256[file.key],
+                "distant layer provenance hash matches " .. file.name)
+        end
+    end
+    check(next(expectedBackgroundIds) == nil,
+        "all five world-space layer ids are present")
+
     mockManifest.collisionMesh = nil
     mockManifest.bakedLighting = false
     mockJson = json.encode(mockManifest)
@@ -166,9 +225,52 @@ function M.run()
     local trueBakedPkg = environment_package.load("test/no_collision_env.json")
     check(trueBakedPkg.bakedLighting == true, "explicit bakedLighting: true is preserved")
 
+    mockManifest.floorMesh = "floor.obj"
+    mockManifest.provenance = nil
+    mockJson = json.encode(mockManifest)
+    local okMissingFloorProvenance = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okMissingFloorProvenance,
+        "floorMesh without provenance.floor fails loudly")
+
+    mockManifest.provenance = { floor = {
+        sourceObject = "CORTICO_floor_grid", gridSpacingWorld = 1,
+        texturePeriodWorld = 2, vertexCount = 1548, faceCount = 1470,
+        textureSource = "old_limestone/albedo.png",
+        sha256 = { ["floor.obj"] = string.rep("0", 64),
+            ["floor.mtl"] = string.rep("0", 64), ["floor.png"] = "bad" },
+    } }
+    mockJson = json.encode(mockManifest)
+    local okBadFloorHash = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okBadFloorHash,
+        "floorMesh with malformed provenance hash fails loudly")
+
+    mockManifest.floorMesh = nil
+    mockManifest.provenance = nil
+    mockManifest.bakedLighting = nil
+    mockJson = json.encode(mockManifest)
+
     love.filesystem.read = originalRead
 
-    -- 10. viewport_3d getFogConfig respects baked town environments (#1037)
+    mockManifest = json.decode(readFile(corticoFilesRoot .. "/environment.json"))
+    love.filesystem.read = function(p)
+        if p == "test/no_collision_env.json" then return json.encode(mockManifest) end
+        return originalRead(p)
+    end
+    mockManifest.backgroundLayers[1].provenance.cameraSpace = true
+    mockJson = json.encode(mockManifest)
+    local okCameraSpaceBackground = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okCameraSpaceBackground,
+        "camera-space background layers fail loudly")
+    mockManifest.backgroundLayers[1].provenance.cameraSpace = false
+    mockManifest.backgroundLayers[1].provenance.sha256.texture = "bad"
+    mockJson = json.encode(mockManifest)
+    local okBadBackgroundHash = pcall(environment_package.load, "test/no_collision_env.json")
+    check(not okBadBackgroundHash,
+        "background layers with malformed provenance hash fail loudly")
+    mockManifest.backgroundLayers = nil
+    mockJson = json.encode(mockManifest)
+
+    -- 11. viewport_3d getFogConfig respects baked town environments (#1037)
     local viewport_3d = require("presentation.viewport_3d")
     check(type(viewport_3d.getFogConfig) == "function", "viewport_3d.getFogConfig is exposed")
     check(type(viewport_3d.isLiveBakedTown) == "function", "viewport_3d.isLiveBakedTown is exposed")

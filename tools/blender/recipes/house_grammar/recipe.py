@@ -221,6 +221,68 @@ class BalconySpec:
 
 
 @dataclass(frozen=True)
+class VerandaSpec:
+    """A continuous covered gallery attached to one wing elevation.
+
+    This is deliberately one operation rather than a preset.  The owner
+    modeled a projecting entry canopy and the house bodies carry deep masonry
+    returns; a veranda composes those same materials into the missing
+    house-wide attached structure.  Its posts remain ordinary editable boxes,
+    so width, depth and rhythm are author controls rather than a baked mesh.
+    """
+
+    id: str
+    wing: str
+    elevation: str = "front"
+    lane_offset: float = 0.0
+    width: float = 3.0
+    depth: float = 1.2
+    height: float = 2.55
+    roof_rise: float = 0.24
+    roof_thickness: float = 0.14
+    slab: float = 0.16
+    support_count: int = 2
+    support_width: float = 0.14
+    support_semantic: str = "dark_wood"
+    roof_semantic: str = "roof_tile"
+
+    def __post_init__(self):
+        if not self.id or ":" in self.id:
+            raise GrammarError(
+                f"veranda id {self.id!r} must be non-empty and free of ':'")
+        if self.elevation not in ELEVATIONS:
+            raise GrammarError(
+                f"veranda {self.id}: elevation {self.elevation!r} is not one of "
+                f"{ELEVATIONS}")
+        for name in ("lane_offset", "width", "depth", "height", "roof_rise",
+                     "roof_thickness", "slab", "support_width"):
+            object.__setattr__(self, name, _number(
+                getattr(self, name), f"veranda {self.id}.{name}",
+                positive=name not in ("lane_offset",)))
+        try:
+            support_count = int(self.support_count)
+        except (OverflowError, TypeError, ValueError):
+            support_count = -1
+        if isinstance(self.support_count, bool) \
+                or support_count != self.support_count \
+                or support_count < 0:
+            raise GrammarError(
+                f"veranda {self.id}.support_count must be a non-negative integer, "
+                f"got {self.support_count!r}")
+        if self.height <= self.slab:
+            raise GrammarError(
+                f"veranda {self.id}: height {self.height} must exceed slab "
+                f"{self.slab}")
+        if self.roof_thickness >= self.height - self.slab:
+            raise GrammarError(
+                f"veranda {self.id}: roof_thickness must leave the roof above "
+                f"the slab")
+        object.__setattr__(self, "support_count", support_count)
+        _semantic(self.support_semantic, f"veranda {self.id}.support_semantic")
+        _semantic(self.roof_semantic, f"veranda {self.id}.roof_semantic")
+
+
+@dataclass(frozen=True)
 class Wing:
     """One rectangular footprint with its own vertical course stack.
 
@@ -387,6 +449,7 @@ class BuildingRecipe:
     wings: tuple
     roof: tuple
     openings: tuple = ()
+    attachments: tuple = ()
     # Axes about which the building is symmetric and the emitter should install
     # an editable Mirror instead of the grammar duplicating geometry.
     mirror_axes: tuple = ()
@@ -409,6 +472,7 @@ class BuildingRecipe:
         object.__setattr__(self, "wings", tuple(self.wings))
         object.__setattr__(self, "roof", tuple(self.roof))
         object.__setattr__(self, "openings", tuple(self.openings))
+        object.__setattr__(self, "attachments", tuple(self.attachments))
         object.__setattr__(self, "mirror_axes", tuple(self.mirror_axes))
         object.__setattr__(self, "baked_axes", tuple(self.baked_axes))
         object.__setattr__(self, "outline", _validate_outline(self.id, self.outline))
@@ -433,6 +497,19 @@ class BuildingRecipe:
                 raise GrammarError(
                     f"recipe {self.id}: opening {opening.id} names unknown wing "
                     f"{opening.wing!r}")
+        for attachment in self.attachments:
+            if not isinstance(attachment, VerandaSpec):
+                raise GrammarError(
+                    f"recipe {self.id}: attachments must be VerandaSpec instances")
+        attachment_ids = [attachment.id for attachment in self.attachments]
+        if len(set(attachment_ids)) != len(attachment_ids):
+            raise GrammarError(
+                f"recipe {self.id}: duplicate attachment ids {attachment_ids}")
+        for attachment in self.attachments:
+            if attachment.wing not in known:
+                raise GrammarError(
+                    f"recipe {self.id}: attachment {attachment.id} names unknown wing "
+                    f"{attachment.wing!r}")
         for axis in self.mirror_axes + self.baked_axes:
             if axis not in ("X", "Y", "Z"):
                 raise GrammarError(f"recipe {self.id}: unknown axis {axis!r}")
@@ -520,6 +597,19 @@ class BuildingRecipe:
                                "brackets": opening.balcony.brackets}
                               if opening.balcony is not None else None)}
                 for opening in self.openings],
+            "attachments": [
+                {"id": attachment.id, "wing": attachment.wing,
+                 "elevation": attachment.elevation,
+                 "laneOffset": attachment.lane_offset,
+                 "width": attachment.width, "depth": attachment.depth,
+                 "height": attachment.height, "roofRise": attachment.roof_rise,
+                 "roofThickness": attachment.roof_thickness,
+                 "slab": attachment.slab,
+                 "supportCount": attachment.support_count,
+                 "supportWidth": attachment.support_width,
+                 "supportSemantic": attachment.support_semantic,
+                 "roofSemantic": attachment.roof_semantic}
+                for attachment in self.attachments],
             "outline": [list(point) for point in self.outline],
             "mirrorAxes": list(self.mirror_axes),
             "bakedAxes": list(self.baked_axes),
@@ -531,7 +621,7 @@ class BuildingRecipe:
 def build(recipe):
     """The grammar: one recipe in, an ordered list of mesh records out.
 
-    Ordering is fixed -- body, roof, then openings in recipe order -- because a
+    Ordering is fixed -- body, roof, attachments, then openings in recipe order -- because a
     stable order is what makes the baseline diff readable when the owner has
     hand-edited one assembly out of nine.
     """
@@ -540,5 +630,8 @@ def build(recipe):
     records = [body.build_body(recipe)]
     if recipe.roof:
         records.append(roof.build_roof(recipe))
+    if recipe.attachments:
+        from . import attachments as attachments_module
+        records.extend(attachments_module.build_attachments(recipe))
     records.extend(openings_module.build_openings(recipe))
     return records

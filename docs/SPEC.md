@@ -240,6 +240,38 @@ the icon palette mirror (`presentation/ui.lua` and
 permission for additional copies. Future changes should migrate them to the
 shared/generated class or give the migration an explicit follow-up issue.
 
+### 1.1.3 Modelled-exterior floor contract
+
+A modelled exterior may author one dedicated walkable-floor source mesh with
+`sr_floor_mesh=true`. This mesh is separate from the facade/prop beauty-atlas
+UV allocation: it uses explicit positive world-unit grid spacing and texture
+period, preserves authored per-vertex heights in its runtime OBJ, and is
+referenced by the package manifest's `floorMesh` field. The manifest must also
+carry `provenance.floor` with the source object, spacing, texture dependency,
+vertex/face counts, and SHA-256 hashes for the floor OBJ, MTL, and texture; the
+runtime loader rejects malformed provenance. A source floor grid is not itself
+an export-role beauty surface. Visual height data does not imply elevation
+traversal: movement, collision, and arrival semantics remain the authority for
+walkability and must be extended together before a terrain becomes traversable.
+
+The same package may declare reusable `backgroundLayers` for distant,
+non-interactive scenery. Each layer is a depth-tested world-space OBJ/MTL
+asset, never a camera-space overlay; its provenance must state the source
+representation, `cameraSpace=false`, `reactsToPitch=true`, and hashes for the
+render mesh, material library, and texture. The renderer queues these layers
+through the normal placed-model path, so foreground architecture and actors
+occlude them by hardware depth. A background layer must not carry a duplicate
+floor bridge: the package's authoritative floor mesh remains the only walkable
+ground surface.
+
+The exterior exporter preserves the source world's lights by default. Its
+explicit `--lighting staged` mode is a diagnostic rig, not the authored look;
+`--bake-device` selects a supported Cycles device and fails if unavailable.
+Floor albedo comes from the packed image named by `sr_floor_texture_image`,
+with a finite RGB `sr_floor_tint` in [0,1] exported as material diffuse colour.
+A bespoke sky can use the same world-space background-layer contract, placing
+its authored texture behind the scenery while retaining the source light rig.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,

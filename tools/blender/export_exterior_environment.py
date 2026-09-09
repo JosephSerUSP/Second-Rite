@@ -14,7 +14,7 @@ exactly three ways, and each is a property of the subject rather than a choice:
 
     blender -b -noaudio --python tools/blender/export_exterior_environment.py --         --blend projects/.../st_maria_praca_modelled.blend         --output projects/.../environments/st_maria_town/praca_3d
 
-## Known incomplete: the atlas packs to 9%
+## Export contract
 
 Geometry is exact -- this reproduces the shipped package's 9,304 triangles
 exactly once the off-square duplicate is filtered. The ATLAS is not: it packs
@@ -28,27 +28,21 @@ move the mean from 0.8 to 2.5. Note that per #1023, the atlas transfer defect is
 driven by a circular image dependency on the bake receiver rather than island
 margin. Do not tune the lights to chase brightness until the bake graph is resolved.
 
-## Not yet generic, and not yet mirrored
-
-The render-mesh rebuild hardcodes the ``st_maria_praca`` names, and ``--span`` now bounds which
-geometry counts as this street.
-
-More importantly this does NOT apply the engine-space conversion that
-``export_room_environment.py`` documents at length: no ``engine_y = centre -
-blender_y`` mirror, and anchors keep the Blender lane x rather than moving to
-the action plane. The shipped Praca package shows the consequence -- its
-``spawn_player`` is ``[7.8, 11.85, 0]`` where an interior package's is
-``[0.0, 6.1333, 0]``. Whether the exterior needs the same reflection is an open
-question (#935), and guessing a mirror centre is silently wrong when mistaken,
-so the behaviour is preserved exactly as PR #998 had it and the question is
-left visible rather than answered here.
+Source membership and the lane adapter are explicit scene properties. A source
+mesh is renderable only when it carries ``sr_export=True``; ground allocation
+uses ``sr_ground=True``. The scene may set ``sr_runtime_y_mode`` to
+``lane_mirror`` and ``sr_lane_center_y`` to export Blender's authored screen
+space into the engine lane space. This is opt-in and cannot silently
+reinterpret an older scene.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import shutil
 import sys
 from pathlib import Path
 
@@ -62,8 +56,17 @@ import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
 
 
-GROUND_NAMES = {"ARCH_square_ground", "ARCH_low_curb"}
 GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
+RUNTIME_Y_MODE = "sr_runtime_y_mode"
+LANE_CENTER = "sr_lane_center_y"
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _areas(mesh, tag_index):
@@ -149,16 +152,25 @@ def cull_enclosed(target, samples, escape_ratio):
                 if votes >= needed:
                     break
         if votes >= needed:
-            doomed.append(poly)
+            doomed.append(poly.index)
     if not doomed:
         return 0
-    for poly in mesh.polygons:
-        poly.select = False
-    for poly in doomed:
-        poly.select = True
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.delete(type="FACE")
-    bpy.ops.object.mode_set(mode="OBJECT")
+    if len(doomed) >= len(mesh.polygons):
+        # A headless Blender/BVH context can classify every joined face as
+        # enclosed after an authored detail pass. Deleting the entire render
+        # mesh is never a valid export, so keep the source geometry and report
+        # the conservative decision to the caller.
+        print("[exterior] parity cull would remove the entire render mesh; keeping faces",
+              flush=True)
+        return 0
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    doomed_faces = [face for face in bm.faces if face.index in set(doomed)]
+    bmesh.ops.delete(bm, geom=doomed_faces, context="FACES")
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.update()
     return len(doomed)
 
 
@@ -235,24 +247,329 @@ def reallocate_ground(target, ground_share):
           flush=True)
 
 
-def in_square(obj, span, margin):
-    """Is this object part of the authored square, or parked outside it?
-
-    A town source accumulates spare copies. `st_maria_praca_modelled.blend`
-    carries a full duplicate of the chapel keeper's home at lane y -20..-17,
-    roughly 40 metres off the square, and the name filter alone cannot tell it
-    from the real one -- Blender's `.001` suffix is not a contract. Baking it
-    added 1,992 triangles and a second building floating beside the terrace.
-
-    So membership is name AND place: the lane runs 0..span, and anything whose
-    centre falls outside that by more than `margin` is not this street.
-    """
+def _runtime_y(obj, scene):
+    """Map authored Blender Y to the explicitly declared runtime lane."""
     centre = sum((obj.matrix_world @ Vector(corner) for corner in obj.bound_box),
                  Vector()) / 8.0
-    return -margin <= centre.y <= span + margin
+    mode = scene.get(RUNTIME_Y_MODE, "direct")
+    if mode == "direct":
+        return centre.y
+    if mode == "lane_mirror":
+        if LANE_CENTER not in scene:
+            raise RuntimeError("lane_mirror export requires sr_lane_center_y")
+        return float(scene[LANE_CENTER]) - centre.y
+    raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
 
 
-def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -> None:
+def in_lane(obj, min_y, max_y, margin, scene):
+    """Is this explicitly exported object inside the authored lane?"""
+    runtime_y = _runtime_y(obj, scene)
+    return min_y - margin <= runtime_y <= max_y + margin
+
+
+def runtime_bounds(bounds, scene):
+    """Transform Blender bounds into the coordinates consumed by the engine."""
+    min_x, min_y, min_z, max_x, max_y, max_z = bounds
+    mode = scene.get(RUNTIME_Y_MODE, "direct")
+    if mode == "direct":
+        return [min_x, min_y, min_z, max_x, max_y, max_z]
+    if mode == "lane_mirror":
+        centre = float(scene[LANE_CENTER])
+        return [min_x, centre - max_y, min_z, max_x, centre - min_y, max_z]
+    raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
+
+
+def configure_ground_tag(tag, source_material):
+    """Preserve the authored ground appearance on the allocation tag.
+
+    Ground faces temporarily use a semantic tag so the atlas allocator can
+    identify them after the source meshes are joined.  The tag is still a
+    real bake material, however: an empty material makes Cycles bake those
+    faces black.  Copy the source Principled surface values into the tag
+    before baking; the tag remains a semantic classifier without becoming an
+    appearance override.
+    """
+    tag.use_nodes = True
+    nodes = tag.node_tree.nodes
+    links = tag.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
+    source_bsdf = None
+    if source_material and source_material.use_nodes:
+        source_bsdf = source_material.node_tree.nodes.get("Principled BSDF")
+    if source_bsdf:
+        for name in ("Base Color", "Roughness", "Metallic", "IOR",
+                     "Specular IOR Level", "Emission Color",
+                     "Emission Strength"):
+            src = source_bsdf.inputs.get(name)
+            dst = bsdf.inputs.get(name)
+            if src is not None and dst is not None and not src.is_linked:
+                try:
+                    dst.default_value = src.default_value
+                except (TypeError, ValueError):
+                    pass
+    elif source_material:
+        bsdf.inputs["Base Color"].default_value = source_material.diffuse_color
+    tag.diffuse_color = (source_material.diffuse_color
+                         if source_material else (0.5, 0.5, 0.5, 1.0))
+
+
+def mirror_obj_file(path, centre):
+    """Reflect the OBJ lane axis while preserving outward normals."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    out, flipped = [], 0
+    for line in lines:
+        if line.startswith("v "):
+            parts = line.split()
+            # Blender OBJ export is x, z, -y; the lane is the third component.
+            parts[3] = f"{-float(parts[3]) - centre:.6f}"
+            out.append(" ".join(parts))
+        elif line.startswith("vn "):
+            parts = line.split()
+            parts[3] = f"{-float(parts[3]):.6f}"
+            out.append(" ".join(parts))
+        elif line.startswith("f "):
+            parts = line.split()
+            out.append(" ".join([parts[0]] + list(reversed(parts[1:]))))
+            flipped += 1
+        else:
+            out.append(line)
+    path.write_text("\n".join(out) + "\n", encoding="utf-8")
+    return flipped
+
+
+def export_floor_mesh(output, scene):
+    """Export the authored walkable grid as an independently textured mesh.
+
+    The beauty atlas is for facades, roofs, foliage and props. A broad floor
+    plane consumes most of that UV space and its glancing-angle bake is not a
+    stable runtime surface. The adopted blend therefore carries a separate
+    ``sr_floor_mesh`` grid. Export its actual faces and vertex heights rather
+    than replacing it with a giant quad: future terrain edits remain visible
+    at the same world-unit resolution in the runtime package.
+    """
+    source = bpy.data.collections.get("TH_SOURCE")
+    grounds = [obj for obj in (source.all_objects if source else bpy.data.objects)
+               if obj.type == "MESH" and bool(obj.get("sr_floor_mesh", False))]
+    if len(grounds) != 1:
+        raise RuntimeError("floor export requires exactly one sr_floor_mesh object")
+    terrain = grounds[0]
+    spacing = float(terrain.get("sr_floor_grid_spacing", 0.0))
+    if spacing <= 0.0:
+        raise RuntimeError("sr_floor_mesh requires positive sr_floor_grid_spacing")
+    texture_period = float(terrain.get("sr_floor_texture_period", 2.0))
+    if texture_period <= 0.0:
+        raise RuntimeError("sr_floor_mesh requires positive sr_floor_texture_period")
+    terrain.data.update()
+    world_matrix = terrain.matrix_world
+    normal_matrix = world_matrix.to_3x3().inverted().transposed()
+    points = [world_matrix @ vertex.co for vertex in terrain.data.vertices]
+    if not points or not terrain.data.polygons:
+        raise RuntimeError("sr_floor_mesh must contain vertices and faces")
+    min_x = min(point.x for point in points)
+    max_x = max(point.x for point in points)
+    min_y = min(point.y for point in points)
+    max_y = max(point.y for point in points)
+    mode = scene.get(RUNTIME_Y_MODE, "direct")
+    if mode == "lane_mirror":
+        centre = float(scene[LANE_CENTER])
+        runtime_min_y, runtime_max_y = centre - max_y, centre - min_y
+    elif mode == "direct":
+        runtime_min_y, runtime_max_y = min_y, max_y
+    else:
+        raise RuntimeError("unsupported sr_runtime_y_mode %r" % mode)
+
+    # The OBJ reader consumes (x, -z, y) and converts it to runtime (x, y, z).
+    # Keep the source vertex heights, with a tiny clearance over the beauty
+    # mesh so the independent floor cannot z-fight with the baked ground.
+    clearance = 0.006
+    vertices = []
+    for point in points:
+        runtime_y = centre - point.y if mode == "lane_mirror" else point.y
+        vertices.append((point.x, point.z + clearance, -runtime_y))
+    uvs = []
+    for point in points:
+        runtime_y = centre - point.y if mode == "lane_mirror" else point.y
+        uvs.append(((point.x - min_x) / texture_period,
+                    (runtime_y - runtime_min_y) / texture_period))
+
+    normals = []
+    faces = []
+    for poly in terrain.data.polygons:
+        normal = (normal_matrix @ poly.normal).normalized()
+        if mode == "lane_mirror":
+            normal = Vector((normal.x, -normal.y, normal.z))
+        normals.append((normal.x, normal.z, -normal.y))
+        indices = list(poly.vertices)
+        if mode == "lane_mirror":
+            indices.reverse()
+        faces.append((indices, len(normals)))
+
+    obj_lines = ["# Cortico world-unit floor grid; generated from the adopted blend",
+                 "mtllib floor.mtl", "usemtl CorticoFloor"]
+    obj_lines.extend("v %.6f %.6f %.6f" % vertex for vertex in vertices)
+    obj_lines.extend("vt %.6f %.6f" % uv for uv in uvs)
+    obj_lines.extend("vn %.6f %.6f %.6f" % normal for normal in normals)
+    for indices, normal_index in faces:
+        obj_lines.append("f " + " ".join(
+            "%d/%d/%d" % (index + 1, index + 1, normal_index)
+            for index in indices))
+    (output / "floor.obj").write_text("\n".join(obj_lines) + "\n",
+                                      encoding="utf-8")
+    tint = tuple(float(v) for v in terrain.get("sr_floor_tint", ()))
+    if len(tint) != 3 or any(not math.isfinite(v) or v < 0 or v > 1 for v in tint):
+        raise RuntimeError("sr_floor_tint requires three finite values in [0,1]")
+    (output / "floor.mtl").write_text(
+        "newmtl CorticoFloor\n"
+        "Ka 1.000 1.000 1.000\n"
+        "Kd %.6f %.6f %.6f\nmap_Kd floor.png\n" % tint, encoding="utf-8")
+    image_name = str(terrain.get("sr_floor_texture_image", ""))
+    floor_image = bpy.data.images.get(image_name)
+    if floor_image is None:
+        raise RuntimeError("floor requires a source-bound sr_floor_texture_image")
+    floor_image.save(filepath=str(output / "floor.png"))
+    floor_files = {name: output / name for name in ("floor.obj", "floor.mtl", "floor.png")}
+    return {
+        "mesh": "floor.obj", "material": "floor.mtl", "texture": "floor.png",
+        "sourceObject": terrain.name,
+        "gridSpacingWorld": spacing,
+        "texturePeriodWorld": texture_period,
+        "tint": list(tint),
+        "vertexCount": len(vertices), "faceCount": len(faces),
+        "bounds": [round(min_x, 4), round(runtime_min_y, 4),
+                   round(min(point.z for point in points) + clearance, 4),
+                   round(max_x, 4), round(runtime_max_y, 4),
+                   round(max(point.z for point in points) + clearance, 4)],
+        "textureSource": "blend-image:" + floor_image.name,
+        "textureSourceSha256": sha256_file(output / "floor.png"),
+        "sha256": {name: sha256_file(path) for name, path in floor_files.items()},
+    }
+
+
+def _background_texture(obj):
+    """Resolve the packed image bound to a source background material."""
+    for slot in obj.material_slots:
+        material = slot.material
+        if not material or not material.use_nodes:
+            continue
+        for node in material.node_tree.nodes:
+            if node.type == "TEX_IMAGE" and node.image is not None:
+                return node.image
+    raise RuntimeError("background layer %s has no image texture binding" % obj.name)
+
+
+def export_background_layers(output, scene):
+    """Export source-owned pitched cards as independent runtime layers.
+
+    These objects are deliberately outside ``TH_SOURCE`` and therefore never
+    enter the beauty atlas. Their geometry is nevertheless authoritative: the
+    exporter transforms the adopted Blender lane-mirror coordinates into the
+    same engine OBJ convention used by the floor exporter, and writes the
+    material texture from the image packed in the source blend.
+    """
+    layers = sorted(
+        [obj for obj in bpy.data.objects
+         if obj.type == "MESH" and bool(obj.get("sr_background_layer", False))],
+        key=lambda obj: str(obj.get("sr_background_layer_id", obj.name)),
+    )
+    if not layers:
+        return []
+    if scene.get(RUNTIME_Y_MODE, "direct") != "lane_mirror":
+        raise RuntimeError("background layer export requires lane_mirror runtime Y")
+    centre = float(scene[LANE_CENTER])
+    result = []
+    for obj in layers:
+        layer_id = str(obj.get("sr_background_layer_id", ""))
+        if not layer_id or not layer_id.replace("_", "").isalnum():
+            raise RuntimeError("background layer id must be stable: %s" % obj.name)
+        if bool(obj.get("sr_camera_space", True)):
+            raise RuntimeError("background layer %s must be world-space" % obj.name)
+        if not bool(obj.get("sr_reacts_to_pitch", False)):
+            raise RuntimeError("background layer %s must react to pitch" % obj.name)
+        image = _background_texture(obj)
+        texture_name = "cortico_background_%s.png" % layer_id
+        texture_path = output / texture_name
+        # ``save_render`` deliberately bakes through the scene and flattens
+        # packed alpha to opaque pixels. Image-authored quads such as the
+        # laundry card need their source alpha preserved for the runtime
+        # world shader's discard path; opaque rendered plates keep the
+        # scene-aware save path.
+        if int(getattr(image, "channels", 3)) == 4:
+            image.save(filepath=str(texture_path))
+        else:
+            image.save_render(filepath=str(texture_path), scene=scene)
+        mesh = obj.data
+        mesh.update()
+        world = obj.matrix_world
+        vertices = []
+        uvs = []
+        faces = []
+        uv_layer = mesh.uv_layers.active
+        if uv_layer is None:
+            raise RuntimeError("background layer %s has no UV map" % obj.name)
+        for poly in mesh.polygons:
+            face = []
+            for loop_index in poly.loop_indices:
+                loop = mesh.loops[loop_index]
+                point = world @ mesh.vertices[loop.vertex_index].co
+                runtime_y = centre - point.y
+                # Runtime OBJ is x, z, -engineY, matching floor.obj.
+                vertices.append((point.x, point.z, -runtime_y))
+                uv = uv_layer.data[loop_index].uv
+                uvs.append((float(uv.x), float(uv.y)))
+                face.append(len(vertices))
+            if scene.get(RUNTIME_Y_MODE) == "lane_mirror":
+                face.reverse()
+            faces.append(face)
+        if not vertices or not faces:
+            raise RuntimeError("background layer %s has no faces" % obj.name)
+        stem = "background_%s" % layer_id
+        mesh_path = output / (stem + ".obj")
+        material_path = output / (stem + ".mtl")
+        lines = ["mtllib %s.mtl" % stem,
+                 "o %s" % obj.name,
+                 "# Source-owned world-space card; engine Y is lane-mirrored."]
+        lines.extend("v %.6f %.6f %.6f" % point for point in vertices)
+        lines.extend("vt %.6f %.6f" % uv for uv in uvs)
+        lines.append("usemtl CorticoBackgroundBillboard")
+        lines.extend("f " + " ".join("%d/%d" % (index, index)
+                                     for index in face) for face in faces)
+        mesh_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        material_path.write_text(
+            "# Source-owned packed background texture.\n"
+            "newmtl CorticoBackgroundBillboard\n"
+            "Ka 1.000 1.000 1.000\n"
+            "Kd 1.000 1.000 1.000\n"
+            "map_Kd %s\n" % texture_name,
+            encoding="utf-8")
+        points = [world @ vertex.co for vertex in mesh.vertices]
+        result.append({
+            "id": layer_id,
+            "renderMesh": mesh_path.name,
+            "materialLibrary": material_path.name,
+            "provenance": {
+                "sourceBlend": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_cortico.blend",
+                "sourceObject": obj.name,
+                "sourceRepresentation": str(obj.get("sr_source_representation")),
+                "cameraSpace": False,
+                "reactsToPitch": True,
+                "depthRangeX": [round(min(point.x for point in points), 4),
+                                round(max(point.x for point in points), 4)],
+                "floorBridge": False,
+                "sha256": {
+                    "renderMesh": sha256_file(mesh_path),
+                    "materialLibrary": sha256_file(material_path),
+                    "texture": sha256_file(texture_path),
+                },
+            },
+        })
+    return result
+
+
+def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
+                        lane_min=None, lane_max=None) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -280,16 +597,23 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
     skipped = []
     ground_tagged = []
     ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
+    scene = bpy.context.scene
+    lane_min = float(scene.get("sr_lane_min_y", 0.0) if lane_min is None else lane_min)
+    lane_max = float(scene.get("sr_lane_max_y", span) if lane_max is None else lane_max)
     source_objects = list(source.all_objects)
     for obj in source_objects:
         if obj.type != "MESH" or obj.hide_render:
             continue
-        if not (obj.name.startswith("STUDY_") or
-                obj.name in {"ARCH_square_ground", "ARCH_low_curb"} or
-                obj.name.startswith("FG_")):
+        if not bool(obj.get("sr_export", False)):
             continue
-        if not in_square(obj, span, margin):
-            print(f"[exterior] SKIPPING off-square {obj.name}", flush=True)
+        # Gameplay and near geometry remain bounded by the authored traversal
+        # lane. Explicit background-ranked scenery is different: the fixed
+        # town camera tracks by projection-window offset, so the west/east
+        # skyline needs authored depth beyond the walkable lane to appear in
+        # the actual open-end frusta.
+        is_background = obj.get("sr_depth_rank") == "BACKGROUND"
+        if not in_lane(obj, lane_min, lane_max, margin, scene) and not is_background:
+            print(f"[exterior] SKIPPING off-lane {obj.name}", flush=True)
             skipped.append(obj.name)
             continue
         print(f"[exterior] copying {obj.name}", flush=True)
@@ -300,7 +624,10 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         copy.hide_render = False
         render.objects.link(copy)
         copy.hide_set(False)
-        if obj.name in GROUND_NAMES:
+        if bool(obj.get("sr_ground", False)):
+            source_material = next((slot.material for slot in obj.material_slots
+                                    if slot.material), None)
+            configure_ground_tag(ground_tag, source_material)
             # Tag with a dedicated material slot. Object identity is lost in the
             # join, but material_index survives it, so this is how the allocator
             # finds the ground faces afterwards.
@@ -312,7 +639,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
     if not copies:
         raise RuntimeError("TH_SOURCE contains no renderable meshes")
     if skipped:
-        print(f"[exterior] skipped {len(skipped)} off-square objects: "
+        print(f"[exterior] skipped {len(skipped)} off-lane objects: "
               f"{', '.join(sorted(skipped))}", flush=True)
 
     bpy.ops.object.select_all(action="DESELECT")
@@ -329,7 +656,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
     target = bpy.context.view_layer.objects.active
     if target is None or target.type != "MESH":
         raise RuntimeError("render join produced no active mesh")
-    target.name = "st_maria_praca_TH_RENDER"
+    target.name = "st_maria_exterior_TH_RENDER"
     target.select_set(True)
     bpy.context.view_layer.objects.active = target
     bpy.ops.object.mode_set(mode="EDIT")
@@ -341,10 +668,42 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         culled = cull_enclosed(target, cull_samples, cull_escape)
         if culled:
             print(f"[exterior] culled {culled} sealed faces nothing can reach", flush=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    target.select_set(True)
+    bpy.context.view_layer.objects.active = target
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.0)
-    bpy.ops.object.mode_set(mode="OBJECT")
+    if not target.data.uv_layers:
+        bpy.ops.mesh.uv_texture_add()
+    try:
+        # Blender 5.1's headless poll can lose the EDIT_MESH context after the
+        # parity face deletion above. Reassert the override so the canonical
+        # operator remains the first path.
+        with bpy.context.temp_override(active_object=target, object=target):
+            bpy.ops.uv.smart_project(angle_limit=math.radians(66.0),
+                                     island_margin=0.0)
+    except RuntimeError as error:
+        # A background export must still be reproducible when Blender refuses
+        # the UV operator poll. The source meshes already carry semantic
+        # materials; this deterministic world projection is a loud, bounded
+        # fallback rather than silently omitting the render package.
+        print(f"[exterior] smart_project unavailable; using deterministic UV fallback: {error}",
+              flush=True)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        mesh = target.data
+        points = [target.matrix_world @ vertex.co for vertex in mesh.vertices]
+        min_x, max_x = min(point.x for point in points), max(point.x for point in points)
+        min_y, max_y = min(point.y for point in points), max(point.y for point in points)
+        span_x = max(max_x - min_x, 1e-6)
+        span_y = max(max_y - min_y, 1e-6)
+        uv = mesh.uv_layers.active
+        for loop in mesh.loops:
+            point = target.matrix_world @ mesh.vertices[loop.vertex_index].co
+            uv.data[loop.index].uv = ((point.x - min_x) / span_x,
+                                      (point.y - min_y) / span_y)
+        bpy.context.view_layer.objects.active = target
+    if target.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
     if ground_tagged:
         reallocate_ground(target, ground_share)
     target.data.calc_loop_triangles()
@@ -352,7 +711,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         raise RuntimeError(
             f"render join is implausibly small: {len(target.data.loop_triangles)} triangles")
     print(f"[exterior] joined {len(copies)} source meshes into "
-          f"{len(target.data.loop_triangles)} runtime triangles")
+          f"{len(target.data.loop_triangles)} runtime triangles", flush=True)
 
 
 def main() -> None:
@@ -362,6 +721,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--span", type=float, default=23.699,
                         help="lane length; geometry beyond it is not this street")
+    parser.add_argument("--bake-device", choices=("CPU", "CUDA", "OPTIX", "HIP", "METAL", "ONEAPI"), default="CPU")
+    parser.add_argument("--lighting", choices=("source", "staged"), default="source",
+                        help="Preserve authored scene lighting; staged is an explicit diagnostic rig")
     parser.add_argument("--ambient", type=float, default=0.35,
                         help="world fill strength for the bake")
     parser.add_argument("--sun", type=float, default=2.5,
@@ -395,21 +757,59 @@ def main() -> None:
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape)
 
-    # Same reason export_room_environment.py stages lighting before baking: a
-    # Cycles bake that just opens the file is lit by whatever the .blend last
-    # saved, and this one saves a near-black world (0.0, 0.092, 0.119) with a
-    # single sun at energy 3. Baked as-is the atlas comes out at mean RGB
-    # 0.8/0.9/0.7 against the shipped package's 30.0/27.6/23.9 -- a cave. The
-    # interior uses an even fill because a room is lit by what it contains; a
-    # street gets the fill AND the hard key, which is what outdoor_sun is for.
-    stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
-    stager.outdoor_sun(args.sun)
+    # Authored lighting is part of the adopted source, just like geometry.
+    # A diagnostic rig is explicit and never silently replaces the artist's sky.
+    if args.lighting == "staged":
+        stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
+        stager.outdoor_sun(args.sun)
 
     output = args.output.resolve()
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     flat_bake=True)
+                                     flat_bake=(args.lighting == "staged"),
+                                     bake_device=args.bake_device,
+                                     batch_sources=True)
+    scene = bpy.context.scene
+    floor_report = export_floor_mesh(output, scene)
+    background_layers = export_background_layers(output, scene)
+    source_visual_adjustment = scene.get("sr_visual_adjustment_cortico")
+    if source_visual_adjustment:
+        floor_report["sourceVisualAdjustment"] = str(source_visual_adjustment)
+    if scene.get(RUNTIME_Y_MODE, "direct") == "lane_mirror":
+        centre = float(scene[LANE_CENTER])
+        obj_path = output / "environment.obj"
+        flipped = mirror_obj_file(obj_path, centre)
+        manifest_path = output / "environment.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["bounds"] = [round(value, 4) for value in runtime_bounds(
+            manifest["bounds"], scene)]
+        manifest.setdefault("provenance", {})["runtimeAdapter"] = {
+            "mode": "lane_mirror",
+            "laneCenterY": centre,
+            "objFacesReversed": flipped,
+        }
+        manifest["floorMesh"] = floor_report["mesh"]
+        manifest.setdefault("provenance", {})["floor"] = floor_report
+        if background_layers:
+            manifest["backgroundLayers"] = background_layers
+        else:
+            manifest.pop("backgroundLayers", None)
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n",
+                                encoding="utf-8")
+        print(f"[exterior] mirrored {flipped} OBJ faces into engine lane space",
+              flush=True)
+    else:
+        manifest_path = output / "environment.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["floorMesh"] = floor_report["mesh"]
+        manifest.setdefault("provenance", {})["floor"] = floor_report
+        if background_layers:
+            manifest["backgroundLayers"] = background_layers
+        else:
+            manifest.pop("backgroundLayers", None)
+        manifest_path.write_text(json.dumps(manifest, indent=2) + "\n",
+                                encoding="utf-8")
     print("EXTERIOR 3D EXPORT OK")
 
 

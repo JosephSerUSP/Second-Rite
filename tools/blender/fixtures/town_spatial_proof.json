@@ -1,0 +1,55 @@
+{
+  "contract": "thestra.town-spatial-proof",
+  "version": 1,
+  "camera": "tools/blender/fixtures/town_sideview_camera.json",
+  "output": {
+    "direct": "direct.png",
+    "reflected": "reflected.png",
+    "report": "town-spatial-proof.json"
+  },
+  "laneOriginY": 0.0,
+  "runtimeProjectionEvidence": {
+    "source": "runtime/presentation/world_camera.lua:245-276 and runtime/presentation/viewport_3d.lua:1291-1310",
+    "townSideviewRightY": 1.0,
+    "positiveWorldYScreenDelta": "positive",
+    "note": "The Blender authoring calibration intentionally uses rightY=-1; the live town_sideview resolver uses rightY=+1. The adapter must reconcile source-space handedness before runtime consumption."
+  },
+  "source": {
+    "axisOrigin": [4.0, 0.0, 0.05],
+    "axisPositiveY": [4.0, 1.5, 0.05],
+    "anchor": [6.0, 1.5, 0.0],
+    "facing": [0.0, 1.0, 0.0],
+    "elevationGround": [8.0, 2.0, 0.0],
+    "elevationRaised": [8.0, 2.0, 0.75],
+    "occluder": {
+      "center": [2.5, 0.0, 1.35],
+      "size": [0.8, 1.5, 2.7]
+    },
+    "occludedTarget": [7.0, 0.25, 1.0],
+    "triangle": {
+      "vertices": [
+        [4.0, -2.2, 0.25],
+        [4.0, -1.0, 1.55],
+        [4.0, -0.2, 0.25]
+      ],
+      "frontFacingNormal": [-1.0, 0.0, 0.0]
+    }
+  },
+  "adapterEvidence": {
+    "interiorCurrent": {
+      "source": "tools/blender/export_room_environment.py:153-195",
+      "transform": "engine_y = 3.8833 - blender_y",
+      "reversesFaceWinding": true
+    },
+    "exteriorCurrent": {
+      "source": "tools/blender/export_exterior_environment.py:31-44",
+      "transform": "engine_y = blender_y",
+      "reversesFaceWinding": false
+    },
+    "proposedCommonAdapter": {
+      "transform": "engine_y = laneOriginY - blender_y",
+      "reversesFaceWinding": true,
+      "requirement": "laneOriginY and source coordinate space must be explicit per adopted blend; never guess a mirror centre"
+    }
+  }
+}

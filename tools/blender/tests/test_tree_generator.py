@@ -1,5 +1,6 @@
 import sys
 import unittest
+import math
 
 sys.path.insert(0, "tools/blender")
 import tree_generator as trees
@@ -41,6 +42,70 @@ class TreeGeneratorTests(unittest.TestCase):
         self.assertGreater(budgets["round_shade"], budgets["young"])
         self.assertGreater(budgets["weeping"], budgets["columnar"])
         self.assertGreater(len(set(budgets.values())), 3)
+
+    def test_directed_crown_bias_moves_the_authored_envelope(self):
+        base = trees.generate(trees.preset("round_shade", attraction_weight=0), "authoring")
+        biased = trees.generate(trees.preset(
+            "round_shade", attraction_weight=0, crown_bias=.65, crown_bias_deg=0),
+            "authoring")
+        base_mean = sum(point[0] for segment in base.segments
+                        for point in (segment.start, segment.end)) / (2 * len(base.segments))
+        biased_mean = sum(point[0] for segment in biased.segments
+                          for point in (segment.start, segment.end)) / (2 * len(biased.segments))
+        self.assertGreater(biased_mean, base_mean + .15)
+        self.assertEqual(biased, trees.generate(trees.preset(
+            "round_shade", attraction_weight=0, crown_bias=.65, crown_bias_deg=0),
+            "authoring"))
+
+    def test_apical_dominance_repositions_branch_attachments(self):
+        def attachment_heights(dominance):
+            skeleton = trees.generate(trees.preset(
+                "columnar", attraction_weight=0, apical_dominance=dominance), "authoring")
+            by_index = {segment.index: segment for segment in skeleton.segments}
+            return [segment.start[2] for segment in skeleton.segments
+                    if segment.level == 1 and by_index[segment.parent].level == 0]
+
+        low = attachment_heights(0)
+        high = attachment_heights(1)
+        self.assertEqual(len(low), len(high))
+        self.assertGreater(sum(high) / len(high), sum(low) / len(low))
+
+    def test_branch_twist_and_attraction_are_independent_shape_controls(self):
+        plain = trees.generate(trees.preset(
+            "round_shade", attraction_weight=0, branch_twist_deg=0), "authoring")
+        twisted = trees.generate(trees.preset(
+            "round_shade", attraction_weight=0, branch_twist_deg=120), "authoring")
+        steered = trees.generate(trees.preset(
+            "round_shade", attraction_weight=1, influence_radius=3.0,
+            kill_radius=.1, branch_twist_deg=0), "authoring")
+        def primary_azimuths(skeleton):
+            by_index = {segment.index: segment for segment in skeleton.segments}
+            return [math.atan2(segment.end[1] - segment.start[1],
+                               segment.end[0] - segment.start[0])
+                    for segment in skeleton.segments
+                    if segment.level == 1 and by_index[segment.parent].level == 0]
+        self.assertNotEqual(primary_azimuths(plain), primary_azimuths(twisted))
+        self.assertNotEqual(plain.segments, steered.segments)
+
+    def test_new_shape_controls_are_bounded(self):
+        with self.assertRaises(ValueError):
+            trees.generate(trees.preset("round_shade", crown_bias=1.01))
+        with self.assertRaises(ValueError):
+            trees.generate(trees.preset("round_shade", branch_sweep_deg=91))
+        with self.assertRaises(ValueError):
+            trees.generate(trees.preset("round_shade", attraction_weight=1.01))
+
+    def test_integer_controls_normalize_json_numbers_but_reject_fractions(self):
+        spec = trees.preset("round_shade", levels=3.0, branch_frequency=4.0,
+                            attraction_points=90.0, stems=1.0)
+        self.assertTrue(all(type(getattr(spec, field)) is int for field in (
+            "levels", "branch_frequency", "attraction_points", "stems")))
+        for field in ("levels", "branch_frequency", "attraction_points", "stems"):
+            with self.assertRaises(ValueError, msg=field):
+                trees.preset("round_shade", **{field: 1.5})
+            for value in (float("nan"), float("inf"), float("-inf")):
+                with self.assertRaises(ValueError, msg=f"{field}={value}"):
+                    trees.preset("round_shade", **{field: value})
 
 
 if __name__ == "__main__":

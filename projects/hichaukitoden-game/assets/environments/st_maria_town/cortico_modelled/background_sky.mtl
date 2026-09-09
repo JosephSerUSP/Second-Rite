@@ -1,0 +1,5 @@
+# Source-owned packed background texture.
+newmtl CorticoBackgroundBillboard
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+map_Kd cortico_background_sky.png

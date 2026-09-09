@@ -59,7 +59,6 @@ import stage_room_model as stager  # noqa: E402
 GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
 RUNTIME_Y_MODE = "sr_runtime_y_mode"
 LANE_CENTER = "sr_lane_center_y"
-FLOOR_TEXTURE_SOURCE = ROOT / "projects" / "hichaukitoden-game" / "assets" / "materials" / "old_limestone" / "albedo.png"
 
 
 def sha256_file(path):
@@ -419,27 +418,32 @@ def export_floor_mesh(output, scene):
             for index in indices))
     (output / "floor.obj").write_text("\n".join(obj_lines) + "\n",
                                       encoding="utf-8")
+    tint = tuple(float(v) for v in terrain.get("sr_floor_tint", ()))
+    if len(tint) != 3 or any(not math.isfinite(v) or v < 0 or v > 1 for v in tint):
+        raise RuntimeError("sr_floor_tint requires three finite values in [0,1]")
     (output / "floor.mtl").write_text(
         "newmtl CorticoFloor\n"
         "Ka 1.000 1.000 1.000\n"
-        "Kd 1.000 1.000 1.000\n"
-        "map_Kd floor.png\n", encoding="utf-8")
-    if not FLOOR_TEXTURE_SOURCE.exists():
-        raise RuntimeError("floor texture source missing: %s" % FLOOR_TEXTURE_SOURCE)
-    shutil.copyfile(FLOOR_TEXTURE_SOURCE, output / "floor.png")
+        "Kd %.6f %.6f %.6f\nmap_Kd floor.png\n" % tint, encoding="utf-8")
+    image_name = str(terrain.get("sr_floor_texture_image", ""))
+    floor_image = bpy.data.images.get(image_name)
+    if floor_image is None:
+        raise RuntimeError("floor requires a source-bound sr_floor_texture_image")
+    floor_image.save(filepath=str(output / "floor.png"))
     floor_files = {name: output / name for name in ("floor.obj", "floor.mtl", "floor.png")}
     return {
         "mesh": "floor.obj", "material": "floor.mtl", "texture": "floor.png",
         "sourceObject": terrain.name,
         "gridSpacingWorld": spacing,
         "texturePeriodWorld": texture_period,
+        "tint": list(tint),
         "vertexCount": len(vertices), "faceCount": len(faces),
         "bounds": [round(min_x, 4), round(runtime_min_y, 4),
                    round(min(point.z for point in points) + clearance, 4),
                    round(max_x, 4), round(runtime_max_y, 4),
                    round(max(point.z for point in points) + clearance, 4)],
-        "textureSource": FLOOR_TEXTURE_SOURCE.relative_to(ROOT).as_posix(),
-        "textureSourceSha256": sha256_file(FLOOR_TEXTURE_SOURCE),
+        "textureSource": "blend-image:" + floor_image.name,
+        "textureSourceSha256": sha256_file(output / "floor.png"),
         "sha256": {name: sha256_file(path) for name, path in floor_files.items()},
     }
 
@@ -707,7 +711,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         raise RuntimeError(
             f"render join is implausibly small: {len(target.data.loop_triangles)} triangles")
     print(f"[exterior] joined {len(copies)} source meshes into "
-          f"{len(target.data.loop_triangles)} runtime triangles")
+          f"{len(target.data.loop_triangles)} runtime triangles", flush=True)
 
 
 def main() -> None:
@@ -717,6 +721,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--span", type=float, default=23.699,
                         help="lane length; geometry beyond it is not this street")
+    parser.add_argument("--bake-device", choices=("CPU", "CUDA", "OPTIX", "HIP", "METAL", "ONEAPI"), default="CPU")
+    parser.add_argument("--lighting", choices=("source", "staged"), default="source",
+                        help="Preserve authored scene lighting; staged is an explicit diagnostic rig")
     parser.add_argument("--ambient", type=float, default=0.35,
                         help="world fill strength for the bake")
     parser.add_argument("--sun", type=float, default=2.5,
@@ -750,21 +757,19 @@ def main() -> None:
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape)
 
-    # Same reason export_room_environment.py stages lighting before baking: a
-    # Cycles bake that just opens the file is lit by whatever the .blend last
-    # saved, and this one saves a near-black world (0.0, 0.092, 0.119) with a
-    # single sun at energy 3. Baked as-is the atlas comes out at mean RGB
-    # 0.8/0.9/0.7 against the shipped package's 30.0/27.6/23.9 -- a cave. The
-    # interior uses an even fill because a room is lit by what it contains; a
-    # street gets the fill AND the hard key, which is what outdoor_sun is for.
-    stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
-    stager.outdoor_sun(args.sun)
+    # Authored lighting is part of the adopted source, just like geometry.
+    # A diagnostic rig is explicit and never silently replaces the artist's sky.
+    if args.lighting == "staged":
+        stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
+        stager.outdoor_sun(args.sun)
 
     output = args.output.resolve()
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     flat_bake=True)
+                                     flat_bake=(args.lighting == "staged"),
+                                     bake_device=args.bake_device,
+                                     batch_sources=True)
     scene = bpy.context.scene
     floor_report = export_floor_mesh(output, scene)
     background_layers = export_background_layers(output, scene)

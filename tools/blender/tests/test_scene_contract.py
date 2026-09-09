@@ -58,6 +58,14 @@ class SceneContractTests(unittest.TestCase):
         self.assertEqual(guide["roles"], ["TH_PREVIEW_ONLY"])
         self.assertEqual(report["semantics"]["objectNames"], "labels_only")
 
+    def test_source_transform_empty_is_allowed_but_is_not_geometry(self):
+        snapshot = good_snapshot()
+        snapshot["objects"].append(obj("shutter_hinge", "EMPTY", ["TH_SOURCE"]))
+        self.assertTrue(inspect_snapshot(snapshot)["ok"])
+        snapshot["objects"] = [item for item in snapshot["objects"]
+                               if item["name"] == "shutter_hinge" or "TH_SOURCE" not in item["collections"]]
+        self.assertFalse(inspect_snapshot(snapshot)["ok"])
+
     def test_missing_and_empty_required_roles_are_actionable(self):
         snapshot = {"collections": [{"name": "TH_SOURCE"}, {"name": "TH_RENDER"}],
                     "objects": [obj("source", "MESH", ["TH_SOURCE"])]}

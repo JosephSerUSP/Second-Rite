@@ -11,7 +11,7 @@ Export roles are assigned only by explicit collection membership:
 
 | Collection | Required | Allowed object types | Meaning |
 | --- | --- | --- | --- |
-| `TH_SOURCE` | yes | `MESH`, `CURVE`, `SURFACE`, `LIGHT` | source appearance and lights |
+| `TH_SOURCE` | yes | `MESH`, `CURVE`, `SURFACE`, `LIGHT`, `EMPTY` | source appearance, lights and transform parents |
 | `TH_RENDER` | yes | `MESH` | real runtime/depth/silhouette mesh |
 | `TH_COLLISION` | no | `MESH` | optional collision export only |
 | `TH_ANCHORS` | yes | `EMPTY`, `LOCATOR` | spatial anchors |
@@ -33,7 +33,9 @@ path.
 
 An object with `sr_floor_mesh=true` is a separate walkable-floor source, not a
 beauty-atlas surface. The exporter requires exactly one such mesh, positive
-`sr_floor_grid_spacing` and `sr_floor_texture_period` properties, and preserves
+`sr_floor_grid_spacing` and `sr_floor_texture_period` properties,
+a source-bound `sr_floor_texture_image`, and a three-channel `sr_floor_tint`
+in [0,1], and preserves
 its authored per-vertex Z values in `floor.obj`; the source grid must not also
 be marked `sr_export=true`. The package manifest points `floorMesh` at the
 separate OBJ and records `provenance.floor` with the source object, world-unit
@@ -51,7 +53,7 @@ separate `floorMesh` remains the only authoritative walkable surface. Runtime
 consumption uses the ordinary placed-model queue, preserving foreground
 occlusion and camera parallax.
 
-`TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights are
+`TH_SOURCE` must contain at least one `MESH`, `CURVE`, or `SURFACE`; lights and transform empties are
 valid source inputs for illumination but cannot be the only selected-to-active
 bake source. `TH_RENDER` must contain a mesh. If render mesh metadata is
 available, a missing UV layer or empty vertex/polygon count is also an error.

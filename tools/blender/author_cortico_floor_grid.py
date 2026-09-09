@@ -14,6 +14,8 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
+ROOT = Path(__file__).resolve().parents[2]
+
 
 def _axis_values(start: float, end: float, spacing: float) -> list[float]:
     values = []
@@ -64,6 +66,10 @@ def author(blend: Path, spacing: float, texture_period: float) -> None:
     floor["sr_export"] = False
     floor["sr_floor_grid_spacing"] = spacing
     floor["sr_floor_texture_period"] = texture_period
+    floor["sr_floor_tint"] = (1.0, 1.0, 1.0)
+    texture = bpy.data.images.load(str(ROOT / "projects/hichaukitoden-game/assets/materials/old_limestone/albedo.png"), check_existing=True)
+    texture.pack()
+    floor["sr_floor_texture_image"] = texture.name
     floor["sr_source_role"] = "walkable_world_unit_grid"
     if ground.data.materials:
         floor.data.materials.append(ground.data.materials[0])

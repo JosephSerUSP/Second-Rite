@@ -184,10 +184,10 @@ function M.run()
 
     -- 10. Reusable world-space distant-layer contract
     local expectedBackgroundIds = {
-        centre = true, east = true, laundry_quad = true, west = true,
+        centre = true, east = true, laundry_quad = true, sky = true, west = true,
     }
-    check(#corticoManifest.backgroundLayers == 4,
-        "Cortico has west, centre, east and laundry-quad world layers")
+    check(#corticoManifest.backgroundLayers == 5,
+        "Cortico has scenery, laundry and bespoke sky world layers")
     for _, backgroundLayer in ipairs(corticoManifest.backgroundLayers) do
         check(expectedBackgroundIds[backgroundLayer.id] == true,
             "distant layer has a stable west/centre/east semantic id")
@@ -212,7 +212,7 @@ function M.run()
         end
     end
     check(next(expectedBackgroundIds) == nil,
-        "all four world-space layer ids are present")
+        "all five world-space layer ids are present")
 
     mockManifest.collisionMesh = nil
     mockManifest.bakedLighting = false

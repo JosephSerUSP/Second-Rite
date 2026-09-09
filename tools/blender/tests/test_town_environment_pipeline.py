@@ -67,6 +67,27 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
         self.assertNotIn("Circular dependency for image", self.export_result.stdout)
         self.assertNotIn("Circular dependency for image", self.export_result.stderr)
 
+    def test_batched_sources_preserve_fixture_palette_and_source_file(self):
+        output = self.temp_dir / "batched"
+        script = self.temp_dir / "batch.py"
+        before = town_environment_pipeline.sha256_file(self.fixture_blend)
+        script.write_text(
+            "import sys\nfrom pathlib import Path\n"
+            f"sys.path.insert(0, {str(BLENDER_TOOLS)!r})\n"
+            "import town_environment_pipeline as pipeline\n"
+            f"pipeline.run_pipeline_in_blender(Path({str(self.fixture_blend)!r}), "
+            f"Path({str(output)!r}), atlas_size=256, bake_samples=4, batch_sources=True)\n",
+            encoding="utf-8")
+        result = subprocess.run([
+            town_environment_pipeline.blender_executable(), "--background",
+            str(self.fixture_blend), "--python-exit-code", "1", "--python", str(script),
+        ], capture_output=True, text=True, timeout=180)
+        self.assertEqual(result.returncode, 0, result.stdout[-3000:] + result.stderr[-3000:])
+        self.assertIn("[pipeline] Batched", result.stdout)
+        manifest = json.loads((output / "environment.json").read_text())
+        self.assertTrue(manifest["provenance"]["bake"]["appearance"]["passed"])
+        self.assertEqual(town_environment_pipeline.sha256_file(self.fixture_blend), before)
+
     def test_bake_integrity_proves_asymmetric_appearance_and_receiver_isolation(self):
         provenance = self.manifest["provenance"]
         bake = provenance["bake"]
@@ -97,6 +118,7 @@ class TownEnvironmentPipelineTests(unittest.TestCase):
             "atlasSize": 256,
             "bakeSamples": 4,
             "flatBake": False,
+            "device": "CPU",
         })
         self.assertTrue(provenance["tool"]["blenderVersion"])
         self.assertIsInstance(provenance["warningEvidence"], list)

@@ -113,6 +113,7 @@ def _finalize_manifest_provenance(manifest_path: Path, blend_path: Path, output_
         "atlasSize": atlas_size,
         "bakeSamples": bake_samples,
         "flatBake": bool(flat_bake),
+        "device": "CPU",
     }
     tool = provenance.setdefault("tool", {})
     tool["blenderExecutable"] = Path(blender).name
@@ -220,7 +221,8 @@ def _bake_appearance_metrics(image, source_objects):
 
 
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
-                            bake_samples: int = 16, flat_bake: bool = False):
+                            bake_samples: int = 16, flat_bake: bool = False,
+                            bake_device: str = "CPU", batch_sources: bool = False):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -344,10 +346,19 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
     scene.render.engine = 'CYCLES'
-    try:
+    if bake_device == "CPU":
         scene.cycles.device = 'CPU'
-    except Exception:
-        pass
+    else:
+        preferences = bpy.context.preferences.addons['cycles'].preferences
+        preferences.compute_device_type = bake_device
+        preferences.get_devices()
+        selected = [device for device in preferences.devices if device.type == bake_device]
+        if not selected:
+            raise RuntimeError("requested bake device unavailable: " + bake_device)
+        for device in preferences.devices:
+            device.use = device in selected
+        scene.cycles.device = 'GPU'
+    print("[pipeline] bake device: " + bake_device, flush=True)
     if flat_bake:
         scene.cycles.samples = 1
         scene.cycles.max_bounces = 0
@@ -375,12 +386,70 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # completely, for one texel per island boundary.
     scene.render.bake.margin = 1 if flat_bake else 4
 
+    # Batch coordinate-independent materials in temporary evaluated copies.
+    # Cycles otherwise repeats selected-to-active setup for every shutter slat.
+    # Object/Generated coordinates and Object Info must retain their objects.
+    def batch_safe(obj):
+        for material in obj.data.materials:
+            if not material or not material.use_nodes:
+                continue
+            for node in material.node_tree.nodes:
+                # Alpha cards require independent projection; joining stacked
+                # cutouts changes which surface a selected-to-active ray hits.
+                if 'Alpha' in node.inputs and (node.inputs['Alpha'].is_linked or node.inputs['Alpha'].default_value < 1):
+                    return False
+                if node.type in {'BSDF_TRANSPARENT', 'BSDF_GLASS'}:
+                    return False
+                if node.type in {'GROUP', 'OBJECT_INFO', 'UVMAP'}:
+                    return False
+                if node.type == 'TEX_COORD' and any(
+                        socket.is_linked and socket.name != 'UV'
+                        for socket in node.outputs):
+                    return False
+                # An unconnected Image Texture uses UV; procedural textures
+                # use Generated coordinates, whose bounds change when joined.
+                if node.type.startswith('TEX_') and node.type != 'TEX_IMAGE' and 'Vector' in node.inputs and not node.inputs['Vector'].is_linked:
+                    return False
+        return True
+
+    bake_sources = [o for o in col_source.all_objects
+                    if o.type in {'MESH', 'CURVE', 'SURFACE'}]
+    batch_originals = [o for o in bake_sources if o.type == 'MESH' and batch_safe(o)]
+    temporary_batch = None
+    if batch_sources and len(batch_originals) > 1:
+        bpy.ops.object.select_all(action='DESELECT')
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        copies = []
+        for original in batch_originals:
+            mesh = bpy.data.meshes.new_from_object(original.evaluated_get(depsgraph),
+                                                   preserve_all_data_layers=True, depsgraph=depsgraph)
+            # Implicit UV inputs follow the active render layer. Different
+            # source layer names must not become separate, empty layers on join.
+            active_uv = next((uv for uv in mesh.uv_layers if uv.active_render), mesh.uv_layers.active)
+            for uv in list(mesh.uv_layers):
+                if uv != active_uv:
+                    mesh.uv_layers.remove(uv)
+            if active_uv:
+                active_uv.name = 'TH_BAKE_SOURCE_UV'
+            copy = bpy.data.objects.new('TH_TEMP_BAKE_SOURCE', mesh)
+            scene.collection.objects.link(copy)
+            copy.matrix_world = original.matrix_world.copy()
+            copy.select_set(True)
+            copies.append(copy)
+        scene.view_layers[0].objects.active = copies[0]
+        bpy.ops.object.join()
+        temporary_batch = copies[0]
+        for original in batch_originals:
+            original.hide_render = True
+        bake_sources = [o for o in bake_sources if o not in batch_originals] + [temporary_batch]
+        print(f'[pipeline] Batched {len(batch_originals)} coordinate-independent sources; {len(bake_sources)} bake objects', flush=True)
+
     # Select all source objects as Selected, target_obj as Active.
     # target_obj must NOT be in the selected set during selected-to-active bake,
     # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
     # and circular dependency warnings (#1023).
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.all_objects:
+    for obj in bake_sources:
         if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
             obj.select_set(True)
     target_obj.select_set(False)
@@ -392,8 +461,13 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         if max(pre_bake_pixels[offset:offset + 3]) > 0.02
     )
 
-    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...", flush=True)
     bpy.ops.object.bake(type='COMBINED')
+
+    if temporary_batch:
+        bpy.data.objects.remove(temporary_batch, do_unlink=True)
+        for original in batch_originals:
+            original.hide_render = False
 
     appearance = _bake_appearance_metrics(bake_image, source_objects)
 
@@ -570,6 +644,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
                 "atlasSize": atlas_size,
                 "bakeSamples": bake_samples,
                 "flatBake": bool(flat_bake),
+                "device": bake_device,
             },
             "bake": {
                 "receiver": {

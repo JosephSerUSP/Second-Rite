@@ -39,7 +39,7 @@ CONTRACT_VERSION = 0
 # Required roles are intentionally small.  Collision remains optional on the
 # current main branch and its presence does not make a scene walkable.
 ROLE_SPECS = {
-    "TH_SOURCE": {"required": True, "types": {"MESH", "CURVE", "SURFACE", "LIGHT"}},
+    "TH_SOURCE": {"required": True, "types": {"MESH", "CURVE", "SURFACE", "LIGHT", "EMPTY"}},
     "TH_RENDER": {"required": True, "types": {"MESH"}},
     "TH_COLLISION": {"required": False, "types": {"MESH"}},
     "TH_ANCHORS": {"required": True, "types": {"EMPTY", "LOCATOR"}},

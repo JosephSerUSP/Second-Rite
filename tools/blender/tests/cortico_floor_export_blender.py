@@ -23,7 +23,7 @@ def main():
         report = export_exterior_environment.export_floor_mesh(output, bpy.context.scene)
         result["report"] = report
         result["files"] = sorted(path.name for path in output.iterdir())
-        background_output = output.parent / "background"
+        background_output = output / "background"
         background_output.mkdir(parents=True, exist_ok=True)
         background = export_exterior_environment.export_background_layers(
             background_output, bpy.context.scene)
@@ -31,7 +31,7 @@ def main():
         result["backgroundFiles"] = sorted(
             path.name for path in background_output.iterdir())
         if [layer["id"] for layer in background] != [
-                "centre", "east", "laundry_quad", "west"]:
+                "centre", "east", "laundry_quad", "sky", "west"]:
             raise RuntimeError("background export did not return canonical layer ids")
         for layer in background:
             if layer["provenance"]["cameraSpace"] is not False:
@@ -41,8 +41,25 @@ def main():
         grid = bpy.data.objects.get("CORTICO_floor_grid")
         if grid is None:
             raise RuntimeError("positive probe lost CORTICO_floor_grid")
+        result["floorMaterial"] = (output / "floor.mtl").read_text()
+        original_tint = list(grid["sr_floor_tint"])
+        grid["sr_floor_tint"] = (float("nan"), 1, 1)
+        try:
+            export_exterior_environment.export_floor_mesh(output, bpy.context.scene)
+        except RuntimeError as error:
+            result["invalidTintError"] = str(error)
+        else:
+            raise RuntimeError("nonfinite floor tint did not fail")
+        grid["sr_floor_tint"] = original_tint
+        grid["sr_floor_texture_image"] = "absent-image"
+        try:
+            export_exterior_environment.export_floor_mesh(output, bpy.context.scene)
+        except RuntimeError as error:
+            result["missingTextureError"] = str(error)
+        else:
+            raise RuntimeError("missing source image did not fail")
         bpy.data.objects.remove(grid, do_unlink=True)
-        negative = output.parent / "negative"
+        negative = output / "negative"
         negative.mkdir(parents=True, exist_ok=True)
         try:
             export_exterior_environment.export_floor_mesh(negative, bpy.context.scene)

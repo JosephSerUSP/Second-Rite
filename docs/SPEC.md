@@ -264,6 +264,14 @@ occlude them by hardware depth. A background layer must not carry a duplicate
 floor bridge: the package's authoritative floor mesh remains the only walkable
 ground surface.
 
+The exterior exporter preserves the source world's lights by default. Its
+explicit `--lighting staged` mode is a diagnostic rig, not the authored look;
+`--bake-device` selects a supported Cycles device and fails if unavailable.
+Floor albedo comes from the packed image named by `sr_floor_texture_image`,
+with a finite RGB `sr_floor_tint` in [0,1] exported as material diffuse colour.
+A bespoke sky can use the same world-space background-layer contract, placing
+its authored texture behind the scenery while retaining the source light rig.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,

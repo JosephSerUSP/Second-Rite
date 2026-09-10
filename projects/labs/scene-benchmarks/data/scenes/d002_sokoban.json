@@ -3,97 +3,880 @@
   "terminal": {
     "reached": "v.win == true"
   },
-  "name": "D002 — Sokoban as Scene",
+  "name": "D002 \u2014 Sokoban as Scene",
   "kind": "menu",
   "draw": "windows",
   "windows": [
     {
       "id": "status",
-      "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
+      "rect": {
+        "x": 5,
+        "y": 2,
+        "w": 22,
+        "h": 4
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.win and 'D002 — YOU WIN!' or 'D002 — Push crates to goals'}" }
+        {
+          "type": "text",
+          "text": "{v.win and 'D002 \u2014 YOU WIN!' or 'D002 \u2014 Push crates to goals'}"
+        }
       ]
     },
     {
       "id": "board_window",
-      "rect": { "x": 6, "y": 7, "w": 20, "h": 12 },
+      "rect": {
+        "x": 6,
+        "y": 7,
+        "w": 20,
+        "h": 12
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.boardText}" }
+        {
+          "type": "text",
+          "text": "#######"
+        },
+        {
+          "type": "text",
+          "text": "#{v.px==1 and v.py==1 and '@' or ((v.c1x==1 and v.c1y==1 or v.c2x==1 and v.c2y==1) and 'O' or '.')}{v.px==2 and v.py==1 and '@' or ((v.c1x==2 and v.c1y==1 or v.c2x==2 and v.c2y==1) and 'O' or '.')}{v.px==3 and v.py==1 and '@' or ((v.c1x==3 and v.c1y==1 or v.c2x==3 and v.c2y==1) and 'O' or ' ')}{v.px==4 and v.py==1 and '@' or ((v.c1x==4 and v.c1y==1 or v.c2x==4 and v.c2y==1) and 'O' or ' ')}##"
+        },
+        {
+          "type": "text",
+          "text": "###{v.px==3 and v.py==2 and '@' or ((v.c1x==3 and v.c1y==2 or v.c2x==3 and v.c2y==2) and 'O' or ' ')}{v.px==4 and v.py==2 and '@' or ((v.c1x==4 and v.c1y==2 or v.c2x==4 and v.c2y==2) and 'O' or ' ')}{v.px==5 and v.py==2 and '@' or ((v.c1x==5 and v.c1y==2 or v.c2x==5 and v.c2y==2) and 'O' or ' ')}#"
+        },
+        {
+          "type": "text",
+          "text": "#{v.px==1 and v.py==3 and '@' or ((v.c1x==1 and v.c1y==3 or v.c2x==1 and v.c2y==3) and 'O' or ' ')}{v.px==2 and v.py==3 and '@' or ((v.c1x==2 and v.c1y==3 or v.c2x==2 and v.c2y==3) and 'O' or ' ')}{v.px==3 and v.py==3 and '@' or ((v.c1x==3 and v.c1y==3 or v.c2x==3 and v.c2y==3) and 'O' or ' ')}{v.px==4 and v.py==3 and '@' or ((v.c1x==4 and v.c1y==3 or v.c2x==4 and v.c2y==3) and 'O' or ' ')}{v.px==5 and v.py==3 and '@' or ((v.c1x==5 and v.c1y==3 or v.c2x==5 and v.c2y==3) and 'O' or ' ')}#"
+        },
+        {
+          "type": "text",
+          "text": "#######"
+        },
+        {
+          "type": "text",
+          "text": "#######"
+        }
       ]
     },
     {
       "id": "help",
-      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "rect": {
+        "x": 4,
+        "y": 21,
+        "w": 24,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Arrows move  Enter reset  B back" }
+        {
+          "type": "text",
+          "text": "Arrows move  Enter reset  B back"
+        }
       ]
     }
   ],
   "hooks": {
     "on_enter": [
-      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SCRIPT", "ref": "init" }
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": 0
+          },
+          {
+            "name": "win",
+            "value": false
+          },
+          {
+            "name": "px",
+            "value": 4
+          },
+          {
+            "name": "py",
+            "value": 3
+          },
+          {
+            "name": "c1x",
+            "value": 4
+          },
+          {
+            "name": "c1y",
+            "value": 2
+          },
+          {
+            "name": "c2x",
+            "value": 3
+          },
+          {
+            "name": "c2y",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "win",
+            "value": false
+          },
+          {
+            "name": "px",
+            "value": 4
+          },
+          {
+            "name": "py",
+            "value": 3
+          },
+          {
+            "name": "c1x",
+            "value": 4
+          },
+          {
+            "name": "c1y",
+            "value": 2
+          },
+          {
+            "name": "c2x",
+            "value": 3
+          },
+          {
+            "name": "c2y",
+            "value": 3
+          }
+        ]
+      }
     ],
     "on_up": [
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
       {
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": -1 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "v.px + (0)"
+              },
+              {
+                "name": "ny",
+                "value": "v.py + (-1)"
+              },
+              {
+                "name": "dx",
+                "value": 0
+              },
+              {
+                "name": "dy",
+                "value": -1
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nWall",
+                "value": "v.nx <= 0 or v.nx >= 6 or v.ny <= 0 or v.ny >= 4 or (v.nx == 5 and v.ny == 1) or (v.nx == 1 and v.ny == 2) or (v.nx == 2 and v.ny == 2)"
+              },
+              {
+                "name": "nCrate1",
+                "value": "v.nx == v.c1x and v.ny == v.c1y"
+              },
+              {
+                "name": "nCrate2",
+                "value": "v.nx == v.c2x and v.ny == v.c2y"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and (v.nCrate1 or v.nCrate2)",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "nnx",
+                    "value": "v.nx + v.dx"
+                  },
+                  {
+                    "name": "nny",
+                    "value": "v.ny + v.dy"
+                  },
+                  {
+                    "name": "nnWall",
+                    "value": "v.nnx <= 0 or v.nnx >= 6 or v.nny <= 0 or v.nny >= 4 or (v.nnx == 5 and v.nny == 1) or (v.nnx == 1 and v.nny == 2) or (v.nnx == 2 and v.nny == 2)"
+                  },
+                  {
+                    "name": "nnCrate1",
+                    "value": "v.nnx == v.c1x and v.nny == v.c1y"
+                  },
+                  {
+                    "name": "nnCrate2",
+                    "value": "v.nnx == v.c2x and v.nny == v.c2y"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not v.nnWall and not v.nnCrate1 and not v.nnCrate2",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "px",
+                        "value": "v.nx"
+                      },
+                      {
+                        "name": "py",
+                        "value": "v.ny"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate1",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c2x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c2y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and not v.nCrate1 and not v.nCrate2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "v.nx"
+                  },
+                  {
+                    "name": "py",
+                    "value": "v.ny"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "c1OnGoal",
+                "value": "(v.c1x == 1 and v.c1y == 1) or (v.c1x == 2 and v.c1y == 1)"
+              },
+              {
+                "name": "c2OnGoal",
+                "value": "(v.c2x == 1 and v.c2y == 1) or (v.c2x == 2 and v.c2y == 1)"
+              },
+              {
+                "name": "win",
+                "value": "v.c1OnGoal and v.c2OnGoal"
+              }
+            ]
+          }
         ]
       }
     ],
     "on_down": [
       {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 1 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "v.px + (0)"
+              },
+              {
+                "name": "ny",
+                "value": "v.py + (1)"
+              },
+              {
+                "name": "dx",
+                "value": 0
+              },
+              {
+                "name": "dy",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nWall",
+                "value": "v.nx <= 0 or v.nx >= 6 or v.ny <= 0 or v.ny >= 4 or (v.nx == 5 and v.ny == 1) or (v.nx == 1 and v.ny == 2) or (v.nx == 2 and v.ny == 2)"
+              },
+              {
+                "name": "nCrate1",
+                "value": "v.nx == v.c1x and v.ny == v.c1y"
+              },
+              {
+                "name": "nCrate2",
+                "value": "v.nx == v.c2x and v.ny == v.c2y"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and (v.nCrate1 or v.nCrate2)",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "nnx",
+                    "value": "v.nx + v.dx"
+                  },
+                  {
+                    "name": "nny",
+                    "value": "v.ny + v.dy"
+                  },
+                  {
+                    "name": "nnWall",
+                    "value": "v.nnx <= 0 or v.nnx >= 6 or v.nny <= 0 or v.nny >= 4 or (v.nnx == 5 and v.nny == 1) or (v.nnx == 1 and v.nny == 2) or (v.nnx == 2 and v.nny == 2)"
+                  },
+                  {
+                    "name": "nnCrate1",
+                    "value": "v.nnx == v.c1x and v.nny == v.c1y"
+                  },
+                  {
+                    "name": "nnCrate2",
+                    "value": "v.nnx == v.c2x and v.nny == v.c2y"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not v.nnWall and not v.nnCrate1 and not v.nnCrate2",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "px",
+                        "value": "v.nx"
+                      },
+                      {
+                        "name": "py",
+                        "value": "v.ny"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate1",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c2x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c2y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and not v.nCrate1 and not v.nCrate2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "v.nx"
+                  },
+                  {
+                    "name": "py",
+                    "value": "v.ny"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "c1OnGoal",
+                "value": "(v.c1x == 1 and v.c1y == 1) or (v.c1x == 2 and v.c1y == 1)"
+              },
+              {
+                "name": "c2OnGoal",
+                "value": "(v.c2x == 1 and v.c2y == 1) or (v.c2x == 2 and v.c2y == 1)"
+              },
+              {
+                "name": "win",
+                "value": "v.c1OnGoal and v.c2OnGoal"
+              }
+            ]
+          }
         ]
       }
     ],
     "on_left": [
       {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": -1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "v.px + (-1)"
+              },
+              {
+                "name": "ny",
+                "value": "v.py + (0)"
+              },
+              {
+                "name": "dx",
+                "value": -1
+              },
+              {
+                "name": "dy",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nWall",
+                "value": "v.nx <= 0 or v.nx >= 6 or v.ny <= 0 or v.ny >= 4 or (v.nx == 5 and v.ny == 1) or (v.nx == 1 and v.ny == 2) or (v.nx == 2 and v.ny == 2)"
+              },
+              {
+                "name": "nCrate1",
+                "value": "v.nx == v.c1x and v.ny == v.c1y"
+              },
+              {
+                "name": "nCrate2",
+                "value": "v.nx == v.c2x and v.ny == v.c2y"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and (v.nCrate1 or v.nCrate2)",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "nnx",
+                    "value": "v.nx + v.dx"
+                  },
+                  {
+                    "name": "nny",
+                    "value": "v.ny + v.dy"
+                  },
+                  {
+                    "name": "nnWall",
+                    "value": "v.nnx <= 0 or v.nnx >= 6 or v.nny <= 0 or v.nny >= 4 or (v.nnx == 5 and v.nny == 1) or (v.nnx == 1 and v.nny == 2) or (v.nnx == 2 and v.nny == 2)"
+                  },
+                  {
+                    "name": "nnCrate1",
+                    "value": "v.nnx == v.c1x and v.nny == v.c1y"
+                  },
+                  {
+                    "name": "nnCrate2",
+                    "value": "v.nnx == v.c2x and v.nny == v.c2y"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not v.nnWall and not v.nnCrate1 and not v.nnCrate2",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "px",
+                        "value": "v.nx"
+                      },
+                      {
+                        "name": "py",
+                        "value": "v.ny"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate1",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c2x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c2y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and not v.nCrate1 and not v.nCrate2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "v.nx"
+                  },
+                  {
+                    "name": "py",
+                    "value": "v.ny"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "c1OnGoal",
+                "value": "(v.c1x == 1 and v.c1y == 1) or (v.c1x == 2 and v.c1y == 1)"
+              },
+              {
+                "name": "c2OnGoal",
+                "value": "(v.c2x == 1 and v.c2y == 1) or (v.c2x == 2 and v.c2y == 1)"
+              },
+              {
+                "name": "win",
+                "value": "v.c1OnGoal and v.c2OnGoal"
+              }
+            ]
+          }
         ]
       }
     ],
     "on_right": [
       {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
         "cmd": "IF",
         "condition": "not v.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "v.px + (1)"
+              },
+              {
+                "name": "ny",
+                "value": "v.py + (0)"
+              },
+              {
+                "name": "dx",
+                "value": 1
+              },
+              {
+                "name": "dy",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "nWall",
+                "value": "v.nx <= 0 or v.nx >= 6 or v.ny <= 0 or v.ny >= 4 or (v.nx == 5 and v.ny == 1) or (v.nx == 1 and v.ny == 2) or (v.nx == 2 and v.ny == 2)"
+              },
+              {
+                "name": "nCrate1",
+                "value": "v.nx == v.c1x and v.ny == v.c1y"
+              },
+              {
+                "name": "nCrate2",
+                "value": "v.nx == v.c2x and v.ny == v.c2y"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and (v.nCrate1 or v.nCrate2)",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "nnx",
+                    "value": "v.nx + v.dx"
+                  },
+                  {
+                    "name": "nny",
+                    "value": "v.ny + v.dy"
+                  },
+                  {
+                    "name": "nnWall",
+                    "value": "v.nnx <= 0 or v.nnx >= 6 or v.nny <= 0 or v.nny >= 4 or (v.nnx == 5 and v.nny == 1) or (v.nnx == 1 and v.nny == 2) or (v.nnx == 2 and v.nny == 2)"
+                  },
+                  {
+                    "name": "nnCrate1",
+                    "value": "v.nnx == v.c1x and v.nny == v.c1y"
+                  },
+                  {
+                    "name": "nnCrate2",
+                    "value": "v.nnx == v.c2x and v.nny == v.c2y"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not v.nnWall and not v.nnCrate1 and not v.nnCrate2",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "px",
+                        "value": "v.nx"
+                      },
+                      {
+                        "name": "py",
+                        "value": "v.ny"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate1",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.nCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "c2x",
+                            "value": "v.nnx"
+                          },
+                          {
+                            "name": "c2y",
+                            "value": "v.nny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not v.nWall and not v.nCrate1 and not v.nCrate2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "v.nx"
+                  },
+                  {
+                    "name": "py",
+                    "value": "v.ny"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "c1OnGoal",
+                "value": "(v.c1x == 1 and v.c1y == 1) or (v.c1x == 2 and v.c1y == 1)"
+              },
+              {
+                "name": "c2OnGoal",
+                "value": "(v.c2x == 1 and v.c2y == 1) or (v.c2x == 2 and v.c2y == 1)"
+              },
+              {
+                "name": "win",
+                "value": "v.c1OnGoal and v.c2OnGoal"
+              }
+            ]
+          }
         ]
       }
     ],
-    "on_select": [ { "cmd": "SCRIPT", "ref": "init" } ],
-    "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
   },
-  "scripts": {
-    "init": "\nlocal v = ctx.v\nv.win = false\n-- Board setup: W = Wall, G = Goal, C = Crate, P = Player, . = Floor\nv.w = 7\nv.h = 6\nv.grid = {\n    'W','W','W','W','W','W','W',\n    'W','G','G','.','.','W','W',\n    'W','W','W','.','C','.','W',\n    'W','.','.','C','P','.','W',\n    'W','W','W','W','W','W','W',\n    'W','W','W','W','W','W','W'\n}\nv.goals = { {1, 1}, {2, 1} }\n\n-- Find player\nfor i, cell in ipairs(v.grid) do\n    if cell == 'P' then\n        v.px = (i - 1) % v.w\n        v.py = math.floor((i - 1) / v.w)\n        v.grid[i] = '.'\n        break\n    end\nend\n\nlocal function redraw()\n    local lines = {}\n    for y = 0, v.h - 1 do\n        local row = \"\"\n        for x = 0, v.w - 1 do\n            local cell = v.grid[y * v.w + x + 1]\n            if x == v.px and y == v.py then\n                row = row .. \"@\"\n            elseif cell == 'W' then\n                row = row .. \"#\"\n            elseif cell == 'C' then\n                row = row .. \"O\"\n            elseif cell == 'G' then\n                row = row .. \".\"\n            else\n                row = row .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    v.boardText = table.concat(lines, \"\\n\")\nend\nv.redraw = redraw\nv.redraw()\n",
-    "move": "\nlocal v = ctx.v\nlocal nx = v.px + v.dx\nlocal ny = v.py + v.dy\n\nlocal function getAt(x, y)\n    if x < 0 or x >= v.w or y < 0 or y >= v.h then return 'W' end\n    return v.grid[y * v.w + x + 1]\nend\n\nlocal function setAt(x, y, val)\n    v.grid[y * v.w + x + 1] = val\nend\n\nlocal dest = getAt(nx, ny)\nif dest == '.' or dest == 'G' then\n    v.px = nx\n    v.py = ny\nelseif dest == 'C' then\n    local nnx = nx + v.dx\n    local nny = ny + v.dy\n    local beyond = getAt(nnx, nny)\n    if beyond == '.' or beyond == 'G' then\n        -- Push crate\n        setAt(nx, ny, '.')\n        -- restore goal if we moved a crate off it\n        for _, g in ipairs(v.goals) do\n            if g[1] == nx and g[2] == ny then\n                setAt(nx, ny, 'G')\n            end\n        end\n        setAt(nnx, nny, 'C')\n        v.px = nx\n        v.py = ny\n    end\nend\n\n-- Check win\nlocal won = true\nfor _, g in ipairs(v.goals) do\n    if getAt(g[1], g[2]) ~= 'C' then\n        won = false\n        break\n    end\nend\nv.win = won\n\nv.redraw()\n"
-  },
+  "scripts": {},
   "goldenScript": [
-    { "key": "up" },
-    { "key": "left" },
-    { "key": "left" },
-    { "key": "down" },
-    { "key": "return" },
-    { "key": "escape" }
+    {
+      "key": "up"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
   ]
 }

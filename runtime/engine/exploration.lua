@@ -7,6 +7,7 @@ local fixturePredicates = require("engine.fixture_predicates")
 local tilesetResolver = require("engine.tileset_resolver")
 local buildProfiler = require("engine.map_build_profiler")
 local event_self_state = require("engine.event_self_state")
+local mover_runtime = require("engine.mover_runtime")
 
 local exploration = {}
 
@@ -1234,6 +1235,7 @@ function exploration.loadMap(session, mapIdx, opts)
             profileAmbient()
         end
     end
+    mover_runtime.activateMap(session)
     if not isSafeMap then
         exploration.revealFog(session)
     end
@@ -1282,6 +1284,7 @@ local function tryMove(session, dx, dy)
 
     local row = session.mapGrid[targetY]
     local ov = session.overrideIndex and session.overrideIndex[targetX .. "," .. targetY]
+    local moverPolicy = mover_runtime.stepPolicy(session, targetX, targetY)
     local passable
     if session.developerMode == true and session.phaseMode == true and session.phaseHeld == true then
         -- Developer sessions get RPG-Maker-style phase movement: the map
@@ -1289,6 +1292,10 @@ local function tryMove(session, dx, dy)
         -- not block inspection. Ordinary campaign sessions never take this
         -- branch, even on maps tagged developer.
         passable = row and row[targetX] ~= nil
+    elseif moverPolicy == "allow" then
+        passable = row and row[targetX] ~= nil
+    elseif moverPolicy == "block" then
+        passable = false
     elseif ov and ov.passable ~= nil then
         passable = ov.passable -- illusory wall (true) / one-way wall (false) override the char
     else
@@ -1300,12 +1307,14 @@ local function tryMove(session, dx, dy)
     -- override wins: an authored `passable` is a deliberate statement about
     -- this exact cell and outranks a decoration that happened to land on it.
     if session.developerMode ~= true and passable and not (ov and ov.passable ~= nil)
+            and moverPolicy ~= "allow"
             and exploration.fixtureBlocksAt(session, targetX - 1, targetY - 1) then
         passable = false
     end
     if passable then
         session.playerX = targetX
         session.playerY = targetY
+        mover_runtime.afterPlayerStep(session)
         exploration.revealFog(session)
 
         -- The step's MP cost is charged by the exploration.step flow (the

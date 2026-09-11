@@ -1,0 +1,309 @@
+{
+  "id": 32,
+  "name": "Stratum III - Linha 1 - Azul",
+  "title": "Stratum III - Linha 1 - Azul",
+  "intro": "Cold fluorescent light and automated rolling stock cut through the buried transit network.",
+  "depth": 7,
+  "safe": true,
+  "generation": "Fixed",
+  "tileset": "metro_minimal",
+  "ceilingStyle": "solid",
+  "music": "dungeon1",
+  "layout": [
+    "#############################################################",
+    "#############################################################",
+    "#...........#...........#...........#...........#...........#",
+    "#...........#...........#...........#...........#...........#",
+    "#...........#...........#...........#...........#...........#",
+    "#...........#...........#...........#...........#...........#",
+    "#...........#...........#...........#...........#...........#",
+    ".............................................................",
+    "#############################################################",
+    "#############################################################",
+    "#############################################################"
+  ],
+  "spawn": {
+    "x": 30,
+    "y": 5,
+    "dir": "S"
+  },
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:metro-blue-train",
+      "name": "Linha 1 - Azul Train",
+      "x": 30,
+      "y": 7,
+      "trigger": "interact",
+      "mover": {
+        "type": "path",
+        "mode": "ping_pong",
+        "speed": 4.5,
+        "dwell": 4,
+        "carryPlayer": true,
+        "initialWaypoint": 3,
+        "waypoints": [
+          {
+            "x": 6,
+            "y": 7,
+            "dwell": 3
+          },
+          {
+            "x": 18,
+            "y": 7,
+            "dwell": 3
+          },
+          {
+            "x": 30,
+            "y": 7,
+            "dwell": 5
+          },
+          {
+            "x": 42,
+            "y": 7,
+            "dwell": 3
+          },
+          {
+            "x": 54,
+            "y": 7,
+            "dwell": 3
+          }
+        ],
+        "footprint": [
+          {
+            "x": -4,
+            "y": 0
+          },
+          {
+            "x": -3,
+            "y": 0
+          },
+          {
+            "x": -2,
+            "y": 0
+          },
+          {
+            "x": -1,
+            "y": 0
+          },
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 2,
+            "y": 0
+          },
+          {
+            "x": 3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0
+          }
+        ],
+        "ports": [
+          {
+            "inside": {
+              "x": -3,
+              "y": 0
+            },
+            "outside": {
+              "x": -3,
+              "y": -1
+            }
+          },
+          {
+            "inside": {
+              "x": 0,
+              "y": 0
+            },
+            "outside": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          {
+            "inside": {
+              "x": 3,
+              "y": 0
+            },
+            "outside": {
+              "x": 3,
+              "y": -1
+            }
+          }
+        ],
+        "door": {
+          "closeSeconds": 0.45,
+          "openSeconds": 0.45
+        },
+        "visual": {
+          "models": {
+            "open": "assets/models/metro/metro_train_blue_open.obj",
+            "closed": "assets/models/metro/metro_train_blue_closed.obj"
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "instanceId": "event:metro-10-jabaquara-sign",
+      "name": "Jabaquara Sign",
+      "x": 6,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_seen_blue_1",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "instanceId": "event:metro-11-santa-cruz-sign",
+      "name": "Santa Cruz Sign",
+      "x": 18,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_seen_blue_2",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "instanceId": "event:metro-12-paraiso-sign",
+      "name": "Paraiso Sign",
+      "x": 30,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_seen_blue_3",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "instanceId": "event:metro-13-se-sign",
+      "name": "Se Sign",
+      "x": 42,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_seen_blue_4",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "instanceId": "event:metro-14-luz-sign",
+      "name": "Luz Sign",
+      "x": 54,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_seen_blue_5",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "instanceId": "event:metro-30-transfer-to-green",
+      "name": "Transfer to Green",
+      "x": 30,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 33
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "instanceId": "event:metro-31-transfer-to-red",
+      "name": "Transfer to Red",
+      "x": 42,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 34
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "instanceId": "event:metro-32-transfer-to-yellow",
+      "name": "Transfer to Yellow",
+      "x": 54,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 35
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "instanceId": "event:metro-33-return-to-sanctum",
+      "name": "Return to Sanctum",
+      "x": 6,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 7
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "instanceId": "event:metro-34-santa-cruz-emergency-corridor",
+      "name": "Santa Cruz Emergency Corridor",
+      "x": 18,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:metro_shortcut_unlocked",
+          "commands": [
+            {
+              "cmd": "LOAD_MAP",
+              "mapId": 36
+            }
+          ],
+          "elseCommands": []
+        }
+      ]
+    }
+  ],
+  "encounters": [],
+  "recruits": []
+}

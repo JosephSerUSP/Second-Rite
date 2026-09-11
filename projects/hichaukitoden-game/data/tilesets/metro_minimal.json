@@ -1,0 +1,63 @@
+{
+  "id": "metro_minimal",
+  "name": "Metro Minimal",
+  "texture": "assets/tilesets/dungeon_001.png",
+  "heightMap": "assets/tilesets/dungeon_001_heightmap.png",
+  "heightMapScale": {
+    "wall": 0.03,
+    "floor": 0.01,
+    "ceiling": 0.01
+  },
+  "heightMapMeshColumns": 12,
+  "heightMapMeshRows": 12,
+  "heightMapTriangleBudget": 192,
+  "tileWidth": 64,
+  "tileHeight": 64,
+  "base": {
+    "walls": [
+      {
+        "id": "metro_wall",
+        "role": "base_wall",
+        "middle": [
+          1,
+          0
+        ],
+        "weight": 100
+      }
+    ],
+    "floors": [
+      {
+        "id": "metro_floor",
+        "role": "base_floor",
+        "atlas": [
+          0,
+          1
+        ],
+        "weight": 100,
+        "heightOffset": 0
+      }
+    ],
+    "ceilings": [
+      {
+        "id": "metro_ceiling",
+        "role": "base_ceiling",
+        "atlas": [
+          0,
+          0
+        ],
+        "weight": 100
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "metro_door",
+      "role": "door",
+      "atlas": [
+        1,
+        1
+      ]
+    }
+  ],
+  "features": []
+}

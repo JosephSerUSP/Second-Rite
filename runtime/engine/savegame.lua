@@ -14,7 +14,7 @@ local event_self_state = require("engine.event_self_state")
 local savegame = {}
 
 local SAVE_DIR = "saves"
-local SAVE_VERSION = 5
+local SAVE_VERSION = 6
 
 local function sourceAbsPath(relPath)
     return love.filesystem.getSource() .. "/" .. relPath
@@ -164,6 +164,7 @@ local function restoreMap(sessionObj, data, loader)
         require("engine.exploration").applyMapPresentation(
             sessionObj, data.mapIndex, presentation)
     end
+    require("engine.mover_runtime").activateMap(sessionObj)
 end
 
 -- Builds the full save payload for a session. `sceneName` should be
@@ -220,6 +221,7 @@ function savegame.serialize(sessionObj, loader, sceneName)
         mapStates = sessionObj.mapStates,
         portalReturn = sessionObj.portalReturn,
         mapPresentationOverrides = sessionObj.mapPresentationOverrides,
+        moverRuntime = state_value.copy(sessionObj.moverRuntime or {}, "mover runtime save payload"),
         dungeonFloor = sessionObj.dungeonFloor,
         mp = sessionObj.mp,
         maxMp = sessionObj.maxMp,
@@ -302,6 +304,8 @@ function savegame.deserialize(data, loader)
     sess.mapStates = restoreNumericKeys(data.mapStates or {})
     sess.portalReturn = data.portalReturn
     sess.mapPresentationOverrides = restoreNumericKeys(data.mapPresentationOverrides or {})
+    if type(data.moverRuntime) ~= "table" then error("save v6 is missing the moverRuntime state owner") end
+    sess.moverRuntime = state_value.copy(data.moverRuntime, "mover runtime save payload")
     sess.dungeonFloor = data.dungeonFloor or 1
     sess.mp = data.mp or sess.mp
     sess.maxMp = data.maxMp or sess.maxMp

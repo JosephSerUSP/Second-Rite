@@ -8,6 +8,8 @@ local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
+local event_actor = require("engine.event_actor")
+local mover_runtime = require("engine.mover_runtime")
 
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
@@ -869,6 +871,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
     local rawFocus = getField("interactionFocus")
 
     local modelPath = (type(rawModel) == "string" and rawModel ~= "") and rawModel or nil
+    modelPath = mover_runtime.presentationModel(session, ev, modelPath)
     local spritePath = nil
     if type(rawSprite) == "string" and rawSprite ~= "" then
         if love.filesystem.getInfo(rawSprite) then
@@ -920,10 +923,11 @@ function viewport_3d.collectEventModelPlacements(session)
             if not rawEv.wallEvent then
                 local pres = viewport_3d.resolveEventPresentation(rawEv, session)
                 if pres.visual == "model" and pres.model then
+                    local actor = event_actor.snapshot(session, rawEv)
                     table.insert(placements, {
                         model = pres.model,
-                        x = rawEv.x + 1.5,
-                        y = rawEv.y + 1.5,
+                        x = (actor.rootX or rawEv.x) + 1.5,
+                        y = (actor.rootY or rawEv.y) + 1.5,
                         event = rawEv,
                         presentation = pres
                     })
@@ -2206,6 +2210,14 @@ local function drawWorldSpace(session, authoredCamera)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
+    local transportX, transportY = mover_runtime.playerWorldRoot(session)
+    if transportX and transportY then
+        local merged = {}
+        for key, value in pairs(focusCam or {}) do merged[key] = value end
+        merged.dollyX = (merged.dollyX or 0) + transportX - ((session.playerX or 1) + 0.5)
+        merged.dollyY = (merged.dollyY or 0) + transportY - ((session.playerY or 1) + 0.5)
+        focusCam = merged
+    end
     -- The Map Scene still owns composition. A bounded provider supplies only
     -- its selected camera record and package-backed environment to this shared
     -- WorldCamera/viewport seam.
@@ -2875,6 +2887,23 @@ local function drawWorldSpace(session, authoredCamera)
         structure.modelSurfaces[cacheKey] = placed
         return placed
     end
+    local function releasePlacedGroups(groups)
+        for _, placed in ipairs(groups or {}) do
+            if placed.mesh and placed.mesh.release then placed.mesh:release() end
+            if placed.clippedMesh and placed.clippedMesh.release then placed.clippedMesh:release() end
+        end
+    end
+    local function ensureDynamicPlacedModel(spec, cacheKey, originX, originY, axis)
+        structure.dynamicModelState = structure.dynamicModelState or {}
+        local sourceKey = viewport_3d.meshSource(spec)
+        local previous = structure.dynamicModelState[cacheKey]
+        if previous and previous.sourceKey == sourceKey and previous.x == originX and previous.y == originY then return previous.groups end
+        if previous then releasePlacedGroups(previous.groups) end
+        structure.modelSurfaces[cacheKey] = nil
+        local groups = ensurePlacedModel(spec, cacheKey, originX, originY, axis)
+        structure.dynamicModelState[cacheKey] = { sourceKey = sourceKey, x = originX, y = originY, groups = groups }
+        return groups
+    end
     local function queuePlacedModels(placedGroups)
         -- Keep projection depth positive on the CPU, but leave the final cut
         -- to the GPU's 0.05 near plane. Cutting triangle soup exactly at the
@@ -3112,10 +3141,10 @@ end
     local function eventWorldPosition(rawEv)
         local position = rawEv.worldPosition or rawEv.position
         if type(position) == "table" then
-            return tonumber(position[1] or position.x),
-                tonumber(position[2] or position.y), tonumber(position[3] or position.z or 0)
+            return tonumber(position[1] or position.x), tonumber(position[2] or position.y), tonumber(position[3] or position.z or 0)
         end
-        return rawEv.x + 1.5, rawEv.y + 1.5, 0
+        local actor = event_actor.snapshot(session, rawEv)
+        return (actor.rootX or rawEv.x) + 1.5, (actor.rootY or rawEv.y) + 1.5, 0
     end
 
     local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex)
@@ -3157,9 +3186,16 @@ end
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
                 if presentation.visual == "model" and presentation.model then
                     local modelSpec = { model = presentation.model }
-                    local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":" .. rawEv.x .. "," .. rawEv.y
                     local worldX, worldY = eventWorldPosition(rawEv)
-                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x"))
+                    local actor = event_actor.snapshot(session, rawEv)
+                    local moved = rawEv.mover ~= nil or actor.rootX ~= rawEv.x or actor.rootY ~= rawEv.y
+                    if moved then
+                        local cacheKey = "event-dynamic:" .. tostring(rawEv.instanceId or rawEv.id or "ev")
+                        queuePlacedModels(ensureDynamicPlacedModel(modelSpec, cacheKey, worldX, worldY, "x"))
+                    else
+                        local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":" .. rawEv.x .. "," .. rawEv.y
+                        queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x"))
+                    end
                 elseif presentation.visual == "sprite" then
                     local image = getEventSprite(rawEv, session)
                     if image then

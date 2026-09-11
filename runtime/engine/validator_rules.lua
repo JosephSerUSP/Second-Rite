@@ -2883,6 +2883,56 @@ elseif paramDef.type == "script" then
                         and love.filesystem.getInfo(ev.sprite) ~= nil,
                     desc .. " references missing wall-event sprite '" .. tostring(ev.sprite) .. "'")
             end
+            if ev.mover then
+                local mover = ev.mover
+                check(type(mover) == "table", desc .. ".mover must be a table")
+                check(mover.type == "path", desc .. ".mover.type must be 'path'")
+                check(type(mover.speed) == "number" and mover.speed > 0, desc .. ".mover.speed must be positive number")
+                local validModes = { loop = true, ping_pong = true, once = true }
+                check(validModes[mover.mode] == true, desc .. ".mover.mode must be 'loop', 'ping_pong', or 'once'")
+                check(type(mover.waypoints) == "table" and #mover.waypoints >= 2, desc .. ".mover.waypoints must have at least 2 waypoints")
+                for wi, wp in ipairs(mover.waypoints or {}) do
+                    check(type(wp.x) == "number" and type(wp.y) == "number", desc .. ".mover waypoint " .. wi .. " must have numeric x and y")
+                    if map.layout then
+                        check(wp.y >= 0 and wp.y < #map.layout, desc .. ".mover waypoint " .. wi .. " y out of map bounds")
+                        check(wp.x >= 0 and wp.x < #map.layout[1], desc .. ".mover waypoint " .. wi .. " x out of map bounds")
+                    end
+                    if wp.dwell ~= nil then
+                        check(type(wp.dwell) == "number" and wp.dwell >= 0, desc .. ".mover waypoint " .. wi .. " dwell must be non-negative")
+                    end
+                end
+                if mover.doorAnimation then
+                    local da = mover.doorAnimation
+                    check(type(da) == "table", desc .. ".mover.doorAnimation must be a table")
+                    if da.openModel then
+                        check(love.filesystem.getInfo(da.openModel) ~= nil, desc .. ".mover.doorAnimation.openModel missing '" .. tostring(da.openModel) .. "'")
+                    end
+                    if da.halfModel then
+                        check(love.filesystem.getInfo(da.halfModel) ~= nil, desc .. ".mover.doorAnimation.halfModel missing '" .. tostring(da.halfModel) .. "'")
+                    end
+                    if da.closedModel then
+                        check(love.filesystem.getInfo(da.closedModel) ~= nil, desc .. ".mover.doorAnimation.closedModel missing '" .. tostring(da.closedModel) .. "'")
+                    end
+                end
+                if mover.consist then
+                    check(type(mover.consist) == "table", desc .. ".mover.consist must be a table")
+                    for ci, car in ipairs(mover.consist) do
+                        check(type(car) == "table", desc .. ".mover.consist[" .. ci .. "] must be a table")
+                        if car.model then
+                            check(love.filesystem.getInfo(car.model) ~= nil, desc .. ".mover.consist[" .. ci .. "].model missing '" .. tostring(car.model) .. "'")
+                        end
+                        if car.stateModels then
+                            check(type(car.stateModels) == "table", desc .. ".mover.consist[" .. ci .. "].stateModels must be a table")
+                            for sName, sPath in pairs(car.stateModels) do
+                                check(love.filesystem.getInfo(sPath) ~= nil, desc .. ".mover.consist[" .. ci .. "].stateModels." .. sName .. " missing '" .. tostring(sPath) .. "'")
+                            end
+                        end
+                    end
+                end
+                if mover.barrierMaterials ~= nil then
+                    check(type(mover.barrierMaterials) == "table", desc .. ".mover.barrierMaterials must be a table")
+                end
+            end
             if ev.commands then
                 validateCommands(ev.commands, "map", false, true, desc)
             end

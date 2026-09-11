@@ -6,11 +6,11 @@
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
     6.8,
-    -2.844,
-    -1.0,
+    0.0,
+    -2.5,
     8.8,
-    26.906,
-    4.0
+    22.254,
+    2.5
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -19,56 +19,56 @@
     "spawn_player": {
       "position": [
         7.8,
-        12.031,
+        11.127,
         0.0
       ]
     },
     "west_praca": {
       "position": [
         7.8,
-        -2.8438,
+        0.0,
         0.0
       ]
     },
     "lodging_door": {
       "position": [
         7.8,
-        10.4635,
+        7.514,
         0.0
       ]
     },
     "padaria_back": {
       "position": [
         7.8,
-        13.7448,
+        15.029,
         0.0
       ]
     },
     "port_stair": {
       "position": [
         7.8,
-        20.125,
+        18.786,
         0.0
       ]
     },
     "east_market": {
       "position": [
         7.8,
-        26.9062,
+        22.254,
         0.0
       ]
     },
     "npc_scholar": {
       "position": [
         7.8,
-        1.8958,
+        4.624,
         0.0
       ]
     },
     "npc_euler": {
       "position": [
         7.8,
-        8.4583,
+        10.983,
         0.0
       ]
     }
@@ -76,11 +76,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      866,
+      850,
       240
     ],
     "slicePositions": [
-      12.031
+      11.127
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
@@ -89,17 +89,17 @@
       "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_866.png"
+      "../stub/empty_850.png"
     ],
     "lane": {
-      "runtimeCenterY": 12.031
+      "runtimeCenterY": 11.127
     },
     "playerProjection": {
-      "centerX": 536.0,
+      "centerX": 425.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 27.428571428571427
+      "pixelsPerRuntimeY": 34.6
     }
   }
 }

@@ -23,40 +23,22 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 29.604,
+      "maxY": 29.48,
       "depthX": 7.8,
       "groundZ": 0.0,
-      "speed": 3.4,
-      "groundProfile": [
-        {
-          "y": -4.6667,
-          "z": 0.0
-        },
-        {
-          "y": 25.2292,
-          "z": 0.0
-        },
-        {
-          "y": 29.6042,
-          "z": 0.5833
-        },
-        {
-          "y": 34.1615,
-          "z": 0.5833
-        }
-      ]
+      "speed": 3.4
     },
     "blockedRanges": [],
     "camera": {
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 14.802,
+        "y": 14.74,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": -17.5,
+      "pitchDegrees": 0.0,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -71,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 14.802,
+        "center": 14.74,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -88,7 +70,7 @@
       {
         "anchor": "forge_door",
         "eventInstanceId": "st-maria-port-forge_door",
-        "radius": 1.2
+        "radius": 0.9
       },
       {
         "anchor": "smith_3d_door",
@@ -98,12 +80,12 @@
       {
         "anchor": "cortico_stair",
         "eventInstanceId": "st-maria-port-cortico_stair",
-        "radius": 1.2
+        "radius": 0.9
       },
       {
         "anchor": "climb_churchyard",
         "eventInstanceId": "st-maria-port-climb_churchyard",
-        "radius": 3.0
+        "radius": 0.9
       }
     ]
   },
@@ -117,18 +99,16 @@
       "worldPosition": [
         7.8,
         0.0,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 19,
           "arrival": "east_port"
         }
-      ],
-      "direction": "left"
+      ]
     },
     {
       "id": 3102,
@@ -138,19 +118,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        8.4583,
-        0.0
+        10.405,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 20,
           "arrival": "exit_door"
         }
-      ],
-      "direction": "away"
+      ]
     },
     {
       "id": 3103,
@@ -160,19 +138,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        16.8073,
-        0.0
+        16.185,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 29,
           "arrival": "exit_door"
         }
-      ],
-      "direction": "away"
+      ]
     },
     {
       "id": 3104,
@@ -182,19 +158,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        19.0312,
-        0.0
+        20.52,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
           "arrival": "port_stair"
         }
-      ],
-      "direction": "away"
+      ]
     },
     {
       "id": 3105,
@@ -204,19 +178,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        28.6927,
-        0.4618
+        24.855,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 16,
           "arrival": "port_climb"
         }
-      ],
-      "direction": "away"
+      ]
     }
   ],
   "treasures": [],

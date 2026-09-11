@@ -1980,13 +1980,18 @@ end
 handlers.LOAD_MAP = function(cmd, ctx)
     local exploration = require("engine.exploration")
     local sys = ctx.session.loader and ctx.session.loader.system
+    local currentMapId = ctx.session.currentMapData and ctx.session.currentMapData.id
     local spawnMapId = sys and sys.spawn and sys.spawn.mapId
-    local mapId = cmd.mapId ~= nil and tonumber(evalFormula(cmd.mapId, ctx)) or spawnMapId or 1
+    local mapId = cmd.mapId ~= nil and tonumber(evalFormula(cmd.mapId, ctx)) or currentMapId or spawnMapId or 1
     local mapIdx = ctx.session.loader.getMapIndex and ctx.session.loader.getMapIndex(mapId)
     if not mapIdx then
         error("LOAD_MAP: no map with authored id " .. tostring(mapId))
     end
-    exploration.loadMap(ctx.session, mapIdx, { arrival = cmd.arrival })
+    local opts = { arrival = cmd.arrival }
+    if cmd.x ~= nil then opts.x = tonumber(evalFormula(cmd.x, ctx)) end
+    if cmd.y ~= nil then opts.y = tonumber(evalFormula(cmd.y, ctx)) end
+    if cmd.dir ~= nil then opts.dir = tostring(cmd.dir) end
+    exploration.loadMap(ctx.session, mapIdx, opts)
 end
 
 handlers.SET_MAP_PRESENTATION = function(cmd, ctx)

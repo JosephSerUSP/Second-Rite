@@ -1465,9 +1465,10 @@ function cli.runPreviewMap(mapId, x, y, dir, loader)
 
         viewport_3d.init()
 
-        local pw, ph = 256, 144
+        local pw, ph = 256, 240
         local previewCanvas = love.graphics.newCanvas(pw, ph)
         love.graphics.setCanvas({ previewCanvas, depth = true, stencil = true })
+        viewport_3d.draw(vSession)
         love.graphics.clear(0, 0, 0, 1, true, true)
         viewport_3d.draw(vSession)
         love.graphics.setCanvas()
@@ -1534,7 +1535,6 @@ function cli.runTownProofFrames(loader)
     end
 
     viewport_3d.init()
-    viewport_3d.showBounds = os.getenv("THESTRA_TOWN_PROOF_BOUNDS") == "1"
 
     -- Every map that declares the bounded-lane provider is part of the town,
     -- so the proof enumerates them rather than naming ids. A screen added to

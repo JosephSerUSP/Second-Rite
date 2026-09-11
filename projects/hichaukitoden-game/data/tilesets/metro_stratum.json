@@ -1,0 +1,54 @@
+{
+  "id": "metro_stratum",
+  "name": "São Paulo Metro",
+  "texture": "assets/tilesets/metro_stratum.png",
+  "tileWidth": 64,
+  "tileHeight": 64,
+  "base": {
+    "walls": [
+      {
+        "id": "metro_wall_blue",
+        "role": "base_wall",
+        "middle": [
+          1,
+          0
+        ],
+        "weight": 100
+      }
+    ],
+    "floors": [
+      {
+        "id": "metro_floor_platform",
+        "role": "base_floor",
+        "atlas": [
+          3,
+          0
+        ],
+        "weight": 100,
+        "heightOffset": 0
+      }
+    ],
+    "ceilings": [
+      {
+        "id": "metro_ceiling_grid",
+        "role": "base_ceiling",
+        "atlas": [
+          0,
+          0
+        ],
+        "weight": 100
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "metro_door_train",
+      "role": "door",
+      "atlas": [
+        2,
+        0
+      ]
+    }
+  ],
+  "features": []
+}

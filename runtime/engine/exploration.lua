@@ -1195,6 +1195,12 @@ function exploration.loadMap(session, mapIdx, opts)
         end
     end
     
+    if opts.x ~= nil and opts.y ~= nil then
+        startX = opts.x + 1
+        startY = opts.y + 1
+        if opts.dir then startDir = opts.dir end
+    end
+
     session.mapGrid = grid
     session.mapStructureRevision = (session.mapStructureRevision or 0) + 1
     exploration.buildOverrideIndex(session)
@@ -1302,6 +1308,12 @@ local function tryMove(session, dx, dy)
     if session.developerMode ~= true and passable and not (ov and ov.passable ~= nil)
             and exploration.fixtureBlocksAt(session, targetX - 1, targetY - 1) then
         passable = false
+    end
+    if passable and (package.loaded["engine.mover_runtime"] or pcall(require, "engine.mover_runtime")) then
+        local mover = require("engine.mover_runtime")
+        if mover.isBlocked(session, targetX, targetY) then
+            passable = false
+        end
     end
     if passable then
         session.playerX = targetX

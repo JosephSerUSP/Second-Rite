@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 10.4,
+      "maxY": 15.029,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 5.2,
+        "y": 7.514,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": -17.5,
+      "pitchDegrees": 0.0,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 5.2,
+        "center": 7.514,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -78,8 +78,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.8125,
-        0.0
+        10.983,
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -166,19 +166,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        10.0625,
-        0.0
+        2.312,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
           "arrival": "lodging_door"
         }
-      ],
-      "direction": "away"
+      ]
     }
   ],
   "treasures": [],

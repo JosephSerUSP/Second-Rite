@@ -122,27 +122,16 @@ function environment_package.load(path)
     if type(manifest.anchors) ~= "table" then
         error("environment package anchors must be an object", 0)
     end
-    local collisionMesh = nil
-    if manifest.collisionMesh ~= nil and manifest.collisionMesh ~= json.null then
-        collisionMesh = asset("collisionMesh", "collisionMesh")
-    end
-    local bakedLighting = manifest.bakedLighting
-    if bakedLighting == nil then
-        bakedLighting = (preRendered == nil)
-    else
-        bakedLighting = (bakedLighting == true)
-    end
     return {
         manifestPath = path,
         manifest = manifest,
         renderMesh = asset("renderMesh", "renderMesh"),
         materialLibrary = asset("materialLibrary", "materialLibrary"),
         textureAtlas = asset("textureAtlas", "textureAtlas"),
-        collisionMesh = collisionMesh,
+        collisionMesh = asset("collisionMesh", "collisionMesh"),
         bounds = manifest.bounds,
         anchors = manifest.anchors,
         preRendered = preRendered,
-        bakedLighting = bakedLighting,
     }
 end
 

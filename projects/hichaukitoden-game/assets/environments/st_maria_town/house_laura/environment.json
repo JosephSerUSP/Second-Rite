@@ -6,11 +6,11 @@
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
     6.8,
-    -2.516,
-    -1.0,
+    0.0,
+    -2.5,
     8.8,
-    18.3,
-    4.0
+    17.919,
+    2.5
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -19,35 +19,35 @@
     "spawn_player": {
       "position": [
         7.8,
-        7.892,
+        8.96,
         0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        -2.5156,
+        2.023,
         0.0
       ]
     },
     "bedroom_door": {
       "position": [
         7.8,
-        14.9844,
+        7.514,
         0.0
       ]
     },
     "shop_stair": {
       "position": [
         7.8,
-        18.2656,
+        15.029,
         0.0
       ]
     },
     "npc_laura": {
       "position": [
         7.8,
-        12.1042,
+        13.295,
         0.0
       ]
     }
@@ -55,11 +55,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      747,
+      700,
       240
     ],
     "slicePositions": [
-      7.892
+      8.96
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/house_laura_bg.png"
@@ -68,17 +68,17 @@
       "../../../../assets/environments/st_maria_town/plates/house_laura_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_747.png"
+      "../stub/empty_700.png"
     ],
     "lane": {
-      "runtimeCenterY": 7.892
+      "runtimeCenterY": 8.96
     },
     "playerProjection": {
-      "centerX": 413.477,
+      "centerX": 350.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 27.428571428571427
+      "pixelsPerRuntimeY": 34.6
     }
   }
 }

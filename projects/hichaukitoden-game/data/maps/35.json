@@ -1,0 +1,958 @@
+{
+  "id": 35,
+  "name": "Stratum III - Linha 4: Amarela",
+  "title": "Stratum III - Linha 4: Amarela",
+  "intro": "Completamente automatizada, asséptica e cintilante em tons dourados, a linha esconde riquezas e defesas perfeitas.",
+  "depth": 10,
+  "safe": true,
+  "generation": "Fixed",
+  "tileset": "metro_station_l4",
+  "music": "dungeon1",
+  "layout": [
+    "################################",
+    "################################",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "####........................####",
+    "................................",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################"
+  ],
+  "spawn": {
+    "x": 3,
+    "y": 2,
+    "dir": "S"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Túnel da Paulista -> Linha 2 (Verde)",
+      "x": 3,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Atravessar as esteiras rolantes do Túnel da Paulista de volta à Linha 2-Verde (Estação Consolação)?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ir para Linha 2 (Verde)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 33,
+                  "x": 3,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 4"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 2,
+      "name": "Totem Paulista L4",
+      "x": 5,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO PAULISTA - LINHA 4-AMARELA]\nConexão com a Linha 2-Verde. Operação 100% autônoma."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 3,
+      "name": "Automated Vending Kiosk",
+      "x": 7,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[TERMINAL AUTOMATIZADO VIAQUATRO]\nInsira 100 moedas de ouro para dispensar consumíveis de alta pureza."
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Comprar Elixir da Clarividência (100 ouros)",
+              "commands": [
+                {
+                  "cmd": "GAIN_GOLD",
+                  "amount": -100
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 4,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "O terminal emite um bipe suave e dispensa o Elixir!"
+                }
+              ]
+            },
+            {
+              "label": "Não comprar"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 4,
+      "name": "Totem República L4",
+      "x": 9,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO REPÚBLICA - LINHA 4-AMARELA]\nTransferência para a Linha 3-Vermelha."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 5,
+      "name": "Baldeação República -> Linha 3 (Vermelha)",
+      "x": 11,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Subir o átrio para a plataforma da Linha 3-Vermelha (Estação República)?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Subir para Linha 3",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 34,
+                  "x": 3,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 4"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 6,
+      "name": "Totem Luz L4",
+      "x": 13,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO DA LUZ - LINHA 4-AMARELA]\nTransferência para a Linha 1-Azul."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 7,
+      "name": "Express Gate to Linha 1 (Luz)",
+      "x": 15,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/map_door_001.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Atravessar o túnel de transferência para a Estação da Luz da Linha 1-Azul?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ir para Linha 1 (Luz)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 32,
+                  "x": 19,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 4"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 8,
+      "name": "Totem Pinheiros",
+      "x": 21,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO PINHEIROS - LINHA 4-AMARELA]\nIntercâmbio com a rede metropolitana e travessia do Rio Pinheiros."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 9,
+      "name": "Vault Guardian Sentinel",
+      "x": 19,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_turnstile.png",
+      "pages": [
+        {
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Uma catraca blindada de titânio bloqueia o cofre de Faria Lima. Um autômato policial com lâminas rotativas monta guarda!"
+            },
+            {
+              "cmd": "BATTLE",
+              "troop": "sentinel_talos",
+              "onVictory": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "metro_sentinel_down",
+                  "value": true
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "O sentinela mecânico desaba em chamas e a catraca destrava!"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "flag:metro_sentinel_down",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Os destroços do sentinela fumegam no chão. O cofre está acessível."
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 10,
+      "name": "Golden Master Safe",
+      "x": 23,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "pages": [
+        {
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "[COFRE DE OURO DE FARIA LIMA]\nO cofre de alta segurança brilha sob as lâmpadas halógenas."
+            },
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": 10000
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "metro_master_pass",
+              "value": true
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "metro_vault_cleared",
+              "value": true
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Você recolheu 10.000 moedas de ouro e o Bilhete Único Mestre do Metrô!"
+            }
+          ]
+        },
+        {
+          "condition": "flag:metro_vault_cleared",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "O cofre mestre está vazio."
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 11,
+      "name": "Totem Faria Lima",
+      "x": 17,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO FARIA LIMA - LINHA 4-AMARELA]\nDistrito financeiro subterrâneo e Reserva Central."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 300,
+      "name": "Trem Stratum III - Linha 4: Amarela",
+      "x": 15,
+      "y": 9,
+      "model": "assets/models/metro/metro_wagon_l4.obj",
+      "mover": {
+        "type": "path",
+        "speed": 3.5,
+        "mode": "ping_pong",
+        "carryPlayer": true,
+        "initialWaypoint": 2,
+        "sway": {
+          "pitch": 0.006,
+          "roll": 0.016,
+          "frequency": 12
+        },
+        "doorAnimation": {
+          "openModel": "assets/models/metro/metro_wagon_l4.obj",
+          "halfModel": "assets/models/metro/metro_wagon_half_l4.obj",
+          "closedModel": "assets/models/metro/metro_wagon_closed_l4.obj",
+          "duration": 0.6
+        },
+        "consist": [
+          {
+            "offset": -3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_rear_l4.obj"
+          },
+          {
+            "offset": 0,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_l4.obj"
+          },
+          {
+            "offset": 3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_lead_l4.obj"
+          }
+        ],
+        "waypoints": [
+          {
+            "x": 1,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Luz / Higienópolis"
+          },
+          {
+            "x": 15,
+            "y": 9,
+            "dwell": 14,
+            "dockDir": "N",
+            "name": "Estação Paulista"
+          },
+          {
+            "x": 30,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Pinheiros / Vila Sônia"
+          }
+        ]
+      }
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "materials": [
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails"
+    ],
+    [
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ]
+}

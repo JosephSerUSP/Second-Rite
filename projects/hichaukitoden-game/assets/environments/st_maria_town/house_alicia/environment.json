@@ -6,11 +6,11 @@
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
     6.8,
-    -0.7,
-    -1.0,
+    0.0,
+    -2.5,
     8.8,
-    7.0,
-    4.0
+    17.919,
+    2.5
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -19,21 +19,21 @@
     "spawn_player": {
       "position": [
         7.8,
-        3.15,
+        8.96,
         0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        1.8958,
+        2.023,
         0.0
       ]
     },
     "npc_alicia": {
       "position": [
         7.8,
-        -0.6562,
+        17.341,
         0.0
       ]
     }
@@ -41,11 +41,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      424,
+      700,
       240
     ],
     "slicePositions": [
-      3.15
+      8.96
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/house_alicia_bg.png"
@@ -54,17 +54,17 @@
       "../../../../assets/environments/st_maria_town/plates/house_alicia_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_424.png"
+      "../stub/empty_700.png"
     ],
     "lane": {
-      "runtimeCenterY": 3.15
+      "runtimeCenterY": 8.96
     },
     "playerProjection": {
-      "centerX": 233.6,
+      "centerX": 350.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 27.428571428571427
+      "pixelsPerRuntimeY": 34.6
     }
   }
 }

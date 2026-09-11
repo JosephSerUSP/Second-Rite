@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 16.0,
+      "maxY": 28.035,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 8.0,
+        "y": 14.017,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": -17.5,
+      "pitchDegrees": 0.0,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 8.0,
+        "center": 14.017,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -78,8 +78,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        12.651,
-        0.0
+        24.277,
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -129,19 +129,17 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        15.7135,
-        0.0
+        2.312,
+        -1.5
       ],
       "trigger": "bump",
-      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
           "arrival": "chapel_door"
         }
-      ],
-      "direction": "away"
+      ]
     }
   ],
   "treasures": [],

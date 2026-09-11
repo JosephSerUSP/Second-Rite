@@ -1,0 +1,954 @@
+{
+  "id": 34,
+  "name": "Stratum III - Linha 3: Vermelha",
+  "title": "Stratum III - Linha 3: Vermelha",
+  "intro": "Vigas de aço vermelho e ecos industriais definem a linha mais densa e agitada das profundezas.",
+  "depth": 9,
+  "safe": true,
+  "generation": "Fixed",
+  "tileset": "metro_station_l3",
+  "music": "dungeon1",
+  "layout": [
+    "################################",
+    "################################",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "####........................####",
+    "................................",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################"
+  ],
+  "spawn": {
+    "x": 3,
+    "y": 2,
+    "dir": "S"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Baldeação Sé -> Linha 1 (Azul)",
+      "x": 3,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Subir as escadarias monumentais de volta à plataforma da Linha 1-Azul (Estação Sé)?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Subir para Linha 1 (Azul)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 32,
+                  "x": 19,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 3"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 2,
+      "name": "Totem Sé L3",
+      "x": 5,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO SÉ - LINHA 3-VERMELHA]\nNível Inferior. Sentido Palmeiras-Barra Funda / Corinthians-Itaquera."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 3,
+      "name": "Anhangabaú Drainage Sump",
+      "x": 7,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_blue_chalk_sigil.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Águas escuras vertem das comportas da galeria pluvial... Criaturas emergem da drenagem!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "metro_ghouls",
+          "onVictory": [
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": 450
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Você eliminou as aberrações e recolheu 450 ouros!"
+            }
+          ]
+        },
+        {
+          "cmd": "ERASE_EVENT"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 4,
+      "name": "Totem Anhangabaú",
+      "x": 9,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO ANHANGABAÚ - LINHA 3-VERMELHA]\nAcesso ao Vale e ao Viaduto do Chá."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 5,
+      "name": "Baldeação República -> Linha 4 (Amarela)",
+      "x": 15,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Descer o átrio circular em direção à Linha 4-Amarela (Estação República)?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ir para Linha 4 (Amarela)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 35,
+                  "x": 3,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 3"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 6,
+      "name": "Totem República",
+      "x": 13,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO REPÚBLICA - LINHA 3-VERMELHA]\nTransferência para a Linha 4-Amarela."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 7,
+      "name": "Minstrel Busker NPC",
+      "x": 20,
+      "y": 3,
+      "trigger": "interact",
+      "sprite": "assets/sprites/metro_commuter.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Um violonista solitário toca acordes de choro na plataforma vazia de Santa Cecília."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "'A música espanta os monstros do túnel, forasteiro. Ouça um pouco e recupere o fôlego.'"
+        },
+        {
+          "cmd": "RECOVER_PARTY"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "A canção suave restaurou o ânimo de todo o grupo!"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Totem Santa Cecília",
+      "x": 17,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO SANTA CECÍLIA - LINHA 3-VERMELHA]\nPróxima parada: Pátio do Brás / Bresser-Mooca."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 9,
+      "name": "Bresser Cargo Chest",
+      "x": 21,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "commands": [
+        {
+          "cmd": "GAIN_GOLD",
+          "amount": 800
+        },
+        {
+          "cmd": "CHANGE_ITEM",
+          "item": 206,
+          "count": 1
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Você obteve 800 ouros e um Frasco de Bell Salt!"
+        },
+        {
+          "cmd": "ERASE_EVENT"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 10,
+      "name": "Totem Bresser",
+      "x": 19,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO BRESSER-MOOCA - LINHA 3-VERMELHA]\nAcesso às antigas tecelagens e oficinas ferroviárias."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 11,
+      "name": "Auxiliary Substation Breaker",
+      "x": 23,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_breaker.png",
+      "pages": [
+        {
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "[SUBESTAÇÃO ELÉTRICA DO BRÁS]\nUma enorme chave-faca industrial controla os geradores auxiliares do metrô."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Engatar a chave-faca",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "metro_aux_power",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "ZUUUUM! Relés elétricos disparam com faíscas azuis! Os circuitos da rede auxiliar foram reativados!"
+                    }
+                  ]
+                },
+                {
+                  "label": "Não mexer"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "flag:metro_aux_power",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "[SUBESTAÇÃO ELÉTRICA DO BRÁS]\nA chave-faca está engatada. Os transformadores zumbem em plena carga operacional."
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 12,
+      "name": "Foreman's Tool Locker (Track Key)",
+      "x": 25,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_reliquary_drawers.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "No armário de ferramentas do pátio de manobras, você encontra uma pesada chave de bronze com dentes hexagonais: a Chave de Manobra!"
+        },
+        {
+          "cmd": "SET_FLAG",
+          "flag": "metro_track_key",
+          "value": true
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Você obteve a Chave de Manobra do Metrô!"
+        },
+        {
+          "cmd": "ERASE_EVENT"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 300,
+      "name": "Trem Stratum III - Linha 3: Vermelha",
+      "x": 15,
+      "y": 9,
+      "model": "assets/models/metro/metro_wagon_l3.obj",
+      "mover": {
+        "type": "path",
+        "speed": 3.5,
+        "mode": "ping_pong",
+        "carryPlayer": true,
+        "initialWaypoint": 2,
+        "sway": {
+          "pitch": 0.006,
+          "roll": 0.016,
+          "frequency": 12
+        },
+        "doorAnimation": {
+          "openModel": "assets/models/metro/metro_wagon_l3.obj",
+          "halfModel": "assets/models/metro/metro_wagon_half_l3.obj",
+          "closedModel": "assets/models/metro/metro_wagon_closed_l3.obj",
+          "duration": 0.6
+        },
+        "consist": [
+          {
+            "offset": -3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_rear_l3.obj"
+          },
+          {
+            "offset": 0,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_l3.obj"
+          },
+          {
+            "offset": 3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_lead_l3.obj"
+          }
+        ],
+        "waypoints": [
+          {
+            "x": 1,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Barra Funda"
+          },
+          {
+            "x": 15,
+            "y": 9,
+            "dwell": 14,
+            "dockDir": "N",
+            "name": "Estação Sé (Nível L3)"
+          },
+          {
+            "x": 30,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Brás / Itaquera"
+          }
+        ]
+      }
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "materials": [
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails"
+    ],
+    [
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ]
+}

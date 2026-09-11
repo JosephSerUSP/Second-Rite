@@ -147,10 +147,11 @@ Two consequences worth knowing before either is used:
   (`alicia_door`, `churchyard_stair`, `east_backstreet`, `npc_registrar`).
   Map 17 now declares `west_churchyard` and `east_cortico`. Anything baked from
   it needs the anchors reconciled first.
-- The exterior exporter (`export_exterior_environment.py`) is merged on `main`.
-  `town_environment_pipeline.py` reads `col_render.all_objects` to include
-  nested collections in the render mesh. Any new exterior bakes should use this
-  canonical pipeline.
+- `town_environment_pipeline.py` on main **cannot bake an exterior**. It reads
+  `col_render.objects`, which misses nested collections and finds no render
+  mesh; the exterior lane needs `col_render.all_objects`. The exterior exporter
+  itself (`export_exterior_environment.py`) is not on main at all. Both live on
+  `codex/praca-exterior-pipeline` (PR #998), which is kept open for that reason.
 
 ## View transform and plate provenance
 

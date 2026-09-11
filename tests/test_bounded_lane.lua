@@ -346,12 +346,14 @@ for _, entry in ipairs(plateMaps) do
     local id = entry.map.id
     local isStreet = (id == 16 or id == 17 or id == 18 or id == 19
         or id == 26 or id == 31)
-    -- Three interiors are architecturally long rather than small rooms: the
-    -- Pub is the town's only two-level room, the Chapel is a nave with the
-    -- altar at the far end, and the Padaria hearth (23) is a through-building
-    -- passage spanning between the Cortico and the market shop.
+    -- Two interiors are deliberately larger than a street, and both are
+    -- architecturally long rather than accidentally wide: the Pub is the
+    -- town's only two-level room -- low floor, a flight of steps, a raised
+    -- bar -- and the Chapel is a nave with the altar at the far end. Naming
+    -- the exceptions keeps the rule meaningful; widening it to swallow them
+    -- would leave nothing being checked.
     local list = isStreet and exteriorWidths or roomWidths
-    if id == 21 or id == 22 or id == 23 then list = nil end
+    if id == 21 or id == 22 then list = nil end
     if list then list[#list + 1] = widthOf[id] end
 end
 local distinct, distinctCount = {}, 0
@@ -365,6 +367,8 @@ local widestRoom = 0
 for _, width in ipairs(roomWidths) do widestRoom = math.max(widestRoom, width) end
 check(widestRoom < narrowestExterior,
     "every ordinary room is narrower than every street")
+check(widthOf[21] > widestRoom and widthOf[22] > widestRoom,
+    "the Pub and the Chapel are the long interiors, and every other room is smaller")
 
 -- A blocked range must stop the walk even when ONE STEP is longer than the
 -- range is wide. Testing only where a step lands lets a long step pass

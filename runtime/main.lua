@@ -688,6 +688,8 @@ function love.load(arg)
             "test_baked_environment_package",
             "test_bounded_lane",
             "test_presentation_contract",
+            "test_mover_runtime",
+            "test_metro_stratum",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1239,6 +1241,7 @@ function love.update(dt)
             local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
             require("engine.player_controller").refireFirstHeld(ctx)
         end
+        if scene_host.getCurrent() == "map" then require("engine.mover_runtime").update(activeSession, dt) end
     end
     
     if inputCooldown > 0 then

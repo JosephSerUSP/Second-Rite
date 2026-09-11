@@ -11,6 +11,7 @@ local config = require("engine.config")
 local barriers = require("engine.barriers")
 local itemModelView = require("presentation.item_model_view")
 local event_self_state = require("engine.event_self_state")
+local mover_runtime = require("engine.mover_runtime")
 
 validator.run = function(loader)
     local problems = {}
@@ -2882,6 +2883,11 @@ elseif paramDef.type == "script" then
                 check(type(ev.sprite) == "string" and ev.sprite ~= ""
                         and love.filesystem.getInfo(ev.sprite) ~= nil,
                     desc .. " references missing wall-event sprite '" .. tostring(ev.sprite) .. "'")
+            end
+            if ev.mover ~= nil then
+                check(type(ev.instanceId) == "string" and ev.instanceId ~= "", desc .. " mover requires stable instanceId")
+                local okMover, moverErr = pcall(mover_runtime.validateSpec, ev.mover)
+                check(okMover, desc .. " has invalid mover: " .. tostring(moverErr))
             end
             if ev.commands then
                 validateCommands(ev.commands, "map", false, true, desc)

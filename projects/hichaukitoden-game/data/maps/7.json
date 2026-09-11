@@ -106,6 +106,21 @@
           "cmd": "CONDITIONAL_BRANCH"
         }
       ]
+    },
+    {
+      "id": 90,
+      "instanceId": "event:metro-descent-from-sanctum",
+      "name": "Sealed Transit Descent",
+      "label": "Sealed Transit Descent",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 32
+        }
+      ]
     }
   ],
   "encounters": [

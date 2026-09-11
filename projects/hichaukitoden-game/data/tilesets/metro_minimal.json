@@ -4,13 +4,13 @@
   "texture": "assets/tilesets/dungeon_001.png",
   "heightMap": "assets/tilesets/dungeon_001_heightmap.png",
   "heightMapScale": {
-    "wall": 0.03,
-    "floor": 0.01,
-    "ceiling": 0.01
+    "wall": 0.12,
+    "floor": 0.08,
+    "ceiling": 0.08
   },
-  "heightMapMeshColumns": 12,
-  "heightMapMeshRows": 12,
-  "heightMapTriangleBudget": 192,
+  "heightMapMeshColumns": 24,
+  "heightMapMeshRows": 24,
+  "heightMapTriangleBudget": 384,
   "tileWidth": 64,
   "tileHeight": 64,
   "base": {

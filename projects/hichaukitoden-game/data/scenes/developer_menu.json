@@ -370,8 +370,8 @@
       },
       {
         "id": "bounds",
-        "name": "TOWN BOUNDS",
-        "help": "Draw the side-view town's lane bounds, doorway reach, event positions and the player's sprite box."
+        "name": "TOWN NAVMESH & BOUNDS",
+        "help": "Draw the 3D walkable navmesh, lane depth, collision blocks, trigger zones, and actor footprints."
       },
       {
         "id": "threed",

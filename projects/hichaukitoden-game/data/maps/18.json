@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 29.48,
+      "maxY": 20.708,
       "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
@@ -33,12 +33,12 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 14.74,
+        "y": 10.354,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 14.74,
+        "center": 10.354,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -65,11 +65,6 @@
       {
         "anchor": "west_cortico",
         "eventInstanceId": "st-maria-market-west_cortico",
-        "radius": 0.9
-      },
-      {
-        "anchor": "padaria_3d_door",
-        "eventInstanceId": "st-maria-market-padaria_3d_door",
         "radius": 0.9
       },
       {
@@ -93,8 +88,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        6.069,
-        -1.5
+        1.6771,
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -179,8 +174,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        9.827,
-        -1.5
+        6.7812,
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -204,76 +199,62 @@
       "worldPosition": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
           "arrival": "east_market"
         }
-      ]
+      ],
+      "direction": "left"
     },
     {
       "id": 1804,
-      "instanceId": "st-maria-market-padaria_3d_door",
-      "name": "Alicia's Padaria (3D)",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        16.0,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 28,
-          "arrival": "exit_door"
-        }
-      ]
-    },
-    {
-      "id": 1805,
       "instanceId": "st-maria-market-padaria_door",
       "name": "Alicia's Padaria",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        22.0,
-        -1.5
+        13.125,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 27,
           "arrival": "exit_door"
         }
-      ]
+      ],
+      "direction": "away"
     },
     {
-      "id": 1806,
+      "id": 1805,
       "instanceId": "st-maria-market-east_quay",
       "name": "The Quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        29.48,
-        -1.5
+        20.7083,
+        0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 19,
           "arrival": "west_market"
         }
-      ]
+      ],
+      "direction": "right"
     }
   ],
   "treasures": [],

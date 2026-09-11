@@ -208,18 +208,6 @@
               ]
             },
             {
-              "label": "Stratum III: Metrô SP (Linha 1)",
-              "commands": [
-                {
-                  "cmd": "LOAD_MAP",
-                  "mapId": 32,
-                  "x": 3,
-                  "y": 3,
-                  "dir": "S"
-                }
-              ]
-            },
-            {
               "label": "Stay here",
               "commands": []
             }

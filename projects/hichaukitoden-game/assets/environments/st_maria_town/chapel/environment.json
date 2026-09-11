@@ -7,10 +7,10 @@
   "bounds": [
     6.8,
     0.0,
-    -2.5,
+    -1.0,
     8.8,
-    28.035,
-    2.5
+    16.0,
+    4.0
   ],
   "provenance": {
     "plateSourceViewTransform": "Standard"
@@ -19,21 +19,21 @@
     "spawn_player": {
       "position": [
         7.8,
-        14.017,
+        8.0,
         0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        2.312,
+        15.7135,
         0.0
       ]
     },
     "npc_agnes": {
       "position": [
         7.8,
-        24.277,
+        12.651,
         0.0
       ]
     }
@@ -41,11 +41,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      1050,
+      674,
       240
     ],
     "slicePositions": [
-      14.017
+      8.0
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/chapel_bg.png"
@@ -54,17 +54,17 @@
       "../../../../assets/environments/st_maria_town/plates/chapel_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_1050.png"
+      "../stub/empty_674.png"
     ],
     "lane": {
-      "runtimeCenterY": 14.017
+      "runtimeCenterY": 8.0
     },
     "playerProjection": {
-      "centerX": 525.0,
+      "centerX": 347.429,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

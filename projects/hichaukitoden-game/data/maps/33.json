@@ -117,31 +117,43 @@
       "sprite": "assets/sprites/NPC04.png",
       "commands": [
         {
-          "condition": "flag:metro_klabin_unlocked",
+          "condition": "flag:metro_vault_cleared",
           "commands": [
             {
-              "amount": 10000,
-              "cmd": "GAIN_GOLD"
-            },
-            {
-              "text": "The vault yields company scrip and a master pass.",
+              "text": "The vault is empty. Company scrip and the master pass have already been claimed.",
               "cmd": "TEXT"
-            },
-            {
-              "flag": "metro_master_pass",
-              "value": true,
-              "cmd": "SET_FLAG"
-            },
-            {
-              "flag": "metro_vault_cleared",
-              "value": true,
-              "cmd": "SET_FLAG"
             }
           ],
           "elseCommands": [
             {
-              "text": "The vault is sealed behind the Klabin gate interlock.",
-              "cmd": "TEXT"
+              "condition": "flag:metro_klabin_unlocked",
+              "commands": [
+                {
+                  "amount": 10000,
+                  "cmd": "GAIN_GOLD"
+                },
+                {
+                  "text": "The vault yields company scrip and a master pass.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "flag": "metro_master_pass",
+                  "value": true,
+                  "cmd": "SET_FLAG"
+                },
+                {
+                  "flag": "metro_vault_cleared",
+                  "value": true,
+                  "cmd": "SET_FLAG"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "The vault is sealed behind the Klabin gate interlock.",
+                  "cmd": "TEXT"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
             }
           ],
           "cmd": "CONDITIONAL_BRANCH"

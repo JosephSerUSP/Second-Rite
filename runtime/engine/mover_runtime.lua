@@ -46,13 +46,15 @@ local function carList(mover)
     return mover.consist or defaultConsist(nil)
 end
 
--- World (0-indexed) cells occupied by each car at a waypoint.
-local function carCellsAt(waypoint, consist)
+-- World (0-indexed) cells occupied by each car at a given position.
+local function carCellsAt(pos, consist)
     local cells = {}
+    local px = pos and pos.x or 0
+    local py = pos and pos.y or 0
     for i, car in ipairs(consist or defaultConsist(nil)) do
         cells[i] = {
-            x = waypoint.x + (car.dx or 0),
-            y = waypoint.y + (car.dy or 0),
+            x = math.floor(px + (car.dx or 0) + 0.5),
+            y = math.floor(py + (car.dy or 0) + 0.5),
             car = car,
         }
     end
@@ -90,12 +92,14 @@ function mover_runtime.initMap(session, mapData)
             local py = (session.playerY or 1) - 1
             local isOnboard = false
             local offX, offY = 0, 0
-            for _, cell in ipairs(carCellsAt(wp1, consist)) do
-                if px == cell.x and py == cell.y then
-                    isOnboard = true
-                    offX = px - wp1.x
-                    offY = py - wp1.y
-                    break
+            if spec.carryPlayer == true then
+                for _, cell in ipairs(carCellsAt(wp1, consist)) do
+                    if cell.car.doors ~= false and px == cell.x and py == cell.y then
+                        isOnboard = true
+                        offX = px - wp1.x
+                        offY = py - wp1.y
+                        break
+                    end
                 end
             end
 
@@ -172,52 +176,52 @@ function mover_runtime.isBlocked(session, targetX, targetY)
     local ty = targetY - 1
 
     for _, mover in ipairs(session.movers) do
-        local curWp = mover.waypoints[mover.segmentIdx]
-        if curWp then
-            local cells = carCellsAt(curWp, carList(mover))
-            local function isCarCell(x, y)
-                for _, c in ipairs(cells) do
-                    if c.x == x and c.y == y then return true end
-                end
-                return false
+        local consist = carList(mover)
+        local curPos = { x = mover.curX, y = mover.curY }
+        local cells = carCellsAt(curPos, consist)
+
+        local function isCarCell(x, y)
+            for _, c in ipairs(cells) do
+                if c.x == x and c.y == y then return true, c end
             end
-            local function adjacentToCar(x, y)
-                for _, c in ipairs(cells) do
+            return false, nil
+        end
+
+        local function adjacentToDoorCar(x, y)
+            for _, c in ipairs(cells) do
+                if c.car.doors ~= false then
                     if math.abs(c.x - x) + math.abs(c.y - y) == 1 then
                         return true
                     end
                 end
-                return false
             end
+            return false
+        end
 
-            if mover.onboard then
-                -- Locked in while closing/moving/opening or with doors shut.
-                if mover.phase ~= "docked" or mover.doorState ~= "open" then
-                    return true
-                end
-                -- Docked with doors open: roam the cars or step to the
-                -- immediately adjacent platform. Anything else is the void
-                -- beyond the platform edge, not a legal disembark.
-                if isCarCell(tx, ty) or adjacentToCar(tx, ty) then
-                    return false
-                end
+        if mover.onboard then
+            -- Locked in while closing/moving/opening or with doors shut.
+            if mover.phase ~= "docked" or mover.doorState ~= "open" then
                 return true
-            else
-                -- Boarding: a car cell is enterable only while this mover is
-                -- docked here with doors open; otherwise it is a wall.
-                if isCarCell(tx, ty) then
-                    local dockedHere = false
-                    for wi, wp in ipairs(mover.waypoints) do
-                        if wi == mover.segmentIdx and wp.x == curWp.x
-                            and wp.y == curWp.y then
-                            dockedHere = true
-                            break
-                        end
-                    end
-                    if dockedHere and mover.phase == "docked"
-                        and mover.doorState == "open" then
-                        return false
-                    end
+            end
+            -- Docked with doors open: roam the cars or step to the
+            -- immediately adjacent platform via a door car. Anything else
+            -- is the void beyond the platform edge, not a legal disembark.
+            local inCar = isCarCell(tx, ty)
+            local canDisembark = adjacentToDoorCar(tx, ty)
+            if not (inCar or canDisembark) then
+                return true
+            end
+        else
+            -- Outside player:
+            local hitCar, carCell = isCarCell(tx, ty)
+            if hitCar then
+                -- A car cell is enterable only while this mover is docked with
+                -- doors open, carries players, and this specific car has doors.
+                local canBoard = mover.carryPlayer
+                    and (carCell.car.doors ~= false)
+                    and (mover.phase == "docked")
+                    and (mover.doorState == "open")
+                if not canBoard then
                     return true
                 end
             end
@@ -242,6 +246,7 @@ function mover_runtime.startLeg(mover)
             mover.nextIdx = mover.segmentIdx + 1
         else
             mover.phase = "docked"
+            mover.doorState = "open"
             mover.timer = 999999
             return
         end
@@ -273,16 +278,17 @@ function mover_runtime.update(session, dt)
         local curWp = mover.waypoints[mover.segmentIdx]
         local daDuration = mover.doorAnimDuration or 0.6
         local consist = carList(mover)
-        local cells = carCellsAt(curWp, consist)
+        local curPos = { x = mover.curX or curWp.x, y = mover.curY or curWp.y }
+        local cells = carCellsAt(curPos, consist)
 
-        -- Boarding / disembark detection (docked, doors open only).
+        -- Boarding / disembark detection (docked, doors open, and carryPlayer only).
         if not mover.onboard then
-            if mover.phase == "docked" and mover.doorState == "open" then
+            if mover.carryPlayer and mover.phase == "docked" and mover.doorState == "open" then
                 for _, c in ipairs(cells) do
-                    if px == c.x and py == c.y then
+                    if c.car.doors ~= false and px == c.x and py == c.y then
                         mover.onboard = true
-                        mover.playerOffsetX = px - curWp.x
-                        mover.playerOffsetY = py - curWp.y
+                        mover.playerOffsetX = px - mover.curX
+                        mover.playerOffsetY = py - mover.curY
                         break
                     end
                 end
@@ -293,8 +299,8 @@ function mover_runtime.update(session, dt)
                 for _, c in ipairs(cells) do
                     if px == c.x and py == c.y then
                         inside = true
-                        mover.playerOffsetX = px - curWp.x
-                        mover.playerOffsetY = py - curWp.y
+                        mover.playerOffsetX = px - mover.curX
+                        mover.playerOffsetY = py - mover.curY
                         break
                     end
                 end
@@ -314,12 +320,18 @@ function mover_runtime.update(session, dt)
             if mover.onboard then session.moverCameraOverride = nil end
             mover.timer = mover.timer - dt
             if mover.timer <= 0 then
-                if mover.hasDoorAnim then
-                    mover.phase = "closing"
-                    mover.timer = daDuration
+                if mover.mode == "once" and mover.segmentIdx >= #mover.waypoints then
+                    mover.timer = 999999
+                    mover.phase = "docked"
+                    mover.doorState = "open"
                 else
-                    mover.phase = "moving"
-                    mover_runtime.startLeg(mover)
+                    if mover.hasDoorAnim then
+                        mover.phase = "closing"
+                        mover.timer = daDuration
+                    else
+                        mover.phase = "moving"
+                        mover_runtime.startLeg(mover)
+                    end
                 end
             end
         elseif mover.phase == "closing" then

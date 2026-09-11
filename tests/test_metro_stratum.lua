@@ -259,6 +259,9 @@ check(sVaultCold.flags["metro_master_pass"] == true,
     "the vault grants the master pass")
 check(sVaultCold.flags["metro_vault_cleared"] == true,
     "the vault sets its cleared flag")
+runEvent(map33, 4, sVaultCold)
+check((sVaultCold.gold or 0) == goldBefore + 10000,
+    "the vault pays nothing on second interaction (infinite gold prevented)")
 
 -- 9. Titan seal: dormant before the gate, solved after; shortcut follows.
 local sSealCold = newSession()
@@ -346,6 +349,137 @@ check(decoded.movers[1].phase == "docked",
 -- delivers the player to 1-indexed (11, 5): offset preserved, not snapped.
 check(decoded.playerX == 11 and decoded.playerY == 5,
     "the restored ride delivers the player with offset intact")
+
+-- 14. Moving collision: departure dock clears, moving body blocks.
+local sMoveCol = newSession()
+exploration.loadMap(sMoveCol, idx32)
+moverRuntime.initMap(sMoveCol, sMoveCol.currentMapData)
+local mCol = sMoveCol.movers[1]
+mCol.phase = "moving"
+mCol.doorState = "closed"
+mCol.curX = 7.0
+mCol.curY = 4.0
+-- In 1-indexed coords, departure rear dock (2, 4) was (3, 5). Must be passable now!
+check(moverRuntime.isBlocked(sMoveCol, 3, 5) == false,
+    "departure dock (3, 5) is no longer blocked when train has departed")
+-- Current mid-transit rear car at (7 - 1, 4) = (6, 4) -> 1-indexed (7, 5). Must be blocked!
+check(moverRuntime.isBlocked(sMoveCol, 7, 5) == true,
+    "mid-transit consist (7, 5) blocks external entry while moving")
+
+-- 15. doors=false schema invariant: non-door cars refuse boarding.
+local sDoorTest = newSession()
+sDoorTest.currentMapData = {
+    id = 999,
+    events = {
+        {
+            id = 1,
+            mover = {
+                type = "path",
+                waypoints = { { x = 5, y = 5 }, { x = 10, y = 5 } },
+                carryPlayer = true,
+                consist = {
+                    { dx = 0, dy = 0, doors = true },
+                    { dx = 1, dy = 0, doors = false },
+                }
+            }
+        }
+    }
+}
+moverRuntime.initMap(sDoorTest, sDoorTest.currentMapData)
+-- (5, 5) is car 1 (doors = true) -> 1-indexed (6, 6)
+check(moverRuntime.isBlocked(sDoorTest, 6, 6) == false,
+    "car with doors=true is boardable when docked open")
+-- (6, 5) is car 2 (doors = false) -> 1-indexed (7, 6)
+check(moverRuntime.isBlocked(sDoorTest, 7, 6) == true,
+    "car with doors=false refuses boarding even when docked open")
+sDoorTest.playerX, sDoorTest.playerY = 7, 6
+moverRuntime.update(sDoorTest, 0.05)
+check(sDoorTest.movers[1].onboard == false,
+    "player cannot board a car with doors=false")
+
+-- 16. carryPlayer=false schema invariant: non-passenger movers refuse boarding.
+local sCargo = newSession()
+sCargo.currentMapData = {
+    id = 998,
+    events = {
+        {
+            id = 1,
+            mover = {
+                type = "path",
+                waypoints = { { x = 2, y = 2 }, { x = 8, y = 2 } },
+                carryPlayer = false,
+                consist = { { dx = 0, dy = 0, doors = true } }
+            }
+        }
+    }
+}
+moverRuntime.initMap(sCargo, sCargo.currentMapData)
+check(moverRuntime.isBlocked(sCargo, 3, 3) == true,
+    "carryPlayer=false mover blocks external entry like a solid obstacle")
+sCargo.playerX, sCargo.playerY = 3, 3
+moverRuntime.update(sCargo, 0.05)
+check(sCargo.movers[1].onboard == false,
+    "carryPlayer=false mover never sets onboard=true")
+
+-- 17. mode='once' terminus invariant: stays docked open without trapping.
+local sOnce = newSession()
+sOnce.currentMapData = {
+    id = 997,
+    events = {
+        {
+            id = 1,
+            mover = {
+                type = "path",
+                mode = "once",
+                speed = 10.0,
+                doorAnimation = { duration = 0.1 },
+                waypoints = { { x = 1, y = 1, dwell = 0.1 }, { x = 3, y = 1, dwell = 0.1 } },
+                carryPlayer = true,
+                consist = { { dx = 0, dy = 0, doors = true } }
+            }
+        }
+    }
+}
+moverRuntime.initMap(sOnce, sOnce.currentMapData)
+local mOnce = sOnce.movers[1]
+moverRuntime.update(sOnce, 0.15)
+moverRuntime.update(sOnce, 0.15)
+moverRuntime.update(sOnce, 0.5)
+moverRuntime.update(sOnce, 0.2)
+check(mOnce.phase == "docked" and mOnce.doorState == "open",
+    "once mover docks with open doors at terminus")
+moverRuntime.update(sOnce, 0.3)
+check(mOnce.phase == "docked" and mOnce.doorState == "open",
+    "once mover remains docked open at terminus rather than trapping players")
+
+-- 18. Multi-mover compositionality: non-blocking mover does not mask blocking mover.
+local sMulti = newSession()
+sMulti.currentMapData = {
+    id = 996,
+    events = {
+        {
+            id = 1,
+            mover = {
+                type = "path",
+                waypoints = { { x = 1, y = 1 }, { x = 2, y = 1 } },
+                carryPlayer = true,
+                consist = { { dx = 0, dy = 0, doors = true } }
+            }
+        },
+        {
+            id = 2,
+            mover = {
+                type = "path",
+                waypoints = { { x = 8, y = 8 }, { x = 9, y = 8 } },
+                carryPlayer = false,
+                consist = { { dx = 0, dy = 0, doors = false } }
+            }
+        }
+    }
+}
+moverRuntime.initMap(sMulti, sMulti.currentMapData)
+check(moverRuntime.isBlocked(sMulti, 9, 9) == true,
+    "multi-mover composition: mover 1 does not mask mover 2 collision")
 
 print("=== Metro stratum pilot: " .. passed .. " passed, " .. failed .. " failed ===")
 assert(failed == 0, "metro stratum pilot tests failed")

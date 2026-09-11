@@ -1243,9 +1243,14 @@ function love.update(dt)
         -- Generic kinematic movers advance on the map scene clock. Nil-safe:
         -- maps without movers keep a nil override and identical frames.
         if scene_host.getCurrent() == "map" then
-            local ok, moverMod = pcall(require, "engine.mover_runtime")
-            if ok and moverMod and moverMod.update then
-                pcall(moverMod.update, activeSession, dt)
+            local moverMod = package.loaded["engine.mover_runtime"]
+            if not moverMod then
+                local ok
+                ok, moverMod = pcall(require, "engine.mover_runtime")
+                if not ok then moverMod = nil end
+            end
+            if moverMod and moverMod.update then
+                moverMod.update(activeSession, dt)
             end
         end
     end

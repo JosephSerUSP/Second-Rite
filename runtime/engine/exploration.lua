@@ -1316,10 +1316,14 @@ local function tryMove(session, dx, dy)
     -- walkable floor; the mover only ever forbids, never permits over the
     -- grid. A map without movers takes the same path with no effect.
     if passable then
-        local hasMover, moverMod = pcall(require, "engine.mover_runtime")
-        if hasMover and moverMod and moverMod.isBlocked then
-            local ok, blocked = pcall(moverMod.isBlocked, session, targetX, targetY)
-            if ok and blocked then
+        local moverMod = package.loaded["engine.mover_runtime"]
+        if not moverMod then
+            local ok
+            ok, moverMod = pcall(require, "engine.mover_runtime")
+            if not ok then moverMod = nil end
+        end
+        if moverMod and moverMod.isBlocked then
+            if moverMod.isBlocked(session, targetX, targetY) then
                 passable = false
             end
         end

@@ -688,6 +688,7 @@ function love.load(arg)
             "test_baked_environment_package",
             "test_bounded_lane",
             "test_presentation_contract",
+            "test_metro_stratum",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1238,6 +1239,14 @@ function love.update(dt)
             and scene_host.getCurrent() == "map" then
             local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
             require("engine.player_controller").refireFirstHeld(ctx)
+        end
+        -- Generic kinematic movers advance on the map scene clock. Nil-safe:
+        -- maps without movers keep a nil override and identical frames.
+        if scene_host.getCurrent() == "map" then
+            local ok, moverMod = pcall(require, "engine.mover_runtime")
+            if ok and moverMod and moverMod.update then
+                pcall(moverMod.update, activeSession, dt)
+            end
         end
     end
     

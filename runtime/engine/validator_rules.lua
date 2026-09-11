@@ -2883,6 +2883,76 @@ elseif paramDef.type == "script" then
                         and love.filesystem.getInfo(ev.sprite) ~= nil,
                     desc .. " references missing wall-event sprite '" .. tostring(ev.sprite) .. "'")
             end
+            -- Generic kinematic mover (see engine/mover_runtime.lua). All
+            -- footprint, timing and visual mapping is authored data; the
+            -- runtime carries no project-specific model, material or axis
+            -- knowledge, so validation stays structural plus file existence.
+            if ev.mover ~= nil then
+                local mover = ev.mover
+                check(type(mover) == "table", desc .. ".mover must be a table")
+                if type(mover) == "table" then
+                    check(mover.type == "path", desc .. ".mover.type must be 'path'")
+                    check(type(mover.speed) == "number" and mover.speed > 0,
+                        desc .. ".mover.speed must be a positive number")
+                    local validModes = { loop = true, ping_pong = true, once = true }
+                    check(validModes[mover.mode] == true,
+                        desc .. ".mover.mode must be 'loop', 'ping_pong' or 'once'")
+                    check(type(mover.waypoints) == "table" and #mover.waypoints >= 2,
+                        desc .. ".mover.waypoints must list at least 2 waypoints")
+                    for wi, wp in ipairs(mover.waypoints or {}) do
+                        check(type(wp) == "table" and type(wp.x) == "number"
+                            and type(wp.y) == "number",
+                            desc .. ".mover waypoint " .. wi .. " must have numeric x and y")
+                        if type(wp) == "table" and map.layout then
+                            check(wp.y >= 0 and wp.y < #map.layout,
+                                desc .. ".mover waypoint " .. wi .. " y out of map bounds")
+                            local row = map.layout[(wp.y or 0) + 1]
+                            if row then
+                                check(wp.x >= 0 and wp.x < #row,
+                                    desc .. ".mover waypoint " .. wi .. " x out of map bounds")
+                            end
+                        end
+                        if wp ~= nil and wp.dwell ~= nil then
+                            check(type(wp.dwell) == "number" and wp.dwell >= 0,
+                                desc .. ".mover waypoint " .. wi .. " dwell must be non-negative")
+                        end
+                    end
+                    if mover.consist ~= nil then
+                        check(type(mover.consist) == "table" and #mover.consist >= 1,
+                            desc .. ".mover.consist must list at least 1 car")
+                        for ci, car in ipairs(mover.consist or {}) do
+                            local cdesc = desc .. ".mover car " .. ci
+                            check(type(car) == "table", cdesc .. " must be a table")
+                            if type(car) == "table" then
+                                check(type(car.dx) == "number" and type(car.dy) == "number",
+                                    cdesc .. " dx/dy must be numbers")
+                                for _, key in ipairs({ "model", "openModel", "halfModel", "closedModel" }) do
+                                    if car[key] ~= nil then
+                                        check(type(car[key]) == "string" and car[key] ~= ""
+                                            and love.filesystem.getInfo(car[key]) ~= nil,
+                                            cdesc .. " references missing model '" .. tostring(car[key]) .. "'")
+                                    end
+                                end
+                                if car.sprite ~= nil then
+                                    check(type(car.sprite) == "string" and car.sprite ~= ""
+                                        and love.filesystem.getInfo(car.sprite) ~= nil,
+                                        cdesc .. " references missing sprite '" .. tostring(car.sprite) .. "'")
+                                end
+                            end
+                        end
+                    end
+                    if mover.doorAnimation ~= nil then
+                        check(type(mover.doorAnimation) == "table",
+                            desc .. ".mover.doorAnimation must be a table")
+                        if type(mover.doorAnimation) == "table"
+                            and mover.doorAnimation.duration ~= nil then
+                            check(type(mover.doorAnimation.duration) == "number"
+                                and mover.doorAnimation.duration >= 0,
+                                desc .. ".mover.doorAnimation.duration must be non-negative")
+                        end
+                    end
+                end
+            end
             if ev.commands then
                 validateCommands(ev.commands, "map", false, true, desc)
             end

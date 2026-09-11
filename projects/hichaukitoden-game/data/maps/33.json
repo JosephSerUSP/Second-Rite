@@ -1,0 +1,238 @@
+{
+  "id": 33,
+  "title": "Bras Substation Pilot",
+  "intro": "Auxiliary breakers line the wall. A locker, a gate, a vault and a sealed titan wait.",
+  "depth": 0,
+  "tileset": "dungeon_default",
+  "ceilingStyle": "solid",
+  "generation": "Fixed",
+  "safe": true,
+  "layout": [
+    "#############",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#############"
+  ],
+  "spawn": {
+    "x": 6,
+    "y": 5,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "metro-pilot-33-breaker",
+      "name": "Auxiliary Breaker",
+      "x": 2,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC01.png",
+      "commands": [
+        {
+          "text": "You throw the auxiliary breaker. The room hums with restored power.",
+          "cmd": "TEXT"
+        },
+        {
+          "flag": "metro_aux_power",
+          "value": true,
+          "cmd": "SET_FLAG"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "instanceId": "metro-pilot-33-locker",
+      "name": "Track Locker",
+      "x": 5,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC02.png",
+      "commands": [
+        {
+          "condition": "flag:metro_aux_power",
+          "commands": [
+            {
+              "text": "The locker clicks open on powered rails. Inside: a track key.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "metro_track_key",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The locker is dead. Its maglock needs auxiliary power.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "instanceId": "metro-pilot-33-klabin-gate",
+      "name": "Klabin Gate",
+      "x": 8,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC03.png",
+      "commands": [
+        {
+          "condition": "flag:metro_track_key",
+          "commands": [
+            {
+              "text": "The track key turns. The Klabin gate rolls aside.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "metro_klabin_unlocked",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The gate needs the Bras track key.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "instanceId": "metro-pilot-33-vault",
+      "name": "Faria Lima Vault",
+      "x": 2,
+      "y": 5,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC04.png",
+      "commands": [
+        {
+          "condition": "flag:metro_klabin_unlocked",
+          "commands": [
+            {
+              "amount": 10000,
+              "cmd": "GAIN_GOLD"
+            },
+            {
+              "text": "The vault yields company scrip and a master pass.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "metro_master_pass",
+              "value": true,
+              "cmd": "SET_FLAG"
+            },
+            {
+              "flag": "metro_vault_cleared",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The vault is sealed behind the Klabin gate interlock.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "instanceId": "metro-pilot-33-tatuzao-seal",
+      "name": "Tatuzao Seal",
+      "x": 6,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC00.png",
+      "commands": [
+        {
+          "condition": "flag:metro_klabin_unlocked",
+          "commands": [
+            {
+              "text": "The tunneling titan stirs, then settles. The Santa Cruz shortcut unlatches.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "metro_stratum_solved",
+              "value": true,
+              "cmd": "SET_FLAG"
+            },
+            {
+              "flag": "metro_santacruz_unlocked",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The seal is dormant. Something beyond the Klabin gate still holds it.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "metro-pilot-33-stairs-back",
+      "name": "Stairs to Luz",
+      "x": 10,
+      "y": 5,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC01.png",
+      "commands": [
+        {
+          "text": "Stairs climb back toward Luz station.",
+          "cmd": "TEXT"
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 32
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "instanceId": "metro-pilot-33-shortcut",
+      "name": "Santa Cruz Shortcut",
+      "x": 10,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC02.png",
+      "commands": [
+        {
+          "condition": "flag:metro_santacruz_unlocked",
+          "commands": [
+            {
+              "cmd": "LOAD_MAP",
+              "mapId": 32
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "An emergency door. It will only unlatch from the titan side.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

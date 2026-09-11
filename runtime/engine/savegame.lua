@@ -122,6 +122,16 @@ end
 -- those two.
 local function serializeMap(sessionObj)
     if not sessionObj.currentMapData then return nil end
+    -- Mover state is part of the map snapshot: phase, segment, timer,
+    -- position, onboard flag and player offset. A save taken mid-transit
+    -- restores the platform under the player instead of snapping the
+    -- platform home while the player stays in the tunnel.
+    local movers = nil
+    local hasMover, moverMod = pcall(require, "engine.mover_runtime")
+    if hasMover and moverMod and moverMod.serialize then
+        local ok, snap = pcall(moverMod.serialize, sessionObj)
+        if ok then movers = snap end
+    end
     return {
         mapIndex = sessionObj.currentMapIndex,
         playerX = sessionObj.playerX,
@@ -135,6 +145,7 @@ local function serializeMap(sessionObj)
         generatedFeatures = sessionObj.generatedFeatures,
         generatedZones = sessionObj.generatedZones,
         dungeonFloor = sessionObj.dungeonFloor,
+        movers = movers,
     }
 end
 
@@ -158,6 +169,12 @@ local function restoreMap(sessionObj, data, loader)
     sessionObj.playerY = data.playerY
     sessionObj.playerDir = data.playerDir
     sessionObj.dungeonFloor = data.dungeonFloor or sessionObj.dungeonFloor
+    -- Restores an in-progress ride when present; a save from before movers
+    -- existed (or a map without them) initializes fresh at the dock.
+    local hasMover, moverMod = pcall(require, "engine.mover_runtime")
+    if hasMover and moverMod and moverMod.restore then
+        pcall(moverMod.restore, sessionObj, sessionObj.currentMapData, data.movers)
+    end
     local presentation = sessionObj.mapPresentationOverrides
         and sessionObj.mapPresentationOverrides[data.mapIndex]
     if presentation then

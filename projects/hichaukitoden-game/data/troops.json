@@ -315,5 +315,17 @@
         ]
       }
     ]
+  },
+  "boss_tatuzao": {
+    "id": "boss_tatuzao",
+    "name": "Boss: O Tatuzao",
+    "description": "Metro pilot climax: the ancient tunneling titan behind the Klabin gate. A single heavy golem-class member; the full multi-phase encounter is follow-up work, so the pilot wires the troop identity and the seal event sets the solved flags.",
+    "members": [
+      {
+        "actor": "golem",
+        "level": 8
+      }
+    ],
+    "events": []
   }
 }

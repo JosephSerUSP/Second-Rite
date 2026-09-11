@@ -2206,6 +2206,18 @@ local function drawWorldSpace(session, authoredCamera)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
+    -- Generic mover ride flourish (fractional dolly + sway pitch). Nil-safe:
+    -- maps without an active ride resolve the identical base camera.
+    if session and session.moverCameraOverride then
+        local mCam = session.moverCameraOverride
+        local merged = {}
+        for k, v in pairs(focusCam or {}) do merged[k] = v end
+        merged.pitch = (merged.pitch or 0) + (mCam.pitch or 0)
+        merged.fovScale = (merged.fovScale or 1.0) * (mCam.fovScale or 1.0)
+        merged.dollyX = (merged.dollyX or 0) + (mCam.dollyX or 0)
+        merged.dollyY = (merged.dollyY or 0) + (mCam.dollyY or 0)
+        focusCam = merged
+    end
     -- The Map Scene still owns composition. A bounded provider supplies only
     -- its selected camera record and package-backed environment to this shared
     -- WorldCamera/viewport seam.

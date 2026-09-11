@@ -1201,6 +1201,13 @@ function exploration.loadMap(session, mapIdx, opts)
     session.playerX = startX
     session.playerY = startY
     session.playerDir = startDir or "N"
+    -- Movers are per-map runtime derived from authored events. A transfer
+    -- drops the previous map's state; the new map initializes lazily on
+    -- first update/placement query (savegame.restoreMap overlays saved
+    -- state afterwards, so load-then-restore keeps phase, not the dock).
+    session.movers = nil
+    session.moverMapId = nil
+    session.moverCameraOverride = nil
 
     -- A Project may opt this map into a narrow traversal capability.  The
     -- ordinary grid remains loaded for shared Map/Event infrastructure, while
@@ -1302,6 +1309,20 @@ local function tryMove(session, dx, dy)
     if session.developerMode ~= true and passable and not (ov and ov.passable ~= nil)
             and exploration.fixtureBlocksAt(session, targetX - 1, targetY - 1) then
         passable = false
+    end
+    -- Generic kinematic movers own their footprint: a boardable car cell is
+    -- passable only while docked with doors open, and an onboard player is
+    -- locked in while the platform moves. Authored car cells must be
+    -- walkable floor; the mover only ever forbids, never permits over the
+    -- grid. A map without movers takes the same path with no effect.
+    if passable then
+        local hasMover, moverMod = pcall(require, "engine.mover_runtime")
+        if hasMover and moverMod and moverMod.isBlocked then
+            local ok, blocked = pcall(moverMod.isBlocked, session, targetX, targetY)
+            if ok and blocked then
+                passable = false
+            end
+        end
     end
     if passable then
         session.playerX = targetX

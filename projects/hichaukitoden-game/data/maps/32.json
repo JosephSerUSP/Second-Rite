@@ -1,0 +1,112 @@
+{
+  "id": 32,
+  "title": "Luz Station Pilot",
+  "intro": "A quiet platform hums beneath St. Maria. A short shuttle glides between two stops.",
+  "depth": 0,
+  "tileset": "dungeon_default",
+  "ceilingStyle": "solid",
+  "generation": "Fixed",
+  "safe": true,
+  "layout": [
+    "###############",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "###############"
+  ],
+  "spawn": {
+    "x": 7,
+    "y": 6,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "metro-pilot-32-shuttle",
+      "name": "Platform Shuttle",
+      "x": 3,
+      "y": 4,
+      "sprite": "assets/sprites/NPC00.png",
+      "mover": {
+        "type": "path",
+        "waypoints": [
+          { "x": 3, "y": 4, "dwell": 4.0 },
+          { "x": 11, "y": 4, "dwell": 4.0 }
+        ],
+        "speed": 3.0,
+        "mode": "ping_pong",
+        "carryPlayer": true,
+        "consist": [
+          { "dx": -1, "dy": 0, "doors": true, "sprite": "assets/sprites/NPC00.png" },
+          { "dx": 1, "dy": 0, "doors": true, "sprite": "assets/sprites/NPC00.png" }
+        ],
+        "doorAnimation": { "duration": 0.6 },
+        "sway": { "frequency": 12.0, "pitch": 0.006 }
+      }
+    },
+    {
+      "id": 2,
+      "instanceId": "metro-pilot-32-to-bras",
+      "name": "Stairs to Bras Substation",
+      "x": 1,
+      "y": 1,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC01.png",
+      "commands": [
+        {
+          "text": "Stairs descend toward the Bras substation rooms.",
+          "cmd": "TEXT"
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 33
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "instanceId": "metro-pilot-32-attendant",
+      "name": "Station Attendant",
+      "x": 13,
+      "y": 6,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC02.png",
+      "commands": [
+        {
+          "condition": "flag:metro_stratum_solved",
+          "commands": [
+            {
+              "text": "You quieted the titan down below. The platforms feel calmer already.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The shuttle runs the length of the platform. Mind the doors.",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        },
+        {
+          "condition": "flag:metro_master_pass, flag:metro_vault_cleared",
+          "commands": [
+            {
+              "text": "That master pass opens every company door. Spend the scrip wisely.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

@@ -3,7 +3,7 @@
 ### Benchmark
 ID: A002
 Name: Breakout
-Benchmark Version: v3 (Boolean Primitives & Multi-Assignment)
+Benchmark Version: v3 (String Booleans for Formula Evaluation)
 Date: 2026-09-11
 
 ### Current Result
@@ -28,12 +28,12 @@ A completely fresh reconstruction of A002. Authored Scene composition leverages 
 * whether the artifact runs independently of Second Gate: Yes.
 
 ### Changes Since Previous Attempt
-* Freshly re-authored `a002_breakout.json` using JSON boolean primitives (`false`/`true`) instead of stringified booleans.
+* Updated `a002_breakout.json` to use stringified booleans (`"false"`/`"true"`) in `SET_VAR` values to adhere to `evalFormula` parser string-eval semantics.
 * Leveraged standard `SET_VAR` multi-assignments (`assignments` array) for initialization state setup and physics update frames.
-* Preserved `goldenScript` to support automated scene validation in CI.
+* Preserved `goldenScript` to support automated scene validation in CI (`check-specimen-play`).
 
 ### Improved
-* **Boolean Semantic Integrity:** Used JSON boolean primitives directly for `gameOver` and `gameWon` flags, eliminating unnecessary string comparisons.
+* **Formula Semantic Compatibility:** Using stringified booleans in `SET_VAR` assignments aligns with `evalFormula`'s parser, ensuring variables resolve correctly during expression evaluation and terminal condition checks.
 * **Declarative Multi-Assignment:** Consolidated initializations and velocity/position updates into `SET_VAR` multi-assignment arrays.
 
 ### Regressed

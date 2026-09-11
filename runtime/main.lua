@@ -71,7 +71,32 @@ local cli = {
     isTownProofShot = false,
     isTownProofFramesMode = false,
     isTownWalkMode = false,
+    isStratum3Mode = false,
+    isStratumSaveMode = false,
 }
+
+function cli.setupStratum3Party(sess, ldr)
+    sess.gold = 3000
+    sess.party = {}
+    sess.reserve = {}
+    sess.storage = {}
+
+    -- Balanced party for Stratum III:
+    sess:recruitActor("talos", 17, 1)
+    sess:recruitActor("archangel", 17, 2)
+    sess:recruitActor("shadow_stalker", 16, 3)
+    sess:recruitActor("cerberus", 16, 4)
+
+    sess:rest()
+
+    -- Stratum III consumables & supplies:
+    sess.inventory = {}
+    sess:addItem(1, 15)
+    if ldr.getItem(568) then sess:addItem(568, 8) end
+    if ldr.getItem(604) then sess:addItem(604, 4) end
+    if ldr.getItem(31) then sess:addItem(31, 5) end
+    if ldr.getItem(24) then sess:addItem(24, 2) end
+end
 
 local triggerTestBattle
 
@@ -509,6 +534,10 @@ function love.load(arg)
                 cli.isPresentationParityFixtureMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
+            elseif val == "stratum3" then
+                cli.isStratum3Mode = true
+            elseif val == "stratum-save" then
+                cli.isStratumSaveMode = true
             elseif val:match("^surface=") then
                 cli.requestedSurfaceProfile = val:sub(#"surface=" + 1)
             end
@@ -550,6 +579,25 @@ function love.load(arg)
         assert(scene == "map", "scene mismatch: " .. tostring(scene))
         savegame.delete("savetest")
         print("SAVETEST OK")
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(0)
+        os.exit(0)
+        return
+    end
+
+    if cli.isStratumSaveMode then
+        loader.init()
+        local s = session.GameSession.new(loader)
+        cli.setupStratum3Party(s, loader)
+        local mapIdx = loader.getMapIndex and loader.getMapIndex(32)
+        if not mapIdx then error("stratum-save requires authored map id 32", 0) end
+        exploration.loadMap(s, mapIdx)
+        s.playerX = 4
+        s.playerY = 4
+        s.playerDir = "S"
+        savegame.save(s, loader, "map", "1")
+        savegame.save(s, loader, "map", "stratum3")
+        print("STRATUM3 SAVES GENERATED")
         if io and io.stdout and io.stdout.flush then io.stdout:flush() end
         love.event.quit(0)
         os.exit(0)
@@ -688,6 +736,7 @@ function love.load(arg)
             "test_baked_environment_package",
             "test_bounded_lane",
             "test_presentation_contract",
+            "test_metro_stratum",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1026,6 +1075,17 @@ function love.load(arg)
         if not townIndex then error("town-proof requires authored map id 16", 0) end
         exploration.loadMap(activeSession, townIndex)
         scene_host.push("map", { session = activeSession, loader = loader, party = activeSession.party })
+    elseif cli.isStratum3Mode then
+        cli.setupStratum3Party(activeSession, loader)
+        local mapIdx = loader.getMapIndex and loader.getMapIndex(32)
+        if not mapIdx then error("stratum3 requires authored map id 32", 0) end
+        exploration.loadMap(activeSession, mapIdx)
+        activeSession.playerX = 4
+        activeSession.playerY = 4
+        activeSession.playerDir = "S"
+        savegame.save(activeSession, loader, "map", "1")
+        savegame.save(activeSession, loader, "map", "stratum3")
+        scene_host.push("map", { session = activeSession, loader = loader, party = activeSession.party })
     else
         scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
     end
@@ -1238,6 +1298,9 @@ function love.update(dt)
             and scene_host.getCurrent() == "map" then
             local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
             require("engine.player_controller").refireFirstHeld(ctx)
+        end
+        if scene_host.getCurrent() == "map" then
+            require("engine.mover_runtime").update(activeSession, dt)
         end
     end
     

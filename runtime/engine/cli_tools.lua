@@ -1465,9 +1465,10 @@ function cli.runPreviewMap(mapId, x, y, dir, loader)
 
         viewport_3d.init()
 
-        local pw, ph = 256, 144
+        local pw, ph = 256, 240
         local previewCanvas = love.graphics.newCanvas(pw, ph)
         love.graphics.setCanvas({ previewCanvas, depth = true, stencil = true })
+        viewport_3d.draw(vSession)
         love.graphics.clear(0, 0, 0, 1, true, true)
         viewport_3d.draw(vSession)
         love.graphics.setCanvas()

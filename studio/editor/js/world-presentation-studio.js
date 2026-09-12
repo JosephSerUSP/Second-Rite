@@ -470,8 +470,12 @@
             walkProfile.classList.toggle('active', !!status.editing);
             walkProfile.textContent = status.editing ? 'Walk Profile: Editing' : 'Walk Profile';
             createProfile.disabled = !!status.authored;
-            splitProfile.disabled = !status.editing || !status.authored;
-            deleteProfile.disabled = !status.editing || !status.authored;
+            splitProfile.disabled = !status.editing || !status.authored
+                || status.selection?.kind !== 'walk-profile-segment';
+            const endpoint = status.selection?.kind === 'walk-profile-point'
+                && (status.selection.index === 0 || status.selection.index === status.pointCount - 1);
+            deleteProfile.disabled = !status.editing || !status.authored
+                || status.selection?.kind !== 'walk-profile-point' || endpoint;
         }
 
         const sceneSelect = document.createElement('select');

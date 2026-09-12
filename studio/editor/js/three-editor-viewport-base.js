@@ -1023,7 +1023,14 @@ export function createThreeEditorViewport(container, options = {}) {
         };
         const group = new THREE.Group();
         if (event.worldPosition) {
-            group.position.fromArray(Contract.runtimePositionToThestra(event.worldPosition));
+            const position = event.worldPosition.slice();
+            const traversal = sceneModel?.map?.source?.traversal;
+            const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;
+            if (lane) {
+                position[2] = WorldView.groundHeight(
+                    lane.groundProfile, Number(lane.groundZ || 0), Number(position[1]));
+            }
+            group.position.fromArray(Contract.runtimePositionToThestra(position));
             group.userData.worldPosition = true;
         } else group.position.set(event.world.x, 0, event.world.z);
         semanticContent.add(group);

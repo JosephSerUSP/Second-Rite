@@ -1,7 +1,14 @@
 {
   "id": "d003_breakout_rpg",
   "terminal": {
-    "reached": "v.win == 1 or v.lost == 1"
+    "reached": "v.win == 1 or v.lost == 1",
+    "script": [
+      "wait 1",
+      "down",
+      "down",
+      "select",
+      "wait 1"
+    ]
   },
   "name": "D003 - Breakout RPG",
   "kind": "menu",
@@ -13,13 +20,21 @@
         "x": 2,
         "y": 1,
         "w": 26,
-        "h": 3
+        "h": 4
       },
       "style": "frame",
       "content": [
         {
           "type": "text",
-          "text": "HP: {v.hp}   Skeletons: {v.skeletons_left}"
+          "text": "Ward HP: {v.hp}     Total Enemies: {v.total_enemies}"
+        },
+        {
+          "type": "text",
+          "text": "The Energy Orb is in the {v.orb_col == 1 and 'Left' or (v.orb_col == 2 and 'Center' or 'Right')} lane,"
+        },
+        {
+          "type": "text",
+          "text": "moving towards {v.orb_dir == 1 and 'the Enemy Lines!' or 'YOUR Ward!'}"
         }
       ]
     },
@@ -27,15 +42,39 @@
       "id": "board",
       "rect": {
         "x": 2,
-        "y": 4,
-        "w": 14,
-        "h": 10
+        "y": 5,
+        "w": 26,
+        "h": 9
       },
       "style": "frame",
       "content": [
         {
           "type": "text",
-          "text": "{v.boardText}"
+          "text": "--- ENEMY VANGUARD ---"
+        },
+        {
+          "type": "text",
+          "text": "Left:   {v.enemy_left} Goblin Spearmen"
+        },
+        {
+          "type": "text",
+          "text": "Center: {v.enemy_center} Orc Warriors"
+        },
+        {
+          "type": "text",
+          "text": "Right:  {v.enemy_right} Dark Mages"
+        },
+        {
+          "type": "text",
+          "text": ""
+        },
+        {
+          "type": "text",
+          "text": "--- YOUR DEFENSES ---"
+        },
+        {
+          "type": "text",
+          "text": "Your Ward is positioned at the {v.player_col == 1 and 'Left' or (v.player_col == 2 and 'Center' or 'Right')} lane."
         }
       ]
     },
@@ -51,15 +90,15 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.lost == 1 and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.win == 1 and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.cmdIdx == 1 and '> Move Left' or '  Move Left'))}"
+          "text": "{v.lost == 1 and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.win == 1 and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.cmdIdx == 1 and '> Shift Ward Left' or '  Shift Ward Left'))}"
         },
         {
           "type": "text",
-          "text": "{v.lost == 1 and '' or (v.win == 1 and '' or (v.cmdIdx == 2 and '> Hold' or '  Hold'))}"
+          "text": "{v.lost == 1 and '' or (v.win == 1 and '' or (v.cmdIdx == 2 and '> Hold Position' or '  Hold Position'))}"
         },
         {
           "type": "text",
-          "text": "{v.lost == 1 and '' or (v.win == 1 and '' or (v.cmdIdx == 3 and '> Move Right' or '  Move Right'))}"
+          "text": "{v.lost == 1 and '' or (v.win == 1 and '' or (v.cmdIdx == 3 and '> Shift Ward Right' or '  Shift Ward Right'))}"
         }
       ]
     }
@@ -69,183 +108,66 @@
       {
         "cmd": "SET_VAR",
         "assignments": [
-          {
-            "name": "hp",
-            "value": 3
-          },
-          {
-            "name": "skeletons_left",
-            "value": 15
-          },
-          {
-            "name": "sk_1_3",
-            "value": 1
-          },
-          {
-            "name": "sk_2_3",
-            "value": 1
-          },
-          {
-            "name": "sk_3_3",
-            "value": 1
-          },
-          {
-            "name": "sk_4_3",
-            "value": 1
-          },
-          {
-            "name": "sk_5_3",
-            "value": 1
-          },
-          {
-            "name": "sk_1_4",
-            "value": 1
-          },
-          {
-            "name": "sk_2_4",
-            "value": 1
-          },
-          {
-            "name": "sk_3_4",
-            "value": 1
-          },
-          {
-            "name": "sk_4_4",
-            "value": 1
-          },
-          {
-            "name": "sk_5_4",
-            "value": 1
-          },
-          {
-            "name": "sk_1_5",
-            "value": 1
-          },
-          {
-            "name": "sk_2_5",
-            "value": 1
-          },
-          {
-            "name": "sk_3_5",
-            "value": 1
-          },
-          {
-            "name": "sk_4_5",
-            "value": 1
-          },
-          {
-            "name": "sk_5_5",
-            "value": 1
-          },
-          {
-            "name": "ward_x",
-            "value": 3
-          },
-          {
-            "name": "bolt_x",
-            "value": 3
-          },
-          {
-            "name": "bolt_y",
-            "value": 2
-          },
-          {
-            "name": "bolt_dx",
-            "value": 1
-          },
-          {
-            "name": "bolt_dy",
-            "value": 1
-          },
-          {
-            "name": "cmdIdx",
-            "value": 2
-          },
-          {
-            "name": "lost",
-            "value": 0
-          },
-          {
-            "name": "win",
-            "value": 0
-          },
-          {
-            "name": "boardText",
-            "value": "''"
-          }
-        ]
-      },
-      {
-        "cmd": "SET_VAR",
-        "assignments": [
-          {
-            "name": "row5",
-            "value": "(v.bolt_y == 5 and v.bolt_x == 1 and ' O ' or (v.sk_1_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 2 and ' O ' or (v.sk_2_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 3 and ' O ' or (v.sk_3_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 4 and ' O ' or (v.sk_4_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 5 and ' O ' or (v.sk_5_5 == 1 and '[S]' or ' . '))"
-          },
-          {
-            "name": "row4",
-            "value": "(v.bolt_y == 4 and v.bolt_x == 1 and ' O ' or (v.sk_1_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 2 and ' O ' or (v.sk_2_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 3 and ' O ' or (v.sk_3_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 4 and ' O ' or (v.sk_4_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 5 and ' O ' or (v.sk_5_4 == 1 and '[S]' or ' . '))"
-          },
-          {
-            "name": "row3",
-            "value": "(v.bolt_y == 3 and v.bolt_x == 1 and ' O ' or (v.sk_1_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 2 and ' O ' or (v.sk_2_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 3 and ' O ' or (v.sk_3_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 4 and ' O ' or (v.sk_4_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 5 and ' O ' or (v.sk_5_3 == 1 and '[S]' or ' . '))"
-          },
-          {
-            "name": "row2",
-            "value": "(v.bolt_y == 2 and v.bolt_x == 1 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 2 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 3 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 4 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 5 and ' O ' or ' . ')"
-          },
-          {
-            "name": "row1",
-            "value": "(v.bolt_y == 1 and v.bolt_x == 1 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 2 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 3 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 4 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 5 and ' O ' or ' . ')"
-          },
-          {
-            "name": "rowW",
-            "value": "(v.ward_x == 1 and '[W]' or '   ') .. (v.ward_x == 2 and '[W]' or '   ') .. (v.ward_x == 3 and '[W]' or '   ') .. (v.ward_x == 4 and '[W]' or '   ') .. (v.ward_x == 5 and '[W]' or '   ')"
-          },
-          {
-            "name": "boardText",
-            "value": "v.row5 .. '\\n' .. v.row4 .. '\\n' .. v.row3 .. '\\n' .. v.row2 .. '\\n' .. v.row1 .. '\\n' .. v.rowW"
-          }
+          { "name": "hp", "value": 3 },
+          { "name": "enemy_left", "value": 3 },
+          { "name": "enemy_center", "value": 3 },
+          { "name": "enemy_right", "value": 3 },
+          { "name": "total_enemies", "value": 9 },
+          { "name": "orb_col", "value": 2 },
+          { "name": "orb_dir", "value": 1 },
+          { "name": "orb_dist", "value": 1 },
+          { "name": "player_col", "value": 2 },
+          { "name": "cmdIdx", "value": 2 },
+          { "name": "win", "value": 0 },
+          { "name": "lost", "value": 0 }
         ]
       }
     ],
     "on_up": [
       {
-        "cmd": "SET_VAR",
-        "name": "cmdIdx",
-        "value": "v.cmdIdx > 1 and v.cmdIdx - 1 or 3"
+        "cmd": "IF",
+        "condition": "v.win == 0 and v.lost == 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cmdIdx",
+            "value": "v.cmdIdx == 1 and 3 or v.cmdIdx - 1"
+          }
+        ]
       }
     ],
     "on_down": [
       {
-        "cmd": "SET_VAR",
-        "name": "cmdIdx",
-        "value": "v.cmdIdx < 3 and v.cmdIdx + 1 or 1"
+        "cmd": "IF",
+        "condition": "v.win == 0 and v.lost == 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "cmdIdx",
+            "value": "v.cmdIdx == 3 and 1 or v.cmdIdx + 1"
+          }
+        ]
       }
     ],
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v.lost == 1 or v.win == 1",
+        "condition": "v.win == 1 or v.lost == 1",
         "then": [
           {
             "cmd": "SCENE_EVENT",
             "kind": "pop"
           }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "v.lost == 0 and v.win == 0",
-        "then": [
+        ],
+        "else": [
           {
             "cmd": "IF",
             "condition": "v.cmdIdx == 1",
             "then": [
               {
                 "cmd": "SET_VAR",
-                "name": "ward_x",
-                "value": "max(1, v.ward_x - 1)"
+                "name": "player_col",
+                "value": "max(1, v.player_col - 1)"
               }
             ]
           },
@@ -255,476 +177,41 @@
             "then": [
               {
                 "cmd": "SET_VAR",
-                "name": "ward_x",
-                "value": "min(5, v.ward_x + 1)"
+                "name": "player_col",
+                "value": "min(3, v.player_col + 1)"
               }
             ]
           },
           {
             "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "nx",
-                "value": "v.bolt_x + v.bolt_dx"
-              },
-              {
-                "name": "ny",
-                "value": "v.bolt_y + v.bolt_dy"
-              },
-              {
-                "name": "hit",
-                "value": 0
-              }
-            ]
+            "name": "orb_dist",
+            "value": "v.orb_dist + v.orb_dir"
           },
           {
             "cmd": "IF",
-            "condition": "v.nx < 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "nx",
-                    "value": 1
-                  },
-                  {
-                    "name": "bolt_dx",
-                    "value": "-v.bolt_dx"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.nx > 5",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "nx",
-                    "value": 5
-                  },
-                  {
-                    "name": "bolt_dx",
-                    "value": "-v.bolt_dx"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 3 and v.nx == 1 and v.sk_1_3 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_1_3",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 3 and v.nx == 2 and v.sk_2_3 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_2_3",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 3 and v.nx == 3 and v.sk_3_3 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_3_3",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 3 and v.nx == 4 and v.sk_4_3 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_4_3",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 3 and v.nx == 5 and v.sk_5_3 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_5_3",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 4 and v.nx == 1 and v.sk_1_4 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_1_4",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 4 and v.nx == 2 and v.sk_2_4 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_2_4",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 4 and v.nx == 3 and v.sk_3_4 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_3_4",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 4 and v.nx == 4 and v.sk_4_4 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_4_4",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 4 and v.nx == 5 and v.sk_5_4 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_5_4",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 5 and v.nx == 1 and v.sk_1_5 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_1_5",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 5 and v.nx == 2 and v.sk_2_5 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_2_5",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 5 and v.nx == 3 and v.sk_3_5 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_3_5",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 5 and v.nx == 4 and v.sk_4_5 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_4_5",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 5 and v.nx == 5 and v.sk_5_5 == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "sk_5_5",
-                    "value": "0"
-                  },
-                  {
-                    "name": "hit",
-                    "value": "1"
-                  },
-                  {
-                    "name": "skeletons_left",
-                    "value": "v.skeletons_left - 1"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.hit == 1",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "bolt_dy",
-                    "value": "-v.bolt_dy"
-                  },
-                  {
-                    "name": "ny",
-                    "value": "v.bolt_y + v.bolt_dy"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.hit == 0 and v.ny > 5",
-            "then": [
-              {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  {
-                    "name": "ny",
-                    "value": 5
-                  },
-                  {
-                    "name": "bolt_dy",
-                    "value": "-v.bolt_dy"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ny == 1",
+            "condition": "v.orb_dist == 0",
             "then": [
               {
                 "cmd": "IF",
-                "condition": "v.nx == v.ward_x",
+                "condition": "v.orb_col == v.player_col",
                 "then": [
                   {
                     "cmd": "SET_VAR",
                     "assignments": [
-                      {
-                        "name": "bolt_dy",
-                        "value": "-v.bolt_dy"
-                      },
-                      {
-                        "name": "ny",
-                        "value": "v.bolt_y + v.bolt_dy"
-                      }
+                      { "name": "orb_dir", "value": 1 },
+                      { "name": "orb_dist", "value": 1 }
                     ]
                   }
                 ],
                 "else": [
                   {
                     "cmd": "SET_VAR",
-                    "name": "hp",
-                    "value": "v.hp - 1"
+                    "assignments": [
+                      { "name": "hp", "value": "v.hp - 1" },
+                      { "name": "orb_dir", "value": 1 },
+                      { "name": "orb_dist", "value": 1 },
+                      { "name": "orb_col", "value": "v.player_col" }
+                    ]
                   },
                   {
                     "cmd": "IF",
@@ -733,33 +220,8 @@
                       {
                         "cmd": "SET_VAR",
                         "assignments": [
-                          {
-                            "name": "lost",
-                            "value": 1
-                          },
-                          {
-                            "name": "cmdIdx",
-                            "value": 1
-                          }
-                        ]
-                      }
-                    ],
-                    "else": [
-                      {
-                        "cmd": "SET_VAR",
-                        "assignments": [
-                          {
-                            "name": "nx",
-                            "value": 3
-                          },
-                          {
-                            "name": "ny",
-                            "value": 2
-                          },
-                          {
-                            "name": "bolt_dy",
-                            "value": 1
-                          }
+                          { "name": "lost", "value": 1 },
+                          { "name": "cmdIdx", "value": 1 }
                         ]
                       }
                     ]
@@ -769,67 +231,83 @@
             ]
           },
           {
-            "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "bolt_x",
-                "value": "v.nx"
-              },
-              {
-                "name": "bolt_y",
-                "value": "v.ny"
-              }
-            ]
-          },
-          {
             "cmd": "IF",
-            "condition": "v.skeletons_left <= 0",
+            "condition": "v.orb_dist == 2",
             "then": [
               {
                 "cmd": "SET_VAR",
-                "assignments": [
+                "name": "hit_enemy",
+                "value": 0
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.orb_col == 1 and v.enemy_left > 0",
+                "then": [
                   {
-                    "name": "win",
-                    "value": 1
-                  },
-                  {
-                    "name": "cmdIdx",
-                    "value": 1
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      { "name": "enemy_left", "value": "v.enemy_left - 1" },
+                      { "name": "hit_enemy", "value": 1 }
+                    ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "row5",
-                "value": "(v.bolt_y == 5 and v.bolt_x == 1 and ' O ' or (v.sk_1_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 2 and ' O ' or (v.sk_2_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 3 and ' O ' or (v.sk_3_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 4 and ' O ' or (v.sk_4_5 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 5 and v.bolt_x == 5 and ' O ' or (v.sk_5_5 == 1 and '[S]' or ' . '))"
               },
               {
-                "name": "row4",
-                "value": "(v.bolt_y == 4 and v.bolt_x == 1 and ' O ' or (v.sk_1_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 2 and ' O ' or (v.sk_2_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 3 and ' O ' or (v.sk_3_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 4 and ' O ' or (v.sk_4_4 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 4 and v.bolt_x == 5 and ' O ' or (v.sk_5_4 == 1 and '[S]' or ' . '))"
+                "cmd": "IF",
+                "condition": "v.orb_col == 2 and v.enemy_center > 0",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      { "name": "enemy_center", "value": "v.enemy_center - 1" },
+                      { "name": "hit_enemy", "value": 1 }
+                    ]
+                  }
+                ]
               },
               {
-                "name": "row3",
-                "value": "(v.bolt_y == 3 and v.bolt_x == 1 and ' O ' or (v.sk_1_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 2 and ' O ' or (v.sk_2_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 3 and ' O ' or (v.sk_3_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 4 and ' O ' or (v.sk_4_3 == 1 and '[S]' or ' . ')) .. (v.bolt_y == 3 and v.bolt_x == 5 and ' O ' or (v.sk_5_3 == 1 and '[S]' or ' . '))"
+                "cmd": "IF",
+                "condition": "v.orb_col == 3 and v.enemy_right > 0",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      { "name": "enemy_right", "value": "v.enemy_right - 1" },
+                      { "name": "hit_enemy", "value": 1 }
+                    ]
+                  }
+                ]
               },
               {
-                "name": "row2",
-                "value": "(v.bolt_y == 2 and v.bolt_x == 1 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 2 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 3 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 4 and ' O ' or ' . ') .. (v.bolt_y == 2 and v.bolt_x == 5 and ' O ' or ' . ')"
+                "cmd": "IF",
+                "condition": "v.hit_enemy == 1",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "total_enemies",
+                    "value": "v.total_enemies - 1"
+                  }
+                ]
               },
               {
-                "name": "row1",
-                "value": "(v.bolt_y == 1 and v.bolt_x == 1 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 2 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 3 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 4 and ' O ' or ' . ') .. (v.bolt_y == 1 and v.bolt_x == 5 and ' O ' or ' . ')"
+                "cmd": "SET_VAR",
+                "assignments": [
+                  { "name": "orb_dir", "value": "-1" },
+                  { "name": "orb_dist", "value": 1 }
+                ]
               },
               {
-                "name": "rowW",
-                "value": "(v.ward_x == 1 and '[W]' or '   ') .. (v.ward_x == 2 and '[W]' or '   ') .. (v.ward_x == 3 and '[W]' or '   ') .. (v.ward_x == 4 and '[W]' or '   ') .. (v.ward_x == 5 and '[W]' or '   ')"
-              },
-              {
-                "name": "boardText",
-                "value": "v.row5 .. '\\n' .. v.row4 .. '\\n' .. v.row3 .. '\\n' .. v.row2 .. '\\n' .. v.row1 .. '\\n' .. v.rowW"
+                "cmd": "IF",
+                "condition": "v.total_enemies <= 0",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      { "name": "win", "value": 1 },
+                      { "name": "cmdIdx", "value": 1 }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -842,12 +320,5 @@
         "kind": "pop"
       }
     ]
-  },
-  "goldenScript": [
-    "wait 1",
-    "down",
-    "down",
-    "select",
-    "wait 1"
-  ]
+  }
 }

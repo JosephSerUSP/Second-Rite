@@ -134,6 +134,8 @@ test('runtime models retain an authored height and ground horizontal arrows on i
         'lane bounds must not silently translate an outward exit marker');
     assert.match(plateStudio, /Project its full authored depth ribbon, not a flat/,
         'the plate walk overlay must be a camera-projected traversal surface');
+    assert.match(plateStudio, /worldYAtScreenXOnGroundProfile/,
+        'plate model dragging must invert screen X along the same non-flat lane floor it renders');
 });
 
 test('fully 3D interior exits carry their authored transition-marker model', () => {

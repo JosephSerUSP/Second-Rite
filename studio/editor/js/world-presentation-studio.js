@@ -596,9 +596,14 @@
                 { step: '0.25' }));
             plate.appendChild(calibrationRow('Pixels / world Y', state.plate.pixelsPerRuntimeY,
                 'Read-only: this scale is coupled to the authored plate render and should change with regenerated plate evidence.'));
-            plate.appendChild(calibrationRow('Image dimensions',
+            plate.appendChild(calibrationRow('Declared image size',
                 `${state.plate.imageSize[0]} × ${state.plate.imageSize[1]}`,
-                'Derived/authored image size, not a crop knob.'));
+                'Environment manifest imageSize. It is not a crop knob.'));
+            plate.appendChild(calibrationRow('Loaded plate size',
+                state.plate.actualImageSize
+                    ? `${state.plate.actualImageSize[0]} × ${state.plate.actualImageSize[1]}`
+                    : 'loading',
+                'Read from the actual plate texture and checked against the environment manifest.'));
             calibrationPanel.appendChild(plate);
 
             const reference = section('Slice / reference calibration', state.reference.owner);

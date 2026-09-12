@@ -45,7 +45,8 @@ export function createCompositionViewport(container, options) {
     renderer.setClearColor(0x24282d);
     renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;touch-action:none;';
     renderer.domElement.tabIndex = 0;
-    renderer.domElement.setAttribute('aria-label', 'Plate map viewport');
+    renderer.domElement.setAttribute('aria-label', 'Plate map viewport; drag Events along the authored lane, world Y.');
+    renderer.domElement.title = 'Plate Events move along the authored lane (world Y).';
     layer.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 5000);

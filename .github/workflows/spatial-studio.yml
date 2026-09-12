@@ -1,0 +1,114 @@
+name: spatial Studio
+
+on:
+  pull_request:
+    paths:
+      - "shared/semantics/world-view.ts"
+      - "runtime/engine/bounded_lane.lua"
+      - "runtime/engine/generated/world-view.lua"
+      - "runtime/presentation/viewport_3d.lua"
+      - "studio/editor/js/generated/world-view.js"
+      - "studio/editor/js/second-rite-editor-commands.js"
+      - "studio/editor/js/event_presentation.js"
+      - "studio/editor/js/thestra-editor-workspace.js"
+      - "studio/editor/js/thestra-workspace-state.js"
+      - "studio/editor/js/three-authoring-tools.js"
+      - "studio/editor/js/three-composition-viewport.js"
+      - "studio/editor/js/three-editor-viewport-base.js"
+      - "studio/editor/js/three-editor-viewport.js"
+      - "studio/editor/js/world-presentation-studio.js"
+      - "studio/editor/tests/test-world-event-authoring.js"
+      - "studio/editor/tests/test-world-presentation.js"
+      - "studio/editor/test-walk-profile-runtime.js"
+      - "tests/test_bounded_lane.lua"
+      - ".github/workflows/spatial-studio.yml"
+  push:
+    branches: [main]
+    paths:
+      - "shared/semantics/world-view.ts"
+      - "runtime/engine/bounded_lane.lua"
+      - "runtime/engine/generated/world-view.lua"
+      - "runtime/presentation/viewport_3d.lua"
+      - "studio/editor/js/generated/world-view.js"
+      - "studio/editor/js/second-rite-editor-commands.js"
+      - "studio/editor/js/event_presentation.js"
+      - "studio/editor/js/thestra-editor-workspace.js"
+      - "studio/editor/js/thestra-workspace-state.js"
+      - "studio/editor/js/three-authoring-tools.js"
+      - "studio/editor/js/three-composition-viewport.js"
+      - "studio/editor/js/three-editor-viewport-base.js"
+      - "studio/editor/js/three-editor-viewport.js"
+      - "studio/editor/js/world-presentation-studio.js"
+      - "studio/editor/tests/test-world-event-authoring.js"
+      - "studio/editor/tests/test-world-presentation.js"
+      - "studio/editor/test-walk-profile-runtime.js"
+      - "tests/test_bounded_lane.lua"
+      - ".github/workflows/spatial-studio.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: spatial-studio-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  authoring:
+    name: authoring contracts
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Walk-profile command and surface contracts
+        shell: pwsh
+        run: |
+          node --test studio/editor/tests/test-world-event-authoring.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node studio/editor/tests/test-world-presentation.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Syntax-check touched browser modules
+        shell: pwsh
+        run: |
+          node --check studio/editor/js/second-rite-editor-commands.js
+          node --check studio/editor/js/event_presentation.js
+          node --check studio/editor/js/thestra-editor-workspace.js
+          node --check studio/editor/js/thestra-workspace-state.js
+          node --check studio/editor/js/world-presentation-studio.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Spatial Studio authoring tests modified tracked source" }
+
+  runtime-proof:
+    name: Port runtime grounding proof
+    runs-on: windows-latest
+    timeout-minutes: 12
+    env:
+      SDL_AUDIODRIVER: "dummy"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
+      - name: Prove authored Port profile reaches real runtime grounding and pixels
+        shell: pwsh
+        run: node --test studio/editor/test-walk-profile-runtime.js
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Spatial Studio runtime proof modified tracked source" }

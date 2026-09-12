@@ -318,6 +318,7 @@
     function updateRuntimeControls() {
         if (!runtimeControls) return;
         runtimeControls.syncWalkMesh?.();
+        runtimeControls.syncWalkProfile?.();
         const runtime = previewState.mode() === 'runtime';
         const plate = viewportApi()?.getCompositionPreview?.();
         runtimeControls.runtime.textContent = plate ? 'Plate Composition' : 'Runtime Camera';
@@ -430,6 +431,49 @@
             const viewport = viewportApi();
             walkMesh.textContent = viewport?.getWalkMeshVisible?.() ? 'Walk Mesh: On' : 'Walk Mesh';
         }
+        const walkProfile = document.createElement('button');
+        walkProfile.type = 'button';
+        walkProfile.className = 'win98-btn';
+        walkProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        walkProfile.title = 'Edit Map-owned bounded-lane groundProfile control points. This never edits collision mesh geometry.';
+        walkProfile.textContent = 'Walk Profile';
+
+        const createProfile = document.createElement('button');
+        createProfile.type = 'button';
+        createProfile.className = 'win98-btn';
+        createProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        createProfile.title = 'Explicitly create a flat two-point groundProfile from the current lane bounds and groundZ.';
+        createProfile.textContent = 'Create Profile';
+
+        const splitProfile = document.createElement('button');
+        splitProfile.type = 'button';
+        splitProfile.className = 'win98-btn';
+        splitProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        splitProfile.title = 'Select a Walk Profile segment, then split it at its interpolated midpoint.';
+        splitProfile.textContent = 'Split Segment';
+
+        const deleteProfile = document.createElement('button');
+        deleteProfile.type = 'button';
+        deleteProfile.className = 'win98-btn';
+        deleteProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        deleteProfile.title = 'Select an interior Walk Profile point to remove it. Endpoints are protected.';
+        deleteProfile.textContent = 'Delete Point';
+
+        function syncWalkProfile() {
+            const viewport = viewportApi();
+            const status = viewport?.getWalkProfileStatus?.();
+            const show = !!status?.available;
+            for (const control of [walkProfile, createProfile, splitProfile, deleteProfile]) {
+                control.style.display = show ? '' : 'none';
+            }
+            if (!show) return;
+            walkProfile.classList.toggle('active', !!status.editing);
+            walkProfile.textContent = status.editing ? 'Walk Profile: Editing' : 'Walk Profile';
+            createProfile.disabled = !!status.authored;
+            splitProfile.disabled = !status.editing || !status.authored;
+            deleteProfile.disabled = !status.editing || !status.authored;
+        }
+
         const sceneSelect = document.createElement('select');
         sceneSelect.className = 'win98-input';
         sceneSelect.style.cssText = 'font-size:9px;max-width:120px;height:20px;';
@@ -445,14 +489,42 @@
             viewport.setWalkMeshVisible(!viewport.getWalkMeshVisible());
             syncWalkMesh();
         });
+        walkProfile.addEventListener('click', () => {
+            const viewport = viewportApi();
+            if (!viewport?.setWalkProfileEditing) return;
+            viewport.setWalkProfileEditing(!viewport.getWalkProfileEditing());
+            syncWalkProfile();
+        });
+        createProfile.addEventListener('click', () => {
+            const viewport = viewportApi();
+            const result = viewport?.createGroundProfile?.();
+            if (result?.ok) viewport.setWalkProfileEditing(true);
+            syncWalkProfile();
+        });
+        splitProfile.addEventListener('click', () => {
+            viewportApi()?.splitSelectedGroundProfileSegment?.(0.5);
+            syncWalkProfile();
+        });
+        deleteProfile.addEventListener('click', () => {
+            viewportApi()?.deleteSelectedGroundProfilePoint?.();
+            syncWalkProfile();
+        });
         sceneSelect.addEventListener('change', () => {
             runtimeSceneId = sceneSelect.value;
             if (previewState.mode() === 'runtime') applyRuntimePreview();
             updateRuntimeControls();
         });
 
-        toolbar.mount('world-presentation', [free, runtime, walkMesh, sceneSelect, info]);
-        runtimeControls = { free, runtime, walkMesh, syncWalkMesh, sceneSelect, info, projectionButtons, projectionDisabled: null };
+        toolbar.mount('world-presentation', [
+            free, runtime, walkMesh,
+            walkProfile, createProfile, splitProfile, deleteProfile,
+            sceneSelect, info
+        ]);
+        runtimeControls = {
+            free, runtime, walkMesh, syncWalkMesh,
+            walkProfile, createProfile, splitProfile, deleteProfile, syncWalkProfile,
+            sceneSelect, info, projectionButtons, projectionDisabled: null
+        };
         updateRuntimeControls();
         return true;
     }

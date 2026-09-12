@@ -20,6 +20,11 @@
             bundleRefresh: true,
             clearBundleImmediately: false
         }),
+        'camera-calibration': Object.freeze({
+            semanticRefresh: true,
+            bundleRefresh: false,
+            clearBundleImmediately: false
+        }),
         'lane-profile': Object.freeze({
             semanticRefresh: true,
             bundleRefresh: false,

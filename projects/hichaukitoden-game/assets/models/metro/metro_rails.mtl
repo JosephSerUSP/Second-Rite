@@ -1,0 +1,12 @@
+# Metro Rail Bed Materials
+newmtl rail_steel
+Kd 0.78 0.82 0.86
+
+newmtl rail_tie
+Kd 0.28 0.24 0.20
+
+newmtl rail_ballast
+Kd 0.16 0.15 0.15
+
+newmtl platform_curb
+Kd 0.48 0.48 0.50

@@ -1986,7 +1986,11 @@ handlers.LOAD_MAP = function(cmd, ctx)
     if not mapIdx then
         error("LOAD_MAP: no map with authored id " .. tostring(mapId))
     end
-    exploration.loadMap(ctx.session, mapIdx, { arrival = cmd.arrival })
+    local opts = { arrival = cmd.arrival }
+    if cmd.x ~= nil then opts.x = tonumber(evalFormula(cmd.x, ctx)) end
+    if cmd.y ~= nil then opts.y = tonumber(evalFormula(cmd.y, ctx)) end
+    if cmd.dir ~= nil then opts.dir = tostring(cmd.dir) end
+    exploration.loadMap(ctx.session, mapIdx, opts)
 end
 
 handlers.SET_MAP_PRESENTATION = function(cmd, ctx)

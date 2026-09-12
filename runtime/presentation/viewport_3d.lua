@@ -918,7 +918,7 @@ function viewport_3d.collectEventModelPlacements(session)
     local mapData = session and session.currentMapData
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
-            if not rawEv.wallEvent then
+            if not rawEv.wallEvent and not rawEv.mover then
                 local pres = viewport_3d.resolveEventPresentation(rawEv, session)
                 if pres.visual == "model" and pres.model then
                     table.insert(placements, {
@@ -930,6 +930,14 @@ function viewport_3d.collectEventModelPlacements(session)
                     })
                 end
             end
+        end
+    end
+
+    local moverRuntime = package.loaded["engine.mover_runtime"] or (pcall(require, "engine.mover_runtime") and require("engine.mover_runtime"))
+    if moverRuntime and moverRuntime.getPlacements then
+        local moverPlacements = moverRuntime.getPlacements(session)
+        for _, p in ipairs(moverPlacements) do
+            table.insert(placements, p)
         end
     end
     return placements
@@ -2171,6 +2179,15 @@ local function drawWorldSpace(session, authoredCamera, inspection)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
+    if session and session.moverCameraOverride then
+        local mCam = session.moverCameraOverride
+        focusCam = {
+            pitch = (focusCam.pitch or 0) + (mCam.pitch or 0),
+            fovScale = (focusCam.fovScale or 1.0) * (mCam.fovScale or 1.0),
+            dollyX = (focusCam.dollyX or 0) + (mCam.dollyX or 0),
+            dollyY = (focusCam.dollyY or 0) + (mCam.dollyY or 0),
+        }
+    end
     -- The Map Scene still owns composition. A bounded provider supplies only
     -- its selected camera record and package-backed environment to this shared
     -- WorldCamera/viewport seam.
@@ -2612,13 +2629,21 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                     key = "floor-base:" .. x .. "," .. y .. ":" .. floorSpec.geometry,
                 }
             else
-                cell.floorSurface = {
-                    a = { x = x, y = y, z = 0 }, b = { x = x + 1, y = y, z = 0 },
-                    c = { x = x + 1, y = y + 1, z = 0 }, d = { x = x, y = y + 1, z = 0 },
-                    uv = cellFloorUV,
-                    colors = { colorAt(x, y, 0, false), colorAt(x + 1, y, 0, false),
-                        colorAt(x + 1, y + 1, 0, false), colorAt(x, y + 1, 0, false) },
-                }
+                local floorFeature = atlas and atlas.tiles[structure.materialLookup[x .. "," .. y] or ""]
+                if floorFeature and floorFeature.atlas then
+                    cellFloorUV = { atlasUV(floorFeature.atlas[2] * ATLAS_TILE,
+                        floorFeature.atlas[1] * ATLAS_TILE, ATLAS_TILE, ATLAS_TILE,
+                        atlas.w, atlas.h, false) }
+                end
+                if not (floorFeature and floorFeature.coversFace == true) then
+                    cell.floorSurface = {
+                        a = { x = x, y = y, z = 0 }, b = { x = x + 1, y = y, z = 0 },
+                        c = { x = x + 1, y = y + 1, z = 0 }, d = { x = x, y = y + 1, z = 0 },
+                        uv = cellFloorUV,
+                        colors = { colorAt(x, y, 0, false), colorAt(x + 1, y, 0, false),
+                            colorAt(x + 1, y + 1, 0, false), colorAt(x, y + 1, 0, false) },
+                    }
+                end
             end
         end
         local floor = cell.floorSurface
@@ -2638,7 +2663,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 key = "floor-feature:" .. x .. "," .. y .. ":" .. floorMesh,
             }
         end
-        if floorFeature and floorFeature.role == "floor_feature" and floorFeature.atlas then
+        if floorFeature and floorFeature.role == "floor_feature" and floorFeature.atlas and (floorFeature.overlay == nil or floorFeature.overlay == true) then
             if not cell.floorFeatureSurface then
                 local featureUV = { atlasUV(floorFeature.atlas[2] * ATLAS_TILE,
                     floorFeature.atlas[1] * ATLAS_TILE, ATLAS_TILE, ATLAS_TILE,
@@ -2646,7 +2671,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 cell.floorFeatureSurface = {
                     a = { x = x, y = y, z = 0.002 }, b = { x = x + 1, y = y, z = 0.002 },
                     c = { x = x + 1, y = y + 1, z = 0.002 }, d = { x = x, y = y + 1, z = 0.002 },
-                    uv = featureUV, colors = floor.colors,
+                    uv = featureUV, colors = floor and floor.colors or { colorAt(x, y, 0, false), colorAt(x + 1, y, 0, false), colorAt(x + 1, y + 1, 0, false), colorAt(x, y + 1, 0, false) },
                 }
             end
             local feature = cell.floorFeatureSurface
@@ -2855,6 +2880,77 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             }
         end
         structure.modelSurfaces[cacheKey] = placed
+        return placed
+    end
+    local function ensureMoverPlacedModel(mover, modelPath, originX, originY, cacheKey)
+        if not mover or not modelPath then return nil end
+        local slotKey = cacheKey or "main"
+        mover.placedSlots = mover.placedSlots or {}
+        local slot = mover.placedSlots[slotKey]
+        if slot and slot.placed and slot.placedModel == modelPath
+                and slot.lastPlacedX == originX and slot.lastPlacedY == originY then
+            return slot.placed
+        end
+
+        local baseModel = mover.baseModelCache and mover.baseModelCache[modelPath]
+        if not baseModel then
+            baseModel = objModel.load(modelPath)
+            mover.baseModelCache = mover.baseModelCache or {}
+            mover.baseModelCache[modelPath] = baseModel
+        end
+
+        local needNewMeshes = (not slot) or (not slot.placed) or (slot.placedModel ~= modelPath)
+        local placed = needNewMeshes and {} or slot.placed
+
+        for gi, modelGroup in ipairs(baseModel.groups) do
+            local vertices = {}
+            local minX, maxX = math.huge, -math.huge
+            local minY, maxY = math.huge, -math.huge
+            for _, vertex in ipairs(modelGroup.vertices) do
+                local lx, ly, lz = vertex[1], vertex[2], vertex[3]
+                local nx, ny, nz = vertex[6], vertex[7], vertex[8]
+                local wx, wy, wz = originX + lx, originY + ly, lz
+                minX, maxX = math.min(minX, wx), math.max(maxX, wx)
+                minY, maxY = math.min(minY, wy), math.max(maxY, wy)
+                local light = colorAt(wx, wy, wz, false)
+                local directional = math.max(0.35, 0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+                vertices[#vertices + 1] = {
+                    wx, wy, vertex[4], vertex[5],
+                    modelGroup.color[1], modelGroup.color[2], modelGroup.color[3], modelGroup.color[4],
+                    light[1] * directional, light[2] * directional, light[3] * directional,
+                    1, wz,
+                }
+            end
+
+            if needNewMeshes then
+                local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "stream")
+                if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
+                placed[gi] = {
+                    mesh = mesh, model = true, vertices = vertices,
+                    texture = modelGroup.texture,
+                    centerX = originX, centerY = originY, centerZ = 0.5,
+                    bounds = #vertices > 0 and {
+                        minX = minX, maxX = maxX, minY = minY, maxY = maxY,
+                    } or nil,
+                }
+            else
+                local entry = placed[gi]
+                entry.vertices = vertices
+                entry.mesh:setVertices(vertices)
+                entry.centerX = originX
+                entry.centerY = originY
+                entry.bounds = #vertices > 0 and {
+                    minX = minX, maxX = maxX, minY = minY, maxY = maxY,
+                } or nil
+            end
+        end
+
+        mover.placedSlots[slotKey] = {
+            placed = placed,
+            placedModel = modelPath,
+            lastPlacedX = originX,
+            lastPlacedY = originY,
+        }
         return placed
     end
     local function queuePlacedModels(placedGroups)
@@ -3135,7 +3231,7 @@ end
     end
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
-            if not rawEv.wallEvent then
+            if not rawEv.wallEvent and not rawEv.mover then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
                 if presentation.visual == "model" and presentation.model then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
@@ -3172,6 +3268,17 @@ end
                             rawEv.worldHeight, rawEv.frameWidth, rawEv.frameHeight, rawEv.frameIndex)
                     end
                 end
+            end
+        end
+    end
+
+    local moverRuntime = package.loaded["engine.mover_runtime"] or (pcall(require, "engine.mover_runtime") and require("engine.mover_runtime"))
+    if moverRuntime and moverRuntime.getPlacements then
+        local moverPlacements = moverRuntime.getPlacements(session)
+        for _, p in ipairs(moverPlacements) do
+            if p.model and p.mover then
+                local moverPlaced = ensureMoverPlacedModel(p.mover, p.model, p.x, p.y, p.cacheKey)
+                if moverPlaced then queuePlacedModels(moverPlaced) end
             end
         end
     end

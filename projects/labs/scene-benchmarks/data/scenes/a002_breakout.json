@@ -14,33 +14,83 @@
   "windows": [
     {
       "id": "header",
-      "rect": { "x": 1, "y": 1, "w": 28, "h": 3 },
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 28,
+        "h": 3
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "Breakout   Score: {v.score}" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "Breakout   Score: {v.score}"
+        }
+      ]
     },
     {
       "id": "playfield",
-      "rect": { "x": 1, "y": 5, "w": 28, "h": 16 },
+      "rect": {
+        "x": 1,
+        "y": 5,
+        "w": 28,
+        "h": 16
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "{v.renderedField}" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.renderedField}"
+        }
+      ]
     },
     {
       "id": "controls",
-      "rect": { "x": 1, "y": 22, "w": 28, "h": 3 },
+      "rect": {
+        "x": 1,
+        "y": 22,
+        "w": 28,
+        "h": 3
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "LEFT/RIGHT: Move   Enter: Restart   B: Exit" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "LEFT/RIGHT: Move   Enter: Restart   B: Exit"
+        }
+      ]
     },
     {
       "id": "paddle_win",
-      "rect": { "x": "1 + 1 + v.padX", "y": "5 + 1 + v.padY", "w": "v.padW", "h": 1 },
+      "rect": {
+        "x": "1 + 1 + v.padX",
+        "y": "5 + 1 + v.padY",
+        "w": "v.padW",
+        "h": 1
+      },
       "style": "panel",
-      "content": [ { "type": "text", "text": "=====" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "====="
+        }
+      ]
     },
     {
       "id": "ball_win",
-      "rect": { "x": "1 + 1 + v.ballX", "y": "5 + 1 + v.ballY", "w": 1, "h": 1 },
+      "rect": {
+        "x": "1 + 1 + v.ballX",
+        "y": "5 + 1 + v.ballY",
+        "w": 1,
+        "h": 1
+      },
       "style": "panel",
-      "content": [ { "type": "text", "text": "O" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
     }
   ],
   "hooks": {
@@ -48,46 +98,139 @@
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "_guard", "value": 0 },
-          { "name": "fieldW", "value": 26 },
-          { "name": "fieldH", "value": 14 },
-          { "name": "padW", "value": 5 },
-          { "name": "padX", "value": 10 },
-          { "name": "padY", "value": 13 },
-          { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 13.5 },
-          { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": 10.0 },
-          { "name": "score", "value": 0 },
-          { "name": "moveInput", "value": 0 },
-          { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          {
+            "name": "_guard",
+            "value": 0
+          },
+          {
+            "name": "fieldW",
+            "value": 26
+          },
+          {
+            "name": "fieldH",
+            "value": 14
+          },
+          {
+            "name": "padW",
+            "value": 5
+          },
+          {
+            "name": "padX",
+            "value": 10
+          },
+          {
+            "name": "padY",
+            "value": 13
+          },
+          {
+            "name": "ballX",
+            "value": 12.0
+          },
+          {
+            "name": "ballY",
+            "value": 13.5
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": 10.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "moveInput",
+            "value": 0
+          },
+          {
+            "name": "renderedField",
+            "value": "''"
+          },
+          {
+            "name": "gameOver",
+            "value": "false"
+          },
+          {
+            "name": "gameWon",
+            "value": "false"
+          }
         ]
       },
-      { "cmd": "SCRIPT", "ref": "setup_bricks" }
+      {
+        "cmd": "SCRIPT",
+        "ref": "setup_bricks"
+      }
     ],
     "on_select": [
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "fieldW", "value": 26 },
-          { "name": "fieldH", "value": 14 },
-          { "name": "padW", "value": 5 },
-          { "name": "padX", "value": 10 },
-          { "name": "padY", "value": 13 },
-          { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 13.5 },
-          { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": 10.0 },
-          { "name": "score", "value": 0 },
-          { "name": "moveInput", "value": 0 },
-          { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          {
+            "name": "fieldW",
+            "value": 26
+          },
+          {
+            "name": "fieldH",
+            "value": 14
+          },
+          {
+            "name": "padW",
+            "value": 5
+          },
+          {
+            "name": "padX",
+            "value": 10
+          },
+          {
+            "name": "padY",
+            "value": 13
+          },
+          {
+            "name": "ballX",
+            "value": 12.0
+          },
+          {
+            "name": "ballY",
+            "value": 13.5
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": 10.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "moveInput",
+            "value": 0
+          },
+          {
+            "name": "renderedField",
+            "value": "''"
+          },
+          {
+            "name": "gameOver",
+            "value": "false"
+          },
+          {
+            "name": "gameWon",
+            "value": "false"
+          }
         ]
       },
-      { "cmd": "SCRIPT", "ref": "setup_bricks" }
+      {
+        "cmd": "SCRIPT",
+        "ref": "setup_bricks"
+      }
     ],
     "on_frame": [
       {
@@ -97,10 +240,22 @@
           {
             "cmd": "SET_VAR",
             "assignments": [
-              { "name": "padX", "value": "clamp(v.padX + v.moveInput * 18.0 * v.time.dt, 0, v.fieldW - v.padW)" },
-              { "name": "moveInput", "value": 0 },
-              { "name": "ballX", "value": "v.ballX + v.ballVX * v.time.dt" },
-              { "name": "ballY", "value": "v.ballY + v.ballVY * v.time.dt" }
+              {
+                "name": "padX",
+                "value": "clamp(v.padX + v.moveInput * 18.0 * v.time.dt, 0, v.fieldW - v.padW)"
+              },
+              {
+                "name": "moveInput",
+                "value": 0
+              },
+              {
+                "name": "ballX",
+                "value": "v.ballX + v.ballVX * v.time.dt"
+              },
+              {
+                "name": "ballY",
+                "value": "v.ballY + v.ballVY * v.time.dt"
+              }
             ]
           },
           {
@@ -110,8 +265,14 @@
               {
                 "cmd": "SET_VAR",
                 "assignments": [
-                  { "name": "ballX", "value": "clamp(v.ballX, 0, v.fieldW - 1)" },
-                  { "name": "ballVX", "value": "-v.ballVX" }
+                  {
+                    "name": "ballX",
+                    "value": "clamp(v.ballX, 0, v.fieldW - 1)"
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "-v.ballVX"
+                  }
                 ]
               }
             ]
@@ -123,8 +284,14 @@
               {
                 "cmd": "SET_VAR",
                 "assignments": [
-                  { "name": "ballY", "value": 0 },
-                  { "name": "ballVY", "value": "-v.ballVY" }
+                  {
+                    "name": "ballY",
+                    "value": 0
+                  },
+                  {
+                    "name": "ballVY",
+                    "value": "-v.ballVY"
+                  }
                 ]
               }
             ]
@@ -132,7 +299,13 @@
           {
             "cmd": "IF",
             "condition": "v.ballY >= v.fieldH",
-            "then": [ { "cmd": "SET_VAR", "name": "gameOver", "value": "true" } ]
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "gameOver",
+                "value": "true"
+              }
+            ]
           },
           {
             "cmd": "IF",
@@ -141,27 +314,184 @@
               {
                 "cmd": "SET_VAR",
                 "assignments": [
-                  { "name": "ballY", "value": "v.padY - 0.5" },
-                  { "name": "ballVY", "value": "-v.ballVY" },
-                  { "name": "ballVX", "value": "v.ballVX + ((v.ballX - (v.padX + v.padW / 2)) / (v.padW / 2)) * 6.0" }
+                  {
+                    "name": "ballY",
+                    "value": "v.padY - 0.5"
+                  },
+                  {
+                    "name": "ballVY",
+                    "value": "-v.ballVY"
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "v.ballVX + ((v.ballX - (v.padX + v.padW / 2)) / (v.padW / 2)) * 6.0"
+                  }
                 ]
               }
             ]
           },
-          { "cmd": "SCRIPT", "ref": "process_bricks" }
+          {
+            "cmd": "SCRIPT",
+            "ref": "process_bricks"
+          }
         ]
       }
     ],
-    "on_left": [ { "cmd": "SET_VAR", "name": "moveInput", "value": -1 } ],
-    "on_right": [ { "cmd": "SET_VAR", "name": "moveInput", "value": 1 } ],
-    "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
+    "on_left": [
+      {
+        "cmd": "SET_VAR",
+        "name": "moveInput",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_VAR",
+        "name": "moveInput",
+        "value": 1
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
   },
   "scripts": {
     "setup_bricks": "\nlocal v = ctx.v\nv.bricks = {}\nfor y = 1, 4 do\n    for x = 2, v.fieldW - 3 do\n        table.insert(v.bricks, {x=x, y=y, intact=true})\n    end\nend\n",
     "process_bricks": "\nlocal v = ctx.v\nlocal bx, by = math.floor(v.ballX + 0.5), math.floor(v.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(v.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break\n        end\n    end\nend\nif count == 0 then v.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, v.fieldH - 1 do\n    for x = 0, v.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif v.gameOver then out = out .. \"GAME OVER\\n\" end\nif v.gameWon then out = out .. \"YOU WIN!\\n\" end\nv.renderedField = out\n"
   },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "key": "right",
+      "wait": 0.05
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    }
   ]
 }

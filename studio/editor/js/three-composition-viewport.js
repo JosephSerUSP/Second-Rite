@@ -642,6 +642,7 @@ export function createCompositionViewport(container, options) {
     return {
         setSceneModel, show, select, hide, setSemanticSelection,
         isPlate: () => !!plate,
+        isVisible: () => visible,
         setWalkMeshVisible(visible) {
             walkMeshVisible = !!visible;
             walkOverlay.visible = walkMeshVisible || walkProfileEditing;

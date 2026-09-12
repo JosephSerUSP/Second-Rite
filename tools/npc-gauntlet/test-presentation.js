@@ -30,13 +30,13 @@ test('speakers resolve to the sprite the Project authors for them', () => {
 });
 
 test('a speaker the Project authors two ways gets no sprite, and says why', () => {
-    // Real content state as of this commit: map 1 authors wall-mounted Alicia
-    // and Laura as bump events wearing a door placeholder, while maps
+    // Real content state as of this commit: map 1 authors wall-mounted Yukio
+    // and Euler as bump events wearing a door placeholder, while maps
     // 23/24/27/28 author them with their town sprites. The lab must report
     // that rather than pick, so a researcher never judges a line against a
     // face the game might not use.
     const speakers = presentation.speakerSprites(PROJECT);
-    for (const name of ['Alicia', 'Laura']) {
+    for (const name of ['Yukio', 'Euler']) {
         const entry = speakers[name];
         assert.ok(entry, `${name} is an authored map event`);
         assert.strictEqual(entry.sprite, null, `${name} must get no default sprite while ambiguous`);

@@ -243,6 +243,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
         canPan(event) {
             if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture) return false;
+            if (walkProfileEditing) return !pickWalkProfile(event);
             if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
             return !pickSemantic(event, ['event', 'light', 'override']);
         },

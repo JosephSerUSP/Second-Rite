@@ -71,6 +71,26 @@ test('calibration writes only playerProjection centerX/screenY and preserves all
     }
 });
 
+test('calibration patches preserve unrelated manifest bytes', () => {
+    const { root, logical, file } = fixture();
+    try {
+        let raw = fs.readFileSync(file, 'utf8');
+        raw = raw.replace('"width": 24,', '"width": 24.0,')
+            .replace('"height": 48,', '"height": 48.000,');
+        fs.writeFileSync(file, raw, 'utf8');
+        const before = authoring.read(root, logical);
+        authoring.writeCalibration(root, logical, { centerX: 240.25 }, before.version);
+        const after = fs.readFileSync(file, 'utf8');
+        assert.match(after, /"width": 24\.0,/,
+            'calibration must not normalize unrelated numeric spelling');
+        assert.match(after, /"height": 48\.000,/,
+            'calibration must preserve unrelated authored bytes');
+        assert.match(after, /"centerX": 240\.25,/);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test('calibration authority rejects stale saves and unsupported framing knobs', () => {
     const { root, logical, file } = fixture();
     try {

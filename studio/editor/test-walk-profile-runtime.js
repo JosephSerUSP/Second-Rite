@@ -6,6 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const roots = require('../../tools/semantic-roots');
+const Commands = require('./js/second-rite-editor-commands');
 
 function captureTownFrames(previewExe, gameRoot) {
     const result = spawnSync(previewExe, [gameRoot, 'town-proof-frames'], {
@@ -39,7 +40,8 @@ test('a Port walk-profile edit changes runtime grounding and only its affected c
         const before = captureTownFrames(previewExe, gameRoot);
         const mapPath = path.join(gameRoot, 'data', 'maps.json');
         const maps = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
-        const port = maps.find(candidate => candidate.id === 31);
+        const mapIndex = maps.findIndex(candidate => candidate.id === 31);
+        const port = maps[mapIndex];
         assert.ok(port?.traversal?.lane?.groundProfile?.length >= 4,
             'the staged Project retains Port as the existing non-flat profile specimen');
         const lane = port.traversal.lane;
@@ -50,11 +52,24 @@ test('a Port walk-profile edit changes runtime grounding and only its affected c
         const eastY = Number(lane.minY) + (Number(lane.maxY) - Number(lane.minY)) * 0.9;
         assert.ok(eastY > Number(profile[1].y) && eastY < Number(profile[2].y),
             'the east proof sample lies on Port\'s authored climb');
+
+        // Use the same commands the Studio host invokes: split the actual
+        // climb, preserving its current interpolated height, then lift that
+        // newly-authored control point. The staged runtime consumes exactly
+        // the resulting Map JSON.
+        const payload = { maps };
+        const split = Commands.splitGroundProfileSegment(payload, mapIndex, 1, 0.5);
+        assert.equal(split.ok, true, 'Studio command splits the Port climb');
+        const splitIndex = split.selection.index;
+        const splitY = Number(split.point.y);
+        assert.ok(eastY < splitY, 'east proof sample lies in the first half of the split climb');
         const lift = 0.5;
+        const moved = Commands.moveGroundProfilePoint(
+            payload, mapIndex, splitIndex, splitY, Number(split.point.z) + lift);
+        assert.equal(moved.ok, true, 'Studio command raises the inserted Port profile point');
         const interpolation = (eastY - Number(profile[1].y))
-            / (Number(profile[2].y) - Number(profile[1].y));
+            / (splitY - Number(profile[1].y));
         const expectedLift = interpolation * lift;
-        profile[2].z = Number(profile[2].z) + lift;
         fs.writeFileSync(mapPath, JSON.stringify(maps, null, 2) + '\n');
 
         const after = captureTownFrames(previewExe, gameRoot);

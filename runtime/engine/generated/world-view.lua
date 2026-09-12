@@ -494,6 +494,72 @@ do
         end
         return (projection[2] - screenX * projection[4]) / denominator
     end
+    function ThestraWorldViewSemantics.worldYAtScreenXOnGroundProfile(camera, width, height, depthX, profile, fallbackZ, sliceY, centerX, screenX, minimumY, maximumY, worldZOffset)
+        minimumY = finite(minimumY, 0, "lane inverse minimum Y")
+        maximumY = finite(maximumY, 0, "lane inverse maximum Y")
+        if maximumY < minimumY then
+            error(
+                __TS__New(Error, "lane inverse maximum Y must be >= minimum Y"),
+                0
+            )
+        end
+        worldZOffset = finite(worldZOffset, 0, "lane inverse world Z offset")
+        local base = ThestraWorldViewSemantics.projectPerspective(
+            camera,
+            width,
+            height,
+            depthX,
+            sliceY,
+            fallbackZ
+        )
+        local function projectedX(laneY)
+            local groundZ = ThestraWorldViewSemantics.groundHeight(profile, fallbackZ, laneY)
+            local projected = ThestraWorldViewSemantics.projectPerspective(
+                camera,
+                width,
+                height,
+                depthX,
+                laneY,
+                groundZ + worldZOffset
+            )
+            return centerX + projected.x - base.x
+        end
+        local low = minimumY
+        local high = maximumY
+        local lowX = projectedX(low)
+        local highX = projectedX(high)
+        if math.abs(screenX - lowX) <= 1e-9 then
+            return low
+        end
+        if math.abs(screenX - highX) <= 1e-9 then
+            return high
+        end
+        local ascending = highX >= lowX
+        if ascending and (screenX < lowX or screenX > highX) or not ascending and (screenX > lowX or screenX < highX) then
+            if math.abs(screenX - lowX) <= math.abs(screenX - highX) then
+                return low
+            else
+                return high
+            end
+        end
+        do
+            local iteration = 0
+            while iteration < 56 do
+                local middle = (low + high) * 0.5
+                local middleX = projectedX(middle)
+                if math.abs(middleX - screenX) <= 1e-10 then
+                    return middle
+                end
+                if ascending and middleX < screenX or not ascending and middleX > screenX then
+                    low = middle
+                else
+                    high = middle
+                end
+                iteration = iteration + 1
+            end
+        end
+        return (low + high) * 0.5
+    end
 end
 -- THES_SHARED_LUA_WORLD_VIEW: generated module adapter; do not edit.
 return ThestraWorldViewSemantics

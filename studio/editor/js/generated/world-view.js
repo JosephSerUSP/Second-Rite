@@ -274,6 +274,47 @@ var ThestraWorldViewSemantics;
         return (projection[1] - screenX * projection[3]) / denominator;
     }
     ThestraWorldViewSemantics.worldYAtScreenX = worldYAtScreenX;
+    // Invert plate X along the actual bounded-lane floor. A pitched camera
+    // makes screen X depend on Z as well as Y, so the closed-form flat-floor
+    // inverse above is not valid once groundProfile changes elevation.
+    // Bisection keeps the authoring inverse tied to the same generated
+    // projector + ground-height semantics as runtime presentation.
+    function worldYAtScreenXOnGroundProfile(camera, width, height, depthX, profile, fallbackZ, sliceY, centerX, screenX, minimumY, maximumY, worldZOffset) {
+        minimumY = finite(minimumY, 0, 'lane inverse minimum Y');
+        maximumY = finite(maximumY, 0, 'lane inverse maximum Y');
+        if (maximumY < minimumY)
+            throw new Error('lane inverse maximum Y must be >= minimum Y');
+        worldZOffset = finite(worldZOffset, 0, 'lane inverse world Z offset');
+        const base = projectPerspective(camera, width, height, depthX, sliceY, fallbackZ);
+        const projectedX = (laneY) => {
+            const groundZ = groundHeight(profile, fallbackZ, laneY);
+            const projected = projectPerspective(camera, width, height, depthX, laneY, groundZ + worldZOffset);
+            return centerX + projected.x - base.x;
+        };
+        let low = minimumY, high = maximumY;
+        let lowX = projectedX(low), highX = projectedX(high);
+        if (Math.abs(screenX - lowX) <= 1e-9)
+            return low;
+        if (Math.abs(screenX - highX) <= 1e-9)
+            return high;
+        const ascending = highX >= lowX;
+        if ((ascending && (screenX < lowX || screenX > highX))
+            || (!ascending && (screenX > lowX || screenX < highX))) {
+            return Math.abs(screenX - lowX) <= Math.abs(screenX - highX) ? low : high;
+        }
+        for (let iteration = 0; iteration < 56; iteration++) {
+            const middle = (low + high) * 0.5;
+            const middleX = projectedX(middle);
+            if (Math.abs(middleX - screenX) <= 1e-10)
+                return middle;
+            if ((ascending && middleX < screenX) || (!ascending && middleX > screenX))
+                low = middle;
+            else
+                high = middle;
+        }
+        return (low + high) * 0.5;
+    }
+    ThestraWorldViewSemantics.worldYAtScreenXOnGroundProfile = worldYAtScreenXOnGroundProfile;
 })(ThestraWorldViewSemantics || (ThestraWorldViewSemantics = {}));
 // THES_SHARED_COMMONJS_WORLD_VIEW: generated host adapter; do not edit.
 if (typeof module === 'object' && module.exports) module.exports = ThestraWorldViewSemantics;

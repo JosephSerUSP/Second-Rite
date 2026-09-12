@@ -79,7 +79,7 @@
       "worldPosition": [
         7.8,
         17.341,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -295,7 +295,12 @@
           ],
           "cmd": "CONDITIONAL_BRANCH"
         }
-      ]
+      ],
+      "sprite": "assets/character/npc_alicia.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
     },
     {
       "id": 2402,
@@ -306,7 +311,7 @@
       "worldPosition": [
         7.8,
         2.023,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [

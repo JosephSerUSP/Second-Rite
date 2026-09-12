@@ -89,7 +89,7 @@
       "worldPosition": [
         7.8,
         13.873,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -230,7 +230,7 @@
       "worldPosition": [
         7.8,
         2.312,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -250,7 +250,7 @@
       "worldPosition": [
         7.8,
         8.382,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -287,14 +287,14 @@
       "worldPosition": [
         7.8,
         26.012,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "west_churchyard"
+          "arrival": "churchyard_stair"
         }
       ]
     }

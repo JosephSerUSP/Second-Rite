@@ -89,7 +89,7 @@
       "worldPosition": [
         7.8,
         13.295,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -263,7 +263,12 @@
           ],
           "cmd": "CONDITIONAL_BRANCH"
         }
-      ]
+      ],
+      "sprite": "assets/character/npc_laura.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
     },
     {
       "id": 2302,
@@ -274,7 +279,7 @@
       "worldPosition": [
         7.8,
         2.023,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -294,7 +299,7 @@
       "worldPosition": [
         7.8,
         7.514,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -314,7 +319,7 @@
       "worldPosition": [
         7.8,
         15.029,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [

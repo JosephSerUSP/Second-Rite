@@ -99,7 +99,7 @@
       "worldPosition": [
         7.8,
         4.624,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -183,7 +183,7 @@
       "worldPosition": [
         7.8,
         10.983,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -228,14 +228,14 @@
       "worldPosition": [
         7.8,
         0.0,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "east_cortico"
+          "arrival": "east_backstreet"
         }
       ]
     },
@@ -248,7 +248,7 @@
       "worldPosition": [
         7.8,
         7.514,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -268,7 +268,7 @@
       "worldPosition": [
         7.8,
         15.029,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -288,7 +288,7 @@
       "worldPosition": [
         7.8,
         18.786,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [
@@ -308,7 +308,7 @@
       "worldPosition": [
         7.8,
         22.254,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [

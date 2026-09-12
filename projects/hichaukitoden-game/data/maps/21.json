@@ -97,7 +97,7 @@
       "worldPosition": [
         7.8,
         23.41,
-        0.0
+        -1.5
       ],
       "trigger": "interact",
       "commands": [
@@ -618,7 +618,7 @@
       "worldPosition": [
         7.8,
         2.601,
-        0.0
+        -1.5
       ],
       "trigger": "bump",
       "commands": [

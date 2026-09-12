@@ -20,42 +20,42 @@
       "position": [
         7.8,
         14.74,
-        -1.5
+        0.0
       ]
     },
     "west_quay": {
       "position": [
         7.8,
         0.0,
-        -1.5
+        0.0
       ]
     },
     "forge_door": {
       "position": [
         7.8,
         10.405,
-        -1.5
+        0.0
       ]
     },
     "smith_3d_door": {
       "position": [
         7.8,
         16.185,
-        -1.5
+        0.0
       ]
     },
     "cortico_stair": {
       "position": [
         7.8,
         20.52,
-        -1.5
+        0.0
       ]
     },
     "climb_churchyard": {
       "position": [
         7.8,
         24.855,
-        -1.5
+        0.0
       ]
     }
   },

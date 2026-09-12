@@ -536,11 +536,7 @@ do
         end
         local ascending = highX >= lowX
         if ascending and (screenX < lowX or screenX > highX) or not ascending and (screenX > lowX or screenX < highX) then
-            if math.abs(screenX - lowX) <= math.abs(screenX - highX) then
-                return low
-            else
-                return high
-            end
+            return math.abs(screenX - lowX) <= math.abs(screenX - highX) and low or high
         end
         do
             local iteration = 0

@@ -1,0 +1,37 @@
+{
+  "bodies": [
+    {
+      "id": "praca",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "shape": {
+        "collision": {
+          "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/collision.obj",
+          "sha256": "be9fbb9be17fedd4bb2a2cc5c9b66b15a0be599335e522676c4644cf95b58391"
+        },
+        "kind": "mesh",
+        "render": {
+          "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/environment.obj",
+          "sha256": "e77dc97eed3bacf31f5439183fdbdba154c07d9d34560058dd5831f2231bafac"
+        }
+      }
+    }
+  ],
+  "coordinateSystem": "XYZ: right-handed, Z-up, XY-ground, world-units",
+  "features": [
+    {
+      "id": "lane_surface.center",
+      "position": [
+        7.800000000000001,
+        11.8494995,
+        0
+      ],
+      "shape": {
+        "kind": "point"
+      }
+    }
+  ]
+}

@@ -172,6 +172,30 @@
         body.append(infoRow('Title', map.title || map.name || `Map ${map.id != null ? map.id : ''}`.trim()));
         body.append(infoRow('Map ID', map.id));
         body.append(infoRow('Category', map.category || '—'));
+        if (map.traversal && map.traversal.environmentPackage) {
+            body.append(infoRow('Geometry', map.traversal.environmentPackage));
+            body.append(muted('Exported geometry is read-only here. Show Collision reveals its green wireframe; Events remain owned by this Map.'));
+            const viewport = window.ThestraRuntimeCameraViewport;
+            if (viewport && viewport.setCollisionVisible) {
+                const visible = viewport.getCollisionVisible();
+                const toggle = actionButton(visible ? 'Hide Collision' : 'Show Collision', () => {
+                    viewport.setCollisionVisible(!viewport.getCollisionVisible());
+                    render();
+                });
+                toggle.setAttribute('aria-pressed', String(visible));
+                body.append(toggle);
+            }
+            body.append(sectionTitle('Map Events'));
+            (map.events || []).forEach((event, index) => {
+                body.append(actionButton(event.name || `Event ${event.id}`, () => {
+                    const id = event.id != null ? event.id : index;
+                    const selection = { kind: 'event', key: `event:${id}`, id,
+                        cell: { x: event.x, y: event.y } };
+                    host.selectSemantic(selection);
+                    if (window.ThestraRuntimeCameraViewport) window.ThestraRuntimeCameraViewport.setSelection(selection);
+                }));
+            });
+        }
         body.append(actionButton('Map Properties…', () => {
             if (typeof window.openMapProperties === 'function') window.openMapProperties();
             else if (typeof openMapProperties === 'function') openMapProperties();
@@ -183,6 +207,14 @@
 
     function renderTransform(source) {
         body.append(sectionTitle('Transform'));
+        if (source && source.worldPosition) {
+            ['X', 'Y', 'Z'].forEach((axis, index) => body.append(infoRow(`World ${axis}`, source.worldPosition[index])));
+            const viewport = window.ThestraRuntimeCameraViewport;
+            body.append(muted(viewport?.getCompositionPreview?.() && viewport?.isRuntimeCameraPreview?.()
+                ? 'Move the Event with its transform gizmo along the lane. X and Z are preserved; plate sprites follow the runtime floor.'
+                : 'Position is owned by this Map Event. Move it with the 3D transform handles.'));
+            return;
+        }
         body.append(infoRow('Cell X', source && source.x));
         body.append(infoRow('Cell Y', source && source.y));
     }
@@ -210,8 +242,8 @@
         body.append(infoRow('Model', event.model === false ? 'Suppressed' : (event.model || 'Inherited')));
         renderTransform(event);
         body.append(actionButton('Edit Event…', () => {
-            if (typeof window.openEventModal === 'function') window.openEventModal(event.x, event.y);
-            else if (typeof openEventModal === 'function') openEventModal(event.x, event.y);
+            if (typeof window.openEventModal === 'function') window.openEventModal(event.x, event.y, context.selection.id);
+            else if (typeof openEventModal === 'function') openEventModal(event.x, event.y, context.selection.id);
         }));
         body.append(muted('Full Event pages/commands remain in the existing Event editor; the Inspector does not duplicate that staged-edit surface.'));
     }

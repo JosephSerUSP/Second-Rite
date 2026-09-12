@@ -12,6 +12,8 @@ const widgets = read('studio/editor/js/widgets.js');
 const studioVertex = read('studio/editor/js/vertex-shading.js');
 const runtimeVertex = read('runtime/engine/vertex_shading.lua');
 const runtimeSprites = read('runtime/presentation/sprite_sheet.lua');
+const runtimeCamera = read('runtime/presentation/world_camera.lua');
+const runtimeLane = read('runtime/engine/bounded_lane.lua');
 
 const timingScript = index.indexOf('js/generated/sprite-timing.js');
 const widgetsScript = index.indexOf('js/widgets.js');
@@ -49,6 +51,12 @@ assert.doesNotMatch(runtimeVertex, /local MODULUS = 65521/,
     'runtime vertex adapter must not carry the old handwritten hash algorithm');
 assert.doesNotMatch(studioVertex, /const MODULUS = 65521/,
     'Studio vertex adapter must not carry the old handwritten hash algorithm');
+assert.match(runtimeCamera, /require\("engine\.generated\.world-view"\)/,
+    'runtime WorldCamera must consume generated shared optics');
+assert.match(runtimeCamera, /world_view\.resolveTownCamera/,
+    'town camera resolution must delegate to shared semantics');
+assert.match(runtimeLane, /world_view\.groundHeight/,
+    'bounded-lane ground projection must delegate to shared semantics');
 
 // The runtime HTTP request remains a provenance/inspection side channel. Local
 // animation must not wait for it: both preview paths above synchronously use the

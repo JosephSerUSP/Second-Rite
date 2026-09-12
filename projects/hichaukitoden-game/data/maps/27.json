@@ -23,8 +23,8 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.35,
-      "maxY": 7.4167,
-      "depthX": 0.0,
+      "maxY": 7.417,
+      "depthX": 7.8,
       "groundZ": 0.0,
       "speed": 3.4
     },
@@ -32,13 +32,13 @@
     "camera": {
       "profile": "town_sideview",
       "target": {
-        "x": 0.0,
-        "y": 3.8833,
+        "x": 7.8,
+        "y": 3.883,
         "z": 0.0
       },
       "distance": 18.666666666666668,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
@@ -53,7 +53,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 3.8833,
+        "center": 3.883,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -69,7 +69,7 @@
       },
       {
         "anchor": "home_stair",
-        "eventInstanceId": "st-maria-padaria-home_stair",
+        "eventInstanceId": "st-maria-alicias_padaria-home_stair",
         "radius": 0.9
       }
     ]
@@ -82,61 +82,230 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        0.0,
-        2.3333,
+        7.8,
+        2.3353,
         0.0
       ],
       "trigger": "interact",
+      "commands": [
+        {
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "condition": "flag:shipment_investigated",
+              "commands": [
+                {
+                  "commonEventId": 30,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Oh! Are you looking for the supply cart? I heard it! I was listening to the wind near the chasm, and I heard squeaky wheels stop suddenly. Then... goblin noises. Lots of them.",
+                  "speaker": "Alicia",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Goblins? I should tell the guard.",
+                      "commands": [
+                        {
+                          "flag": "shipment_investigated",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "text": "Please be careful! If the goblins have the food, they'll be... energetic.",
+                          "speaker": "Alicia",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "commonEventId": 30,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:alicia_first_met",
+              "commands": [
+                {
+                  "commonEventId": 30,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Oh! H-hello—! I… I didn’t see you coming. I’m Alicia. Welcome to my shop! Uhm— please look around! And— and if you’re hungry, I can warm something up. Not for sale. Just… because.",
+                  "speaker": "Alicia",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Buy Consumables",
+                      "commands": [
+                        {
+                          "flag": "alicia_first_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "label": "Alicia",
+                          "persistent": true,
+                          "cmd": "CHANGE_EVENT_PROPERTIES"
+                        },
+                        {
+                          "shopId": 7,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "commonEventId": 30,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "You’re kind.",
+                      "commands": [
+                        {
+                          "text": "M-me? No, I’m… I’m normal. I just… I don’t like when people look empty. Like they forgot they have a body. Sorry. That sounded weird.",
+                          "speaker": "Alicia",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Not weird.",
+                              "commands": [
+                                {
+                                  "text": "…Thank you. People usually laugh. Or they say ‘that’s cute’ and then they don’t mean it. Anyway! Please— uhm— browse!",
+                                  "speaker": "Alicia",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "Buy Consumables",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        },
+                                        {
+                                          "label": "Alicia",
+                                          "cmd": "SET_EVENT_LABEL"
+                                        },
+                                        {
+                                          "shopId": 7,
+                                          "cmd": "OPEN_SHOP"
+                                        },
+                                        {
+                                          "commonEventId": 30,
+                                          "cmd": "CALL_COMMON_EVENT"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Talk",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        },
+                                        {
+                                          "commonEventId": 15,
+                                          "cmd": "CALL_COMMON_EVENT"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Leave",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Buy Consumables",
+                              "commands": [
+                                {
+                                  "flag": "alicia_first_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "label": "Alicia",
+                                  "cmd": "SET_EVENT_LABEL"
+                                },
+                                {
+                                  "shopId": 7,
+                                  "cmd": "OPEN_SHOP"
+                                },
+                                {
+                                  "commonEventId": 30,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": [
+                                {
+                                  "flag": "alicia_first_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "flag": "alicia_first_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
       "sprite": "assets/character/npc_alicia.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,
-      "worldHeight": 1.75,
-      "commands": [
-        {
-          "name": "padaria_hub",
-          "cmd": "LABEL"
-        },
-        {
-          "text": "Morning! The rolls are still warm, and I've flour, salt and lamp oil besides. Summoners get the shelf under the counter.",
-          "cmd": "TEXT"
-        },
-        {
-          "options": [
-            {
-              "label": "Buy",
-              "commands": [
-                {
-                  "shopId": 7,
-                  "cmd": "OPEN_SHOP"
-                },
-                {
-                  "label": "padaria_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ]
-            },
-            {
-              "label": "Ask about the town",
-              "commands": [
-                {
-                  "text": "Everyone comes through here eventually. Bread is the one thing nobody can talk themselves out of needing.",
-                  "cmd": "TEXT"
-                },
-                {
-                  "label": "padaria_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ]
-            },
-            {
-              "label": "Leave",
-              "commands": []
-            }
-          ],
-          "cmd": "CHOICE"
-        }
-      ]
+      "worldHeight": 1.75
     },
     {
       "id": 2702,
@@ -145,11 +314,13 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        0.0,
-        7.0333,
+        7.8,
+        0.35,
         0.0
       ],
       "trigger": "bump",
+      "direction": "left",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
@@ -160,16 +331,18 @@
     },
     {
       "id": 2703,
-      "instanceId": "st-maria-padaria-home_stair",
+      "instanceId": "st-maria-alicias_padaria-home_stair",
       "name": "Up to the hearth",
       "x": 0,
       "y": 0,
       "worldPosition": [
-        0.0,
-        0.7333,
+        7.8,
+        7.2254,
         0.0
       ],
       "trigger": "bump",
+      "direction": "right",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",

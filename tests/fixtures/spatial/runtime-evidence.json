@@ -1,0 +1,520 @@
+{
+  "camera": {
+    "pitch": 0.7853981633974483,
+    "profile": "rpg_ortho",
+    "projection": "orthographic",
+    "projectionScale": [
+      0.7071067811865476,
+      1
+    ]
+  },
+  "collisionVertices": [
+    [
+      6.8,
+      0,
+      0
+    ],
+    [
+      6.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      6.8,
+      0,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      8.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      0,
+      -0.1
+    ],
+    [
+      8.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      8.8,
+      0,
+      0
+    ],
+    [
+      6.8,
+      0,
+      -0.1
+    ],
+    [
+      8.8,
+      0,
+      -0.1
+    ],
+    [
+      8.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      6.8,
+      0,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      0,
+      0
+    ],
+    [
+      8.8,
+      23.698999,
+      0
+    ],
+    [
+      6.8,
+      0,
+      0
+    ],
+    [
+      6.8,
+      23.698999,
+      0
+    ],
+    [
+      6.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      8.8,
+      23.698999,
+      0
+    ],
+    [
+      8.8,
+      0,
+      0
+    ],
+    [
+      8.8,
+      0,
+      -0.1
+    ],
+    [
+      8.8,
+      0,
+      0
+    ],
+    [
+      6.8,
+      0,
+      0
+    ],
+    [
+      6.8,
+      0,
+      -0.1
+    ],
+    [
+      8.8,
+      23.698999,
+      -0.1
+    ],
+    [
+      8.8,
+      0,
+      -0.1
+    ],
+    [
+      6.8,
+      0,
+      -0.1
+    ],
+    [
+      6.8,
+      23.698999,
+      0
+    ],
+    [
+      6.8,
+      0,
+      0
+    ],
+    [
+      8.8,
+      0,
+      0
+    ]
+  ],
+  "dungeon": {
+    "corridors": [
+      {
+        "cells": [
+          {
+            "x": 5,
+            "y": 3
+          },
+          {
+            "x": 6,
+            "y": 3
+          },
+          {
+            "x": 7,
+            "y": 3
+          },
+          {
+            "x": 8,
+            "y": 3
+          },
+          {
+            "x": 9,
+            "y": 3
+          },
+          {
+            "x": 15,
+            "y": 3
+          },
+          {
+            "x": 15,
+            "y": 4
+          },
+          {
+            "x": 15,
+            "y": 5
+          },
+          {
+            "x": 15,
+            "y": 6
+          },
+          {
+            "x": 15,
+            "y": 7
+          },
+          {
+            "x": 15,
+            "y": 8
+          },
+          {
+            "x": 15,
+            "y": 9
+          },
+          {
+            "x": 15,
+            "y": 10
+          }
+        ],
+        "fromRoom": 1,
+        "toRoom": 2
+      },
+      {
+        "cells": [
+          {
+            "x": 8,
+            "y": 13
+          },
+          {
+            "x": 9,
+            "y": 13
+          },
+          {
+            "x": 10,
+            "y": 13
+          },
+          {
+            "x": 11,
+            "y": 13
+          },
+          {
+            "x": 12,
+            "y": 13
+          }
+        ],
+        "fromRoom": 2,
+        "toRoom": 3
+      },
+      {
+        "cells": [
+          {
+            "x": 10,
+            "y": 10
+          },
+          {
+            "x": 11,
+            "y": 10
+          },
+          {
+            "x": 12,
+            "y": 10
+          },
+          {
+            "x": 12,
+            "y": 7
+          },
+          {
+            "x": 12,
+            "y": 8
+          },
+          {
+            "x": 12,
+            "y": 9
+          }
+        ],
+        "fromRoom": 3,
+        "toRoom": 4
+      },
+      {
+        "cells": [
+          {
+            "x": 4,
+            "y": 5
+          },
+          {
+            "x": 5,
+            "y": 5
+          },
+          {
+            "x": 6,
+            "y": 5
+          },
+          {
+            "x": 7,
+            "y": 5
+          },
+          {
+            "x": 8,
+            "y": 5
+          },
+          {
+            "x": 9,
+            "y": 5
+          },
+          {
+            "x": 3,
+            "y": 6
+          }
+        ],
+        "fromRoom": 4,
+        "toRoom": 5
+      }
+    ],
+    "openings": [
+      {
+        "source": "generated corridor threshold",
+        "x": 3,
+        "y": 6
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 6,
+        "y": 3
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 6,
+        "y": 5
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 12,
+        "y": 9
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 15,
+        "y": 9
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 11,
+        "y": 10
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 11,
+        "y": 13
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 8,
+        "y": 13
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 9,
+        "y": 13
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 10,
+        "y": 10
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 12,
+        "y": 7
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 9,
+        "y": 3
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 15,
+        "y": 3
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 15,
+        "y": 4
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 9,
+        "y": 5
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 15,
+        "y": 5
+      },
+      {
+        "source": "generated corridor threshold",
+        "x": 15,
+        "y": 6
+      }
+    ],
+    "rooms": [
+      {
+        "allowRandomEvents": true,
+        "anchorIndex": 1,
+        "center": {
+          "x": 3,
+          "y": 3
+        },
+        "height": 5,
+        "index": 1,
+        "source": "authored anchor",
+        "width": 5,
+        "x": 1,
+        "y": 1
+      },
+      {
+        "allowRandomEvents": true,
+        "anchorIndex": 2,
+        "center": {
+          "x": 15,
+          "y": 13
+        },
+        "height": 6,
+        "index": 2,
+        "source": "authored anchor",
+        "width": 6,
+        "x": 12,
+        "y": 10
+      },
+      {
+        "allowRandomEvents": true,
+        "center": {
+          "x": 8,
+          "y": 10
+        },
+        "height": 5,
+        "index": 3,
+        "source": "generated room",
+        "width": 4,
+        "x": 6,
+        "y": 8
+      },
+      {
+        "allowRandomEvents": true,
+        "center": {
+          "x": 12,
+          "y": 5
+        },
+        "height": 4,
+        "index": 4,
+        "source": "generated room",
+        "width": 5,
+        "x": 10,
+        "y": 3
+      },
+      {
+        "allowRandomEvents": true,
+        "center": {
+          "x": 3,
+          "y": 9
+        },
+        "height": 5,
+        "index": 5,
+        "source": "generated room",
+        "width": 3,
+        "x": 2,
+        "y": 7
+      }
+    ],
+    "rows": [
+      "#################",
+      "#################",
+      "##...############",
+      "##....o..o.....o#",
+      "##...#####.....o#",
+      "###o..o..o.....o#",
+      "###o######.....o#",
+      "##...#######o##.#",
+      "##...#....##.##.#",
+      "##...#....##o##o#",
+      "##...#....oo.##.#",
+      "##...#....###....",
+      "######....###....",
+      "########oo.o.....",
+      "#############....",
+      "#################",
+      "#################"
+    ]
+  }
+}

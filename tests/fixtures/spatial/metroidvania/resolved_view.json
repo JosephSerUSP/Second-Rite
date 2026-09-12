@@ -1,0 +1,21 @@
+{
+  "camera": {
+    "pitch": 0.7853981633974483,
+    "profile": "rpg_ortho",
+    "projection": "orthographic",
+    "projectionScale": [
+      0.7071067811865476,
+      1
+    ]
+  },
+  "events": [
+    {
+      "id": "guide",
+      "position": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

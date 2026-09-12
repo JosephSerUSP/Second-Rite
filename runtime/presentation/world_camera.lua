@@ -1,5 +1,6 @@
 local config = require("engine.config")
 local ui = require("presentation.ui")
+local world_view = require("engine.generated.world-view")
 
 local world_camera = {}
 
@@ -165,54 +166,19 @@ end
 -- numerical tests retain the same contract without needing a live surface.
 local function resolveProjectionFrame(opts)
     opts = opts or {}
-    local frame = type(opts.projectionFrame) == "table" and opts.projectionFrame or {}
-    local targetWidth = positiveFinite(frame.targetWidth or 256, "camera target width")
-    local targetHeight = positiveFinite(frame.targetHeight or 240, "camera target height")
-    local compositionWidth = positiveFinite(
-        frame.compositionWidth or 256, "camera composition width")
-    local canonicalCenterX = finiteNumber(
-        frame.canonicalCenterX, compositionWidth * 0.5, "camera canonical center X")
-    local canonicalHorizonY = finiteNumber(
-        frame.canonicalHorizonY, 70, "camera canonical horizon Y")
-    local squareAuthoringCamera = opts.squareAuthoringCamera == true
-
-    local baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth
-    local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
-    local defaultCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
-    local defaultCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
-
-    local rawOffsetX = opts.projectionWindowOffsetX
-    if rawOffsetX == nil and frame.projectionWindowOffsetX ~= nil then
-        rawOffsetX = frame.projectionWindowOffsetX
+    if opts.projectionWindowOffsetX == nil and opts.projectionOffsetX ~= nil then
+        local copy = {}
+        for key, value in pairs(opts) do copy[key] = value end
+        copy.projectionWindowOffsetX = opts.projectionOffsetX
+        copy.projectionWindowOffsetY = opts.projectionWindowOffsetY or opts.projectionOffsetY
+        opts = copy
+    elseif opts.projectionWindowOffsetY == nil and opts.projectionOffsetY ~= nil then
+        local copy = {}
+        for key, value in pairs(opts) do copy[key] = value end
+        copy.projectionWindowOffsetY = opts.projectionOffsetY
+        opts = copy
     end
-    if rawOffsetX == nil and opts.projectionOffsetX ~= nil then
-        rawOffsetX = opts.projectionOffsetX
-    end
-    if rawOffsetX == nil and frame.offsetX ~= nil then
-        rawOffsetX = frame.offsetX
-    end
-    local offsetX = finiteNumber(rawOffsetX, 0, "camera projection window offset X")
-
-    local rawOffsetY = opts.projectionWindowOffsetY
-    if rawOffsetY == nil and frame.projectionWindowOffsetY ~= nil then
-        rawOffsetY = frame.projectionWindowOffsetY
-    end
-    if rawOffsetY == nil and opts.projectionOffsetY ~= nil then
-        rawOffsetY = opts.projectionOffsetY
-    end
-    if rawOffsetY == nil and frame.offsetY ~= nil then
-        rawOffsetY = frame.offsetY
-    end
-    local offsetY = finiteNumber(rawOffsetY, 0, "camera projection window offset Y")
-
-    return {
-        baseViewportWidth = baseViewportWidth,
-        baseViewportHeight = baseViewportHeight,
-        viewportCenterX = defaultCenterX + offsetX,
-        viewportCenterY = defaultCenterY + offsetY,
-        projectionWindowOffsetX = offsetX,
-        projectionWindowOffsetY = offsetY,
-    }
+    return world_view.resolveProjectionFrame(opts)
 end
 
 local function attachProjectionFrame(camera, opts)
@@ -231,65 +197,14 @@ end
 -- attachment as every other WorldCamera profile.
 local function resolveTownSideview(session, opts)
     if type(session) ~= "table" then error("town side-view camera requires a session", 0) end
-    opts = opts or {}
-    local target = type(opts.target) == "table" and opts.target or {}
-    local targetX = finiteNumber(target.x, 0, "town camera target x")
-    local targetY = finiteNumber(target.y, 0, "town camera target y")
-    local targetZ = finiteNumber(target.z, 0, "town camera target z")
-    local distance = positiveFinite(opts.distance or 1, "town camera distance")
-    local angle = math.rad(finiteNumber(opts.yawDegrees, 0, "town camera yaw degrees"))
-    local pitch = math.rad(finiteNumber(opts.pitchDegrees, 0, "town camera pitch degrees"))
-    if pitch <= -math.pi / 2 or pitch >= math.pi / 2 then
-        error("town camera pitch must be between -90 and 90 degrees", 0)
-    end
-    local dirX, dirY = math.cos(angle), math.sin(angle)
-    local rightX, rightY = -dirY, dirX
-    local fovHalfX = world_camera.fovHalfExtentFromDegrees(
-        positiveFinite(opts.fovDegrees or 28.072486935852957, "town camera FOV degrees"))
-    local scale = type(opts.projectionScale) == "table" and opts.projectionScale or {}
-    local scaleX = positiveFinite(scale.x or 1, "town camera projection scale x")
-    local scaleY = positiveFinite(scale.y or 1, "town camera projection scale y")
-    local aspectY = (opts.squareAuthoringCamera == true) and 1 or (144 / 256)
-    local fovHalfY = fovHalfX * aspectY
-    local cameraX = targetX - dirX * distance
-    local cameraY = targetY - dirY * distance
-    -- The town camera normally derives its eye height from the optical target
-    -- and pitch. A study may supply eyeHeight to decouple those two facts:
-    -- this is the deliberate eye-height/pitch treatment used by the town
-    -- camera experiments, where the player footprint is re-solved after the
-    -- eye moves. It is relative to target.z, not an absolute world height.
-    local eyeHeight = opts.eyeHeight
-    local cameraZ = targetZ + (eyeHeight == nil
-        and distance * math.tan(pitch) or finiteNumber(eyeHeight, 0, "town camera eye height"))
-    local framingScale = tonumber((opts.focusOverride or {}).fovScale) or 1
-    fovHalfX = fovHalfX * framingScale
-    fovHalfY = fovHalfY * framingScale
-    return attachProjectionFrame({
-        projection = "perspective",
-        profile = "town_sideview",
-        x = cameraX, y = cameraY, z = cameraZ,
-        targetX = targetX, targetY = targetY, targetZ = targetZ,
-        playerLightX = targetX, playerLightY = targetY,
-        fogMetric = "ground_distance", fogOriginX = targetX, fogOriginY = targetY,
-        focusDepth = distance, groundDistance = distance,
-        angle = angle, dirX = dirX, dirY = dirY,
-        rightX = rightX, rightY = rightY, pitch = pitch,
-        fovScale = framingScale, fovHalfX = fovHalfX, fovHalfY = fovHalfY,
-        orthoHalfX = 1, orthoHalfY = 1,
-        projectionScaleX = scaleX, projectionScaleY = scaleY,
-        nearPlane = positiveFinite(opts.nearPlane or 0.05, "town camera near plane"),
-        farPlane = positiveFinite(opts.farPlane or 128, "town camera far plane"),
-        visibilityProfile = opts.visibilityProfile or "play-overhead",
-    }, opts)
+    return world_view.resolveTownCamera(opts or {})
 end
 
 -- Human-facing perspective lens vocabulary. The renderer/shader keeps its
 -- established half-extent contract (tan(FOV/2)); authored data never needs to
 -- know that representation.
 function world_camera.fovHalfExtentFromDegrees(degrees)
-    degrees = positiveFinite(degrees, "camera FOV degrees")
-    if degrees >= 179 then error("camera FOV degrees must be < 179", 0) end
-    return math.tan(math.rad(degrees) * 0.5)
+    return world_view.fovHalfExtentFromDegrees(degrees)
 end
 
 function world_camera.fovDegreesFromHalfExtent(halfExtent)

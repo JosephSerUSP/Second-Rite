@@ -1,0 +1,34 @@
+{
+  "note": "Committed HEAD snapshot; pre-existing dirty town changes excluded. Source blend is hash-bound, never opened or modified. Runtime probe dependencies are separately hashed.",
+  "revision": "2fe51c223807fda0930799084d0ba2da5d143ad7",
+  "sources": [
+    {
+      "path": "projects/hichaukitoden-game/data/maps/2.json",
+      "sha256": "1e5fc7b827d9eb514ca6d6f161db0dcfe78d74b3ee0f56917d81b3c14edc4a7c"
+    },
+    {
+      "path": "projects/hichaukitoden-game/data/system.json",
+      "sha256": "b4085159f1463bc3a178be50ca9ed0f39e52ab9dc51028d700a320b9fd419432"
+    },
+    {
+      "path": "projects/hichaukitoden-game/data/maps/17.json",
+      "sha256": "569cb030c321b9e78077c306ff5bc3e2ca9c51fbf4cdf93e04643d12ee9b2f92"
+    },
+    {
+      "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/environment.json",
+      "sha256": "c040061556bcf2ec7eec8e59c1ca3d9bf8b171d0983b531f52c7d7da3254e884"
+    },
+    {
+      "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/environment.obj",
+      "sha256": "e77dc97eed3bacf31f5439183fdbdba154c07d9d34560058dd5831f2231bafac"
+    },
+    {
+      "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/collision.obj",
+      "sha256": "be9fbb9be17fedd4bb2a2cc5c9b66b15a0be599335e522676c4644cf95b58391"
+    },
+    {
+      "path": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca_modelled.blend",
+      "sha256": "69585e1fd5a29d941811a3feb83b5dc5f22b2c83f287e7f8aab41312a98d3395"
+    }
+  ]
+}

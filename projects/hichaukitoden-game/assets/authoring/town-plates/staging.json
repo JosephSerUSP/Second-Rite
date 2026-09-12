@@ -1,0 +1,1973 @@
+{
+  "schemaVersion": 2,
+  "purpose": "Non-promoted St. Maria town plate authoring record.",
+  "referenceMaps": [
+    17,
+    28,
+    29
+  ],
+  "referenceCapture": {
+    "styleSheet": "out/towngen/style-reference/style-reference.png",
+    "inputsManifest": "out/towngen/style-reference/inputs.json",
+    "runtimeProof": "out/towngen/style-reference/raw/town-proof.json",
+    "scope": "Live-runtime frames only: authored modelled Praca, Alicia Padaria, and Laura Smithy."
+  },
+  "contract": {
+    "compositionMarginPx": 128,
+    "pixelsPerRuntimeY": 27.428571428571427,
+    "visibleHeightPx": 144,
+    "plateHeightPx": 240,
+    "groundY": 136,
+    "horizonY": 66,
+    "persistentUiBeginsY": 144,
+    "uiCoveredLowerRows": 96,
+    "actorPx": [
+      24,
+      48
+    ],
+    "stitch": {
+      "overlapRatio": 0.22,
+      "overlapRule": "ceil(width * 0.22)",
+      "blend": "deterministic linear overlap blend"
+    }
+  },
+  "workflow": {
+    "protocol": "projects/hichaukitoden-game/assets/authoring/town-plates/AUTHORING.md",
+    "strategy": "One semantic proof must pass before three-candidate, weather, cleanup, or promotion work.",
+    "geometryAuthority": "Map data projected as universal triangular-prism trigger pins through the authored Blender camera.",
+    "visualAuthority": "Only the tagged live modelled-screen capture of maps 17, 28, and 29; generated images are never positive references.",
+    "semanticReview": "Every transition must exist, read correctly, reach actor ground, remain above the persistent UI band, and land within 8 final pixels of its authored anchor.",
+    "imageLedRemap": "Proposal-only fallback; tooling may validate and report coordinates but never mutate authored gameplay data.",
+    "blenderSpatialGuide": "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-2160x720.png",
+    "blenderCleanGuide": "out/towngen/port/blender-spatial-reference/port-spatial-working-clean-2160x720.png",
+    "projectionAuditFields": "out/towngen/map-derived-spatial-fields",
+    "portGuide": "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-2160x720.png",
+    "portFinalProjectionPreview": "out/towngen/port/blender-spatial-reference/port-spatial-final-semantic-1065x240.png",
+    "diagnosticAiPrecedent": {
+      "path": "projects/hichaukitoden-game/assets/authoring/town-plates/precedents/port/precedent.json",
+      "allowedAsGenerationInput": false,
+      "status": "retained only as evidence of the superseded workflow"
+    }
+  },
+  "screenOrder": [
+    "port",
+    "churchyard",
+    "cortico",
+    "market",
+    "quay",
+    "weaponsmith",
+    "alicias_padaria",
+    "pub",
+    "chapel",
+    "house_laura",
+    "house_alicia",
+    "lodging"
+  ],
+  "workOrder": [
+    "port",
+    "churchyard",
+    "cortico",
+    "market",
+    "quay",
+    "weaponsmith",
+    "alicias_padaria",
+    "pub",
+    "chapel",
+    "house_laura",
+    "house_alicia",
+    "lodging"
+  ],
+  "screens": {
+    "port": {
+      "mapId": 31,
+      "plate": "port_bg.png",
+      "dimensions": [
+        1065,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "raw": "out/towngen/port/replacement/raw-001.png",
+        "accepted": "out/towngen/repaint-v3/port/calibrated-clean.png",
+        "calibration": "out/towngen/repaint-v3/port/calibration.json",
+        "prompt": "out/towngen/port/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/port/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/port/review/event-placement.json",
+        "observedPlateX": {
+          "west_quay": 128.0,
+          "forge_door": 413.383,
+          "smith_3d_door": 571.931,
+          "cortico_stair": 690.84,
+          "climb_churchyard": 809.751
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              29.48
+            ],
+            [
+              0.0,
+              29.48
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.515,
+          "matrix": [
+            [
+              0.5149999856948853,
+              0.0,
+              -0.00015999999595806003
+            ],
+            [
+              0.0,
+              0.5149999856948853,
+              -139.01158142089844
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/port/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "1693101182fd11f497e54c9024c80d2ca668732f48d4e72cb33072b381c976d2",
+          "matrix": [
+            [
+              0.5149999856948853,
+              0.0,
+              -0.00015999999595806003
+            ],
+            [
+              0.0,
+              0.5149999856948853,
+              -139.01158142089844
+            ]
+          ],
+          "scale": 0.515,
+          "floorYAtSourceCentre": 534.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1713,
+                437,
+                49,
+                97
+              ],
+              "feetY": 534,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 97,
+              "targetVisibleHeight": 49.955,
+              "ratio": 0.515
+            }
+          ],
+          "excludedRefs": []
+        },
+        "repaint": "out/towngen/repaint-v3/port/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/port/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "guide": {
+        "manifest": "out/towngen/imagegen-guides/port/guide.json",
+        "west": "out/towngen/imagegen-guides/port/guide-west.png",
+        "east": "out/towngen/imagegen-guides/port/guide-east.png",
+        "placementOnly": true
+      },
+      "prompts": {
+        "west": "Port west crop: wet stone quay, marine fog, grey estuary, old immobile hull, sparse mooring hardware, open horizon, clear walking lane; early 1998 PlayStation pre-rendered environment art; guide marks are placement-only and must not appear.",
+        "east": "Port east crop: continue the same quay, fog, water, lighting, and material rhythm; keep the horizon open and the long-climb/Cortico openings readable; early 1998 PlayStation pre-rendered environment art; guide marks are placement-only and must not appear."
+      },
+      "candidates": [
+        {
+          "id": 1,
+          "west": "out/towngen/port/candidates/candidate-1-west.png",
+          "east": "out/towngen/port/candidates/candidate-1-east.png",
+          "stitched": "out/towngen/port/candidates/candidate-1.png"
+        },
+        {
+          "id": 2,
+          "west": "out/towngen/port/candidates/candidate-2-west.png",
+          "east": "out/towngen/port/candidates/candidate-2-east.png",
+          "stitched": "out/towngen/port/candidates/candidate-2.png"
+        },
+        {
+          "id": 3,
+          "west": "out/towngen/port/candidates/candidate-3-west.png",
+          "east": "out/towngen/port/candidates/candidate-3-east.png",
+          "stitched": "out/towngen/port/candidates/candidate-3.png"
+        }
+      ],
+      "review": {
+        "package": "out/towngen/port/review/review.json",
+        "contactSheet": "out/towngen/port/review/candidate-contact-sheet.png",
+        "plateChecks": "out/towngen/port/plate-check",
+        "stitchOverlapPx": 235,
+        "stitchBlend": "linear",
+        "cleanup": {
+          "status": "blocked",
+          "instruction": "After owner selects a winner, use focused ImageGen edit to remove people only; reject architecture, openings, lighting, or framing changes."
+        },
+        "winner": null,
+        "baseCompositionWinner": 2,
+        "weatherReview": {
+          "status": "superseded-by-base-selection-2",
+          "source": "out/towngen/port/candidates/candidate-3.png",
+          "package": "out/towngen/port/weather-review/review.json",
+          "contactSheet": "out/towngen/port/weather-review/candidate-contact-sheet.png",
+          "variants": [
+            {
+              "id": "visible-overcast",
+              "raw": "out/towngen/port/weather-variants/raw/weather-visible-overcast.png",
+              "normalized": "out/towngen/port/weather-variants/candidate-1.png",
+              "prompt": "Change only sky and atmosphere to a visible moody overcast: layered charcoal clouds, readable horizon and water, slightly damp haze, no night."
+            },
+            {
+              "id": "bright-overcast",
+              "raw": "out/towngen/port/weather-variants/raw/weather-bright-overcast.png",
+              "normalized": "out/towngen/port/weather-variants/candidate-2.png",
+              "prompt": "Change only sky and atmosphere to bright soft overcast: pale blue-grey cloud deck, visible cloud texture, restrained diffuse light, reduced mist, no direct sun."
+            },
+            {
+              "id": "storm-front",
+              "raw": "out/towngen/port/weather-variants/raw/weather-storm-front.png",
+              "normalized": "out/towngen/port/weather-variants/candidate-3.png",
+              "prompt": "Change only sky and atmosphere to a visible daytime storm front: layered slate clouds, silver horizon, light transparent mist, no lightning, rain curtain, or night."
+            }
+          ],
+          "dimensions": [
+            1065,
+            240
+          ],
+          "plateChecks": "out/towngen/port/weather-variants/plate-check",
+          "winner": null,
+          "cleanup": "blocked until weather winner is selected"
+        },
+        "perspectiveReview": {
+          "status": "rejected-owner-review",
+          "sourceCandidate": 2,
+          "workflow": "single-camera unified render; normalize from the generated working aspect into the 1065x240 plate contract",
+          "raw": "out/towngen/port/unified-camera-proof/raw/unified-camera-port.png",
+          "normalized": "out/towngen/port/unified-camera-proof/port-unified-1065x240.png",
+          "plateCheck": "out/towngen/port/unified-camera-proof/plate-check/index.html",
+          "dimensions": [
+            1065,
+            240
+          ],
+          "stitch": null,
+          "winner": null,
+          "cleanup": "blocked until owner accepts the unified-camera proof"
+        },
+        "freshAnisotropicBatch": {
+          "status": "superseded-by-preferred-unlabeled-guides",
+          "referenceImages": [
+            "out/towngen/style-reference/style-reference.png",
+            "out/towngen/blockouts-reconciled/port.png"
+          ],
+          "workingRender": {
+            "camera": "single shared camera",
+            "nativeAspect": "ImageGen native wide working frame",
+            "finalDimensions": [
+              1065,
+              240
+            ],
+            "transform": "same independent x/y pixel scale across the complete frame",
+            "stitch": "none"
+          },
+          "reviewPackage": "out/towngen/port/batch-anisotropic-review/review.json",
+          "contactSheet": "out/towngen/port/batch-anisotropic-review/candidate-contact-sheet.png",
+          "plateChecks": "out/towngen/port/batch-anisotropic-plate-check",
+          "candidates": [
+            {
+              "id": 1,
+              "weather": "moody visible overcast",
+              "raw": "out/towngen/port/batch-anisotropic/raw/candidate-1-moody-overcast.png",
+              "normalized": "out/towngen/port/batch-anisotropic/candidate-1.png",
+              "prompt": "Fresh single-camera Port render; visible moody overcast; tree-topped central stone building, west ship, east water; preserve guide openings; uniform anisotropic final scaling; no collage or stitch."
+            },
+            {
+              "id": 2,
+              "weather": "bright restrained overcast",
+              "raw": "out/towngen/port/batch-anisotropic/raw/candidate-2-bright-overcast.png",
+              "normalized": "out/towngen/port/batch-anisotropic/candidate-2.png",
+              "prompt": "Fresh single-camera Port render; bright but restrained overcast with visible sky; tree-topped central stone building, west ship, east water; preserve guide openings; uniform anisotropic final scaling; no collage or stitch."
+            },
+            {
+              "id": 3,
+              "weather": "visible daytime storm front",
+              "raw": "out/towngen/port/batch-anisotropic/raw/candidate-3-storm-front.png",
+              "normalized": "out/towngen/port/batch-anisotropic/candidate-3.png",
+              "prompt": "Fresh single-camera Port render; visible daytime storm front with silver horizon; tree-topped central stone building, west ship, east water; preserve guide openings; uniform anisotropic final scaling; no collage or stitch."
+            }
+          ],
+          "winner": null,
+          "cleanup": "blocked until owner selects a fresh-batch candidate"
+        },
+        "preferredGuideAnamorphicBatch": {
+          "status": "rejected-owner-review",
+          "referenceImages": [
+            "out/town-guides/00-style-reference.png",
+            "out/town-guides/31-the-port-guide.png"
+          ],
+          "guideRole": "unlabeled spatial/depth guide; geometry remains open to the model",
+          "workingRender": {
+            "camera": "single shared camera",
+            "transform": "same anisotropic X/Y fit across the complete frame",
+            "stitch": "none",
+            "finalDimensions": [
+              1065,
+              240
+            ]
+          },
+          "reviewPackage": "out/towngen/port/town-guides-anamorphic-review/review.json",
+          "contactSheet": "out/towngen/port/town-guides-anamorphic-review/candidate-contact-sheet.png",
+          "plateChecks": "out/towngen/port/town-guides-anamorphic-plate-check",
+          "candidates": [
+            {
+              "id": 1,
+              "weather": "moody visible overcast",
+              "raw": "out/towngen/port/town-guides-anamorphic-batch/raw/candidate-1-moody-overcast.png",
+              "normalized": "out/towngen/port/town-guides-anamorphic-batch/candidate-1.png",
+              "prompt": "Generate a screenshot for this game: shipping, and one hull that has not moved in a long time. Nothing between here and the horizon. Focus on the 90's CGI look; visible moody overcast; one camera; use the unlabeled guide only for spatiality; no collage or stitch."
+            },
+            {
+              "id": 2,
+              "weather": "bright restrained overcast",
+              "raw": "out/towngen/port/town-guides-anamorphic-batch/raw/candidate-2-bright-overcast.png",
+              "normalized": "out/towngen/port/town-guides-anamorphic-batch/candidate-2.png",
+              "prompt": "Generate a screenshot for this game: shipping, and one hull that has not moved in a long time. Nothing between here and the horizon. Focus on the 90's CGI look; bright restrained overcast; one camera; use the unlabeled guide only for spatiality; no collage or stitch."
+            },
+            {
+              "id": 3,
+              "weather": "visible daytime storm front",
+              "raw": "out/towngen/port/town-guides-anamorphic-batch/raw/candidate-3-storm-front.png",
+              "normalized": "out/towngen/port/town-guides-anamorphic-batch/candidate-3.png",
+              "prompt": "Generate a screenshot for this game: shipping, and one hull that has not moved in a long time. Nothing between here and the horizon. Focus on the 90's CGI look; visible daytime storm front; one camera; use the unlabeled guide only for spatiality; no collage or stitch."
+            }
+          ],
+          "winner": null,
+          "cleanup": "blocked until owner selects a preferred-guide candidate"
+        },
+        "cameraContractBatch": {
+          "status": "superseded-by-corrected-sideview-batch",
+          "referenceImages": [
+            "out/town-guides/00-style-reference.png",
+            "out/towngen/camera-contract-guides/port-camera.png"
+          ],
+          "guideRole": "camera-space contract: portal faces parallel to the camera, foot-level thresholds, receding route wedges, and explicit street-versus-door forms",
+          "triggerModel": "Each transition is a bump trigger at the authored floor threshold; the open yard is not a generic zone boundary.",
+          "workingRender": {
+            "camera": "single shared camera",
+            "transform": "same anisotropic X/Y fit across the complete frame",
+            "stitch": "none",
+            "finalDimensions": [
+              1065,
+              240
+            ]
+          },
+          "reviewPackage": "out/towngen/port/town-camera-contract-batch/review/review.json",
+          "contactSheet": "out/towngen/port/town-camera-contract-batch/review/candidate-contact-sheet.png",
+          "plateChecks": "out/towngen/port/town-camera-contract-batch/plate-check",
+          "candidates": [
+            {
+              "id": 1,
+              "weather": "moody visible overcast",
+              "raw": "out/towngen/port/town-camera-contract-batch/raw/candidate-1-moody-overcast.png",
+              "normalized": "out/towngen/port/town-camera-contract-batch/candidate-1.png",
+              "prompt": "Single-camera Port render using the camera-contract guide; front-facing forge and smithy entrances, distinct Cortico stair and Churchyard climb, clear foot-level thresholds, moody visible overcast; no collage or stitch."
+            },
+            {
+              "id": 2,
+              "weather": "bright restrained overcast",
+              "raw": "out/towngen/port/town-camera-contract-batch/raw/candidate-2-bright-overcast.png",
+              "normalized": "out/towngen/port/town-camera-contract-batch/candidate-2.png",
+              "prompt": "Single-camera Port render using the camera-contract guide; front-facing forge and smithy entrances, distinct Cortico stair and Churchyard climb, clear foot-level thresholds, bright restrained overcast; no collage or stitch."
+            },
+            {
+              "id": 3,
+              "weather": "visible daytime storm front",
+              "raw": "out/towngen/port/town-camera-contract-batch/raw/candidate-3-storm-front.png",
+              "normalized": "out/towngen/port/town-camera-contract-batch/candidate-3.png",
+              "prompt": "Single-camera Port render using the camera-contract guide; front-facing forge and smithy entrances, distinct Cortico stair and Churchyard climb, clear foot-level thresholds, visible daytime storm front; no collage or stitch."
+            }
+          ],
+          "winner": null,
+          "cleanup": "blocked until owner selects a camera-contract candidate"
+        },
+        "correctedSideviewBatch": {
+          "status": "rejected-owner-review",
+          "referenceImages": [
+            "out/town-guides/00-style-reference.png",
+            "out/town-guides/31-the-port-guide.png",
+            "out/town-guides/20-lauras-forge-guide.png"
+          ],
+          "referenceRoles": "first image supplies camera and style; second supplies Port placement; third supplies the guide family's pitched 3D floor and wall construction",
+          "promptPolicy": "Do not restate camera parameters or style adjectives; identify reference roles and describe only Port-specific content and hard exclusions.",
+          "triggerModel": "Each transition is a bump trigger at the authored floor threshold; the open yard is not a generic zone boundary.",
+          "workingRender": {
+            "camera": "inherited from reference images",
+            "transform": "same anisotropic X/Y fit across the complete frame",
+            "stitch": "none",
+            "finalDimensions": [
+              1065,
+              240
+            ]
+          },
+          "reviewPackage": "out/towngen/port/corrected-sideview-batch/review/review.json",
+          "contactSheet": "out/towngen/port/corrected-sideview-batch/review/candidate-contact-sheet.png",
+          "anchorContactSheet": "out/towngen/port/corrected-sideview-batch/review/candidate-contact-sheet-anchors.png",
+          "reviewBasis": "Primary contact sheet overlays the fed perspective Port guide; anchor boxes are secondary diagnostics only.",
+          "plateChecks": "out/towngen/port/corrected-sideview-batch/plate-check",
+          "prompt": "Use reference 1 for the camera and visual style, reference 2 for the Port layout, and reference 3 as an example of how the guide's pitched 3D floor and wall lines should be interpreted. Generate St. Maria - The Port: a working quay, sea and sky, moored boats, one old stranded hull, iron and charcoal cargo, and readable thresholds at the five guide openings in order. Preserve the reference camera and geometry; do not turn the lane into a first-person corridor or a flat facade. Do not draw guide lines, arrows, labels, or text. One coherent scene, no stitching or collage, no people.",
+          "candidates": [
+            {
+              "id": 1,
+              "weather": "moody visible overcast",
+              "raw": "out/towngen/port/corrected-sideview-batch/raw/candidate-1-moody-overcast.png",
+              "normalized": "out/towngen/port/corrected-sideview-batch/candidate-1.png"
+            },
+            {
+              "id": 2,
+              "weather": "bright restrained overcast",
+              "raw": "out/towngen/port/corrected-sideview-batch/raw/candidate-2-bright-overcast.png",
+              "normalized": "out/towngen/port/corrected-sideview-batch/candidate-2.png"
+            },
+            {
+              "id": 3,
+              "weather": "visible daytime storm front",
+              "raw": "out/towngen/port/corrected-sideview-batch/raw/candidate-3-storm-front.png",
+              "normalized": "out/towngen/port/corrected-sideview-batch/candidate-3.png"
+            }
+          ],
+          "winner": null,
+          "cleanup": "blocked; all candidates rejected because neither the authored perspective nor the guide anchor placement survived ImageGen reference conditioning"
+        },
+        "annotatedPerspectiveGuideBatch": {
+          "status": "rejected-owner-review",
+          "referenceImages": [
+            "out/town-guides/00-style-reference.png",
+            "out/towngen/port/perspective-guide-v2/31-position.png"
+          ],
+          "guideRole": "projected 3D world-geometry guide with continuous floor-plane rulers, full-height world verticals, explicit legend, and named thresholds",
+          "promptPolicy": "Reference roles are identified once; camera and style parameters are inherited from the images rather than restated.",
+          "triggerModel": "Red named thresholds identify the five authored bump-transition locations; the green and yellow lines describe construction geometry only and must not be rendered.",
+          "workingRender": {
+            "camera": "inherited from reference images",
+            "transform": "same anisotropic X/Y fit across the complete frame",
+            "stitch": "none",
+            "finalDimensions": [
+              1065,
+              240
+            ]
+          },
+          "reviewPackage": "out/towngen/port/annotated-perspective-batch/review/review.json",
+          "contactSheet": "out/towngen/port/annotated-perspective-batch/review/candidate-contact-sheet.png",
+          "anchorContactSheet": "out/towngen/port/annotated-perspective-batch/review/candidate-contact-sheet-anchors.png",
+          "plateChecks": "out/towngen/port/annotated-perspective-batch/plate-check",
+          "prompt": "Use image 1 as the visual and camera reference. Use image 2 as the authoritative Port world-geometry guide. Generate a finished St. Maria - The Port scene: working waterfront, open sea and sky, moored boats, one old stranded hull, stone quay architecture, iron and charcoal cargo, and readable transitions at the five named guide thresholds in their exact left-to-right order. Preserve the guide's perspective, continuous floor and wall geometry, and relative threshold placement. Do not render guide lines, arrows, labels, or text. One coherent scene, no stitching or collage, no people.",
+          "candidates": [
+            {
+              "id": 1,
+              "weather": "moody visible overcast",
+              "raw": "out/towngen/port/annotated-perspective-batch/raw/candidate-1-moody-overcast.png",
+              "normalized": "out/towngen/port/annotated-perspective-batch/candidate-1.png"
+            },
+            {
+              "id": 2,
+              "weather": "bright restrained overcast",
+              "raw": "out/towngen/port/annotated-perspective-batch/raw/candidate-2-bright-overcast.png",
+              "normalized": "out/towngen/port/annotated-perspective-batch/candidate-2.png"
+            },
+            {
+              "id": 3,
+              "weather": "visible daytime storm front",
+              "raw": "out/towngen/port/annotated-perspective-batch/raw/candidate-3-storm-front.png",
+              "normalized": "out/towngen/port/annotated-perspective-batch/candidate-3.png"
+            }
+          ],
+          "winner": null,
+          "cleanup": "blocked; visually and semantically rejected before selection"
+        },
+        "nextSemanticProof": {
+          "status": "annotated 3:1 Blender event-placement guide ready; lean-role prompt awaiting test",
+          "generationCount": 2,
+          "styleReference": "out/towngen/style-reference/style-reference.png",
+          "styleReferenceMaps": [
+            17,
+            28,
+            29
+          ],
+          "baselineBlend": "projects/hichaukitoden-game/assets/authoring/environments/img2imgguide.blend",
+          "blenderSource": "projects/hichaukitoden-game/assets/authoring/environments/st_maria_port_spatial_reference.blend",
+          "layoutAuthority": "out/towngen/blockouts-reconciled/port.json",
+          "blenderRender": "out/towngen/port/blender-spatial-reference/port-spatial-final-clean-1065x240.png",
+          "blenderSpatialReference": "out/towngen/port/blender-spatial-reference/port-spatial-final-clean-1065x240.png",
+          "blenderModelReference": "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-2160x720.png",
+          "finalProjectionPreview": "out/towngen/port/blender-spatial-reference/port-spatial-final-semantic-1065x240.png",
+          "activeLunaDiagnostic": {
+            "threadId": "01a066ba-4f85-7273-8909-c4511c56c657",
+            "referenceRevision": "superseded sculpted revision of the Blender semantic guide",
+            "review": "out/towngen/port/luna-blender-semantic-proof/review.json",
+            "status": "rejected-anamorphic-proof",
+            "finding": "Prompt wording did not control ImageGen output dimensions; semantic centers also drifted. The generic-prism Blender revision was produced afterward and has not been tested."
+          },
+          "triggerPinLunaDiagnostic": {
+            "threadId": "01a066e1-09ee-7272-b8a2-b5bfb50a1e58",
+            "reference": "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-1024x960.png",
+            "status": "failed-before-generation; usage limit; superseded because the guide aspect was wrong"
+          },
+          "annotatedGuideLunaDiagnostic": {
+            "threadId": "01a06b8c-9f6d-7ea1-846c-500ec355d956",
+            "reference": "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-2160x720.png",
+            "review": "out/towngen/port/luna-trigger-pin-proof-3x1/review.json",
+            "status": "rejected-owner-review",
+            "finding": "The model literalized the annotated event vocabulary into five isolated structures and failed to construct a coherent town screen. Its automated self-review is not accepted."
+          },
+          "shapeNeutralSpatialReference": "out/towngen/port/map-derived-spatial-field/31-spatial-field.png",
+          "shapeNeutralCleanReference": "out/towngen/port/map-derived-spatial-field/31-spatial-field-clean.png",
+          "shapeNeutralScope": "Projection audit generated from map camera, lane, events, anchors, and trigger radii; retained as a diagnostic rather than the preferred model input.",
+          "semanticPrimitives": "Every transition uses the same triangular prism pointed at its trigger origin. Blue = edge exit; red = door; yellow = upward route; magenta proxy = actor scale. Marker volume never expresses route shape or extent.",
+          "modelVisualInputs": [
+            "out/towngen/style-reference/style-reference.png",
+            "out/towngen/port/blender-spatial-reference/port-spatial-working-semantic-2160x720.png"
+          ],
+          "outputTransform": "Author and render the coherent 1065x240 frame first; compress that completed raster to the model's 3:1 landscape canvas; add annotations only afterward. Apply one complete-frame 3:1-to-1065x240 transform to generated output; never render a second camera aspect, crop, or stitch.",
+          "nextPrompt": "Create one complete 3:1 pre-rendered early-90s CGI background of a town map in a side-scroller RPG, like a PSX screenshot. St. Maria is a damp Portuguese colonial town built in steep tiers above its port. This is the port: from left to right it links the quay, an active forge, Laura's smithy, the uphill way to the Cortico, and the long climb to the churchyard. Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon. A few inhabitants are present. Image 1 is the aesthetic reference. Image 2 is where ingame events are placed.",
+          "measuredAnchorProjection": {
+            "groundY": 136.3583,
+            "maximumAnchorErrorPx": 0.0
+          },
+          "rules": [
+            "Do not generate weather variants until this proof passes.",
+            "No generated image may be used as a positive reference.",
+            "Exactly two visual inputs: image 1 is the in-house live-capture sheet and image 2 is the pre-distorted annotated Blender event-placement guide.",
+            "Describe image 2 only as where ingame events are placed; do not explain its symbols, camera, geometry, or transform.",
+            "Do not give the model the clean guide, final-aspect preview, generated candidates, or any other visual input.",
+            "Include inhabitants in the first pass.",
+            "Reject missing, blocked, depth-incoherent, or UI-obscured transitions before aesthetic ranking.",
+            "Do not move gameplay anchors without an owner-approved remap proposal."
+          ]
+        },
+        "promoted": false
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "churchyard": {
+      "mapId": 16,
+      "plate": "churchyard_bg.png",
+      "dimensions": [
+        969,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/churchyard/calibrated-clean.png",
+        "prompt": "out/towngen/churchyard/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/churchyard/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/churchyard/review/event-placement.json",
+        "observedPlateX": {
+          "port_climb": 124.037,
+          "labyrinth_door": 564.005,
+          "east_praca": 841.461
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              26.012
+            ],
+            [
+              0.0,
+              26.012
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/churchyard/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.425,
+          "matrix": [
+            [
+              0.42500001192092896,
+              0.0,
+              0.0001250000059371814
+            ],
+            [
+              0.0,
+              0.42500001192092896,
+              -0.0013050819979980588
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/churchyard/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "082570e93b909df15fed785e7a97800161f72cab135256bbec82521a2be1a328",
+          "matrix": [
+            [
+              0.42500001192092896,
+              0.0,
+              0.0001250000059371814
+            ],
+            [
+              0.0,
+              0.42500001192092896,
+              -0.0013050819979980588
+            ]
+          ],
+          "scale": 0.425,
+          "floorYAtSourceCentre": 320.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1916,
+                205,
+                54,
+                115
+              ],
+              "feetY": 320,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 115,
+              "targetVisibleHeight": 48.875,
+              "ratio": 0.425
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/churchyard/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/churchyard/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/churchyard/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "cortico": {
+      "mapId": 26,
+      "plate": "backstreet_bg.png",
+      "dimensions": [
+        866,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/cortico/calibrated-clean.png",
+        "prompt": "out/towngen/cortico/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/cortico/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/cortico/review/event-placement.json",
+        "observedPlateX": {
+          "west_praca": 128.0,
+          "lodging_door": 334.112,
+          "padaria_back": 540.221,
+          "port_stair": 643.276,
+          "east_market": 738.404
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              22.254
+            ],
+            [
+              0.0,
+              22.254
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/cortico/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.485,
+          "matrix": [
+            [
+              0.48500001430511475,
+              0.0,
+              -0.00013499999477062374
+            ],
+            [
+              0.0,
+              0.48500001430511475,
+              -101.16648864746094
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/cortico/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "6bb31621e8b409d2f680d771438be07ec3b290131aded094bd567018647b67f7",
+          "matrix": [
+            [
+              0.48500001430511475,
+              0.0,
+              -0.00013499999477062374
+            ],
+            [
+              0.0,
+              0.48500001430511475,
+              -101.16648864746094
+            ]
+          ],
+          "scale": 0.485,
+          "floorYAtSourceCentre": 489.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                765,
+                362,
+                70,
+                127
+              ],
+              "feetY": 489,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 127,
+              "targetVisibleHeight": 61.595,
+              "ratio": 0.485
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/cortico/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/cortico/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/cortico/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "market": {
+      "mapId": 18,
+      "plate": "market_bg.png",
+      "dimensions": [
+        1065,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/market/calibrated-clean.png",
+        "prompt": "out/towngen/market/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/market/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/market/review/event-placement.json",
+        "observedPlateX": {
+          "west_cortico": 128.0,
+          "padaria_3d_door": 566.857,
+          "padaria_door": 731.429,
+          "east_quay": 936.589
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              29.48
+            ],
+            [
+              0.0,
+              29.48
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/market/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.355,
+          "matrix": [
+            [
+              0.35499998927116394,
+              0.0,
+              -4.5000000682193786e-05
+            ],
+            [
+              0.0,
+              0.35499998927116394,
+              -28.011089324951172
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/market/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "243dd6b4b20c7bb9f2f429950e20182c7005818853aac8296175e420ad905a9c",
+          "matrix": [
+            [
+              0.35499998927116394,
+              0.0,
+              -4.5000000682193786e-05
+            ],
+            [
+              0.0,
+              0.35499998927116394,
+              -28.011089324951172
+            ]
+          ],
+          "scale": 0.355,
+          "floorYAtSourceCentre": 462.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1693,
+                326,
+                61,
+                136
+              ],
+              "feetY": 462,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 136,
+              "targetVisibleHeight": 48.28,
+              "ratio": 0.355
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/market/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/market/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/market/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "quay": {
+      "mapId": 19,
+      "plate": "quay_bg.png",
+      "dimensions": [
+        1065,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/quay/calibrated-clean.png",
+        "prompt": "out/towngen/quay/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/quay/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/quay/review/event-placement.json",
+        "observedPlateX": {
+          "west_market": 128.0,
+          "praca_stair": 413.383,
+          "pub_door": 706.696,
+          "east_port": 936.589
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              29.48
+            ],
+            [
+              0.0,
+              29.48
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/quay/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.38,
+          "matrix": [
+            [
+              0.3799999952316284,
+              0.0,
+              0.00011999999696854502
+            ],
+            [
+              0.0,
+              0.3799999952316284,
+              -76.04116821289062
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/quay/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "2d9f36bfb5813f81c350e43b3e066ac1cec930469b449a62bb33ae23ab2f22a6",
+          "matrix": [
+            [
+              0.3799999952316284,
+              0.0,
+              0.00011999999696854502
+            ],
+            [
+              0.0,
+              0.3799999952316284,
+              -76.04116821289062
+            ]
+          ],
+          "scale": 0.38,
+          "floorYAtSourceCentre": 558.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1091,
+                422,
+                61,
+                136
+              ],
+              "feetY": 558,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 136,
+              "targetVisibleHeight": 51.68,
+              "ratio": 0.38
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/quay/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/quay/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/quay/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "weaponsmith": {
+      "mapId": 20,
+      "plate": "lauras_smith_bg.png",
+      "dimensions": [
+        450,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/weaponsmith/calibrated-clean.png",
+        "prompt": "out/towngen/weaponsmith/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/weaponsmith/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/weaponsmith/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 421.31
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.35,
+              7.417
+            ],
+            [
+              0.35,
+              7.417
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/weaponsmith/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.22,
+          "matrix": [
+            [
+              0.2199999988079071,
+              0.0,
+              5.999999848427251e-05
+            ],
+            [
+              0.0,
+              0.2199999988079071,
+              27.09932518005371
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/weaponsmith/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "e204cea0e6ea862e7cbbb58d93a3f55f1e72992af25b564d275baf1b3d037cad",
+          "matrix": [
+            [
+              0.2199999988079071,
+              0.0,
+              5.999999848427251e-05
+            ],
+            [
+              0.0,
+              0.2199999988079071,
+              27.09932518005371
+            ]
+          ],
+          "scale": 0.22,
+          "floorYAtSourceCentre": 495.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                661,
+                338,
+                135,
+                157
+              ],
+              "feetY": 495,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 157,
+              "targetVisibleHeight": 34.54,
+              "ratio": 0.22
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/weaponsmith/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/weaponsmith/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/weaponsmith/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "alicias_padaria": {
+      "mapId": 27,
+      "plate": "alicias_padaria_bg.png",
+      "dimensions": [
+        450,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/alicias_padaria/calibrated-clean.png",
+        "prompt": "out/towngen/alicias_padaria/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/alicias_padaria/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/alicias_padaria/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 29.701,
+          "home_stair": 405.456
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.35,
+              7.417
+            ],
+            [
+              0.35,
+              7.417
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/alicias_padaria/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.235,
+          "matrix": [
+            [
+              0.23499999940395355,
+              0.0,
+              -6.500000017695129e-05
+            ],
+            [
+              0.0,
+              0.23499999940395355,
+              17.55927848815918
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/alicias_padaria/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "0bad03b9e520b544eb6e471551a83b96a77de335436cf2cb0168d605ee8a1114",
+          "matrix": [
+            [
+              0.23499999940395355,
+              0.0,
+              -6.500000017695129e-05
+            ],
+            [
+              0.0,
+              0.23499999940395355,
+              17.55927848815918
+            ]
+          ],
+          "scale": 0.235,
+          "floorYAtSourceCentre": 504.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                932,
+                347,
+                135,
+                157
+              ],
+              "feetY": 504,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 157,
+              "targetVisibleHeight": 36.895,
+              "ratio": 0.23500000000000001
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/alicias_padaria/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/alicias_padaria/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/alicias_padaria/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "pub": {
+      "mapId": 21,
+      "plate": "pub_bg.png",
+      "dimensions": [
+        1065,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/pub/calibrated-clean.png",
+        "prompt": "out/towngen/pub/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/pub/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/pub/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 520.404
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              29.48
+            ],
+            [
+              0.0,
+              29.48
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/pub/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.265,
+          "matrix": [
+            [
+              0.26499998569488525,
+              0.0,
+              -4.5000000682193786e-05
+            ],
+            [
+              0.0,
+              0.26499998569488525,
+              -2.3308136463165283
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/pub/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "6a11357fe3153aaf7e444168aaf2e6e33c54d9e1fef7f54b6f13d7f3faedb072",
+          "matrix": [
+            [
+              0.26499998569488525,
+              0.0,
+              -4.5000000682193786e-05
+            ],
+            [
+              0.0,
+              0.26499998569488525,
+              -2.3308136463165283
+            ]
+          ],
+          "scale": 0.265,
+          "floorYAtSourceCentre": 522.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                779,
+                347,
+                77,
+                175
+              ],
+              "feetY": 522,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 175,
+              "targetVisibleHeight": 46.375,
+              "ratio": 0.265
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/pub/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/pub/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/pub/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "chapel": {
+      "mapId": 22,
+      "plate": "chapel_bg.png",
+      "dimensions": [
+        1025,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/chapel/calibrated-clean.png",
+        "prompt": "out/towngen/chapel/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/chapel/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/chapel/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 587.785
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              28.035
+            ],
+            [
+              0.0,
+              28.035
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/chapel/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.31,
+          "matrix": [
+            [
+              0.3100000023841858,
+              0.0,
+              0.00013000000035390258
+            ],
+            [
+              0.0,
+              0.3100000023841858,
+              -32.33095169067383
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/chapel/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "967742800624afe2fd8170b7cda798369417ce6f36cf8e9ebd283e138930e599",
+          "matrix": [
+            [
+              0.3100000023841858,
+              0.0,
+              0.00013000000035390258
+            ],
+            [
+              0.0,
+              0.3100000023841858,
+              -32.33095169067383
+            ]
+          ],
+          "scale": 0.31,
+          "floorYAtSourceCentre": 543.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                985,
+                362,
+                74,
+                181
+              ],
+              "feetY": 543,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 181,
+              "targetVisibleHeight": 56.11,
+              "ratio": 0.31
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/chapel/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/chapel/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/chapel/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "house_laura": {
+      "mapId": 23,
+      "plate": "house_laura_bg.png",
+      "dimensions": [
+        747,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/house_laura/calibrated-clean.png",
+        "prompt": "out/towngen/house_laura/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/house_laura/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/house_laura/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 29.701,
+          "bedroom_door": 421.31,
+          "shop_stair": 540.221
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              17.919
+            ],
+            [
+              0.0,
+              17.919
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/house_laura/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.37,
+          "matrix": [
+            [
+              0.3700000047683716,
+              0.0,
+              -0.00014000000373926014
+            ],
+            [
+              0.0,
+              0.3700000047683716,
+              -64.9111328125
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/house_laura/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "459564fe0ac33a6c9cc2ac4a272615375d9ffb59b574e13f7f73fecb5399ab5b",
+          "matrix": [
+            [
+              0.3700000047683716,
+              0.0,
+              -0.00014000000373926014
+            ],
+            [
+              0.0,
+              0.3700000047683716,
+              -64.9111328125
+            ]
+          ],
+          "scale": 0.37,
+          "floorYAtSourceCentre": 543.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1163,
+                362,
+                102,
+                181
+              ],
+              "feetY": 543,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 181,
+              "targetVisibleHeight": 66.97,
+              "ratio": 0.37
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/house_laura/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/house_laura/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/house_laura/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "house_alicia": {
+      "mapId": 24,
+      "plate": "house_alicia_bg.png",
+      "dimensions": [
+        747,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/house_alicia/calibrated-clean.png",
+        "prompt": "out/towngen/house_alicia/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/house_alicia/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/house_alicia/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 29.701
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              17.919
+            ],
+            [
+              0.0,
+              17.919
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/house_alicia/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.195,
+          "matrix": [
+            [
+              0.19499999284744263,
+              0.0,
+              9.500000305706635e-05
+            ],
+            [
+              0.0,
+              0.19499999284744263,
+              34.794403076171875
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/house_alicia/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "5aec19a8ffc059ddd1091b3dfabafb7bf85e5795bff56eedf3eb203e07b9a841",
+          "matrix": [
+            [
+              0.19499999284744263,
+              0.0,
+              9.500000305706635e-05
+            ],
+            [
+              0.0,
+              0.19499999284744263,
+              34.794403076171875
+            ]
+          ],
+          "scale": 0.195,
+          "floorYAtSourceCentre": 519.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                355,
+                326,
+                102,
+                193
+              ],
+              "feetY": 519,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 193,
+              "targetVisibleHeight": 37.635,
+              "ratio": 0.19499999999999998
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/house_alicia/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/house_alicia/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/house_alicia/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    },
+    "lodging": {
+      "mapId": 25,
+      "plate": "lodging_bg.png",
+      "dimensions": [
+        668,
+        240
+      ],
+      "status": "accepted-repaint-v3-anchor-review",
+      "winner": {
+        "accepted": "out/towngen/repaint-v3/lodging/calibrated-clean.png",
+        "prompt": "out/towngen/lodging/replacement/prompt.txt",
+        "inputs": [
+          "out/towngen/style-reference/style-reference.png",
+          "out/towngen/lodging/replacement/semantic-guide.png"
+        ],
+        "review": "out/towngen/repaint-v3/lodging/review/event-placement.json",
+        "observedPlateX": {
+          "exit_door": 409.42
+        },
+        "beforeAfter": {
+          "lane": [
+            [
+              0.0,
+              15.029
+            ],
+            [
+              0.0,
+              15.029
+            ]
+          ],
+          "horizonY": [
+            66,
+            66
+          ],
+          "groundY": [
+            136,
+            136
+          ],
+          "persistentUiBeginsY": [
+            144,
+            144
+          ]
+        },
+        "calibration": "out/towngen/repaint-v3/lodging/calibration.json",
+        "calibrationCorrection": {
+          "runtimeGroundY": 136,
+          "actorPx": [
+            24,
+            48
+          ],
+          "source": "raw-only v2 identity-normalized actor and paired floor calibration",
+          "scale": 0.21,
+          "matrix": [
+            [
+              0.20999999344348907,
+              0.0,
+              5.999999848427251e-05
+            ],
+            [
+              0.0,
+              0.20999999344348907,
+              27.009355545043945
+            ]
+          ]
+        },
+        "visualPersonAudit": "out/towngen/repaint-v3/lodging/calibration.json",
+        "calibrationV2": {
+          "source": "immutable raw-001.png",
+          "sourceSha256": "5103c36adcb98dfc77e2eef9157989e5731454739424d060b05630c5fedb5003",
+          "matrix": [
+            [
+              0.20999999344348907,
+              0.0,
+              5.999999848427251e-05
+            ],
+            [
+              0.0,
+              0.20999999344348907,
+              27.009355545043945
+            ]
+          ],
+          "scale": 0.21,
+          "floorYAtSourceCentre": 519.003,
+          "targetGroundY": 136.0,
+          "floorResidualMaxPx": 0.003,
+          "portalResidualsPx": [
+            0.0
+          ],
+          "actorRefs": [
+            {
+              "id": "primary_same_plane",
+              "box": [
+                1008,
+                326,
+                146,
+                193
+              ],
+              "feetY": 519,
+              "identity": "adult_or_runtime_scale_reference",
+              "eligible": true,
+              "reason": "fully visible standing figure on the action-plane",
+              "sourceVisibleHeight": 193,
+              "targetVisibleHeight": 40.53,
+              "ratio": 0.21
+            }
+          ],
+          "excludedRefs": []
+        },
+        "raw": "out/towngen/lodging/replacement/raw-001.png",
+        "repaint": "out/towngen/repaint-v3/lodging/source/repaint-request.json",
+        "eventReview": "out/towngen/repaint-v3/lodging/review/event-placement.json",
+        "status": "accepted-repaint-v3-anchor-review"
+      },
+      "calibrationCorrection": {
+        "visualGroundOffsetPx": 0,
+        "runtimeGroundY": 136,
+        "actorPx": [
+          24,
+          48
+        ],
+        "source": "detector person boxes on promoted plate"
+      }
+    }
+  },
+  "calibrationRecords": {
+    "port": "out/towngen/repaint-v3/port/calibration.json",
+    "churchyard": "out/towngen/repaint-v3/churchyard/calibration.json",
+    "cortico": "out/towngen/repaint-v3/cortico/calibration.json",
+    "market": "out/towngen/repaint-v3/market/calibration.json",
+    "quay": "out/towngen/repaint-v3/quay/calibration.json",
+    "weaponsmith": "out/towngen/repaint-v3/weaponsmith/calibration.json",
+    "alicias_padaria": "out/towngen/repaint-v3/alicias_padaria/calibration.json",
+    "pub": "out/towngen/repaint-v3/pub/calibration.json",
+    "chapel": "out/towngen/repaint-v3/chapel/calibration.json",
+    "house_laura": "out/towngen/repaint-v3/house_laura/calibration.json",
+    "house_alicia": "out/towngen/repaint-v3/house_alicia/calibration.json",
+    "lodging": "out/towngen/repaint-v3/lodging/calibration.json"
+  }
+}

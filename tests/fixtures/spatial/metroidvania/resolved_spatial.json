@@ -1,0 +1,87 @@
+{
+  "bodies": [
+    {
+      "id": "ground",
+      "position": [
+        3,
+        0,
+        -0.25
+      ],
+      "shape": {
+        "kind": "box",
+        "size": [
+          8,
+          1,
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "upper_platform",
+      "position": [
+        6,
+        0,
+        1.75
+      ],
+      "shape": {
+        "kind": "box",
+        "size": [
+          3,
+          1,
+          0.5
+        ]
+      }
+    },
+    {
+      "id": "rear_platform",
+      "position": [
+        6,
+        2,
+        1.75
+      ],
+      "shape": {
+        "kind": "box",
+        "size": [
+          3,
+          1,
+          0.5
+        ]
+      }
+    }
+  ],
+  "coordinateSystem": "XYZ: right-handed, Z-up, XY-ground, world-units",
+  "features": [
+    {
+      "id": "exit",
+      "position": [
+        8,
+        0,
+        2
+      ],
+      "shape": {
+        "kind": "box",
+        "size": [
+          1,
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "trigger_volume",
+      "position": [
+        5,
+        0,
+        1
+      ],
+      "shape": {
+        "kind": "box",
+        "size": [
+          2,
+          1,
+          2
+        ]
+      }
+    }
+  ]
+}

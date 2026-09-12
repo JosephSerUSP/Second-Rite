@@ -7,6 +7,7 @@ const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 const viewport = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
+const navigation = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-authoring-tools.js'), 'utf8');
 
 test('projection and orientation are independent in the Three viewport', () => {
     assert.match(viewport, /function projectionName\(\)/);
@@ -19,15 +20,17 @@ test('projection and orientation are independent in the Three viewport', () => {
     assert.match(viewport, /setAxisView\(name\)/);
     assert.match(viewport, /orbitStep\(action\)/);
     assert.match(viewport, /oppositeView\(\)/);
-    assert.match(viewport, /topControls\.enableRotate = true/,
-        'orthographic projection must remain orbitable into User Orthographic views');
+    assert.match(navigation, /control\.enableRotate = !planar/,
+        'the shared authoring navigator must keep non-planar scenes orbitable');
 });
 
 test('Blender-like mouse and numpad integration preserves authored left click', () => {
-    assert.match(viewport, /controls\.mouseButtons\.LEFT = null/,
+    assert.match(navigation, /control\.mouseButtons\.LEFT = null/,
         'left click remains owned by map authoring');
-    assert.match(viewport, /controls\.mouseButtons\.MIDDLE = THREE\.MOUSE\.ROTATE/,
-        'MMB must orbit like Blender');
+    assert.match(navigation, /control\.mouseButtons\.MIDDLE = THREE\.MOUSE\.PAN/,
+        'middle drag must pan with the game camera on planar maps');
+    assert.match(navigation, /event\.altKey && !planar \? THREE\.MOUSE\.ROTATE : THREE\.MOUSE\.PAN/,
+        'Alt+middle may orbit only fully 3D maps');
     assert.match(viewport, /action === 'toggle-projection'[\s\S]*requestProjectionToggle\(\)/);
     assert.match(viewport, /\['front', 'back', 'right', 'left', 'top', 'bottom'\]/);
     assert.match(viewport, /\['orbit-down', 'orbit-left', 'orbit-right', 'orbit-up'\]/);

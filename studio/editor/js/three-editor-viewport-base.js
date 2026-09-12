@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/OrbitControls.js';
-import { TransformControls } from '/vendor/three/TransformControls.js';
+import { createSelectionOverlay, createEventBox, createMoveGizmo, configureEventSpriteFrame, installNavigation } from '/js/three-authoring-tools.js';
 import { OBJLoader } from '/vendor/three/OBJLoader.js';
+import { MTLLoader } from '/vendor/three/MTLLoader.js';
 import '/js/thestra-viewport-contract.js';
 import '/js/three-world-fidelity-core.js';
 import '/js/three-definition-consumer.js';
@@ -14,6 +15,8 @@ const DirectDefinitions = globalThis.ThestraThreeDefinitionConsumer;
 if (!DirectDefinitions) throw new Error('Thestra direct definition consumer failed to load.');
 const EditorAdapter = globalThis.SecondRiteEditorAdapter;
 if (!EditorAdapter) throw new Error('Second Rite editor adapter failed to load.');
+const WorldView = globalThis.ThestraWorldViewSemantics;
+if (!WorldView) throw new Error('Shared world-view semantics failed to load.');
 
 const FALLBACK = {
     wall: 0x777777,
@@ -78,6 +81,9 @@ function semanticFromSource(source) {
     }
     if (source.kind === 'event' && source.id != null) {
         return { kind: 'event', key: `event:${source.id}`, id: source.id };
+    }
+    if (source.kind === 'environment') {
+        return { kind: 'environment', key: `environment:${source.path}`, source };
     }
     return null;
 }
@@ -213,12 +219,7 @@ export function createThreeEditorViewport(container, options = {}) {
     renderableContent.name = 'SecondRiteAuthoritativeRenderables';
     scene.add(renderableContent);
 
-    const selectionOverlay = new THREE.Mesh(
-        new THREE.BoxGeometry(1.04, 1.04, 1.04),
-        new THREE.MeshBasicMaterial({ color: 0xffd45a, wireframe: true, depthTest: false, transparent: true, opacity: 0.95 })
-    );
-    selectionOverlay.visible = false;
-    selectionOverlay.renderOrder = 1000;
+    const selectionOverlay = createSelectionOverlay();
     scene.add(selectionOverlay);
 
     // Projection and orientation are independent. `top` remains the local name
@@ -229,36 +230,19 @@ export function createThreeEditorViewport(container, options = {}) {
     const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
     const topControls = new OrbitControls(top, renderer.domElement);
-    const moveGizmo = new TransformControls(perspective, renderer.domElement);
-    moveGizmo.setMode('translate');
-    moveGizmo.space = 'world';
-    moveGizmo.translationSnap = null;
-    moveGizmo.showX = true;
-    moveGizmo.showY = false;
-    moveGizmo.showZ = true;
-    moveGizmo.showXY = false;
-    moveGizmo.showYZ = false;
-    moveGizmo.showXZ = true;
-    moveGizmo.showXYZE = false;
-    moveGizmo.setColors(0xb98278, 0x829679, 0x748fae, 0xc8b77d);
-    moveGizmo.enabled = false;
+    const moveGizmo = createMoveGizmo(perspective, renderer.domElement);
     scene.add(moveGizmo.getHelper());
 
-    perspectiveControls.enableDamping = true;
-    topControls.enableDamping = true;
-    topControls.enableRotate = true;
-    topControls.screenSpacePanning = true;
     topControls.enabled = false;
 
-    // Left mouse belongs to authored interaction. Blender-like navigation uses
-    // MMB to orbit; OrbitControls turns modified rotation gestures into panning,
-    // while wheel retains dolly/orthographic zoom. Right drag stays a secondary
-    // pan affordance rather than stealing authored left-click interaction.
-    for (const controls of [perspectiveControls, topControls]) {
-        controls.mouseButtons.LEFT = null;
-        controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
-        controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
-    }
+    const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
+        canPan(event) {
+            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture) return false;
+            if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
+            return !pickSemantic(event, ['event', 'light', 'override']);
+        },
+        getOpticalNavigation: options.getOpticalNavigation || null
+    });
 
     let mode = 'perspective'; // projection: `top` now means orthographic, not Top orientation.
     let orientation = 'user';
@@ -289,6 +273,20 @@ export function createThreeEditorViewport(container, options = {}) {
     const provisionalCells = new Set();
     const proxyMeshesByCell = new Map();
     const renderableMeshesByCell = new Map();
+    let framedEnvironmentMap = null;
+    let importedCamera = null;
+    let displayAspect = null;
+    // Collision is an inspection overlay.  Starting an environment in this
+    // view with its wireframe on makes authored Event boxes and handles look
+    // like part of the collision mesh, especially in the narrow town rooms.
+    let collisionVisible = false;
+
+    function setCollisionVisible(visible) {
+        collisionVisible = !!visible;
+        renderableContent.traverse(object => {
+            if (object.userData.thestraSource?.surface === 'collision') object.visible = collisionVisible;
+        });
+    }
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
@@ -439,14 +437,25 @@ export function createThreeEditorViewport(container, options = {}) {
         });
     }
 
-    function frameScene(reset) {
+    function frameScene(reset, initial = false) {
         if (!sceneModel) return;
         const width = Math.max(1, sceneModel.bounds.width);
         const height = Math.max(1, sceneModel.bounds.height);
-        const cx = width / 2, cz = height / 2, span = Math.max(width, height, 4);
+        const box = new THREE.Box3();
+        renderableContent.children.forEach(object => {
+            if (object.userData.thestraSource && object.userData.thestraSource.surface === 'collision') box.expandByObject(object);
+        });
+        const imported = sceneModel.map.environmentPackage && !box.isEmpty();
+        const center = imported ? box.getCenter(new THREE.Vector3()) : new THREE.Vector3(width / 2, 0.15, height / 2);
+        const size = imported ? box.getSize(new THREE.Vector3()) : new THREE.Vector3(width, 0, height);
+        const cx = center.x, cz = center.z, span = Math.max(size.x, size.y, size.z, 4);
         if (reset) {
-            const endPosition = new THREE.Vector3(cx + span * 0.75, span * 0.72, cz + span * 0.85);
-            const endTarget = new THREE.Vector3(cx, 0.15, cz);
+            const endPosition = new THREE.Vector3(cx + span * 0.75, (imported ? center.y : 0) + span * 0.72, cz + span * 0.85);
+            const endTarget = center;
+            if (initial && sceneModel.map.environmentPackage && importedCamera) {
+                endPosition.fromArray(Contract.runtimePositionToThestra([importedCamera.x, importedCamera.y, importedCamera.z]));
+                endTarget.fromArray(Contract.runtimePositionToThestra([importedCamera.targetX, importedCamera.targetY, importedCamera.targetZ]));
+            }
             const camera = mode === 'top' ? top : perspective;
             const tempCam = camera.clone();
             tempCam.position.copy(endPosition);
@@ -466,6 +475,7 @@ export function createThreeEditorViewport(container, options = {}) {
                 endPosition,
                 endQuaternion,
                 endZoom,
+                duration: initial ? 0 : 200,
                 nextOrientation: 'user'
             });
         }
@@ -875,6 +885,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const object = selectedMovableObject();
         moveGizmo.camera = activeCamera();
         moveGizmo.enabled = !!object && !cameraTransition;
+        moveGizmo.showY = !!(object && object.userData.worldPosition);
         if (object && moveGizmo.object !== object) moveGizmo.attach(object);
         if (!object && moveGizmo.object) moveGizmo.detach();
     }
@@ -893,6 +904,18 @@ export function createThreeEditorViewport(container, options = {}) {
         object.position.y -= grounded.min.y;
     }
 
+    function eventSpriteMetrics(event, aspect = null) {
+        // Town traversal's runtime billboard default is 1.75; ordinary grid
+        // Events retain the one-unit default used by the world renderer.
+        const height = event.worldHeight || (event.worldPosition ? 1.75 : 1);
+        const frameAspect = event.frameWidth && event.frameHeight
+            ? event.frameWidth / event.frameHeight : null;
+        return {
+            height,
+            width: height * (aspect || frameAspect || 0.5)
+        };
+    }
+
     function addEventVisual(group, event, fallback) {
         const plan = Contract.eventVisualPlan(event.asset);
         if (plan.kind === 'fallback') return { visual: null, fallback };
@@ -904,11 +927,10 @@ export function createThreeEditorViewport(container, options = {}) {
                 texture.colorSpace = THREE.SRGBColorSpace;
                 texture.magFilter = THREE.NearestFilter;
                 texture.minFilter = THREE.NearestFilter;
-                const aspect = texture.image && texture.image.width && texture.image.height
-                    ? texture.image.width / texture.image.height : 1;
+                const metrics = eventSpriteMetrics(event, configureEventSpriteFrame(texture, event).aspect);
                 const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
-                sprite.position.y = 0.48;
-                sprite.scale.set(Math.min(0.9, 0.9 * aspect), 0.9, 1);
+                sprite.position.y = metrics.height / 2;
+                sprite.scale.set(metrics.width, metrics.height, 1);
                 visual.add(sprite);
             }, undefined, () => {
                 visual.removeFromParent();
@@ -916,22 +938,63 @@ export function createThreeEditorViewport(container, options = {}) {
                 if (entry) entry.fallback.visible = true;
             });
         } else {
-            new OBJLoader().load(assetUrl(plan.path), object => {
+            const finish = object => {
                 object.traverse(child => {
                     if (!child.isMesh) return;
                     const materials = Array.isArray(child.material) ? child.material : [child.material];
-                    materials.forEach(material => { material.side = THREE.DoubleSide; });
+                    materials.forEach(material => {
+                        material.side = THREE.DoubleSide;
+                        // Models are authoring affordances here.  Keep their
+                        // authored colour, but make a small transition marker
+                        // legible over the environment it belongs to.
+                        material.depthTest = false;
+                        material.depthWrite = false;
+                        if ('emissive' in material && material.color) {
+                            material.emissive.copy(material.color);
+                            material.emissiveIntensity = 0.55;
+                        }
+                    });
+                    child.renderOrder = 1002;
                 });
+                if (/transition_arrow\.obj$/i.test(plan.path)) {
+                    const axis = WorldView.transitionArrowAxis(event.direction);
+                    // Runtime ground (x, y) maps to Thestra's (x, z).  Rotate
+                    // the OBJ's native +Y shaft onto that shared semantic axis
+                    // before its authoring-size bounds are calculated.
+                    object.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0),
+                        new THREE.Vector3(axis.x, 0, axis.y));
+                }
                 fitEventModel(object);
                 object.position.y = 0.01;
                 visual.add(object);
-            }, undefined, () => {
+            };
+            const fail = () => {
                 visual.removeFromParent();
                 const entry = eventVisuals.find(candidate => candidate.visual === visual);
                 if (entry) entry.fallback.visible = true;
-            });
+            };
+            const loadObject = materials => {
+                const loader = new OBJLoader();
+                if (materials) loader.setMaterials(materials);
+                loader.load(assetUrl(plan.path), finish, undefined, fail);
+            };
+            // Event models are authored OBJ+MTL pairs.  OBJLoader deliberately
+            // does not follow `mtllib` itself; resolving the companion file is
+            // what makes transition arrows and ordinary event props use their
+            // author-defined colour instead of an unlit anonymous fallback.
+            if (/\.obj$/i.test(plan.path)) {
+                const mtlPath = plan.path.replace(/\.obj$/i, '.mtl');
+                new MTLLoader().load(assetUrl(mtlPath), materials => {
+                    materials.preload();
+                    loadObject(materials);
+                }, undefined, () => loadObject(null));
+            } else loadObject(null);
         }
-        fallback.visible = false;
+        // A visual asset enriches an Event; it never replaces the shared
+        // authoring box.  Keeping the box visible gives sprites, props and
+        // unadorned Events the same placement language and leaves each
+        // transition arrow locatable before it is selected.
+        fallback.visible = true;
         return { visual, fallback };
     }
 
@@ -940,22 +1003,21 @@ export function createThreeEditorViewport(container, options = {}) {
             kind: 'event', key: event.key, id: event.id, index: event.index, cell: event.cell
         };
         const group = new THREE.Group();
-        group.position.set(event.world.x, 0, event.world.z);
+        if (event.worldPosition) {
+            group.position.fromArray(Contract.runtimePositionToThestra(event.worldPosition));
+            group.userData.worldPosition = true;
+        } else group.position.set(event.world.x, 0, event.world.z);
         semanticContent.add(group);
 
-        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(0.92, 0.92, 0.92),
-            new THREE.MeshBasicMaterial({ color: FALLBACK.event, transparent: true, opacity: 0.16, depthWrite: false })
-        );
-        cube.position.y = 0.46;
+        const spriteMetrics = event.asset && event.asset.sprite ? eventSpriteMetrics(event) : null;
+        const { cube, edges } = spriteMetrics
+            ? createEventBox(spriteMetrics.width, spriteMetrics.height, Math.min(0.92, spriteMetrics.width))
+            : createEventBox();
+        cube.position.y = spriteMetrics ? spriteMetrics.height / 2 : 0.46;
         group.add(cube);
         addSemanticSelectable(cube, semantic, false);
         semanticObjects.set(event.key, group);
 
-        const edges = new THREE.LineSegments(
-            new THREE.EdgesGeometry(cube.geometry),
-            new THREE.LineBasicMaterial({ color: 0x61cfff, transparent: true, opacity: 0.9 })
-        );
         edges.position.copy(cube.position);
         group.add(edges);
         eventVisuals.push(addEventVisual(group, event, edges));
@@ -1033,7 +1095,11 @@ export function createThreeEditorViewport(container, options = {}) {
         // Provisional cells are coordinates in ONE map. Carrying them across a
         // map switch would blank authoritative geometry at the same x/y in the
         // map you just opened.
-        if (shouldFrame) provisionalCells.clear();
+        if (shouldFrame) {
+            provisionalCells.clear();
+            framedEnvironmentMap = null;
+            importedCamera = null;
+        }
         priorMapIdentity = nextIdentity;
         markLiveLightingDirty();
         if (!sceneModel) return;
@@ -1066,11 +1132,12 @@ export function createThreeEditorViewport(container, options = {}) {
         addSpawn(sceneModel.annotations && sceneModel.annotations.spawn);
         syncProxyVisibility();
         syncLayerVisuals();
-        frameScene(shouldFrame);
+        frameScene(shouldFrame, shouldFrame);
         setSelection(priorSelection);
     }
 
-    function setRenderableBundle(bundle) {
+    function setRenderableBundle(bundle, options = {}) {
+        importedCamera = bundle && bundle.spatialCamera || null;
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
         renderableGeometries.length = 0;
@@ -1104,6 +1171,11 @@ export function createThreeEditorViewport(container, options = {}) {
                 }));
         }
         function addMesh(mesh, source, materialId, order) {
+            if (source && source.kind === 'environment' && source.surface === 'collision') {
+                mesh.material = new THREE.MeshBasicMaterial({ color: 0x31dd90, wireframe: true,
+                    transparent: true, opacity: 0.35, depthWrite: false, depthTest: false });
+                mesh.visible = collisionVisible;
+            }
             mesh.userData.thestraSource = source || null;
             mesh.userData.thestraMaterialId = materialId || null;
             mesh.userData.thestraTransportOrder = order;
@@ -1152,6 +1224,11 @@ export function createThreeEditorViewport(container, options = {}) {
                 addMesh(mesh, placement.source, placement.material, placement.order);
             }
             renderableContent.updateMatrixWorld(true);
+            if (!options.preserveCamera && sceneModel && sceneModel.map.environmentPackage
+                    && framedEnvironmentMap !== sceneModel.map.id) {
+                framedEnvironmentMap = sceneModel.map.id;
+                frameScene(true, true);
+            }
             setSelection(selection);
             return;
         }
@@ -1163,6 +1240,11 @@ export function createThreeEditorViewport(container, options = {}) {
             mesh.name = surface.name || surface.id || 'runtime-surface';
             addMesh(mesh, surface.source, surface.material, null);
         });
+        if (!options.preserveCamera && sceneModel && sceneModel.map.environmentPackage
+                && framedEnvironmentMap !== sceneModel.map.id) {
+            framedEnvironmentMap = sceneModel.map.id;
+            frameScene(true, true);
+        }
         setSelection(selection);
     }
 
@@ -1315,9 +1397,15 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function resize() {
         const rect = container.getBoundingClientRect();
-        const width = Math.max(1, Math.floor(rect.width));
-        const height = Math.max(1, Math.floor(rect.height));
+        let width = Math.max(1, Math.floor(rect.width));
+        let height = Math.max(1, Math.floor(rect.height));
+        if (displayAspect) {
+            if (width / height > displayAspect) width = Math.max(1, Math.floor(height * displayAspect));
+            else height = Math.max(1, Math.floor(width / displayAspect));
+        }
         renderer.setSize(width, height, false);
+        renderer.domElement.style.width = `${width}px`;
+        renderer.domElement.style.height = `${height}px`;
         perspective.aspect = width / height;
         perspective.updateProjectionMatrix();
         const span = sceneModel ? Math.max(sceneModel.bounds.width, sceneModel.bounds.height, 4) : 10;
@@ -1328,6 +1416,12 @@ export function createThreeEditorViewport(container, options = {}) {
             top.zoom = Math.max(0.001, (top.top - top.bottom) / oldVisibleHeight);
         }
         top.updateProjectionMatrix();
+    }
+
+    function setDisplayAspect(nextAspect) {
+        const numeric = Number(nextAspect);
+        displayAspect = Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+        resize();
     }
 
     function updatePointer(event) {
@@ -1342,6 +1436,7 @@ export function createThreeEditorViewport(container, options = {}) {
         updatePointer(event);
         const hits = raycaster.intersectObjects(allSelectable(), false);
         for (const hit of hits) {
+            if (hit.object.userData.thestraSource?.surface === 'collision' && !hit.object.visible) continue;
             const semantic = hit.object.userData.thestraSelection;
             if (!semantic) continue;
             if (!acceptedKinds || acceptedKinds.includes(semantic.kind)) return semantic;
@@ -1384,7 +1479,7 @@ export function createThreeEditorViewport(container, options = {}) {
         if (moveGizmo.dragging || moveGizmo.axis) return;
         const layer = interactionLayer();
         const kinds = {
-            map: event.shiftKey ? ['spawn', 'cell'] : ['cell'],
+            map: event.shiftKey ? ['spawn', 'cell'] : ['environment', 'cell'],
             event: ['event', 'cell'],
             light: ['light', 'cell'],
             override: ['override', 'cell']
@@ -1422,6 +1517,7 @@ export function createThreeEditorViewport(container, options = {}) {
 
     moveGizmo.addEventListener('objectChange', () => {
         if (!moveGesture || !moveGizmo.object) return;
+        if (moveGizmo.object.userData.worldPosition) return;
         moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
         moveGizmo.object.position.y = moveGesture.origin.y;
         moveGizmo.object.position.z = Contract.cellCenter(moveGizmo.object.position.z);
@@ -1435,6 +1531,13 @@ export function createThreeEditorViewport(container, options = {}) {
         if (!gesture) return;
         const object = selectedMovableObject();
         if (!object) return;
+        if (object.userData.worldPosition) {
+            const result = options.onMoveWorldEvent && options.onMoveWorldEvent(gesture.semantic,
+                Contract.thestraPositionToRuntime(object.position.toArray()));
+            if (result && result.ok) emitSelection(result.selection);
+            else object.position.copy(gesture.origin);
+            return;
+        }
         const x = Contract.cellCoordinate(object.position.x);
         const y = Contract.cellCoordinate(object.position.z);
         const cell = (sceneModel.cells || []).find(entry => entry.cell.x === x && entry.cell.y === y);
@@ -1496,7 +1599,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
     if (navigationHelp) {
-        navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
+        navigationHelp.title = 'Drag empty space, MMB or RMB to pan; wheel zooms; Alt+MMB orbits 3D. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -1518,6 +1621,8 @@ export function createThreeEditorViewport(container, options = {}) {
     return {
         setSceneModel: rebuild,
         setRenderableBundle,
+        setCollisionVisible,
+        getCollisionVisible: () => collisionVisible,
         markCellsProvisional,
         setMode,
         transitionToMode,
@@ -1526,10 +1631,16 @@ export function createThreeEditorViewport(container, options = {}) {
         setAxisView,
         orbitStep,
         oppositeView,
+        getCameraRig: () => ({
+            perspective: { camera: perspective, controls: perspectiveControls },
+            orthographic: { camera: top, controls: topControls }
+        }),
+        setDisplayAspect,
         getSelection: () => selection,
         setSelection,
         frameScene: () => frameScene(true),
         dispose() {
+            disposeNavigation();
             disposed = true;
             resizeObserver.disconnect();
             renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);

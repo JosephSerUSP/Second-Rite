@@ -546,7 +546,7 @@ local function summarize(surfaces, materials)
     }
 end
 
-function bundle.collect(session, profileName)
+function bundle.collect(session, profileName, options)
     if not (session and session.currentMapData and session.mapGrid) then
         return nil, "No runtime map is loaded."
     end
@@ -736,11 +736,29 @@ function bundle.collect(session, profileName)
         end
     end
 
-    for index, placement in ipairs(viewport_3d.collectEventModelPlacements(session)) do
-        local id = placement.event and placement.event.id or index
-        addPlacedModel(surfaces, registry, "event_" .. tostring(id),
-            { kind = "event", id = id },
-            { model = placement.model }, placement.x, placement.y, "x")
+    -- Consume the package already resolved by exploration. OBJ import and
+    -- placement remain the runtime's authority, including transport axes.
+    local environment = session.townTraversal and session.townTraversal.environment
+    if environment then
+        addPlacedModel(surfaces, registry, "environment_render",
+            { kind = "environment", path = environment.renderMesh,
+                manifestPath = environment.manifestPath, surface = "render" },
+            { model = environment.renderMesh }, 0, 0, "x")
+        if options and options.includeCollision then
+            addPlacedModel(surfaces, registry, "environment_collision",
+                { kind = "environment", path = environment.collisionMesh,
+                    manifestPath = environment.manifestPath, surface = "collision" },
+                { model = environment.collisionMesh }, 0, 0, "x")
+        end
+    end
+
+    if not options or options.includeEventModels ~= false then
+        for index, placement in ipairs(viewport_3d.collectEventModelPlacements(session)) do
+            local id = placement.event and placement.event.id or index
+            addPlacedModel(surfaces, registry, "event_" .. tostring(id),
+                { kind = "event", id = id },
+                { model = placement.model }, placement.x, placement.y, "x")
+        end
     end
 
     local mapId = mapData.id or session.currentMapIndex or "runtime"

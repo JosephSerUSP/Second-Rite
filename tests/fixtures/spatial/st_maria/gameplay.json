@@ -1,0 +1,160 @@
+{
+  "camera": {
+    "distance": 18.6667,
+    "farPlane": 128,
+    "fovDegrees": 28.072486935852957,
+    "nearPlane": 0.05,
+    "pitchDegrees": -17.5,
+    "profile": "town_sideview",
+    "projectionFrame": {
+      "canonicalCenterX": 128,
+      "canonicalHorizonY": 66,
+      "compositionHeight": 144,
+      "compositionWidth": 256
+    },
+    "projectionScale": {
+      "x": 1,
+      "y": 1
+    },
+    "target": {
+      "x": 7.8,
+      "y": 11.85,
+      "z": 2.2604
+    },
+    "tracking": {
+      "animationFps": 8,
+      "axis": "y",
+      "center": 11.85,
+      "interpolationSpeed": 12,
+      "maxOffsetX": 300,
+      "minOffsetX": -300,
+      "movementInterpolationSpeed": 14
+    },
+    "yawDegrees": 0
+  },
+  "events": [
+    {
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
+        }
+      ],
+      "id": "st-maria-praca-child",
+      "position": [
+        7.8,
+        12.717,
+        0
+      ]
+    }
+  ],
+  "transfers": [
+    {
+      "commands": [
+        {
+          "arrival": "praca_stair",
+          "cmd": "LOAD_MAP",
+          "mapId": 19
+        }
+      ],
+      "id": 1703,
+      "instanceId": "st-maria-praca-quay_stair",
+      "name": "Down to the Quay",
+      "trigger": "bump",
+      "worldPosition": [
+        7.8,
+        0.434,
+        -1.5
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "commands": [
+        {
+          "arrival": "exit_door",
+          "cmd": "LOAD_MAP",
+          "mapId": 24
+        }
+      ],
+      "id": 1704,
+      "instanceId": "st-maria-praca-alicia_door",
+      "name": "Alicia's door",
+      "trigger": "bump",
+      "worldPosition": [
+        7.8,
+        4.625,
+        -1.5
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "commands": [
+        {
+          "arrival": "east_praca",
+          "cmd": "LOAD_MAP",
+          "mapId": 16
+        }
+      ],
+      "id": 1705,
+      "instanceId": "st-maria-praca-churchyard_stair",
+      "name": "The Churchyard",
+      "trigger": "bump",
+      "worldPosition": [
+        7.8,
+        9.827,
+        -1.5
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "commands": [
+        {
+          "arrival": "exit_door",
+          "cmd": "LOAD_MAP",
+          "mapId": 22
+        }
+      ],
+      "id": 1706,
+      "instanceId": "st-maria-praca-chapel_door",
+      "name": "Chapel",
+      "trigger": "bump",
+      "worldPosition": [
+        7.8,
+        20.81,
+        -1.5
+      ],
+      "x": 0,
+      "y": 0
+    },
+    {
+      "commands": [
+        {
+          "arrival": "west_praca",
+          "cmd": "LOAD_MAP",
+          "mapId": 26
+        }
+      ],
+      "id": 1707,
+      "instanceId": "st-maria-praca-east_backstreet",
+      "name": "The Backstreet",
+      "trigger": "bump",
+      "worldPosition": [
+        7.8,
+        23.7,
+        -1.5
+      ],
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "traversal": {
+    "depthX": 7.8,
+    "groundZ": 0,
+    "maxY": 23.699,
+    "minY": 0,
+    "speed": 3.4
+  }
+}

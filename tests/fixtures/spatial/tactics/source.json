@@ -1,0 +1,10 @@
+{
+  "size": 6,
+  "elevation": {"splitX": 3, "low": 0, "high": 1},
+  "gaps": ["2/2", "2/3", "2/4"],
+  "blocked": ["1/1"],
+  "bridge": {"position": [2, 3, 1], "size": [1, 1, 0.2]},
+  "stair": {"start": [2, 1, 0], "end": [3, 1, 1], "steps": 4},
+  "deployment": {"position": [0.5, 2.5, 0], "size": [2, 6, 0.1]},
+  "connections": [["2/1", "3/1"], ["1/3", "bridge"], ["bridge", "3/3"]]
+}

@@ -134,6 +134,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     const cameraLua = fs.readFileSync(path.join(ROOT, 'runtime', 'presentation', 'world_camera.lua'), 'utf8');
     const validatorLua = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'project_validator_rules.lua'), 'utf8');
     const viewportSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+    const compositionSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
+    const navigationSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-authoring-tools.js'), 'utf8');
     const studioSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
 
     assert.match(cameraLua, /rpg_perspective\s*=\s*\{[\s\S]*?fovDegrees\s*=\s*26,\s*tilesAcross\s*=\s*18/);
@@ -148,12 +150,38 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.match(viewportSource, /captureCameraState/);
     assert.match(viewportSource, /restoreCameraState/);
     assert.match(viewportSource, /applyRuntimeCamera/);
+    assert.match(viewportSource, /active: \(\) => !!runtimeProjection && !compositionAuthoring\.isPlate\(\)/,
+        'a fixed runtime pose must retain its projection-window pan/zoom surface');
+    assert.match(viewportSource, /View\.zoomProjectionWindowAtCursor\(/,
+        'indoor optical zoom must preserve the cursor focus through shared projection semantics');
+    assert.match(navigationSource, /optical\.zoom\(event\.deltaY, event\.clientX - rect\.left, event\.clientY - rect\.top, rect\)/,
+        'navigation must supply cursor coordinates to the shared optical adapter');
+    assert.doesNotMatch(viewportSource, /!runtimeProjection \|\| runtimeLocked \|\| compositionAuthoring\.isPlate\(\)/,
+        'runtime locking forbids free orbit, never game-style projection-window navigation');
+    assert.doesNotMatch(viewportSource, /base\.setDisplayAspect\(/,
+        'Studio must not shrink the authoring canvas into a fixed game-frame rectangle');
+    assert.match(viewportSource, /if \(spatialCamera && !compositionAuthoring\.isPlate\(\) && !runtimeLocked\) \{[\s\S]*?\r?\n            \}\r?\n            return result;/,
+        'the runtime-bundle method must close its conditional before returning');
+    assert.match(studioSource, /function fillRuntimeViewport\(\)/);
+    assert.doesNotMatch(studioSource, /letterboxRuntimeViewport/,
+        'the authoring workspace must not reserve letterbox bands for a game capture frame');
+    assert.match(studioSource, /drag shifts camera · wheel zooms/);
     assert.match(studioSource, /Free Authoring/);
     assert.match(studioSource, /Runtime Camera/);
     assert.match(studioSource, /Owner: Scene/);
     assert.match(studioSource, /Map topology\/collision is not copied or rewritten here/);
     assert.doesNotMatch(studioSource, /map\.worldPresentation\s*=/,
         'Studio must not create a Map-local worldPresentation convenience copy');
+    assert.match(compositionSource, /OBJLoader/,
+        'plate Event models must retain OBJ topology rather than falling back to a billboard');
+    assert.match(compositionSource, /function projectedModelPoint\(/,
+        'plate Event model vertices must be projected through the authored town camera');
+    assert.doesNotMatch(compositionSource, /ArrowHelper/,
+        'transition arrows use their authoritative OBJ geometry in plates');
+    assert.match(compositionSource, /setWalkMeshVisible/,
+        'plate traversal geometry must be inspectable without becoming editable');
+    assert.match(studioSource, /Walk Mesh/,
+        'the shared map toolbar exposes read-only walk geometry inspection');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

@@ -4,6 +4,7 @@ local originalTracebackBefore = rawget(_G, "__TS__originalTraceback")
 
 local vertex = require("engine.generated.vertex-shading")
 local sprite_timing = require("engine.generated.sprite-timing")
+local world_view = require("engine.generated.world-view")
 
 if debug.traceback ~= tracebackBefore then
     error("generated shared semantics must not replace process-wide debug.traceback", 0)
@@ -126,6 +127,60 @@ equal(timing.fps, 8, "key speed replaces filename speed")
 timing = sprite_timing.resolveTiming({}, {})
 equal(timing.fps, 4, "resolved default")
 equal(timing.source, "default", "default provenance")
+
+local townCamera = world_view.resolveTownCamera({
+    target = { x = 7.8, y = 11.85, z = 2.2604 }, distance = 18.6667,
+    yawDegrees = 0, pitchDegrees = -17.5, fovDegrees = 28.072486935852957,
+    projectionScale = { x = 1, y = 1 },
+    projectionFrame = { compositionWidth = 256, canonicalCenterX = 128, canonicalHorizonY = 66 },
+})
+equal(townCamera.profile, "town_sideview", "town camera profile")
+close(townCamera.viewportCenterX, 128, "town camera principal point x")
+close(townCamera.viewportCenterY, 66, "town camera principal point y")
+close(townCamera.forwardX, math.cos(math.rad(17.5)), "town camera forward x")
+close(townCamera.forwardZ, math.sin(math.rad(17.5)), "town camera forward z")
+close(townCamera.upX, -math.sin(math.rad(17.5)), "town camera up x")
+close(townCamera.upZ, math.cos(math.rad(17.5)), "town camera up z")
+local projection = world_view.horizontalProjection(townCamera, 906, 240, 7.8, 0, 11.85, 453)
+for _, laneY in ipairs({ 0, 4.625, 12.717, 23.7 }) do
+    local screen = world_view.projectPerspective(townCamera, 906, 240, 7.8, laneY, 0)
+    local base = world_view.projectPerspective(townCamera, 906, 240, 7.8, 11.85, 0)
+    close(world_view.worldYAtScreenX(projection, 453 + screen.x - base.x), laneY,
+        "plate inverse " .. tostring(laneY), 1e-9)
+end
+local pan = world_view.panProjectionWindow(0, 0, 128, 72, 512, 288, 256, 144)
+close(pan.x, 64, "projection-window pan x")
+close(pan.y, 36, "projection-window pan y")
+local leftArrow = world_view.transitionArrowAxis("left")
+equal(leftArrow.x, 0, "left transition arrow x")
+equal(leftArrow.y, -1, "left transition arrow y")
+local towardArrow = world_view.transitionArrowAxis("toward")
+equal(towardArrow.x, -1, "toward transition arrow x")
+equal(towardArrow.y, 0, "toward transition arrow y")
+local awayPoint = world_view.transitionArrowWorldPoint(7.8, 12, 0, 1, "away", 0, 0, 1.04)
+close(awayPoint.x, 8.84, "away arrow endpoint x")
+close(awayPoint.y, 12, "away arrow endpoint y")
+close(awayPoint.z, 0.22, "away arrow endpoint z")
+local leftPoint = world_view.transitionArrowWorldPoint(7.8, 12, 0.5, 2, "left", 0.07, 0, 1.04)
+close(leftPoint.x, 7.66, "left arrow endpoint x")
+close(leftPoint.y, 9.92, "left arrow endpoint y")
+close(leftPoint.z, 0.94, "left arrow endpoint z")
+local priorOptics = world_view.projectionCoefficients(townCamera, 1, 13, -7)
+local cursorX, cursorY, displayWidth, displayHeight = 533, 161, 800, 300
+local cursorNdcX = cursorX * 2 / displayWidth - 1
+local cursorNdcY = 1 - cursorY * 2 / displayHeight
+local zoomedOptical = world_view.zoomProjectionWindowAtCursor(
+    townCamera, 1, 13, -7, -360, cursorX, cursorY, displayWidth, displayHeight)
+local nextOptics = world_view.projectionCoefficients(
+    townCamera, zoomedOptical.scale, zoomedOptical.x, zoomedOptical.y)
+local anchoredX = (cursorNdcX + priorOptics.centerNdcX) / priorOptics.xScale
+local anchoredY = (cursorNdcY + priorOptics.centerNdcY) / priorOptics.yScale
+close(nextOptics.xScale * anchoredX - nextOptics.centerNdcX, cursorNdcX,
+    "cursor-anchored optical zoom x")
+close(nextOptics.yScale * anchoredY - nextOptics.centerNdcY, cursorNdcY,
+    "cursor-anchored optical zoom y")
+close(world_view.groundHeight({ { y = 0, z = 0 }, { y = 2, z = 1 } }, 0, 1),
+    0.5, "lane ground interpolation")
 
 local function bench(fn, iterations)
     for _ = 1, 2000 do fn() end

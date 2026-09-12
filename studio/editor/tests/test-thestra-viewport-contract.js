@@ -159,8 +159,32 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'proxies show without a bundle, and otherwise only where an edit outran the runtime');
     assert.doesNotMatch(source, /opacity: hasAuthoritativeBundle \? 0 : 0\.72/,
         'proxy visibility is per mesh now; a shared material cannot express one dirty cell');
-    assert.match(source, /if \(shouldFrame\) provisionalCells\.clear\(\)/,
+    assert.match(source, /if \(shouldFrame\) (?:\{\s*)?provisionalCells\.clear\(\)/,
         'provisional cells are per map; carrying them across a switch blanks the next map');
 })();
+
+(function testRuntimeCameraOwnsEnvironmentInitialFraming() {
+    const adapterSource = fs.readFileSync(
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8'
+    );
+    const baseSource = fs.readFileSync(
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+    );
+    assert.match(adapterSource, /base\.setRenderableBundle\(bundle, \{ preserveCamera: !!spatialCamera \}\)/,
+        'a resolved runtime camera must suppress the generic collision-bounds framing transition');
+    assert.match(baseSource, /if \(!options\.preserveCamera && sceneModel && sceneModel\.map\.environmentPackage/,
+        'the base viewport must honour that suppression before beginning environment framing');
+})();
+
+(function testEventObjPreviewUsesItsAuthoringMaterial() {
+    const source = fs.readFileSync(
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+    );
+    assert.match(source, /import \{ MTLLoader \}/,
+        'the event-model preview must load authored OBJ material libraries');
+    assert.ok(source.includes("plan.path.replace(/\\.obj$/i, '.mtl')"),
+        'the OBJ companion material must be resolved mechanically');
+})();
+
 
 console.log('Thestra viewport contract tests OK');

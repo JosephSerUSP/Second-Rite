@@ -34,6 +34,7 @@
     toolbar.id = 'thestra-map-view-toolbar';
     toolbar.style.cssText = [
         'position:absolute', 'top:6px', 'right:6px', 'z-index:20', 'display:flex',
+        'flex-wrap:wrap', 'max-width:calc(100% - 12px)',
         'gap:2px', 'align-items:center', 'padding:2px', 'background:var(--win-gray)',
         'border:2px solid',
         'border-color:var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white)',
@@ -47,6 +48,20 @@
     status.id = 'thestra-map-view-status';
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = 'Loading 3D…';
+
+    const runtimeFailure = document.createElement('div');
+    runtimeFailure.id = 'thestra-map-runtime-failure';
+    runtimeFailure.setAttribute('role', 'alert');
+    runtimeFailure.style.cssText = 'display:none;position:absolute;bottom:8px;left:8px;right:8px;z-index:21;padding:8px;background:var(--win-gray);border:2px solid var(--win-shadow);font-size:12px;';
+    const failureDetail = document.createElement('span');
+    const retryRuntime = document.createElement('button');
+    retryRuntime.type = 'button';
+    retryRuntime.className = 'win98-btn';
+    retryRuntime.textContent = 'Retry Preview';
+    retryRuntime.style.marginLeft = '8px';
+    retryRuntime.addEventListener('click', () => refreshAuthoritativeBundle({ clearFirst: true }).catch(console.error));
+    runtimeFailure.append(failureDetail, retryRuntime);
+    area.appendChild(runtimeFailure);
 
     function setStatus(text, detail) {
         status.textContent = text;
@@ -334,6 +349,10 @@
     }
 
     function scheduleMutation(kind, detail) {
+        // A plate Event is already authoritative Map JSON plus a direct visual
+        // projection. Moving it updates the shared Three object immediately;
+        // there is no runtime raster or geometry product to invalidate.
+        if (kind === 'event-move' && backend?.isPlateComposition?.()) return;
         const plan = WorkspaceState.mutationPlan(kind);
         if (plan.bundleRefresh) {
             // Invalidate an already-running compile immediately. Waiting until
@@ -390,6 +409,12 @@
                         'event-move'
                     );
                 },
+                onMoveWorldEvent(eventSelection, position) {
+                    return handleMutationResult(
+                        host.moveWorldEvent ? host.moveWorldEvent(eventSelection.id, position) : null,
+                        'event-move'
+                    );
+                },
                 canMoveLight(lightSelection, cell) {
                     return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
                 },
@@ -422,7 +447,7 @@
         const inspection = host.getMapInspection ? host.getMapInspection() : null;
         const sceneModel = await Adapter.buildScene(payload, mapIndex, inspection);
         if (serial !== semanticSerial) return;
-        three.setSceneModel(sceneModel);
+        await three.setSceneModel(sceneModel);
         three.setMode(currentMode);
         loadedMapIndex = mapIndex;
         if (options.clearBundle) {
@@ -437,10 +462,18 @@
     async function refreshAuthoritativeBundle(options) {
         options = options || {};
         const serial = ++bundleSerial;
+        runtimeFailure.style.display = 'none';
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
         const map = payload && payload.maps && payload.maps[mapIndex];
         const three = await ensureBackend();
+        if (three.isPlateComposition?.()) {
+            currentBundle = null;
+            three.setRenderableBundle(null);
+            bundleStatus = 'plate assets';
+            setStatus(`${layerLabel()} · ${modeLabel()} · plate assets`);
+            return;
+        }
         if (options.clearFirst) {
             currentBundle = null;
             three.setRenderableBundle(null);
@@ -464,6 +497,8 @@
             if (serial !== bundleSerial) return;
             currentBundle = null;
             three.setRenderableBundle(null);
+            failureDetail.textContent = `Map preview failed: ${error.message}`;
+            runtimeFailure.style.display = 'block';
             setStatus(`${layerLabel()} · ${modeLabel()} · ${WorkspaceState.fallbackStatusLabel()}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
         }

@@ -617,11 +617,11 @@
         // setter, so decorate openEventModal and seed the picker from the Event.
         if (typeof window.openEventModal === 'function' && !window.openEventModal._animationControllerIntegrated) {
             const baseOpen = window.openEventModal;
-            const wrapped = function (x, y) {
-                const result = baseOpen(x, y);
+            const wrapped = function (x, y, eventId) {
+                const result = baseOpen(x, y, eventId);
                 try {
                     const map = dbPayload.maps[currentMapIndex];
-                    const event = map && (map.events || []).find(candidate => candidate.x === x && candidate.y === y);
+                    const event = typeof eventOriginalData !== 'undefined' ? eventOriginalData : null;
                     api.setEventField(event && event.animationController);
                 } catch (_) { api.setEventField(undefined); }
                 return result;

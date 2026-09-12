@@ -1,5 +1,6 @@
 local viewport_3d = {}
 local worldCamera = require("presentation.world_camera")
+local worldView = require("engine.generated.world-view")
 local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
 local geometryImages = require("engine.geometry.images")
@@ -1171,11 +1172,10 @@ local function drawTownBounds(session, state, toScreen, depthX, renderWidth, ren
 
             -- Vertical doorway portal arch at anchor depth
             local doorX = tonumber(anchor.position[1]) or maxX
-            local halfW = math.min(radius, 2.2)
-            local d1x, d1y = toScreen(doorX, centreY - halfW * 0.5, groundZ)
-            local d2x, d2y = toScreen(doorX, centreY + halfW * 0.5, groundZ)
-            local d3x, d3y = toScreen(doorX, centreY + halfW * 0.5, groundZ + 2.0)
-            local d4x, d4y = toScreen(doorX, centreY - halfW * 0.5, groundZ + 2.0)
+            local d1x, d1y = toScreen(doorX, centreY - 0.45, groundZ)
+            local d2x, d2y = toScreen(doorX, centreY + 0.45, groundZ)
+            local d3x, d3y = toScreen(doorX, centreY + 0.45, groundZ + 2.0)
+            local d4x, d4y = toScreen(doorX, centreY - 0.45, groundZ + 2.0)
             love.graphics.setColor(0.3, 0.95, 1.0, 0.75)
             love.graphics.line(d1x, d1y, d4x, d4y, d3x, d3y, d2x, d2y)
         end
@@ -1236,7 +1236,7 @@ local function drawTownBounds(session, state, toScreen, depthX, renderWidth, ren
 end
 
 
-local function drawTownPrerender(session)
+local function drawTownPrerender(session, inspection)
     local state = session.townTraversal
     local preRendered = state and state.environment and state.environment.preRendered
     if not preRendered then return false end
@@ -1288,40 +1288,13 @@ local function drawTownPrerender(session)
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
 
-    local function projectTownPoint(worldX, worldY, worldZ)
-        local relativeX, relativeY = worldX - townCamera.x, worldY - townCamera.y
-        local depth = relativeX * townCamera.dirX + relativeY * townCamera.dirY
-        local horizontal = relativeX * townCamera.rightX + relativeY * townCamera.rightY
-        local vertical = worldZ - townCamera.z
-        local pitch = townCamera.pitch or 0
-        local cosP, sinP = math.cos(pitch), math.sin(pitch)
-        local pitchedDepth = depth * cosP - vertical * sinP
-        local pitchedVertical = vertical * cosP + depth * sinP
-        local safeDepth = math.max(pitchedDepth, 0.001)
-        local ndcX = townCamera.viewportCenterX * 2 / renderWidth - 1
-            + horizontal / (townCamera.fovHalfX * safeDepth)
-                * townCamera.projectionScaleX
-                * (townCamera.baseViewportWidth / renderWidth)
-        local ndcY = townCamera.viewportCenterY * 2 / renderHeight - 1
-            + pitchedVertical / (townCamera.fovHalfY * safeDepth)
-                * townCamera.projectionScaleY
-                * (townCamera.baseViewportHeight / renderHeight)
-        return (ndcX + 1) * renderWidth * 0.5,
-            (1 - ndcY) * renderHeight * 0.5
-    end
-    local depthX = lane.depthX or townCamera.targetX
-    local plateGroundX, plateGroundY = projectTownPoint(
-        depthX, sliceY, state.groundZ or 0)
-    local groundScreenOffsetY = screenY - plateGroundY
-
     -- Scroll the plate to follow the actor, then stop at its edges. The actor
     -- rides the middle of the window until the plate runs out, and walks the
     -- rest of the way to the edge after that - an ordinary side-scrolling
     -- camera. When the window is as wide as the plate this clamps to zero and
     -- the whole plate is simply visible, which is the wide profile.
     local plateWidth = imageWidth * scaleX
-    local actorProjectedX = projectTownPoint(depthX, actorY, state.groundZ or 0)
-    local actorPlateX = centerX + (actorProjectedX - plateGroundX)
+    local actorPlateX = (centerX + (actorY - sliceY) * pixelsPerRuntimeY)
     local panX = renderWidth * 0.5 - actorPlateX
     panX = math.min(0, math.max(renderWidth - plateWidth, panX))
     panX = math.floor(panX + 0.5)
@@ -1343,14 +1316,23 @@ local function drawTownPrerender(session)
     -- and needs no underlay behind it.
     drawLayer(preRendered.scenes, sceneIndex, panX)
 
+    local function projectTownPoint(worldX, worldY, worldZ)
+        local projected = worldView.projectPerspective(townCamera, renderWidth,
+            renderHeight, worldX, worldY, worldZ)
+        return projected.x, projected.y, projected.depth
+    end
+    local depthX = lane.depthX or townCamera.targetX
+    local plateGroundX, plateGroundY = projectTownPoint(
+        depthX, sliceY, state.groundZ or 0)
+    local groundScreenOffsetY = screenY - plateGroundY
     local function toScreen(worldX, worldY, worldZ)
-        local projectedX, projectedY = projectTownPoint(worldX, worldY, worldZ)
+        local projectedX, projectedY, denominator = projectTownPoint(worldX, worldY, worldZ)
         return panX + centerX + (projectedX - plateGroundX),
-            projectedY + groundScreenOffsetY
+            projectedY + groundScreenOffsetY, denominator
     end
     local function screenXForTownY(y)
-        local x = projectTownPoint(depthX, y, state.groundZ or 0)
-        return panX + centerX + (x - plateGroundX)
+        local x, _, denominator = projectTownPoint(depthX, y, state.groundZ or 0)
+        return panX + centerX + (x - plateGroundX), denominator
     end
 
     -- Where the floor is at a given point along the lane. The camera looks
@@ -1364,6 +1346,40 @@ local function drawTownPrerender(session)
         return screenY - (groundZ - state.groundZ) * pixelsPerRuntimeY
     end
 
+    local function eventSpriteSize(event)
+        local height = tonumber(event.worldHeight) or 1.75
+        return actorWidth * height / 1.75, actorHeight * height / 1.75
+    end
+
+    if inspection then
+        for index, event in ipairs(session.currentMapData.events or {}) do
+            if event.worldPosition then
+                local position = event.worldPosition
+                local presentation = viewport_3d.resolveEventPresentation(event, session)
+                local function project(y)
+                    if presentation.visual == "sprite" then
+                        local x, denominator = screenXForTownY(y)
+                        return x, screenFootY(y), denominator
+                    end
+                    return toScreen(position[1], y, position[3])
+                end
+                local x, y = project(position[2])
+                local width, height = eventSpriteSize(event)
+                inspection.events[#inspection.events + 1] = {
+                    id = event.id or (index - 1), name = event.name,
+                    position = { position[1], position[2], position[3] },
+                    screen = { x, y },
+                    bounds = { width, height },
+                    -- x = (a * worldY + b) / (c * worldY + d).
+                    -- Resolved projection, consumed/inverted by the editor.
+                    horizontalProjection = worldView.horizontalProjection(townCamera,
+                        renderWidth, renderHeight, depthX, state.groundZ or 0,
+                        sliceY, panX + centerX),
+                }
+            end
+        end
+    end
+
     if session.currentMapData and session.currentMapData.events then
         for _, rawEv in ipairs(session.currentMapData.events) do
             if not rawEv.wallEvent then
@@ -1372,9 +1388,7 @@ local function drawTownPrerender(session)
                     local image = getEventSprite(rawEv, session)
                     if image then
                         local _, worldY = townEventWorldPosition(rawEv)
-                        local eventHeight = tonumber(rawEv.worldHeight) or 1.75
-                        local height = actorHeight * eventHeight / 1.75
-                        local width = actorWidth * eventHeight / 1.75
+                        local width, height = eventSpriteSize(rawEv)
                         -- An NPC stands on the floor under it, so a pub's
                         -- lower level is populated by authoring lane
                         -- positions rather than by re-authoring heights.
@@ -1418,7 +1432,8 @@ local function drawTownPrerender(session)
         if not rawEv.wallEvent then
             local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
             if presentation.visual == "model" and presentation.model then
-                local _, imageY = townEventWorldPosition(rawEv)
+                local imageX, imageY = townEventWorldPosition(rawEv)
+                imageX = imageX or depthX
                 local model = townArrowModel(presentation.model)
                 -- OBJ vertices are runtime world units.  Do not multiply by
                 -- the plate's screen-pixel calibration; that would turn a
@@ -1426,41 +1441,8 @@ local function drawTownPrerender(session)
                 -- authored camera ever sees it.
                 local modelScale = tonumber(rawEv.modelScale) or 1
                 local isTransitionArrow = presentation.model:match("transition_arrow") ~= nil
-                local arrowDirection = rawEv.direction
-                if not arrowDirection then
-                    local label = string.lower(tostring(rawEv.name or ""))
-                    local lane = require("engine.bounded_lane")
-                    local isEdge = false
-                    for _, doorway in ipairs((state.doorways or {})) do
-                        if doorway.eventInstanceId == rawEv.instanceId or doorway.eventId == rawEv.id then
-                            isEdge = lane.isEdgeDoorway(session, doorway)
-                            break
-                        end
-                    end
-                    local isInterior = (session.currentMapData and session.currentMapData.category == "interior")
-                        or (rawEv.instanceId and rawEv.instanceId:match("exit_door"))
-                        or label:match("out to")
-                    if isEdge and not isInterior then
-                        if imageY <= state.minY + 0.5 then
-                            arrowDirection = "left"
-                        else
-                            arrowDirection = "right"
-                        end
-                    elseif not isInterior and (label:match("%f[%a]west%f[%A]") or label:match("%f[%a]left%f[%A]")) then
-                        arrowDirection = "left"
-                    elseif not isInterior and (label:match("%f[%a]east%f[%A]") or label:match("%f[%a]right%f[%A]")) then
-                        arrowDirection = "right"
-                    else
-                        arrowDirection = "away"
-                    end
-                end
-
                 local lanes = require("engine.bounded_lane")
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
-                local arrowLen = 1.04 * modelScale
-                local arrowRad = 0.22 * modelScale
-                local arrowY = math.min(state.maxY, math.max(state.minY, imageY))
-
                 for _, modelGroup in ipairs(model.groups or {}) do
                     local color = modelGroup.color or { 1, 0.65, 0.08, 1 }
                     local lineSegments = {}
@@ -1469,35 +1451,18 @@ local function drawTownPrerender(session)
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
                         if a and b and c then
                             local function arrowPoint(vertex)
-                                local lx = vertex[1] * modelScale
-                                local ly = vertex[2] * modelScale
-                                local lz = vertex[3] * modelScale
+                                local lx = vertex[1]
+                                local ly = vertex[2]
+                                local lz = vertex[3]
                                 local worldX, worldY, worldZ
                                 if isTransitionArrow then
-                                    if arrowDirection == "right" then
-                                        local tipY = math.min(arrowY, state.maxY - 0.15)
-                                        tipY = math.max(tipY, state.minY + 0.15 + arrowLen)
-                                        worldY = tipY - (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    elseif arrowDirection == "left" then
-                                        local tipY = math.max(arrowY, state.minY + 0.15)
-                                        tipY = math.min(tipY, state.maxY - 0.15 - arrowLen)
-                                        worldY = tipY + (arrowLen - lz)
-                                        worldX = depthX + lx
-                                        worldZ = groundZ + 0.35 + ly
-                                    else -- "away" (doors, gates, stairs into depth)
-                                        local clampedY = math.min(state.maxY - arrowRad, math.max(state.minY + arrowRad, arrowY))
-                                        local tiltAngle = math.rad(22)
-                                        local cosT, sinT = math.cos(tiltAngle), math.sin(tiltAngle)
-                                        worldY = clampedY + lx
-                                        worldX = depthX - 0.10 * modelScale + (lz * cosT - ly * sinT)
-                                        worldZ = groundZ + 0.15 + (lz * sinT + ly * cosT)
-                                    end
+                                    local point = worldView.transitionArrowWorldPoint(imageX, imageY,
+                                        groundZ, modelScale, rawEv.direction, lx, ly, lz)
+                                    worldX, worldY, worldZ = point.x, point.y, point.z
                                 else
-                                    worldX = depthX + lx
-                                    worldY = imageY + ly
-                                    worldZ = groundZ + lz
+                                    worldX = imageX + lx * modelScale
+                                    worldY = imageY + ly * modelScale
+                                    worldZ = groundZ + lz * modelScale
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end
@@ -2163,7 +2128,7 @@ local function addWorldQuad(group, a, b, c, d, uv, colors)
     addWorldVertex(group, d.x, d.y, d.z, uv[1], uv[4], colors[4][1], colors[4][2], colors[4][3], colors[4][4])
 end
 
-local function drawWorldSpace(session, authoredCamera)
+local function drawWorldSpace(session, authoredCamera, inspection)
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
@@ -2173,7 +2138,7 @@ local function drawWorldSpace(session, authoredCamera)
     -- loaded or submitted for these maps.
     if session.townTraversal and session.townTraversal.environment
             and session.townTraversal.environment.preRendered then
-        return drawTownPrerender(session)
+        return drawTownPrerender(session, inspection)
     end
 
     local shader = ensureWorldShader()
@@ -2349,7 +2314,7 @@ local function drawWorldSpace(session, authoredCamera)
         falloff = (pLightCfg and pLightCfg.falloff) or 1.5,
         onlyInDungeons = (pLightCfg == nil or pLightCfg.onlyInDungeons == nil) and true or pLightCfg.onlyInDungeons,
     }
-    playerLight.active = not session.townTraversal and playerLight.enabled and (not playerLight.onlyInDungeons or not (mapData and mapData.safe)) and playerLight.radius > 0
+    playerLight.active = playerLight.enabled and (not playerLight.onlyInDungeons or not (mapData and mapData.safe)) and playerLight.radius > 0
     local psxCfg = session.loader and session.loader.system and session.loader.system.dungeon
         and session.loader.system.dungeon.psxRendering or {}
     local affineTextures = psxCfg.affineTextures ~= false
@@ -2795,7 +2760,8 @@ local function drawWorldSpace(session, authoredCamera)
 
     structure.modelSurfaces = structure.modelSurfaces or {}
     local objModel = require("presentation.obj_model")
-    local function ensurePlacedModel(spec, cacheKey, originX, originY, axis, normalX, normalY)
+    local function ensurePlacedModel(spec, cacheKey, originX, originY, axis, normalX, normalY, originZ)
+        originZ = tonumber(originZ) or 0
         if structure.modelSurfaces[cacheKey] then
             buildProfiler.cache("materialize.placedModel", true)
             return structure.modelSurfaces[cacheKey]
@@ -2827,7 +2793,19 @@ local function drawWorldSpace(session, authoredCamera)
             for _, vertex in ipairs(modelGroup.vertices) do
                 local lx, ly, lz = vertex[1], vertex[2], vertex[3]
                 local nx, ny, nz = vertex[6], vertex[7], vertex[8]
-                if normalX or normalY then
+                if spec.transitionArrowAxis then
+                    -- obj_model normalizes the source OBJ from Y-up to
+                    -- runtime Z-up, so local +Z is the shaft. Rotate that
+                    -- shaft into the one authored ground axis here.
+                    local direction = spec.transitionArrowAxis
+                    local rightX, rightY = direction.y, -direction.x
+                    local arrowPoint = worldView.transitionArrowWorldPoint(originX, originY,
+                        spec.transitionArrowGroundZ or originZ, spec.modelScale or 1,
+                        spec.transitionArrowDirection, lx, ly, lz)
+                    lx, ly, lz = arrowPoint.x - originX, arrowPoint.y - originY, arrowPoint.z - originZ
+                    nx, ny, nz = nx * rightX + nz * direction.x,
+                        nx * rightY + nz * direction.y, ny
+                elseif normalX or normalY then
                     -- Wall models use a stable local frame: +X is depth out
                     -- of the wall, +Y runs along it, and +Z is up. Mapping by
                     -- the actual visible-face normal (not only its axis) keeps
@@ -2838,7 +2816,11 @@ local function drawWorldSpace(session, authoredCamera)
                     lx, ly = -ly, lx
                     nx, ny = -ny, nx
                 end
-                local wx, wy, wz = originX + lx, originY + ly, lz
+                if not spec.transitionArrowAxis then
+                    local scale = tonumber(spec.modelScale) or 1
+                    lx, ly, lz = lx * scale, ly * scale, lz * scale
+                end
+                local wx, wy, wz = originX + lx, originY + ly, originZ + lz
                 minX, maxX = math.min(minX, wx), math.max(maxX, wx)
                 minY, maxY = math.min(minY, wy), math.max(maxY, wy)
                 -- The town package is already a beauty bake. Map-grid lighting
@@ -2866,7 +2848,7 @@ local function drawWorldSpace(session, authoredCamera)
                 mesh = mesh, model = true, vertices = vertices,
                 texture = modelGroup.texture,
                 isHeightSurface = spec.runtimeSurface and true or false,
-                centerX = originX, centerY = originY, centerZ = 0.5,
+                centerX = originX, centerY = originY, centerZ = originZ + 0.5,
                 bounds = #vertices > 0 and {
                     minX = minX, maxX = maxX, minY = minY, maxY = maxY,
                 } or nil,
@@ -3156,10 +3138,32 @@ end
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
                 if presentation.visual == "model" and presentation.model then
-                    local modelSpec = { model = presentation.model }
-                    local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":" .. rawEv.x .. "," .. rawEv.y
-                    local worldX, worldY = eventWorldPosition(rawEv)
-                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x"))
+                    local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
+                    if presentation.model:match("transition_arrow") then
+                        modelSpec.transitionArrowDirection = rawEv.direction
+                        modelSpec.transitionArrowAxis = worldView.transitionArrowAxis(rawEv.direction)
+                    end
+                    local worldX, worldY, worldZ = eventWorldPosition(rawEv)
+                    -- A world-positioned model belongs on the traversal floor,
+                    -- which can be sloped.  The old placed-model path retained
+                    -- only x/y and silently rendered every model at z = 0.
+                    if session.townTraversal then
+                        local floorZ = require("engine.bounded_lane").groundAt(session, worldY)
+                        if floorZ ~= nil then worldZ = floorZ end
+                    end
+                    modelSpec.transitionArrowGroundZ = worldZ
+                    if modelSpec.transitionArrowAxis then
+                        local modelScale = tonumber(rawEv.modelScale) or 1
+                        -- The arrow source is a cylinder with a 0.22-unit
+                        -- radius.  After its shaft is placed in the ground
+                        -- plane, lift its centre by that radius so it rests on
+                        -- the floor instead of bisecting it.
+                        worldZ = worldZ + 0.22 * modelScale
+                    end
+                    local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":"
+                        .. tostring(worldX) .. "," .. tostring(worldY) .. "," .. tostring(worldZ)
+                        .. ":" .. tostring(rawEv.direction or "")
+                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x", nil, nil, worldZ))
                 elseif presentation.visual == "sprite" then
                     local image = getEventSprite(rawEv, session)
                     if image then
@@ -3381,9 +3385,9 @@ end
     require("presentation.door_transition").draw()
 end
 
-function viewport_3d.draw(session, authoredCamera)
+function viewport_3d.draw(session, authoredCamera, inspection)
     -- `authoredCamera` is the current Scene's presentation default, never Map state.
-    return drawWorldSpace(session, authoredCamera)
+    return drawWorldSpace(session, authoredCamera, inspection)
 end
 
 viewport_3d.getFogConfig = getFogConfig

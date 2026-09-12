@@ -1,0 +1,141 @@
+{
+  "screen": "port",
+  "mapId": 31,
+  "role": "aesthetic precedent only; not accepted art or geometry authority",
+  "source": "projects\\hichaukitoden-game\\assets\\authoring\\town-plates\\precedents\\port\\aesthetic-precedent.png",
+  "projectionAuthority": "projects\\hichaukitoden-game\\assets\\authoring\\town-plates\\precedents\\port\\projected-geometry-guide.png",
+  "target": {
+    "size": [
+      1065,
+      240
+    ],
+    "visibleWorldHeight": 144
+  },
+  "workingTransform": {
+    "sourceSize": [
+      1869,
+      842
+    ],
+    "xScale": 0.5698234349919743,
+    "yScale": 0.2850356294536817,
+    "anisotropic": true,
+    "policy": "one deterministic full-frame transform; never stitch"
+  },
+  "framingRows": {
+    "target": {
+      "horizon": 66,
+      "actorGround": 136,
+      "persistentUiBegins": 144
+    },
+    "workingImage": {
+      "horizon": 231.55,
+      "actorGround": 477.13,
+      "persistentUiBegins": 505.2
+    },
+    "rule": "essential transitions stay above the persistent UI band"
+  },
+  "affordances": [
+    {
+      "anchor": "west_quay",
+      "destination": "The Quay",
+      "kind": "street",
+      "requiredVisualMeaning": "clear walkable edge continuation to The Quay",
+      "authoredPlateX": 128.0,
+      "workingImageX": 224.63,
+      "review": {
+        "status": "unreviewed",
+        "readable": null,
+        "accessibleFromActorGround": null,
+        "spatiallyPlausible": null,
+        "observedPlateX": null,
+        "notes": null
+      }
+    },
+    {
+      "anchor": "forge_door",
+      "destination": "The forge",
+      "kind": "door",
+      "requiredVisualMeaning": "readable accessible entrance to the active forge",
+      "authoredPlateX": 413.383,
+      "workingImageX": 725.46,
+      "review": {
+        "status": "unreviewed",
+        "readable": null,
+        "accessibleFromActorGround": null,
+        "spatiallyPlausible": null,
+        "observedPlateX": null,
+        "notes": null
+      }
+    },
+    {
+      "anchor": "smith_3d_door",
+      "destination": "Laura's Smithy (3D)",
+      "kind": "door",
+      "requiredVisualMeaning": "second readable accessible smithy entrance",
+      "authoredPlateX": 571.931,
+      "workingImageX": 1003.7,
+      "review": {
+        "status": "unreviewed",
+        "readable": null,
+        "accessibleFromActorGround": null,
+        "spatiallyPlausible": null,
+        "observedPlateX": null,
+        "notes": null
+      }
+    },
+    {
+      "anchor": "cortico_stair",
+      "destination": "Up to the Cortico",
+      "kind": "door",
+      "requiredVisualMeaning": "distinct upward route to the Cortico",
+      "authoredPlateX": 690.84,
+      "workingImageX": 1212.38,
+      "review": {
+        "status": "unreviewed",
+        "readable": null,
+        "accessibleFromActorGround": null,
+        "spatiallyPlausible": null,
+        "observedPlateX": null,
+        "notes": null
+      }
+    },
+    {
+      "anchor": "climb_churchyard",
+      "destination": "The long climb",
+      "kind": "door",
+      "requiredVisualMeaning": "distinct long exterior climb to the Churchyard",
+      "authoredPlateX": 809.751,
+      "workingImageX": 1421.06,
+      "review": {
+        "status": "unreviewed",
+        "readable": null,
+        "accessibleFromActorGround": null,
+        "spatiallyPlausible": null,
+        "observedPlateX": null,
+        "notes": null
+      }
+    }
+  ],
+  "imageLedRemap": {
+    "status": "proposal-only",
+    "allowedOnlyWhen": "every required transition exists, is readable, accessible, and perspective-coherent",
+    "mustPreserve": [
+      "left-to-right order",
+      "destination and arrival topology",
+      "lane bounds",
+      "non-overlapping trigger radii"
+    ],
+    "authority": "owner approval before build_town.py or map data changes"
+  },
+  "promptPolicy": {
+    "image1": "aesthetic precedent; visual language, materials, mood, and location vocabulary only",
+    "image2": "semantic-edit-guide.png; authoritative camera projection, keystoning, floor geometry, framing, and transition placement",
+    "firstPassPeople": "keep or add inhabitants; removal is a later selected-candidate edit",
+    "avoid": [
+      "style prose competing with image 1",
+      "invented camera wording",
+      "rendered guide marks or labels",
+      "weather variants before semantic acceptance"
+    ]
+  }
+}

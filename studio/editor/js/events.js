@@ -54,7 +54,7 @@
             eventModalDirty = true;
         };
 
-        function openEventModal(x, y) {
+        function openEventModal(x, y, eventId) {
             selectedEventX = x;
             selectedEventY = y;
 
@@ -76,7 +76,11 @@
             };
 
             const map = dbPayload.maps[currentMapIndex];
-            const eventData = (map.events || []).find(e => e.x === x && e.y === y);
+            const matches = (map.events || []).filter((e, index) => eventId != null
+                ? String(e.id != null ? e.id : index) === String(eventId) : e.x === x && e.y === y);
+            if (matches.length > 1) throw new Error('Select an Event by identity in the 3D view. Multiple Events share this cell.');
+            if (eventId != null && matches.length !== 1) throw new Error('Selected Event no longer exists.');
+            const eventData = matches[0];
             activeEventInstanceId = (eventData && typeof eventData.instanceId === 'string' && eventData.instanceId.trim())
                 ? eventData.instanceId
                 : EventSelfStateAuthoring.createInstanceId();
@@ -554,7 +558,8 @@
             const map = dbPayload.maps[currentMapIndex];
             if (!map.events) map.events = [];
 
-            let eventData = map.events.find(e => e.x === selectedEventX && e.y === selectedEventY);
+            let eventData = eventOriginalData;
+            if (eventData && !map.events.includes(eventData)) throw new Error('Selected Event no longer exists. Reopen the Event editor.');
 
             const isNew = !eventData;
             if (isNew) {
@@ -627,7 +632,7 @@
         function deleteEventAtCoords() {
             const map = dbPayload.maps[currentMapIndex];
             if (map.events) {
-                map.events = map.events.filter(e => !(e.x === selectedEventX && e.y === selectedEventY));
+                map.events = map.events.filter(e => e !== eventOriginalData);
             }
             closeEventModal(true);
             renderGridCells();

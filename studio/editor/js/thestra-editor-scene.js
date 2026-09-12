@@ -81,15 +81,28 @@
             }
         }
 
-        const events = (map.events || []).filter(event => Number.isFinite(Number(event.x)) && Number.isFinite(Number(event.y))).map((event, index) => {
+        const events = (map.events || []).map((event, index) => {
+            if (event.worldPosition !== undefined && (!Array.isArray(event.worldPosition)
+                    || event.worldPosition.length !== 3 || !event.worldPosition.every(Number.isFinite))) {
+                throw new Error(`Event ${event.id} has an invalid worldPosition.`);
+            }
             const x = Number(event.x), y = Number(event.y);
+            if (!event.worldPosition && (!Number.isFinite(x) || !Number.isFinite(y))) return null;
             return {
                 kind: 'event', key: `event:${event.id != null ? event.id : index}`, id: event.id != null ? event.id : index, index,
                 label: event.label || event.name || `Event ${event.id != null ? event.id : index}`,
                 cell: { x, y }, world: { x: x + 0.5, y: 0.5, z: y + 0.5 }, size: { x: 1, y: 1, z: 1 },
+                worldPosition: event.worldPosition && event.worldPosition.slice(),
+                direction: typeof event.direction === 'string' ? event.direction : null,
+                worldHeight: Number.isFinite(Number(event.worldHeight)) && Number(event.worldHeight) > 0
+                    ? Number(event.worldHeight) : null,
+                frameWidth: Number.isFinite(Number(event.frameWidth)) && Number(event.frameWidth) > 0
+                    ? Number(event.frameWidth) : null,
+                frameHeight: Number.isFinite(Number(event.frameHeight)) && Number(event.frameHeight) > 0
+                    ? Number(event.frameHeight) : null,
                 asset: resolvedEventAsset(payload, event), source: event
             };
-        });
+        }).filter(Boolean);
 
         const lights = (map.lightObjects || []).map((light, index) => ({ light, index }))
             .filter(entry => Number.isFinite(Number(entry.light.x)) && Number.isFinite(Number(entry.light.y)))
@@ -118,7 +131,17 @@
 
         return {
             version: SCENE_VERSION,
-            map: { id: map.id, title: map.title || `Map ${map.id != null ? map.id : ''}`.trim(), layoutSource: layout.source, provisionalGeometry: layout.provisional },
+            map: {
+                id: map.id,
+                title: map.title || `Map ${map.id != null ? map.id : ''}`.trim(),
+                layoutSource: layout.source,
+                provisionalGeometry: layout.provisional,
+                environmentPackage: map.traversal && map.traversal.environmentPackage,
+                // Read-only adapter input. Map/Event JSON remains the authority;
+                // plate composition reads it directly instead of asking LÖVE to
+                // rasterize the same static image after every Event movement.
+                source: map
+            },
             coordinateSystem: { authored: 'grid x/y', world: 'x/right, y/up, z/map-y', cellSize: 1 },
             bounds: { width: layout.width, height: layout.height },
             cells, events, lights,

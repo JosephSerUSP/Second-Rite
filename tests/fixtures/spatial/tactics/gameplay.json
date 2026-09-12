@@ -1,0 +1,5 @@
+{
+  "events": [],
+  "deploymentRegion": "deployment",
+  "movement": {"maxStep": 0, "baseCost": 1, "climbCost": 2}
+}

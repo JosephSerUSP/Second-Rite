@@ -1,0 +1,92 @@
+{
+  "dungeonPolicy": {
+    "defaultLoot": 1,
+    "entranceScriptId": 40,
+    "entranceSprite": "assets/sprites/dungeon_stairs_up.png",
+    "exitScriptId": 1,
+    "exitSprite": "assets/sprites/dungeon_stairs_down.png",
+    "generationProfile": "standard",
+    "generationProfiles": {
+      "broad": {
+        "maxRoomSize": 5,
+        "maxRooms": 7,
+        "minRoomSize": 3,
+        "minRooms": 5
+      },
+      "deep": {
+        "maxRoomSize": 5,
+        "maxRooms": 9,
+        "minRoomSize": 3,
+        "minRooms": 7
+      },
+      "entry": {
+        "maxRoomSize": 5,
+        "maxRooms": 4,
+        "minRoomSize": 3,
+        "minRooms": 3
+      },
+      "standard": {
+        "maxRoomSize": 5,
+        "maxRooms": 6,
+        "minRoomSize": 3,
+        "minRooms": 4
+      }
+    },
+    "playerLight": {
+      "color": [
+        0.35,
+        0.3,
+        0.22
+      ],
+      "enabled": true,
+      "falloff": 1.5,
+      "onlyInDungeons": false,
+      "radius": 3.5
+    },
+    "psxRendering": {
+      "affineTextures": true,
+      "cpuNearClip": false,
+      "ditherLevels": 31,
+      "fogBands": 8,
+      "vertexSnapPixels": 1
+    }
+  },
+  "map": {
+    "anchors": [
+      {
+        "allowRandomEvents": true,
+        "layout": [
+          "#####",
+          "#...#",
+          "#...#",
+          "#...#",
+          "##o##"
+        ],
+        "name": "Vault Entry Archway",
+        "x": 1,
+        "y": 1
+      },
+      {
+        "allowRandomEvents": true,
+        "layout": [
+          "######",
+          "#....#",
+          "#....#",
+          "#....#",
+          "#....#",
+          "######"
+        ],
+        "name": "Alchemist's Hidden Workshop",
+        "x": 12,
+        "y": 10
+      }
+    ],
+    "events": [],
+    "generateOpenings": true,
+    "generationProfile": "entry",
+    "height": 17,
+    "tileset": "spatial_probe_no_art",
+    "width": 17
+  },
+  "seed": 97531
+}

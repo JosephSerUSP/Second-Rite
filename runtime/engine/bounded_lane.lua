@@ -2,6 +2,7 @@
 -- It owns continuous horizontal position, bounds and doorway proximity; it is
 -- not a general physics or Map replacement.
 local bounded_lane = {}
+local world_view = require("engine.generated.world-view")
 
 -- How far from a bound a doorway may sit and still be that edge's exit
 -- when no doorway sits on the bound itself. Wide enough for a door
@@ -51,19 +52,7 @@ end
 -- scene substituted for the plate has a floor at a world height, and this
 -- profile is then a description of it rather than a picture-space fudge.
 local function groundAt(state, y)
-    local profile = state.groundProfile
-    if not profile or #profile == 0 then return state.groundZ end
-    if y <= profile[1].y then return profile[1].z end
-    for index = 2, #profile do
-        local previous, current = profile[index - 1], profile[index]
-        if y <= current.y then
-            local span = current.y - previous.y
-            if span <= 0 then return current.z end
-            local t = (y - previous.y) / span
-            return previous.z + (current.z - previous.z) * t
-        end
-    end
-    return profile[#profile].z
+    return world_view.groundHeight(state.groundProfile, state.groundZ, y)
 end
 
 function bounded_lane.groundAt(session, y)
@@ -109,8 +98,8 @@ end
 
 local function updateProjectionWindow(session, state)
     local tracking = state.tracking
-    local target = -(state.y - tracking.center) * tracking.pixelsPerWorld
-    target = clamp(target, tracking.minOffsetX, tracking.maxOffsetX)
+    local target = world_view.trackedProjectionOffset(state.y, tracking.center,
+        tracking.pixelsPerWorld, tracking.minOffsetX, tracking.maxOffsetX)
     state.cameraTargetOffsetX = target
     if state.cameraOffsetX == nil then state.cameraOffsetX = target end
     state.camera.projectionWindowOffsetX = state.cameraOffsetX

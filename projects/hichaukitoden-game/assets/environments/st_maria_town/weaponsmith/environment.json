@@ -6,31 +6,34 @@
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
     6.8,
-    0.0,
-    -2.5,
+    0.35,
+    -1.0,
     8.8,
-    17.919,
-    2.5
+    7.417,
+    4.0
   ],
+  "provenance": {
+    "plateSourceViewTransform": "AgX"
+  },
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        8.96,
+        3.883,
         0.0
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        2.024,
+        7.2254,
         0.0
       ]
     },
     "npc_smith": {
       "position": [
         7.8,
-        15.029,
+        2.7329,
         0.0
       ]
     }
@@ -38,30 +41,30 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      700,
+      450,
       240
     ],
     "slicePositions": [
-      8.96
+      3.883
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/weaponsmith_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/lauras_smith_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/weaponsmith_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/lauras_smith_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_700.png"
+      "../stub/empty_450.png"
     ],
     "lane": {
-      "runtimeCenterY": 8.96
+      "runtimeCenterY": 3.883
     },
     "playerProjection": {
-      "centerX": 350.0,
+      "centerX": 225.0,
       "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 34.6
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

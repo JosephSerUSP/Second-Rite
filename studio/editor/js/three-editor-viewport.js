@@ -306,7 +306,6 @@ export function createThreeEditorViewport(container, options = {}) {
             const active = !!enabled;
             base.setWalkProfileEditing?.(active);
             compositionAuthoring.setWalkProfileEditing?.(active);
-            if (active && compositionAuthoring.isPlate()) compositionAuthoring.setWalkMeshVisible(true);
         },
         getWalkProfileEditing() {
             return compositionAuthoring.isVisible?.()
@@ -319,11 +318,13 @@ export function createThreeEditorViewport(container, options = {}) {
                 : base.getWalkProfileSelection?.() || null;
         },
         getWalkProfileStatus() {
-            const lane = currentSceneModel?.map?.source?.traversal?.lane;
+            const traversal = currentSceneModel?.map?.source?.traversal;
+            const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;
             const profile = lane?.groundProfile;
             return {
                 available: !!lane,
                 authored: Array.isArray(profile) && profile.length >= 2,
+                pointCount: Array.isArray(profile) ? profile.length : 0,
                 editing: api.getWalkProfileEditing(),
                 selection: api.getWalkProfileSelection()
             };

@@ -20,6 +20,11 @@
             bundleRefresh: true,
             clearBundleImmediately: false
         }),
+        'lane-profile': Object.freeze({
+            semanticRefresh: true,
+            bundleRefresh: false,
+            clearBundleImmediately: false
+        }),
         'light-property': Object.freeze({
             semanticRefresh: true,
             bundleRefresh: true,

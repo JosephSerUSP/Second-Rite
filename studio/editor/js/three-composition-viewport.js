@@ -510,12 +510,31 @@ export function createCompositionViewport(container, options) {
         }
         refreshOverlay();
     }
-    function assignTexture(mesh, url, revision) {
-        new THREE.TextureLoader().load(url, texture => {
-            if (disposed || revision !== serial) { texture.dispose(); return; }
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.magFilter = texture.minFilter = THREE.NearestFilter;
-            mesh.material.map?.dispose(); mesh.material.map = texture; mesh.material.needsUpdate = true;
+    function assignTexture(mesh, url, revision, expectedWidth, expectedHeight) {
+        return new Promise((resolve, reject) => {
+            new THREE.TextureLoader().load(url, texture => {
+                if (disposed || revision !== serial) {
+                    texture.dispose();
+                    resolve(null);
+                    return;
+                }
+                const imageWidth = Number(texture.image?.naturalWidth || texture.image?.width);
+                const imageHeight = Number(texture.image?.naturalHeight || texture.image?.height);
+                if (imageWidth !== expectedWidth || imageHeight !== expectedHeight) {
+                    texture.dispose();
+                    reject(new Error(
+                        `Plate image ${url} is ${imageWidth}×${imageHeight}; environment imageSize declares ${expectedWidth}×${expectedHeight}.`
+                    ));
+                    return;
+                }
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.magFilter = texture.minFilter = THREE.NearestFilter;
+                mesh.material.map?.dispose();
+                mesh.material.map = texture;
+                mesh.material.needsUpdate = true;
+                resolve([imageWidth, imageHeight]);
+            }, undefined, error => reject(error instanceof Error ? error
+                : new Error(`Plate image ${url} failed to load.`)));
         });
     }
     async function setSceneModel(nextModel) {
@@ -553,8 +572,16 @@ export function createCompositionViewport(container, options) {
         scenePlane.scale.set(width, height, 1); foregroundPlane.scale.set(width, height, 1);
         scenePlane.position.set(width / 2, -height / 2, -2); foregroundPlane.position.set(width / 2, -height / 2, 2);
         if (changedPlate) {
-            assignTexture(scenePlane, resolvePackageAsset(manifestPath, spec.scenes[index]), revision);
-            assignTexture(foregroundPlane, resolvePackageAsset(manifestPath, spec.foregrounds[index]), revision);
+            const [sceneSize] = await Promise.all([
+                assignTexture(scenePlane, resolvePackageAsset(manifestPath, spec.scenes[index]),
+                    revision, width, height),
+                assignTexture(foregroundPlane, resolvePackageAsset(manifestPath, spec.foregrounds[index]),
+                    revision, width, height)
+            ]);
+            if (revision !== serial) return false;
+            plate.actualImageSize = sceneSize || [width, height];
+        } else if (!plate.actualImageSize) {
+            plate.actualImageSize = [width, height];
         }
         rebuildEvents();
         rebuildWalkOverlay();
@@ -700,7 +727,8 @@ export function createCompositionViewport(container, options) {
                 centerX: Number(plate.player.centerX),
                 screenY: Number(plate.player.screenY),
                 pixelsPerRuntimeY: Number(plate.player.pixelsPerRuntimeY),
-                imageSize: [plate.width, plate.height]
+                imageSize: [plate.width, plate.height],
+                actualImageSize: plate.actualImageSize ? plate.actualImageSize.slice() : null
             },
             reference: {
                 owner: `Environment package · ${plate.manifestPath}`,

@@ -182,6 +182,17 @@ close(nextOptics.yScale * anchoredY - nextOptics.centerNdcY, cursorNdcY,
 close(world_view.groundHeight({ { y = 0, z = 0 }, { y = 2, z = 1 } }, 0, 1),
     0.5, "lane ground interpolation")
 
+local dragWorldY, dragWorldZ, dragCenterX, dragCenterY = 8.25, 1.125, 453, 136
+local dragBase = world_view.projectPerspective(townCamera, 906, 240, 7.8, 11.85, 0)
+local dragProjected = world_view.projectPerspective(townCamera, 906, 240, 7.8, dragWorldY, dragWorldZ)
+local dragScreenX = dragCenterX + dragProjected.x - dragBase.x
+local dragScreenY = dragCenterY + dragProjected.y - dragBase.y
+local dragInverted = world_view.worldYZAtScreenOnDepthPlane(
+    townCamera, 906, 240, 7.8, 11.85, 0, dragCenterX, dragCenterY,
+    dragScreenX, dragScreenY, dragWorldY + 0.7, dragWorldZ - 0.4)
+close(dragInverted.y, dragWorldY, "plate depth-plane inverse Y", 1e-7)
+close(dragInverted.z, dragWorldZ, "plate depth-plane inverse Z", 1e-7)
+
 local portCamera = world_view.resolveTownCamera({
     target = { x = 7.8, y = 14.802, z = 0 }, distance = 18.666666666666668,
     yawDegrees = 0, pitchDegrees = -17.5, eyeHeight = 2.2604166666666665,

@@ -62,6 +62,44 @@ function finite(value, label) {
     return number;
 }
 
+function objectRangeForKey(raw, key) {
+    const keyIndex = raw.indexOf(JSON.stringify(key));
+    if (keyIndex < 0) throw new Error('Environment package is missing ' + key + '.');
+    const colon = raw.indexOf(':', keyIndex);
+    const start = raw.indexOf('{', colon);
+    if (colon < 0 || start < 0) throw new Error('Environment package ' + key + ' is not an object.');
+    let depth = 0, string = false, escape = false;
+    for (let index = start; index < raw.length; index++) {
+        const char = raw[index];
+        if (string) {
+            if (escape) escape = false;
+            else if (char === '\\') escape = true;
+            else if (char === '"') string = false;
+            continue;
+        }
+        if (char === '"') { string = true; continue; }
+        if (char === '{') depth += 1;
+        else if (char === '}') {
+            depth -= 1;
+            if (depth === 0) return { start, end: index + 1 };
+        }
+    }
+    throw new Error('Environment package ' + key + ' object is unterminated.');
+}
+
+function patchPlayerProjectionRaw(raw, patch) {
+    const range = objectRangeForKey(raw, 'playerProjection');
+    let body = raw.slice(range.start, range.end);
+    for (const [field, value] of Object.entries(patch)) {
+        const pattern = new RegExp('(\\"' + field + '\\"\\s*:\\s*)' +
+            '-?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?');
+        if (!pattern.test(body)) {
+            throw new Error('Environment package playerProjection.' + field + ' is missing or non-numeric.');
+        }
+        body = body.replace(pattern, (_, prefix) => prefix + JSON.stringify(value));
+    }
+    return raw.slice(0, range.start) + body + raw.slice(range.end);
+}
 function writeCalibration(projectRoot, value, patch, expectedVersion) {
     const current = read(projectRoot, value);
     if (expectedVersion && expectedVersion !== current.version) {
@@ -83,21 +121,29 @@ function writeCalibration(projectRoot, value, patch, expectedVersion) {
     }
 
     const projection = current.value.preRendered.playerProjection;
+    const normalizedPatch = {};
     let changed = false;
     for (const key of keys) {
         const nextValue = finite(patch[key], `playerProjection.${key}`);
+        normalizedPatch[key] = nextValue;
         if (projection[key] !== nextValue) changed = true;
-        projection[key] = nextValue;
     }
 
-    const nextRaw = JSON.stringify(current.value, null, 2) + '\n';
-    if (changed) fs.writeFileSync(current.file, nextRaw, 'utf8');
+    if (!changed) {
+        return { path: current.path, version: current.version, value: current.value, changed: false };
+    }
+    const nextRaw = patchPlayerProjectionRaw(fs.readFileSync(current.file, 'utf8'), normalizedPatch);
+    const nextValue = parse(nextRaw, current.path);
+    fs.writeFileSync(current.file, nextRaw, 'utf8');
     return {
         path: current.path,
-        version: changed ? token(nextRaw) : current.version,
-        value: current.value,
-        changed
+        version: token(nextRaw),
+        value: nextValue,
+        changed: true
     };
 }
 
-module.exports = { logicalPath, resolve, token, read, writeCalibration };
+module.exports = {
+    logicalPath, resolve, token, read, writeCalibration,
+    objectRangeForKey, patchPlayerProjectionRaw
+};

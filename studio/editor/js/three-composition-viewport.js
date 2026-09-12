@@ -433,10 +433,23 @@ export function createCompositionViewport(container, options) {
         if (!gesture) return;
         const { record, origin } = gesture; gesture = null;
         const lane = model.map.source.traversal.lane;
-        const projection = View.horizontalProjection(plate.camera, plate.width, plate.height,
-            Number(lane.depthX), Number(lane.groundZ || 0), plate.sliceY, Number(plate.player.centerX));
         const position = record.event.worldPosition.slice();
-        position[1] = View.worldYAtScreenX(projection, record.group.position.x);
+        const modelPath = record.record.asset?.model;
+        if (modelPath) {
+            const modelScale = Number(record.event.modelScale) > 0 ? Number(record.event.modelScale) : 1;
+            const zOffset = /transition_arrow\.obj$/i.test(modelPath) ? 0.22 * modelScale : 0;
+            position[1] = View.worldYAtScreenXOnGroundProfile(
+                plate.camera, plate.width, plate.height, Number(lane.depthX),
+                lane.groundProfile, Number(lane.groundZ || 0), plate.sliceY,
+                Number(plate.player.centerX), record.group.position.x,
+                Number(lane.minY), Number(lane.maxY), zOffset);
+        } else {
+            // Runtime plate sprites deliberately keep horizontal projection on
+            // the base plane; elevation only changes their foot-line Y.
+            const projection = View.horizontalProjection(plate.camera, plate.width, plate.height,
+                Number(lane.depthX), Number(lane.groundZ || 0), plate.sliceY, Number(plate.player.centerX));
+            position[1] = View.worldYAtScreenX(projection, record.group.position.x);
+        }
         const result = options.onMoveWorldEvent?.(semantic(record.event), position);
         if (!result?.ok) record.group.position.copy(origin);
         else {

@@ -81,6 +81,7 @@ export function createCompositionViewport(container, options) {
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
     let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null;
+    let calibrationPreviewVisible = false;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
@@ -251,7 +252,7 @@ export function createCompositionViewport(container, options) {
         walkProfileEditing = !!enabled;
         walkProfileControls.visible = walkProfileEditing;
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
-        playerPreview.visible = walkProfileEditing;
+        playerPreview.visible = walkProfileEditing || calibrationPreviewVisible;
         if (!walkProfileEditing) walkProfileSelection = null;
         rebuildPlayerPreview();
         refreshOverlay();
@@ -484,7 +485,7 @@ export function createCompositionViewport(container, options) {
         group.position.set(Number(plate.player.centerX), -footY, 3.2);
         group.add(cube, edges);
         playerPreview.add(group);
-        playerPreview.visible = walkProfileEditing;
+        playerPreview.visible = walkProfileEditing || calibrationPreviewVisible;
     }
 
     function rebuildEvents() {
@@ -697,6 +698,11 @@ export function createCompositionViewport(container, options) {
         }
         refreshOverlay();
     });
+    function setCalibrationPreviewVisible(visible) {
+        calibrationPreviewVisible = !!visible;
+        rebuildPlayerPreview();
+    }
+
     function calibrationState() {
         if (!plate || !model) return { available: false };
         const map = model.map.source;
@@ -745,6 +751,20 @@ export function createCompositionViewport(container, options) {
                 owner: 'Map JSON · traversal.lane.groundProfile',
                 authored: Array.isArray(traversal.lane?.groundProfile)
                     && traversal.lane.groundProfile.length >= 2
+            },
+            spatialReferences: {
+                owner: 'Environment anchors + Map Events',
+                anchors: Object.entries(plate.manifest?.anchors || {}).map(([id, anchor]) => ({
+                    id,
+                    position: Array.isArray(anchor?.position) ? anchor.position.map(Number) : null
+                })),
+                transfers: (map.events || []).filter(event =>
+                    (event.commands || []).some(command => command?.cmd === 'LOAD_MAP'))
+                    .map(event => ({
+                        id: event.id,
+                        name: event.name || event.instanceId || String(event.id),
+                        position: Array.isArray(event.worldPosition) ? event.worldPosition.map(Number) : null
+                    }))
             }
         };
     }
@@ -819,6 +839,7 @@ export function createCompositionViewport(container, options) {
             rebuildEvents();
         },
         getCalibrationState: calibrationState,
+        setCalibrationPreviewVisible,
         refreshCalibrationPresentation,
         setPlateProjectionField,
         descriptor: () => plate?.descriptor || null,

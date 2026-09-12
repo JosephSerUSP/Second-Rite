@@ -5,6 +5,7 @@ on:
     paths:
       - "shared/semantics/world-view.ts"
       - "runtime/engine/bounded_lane.lua"
+      - "runtime/engine/cli_tools.lua"
       - "runtime/engine/generated/world-view.lua"
       - "runtime/presentation/viewport_3d.lua"
       - "studio/editor/js/generated/world-view.js"
@@ -27,6 +28,7 @@ on:
     paths:
       - "shared/semantics/world-view.ts"
       - "runtime/engine/bounded_lane.lua"
+      - "runtime/engine/cli_tools.lua"
       - "runtime/engine/generated/world-view.lua"
       - "runtime/presentation/viewport_3d.lua"
       - "studio/editor/js/generated/world-view.js"

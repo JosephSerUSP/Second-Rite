@@ -2,10 +2,25 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const bridge = require('./runtime-bridge-server');
 const roots = require('../../tools/semantic-roots');
 const storage = require('./authored-storage');
+
+function captureTownFrames(previewExe, gameRoot) {
+    const result = spawnSync(previewExe, [gameRoot, 'town-proof-frames'], {
+        cwd: gameRoot,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+        timeout: 120000,
+    });
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    const match = result.stdout.match(/TOWN PROOF BEGIN\s*([\s\S]*?)\s*TOWN PROOF END/);
+    assert.ok(match, 'town proof emitted its framed payload');
+    return JSON.parse(match[1]).frames;
+}
 
 test('live spatial bridge preserves environment authority across Event edits', { timeout: 180000 }, async () => {
     const previewExe = process.env.LOVEC || process.env.LOVE_PATH;
@@ -45,4 +60,37 @@ test('live spatial bridge preserves environment authority across Event edits', {
     const indoor = storage.loadResource(path.join(projectRoot, 'data'), 'maps').value.find(m => m.id === 28);
     const indoorBundle = await compile(indoor);
     assert.equal(indoorBundle.compositionPreview, undefined, 'fully 3D Maps never become images');
+});
+
+test('a supported plate Event lane edit changes the real town compositor', { timeout: 180000 }, () => {
+    const previewExe = process.env.LOVEC || process.env.LOVE_PATH;
+    assert.ok(previewExe && fs.existsSync(previewExe), 'Set LOVEC to the console LÖVE executable.');
+    const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-town-composition-'));
+    try {
+        const stageResult = spawnSync(process.execPath, [
+            path.join(roots.DEFAULT_INSTALL_ROOT, 'tools', 'ci', 'stage-project-gates.js'),
+            '--output', stage,
+        ], { cwd: roots.DEFAULT_INSTALL_ROOT, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, timeout: 120000 });
+        assert.equal(stageResult.status, 0, stageResult.stdout + stageResult.stderr);
+        const staged = stageResult.stdout.match(/PROJECT GATE STAGE OK\s+(\{.*\})/);
+        assert.ok(staged, 'the canonical exporter reported its staged Project root');
+        const gameRoot = JSON.parse(staged[1]).stageDir;
+
+        const before = captureTownFrames(previewExe, gameRoot);
+        const mapPath = path.join(gameRoot, 'data', 'maps.json');
+        const maps = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
+        const map = maps.find(candidate => candidate.id === 16);
+        assert.ok(map, 'the staged Project contains Churchyard');
+        const guard = map.events.find(event => event.instanceId === 'st-maria-churchyard-guard');
+        assert.ok(guard && Array.isArray(guard.worldPosition), 'Churchyard guard is a lane-positioned plate Event');
+        guard.worldPosition[1] += 1.25;
+        fs.writeFileSync(mapPath, JSON.stringify(maps, null, 2) + '\n');
+
+        const after = captureTownFrames(previewExe, gameRoot);
+        assert.deepEqual(after.map(frame => frame.label), before.map(frame => frame.label));
+        assert.ok(after.some((frame, index) => frame.image !== before[index].image),
+            'moving the lane coordinate changes a frame emitted by the actual town compositor');
+    } finally {
+        fs.rmSync(stage, { recursive: true, force: true });
+    }
 });

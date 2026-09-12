@@ -164,20 +164,7 @@ function main() {
         runCompiler('tstl', 'tsconfig.lua.json');
         appendAdapters();
         const changed = changedFiles(before);
-        if (checkOnly && changed.length) {
-            stale = changed;
-            const worldLua = path.join(runtimeRoot, 'engine', 'generated', 'world-view.lua');
-            if (changed.includes('runtime/engine/generated/world-view.lua') && fs.existsSync(worldLua)) {
-                const generated = fs.readFileSync(worldLua, 'utf8');
-                const start = generated.indexOf('    function ThestraWorldViewSemantics.worldYZAtScreenOnDepthPlane');
-                if (start >= 0) {
-                    const finish = generated.indexOf('\n    end\nend\n-- THES_SHARED_LUA_WORLD_VIEW', start);
-                    console.log('WORLD_YZ_LUA_GENERATED_BEGIN');
-                    console.log(generated.slice(start, finish >= 0 ? finish + 9 : undefined));
-                    console.log('WORLD_YZ_LUA_GENERATED_END');
-                }
-            }
-        }
+        if (checkOnly && changed.length) stale = changed;
         const digest = outputDigest();
         console.log(`shared semantics generated: ${digest.files} files, ${digest.bytes} normalized bytes, sha256=${digest.sha256}`);
     } finally {

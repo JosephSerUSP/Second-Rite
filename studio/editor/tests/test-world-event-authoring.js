@@ -197,6 +197,19 @@ test('runtime models retain an authored height and ground horizontal arrows on i
         'plate model dragging must invert screen X along the same non-flat lane floor it renders');
 });
 
+test('walk profile authoring never aliases collision-mesh ownership', () => {
+    const root = path.resolve(__dirname, '..', '..', '..');
+    const baseStudio = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
+    const plateStudio = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
+    const workspace = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'thestra-workspace-state.js'), 'utf8');
+    assert.match(baseStudio, /ThestraWalkProfileAuthoring/);
+    assert.match(baseStudio, /onMoveGroundProfilePoint/);
+    assert.match(plateStudio, /ThestraPlateWalkProfileAuthoring/);
+    assert.match(plateStudio, /worldYZAtScreenOnDepthPlane/);
+    assert.match(workspace, /'lane-profile': Object\.freeze\(\{[\s\S]*?bundleRefresh: false/,
+        'profile drags must update local semantic presentation without asking LÖVE to rebuild environment geometry');
+});
+
 test('fully 3D interior exits carry their authored transition-marker model', () => {
     const mapsRoot = path.resolve(__dirname, '..', '..', '..', 'projects', 'hichaukitoden-game', 'data', 'maps');
     const maps = fs.readdirSync(mapsRoot)

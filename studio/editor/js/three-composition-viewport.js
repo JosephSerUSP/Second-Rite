@@ -720,6 +720,10 @@ export function createCompositionViewport(container, options) {
                 eyeHeight: Number(cameraSource.eyeHeight),
                 projectionScale: cameraSource.projectionScale || null,
                 projectionFrame: cameraSource.projectionFrame || null,
+                projectionWindowOffsetX: cameraSource.projectionWindowOffsetX == null
+                    ? null : Number(cameraSource.projectionWindowOffsetX),
+                projectionWindowOffsetY: cameraSource.projectionWindowOffsetY == null
+                    ? null : Number(cameraSource.projectionWindowOffsetY),
                 tracking: cameraSource.tracking || null
             },
             plate: {

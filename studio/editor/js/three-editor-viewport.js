@@ -317,6 +317,23 @@ export function createThreeEditorViewport(container, options = {}) {
                 ? compositionAuthoring.getWalkProfileSelection?.() || null
                 : base.getWalkProfileSelection?.() || null;
         },
+        getPlateCalibration() {
+            return compositionAuthoring.getCalibrationState?.() || { available: false };
+        },
+        setPlateCalibrationPreviewVisible(visible) {
+            compositionAuthoring.setCalibrationPreviewVisible?.(visible);
+        },
+        setTownCameraField(field, value) {
+            const result = options.onSetTownCameraField?.(field, value)
+                || { ok: false, reason: 'camera-authoring-unavailable' };
+            if (result?.changed) compositionAuthoring.refreshCalibrationPresentation?.();
+            return result;
+        },
+        async setPlateProjectionField(field, value) {
+            return compositionAuthoring.setPlateProjectionField
+                ? compositionAuthoring.setPlateProjectionField(field, value)
+                : { ok: false, reason: 'plate-authoring-unavailable' };
+        },
         getWalkProfileStatus() {
             const traversal = currentSceneModel?.map?.source?.traversal;
             const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;

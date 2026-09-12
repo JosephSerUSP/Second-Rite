@@ -1523,7 +1523,8 @@ function cli.runTownProofFrames(loader)
         love.graphics.setCanvas({ canvas, depth = true, stencil = true })
         love.graphics.clear(0, 0, 0, 1, true, true)
         love.graphics.setColor(1, 1, 1, 1)
-        viewport_3d.draw(vSession)
+        local inspection = { events = {} }
+        viewport_3d.draw(vSession, nil, inspection)
         love.graphics.setCanvas()
         local png = canvas:newImageData():encode("png")
         local state = vSession.townTraversal
@@ -1534,6 +1535,7 @@ function cli.runTownProofFrames(loader)
             image = love.data.encode("string", "base64", png),
             mapId = vSession.currentMapData and vSession.currentMapData.id,
             actor = state and { x = state.x, y = state.y, z = state.z } or nil,
+            composition = inspection,
             projectionWindowOffsetX = state and state.camera.projectionWindowOffsetX or nil,
             changedReturn = vSession.flags.town_room_changed == true,
         }

@@ -115,6 +115,33 @@
         return lane;
     }
 
+    function townCameraAt(payload, mapIndex) {
+        const map = mapAt(payload, mapIndex);
+        if (!map?.traversal || map.traversal.provider !== 'bounded_lane') return null;
+        const camera = map.traversal.camera;
+        if (!camera || typeof camera !== 'object' || Array.isArray(camera)) return null;
+        return camera;
+    }
+
+    function setTownCameraField(payload, mapIndex, field, value) {
+        const camera = townCameraAt(payload, mapIndex);
+        if (!camera) return { ok: false, reason: 'missing-town-camera' };
+        if (field !== 'pitchDegrees' && field !== 'fovDegrees') {
+            return { ok: false, reason: 'unsupported-camera-field' };
+        }
+        const next = Number(value);
+        if (!Number.isFinite(next)) return { ok: false, reason: 'invalid-camera-value' };
+        if (field === 'pitchDegrees' && (next <= -89 || next >= 89)) {
+            return { ok: false, reason: 'invalid-camera-pitch' };
+        }
+        if (field === 'fovDegrees' && (next <= 0 || next >= 179)) {
+            return { ok: false, reason: 'invalid-camera-fov' };
+        }
+        const changed = Number(camera[field]) !== next;
+        if (changed) camera[field] = next;
+        return { ok: true, changed, camera, field, value: next };
+    }
+
     function profileSelection(index) {
         return { kind: 'walk-profile-point', key: `walk-profile-point:${index}`, index };
     }
@@ -221,6 +248,7 @@
     return {
         TILE_BY_TOOL, tileForTool, cellBounds, validateCell, paintCell, eventById,
         canMoveEvent, moveEvent, moveWorldEvent,
+        setTownCameraField,
         createGroundProfile, splitGroundProfileSegment, moveGroundProfilePoint, deleteGroundProfilePoint,
         canMoveLight, moveLight
     };

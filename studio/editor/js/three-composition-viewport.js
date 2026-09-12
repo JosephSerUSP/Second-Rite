@@ -81,6 +81,7 @@ export function createCompositionViewport(container, options) {
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
     let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null;
+    let calibrationPreviewVisible = false;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
@@ -251,7 +252,7 @@ export function createCompositionViewport(container, options) {
         walkProfileEditing = !!enabled;
         walkProfileControls.visible = walkProfileEditing;
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
-        playerPreview.visible = walkProfileEditing;
+        playerPreview.visible = walkProfileEditing || calibrationPreviewVisible;
         if (!walkProfileEditing) walkProfileSelection = null;
         rebuildPlayerPreview();
         refreshOverlay();
@@ -484,7 +485,7 @@ export function createCompositionViewport(container, options) {
         group.position.set(Number(plate.player.centerX), -footY, 3.2);
         group.add(cube, edges);
         playerPreview.add(group);
-        playerPreview.visible = walkProfileEditing;
+        playerPreview.visible = walkProfileEditing || calibrationPreviewVisible;
     }
 
     function rebuildEvents() {
@@ -510,12 +511,31 @@ export function createCompositionViewport(container, options) {
         }
         refreshOverlay();
     }
-    function assignTexture(mesh, url, revision) {
-        new THREE.TextureLoader().load(url, texture => {
-            if (disposed || revision !== serial) { texture.dispose(); return; }
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.magFilter = texture.minFilter = THREE.NearestFilter;
-            mesh.material.map?.dispose(); mesh.material.map = texture; mesh.material.needsUpdate = true;
+    function assignTexture(mesh, url, revision, expectedWidth, expectedHeight) {
+        return new Promise((resolve, reject) => {
+            new THREE.TextureLoader().load(url, texture => {
+                if (disposed || revision !== serial) {
+                    texture.dispose();
+                    resolve(null);
+                    return;
+                }
+                const imageWidth = Number(texture.image?.naturalWidth || texture.image?.width);
+                const imageHeight = Number(texture.image?.naturalHeight || texture.image?.height);
+                if (imageWidth !== expectedWidth || imageHeight !== expectedHeight) {
+                    texture.dispose();
+                    reject(new Error(
+                        `Plate image ${url} is ${imageWidth}×${imageHeight}; environment imageSize declares ${expectedWidth}×${expectedHeight}.`
+                    ));
+                    return;
+                }
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.magFilter = texture.minFilter = THREE.NearestFilter;
+                mesh.material.map?.dispose();
+                mesh.material.map = texture;
+                mesh.material.needsUpdate = true;
+                resolve([imageWidth, imageHeight]);
+            }, undefined, error => reject(error instanceof Error ? error
+                : new Error(`Plate image ${url} failed to load.`)));
         });
     }
     async function setSceneModel(nextModel) {
@@ -524,9 +544,10 @@ export function createCompositionViewport(container, options) {
         const map = model?.map?.source;
         const revision = ++serial;
         if (!manifestPath || !map?.traversal?.camera) { plate = null; hide(); clearEvents(); return false; }
-        const response = await fetch(projectAsset(manifestPath));
+        const response = await fetch('/api/environment-package?path=' + encodeURIComponent(manifestPath));
         if (!response.ok) throw new Error(`Environment package ${manifestPath} returned HTTP ${response.status}.`);
-        const manifest = await response.json();
+        const packagePayload = await response.json();
+        const manifest = packagePayload.value;
         if (revision !== serial) return false;
         const spec = manifest.preRendered;
         if (!spec) { plate = null; hide(); clearEvents(); return false; }
@@ -540,16 +561,28 @@ export function createCompositionViewport(container, options) {
         const changedPlate = !plate || plate.key !== nextKey;
         plate = {
             key: nextKey, width, height, sliceY: Number(spec.slicePositions[index]),
+            sliceIndex: index,
             player: spec.playerProjection,
             camera: View.resolveTownCamera(map.traversal.camera),
             bounds: manifest.bounds,
+            manifestPath,
+            manifestVersion: packagePayload.version,
+            manifest,
             descriptor: { mapId: map.id, frames: [{ id: 'authoring/map', profile: 'authoring', location: 'map', width, height }] }
         };
         scenePlane.scale.set(width, height, 1); foregroundPlane.scale.set(width, height, 1);
         scenePlane.position.set(width / 2, -height / 2, -2); foregroundPlane.position.set(width / 2, -height / 2, 2);
         if (changedPlate) {
-            assignTexture(scenePlane, resolvePackageAsset(manifestPath, spec.scenes[index]), revision);
-            assignTexture(foregroundPlane, resolvePackageAsset(manifestPath, spec.foregrounds[index]), revision);
+            const [sceneSize] = await Promise.all([
+                assignTexture(scenePlane, resolvePackageAsset(manifestPath, spec.scenes[index]),
+                    revision, width, height),
+                assignTexture(foregroundPlane, resolvePackageAsset(manifestPath, spec.foregrounds[index]),
+                    revision, width, height)
+            ]);
+            if (revision !== serial) return false;
+            plate.actualImageSize = sceneSize || [width, height];
+        } else if (!plate.actualImageSize) {
+            plate.actualImageSize = [width, height];
         }
         rebuildEvents();
         rebuildWalkOverlay();
@@ -665,6 +698,122 @@ export function createCompositionViewport(container, options) {
         }
         refreshOverlay();
     });
+    function setCalibrationPreviewVisible(visible) {
+        calibrationPreviewVisible = !!visible;
+        rebuildPlayerPreview();
+    }
+
+    function calibrationState() {
+        if (!plate || !model) return { available: false };
+        const map = model.map.source;
+        const traversal = map.traversal || {};
+        const spec = plate.manifest?.preRendered || {};
+        const cameraSource = traversal.camera || {};
+        return {
+            available: true,
+            mapId: map.id,
+            environmentPath: plate.manifestPath,
+            camera: {
+                owner: 'Map JSON · traversal.camera',
+                pitchDegrees: Number(cameraSource.pitchDegrees),
+                fovDegrees: Number(cameraSource.fovDegrees),
+                target: cameraSource.target ? {
+                    x: Number(cameraSource.target.x),
+                    y: Number(cameraSource.target.y),
+                    z: Number(cameraSource.target.z)
+                } : null,
+                distance: Number(cameraSource.distance),
+                eyeHeight: Number(cameraSource.eyeHeight),
+                projectionScale: cameraSource.projectionScale || null,
+                projectionFrame: cameraSource.projectionFrame || null,
+                projectionWindowOffsetX: cameraSource.projectionWindowOffsetX == null
+                    ? null : Number(cameraSource.projectionWindowOffsetX),
+                projectionWindowOffsetY: cameraSource.projectionWindowOffsetY == null
+                    ? null : Number(cameraSource.projectionWindowOffsetY),
+                tracking: cameraSource.tracking || null
+            },
+            plate: {
+                owner: `Environment package · ${plate.manifestPath}`,
+                centerX: Number(plate.player.centerX),
+                screenY: Number(plate.player.screenY),
+                pixelsPerRuntimeY: Number(plate.player.pixelsPerRuntimeY),
+                imageSize: [plate.width, plate.height],
+                actualImageSize: plate.actualImageSize ? plate.actualImageSize.slice() : null
+            },
+            reference: {
+                owner: `Environment package · ${plate.manifestPath}`,
+                slicePositions: Array.isArray(spec.slicePositions) ? spec.slicePositions.map(Number) : [],
+                runtimeCenterY: Number(spec.lane?.runtimeCenterY),
+                activeSliceIndex: plate.sliceIndex,
+                activeSliceY: plate.sliceY
+            },
+            walkProfile: {
+                owner: 'Map JSON · traversal.lane.groundProfile',
+                authored: Array.isArray(traversal.lane?.groundProfile)
+                    && traversal.lane.groundProfile.length >= 2
+            },
+            spatialReferences: {
+                owner: 'Environment anchors + Map Events',
+                anchors: Object.entries(plate.manifest?.anchors || {}).map(([id, anchor]) => ({
+                    id,
+                    position: Array.isArray(anchor?.position) ? anchor.position.map(Number) : null
+                })),
+                transfers: (map.events || []).filter(event =>
+                    (event.commands || []).some(command => command?.cmd === 'LOAD_MAP'))
+                    .map(event => ({
+                        id: event.id,
+                        name: event.name || event.instanceId || String(event.id),
+                        position: Array.isArray(event.worldPosition) ? event.worldPosition.map(Number) : null
+                    }))
+            }
+        };
+    }
+
+    function refreshCalibrationPresentation() {
+        if (!plate || !model) return;
+        plate.camera = View.resolveTownCamera(model.map.source.traversal.camera);
+        rebuildEvents();
+        rebuildWalkOverlay();
+        rebuildWalkProfileControls();
+        rebuildPlayerPreview();
+        refreshOverlay();
+    }
+
+    async function setPlateProjectionField(field, value) {
+        if (!plate) return { ok: false, reason: 'missing-plate' };
+        if (field !== 'centerX' && field !== 'screenY') {
+            return { ok: false, reason: 'unsupported-plate-field' };
+        }
+        const number = Number(value);
+        if (!Number.isFinite(number)) return { ok: false, reason: 'invalid-plate-value' };
+        const response = await fetch('/api/environment-package/calibration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                path: plate.manifestPath,
+                expectedVersion: plate.manifestVersion,
+                patch: { [field]: number }
+            })
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+            const error = new Error(payload.message || payload.error || 'Plate calibration save failed.');
+            error.stale = payload.stale === true;
+            throw error;
+        }
+        plate.manifestVersion = payload.version;
+        plate.manifest = payload.value;
+        plate.player = payload.value.preRendered.playerProjection;
+        refreshCalibrationPresentation();
+        return {
+            ok: true,
+            changed: payload.changed === true,
+            field,
+            value: number,
+            calibration: calibrationState()
+        };
+    }
+
     (function animate() {
         if (disposed) return;
         requestAnimationFrame(animate);
@@ -689,6 +838,10 @@ export function createCompositionViewport(container, options) {
             rebuildPlayerPreview();
             rebuildEvents();
         },
+        getCalibrationState: calibrationState,
+        setCalibrationPreviewVisible,
+        refreshCalibrationPresentation,
+        setPlateProjectionField,
         descriptor: () => plate?.descriptor || null,
         dispose() {
             disposed = true; serial += 1; disposeNavigation(); observer.disconnect();

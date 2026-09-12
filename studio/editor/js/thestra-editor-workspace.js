@@ -415,6 +415,12 @@
                         'event-move'
                     );
                 },
+                onSetTownCameraField(field, value) {
+                    return handleMutationResult(
+                        host.setTownCameraField ? host.setTownCameraField(field, value) : null,
+                        'camera-calibration'
+                    );
+                },
                 onCreateGroundProfile() {
                     return handleMutationResult(
                         host.createGroundProfile ? host.createGroundProfile() : null,

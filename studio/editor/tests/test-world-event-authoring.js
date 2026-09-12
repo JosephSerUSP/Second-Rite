@@ -205,7 +205,13 @@ test('walk profile authoring never aliases collision-mesh ownership', () => {
     const workspace = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'thestra-workspace-state.js'), 'utf8');
     assert.match(baseStudio, /ThestraWalkProfileAuthoring/);
     assert.match(baseStudio, /onMoveGroundProfilePoint/);
+    assert.match(baseStudio, /WorldView\.groundHeight\([\s\S]*?lane\.groundProfile/,
+        '3D bounded-lane Event references must follow the live authored floor without rewriting Event placement');
     assert.match(plateStudio, /ThestraPlateWalkProfileAuthoring/);
+    assert.match(plateStudio, /ThestraPlatePlayerPreview/,
+        'plate Walk Profile mode must show the live baked player footing');
+    assert.match(plateStudio, /const ground = View\.groundHeight\(lane\.groundProfile/,
+        'player footing must consume the same shared ground semantic as Events and runtime');
     assert.match(plateStudio, /worldYZAtScreenOnDepthPlane/);
     assert.match(workspace, /'lane-profile': Object\.freeze\(\{[\s\S]*?bundleRefresh: false/,
         'profile drags must update local semantic presentation without asking LÖVE to rebuild environment geometry');

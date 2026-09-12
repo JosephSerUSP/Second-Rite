@@ -23,6 +23,40 @@ function laneFixture(profile) {
         traversal: { provider: 'bounded_lane', lane }, events: [] }] };
 }
 
+test('bounded-lane camera authoring exposes only proven optical fields', () => {
+    const payload = laneFixture();
+    payload.maps[0].traversal.camera = {
+        profile: 'town_sideview',
+        pitchDegrees: -17.5,
+        fovDegrees: 28.072486935852957,
+        target: { x: 7.8, y: 5, z: 0 },
+        projectionFrame: { canonicalCenterX: 213, canonicalHorizonY: 66 }
+    };
+
+    const fov = Commands.setTownCameraField(payload, 0, 'fovDegrees', 24);
+    assert.equal(fov.ok, true);
+    assert.equal(fov.changed, true);
+    assert.equal(payload.maps[0].traversal.camera.fovDegrees, 24);
+
+    const pitch = Commands.setTownCameraField(payload, 0, 'pitchDegrees', -12.25);
+    assert.equal(pitch.ok, true);
+    assert.equal(payload.maps[0].traversal.camera.pitchDegrees, -12.25);
+
+    const beforePrincipal = JSON.stringify(payload.maps[0].traversal.camera.projectionFrame);
+    assert.equal(Commands.setTownCameraField(payload, 0, 'canonicalCenterX', 225).reason,
+        'unsupported-camera-field');
+    assert.equal(JSON.stringify(payload.maps[0].traversal.camera.projectionFrame), beforePrincipal,
+        'Studio must not turn principal-point calibration into an unproven generic camera knob');
+    assert.equal(Commands.setTownCameraField(payload, 0, 'fovDegrees', 179).reason,
+        'invalid-camera-fov');
+    assert.equal(Commands.setTownCameraField(payload, 0, 'pitchDegrees', 90).reason,
+        'invalid-camera-pitch');
+
+    payload.maps[0].traversal.provider = 'future_surface';
+    assert.equal(Commands.setTownCameraField(payload, 0, 'fovDegrees', 30).reason,
+        'missing-town-camera');
+});
+
 test('walk profile commands are unavailable outside the bounded-lane provider', () => {
     const payload = laneFixture();
     payload.maps[0].traversal.provider = 'future_surface';

@@ -319,6 +319,7 @@
         if (!runtimeControls) return;
         runtimeControls.syncWalkMesh?.();
         runtimeControls.syncWalkProfile?.();
+        runtimeControls.syncPlateCalibration?.();
         const runtime = previewState.mode() === 'runtime';
         const plate = viewportApi()?.getCompositionPreview?.();
         runtimeControls.runtime.textContent = plate ? 'Plate Composition' : 'Runtime Camera';
@@ -459,6 +460,173 @@
         deleteProfile.title = 'Select an interior Walk Profile point to remove it. Endpoints are protected.';
         deleteProfile.textContent = 'Delete Point';
 
+        const plateCalibration = document.createElement('button');
+        plateCalibration.type = 'button';
+        plateCalibration.className = 'win98-btn';
+        plateCalibration.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        plateCalibration.textContent = 'Plate Calibration';
+        plateCalibration.title = 'Inspect and edit the separate Map-camera and environment-package calibration authorities.';
+
+        const calibrationPanel = document.createElement('div');
+        calibrationPanel.dataset.thestraPlateCalibration = 'true';
+        calibrationPanel.style.cssText = [
+            'display:none', 'position:fixed', 'right:18px', 'top:72px', 'z-index:10020',
+            'width:360px', 'max-height:calc(100vh - 100px)', 'overflow:auto',
+            'background:var(--win-face,#c0c0c0)', 'border:2px outset #fff',
+            'padding:8px', 'font-size:10px', 'box-sizing:border-box'
+        ].join(';');
+        document.body.appendChild(calibrationPanel);
+
+        function calibrationRow(label, value, hint) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;margin:3px 0;';
+            const name = document.createElement('span');
+            name.textContent = label;
+            const content = document.createElement('div');
+            content.textContent = value == null ? '—' : String(value);
+            if (hint) content.title = hint;
+            row.append(name, content);
+            return row;
+        }
+
+        function calibrationNumber(label, value, onChange, options = {}) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:grid;grid-template-columns:110px 1fr;gap:6px;align-items:center;margin:3px 0;';
+            const name = document.createElement('label');
+            name.textContent = label;
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'win98-input';
+            input.value = Number.isFinite(value) ? String(value) : '';
+            input.step = options.step || '0.1';
+            if (options.min != null) input.min = String(options.min);
+            if (options.max != null) input.max = String(options.max);
+            input.addEventListener('change', async () => {
+                input.disabled = true;
+                try {
+                    const result = await onChange(Number(input.value));
+                    if (!result?.ok) throw new Error(result?.reason || 'Calibration edit was rejected.');
+                    input.style.background = '';
+                    renderCalibrationPanel();
+                } catch (error) {
+                    input.style.background = '#ffcccc';
+                    if (runtimeControls) {
+                        runtimeControls.info.textContent = error.stale
+                            ? 'Plate calibration changed on disk · reload the Map before editing again'
+                            : `Calibration edit failed: ${error.message || error}`;
+                    }
+                } finally {
+                    input.disabled = false;
+                }
+            });
+            row.append(name, input);
+            return row;
+        }
+
+        function section(title, owner) {
+            const fieldset = document.createElement('fieldset');
+            fieldset.style.cssText = 'padding:6px;margin:0 0 7px;';
+            const legend = document.createElement('legend');
+            legend.textContent = title;
+            fieldset.appendChild(legend);
+            if (owner) {
+                const provenance = document.createElement('div');
+                provenance.style.cssText = 'font-size:9px;color:var(--win-dark-shadow);margin-bottom:5px;overflow-wrap:anywhere;';
+                provenance.textContent = `Owner: ${owner}`;
+                fieldset.appendChild(provenance);
+            }
+            return fieldset;
+        }
+
+        function renderCalibrationPanel() {
+            const viewport = viewportApi();
+            const state = viewport?.getPlateCalibration?.();
+            calibrationPanel.innerHTML = '';
+            if (!state?.available) {
+                calibrationPanel.style.display = 'none';
+                return;
+            }
+
+            const heading = document.createElement('div');
+            heading.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-weight:bold;';
+            heading.textContent = `Plate Composition · Map ${state.mapId}`;
+            const close = document.createElement('button');
+            close.type = 'button'; close.className = 'win98-btn'; close.textContent = '×';
+            close.style.cssText = 'min-width:22px;padding:0 4px;';
+            close.addEventListener('click', () => { calibrationPanel.style.display = 'none'; });
+            heading.appendChild(close);
+            calibrationPanel.appendChild(heading);
+
+            const warning = document.createElement('div');
+            warning.style.cssText = 'font-size:9px;margin-bottom:7px;padding:4px;border:1px solid var(--win-shadow,#808080);background:#fff;';
+            warning.textContent = 'WorldCamera principal point and plate player anchor are independent coordinate facts. They are not normalized to each other.';
+            calibrationPanel.appendChild(warning);
+
+            const camera = section('WorldCamera', state.camera.owner);
+            camera.appendChild(calibrationNumber('Pitch (deg)', state.camera.pitchDegrees,
+                value => viewport.setTownCameraField('pitchDegrees', value),
+                { step: '0.25', min: -88.9, max: 88.9 }));
+            camera.appendChild(calibrationNumber('Horizontal FOV', state.camera.fovDegrees,
+                value => viewport.setTownCameraField('fovDegrees', value),
+                { step: '0.25', min: 0.1, max: 178.9 }));
+            camera.appendChild(calibrationRow('Target', state.camera.target
+                ? `${state.camera.target.x}, ${state.camera.target.y}, ${state.camera.target.z}` : '—',
+                'Read-only in this first manual calibration slice.'));
+            camera.appendChild(calibrationRow('Distance', state.camera.distance));
+            camera.appendChild(calibrationRow('Eye height', state.camera.eyeHeight));
+            camera.appendChild(calibrationRow('Projection scale', state.camera.projectionScale
+                ? `${state.camera.projectionScale.x}, ${state.camera.projectionScale.y}` : '—'));
+            camera.appendChild(calibrationRow('Principal point',
+                state.camera.projectionFrame
+                    ? `X ${state.camera.projectionFrame.canonicalCenterX} · horizon Y ${state.camera.projectionFrame.canonicalHorizonY}`
+                    : '—',
+                'WorldCamera projection-frame fact; not the baked plate anchor.'));
+            camera.appendChild(calibrationRow('Tracking',
+                state.camera.tracking
+                    ? `center ${state.camera.tracking.center} · offsets ${state.camera.tracking.minOffsetX}…${state.camera.tracking.maxOffsetX}`
+                    : '—'));
+            calibrationPanel.appendChild(camera);
+
+            const plate = section('Plate player projection', state.plate.owner);
+            plate.appendChild(calibrationNumber('Anchor center X', state.plate.centerX,
+                value => viewport.setPlateProjectionField('centerX', value),
+                { step: '0.25' }));
+            plate.appendChild(calibrationNumber('Foot line Y', state.plate.screenY,
+                value => viewport.setPlateProjectionField('screenY', value),
+                { step: '0.25' }));
+            plate.appendChild(calibrationRow('Pixels / world Y', state.plate.pixelsPerRuntimeY,
+                'Read-only: this scale is coupled to the authored plate render and should change with regenerated plate evidence.'));
+            plate.appendChild(calibrationRow('Image dimensions',
+                `${state.plate.imageSize[0]} × ${state.plate.imageSize[1]}`,
+                'Derived/authored image size, not a crop knob.'));
+            calibrationPanel.appendChild(plate);
+
+            const reference = section('Slice / reference calibration', state.reference.owner);
+            reference.appendChild(calibrationRow('Slice positions', state.reference.slicePositions.join(', '),
+                'Visible but read-only until an independently meaningful runtime edit is proven.'));
+            reference.appendChild(calibrationRow('Runtime center Y', state.reference.runtimeCenterY));
+            reference.appendChild(calibrationRow('Active slice',
+                `#${state.reference.activeSliceIndex + 1} @ Y ${state.reference.activeSliceY}`));
+            calibrationPanel.appendChild(reference);
+
+            const profile = section('Walk profile', state.walkProfile.owner);
+            profile.appendChild(calibrationRow('Ground profile',
+                state.walkProfile.authored ? 'authored polyline' : 'effective flat groundZ'));
+            const note = document.createElement('div');
+            note.style.cssText = 'font-size:9px;color:var(--win-dark-shadow);margin-top:4px;';
+            note.textContent = 'Elevation remains a separate Map-owned traversal fact. Camera/plate corrections never synthesize or rewrite it.';
+            profile.appendChild(note);
+            calibrationPanel.appendChild(profile);
+        }
+
+        function syncPlateCalibration() {
+            const state = viewportApi()?.getPlateCalibration?.();
+            const show = !!state?.available;
+            plateCalibration.style.display = show ? '' : 'none';
+            if (!show) calibrationPanel.style.display = 'none';
+            else if (calibrationPanel.style.display !== 'none') renderCalibrationPanel();
+        }
+
         function syncWalkProfile() {
             const viewport = viewportApi();
             const status = viewport?.getWalkProfileStatus?.();
@@ -493,6 +661,14 @@
             viewport.setWalkMeshVisible(!viewport.getWalkMeshVisible());
             syncWalkMesh();
         });
+        plateCalibration.addEventListener('click', () => {
+            if (calibrationPanel.style.display === 'none') {
+                renderCalibrationPanel();
+                calibrationPanel.style.display = '';
+            } else {
+                calibrationPanel.style.display = 'none';
+            }
+        });
         walkProfile.addEventListener('click', () => {
             const viewport = viewportApi();
             if (!viewport?.setWalkProfileEditing) return;
@@ -520,12 +696,13 @@
         });
 
         toolbar.mount('world-presentation', [
-            free, runtime, walkMesh,
+            free, runtime, walkMesh, plateCalibration,
             walkProfile, createProfile, splitProfile, deleteProfile,
             sceneSelect, info
         ]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
+            plateCalibration, calibrationPanel, syncPlateCalibration,
             walkProfile, createProfile, splitProfile, deleteProfile, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };

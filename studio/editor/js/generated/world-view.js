@@ -315,6 +315,42 @@ var ThestraWorldViewSemantics;
         return (low + high) * 0.5;
     }
     ThestraWorldViewSemantics.worldYAtScreenXOnGroundProfile = worldYAtScreenXOnGroundProfile;
+    // Invert a plate pixel back onto the fixed world-X plane used by bounded
+    // lanes. This is the drag inverse for profile control points: both hosts
+    // share the same projector and numerical solve instead of Studio growing a
+    // second camera model.
+    function worldYZAtScreenOnDepthPlane(camera, width, height, depthX, baseY, baseZ, centerX, centerY, screenX, screenY, initialY, initialZ) {
+        let y = finite(initialY, 0, 'lane inverse initial Y');
+        let z = finite(initialZ, 0, 'lane inverse initial Z');
+        screenX = finite(screenX, 0, 'lane inverse screen X');
+        screenY = finite(screenY, 0, 'lane inverse screen Y');
+        const base = projectPerspective(camera, width, height, depthX, baseY, baseZ);
+        const platePoint = (worldY, worldZ) => {
+            const projected = projectPerspective(camera, width, height, depthX, worldY, worldZ);
+            return { x: centerX + projected.x - base.x, y: centerY + projected.y - base.y };
+        };
+        const epsilon = 1e-4;
+        for (let iteration = 0; iteration < 12; iteration++) {
+            const point = platePoint(y, z);
+            const errorX = screenX - point.x, errorY = screenY - point.y;
+            if (Math.abs(errorX) + Math.abs(errorY) <= 1e-9)
+                break;
+            const yStep = platePoint(y + epsilon, z);
+            const zStep = platePoint(y, z + epsilon);
+            const dXdy = (yStep.x - point.x) / epsilon;
+            const dXdz = (zStep.x - point.x) / epsilon;
+            const dYdy = (yStep.y - point.y) / epsilon;
+            const dYdz = (zStep.y - point.y) / epsilon;
+            const determinant = dXdy * dYdz - dXdz * dYdy;
+            if (Math.abs(determinant) < 1e-12) {
+                throw new Error('Plate depth-plane projection cannot be inverted at this position.');
+            }
+            y += (errorX * dYdz - dXdz * errorY) / determinant;
+            z += (dXdy * errorY - errorX * dYdy) / determinant;
+        }
+        return { y, z };
+    }
+    ThestraWorldViewSemantics.worldYZAtScreenOnDepthPlane = worldYZAtScreenOnDepthPlane;
 })(ThestraWorldViewSemantics || (ThestraWorldViewSemantics = {}));
 // THES_SHARED_COMMONJS_WORLD_VIEW: generated host adapter; do not edit.
 if (typeof module === 'object' && module.exports) module.exports = ThestraWorldViewSemantics;

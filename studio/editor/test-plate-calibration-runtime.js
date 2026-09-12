@@ -78,10 +78,12 @@ test('camera optics and plate anchor calibration move map 24 independently in th
 
         const cameraFrames = captureTownFrames(previewExe, gameRoot);
         const cameraEast = frame(cameraFrames, '24-east');
-        const beforeDx = baselineEast.composition.player.screen.x
-            - baselineEast.composition.player.plate.centerX;
-        const afterDx = cameraEast.composition.player.screen.x
-            - cameraEast.composition.player.plate.centerX;
+        const beforeAnchorX = baselineEast.composition.player.plate.panX
+            + baselineEast.composition.player.plate.centerX;
+        const afterAnchorX = cameraEast.composition.player.plate.panX
+            + cameraEast.composition.player.plate.centerX;
+        const beforeDx = baselineEast.composition.player.screen.x - beforeAnchorX;
+        const afterDx = cameraEast.composition.player.screen.x - afterAnchorX;
         assert.equal(Math.sign(afterDx), Math.sign(beforeDx),
             'narrower FOV preserves the side of the plate anchor');
         assert.ok(Math.abs(afterDx) > Math.abs(beforeDx) + 0.05,
@@ -89,6 +91,9 @@ test('camera optics and plate anchor calibration move map 24 independently in th
         assert.equal(cameraEast.composition.player.plate.centerX,
             baselineEast.composition.player.plate.centerX,
             'Map camera edit does not rewrite the environment player anchor');
+        assert.equal(cameraEast.composition.player.plate.panX,
+            baselineEast.composition.player.plate.panX,
+            'camera lens edit does not rewrite plate-scroll calibration');
         assert.deepEqual(cameraEast.actor, baselineEast.actor,
             'Map camera edit changes composition, not gameplay position');
         assert.notEqual(cameraEast.image, baselineEast.image,

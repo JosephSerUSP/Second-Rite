@@ -556,6 +556,60 @@ do
         end
         return (low + high) * 0.5
     end
+    function ThestraWorldViewSemantics.worldYZAtScreenOnDepthPlane(camera, width, height, depthX, baseY, baseZ, centerX, centerY, screenX, screenY, initialY, initialZ)
+        local y = finite(initialY, 0, "lane inverse initial Y")
+        local z = finite(initialZ, 0, "lane inverse initial Z")
+        screenX = finite(screenX, 0, "lane inverse screen X")
+        screenY = finite(screenY, 0, "lane inverse screen Y")
+        local base = ThestraWorldViewSemantics.projectPerspective(
+            camera,
+            width,
+            height,
+            depthX,
+            baseY,
+            baseZ
+        )
+        local function platePoint(worldY, worldZ)
+            local projected = ThestraWorldViewSemantics.projectPerspective(
+                camera,
+                width,
+                height,
+                depthX,
+                worldY,
+                worldZ
+            )
+            return {x = centerX + projected.x - base.x, y = centerY + projected.y - base.y}
+        end
+        local epsilon = 1e-4
+        do
+            local iteration = 0
+            while iteration < 12 do
+                local point = platePoint(y, z)
+                local errorX = screenX - point.x
+                local errorY = screenY - point.y
+                if math.abs(errorX) + math.abs(errorY) <= 1e-9 then
+                    break
+                end
+                local yStep = platePoint(y + epsilon, z)
+                local zStep = platePoint(y, z + epsilon)
+                local dXdy = (yStep.x - point.x) / epsilon
+                local dXdz = (zStep.x - point.x) / epsilon
+                local dYdy = (yStep.y - point.y) / epsilon
+                local dYdz = (zStep.y - point.y) / epsilon
+                local determinant = dXdy * dYdz - dXdz * dYdy
+                if math.abs(determinant) < 1e-12 then
+                    error(
+                        __TS__New(Error, "Plate depth-plane projection cannot be inverted at this position."),
+                        0
+                    )
+                end
+                y = y + (errorX * dYdz - dXdz * errorY) / determinant
+                z = z + (dXdy * errorY - errorX * dYdy) / determinant
+                iteration = iteration + 1
+            end
+        end
+        return {y = y, z = z}
+    end
 end
 -- THES_SHARED_LUA_WORLD_VIEW: generated module adapter; do not edit.
 return ThestraWorldViewSemantics

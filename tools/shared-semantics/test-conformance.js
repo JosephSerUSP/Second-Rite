@@ -160,6 +160,25 @@ close(nextOptics.yScale * anchoredY - nextOptics.centerNdcY, cursorNdcY,
     'cursor-anchored optical zoom y');
 close(WorldView.groundHeight([{ y: 0, z: 0 }, { y: 2, z: 1 }], 0, 1), 0.5, 'lane ground interpolation');
 
+const portCamera = WorldView.resolveTownCamera({
+    target: { x: 7.8, y: 14.802, z: 0 }, distance: 18.666666666666668,
+    yawDegrees: 0, pitchDegrees: -17.5, eyeHeight: 2.2604166666666665,
+    fovDegrees: 28.072486935852957, projectionScale: { x: 1, y: 1 },
+    projectionFrame: { compositionWidth: 256, canonicalCenterX: 213, canonicalHorizonY: 66 }
+});
+const portProfile = [
+    { y: -4.6667, z: 0 }, { y: 25.2292, z: 0 },
+    { y: 29.6042, z: 0.5833 }, { y: 34.1615, z: 0.5833 }
+];
+const portY = 28.6927;
+const portBase = WorldView.projectPerspective(portCamera, 1065, 240, 7.8, 14.802, 0);
+const portPoint = WorldView.projectPerspective(portCamera, 1065, 240, 7.8, portY,
+    WorldView.groundHeight(portProfile, 0, portY) + 0.22);
+const portScreenX = 533.998 + portPoint.x - portBase.x;
+close(WorldView.worldYAtScreenXOnGroundProfile(
+    portCamera, 1065, 240, 7.8, portProfile, 0, 14.802, 533.998,
+    portScreenX, 0, 29.604, 0.22), portY, 'Port sloped-floor plate inverse', 1e-7);
+
 function bench(fn, iterations) {
     for (let i = 0; i < 2000; i++) fn();
     const started = performance.now();

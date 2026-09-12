@@ -5,75 +5,73 @@
   "textureAtlas": "../stub/atlas.png",
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
+    6.8,
+    0.35,
     -1.0,
-    0.0,
-    -0.5,
-    1.0,
-    7.7667,
-    3.7
+    8.8,
+    7.417,
+    4.0
   ],
   "provenance": {
-    "plateSourceViewTransform": "NotRecorded",
-    "note": "The current source blend is AgX; that does not prove the historical PNG bake."
+    "plateSourceViewTransform": "AgX"
   },
   "anchors": {
     "spawn_player": {
       "position": [
-        0.0,
-        6.1333,
+        7.8,
+        1.25,
         0.0
       ]
     },
     "exit_door": {
       "position": [
-        0.0,
-        7.0333,
+        7.8,
+        0.35,
         0.0
       ]
     },
     "home_stair": {
       "position": [
-        0.0,
-        0.7333,
+        7.8,
+        7.2254,
         0.0
       ]
     },
     "npc_alicia": {
       "position": [
-        0.0,
-        2.3333,
+        7.8,
+        2.3353,
         0.0
       ]
     }
   },
   "preRendered": {
     "mode": "layered_2d",
-    "cameraMode": "static",
     "imageSize": [
-      256,
+      450,
       240
     ],
     "slicePositions": [
-      3.8833
+      3.883
     ],
     "backgrounds": [
-      "../plates/alicias_padaria_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/alicias_padaria_bg.png"
     ],
     "scenes": [
-      "../plates/alicias_padaria_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/alicias_padaria_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_256.png"
+      "../stub/empty_450.png"
     ],
     "lane": {
-      "runtimeCenterY": 3.8833
+      "runtimeCenterY": 3.883
     },
     "playerProjection": {
-      "centerX": 128.0,
-      "screenY": 128.0,
+      "centerX": 225.0,
+      "screenY": 136,
       "width": 24,
       "height": 48,
-      "pixelsPerRuntimeY": 27.4286
+      "pixelsPerRuntimeY": 27.428571428571427
     }
   }
 }

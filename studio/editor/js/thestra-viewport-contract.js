@@ -41,6 +41,15 @@
         return [Number(value[0]), Number(value[2]), Number(value[1])];
     }
 
+
+    function thestraPositionToRuntime(value) {
+        if (!Array.isArray(value) || value.length !== 3 || !value.every(Number.isFinite)) {
+            throw new Error('World position must contain three finite coordinates.');
+        }
+        return [value[0] + 1, value[2] + 1, value[1]];
+    }
+
+
     function runtimePlacementTransformToThestra(placement, coordinateSystem) {
         const transform = placement && placement.transform || {};
         const m = transform.matrix2d;
@@ -295,7 +304,7 @@
     return {
         DEFAULT_LIGHT_AMBIENT,
         ORBIT_STEP_DEGREES,
-        transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
+        transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra, thestraPositionToRuntime,
         runtimePlacementTransformToThestra, runtimeNormalToThestra,
         eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
         provisionalRegion,

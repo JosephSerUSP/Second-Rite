@@ -1,0 +1,7 @@
+{
+  "events": [{"id": "guide", "position": [1, 0, 0]}],
+  "motionPlane": {"axis": "y", "value": 0},
+  "camera": {"profile": "rpg_ortho"},
+  "transfers": [{"feature": "exit", "destination": "next_room", "requires": "double_jump"}],
+  "triggers": [{"feature": "trigger_volume", "action": "checkpoint"}]
+}

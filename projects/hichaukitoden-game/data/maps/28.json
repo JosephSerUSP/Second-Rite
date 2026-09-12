@@ -47,7 +47,7 @@
       "nearPlane": 0.05,
       "farPlane": 128.0,
       "projectionScale": {
-        "x": 0.9407962900,
+        "x": 0.94079629,
         "y": 0.9116197588
       },
       "projectionWindowOffsetY": -107.16301268,
@@ -150,13 +150,15 @@
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 18,
           "arrival": "padaria_door"
         }
-      ]
+      ],
+      "direction": "right"
     }
   ],
   "treasures": [],

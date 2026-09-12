@@ -6,6 +6,7 @@ const { performance } = require('node:perf_hooks');
 const loadStarted = performance.now();
 const Vertex = require('../../studio/editor/js/generated/vertex-shading.js');
 const SpriteTiming = require('../../studio/editor/js/generated/sprite-timing.js');
+const WorldView = require('../../studio/editor/js/generated/world-view.js');
 const generatedLoadMs = performance.now() - loadStarted;
 const VertexStudioAdapter = require('../../studio/editor/js/vertex-shading.js');
 
@@ -111,6 +112,53 @@ assert.deepEqual(SpriteTiming.resolveTiming({ speed: 2 }, { speed: 3 }),
     { fps: 8, source: 'key', token: 'speed', value: 2 });
 assert.deepEqual(SpriteTiming.resolveTiming({}, {}),
     { fps: 4, source: 'default', token: null, value: null });
+
+// World camera optics and editor navigation are one generated numerical leaf.
+const townCamera = WorldView.resolveTownCamera({
+    target: { x: 7.8, y: 11.85, z: 2.2604 }, distance: 18.6667,
+    yawDegrees: 0, pitchDegrees: -17.5, fovDegrees: 28.072486935852957,
+    projectionScale: { x: 1, y: 1 },
+    projectionFrame: { compositionWidth: 256, canonicalCenterX: 128, canonicalHorizonY: 66 }
+});
+assert.equal(townCamera.profile, 'town_sideview');
+close(townCamera.viewportCenterX, 128, 'town camera principal point x');
+close(townCamera.viewportCenterY, 66, 'town camera principal point y');
+close(townCamera.forwardX, Math.cos(17.5 * Math.PI / 180), 'town camera forward x');
+close(townCamera.forwardZ, Math.sin(17.5 * Math.PI / 180), 'town camera forward z');
+close(townCamera.upX, -Math.sin(17.5 * Math.PI / 180), 'town camera up x');
+close(townCamera.upZ, Math.cos(17.5 * Math.PI / 180), 'town camera up z');
+const projection = WorldView.horizontalProjection(townCamera, 906, 240, 7.8, 0, 11.85, 453);
+for (const laneY of [0, 4.625, 12.717, 23.7]) {
+    const screen = WorldView.projectPerspective(townCamera, 906, 240, 7.8, laneY, 0);
+    const base = WorldView.projectPerspective(townCamera, 906, 240, 7.8, 11.85, 0);
+    close(WorldView.worldYAtScreenX(projection, 453 + screen.x - base.x), laneY,
+        `plate inverse ${laneY}`, 1e-9);
+}
+assert.deepEqual(WorldView.panProjectionWindow(0, 0, 128, 72, 512, 288, 256, 144), { x: 64, y: 36 });
+assert.deepEqual(WorldView.transitionArrowAxis('left'), { x: 0, y: -1 });
+assert.deepEqual(WorldView.transitionArrowAxis('right'), { x: 0, y: 1 });
+assert.deepEqual(WorldView.transitionArrowAxis('toward'), { x: -1, y: 0 });
+assert.throws(() => WorldView.transitionArrowAxis('up'), /transition arrow direction/);
+assert.deepEqual(WorldView.transitionArrowWorldPoint(7.8, 12, 0, 1, 'away', 0, 0, 1.04),
+    { x: 8.84, y: 12, z: 0.22 });
+assert.deepEqual(WorldView.transitionArrowWorldPoint(7.8, 12, 0.5, 2, 'left', 0.07, 0, 1.04),
+    { x: 7.66, y: 9.92, z: 0.94 });
+close(WorldView.opticalScaleAfterWheel(1, 0), 1, 'zero wheel optical scale');
+const priorOptics = WorldView.projectionCoefficients(townCamera, 1, 13, -7);
+const cursorX = 533, cursorY = 161, displayWidth = 800, displayHeight = 300;
+const cursorNdcX = cursorX * 2 / displayWidth - 1;
+const cursorNdcY = 1 - cursorY * 2 / displayHeight;
+const zoomedOptical = WorldView.zoomProjectionWindowAtCursor(
+    townCamera, 1, 13, -7, -360, cursorX, cursorY, displayWidth, displayHeight);
+const nextOptics = WorldView.projectionCoefficients(
+    townCamera, zoomedOptical.scale, zoomedOptical.x, zoomedOptical.y);
+const anchoredX = (cursorNdcX + priorOptics.centerNdcX) / priorOptics.xScale;
+const anchoredY = (cursorNdcY + priorOptics.centerNdcY) / priorOptics.yScale;
+close(nextOptics.xScale * anchoredX - nextOptics.centerNdcX, cursorNdcX,
+    'cursor-anchored optical zoom x');
+close(nextOptics.yScale * anchoredY - nextOptics.centerNdcY, cursorNdcY,
+    'cursor-anchored optical zoom y');
+close(WorldView.groundHeight([{ y: 0, z: 0 }, { y: 2, z: 1 }], 0, 1), 0.5, 'lane ground interpolation');
 
 function bench(fn, iterations) {
     for (let i = 0; i < 2000; i++) fn();

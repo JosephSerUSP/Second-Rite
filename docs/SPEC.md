@@ -2100,6 +2100,43 @@ health from game content churn.
 
 ### 4.1 One event language, one editor, one clipboard (27.07.2026)
 
+The spatial Studio pilot consumes exported town render and collision meshes
+through the existing runtime renderable bridge. Collision is an optional
+inspection overlay; it does not become exported render geometry. Environment
+geometry remains read-only in Studio. Events with `worldPosition` use the
+shared XYZ display adapter and three-axis movement, writing the existing Map
+Event field. Colocated Events open by identity through the same command editor;
+coordinate-only lookup must reject ambiguity. The Inspector lists these Events
+so geometry occlusion does not prevent selection.
+
+Plate Maps open in an editable full-plate composition with pan/zoom. Event
+boxes, selection outlines, transform gizmos and navigation policy come from
+the same Three.js authoring helpers as the 3D viewport. Empty-space drag and
+middle/right drag pan in the screen plane; the wheel zooms; Alt+middle drag
+orbits 3D views. Authored targets retain left-click selection and gizmo dragging,
+and dungeon Map-layer painting retains its drag gesture.
+Studio reads the package's authored plate layers directly; a plate edit never
+requests a LÖVE render or waits for a screenshot refresh. Camera, projection,
+lane-floor and inverse-placement calculations come from one TypeScript semantic
+leaf compiled into both browser JavaScript and runtime Lua. Dragging updates the
+local Event object immediately and writes the same Map `worldPosition` field;
+double-click opens the existing Event editor.
+
+Fully 3D Maps retain their interactive 3D viewport and initially use the exact
+runtime camera frame. Screen-plane pan changes the projection window while
+wheel zoom changes optical scale; neither operation moves the camera eye.
+Alt+middle drag explicitly leaves that composition frame for orbit inspection.
+The Studio bridge supplies static environment and collision geometry without
+duplicating Event models, because Studio's semantic Event objects are the live
+authoring representation. All initial map framing is immediate, including
+dungeon Maps; only subsequent requested camera navigation may ease. Plate Maps
+can also switch to the 3D geometry view. No fixed-viewpoint screenshot mode is
+used for authoring.
+This pilot does not migrate Map schemas or
+introduce tactical/platformer gameplay. Evidence and limits are recorded in
+`docs/reports/spatial-studio-pilot-2026-09-10.md` and
+`docs/reports/spatial-studio-audit-2026-09-11.md` (#1088 follow-through).
+
 The engine is made of event blocks (§0). It follows that **there is exactly one
 way to edit a command list, everywhere one exists.** Map events, common events,
 scene hooks, battle phases, troop battle events, quest hooks, action sequences

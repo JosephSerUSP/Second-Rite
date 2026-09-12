@@ -1,0 +1,25 @@
+{
+  "dependencies": [
+    {
+      "path": "runtime/engine/exploration.lua",
+      "sha256": "4eaf286ebe0b99f73cbce26c505d33605fae193fbee61c3f540088663d8ba193"
+    },
+    {
+      "path": "runtime/engine/tileset_resolver.lua",
+      "sha256": "21ae7740fb51c5cb30da46d44a24f7c1bd6408e690ab70c08c379a8c7fafaa07"
+    },
+    {
+      "path": "runtime/engine/geometry/model.lua",
+      "sha256": "04cd63f1e1ddb66d3f8f9cd2808bfdb87833764f9ada99fb40bbdbdbe113c897"
+    },
+    {
+      "path": "runtime/presentation/obj_model.lua",
+      "sha256": "851acf51fb3f85be106dc90f11606622b5ca073b31e4ef93ef3dabdaabea76bc"
+    },
+    {
+      "path": "runtime/presentation/world_camera.lua",
+      "sha256": "036750889fc7f5a1f3bf56457f3bdb0059c0dc56612ec8bdfd3715d7c1ebaae4"
+    }
+  ],
+  "note": "Real LOVE generator, OBJ parser, and WorldCamera; minimal no-art dungeon source. Not a rendered/playable proof."
+}

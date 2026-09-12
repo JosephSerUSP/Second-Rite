@@ -94,6 +94,19 @@
         return result;
     }
 
+    function moveWorldEvent(payload, mapIndex, eventId, position) {
+        const event = eventById(mapAt(payload, mapIndex), eventId);
+        if (!event || !Array.isArray(event.worldPosition)) return { ok: false, reason: 'missing-world-event' };
+        if (!Array.isArray(position) || position.length !== 3 || !position.every(Number.isFinite)) {
+            return { ok: false, reason: 'invalid-world-position' };
+        }
+        const changed = position.some((value, index) => value !== event.worldPosition[index]);
+        if (changed) event.worldPosition = position.slice();
+        return { ok: true, changed, entity: event,
+            selection: { kind: 'event', key: `event:${eventId}`, id: eventId,
+                cell: { x: event.x, y: event.y } } };
+    }
+
     function lightAtIndex(map, lightIndex) {
         if (!map || !Array.isArray(map.lightObjects)) return null;
         const index = Number(lightIndex);
@@ -128,5 +141,5 @@
         return result;
     }
 
-    return { TILE_BY_TOOL, tileForTool, cellBounds, validateCell, paintCell, eventById, canMoveEvent, moveEvent, canMoveLight, moveLight };
+    return { TILE_BY_TOOL, tileForTool, cellBounds, validateCell, paintCell, eventById, canMoveEvent, moveEvent, moveWorldEvent, canMoveLight, moveLight };
 }));

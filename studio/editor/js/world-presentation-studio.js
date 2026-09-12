@@ -306,26 +306,22 @@
         return root.ThestraRuntimeCameraViewport || null;
     }
 
-    function letterboxRuntimeViewport() {
+    // The game has a fixed presentation frame; Studio does not.  Constraining
+    // the editor host to 256:144 created a dead lower band whenever the Map
+    // workspace had another aspect.  The runtime projection remains exact;
+    // its authoring surface fills the available workspace.
+    function fillRuntimeViewport() {
         const viewport = document.getElementById('thestra-map-viewport');
-        if (!viewport || previewState.mode() !== 'runtime') return;
-        const parent = viewport.parentElement;
-        const rect = parent.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return;
-        const targetAspect = 256 / 144;
-        const aspect = rect.width / rect.height;
-        if (aspect > targetAspect) {
-            const inset = Math.max(0, (rect.width - rect.height * targetAspect) / 2);
-            viewport.style.inset = `0px ${inset}px`;
-        } else {
-            const inset = Math.max(0, (rect.height - rect.width / targetAspect) / 2);
-            viewport.style.inset = `${inset}px 0px`;
-        }
+        if (viewport) viewport.style.inset = '0px';
     }
 
     function updateRuntimeControls() {
         if (!runtimeControls) return;
+        runtimeControls.syncWalkMesh?.();
         const runtime = previewState.mode() === 'runtime';
+        const plate = viewportApi()?.getCompositionPreview?.();
+        runtimeControls.runtime.textContent = plate ? 'Plate Composition' : 'Runtime Camera';
+        runtimeControls.free.textContent = plate ? '3D View' : 'Free Authoring';
         runtimeControls.free.disabled = !runtime;
         runtimeControls.runtime.disabled = runtime || !worldScenes().length;
         if (runtime) {
@@ -358,11 +354,26 @@
             payload(), mapIndex(), viewport.getSelection ? viewport.getSelection() : null
         );
         const authoredCamera = scene.worldPresentation && scene.worldPresentation.camera;
-        const resolved = WorldPresentation.resolveCamera(authoredCamera, focus);
+        const spatialCamera = viewport.getSpatialCamera && viewport.getSpatialCamera();
+        const composition = viewport.getCompositionPreview && viewport.getCompositionPreview();
+        const map = payload().maps[mapIndex()];
+        if (map && map.traversal && map.traversal.environmentPackage && !spatialCamera && !composition) {
+            if (runtimeControls) runtimeControls.info.textContent = 'Waiting for current Map camera compilation.';
+            return false;
+        }
+        if (composition) {
+            viewport.showComposition('authoring/map');
+            fillRuntimeViewport();
+            if (runtimeControls) runtimeControls.info.textContent = 'Select Event boxes · drag gizmo · background drag pans · wheel zooms';
+            return true;
+        }
+        const resolved = spatialCamera || WorldPresentation.resolveCamera(authoredCamera, focus);
         viewport.applyRuntimeCamera(resolved);
-        letterboxRuntimeViewport();
+        fillRuntimeViewport();
         if (runtimeControls) {
-            runtimeControls.info.textContent = `Scene ${scene.id} · ${resolved.provenance} · ${resolved.profile} · focus: ${focus.source}`;
+            runtimeControls.info.textContent = spatialCamera
+                ? `Map traversal · ${resolved.profile} · drag shifts camera · wheel zooms`
+                : `Scene ${scene.id} · ${resolved.provenance} · ${resolved.profile} · focus: ${focus.source}`;
         }
         return true;
     }
@@ -401,15 +412,24 @@
         const free = document.createElement('button');
         free.type = 'button';
         free.className = 'win98-btn';
-        free.style.cssText = 'font-size:10px;padding:2px 6px;';
+        free.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;';
         free.textContent = 'Free Authoring';
         free.title = 'Restore the exact editor camera pose used before Runtime Camera preview.';
         const runtime = document.createElement('button');
         runtime.type = 'button';
         runtime.className = 'win98-btn';
-        runtime.style.cssText = 'font-size:10px;padding:2px 6px;';
+        runtime.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;';
         runtime.textContent = 'Runtime Camera';
         runtime.title = 'Preview the selected world Scene through the real #617 runtime camera semantics.';
+        const walkMesh = document.createElement('button');
+        walkMesh.type = 'button';
+        walkMesh.className = 'win98-btn';
+        walkMesh.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;';
+        walkMesh.title = 'Show the runtime collision mesh for 3D environments or the authored traversal lane for plates. Inspection only.';
+        function syncWalkMesh() {
+            const viewport = viewportApi();
+            walkMesh.textContent = viewport?.getWalkMeshVisible?.() ? 'Walk Mesh: On' : 'Walk Mesh';
+        }
         const sceneSelect = document.createElement('select');
         sceneSelect.className = 'win98-input';
         sceneSelect.style.cssText = 'font-size:9px;max-width:120px;height:20px;';
@@ -419,14 +439,20 @@
 
         free.addEventListener('click', leaveRuntimePreview);
         runtime.addEventListener('click', enterRuntimePreview);
+        walkMesh.addEventListener('click', () => {
+            const viewport = viewportApi();
+            if (!viewport?.setWalkMeshVisible) return;
+            viewport.setWalkMeshVisible(!viewport.getWalkMeshVisible());
+            syncWalkMesh();
+        });
         sceneSelect.addEventListener('change', () => {
             runtimeSceneId = sceneSelect.value;
             if (previewState.mode() === 'runtime') applyRuntimePreview();
             updateRuntimeControls();
         });
 
-        toolbar.mount('world-presentation', [free, runtime, sceneSelect, info]);
-        runtimeControls = { free, runtime, sceneSelect, info, projectionButtons, projectionDisabled: null };
+        toolbar.mount('world-presentation', [free, runtime, walkMesh, sceneSelect, info]);
+        runtimeControls = { free, runtime, walkMesh, syncWalkMesh, sceneSelect, info, projectionButtons, projectionDisabled: null };
         updateRuntimeControls();
         return true;
     }
@@ -438,18 +464,29 @@
         installRuntimeToolbar();
     }, { once: true });
     root.addEventListener('thestra-runtime-camera-viewport-ready', () => updateRuntimeControls());
+    let initialCompositionMap = null;
+    root.addEventListener('thestra-composition-preview-ready', () => {
+        const composition = viewportApi()?.getCompositionPreview?.();
+        if (!composition) { updateRuntimeControls(); return; }
+        if (initialCompositionMap !== composition.mapId) {
+            initialCompositionMap = composition.mapId;
+            enterRuntimePreview();
+        } else if (previewState.mode() === 'runtime') applyRuntimePreview();
+        updateRuntimeControls();
+    });
     root.addEventListener('thestra-world-presentation-changed', event => {
         updateRuntimeControls();
         if (previewState.mode() !== 'runtime') return;
         if (!event.detail || String(event.detail.sceneId) === String(runtimeSceneId)) applyRuntimePreview();
     });
-    root.addEventListener('resize', letterboxRuntimeViewport);
+    root.addEventListener('resize', fillRuntimeViewport);
 
     if (typeof root.loadActiveMap === 'function' && !root.__thestraWorldPresentationMapLoadWrapped) {
         const loadActiveMap = root.loadActiveMap;
         root.loadActiveMap = function () {
             if (previewState.mode() === 'runtime') leaveRuntimePreview();
             const result = loadActiveMap.apply(this, arguments);
+            if (payload()?.maps?.[mapIndex()]?.id !== initialCompositionMap) initialCompositionMap = null;
             updateRuntimeControls();
             return result;
         };

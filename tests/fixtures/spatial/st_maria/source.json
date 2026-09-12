@@ -1,0 +1,11 @@
+{
+  "collision": {
+    "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/collision.obj",
+    "sha256": "be9fbb9be17fedd4bb2a2cc5c9b66b15a0be599335e522676c4644cf95b58391"
+  },
+  "collisionObj": "# Blender 5.1.2\n# www.blender.org\no COL_walkable_surface\nv 6.800000 -0.100000 0.000000\nv 6.800000 -0.000000 0.000000\nv 6.800000 -0.100000 -23.698999\nv 6.800000 -0.000000 -23.698999\nv 8.800000 -0.100000 0.000000\nv 8.800000 -0.000000 0.000000\nv 8.800000 -0.100000 -23.698999\nv 8.800000 -0.000000 -23.698999\nvn -1.0000 -0.0000 -0.0000\nvn -0.0000 -0.0000 -1.0000\nvn 1.0000 -0.0000 -0.0000\nvn -0.0000 -0.0000 1.0000\nvn -0.0000 -1.0000 -0.0000\nvn -0.0000 1.0000 -0.0000\ns 0\nf 2//1 3//1 1//1\nf 4//2 7//2 3//2\nf 8//3 5//3 7//3\nf 6//4 1//4 5//4\nf 7//5 1//5 3//5\nf 4//6 6//6 8//6\nf 2//1 4//1 3//1\nf 4//2 8//2 7//2\nf 8//3 6//3 5//3\nf 6//4 2//4 1//4\nf 7//5 5//5 1//5\nf 4//6 2//6 6//6\n",
+  "render": {
+    "path": "projects/hichaukitoden-game/assets/environments/st_maria_town/praca/environment.obj",
+    "sha256": "e77dc97eed3bacf31f5439183fdbdba154c07d9d34560058dd5831f2231bafac"
+  }
+}

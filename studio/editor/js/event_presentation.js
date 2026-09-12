@@ -154,6 +154,16 @@
                 return window.SecondRiteEditorCommands.canMoveEvent(dbPayload, currentMapIndex, eventId, x, y);
             },
 
+            moveWorldEvent(eventId, position) {
+                const result = window.SecondRiteEditorCommands.moveWorldEvent(dbPayload, currentMapIndex, eventId, position);
+                if (result.changed) {
+                    selectedEvent = result.entity;
+                    markMapDirty();
+                    renderGridCells();
+                }
+                return result;
+            },
+
             moveEvent(eventId, x, y) {
                 const result = window.SecondRiteEditorCommands.moveEvent(dbPayload, currentMapIndex, eventId, x, y);
                 if (result.changed) {
@@ -180,9 +190,16 @@
             },
 
             openAt(selection) {
+                if (selection && selection.kind === 'event') {
+                    const map = dbPayload.maps[currentMapIndex];
+                    const event = (map.events || []).find((entry, index) => String(entry.id ?? index) === String(selection.id));
+                    if (!event) throw new Error('The selected Event is no longer on this Map.');
+                    openEventModal(event.x, event.y, selection.id);
+                    return;
+                }
                 if (!selection || !selection.cell) return;
                 const x = selection.cell.x, y = selection.cell.y;
-                if (editingMode === 'event') openEventModal(x, y);
+                if (editingMode === 'event') openEventModal(x, y, selection.kind === 'event' ? selection.id : undefined);
                 else if (editingMode === 'light') selectOrCreateLightObjectAt(x, y);
                 else if (editingMode === 'override') selectOrCreateOverrideAt(x, y);
             }

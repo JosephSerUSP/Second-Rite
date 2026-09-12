@@ -36,6 +36,9 @@ from town_projection import (PlateCamera, self_check, ACTOR_HEIGHT,
                              PIXELS_PER_UNIT, plate_width_for)
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools" / "towngen"))
+from build_town import WORLD_H as VISIBLE_WORLD_ROWS  # noqa: E402
+
 GAME = ROOT / "projects" / "hichaukitoden-game"
 PLAYER = GAME / "assets" / "character" / "player.png"
 
@@ -63,6 +66,10 @@ SCALE_MARK = (64, 128, 255)
 FLOOR_RULE = (110, 210, 140)
 WALL_RULE = (225, 190, 90)
 HORIZON = (245, 245, 120)
+UI_BAND = (195, 115, 245)
+FIELD_STREET = (70, 180, 255, 72)
+FIELD_ENTRANCE = (255, 155, 45, 58)
+FIELD_ROUTE = (255, 220, 70, 64)
 MARK_SIZE = 0.30            # of person height
 RULE = 2
 
@@ -79,7 +86,6 @@ RULE = 2
 # floor bare. Twice now that was the complaint.
 FLOOR_RULERS = 10           # rulers lying flat, spread down the visible floor
 DEPTH_LINES = 9             # lines running away from the eye, across the width
-WALL_HEIGHT = 6.0           # world units, about two and a half people
 WALL_UPRIGHTS = 7
 
 # The plate screens declare pitchDegrees 0. A guide projected through a screen's
@@ -110,7 +116,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--maps", default="all")
+    parser.add_argument("--scale", type=int, default=SCALE)
+    parser.add_argument("--annotate", action="store_true",
+                        help="add a legend and named transition annotations")
+    parser.add_argument(
+        "--spatial-fields", action="store_true",
+        help="also draw shape-neutral event depth corridors from map data")
     args = parser.parse_args()
+
+    if args.scale < 1:
+        raise SystemExit("--scale must be a positive integer")
 
     keep = None if args.maps == "all" else {int(m) for m in args.maps.split(",")}
     args.output.mkdir(parents=True, exist_ok=True)
@@ -173,16 +188,42 @@ def main() -> None:
         person = int(round(cam.project(centre_y, 0.0)[1] - cam.project(centre_y, ACTOR_HEIGHT)[1]))
         mark = max(3, int(person * MARK_SIZE))
         placed = []
+        opening_records = []
+        events = {event.get("instanceId"): event
+                  for event in data.get("events", [])}
         for doorway in traversal.get("doorways", []):
             name = doorway.get("anchor")
             if name not in anchors:
                 continue
-            x = column(anchors[name]["position"][1])
+            lane_y = float(anchors[name]["position"][1])
+            x = column(lane_y)
             # A caret pointing at the spot. It has no width, no doorway shape and
             # no architecture: it is an arrow saying "here".
             draw.polygon([(x, feet - 1), (x - mark // 2, feet - mark),
                           (x + mark // 2, feet - mark)], fill=MARK)
             placed.append(name)
+            event = events.get(doorway.get("eventInstanceId")) or {}
+            event_name = event.get("name") or name.replace("_", " ")
+            lane_min = float(lane["minY"])
+            lane_max = float(lane["maxY"])
+            at_edge = (abs(lane_y - lane_min) < 0.01
+                       or abs(lane_y - lane_max) < 0.01)
+            named_lateral_edge = (name.startswith("west_")
+                                  or name.startswith("east_"))
+            route_words = ("stair", "climb", " up", "down ", "down to")
+            combined = (name + " " + event_name).lower()
+            semantic_type = ("street" if at_edge and named_lateral_edge else
+                             "route" if any(word in combined
+                                            for word in route_words)
+                             else "entrance")
+            opening_records.append({
+                "anchor": name,
+                "eventName": event_name,
+                "laneY": lane_y,
+                "plateX": x,
+                "radius": float(doorway.get("radius", 0.9)),
+                "semanticType": semantic_type,
+            })
 
         # Floor: rulers lying flat at fixed distances back, and lines running
         # away from the eye. The second family is the one that keystones -- they
@@ -194,11 +235,14 @@ def main() -> None:
                 for step in range(FLOOR_RULERS)]
         depths = [d for d in (cam.depth_for_row(r) for r in rows) if d is not None]
         for depth in depths:
-            points = [cam.project(lane_at(i / 24.0), 0.0, depth)
-                      for i in range(25)]
-            points = [q for q in points if q]
-            if len(points) > 1:
-                draw.line([(int(a), int(b)) for a, b in points], fill=FLOOR_RULE)
+            # At a fixed depth, a world-horizontal floor ruler projects to a
+            # screen-horizontal line. The old lane-bounded sample stopped at
+            # the authored lane edges, making the ruler look like the edge of
+            # a physical platform. Extend it across the complete image.
+            row = cam.project(centre_y, 0.0, depth)
+            if row:
+                draw.line((0, int(round(row[1])), width, int(round(row[1]))),
+                          fill=FLOOR_RULE)
         for step in range(DEPTH_LINES):
             lane_y = lane_at((step + 0.5) / DEPTH_LINES)
             points = [cam.project(lane_y, 0.0, d) for d in depths]
@@ -209,12 +253,13 @@ def main() -> None:
         draw.line((0, horizon, width, horizon), fill=HORIZON, width=RULE)
 
         # Wall uprights: world-vertical, which under a pitched camera is NOT
-        # screen-vertical. Drawn as projected polylines so they lean the way the
-        # engine makes them lean.
+        # screen-vertical. Extend the construction lines beyond the visible
+        # world so they continue through the full frame instead of stopping at
+        # the top of an invented wall fragment.
         for step in range(WALL_UPRIGHTS):
             lane_y = lane_at((step + 0.5) / WALL_UPRIGHTS)
-            points = [cam.project(lane_y, h * WALL_HEIGHT / 6.0, 0.0)
-                      for h in range(7)]
+            points = [cam.project(lane_y, height, 0.0)
+                      for height in (-8.0, -4.0, 0.0, 4.0, 8.0, 16.0, 32.0)]
             points = [q for q in points if q]
             if len(points) > 1:
                 draw.line([(int(a), int(b)) for a, b in points], fill=WALL_RULE)
@@ -224,10 +269,145 @@ def main() -> None:
         centre = column(centre_y)
         draw.rectangle((centre - 1, feet - person, centre, feet), fill=SCALE_MARK)
 
-        frame = frame.resize((width * SCALE, height * SCALE), Image.NEAREST)
+        # Preserve a text-free conditioning source. Labels must be added only
+        # after any working-aspect pre-warp or anisotropic scaling makes them
+        # unreadable and hands the image model distorted glyphs as geometry.
+        clean_frame = frame.copy()
+
+        spatial_clean = None
+        spatial_annotated = None
+        if args.spatial_fields:
+            # Event fields describe WHERE interaction begins and which way
+            # depth proceeds, while deliberately refusing to prescribe a door,
+            # stair, arch, building, or other silhouette. The red caret remains
+            # the exact gameplay position. A translucent corridor is only a
+            # family of projected rays behind it, not an authored endpoint.
+            spatial = frame.convert("RGBA")
+            field_layer = Image.new("RGBA", spatial.size, (0, 0, 0, 0))
+            field_draw = ImageDraw.Draw(field_layer, "RGBA")
+            for record in opening_records:
+                x = record["plateX"]
+                lane_y = record["laneY"]
+                kind = record["semanticType"]
+                if kind == "street":
+                    edge_x = 0 if x < centre_x else width - 1
+                    lo, hi = sorted((x, edge_x))
+                    field_draw.rectangle((lo, feet - 5, hi, feet + 4),
+                                         fill=FIELD_STREET)
+                    direction = -1 if edge_x == 0 else 1
+                    tip = edge_x + 2 * direction
+                    field_draw.polygon(((tip, feet),
+                                        (tip - 12 * direction, feet - 8),
+                                        (tip - 12 * direction, feet + 8)),
+                                       fill=(70, 180, 255, 220))
+                    continue
+
+                radius = max(0.35, min(1.1, record["radius"]))
+                depths = (0.0, 1.5, 3.5, 6.5, 11.0, 18.0)
+                centre_points = [cam.project(lane_y, 0.0, depth)
+                                 for depth in depths]
+                left_points = [cam.project(lane_y - radius, 0.0, depth)
+                               for depth in depths]
+                right_points = [cam.project(lane_y + radius, 0.0, depth)
+                                for depth in depths]
+                centre_points = [point for point in centre_points if point]
+                left_points = [point for point in left_points if point]
+                right_points = [point for point in right_points if point]
+                colour = FIELD_ROUTE if kind == "route" else FIELD_ENTRANCE
+                outline = ((255, 220, 70, 210) if kind == "route"
+                           else (255, 155, 45, 205))
+                polygon = left_points + list(reversed(right_points))
+                field_draw.polygon([(round(px), round(py)) for px, py in polygon],
+                                   fill=colour)
+                field_draw.line([(round(px), round(py)) for px, py in left_points],
+                                fill=outline, width=1)
+                field_draw.line([(round(px), round(py)) for px, py in right_points],
+                                fill=outline, width=1)
+                field_draw.line([(round(px), round(py)) for px, py in centre_points],
+                                fill=outline, width=2)
+
+            spatial_clean = Image.alpha_composite(spatial, field_layer).convert("RGB")
+            spatial_annotated = spatial_clean.copy()
+            if args.annotate:
+                field_labels = ImageDraw.Draw(spatial_annotated, "RGBA")
+                field_labels.rectangle((0, 0, width, 38),
+                                       fill=(20, 20, 24, 232))
+                field_labels.text((8, 5),
+                                  "MAP-DERIVED SPATIAL FIELD - MARKS ARE NOT ARCHITECTURE",
+                                  fill=LINE)
+                field_labels.text((8, 17),
+                                  "RED = EXACT TRIGGER | COLOURED CORRIDOR = DEPTH DIRECTION, NOT SHAPE",
+                                  fill=LINE)
+                field_labels.line((0, VISIBLE_WORLD_ROWS, width,
+                                   VISIBLE_WORLD_ROWS), fill=UI_BAND, width=RULE)
+                field_labels.rectangle((0, VISIBLE_WORLD_ROWS, width, height),
+                                       fill=(80, 35, 105, 54))
+                for index, record in enumerate(opening_records):
+                    kind = record["semanticType"]
+                    colour = ((70, 180, 255, 255) if kind == "street" else
+                              (255, 220, 70, 255) if kind == "route" else
+                              (255, 155, 45, 255))
+                    prefix = {"street": "STREET EXIT", "route": "DEPTH ROUTE",
+                              "entrance": "DEPTH ENTRANCE"}[kind]
+                    label = "%s: %s" % (prefix, record["eventName"].upper())
+                    x = record["plateX"]
+                    label_y = 43 + (index % 2) * 18
+                    bounds = field_labels.textbbox((0, 0), label)
+                    label_w = bounds[2] - bounds[0]
+                    label_x = max(3, min(width - label_w - 7,
+                                         x - label_w // 2))
+                    field_labels.rectangle((label_x - 3, label_y - 2,
+                                            label_x + label_w + 3, label_y + 11),
+                                           fill=(25, 25, 30, 205))
+                    field_labels.text((label_x, label_y), label, fill=colour)
+                    field_labels.line((x, label_y + 12, x, feet - mark - 2),
+                                      fill=colour, width=1)
+
+        if args.annotate:
+            # These labels are authoring metadata, not scene geometry. They
+            # deliberately explain the line families so a multimodal model
+            # does not turn a clipped ruler into a platform edge.
+            draw.text((8, 6), "WORLD GEOMETRY GUIDE - NOT FINAL ART", fill=LINE)
+            draw.text((8, 16), "FIXED PERSPECTIVE 3D CAMERA / WALK LEFT-RIGHT", fill=LINE)
+            draw.text((8, 26), "GREEN FLOOR PLANE | YELLOW WORLD VERTICALS | WHITE GROUND | RED THRESHOLDS", fill=LINE)
+            draw.text((width - 250, 6), "HORIZON / SKY", fill=HORIZON)
+            draw.text((width - 250, 16), "FLOOR CONTINUES OFF BOTH SIDES", fill=FLOOR_RULE)
+            draw.line((0, VISIBLE_WORLD_ROWS, width, VISIBLE_WORLD_ROWS),
+                      fill=UI_BAND, width=RULE)
+            draw.text((8, VISIBLE_WORLD_ROWS + 4),
+                      "PERSISTENT SEMITRANSPARENT UI BELOW - DEAD FOREGROUND; NO ESSENTIAL EXITS",
+                      fill=UI_BAND)
+            for doorway in traversal.get("doorways", []):
+                name = doorway.get("anchor")
+                if name not in anchors:
+                    continue
+                x = column(anchors[name]["position"][1])
+                draw.text((max(2, min(width - 180, x - 20)),
+                           max(40, feet - mark - 14)),
+                          name, fill=MARK)
+
+        clean_frame = clean_frame.resize(
+            (width * args.scale, height * args.scale), Image.NEAREST)
+        clean_name = "%02d-position-clean.png" % map_id
+        clean_frame.save(args.output / clean_name)
+        frame = frame.resize((width * args.scale, height * args.scale), Image.NEAREST)
         name = "%02d-position.png" % map_id
         frame.save(args.output / name)
+        spatial_clean_name = None
+        spatial_name = None
+        if spatial_clean is not None:
+            spatial_clean = spatial_clean.resize(
+                (width * args.scale, height * args.scale), Image.NEAREST)
+            spatial_clean_name = "%02d-spatial-field-clean.png" % map_id
+            spatial_clean.save(args.output / spatial_clean_name)
+            spatial_annotated = spatial_annotated.resize(
+                (width * args.scale, height * args.scale), Image.NEAREST)
+            spatial_name = "%02d-spatial-field.png" % map_id
+            spatial_annotated.save(args.output / spatial_name)
         entries.append({"mapId": map_id, "file": name,
+                        "cleanFile": clean_name,
+                        "spatialFieldFile": spatial_name,
+                        "spatialFieldCleanFile": spatial_clean_name,
                         "openings": [
                             {"anchor": n,
                              "fraction": round(column(anchors[n]["position"][1]) / width, 4)}
@@ -238,12 +418,17 @@ def main() -> None:
                         "title": data.get("title", ""),
                         "intro": data.get("intro", ""),
                         "doorways": placed,
+                        "eventFields": opening_records,
                         "plateSize": [width, height],
                         "currentPlateSize": pre["imageSize"],
                         "pixelsPerRuntimeY": PIXELS_PER_UNIT,
                         "groundRow": feet,
+                        "persistentUiBeginsRow": VISIBLE_WORLD_ROWS,
+                        "persistentUiFraction": round(VISIBLE_WORLD_ROWS / height, 4),
                         "laneSpan": [traversal["lane"]["minY"], traversal["lane"]["maxY"]],
-                        "outputSize": [frame.width, frame.height]})
+                        "outputSize": [frame.width, frame.height],
+                        "scale": args.scale,
+                        "annotated": args.annotate})
         print("  map %-3d %-38s doorways in view: %s"
               % (map_id, data.get("title", ""), ", ".join(placed) or "none"))
 

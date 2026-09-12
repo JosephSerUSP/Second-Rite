@@ -80,7 +80,13 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
             viewport_3d.init()
-            local result, collectErr = renderables.collect(vSession, "authoring")
+            -- Studio already owns live Event boxes/models from the authored
+            -- Map snapshot. Keep the runtime bundle static so a dragged Event
+            -- has one visible representation and never waits for recompilation.
+            local result, collectErr = renderables.collect(vSession, "authoring", {
+                includeCollision = true,
+                includeEventModels = false,
+            })
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
             -- Compact only THIS bridge payload. Exporters call the collector
@@ -94,6 +100,12 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.light = resolvedMap and resolvedMap.runtimeLight or nil
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
+            if vSession.townTraversal then
+                result.spatialCamera = require("presentation.world_camera").resolve(vSession, {
+                    authoredCamera = request.map.traversal.camera,
+                    profile = request.map.traversal.camera.profile,
+                })
+            end
             return result
         end)
     end)

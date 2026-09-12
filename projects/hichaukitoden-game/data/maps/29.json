@@ -368,13 +368,15 @@
         0.0
       ],
       "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
       "commands": [
         {
           "cmd": "LOAD_MAP",
           "mapId": 31,
           "arrival": "smith_3d_door"
         }
-      ]
+      ],
+      "direction": "away"
     }
   ],
   "treasures": [],

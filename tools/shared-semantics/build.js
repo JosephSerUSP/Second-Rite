@@ -22,6 +22,8 @@ const outputs = [
     path.join(runtimeRoot, 'engine', 'generated', 'sprite-timing.lua'),
     path.join(studioEditorRoot, 'js', 'generated', 'sprite-resolution.js'),
     path.join(runtimeRoot, 'engine', 'generated', 'sprite-resolution.lua'),
+    path.join(studioEditorRoot, 'js', 'generated', 'world-view.js'),
+    path.join(runtimeRoot, 'engine', 'generated', 'world-view.lua'),
 ];
 
 const adapters = [
@@ -60,6 +62,18 @@ const adapters = [
         marker: 'THES_SHARED_LUA_SPRITE_RESOLUTION',
         text: '\n-- THES_SHARED_LUA_SPRITE_RESOLUTION: generated module adapter; do not edit.\n'
             + 'return ThestraSpriteResolutionSemantics\n',
+    },
+    {
+        file: path.join(studioEditorRoot, 'js', 'generated', 'world-view.js'),
+        marker: 'THES_SHARED_COMMONJS_WORLD_VIEW',
+        text: '\n// THES_SHARED_COMMONJS_WORLD_VIEW: generated host adapter; do not edit.\n'
+            + "if (typeof module === 'object' && module.exports) module.exports = ThestraWorldViewSemantics;\n",
+    },
+    {
+        file: path.join(runtimeRoot, 'engine', 'generated', 'world-view.lua'),
+        marker: 'THES_SHARED_LUA_WORLD_VIEW',
+        text: '\n-- THES_SHARED_LUA_WORLD_VIEW: generated module adapter; do not edit.\n'
+            + 'return ThestraWorldViewSemantics\n',
     },
 ];
 

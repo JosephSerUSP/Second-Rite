@@ -81,7 +81,7 @@ const { installProjectIpc } = require('./editor/project-electron');
 const PORT = process.env.PORT || 8080;
 const server = require('./editor/server.js');
 // 2. Keep LÖVE invocation on a deliberately separate host boundary.
-const runtimeBridge = require('./editor/runtime-bridge-server.js').startRuntimeBridgeServer();
+const runtimeBridge = require('./editor/runtime-bridge-server.js').startRuntimeBridgeServer({ editorPort: Number(PORT) });
 
 installProjectIpc({
     ipcMain,

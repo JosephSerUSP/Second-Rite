@@ -42,8 +42,8 @@
     {
       "id": "paddle1",
       "rect": {
-        "x": "5 + 1",
-        "y": "5 + 1 + v.paddle1Y",
+        "x": 6,
+        "y": "6 + v.paddle1Y",
         "w": 1,
         "h": "v.paddleH"
       },
@@ -54,7 +54,7 @@
       "id": "paddle2",
       "rect": {
         "x": "5 + v.gridW",
-        "y": "5 + 1 + v.paddle2Y",
+        "y": "6 + v.paddle2Y",
         "w": 1,
         "h": "v.paddleH"
       },
@@ -64,8 +64,8 @@
     {
       "id": "ball",
       "rect": {
-        "x": "5 + 1 + v.ballX",
-        "y": "5 + 1 + v.ballY",
+        "x": "6 + v.ballX",
+        "y": "6 + v.ballY",
         "w": 1,
         "h": 1
       },
@@ -160,7 +160,7 @@
         "assignments": [
           {
             "name": "paddle1Y",
-            "value": "max(0, min(v.gridH - v.paddleH, v.paddle1Y + v.inputY * 15.0 * v.time.dt))"
+            "value": "clamp(v.paddle1Y + v.inputY * 15.0 * v.time.dt, 0, v.gridH - v.paddleH)"
           },
           {
             "name": "inputY",
@@ -172,11 +172,7 @@
           },
           {
             "name": "paddle2Y",
-            "value": "v.center2 < v.ballY - 0.5 and v.paddle2Y + 8.0 * v.time.dt or (v.center2 > v.ballY + 0.5 and v.paddle2Y - 8.0 * v.time.dt or v.paddle2Y)"
-          },
-          {
-            "name": "paddle2Y",
-            "value": "max(0, min(v.gridH - v.paddleH, v.paddle2Y))"
+            "value": "clamp(v.center2 < v.ballY - 0.5 and v.paddle2Y + 8.0 * v.time.dt or (v.center2 > v.ballY + 0.5 and v.paddle2Y - 8.0 * v.time.dt or v.paddle2Y), 0, v.gridH - v.paddleH)"
           },
           {
             "name": "ballX",
@@ -187,25 +183,41 @@
             "value": "v.ballY + v.ballVY * v.time.dt"
           },
           {
-            "name": "hitPaddle1",
+            "name": "hitP1",
             "value": "v.ballX <= 1 and v.ballX >= 0 and v.ballVX < 0 and v.ballY >= v.paddle1Y and v.ballY <= v.paddle1Y + v.paddleH"
           },
           {
-            "name": "hitPaddle2",
+            "name": "hitP2",
             "value": "v.ballX >= v.gridW - 2 and v.ballX <= v.gridW - 1 and v.ballVX > 0 and v.ballY >= v.paddle2Y and v.ballY <= v.paddle2Y + v.paddleH"
+          },
+          {
+            "name": "hitWallTop",
+            "value": "v.ballY <= 0"
+          },
+          {
+            "name": "hitWallBot",
+            "value": "v.ballY >= v.gridH - 1"
+          },
+          {
+            "name": "scoreP1",
+            "value": "v.ballX >= v.gridW"
+          },
+          {
+            "name": "scoreP2",
+            "value": "v.ballX < 0"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.ballY <= 0",
+        "condition": "v.hitWallTop or v.hitWallBot",
         "then": [
           {
             "cmd": "SET_VAR",
             "assignments": [
               {
                 "name": "ballY",
-                "value": 0
+                "value": "v.hitWallTop and 0 or v.gridH - 1"
               },
               {
                 "name": "ballVY",
@@ -217,33 +229,14 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.ballY >= v.gridH - 1",
-        "then": [
-          {
-            "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "ballY",
-                "value": "v.gridH - 1"
-              },
-              {
-                "name": "ballVY",
-                "value": "-v.ballVY"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "v.hitPaddle1",
+        "condition": "v.hitP1 or v.hitP2",
         "then": [
           {
             "cmd": "SET_VAR",
             "assignments": [
               {
                 "name": "ballX",
-                "value": 1
+                "value": "v.hitP1 and 1 or v.gridW - 2"
               },
               {
                 "name": "ballVX",
@@ -251,7 +244,7 @@
               },
               {
                 "name": "ballVY",
-                "value": "v.ballVY + (v.ballY - (v.paddle1Y + v.paddleH/2)) * 2"
+                "value": "v.ballVY + (v.ballY - ((v.hitP1 and v.paddle1Y or v.paddle2Y) + v.paddleH/2)) * 2"
               }
             ]
           }
@@ -259,68 +252,18 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.hitPaddle2",
-        "then": [
-          {
-            "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "ballX",
-                "value": "v.gridW - 2"
-              },
-              {
-                "name": "ballVX",
-                "value": "-v.ballVX * 1.1"
-              },
-              {
-                "name": "ballVY",
-                "value": "v.ballVY + (v.ballY - (v.paddle2Y + v.paddleH/2)) * 2"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "v.ballX < 0",
-        "then": [
-          {
-            "cmd": "SET_VAR",
-            "assignments": [
-              {
-                "name": "score2",
-                "value": "v.score2 + 1"
-              },
-              {
-                "name": "ballX",
-                "value": 10.0
-              },
-              {
-                "name": "ballY",
-                "value": 6.0
-              },
-              {
-                "name": "ballVX",
-                "value": 10.0
-              },
-              {
-                "name": "ballVY",
-                "value": 6.0
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "v.ballX >= v.gridW",
+        "condition": "v.scoreP1 or v.scoreP2",
         "then": [
           {
             "cmd": "SET_VAR",
             "assignments": [
               {
                 "name": "score1",
-                "value": "v.score1 + 1"
+                "value": "v.score1 + (v.scoreP1 and 1 or 0)"
+              },
+              {
+                "name": "score2",
+                "value": "v.score2 + (v.scoreP2 and 1 or 0)"
               },
               {
                 "name": "ballX",
@@ -332,7 +275,7 @@
               },
               {
                 "name": "ballVX",
-                "value": -10.0
+                "value": "v.scoreP1 and -10.0 or 10.0"
               },
               {
                 "name": "ballVY",

@@ -553,7 +553,10 @@
             const close = document.createElement('button');
             close.type = 'button'; close.className = 'win98-btn'; close.textContent = '×';
             close.style.cssText = 'min-width:22px;padding:0 4px;';
-            close.addEventListener('click', () => { calibrationPanel.style.display = 'none'; });
+            close.addEventListener('click', () => {
+                calibrationPanel.style.display = 'none';
+                viewportApi()?.setPlateCalibrationPreviewVisible?.(false);
+            });
             heading.appendChild(close);
             calibrationPanel.appendChild(heading);
 
@@ -625,14 +628,34 @@
             note.textContent = 'Elevation remains a separate Map-owned traversal fact. Camera/plate corrections never synthesize or rewrite it.';
             profile.appendChild(note);
             calibrationPanel.appendChild(profile);
+
+            const references = section('Spatial references', state.spatialReferences.owner);
+            const anchorText = state.spatialReferences.anchors.length
+                ? state.spatialReferences.anchors.map(anchor =>
+                    `${anchor.id} [${anchor.position ? anchor.position.join(', ') : 'invalid'}]`).join(' · ')
+                : 'none';
+            references.appendChild(calibrationRow('Anchors', anchorText,
+                'Environment-package anchors are reference facts here; use their owning authoring workflow to change them.'));
+            const transferText = state.spatialReferences.transfers.length
+                ? state.spatialReferences.transfers.map(transfer =>
+                    `${transfer.name} [${transfer.position ? transfer.position.join(', ') : 'no world position'}]`).join(' · ')
+                : 'none';
+            references.appendChild(calibrationRow('Transfer markers', transferText,
+                'Map Events remain visible/editable through Event authoring, not through camera calibration.'));
+            calibrationPanel.appendChild(references);
         }
 
         function syncPlateCalibration() {
             const state = viewportApi()?.getPlateCalibration?.();
             const show = !!state?.available;
             plateCalibration.style.display = show ? '' : 'none';
-            if (!show) calibrationPanel.style.display = 'none';
-            else if (calibrationPanel.style.display !== 'none') renderCalibrationPanel();
+            if (!show) {
+                calibrationPanel.style.display = 'none';
+                viewport?.setPlateCalibrationPreviewVisible?.(false);
+            } else if (calibrationPanel.style.display !== 'none') {
+                viewport?.setPlateCalibrationPreviewVisible?.(true);
+                renderCalibrationPanel();
+            }
         }
 
         function syncWalkProfile() {
@@ -670,11 +693,14 @@
             syncWalkMesh();
         });
         plateCalibration.addEventListener('click', () => {
+            const viewport = viewportApi();
             if (calibrationPanel.style.display === 'none') {
+                viewport?.setPlateCalibrationPreviewVisible?.(true);
                 renderCalibrationPanel();
                 calibrationPanel.style.display = '';
             } else {
                 calibrationPanel.style.display = 'none';
+                viewport?.setPlateCalibrationPreviewVisible?.(false);
             }
         });
         walkProfile.addEventListener('click', () => {

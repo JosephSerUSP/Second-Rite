@@ -1402,10 +1402,25 @@ local function drawTownPrerender(session, inspection)
         end
     end
 
+    local playerScreenX = screenXForTownY(actorY)
+    local playerFootY = screenFootY(actorY)
+    if inspection then
+        inspection.player = {
+            world = { x = state.x, y = actorY, z = state.z },
+            screen = { x = playerScreenX, y = playerFootY },
+            plate = {
+                centerX = centerX,
+                screenY = screenY,
+                sliceY = sliceY,
+                panX = panX,
+                imageWidth = imageWidth * scaleX,
+                imageHeight = imageHeight * scaleY,
+            },
+        }
+    end
     local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
     if playerImage then
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
-            screenFootY(actorY),
+        drawTownPrerenderSprite(playerImage, playerScreenX, playerFootY,
             actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
             state.facing or 1)
     end

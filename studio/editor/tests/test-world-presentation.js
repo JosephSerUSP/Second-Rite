@@ -179,9 +179,19 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.doesNotMatch(compositionSource, /ArrowHelper/,
         'transition arrows use their authoritative OBJ geometry in plates');
     assert.match(compositionSource, /setWalkMeshVisible/,
-        'plate traversal geometry must be inspectable without becoming editable');
+        'plate traversal geometry remains independently inspectable');
+    assert.match(compositionSource, /setWalkProfileEditing/,
+        'plate traversal authority has a dedicated Walk Profile edit surface');
+    assert.match(compositionSource, /worldYZAtScreenOnDepthPlane/,
+        'plate profile dragging must invert through generated shared camera semantics');
+    assert.match(viewportSource, /splitSelectedGroundProfileSegment/,
+        'the shared viewport owns selected-segment profile operations across plate and 3D views');
     assert.match(studioSource, /Walk Mesh/,
-        'the shared map toolbar exposes read-only walk geometry inspection');
+        'the shared map toolbar retains walk-geometry inspection');
+    assert.match(studioSource, /Walk Profile/,
+        'bounded-lane maps expose an explicit profile authoring mode');
+    assert.match(studioSource, /Create Profile/,
+        'flat lanes require an explicit author action before a groundProfile exists');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

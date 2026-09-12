@@ -219,6 +219,11 @@ export function createThreeEditorViewport(container, options = {}) {
     renderableContent.name = 'SecondRiteAuthoritativeRenderables';
     scene.add(renderableContent);
 
+    const walkProfileContent = new THREE.Group();
+    walkProfileContent.name = 'ThestraWalkProfileAuthoring';
+    walkProfileContent.visible = false;
+    scene.add(walkProfileContent);
+
     const selectionOverlay = createSelectionOverlay();
     scene.add(selectionOverlay);
 
@@ -238,6 +243,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
         canPan(event) {
             if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture) return false;
+            if (walkProfileEditing) return !pickWalkProfile(event);
             if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
             return !pickSemantic(event, ['event', 'light', 'override']);
         },
@@ -280,6 +286,9 @@ export function createThreeEditorViewport(container, options = {}) {
     // view with its wireframe on makes authored Event boxes and handles look
     // like part of the collision mesh, especially in the narrow town rooms.
     let collisionVisible = false;
+    let walkProfileEditing = false;
+    const walkProfileSelectable = [];
+    const walkProfileObjects = new Map();
 
     function setCollisionVisible(visible) {
         collisionVisible = !!visible;
@@ -876,16 +885,26 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function selectedMovableObject() {
-        if (!selection || (selection.kind !== 'event' && selection.kind !== 'light')) return null;
+        if (!selection) return null;
+        if (selection.kind === 'walk-profile-point' && walkProfileEditing) {
+            return walkProfileObjects.get(selection.key) || null;
+        }
+        if (selection.kind !== 'event' && selection.kind !== 'light') return null;
         if (interactionLayer() !== selection.kind) return null;
         return semanticObjects.get(selection.key) || null;
     }
 
     function syncMoveGizmo() {
         const object = selectedMovableObject();
+        const profilePoint = !!(object && selection?.kind === 'walk-profile-point');
         moveGizmo.camera = activeCamera();
         moveGizmo.enabled = !!object && !cameraTransition;
-        moveGizmo.showY = !!(object && object.userData.worldPosition);
+        moveGizmo.showX = !!object && !profilePoint;
+        moveGizmo.showY = !!object && (profilePoint || object.userData.worldPosition);
+        moveGizmo.showZ = !!object;
+        moveGizmo.showXY = false;
+        moveGizmo.showXZ = !!object && !profilePoint;
+        moveGizmo.showYZ = profilePoint;
         if (object && moveGizmo.object !== object) moveGizmo.attach(object);
         if (!object && moveGizmo.object) moveGizmo.detach();
     }
@@ -1004,7 +1023,14 @@ export function createThreeEditorViewport(container, options = {}) {
         };
         const group = new THREE.Group();
         if (event.worldPosition) {
-            group.position.fromArray(Contract.runtimePositionToThestra(event.worldPosition));
+            const position = event.worldPosition.slice();
+            const traversal = sceneModel?.map?.source?.traversal;
+            const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;
+            if (lane) {
+                position[2] = WorldView.groundHeight(
+                    lane.groundProfile, Number(lane.groundZ || 0), Number(position[1]));
+            }
+            group.position.fromArray(Contract.runtimePositionToThestra(position));
             group.userData.worldPosition = true;
         } else group.position.set(event.world.x, 0, event.world.z);
         semanticContent.add(group);
@@ -1077,6 +1103,107 @@ export function createThreeEditorViewport(container, options = {}) {
         semanticObjects.set(spawn.key, marker);
     }
 
+    function walkProfileLane() {
+        return sceneModel?.map?.source?.traversal?.lane || null;
+    }
+
+    function walkProfilePosition(lane, point) {
+        return Contract.runtimePositionToThestra([
+            Number(lane.depthX), Number(point.y), Number(point.z)
+        ]);
+    }
+
+    function profileSegmentMesh(start, end, semantic) {
+        const a = new THREE.Vector3(...start), b = new THREE.Vector3(...end);
+        const delta = b.clone().sub(a);
+        const length = Math.max(delta.length(), 0.001);
+        const mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.035, 0.035, length, 8),
+            new THREE.MeshBasicMaterial({
+                color: 0x38d0f4, transparent: true, opacity: 0.9,
+                depthTest: false, depthWrite: false
+            })
+        );
+        mesh.position.copy(a).add(b).multiplyScalar(0.5);
+        mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+        mesh.renderOrder = 999;
+        mesh.userData.thestraSelection = semantic;
+        return mesh;
+    }
+
+    function rebuildWalkProfile() {
+        if (moveGizmo.object && walkProfileContent.getObjectById(moveGizmo.object.id)) moveGizmo.detach();
+        clearGroup(walkProfileContent);
+        walkProfileSelectable.length = 0;
+        walkProfileObjects.clear();
+        if (!sceneModel) return;
+        const lane = walkProfileLane();
+        if (!lane) return;
+        const minimum = Number(lane.minY), maximum = Number(lane.maxY);
+        const groundZ = Number(lane.groundZ || 0);
+        if (![Number(lane.depthX), minimum, maximum, groundZ].every(Number.isFinite)) return;
+        const authored = Array.isArray(lane.groundProfile) && lane.groundProfile.length >= 2;
+        const profile = authored
+            ? lane.groundProfile
+            : [{ y: minimum, z: groundZ }, { y: maximum, z: groundZ }];
+        const positions = profile.map(point => walkProfilePosition(lane, point));
+
+        for (let index = 0; index < positions.length - 1; index++) {
+            const semantic = {
+                kind: 'walk-profile-segment',
+                key: `walk-profile-segment:${index}`,
+                index
+            };
+            const segment = profileSegmentMesh(positions[index], positions[index + 1], semantic);
+            segment.material.opacity = authored ? 0.9 : 0.45;
+            walkProfileContent.add(segment);
+            if (authored) {
+                walkProfileSelectable.push(segment);
+                walkProfileObjects.set(semantic.key, segment);
+            }
+        }
+        if (authored) {
+            positions.forEach((position, index) => {
+                const semantic = {
+                    kind: 'walk-profile-point',
+                    key: `walk-profile-point:${index}`,
+                    index
+                };
+                const point = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.12, 12, 8),
+                    new THREE.MeshBasicMaterial({
+                        color: 0xffd45a, depthTest: false, depthWrite: false
+                    })
+                );
+                point.position.fromArray(position);
+                point.renderOrder = 1000;
+                point.userData.thestraSelection = semantic;
+                walkProfileContent.add(point);
+                walkProfileSelectable.push(point);
+                walkProfileObjects.set(semantic.key, point);
+            });
+        }
+        walkProfileContent.visible = walkProfileEditing;
+    }
+
+    function pickWalkProfile(event) {
+        if (!walkProfileEditing || !sceneModel) return null;
+        updatePointer(event);
+        const hits = raycaster.intersectObjects(walkProfileSelectable, false);
+        return hits[0]?.object?.userData?.thestraSelection || null;
+    }
+
+    function setWalkProfileEditing(enabled) {
+        walkProfileEditing = !!enabled;
+        walkProfileContent.visible = walkProfileEditing;
+        if (!walkProfileEditing && selection
+                && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')) {
+            setSelection(null);
+        } else {
+            syncMoveGizmo();
+        }
+    }
+
     function rebuild(model) {
         const priorSelection = selection;
         const nextIdentity = mapIdentity(model);
@@ -1130,6 +1257,7 @@ export function createThreeEditorViewport(container, options = {}) {
         (sceneModel.lights || []).forEach(addLight);
         ((sceneModel.annotations && sceneModel.annotations.overrides) || []).forEach(addOverride);
         addSpawn(sceneModel.annotations && sceneModel.annotations.spawn);
+        rebuildWalkProfile();
         syncProxyVisibility();
         syncLayerVisuals();
         frameScene(shouldFrame, shouldFrame);
@@ -1269,7 +1397,9 @@ export function createThreeEditorViewport(container, options = {}) {
             return;
         }
 
-        const object = semanticObjects.get(selection.key);
+        const object = (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
+            ? walkProfileObjects.get(selection.key)
+            : semanticObjects.get(selection.key);
         if (!object) {
             syncMoveGizmo();
             return;
@@ -1477,6 +1607,11 @@ export function createThreeEditorViewport(container, options = {}) {
     function onPointerDown(event) {
         if (!sceneModel || event.button !== 0) return;
         if (moveGizmo.dragging || moveGizmo.axis) return;
+        if (walkProfileEditing) {
+            const profileSelection = pickWalkProfile(event);
+            emitSelection(profileSelection);
+            return;
+        }
         const layer = interactionLayer();
         const kinds = {
             map: event.shiftKey ? ['spawn', 'cell'] : ['environment', 'cell'],
@@ -1517,6 +1652,7 @@ export function createThreeEditorViewport(container, options = {}) {
 
     moveGizmo.addEventListener('objectChange', () => {
         if (!moveGesture || !moveGizmo.object) return;
+        if (moveGesture.semantic.kind === 'walk-profile-point') return;
         if (moveGizmo.object.userData.worldPosition) return;
         moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
         moveGizmo.object.position.y = moveGesture.origin.y;
@@ -1531,6 +1667,20 @@ export function createThreeEditorViewport(container, options = {}) {
         if (!gesture) return;
         const object = selectedMovableObject();
         if (!object) return;
+        if (gesture.semantic.kind === 'walk-profile-point') {
+            const runtime = Contract.thestraPositionToRuntime(object.position.toArray());
+            const result = options.onMoveGroundProfilePoint
+                ? options.onMoveGroundProfilePoint(gesture.semantic.index, runtime[1], runtime[2])
+                : null;
+            if (result && result.ok) {
+                moveGizmo.detach();
+                rebuildWalkProfile();
+                emitSelection(result.selection || gesture.semantic);
+            } else {
+                object.position.copy(gesture.origin);
+            }
+            return;
+        }
         if (object.userData.worldPosition) {
             const result = options.onMoveWorldEvent && options.onMoveWorldEvent(gesture.semantic,
                 Contract.thestraPositionToRuntime(object.position.toArray()));
@@ -1623,6 +1773,12 @@ export function createThreeEditorViewport(container, options = {}) {
         setRenderableBundle,
         setCollisionVisible,
         getCollisionVisible: () => collisionVisible,
+        setWalkProfileEditing,
+        getWalkProfileEditing: () => walkProfileEditing,
+        getWalkProfileSelection: () => selection
+            && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
+            ? selection : null,
+        refreshWalkProfile: rebuildWalkProfile,
         markCellsProvisional,
         setMode,
         transitionToMode,
@@ -1653,6 +1809,7 @@ export function createThreeEditorViewport(container, options = {}) {
             topControls.dispose();
             disposeObject(semanticContent);
             disposeObject(renderableContent);
+            disposeObject(walkProfileContent);
             selectionOverlay.geometry.dispose();
             selectionOverlay.material.dispose();
             moveGizmo.detach();

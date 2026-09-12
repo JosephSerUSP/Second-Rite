@@ -415,6 +415,30 @@
                         'event-move'
                     );
                 },
+                onCreateGroundProfile() {
+                    return handleMutationResult(
+                        host.createGroundProfile ? host.createGroundProfile() : null,
+                        'lane-profile'
+                    );
+                },
+                onSplitGroundProfileSegment(segmentIndex, amount) {
+                    return handleMutationResult(
+                        host.splitGroundProfileSegment ? host.splitGroundProfileSegment(segmentIndex, amount) : null,
+                        'lane-profile'
+                    );
+                },
+                onMoveGroundProfilePoint(pointIndex, y, z) {
+                    return handleMutationResult(
+                        host.moveGroundProfilePoint ? host.moveGroundProfilePoint(pointIndex, y, z) : null,
+                        'lane-profile'
+                    );
+                },
+                onDeleteGroundProfilePoint(pointIndex) {
+                    return handleMutationResult(
+                        host.deleteGroundProfilePoint ? host.deleteGroundProfilePoint(pointIndex) : null,
+                        'lane-profile'
+                    );
+                },
                 canMoveLight(lightSelection, cell) {
                     return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
                 },

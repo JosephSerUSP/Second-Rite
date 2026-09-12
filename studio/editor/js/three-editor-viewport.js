@@ -263,15 +263,17 @@ export function createThreeEditorViewport(container, options = {}) {
     const rawDispose = base.dispose;
     let spatialCamera = null;
     let compositionFrameId = 'authoring/map';
+    let currentSceneModel = null;
     const api = Object.assign({}, base, {
         async setSceneModel(model) {
+            currentSceneModel = model;
             base.setSceneModel(model);
             await compositionAuthoring.setSceneModel(model);
             window.dispatchEvent(new CustomEvent('thestra-composition-preview-ready'));
         },
         setSelection(selection) {
             base.setSelection(selection);
-            compositionAuthoring.select(selection?.id);
+            compositionAuthoring.setSemanticSelection(selection);
         },
         setRenderableBundle(bundle) {
             spatialCamera = bundle && bundle.spatialCamera || null;
@@ -299,6 +301,68 @@ export function createThreeEditorViewport(container, options = {}) {
             return compositionAuthoring.isPlate()
                 ? compositionAuthoring.getWalkMeshVisible()
                 : base.getCollisionVisible();
+        },
+        setWalkProfileEditing(enabled) {
+            const active = !!enabled;
+            base.setWalkProfileEditing?.(active);
+            compositionAuthoring.setWalkProfileEditing?.(active);
+        },
+        getWalkProfileEditing() {
+            return compositionAuthoring.isVisible?.()
+                ? !!compositionAuthoring.getWalkProfileEditing?.()
+                : !!base.getWalkProfileEditing?.();
+        },
+        getWalkProfileSelection() {
+            return compositionAuthoring.isVisible?.()
+                ? compositionAuthoring.getWalkProfileSelection?.() || null
+                : base.getWalkProfileSelection?.() || null;
+        },
+        getWalkProfileStatus() {
+            const traversal = currentSceneModel?.map?.source?.traversal;
+            const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;
+            const profile = lane?.groundProfile;
+            return {
+                available: !!lane,
+                authored: Array.isArray(profile) && profile.length >= 2,
+                pointCount: Array.isArray(profile) ? profile.length : 0,
+                editing: api.getWalkProfileEditing(),
+                selection: api.getWalkProfileSelection()
+            };
+        },
+        createGroundProfile() {
+            const result = options.onCreateGroundProfile?.();
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        splitSelectedGroundProfileSegment(amount = 0.5) {
+            const selection = api.getWalkProfileSelection();
+            if (!selection || selection.kind !== 'walk-profile-segment') {
+                return { ok: false, reason: 'no-profile-segment-selected' };
+            }
+            const result = options.onSplitGroundProfileSegment?.(selection.index, amount);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        deleteSelectedGroundProfilePoint() {
+            const selection = api.getWalkProfileSelection();
+            if (!selection || selection.kind !== 'walk-profile-point') {
+                return { ok: false, reason: 'no-profile-point-selected' };
+            }
+            const result = options.onDeleteGroundProfilePoint?.(selection.index);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
         },
         showComposition(frameId) {
             const frame = compositionAuthoring.descriptor()?.frames.find(candidate => candidate.id === frameId);

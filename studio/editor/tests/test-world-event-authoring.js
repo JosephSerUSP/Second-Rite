@@ -16,6 +16,77 @@ function fixture() {
     ] }] };
 }
 
+function laneFixture(profile) {
+    const lane = { minY: 0, maxY: 10, depthX: 7.8, groundZ: 1, speed: 3.4 };
+    if (profile !== undefined) lane.groundProfile = profile;
+    return { maps: [{ id: 31, safe: true, layout: ['.'],
+        traversal: { provider: 'bounded_lane', lane }, events: [] }] };
+}
+
+test('walk profile commands are unavailable outside the bounded-lane provider', () => {
+    const payload = laneFixture();
+    payload.maps[0].traversal.provider = 'future_surface';
+    const before = JSON.stringify(payload);
+    const result = Commands.createGroundProfile(payload, 0);
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, 'missing-bounded-lane');
+    assert.equal(JSON.stringify(payload), before,
+        'a different future traversal provider must not be interpreted as bounded-lane schema');
+});
+
+test('walk profile creation is explicit and flat lanes remain absent until requested', () => {
+    const payload = laneFixture();
+    const before = JSON.stringify(payload);
+    assert.equal(payload.maps[0].traversal.lane.groundProfile, undefined);
+    assert.equal(JSON.stringify(payload), before, 'merely inspecting the fixture must not synthesize a profile');
+
+    const created = Commands.createGroundProfile(payload, 0);
+    assert.equal(created.ok, true);
+    assert.equal(created.changed, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile,
+        [{ y: 0, z: 1 }, { y: 10, z: 1 }]);
+});
+
+test('walk profile segment split preserves the interpolated floor exactly', () => {
+    const payload = laneFixture([{ y: -4, z: 0 }, { y: 6, z: 2 }]);
+    const result = Commands.splitGroundProfileSegment(payload, 0, 0, 0.25);
+    assert.equal(result.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile,
+        [{ y: -4, z: 0 }, { y: -1.5, z: 0.5 }, { y: 6, z: 2 }]);
+    assert.deepEqual(result.selection, { kind: 'walk-profile-point', key: 'walk-profile-point:1', index: 1 });
+});
+
+test('walk profile edits preserve order without clamping calibration points to lane bounds', () => {
+    const profile = [
+        { y: -4.6667, z: 0 }, { y: 25.2292, z: 0 },
+        { y: 29.6042, z: 0.5833 }, { y: 34.1615, z: 0.5833 }
+    ];
+    const payload = laneFixture(JSON.parse(JSON.stringify(profile)));
+    const original = JSON.stringify(payload.maps[0].traversal.lane.groundProfile);
+    assert.equal(Commands.createGroundProfile(payload, 0).changed, false);
+    assert.equal(JSON.stringify(payload.maps[0].traversal.lane.groundProfile), original,
+        'opening an existing Port-style profile must not normalize its domain');
+
+    const moved = Commands.moveGroundProfilePoint(payload, 0, 3, 36, 0.75);
+    assert.equal(moved.ok, true);
+    assert.equal(payload.maps[0].traversal.lane.groundProfile[3].y, 36,
+        'profile points may remain outside the playable maxY');
+
+    const rejected = Commands.moveGroundProfilePoint(payload, 0, 2, 40, 0.5);
+    assert.equal(rejected.ok, false);
+    assert.equal(rejected.reason, 'profile-order');
+});
+
+test('walk profile deletion is interior-only and keeps a usable polyline', () => {
+    const payload = laneFixture([{ y: 0, z: 0 }, { y: 5, z: 1 }, { y: 10, z: 0 }]);
+    assert.equal(Commands.deleteGroundProfilePoint(payload, 0, 0).reason, 'profile-endpoint');
+    assert.equal(Commands.deleteGroundProfilePoint(payload, 0, 2).reason, 'profile-endpoint');
+    const deleted = Commands.deleteGroundProfilePoint(payload, 0, 1);
+    assert.equal(deleted.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile,
+        [{ y: 0, z: 0 }, { y: 10, z: 0 }]);
+});
+
 test('world Event movement retains depth, identity and all other authored facts', () => {
     const payload = fixture();
     const first = JSON.stringify(payload.maps[0].events[0]);
@@ -136,6 +207,25 @@ test('runtime models retain an authored height and ground horizontal arrows on i
         'the plate walk overlay must be a camera-projected traversal surface');
     assert.match(plateStudio, /worldYAtScreenXOnGroundProfile/,
         'plate model dragging must invert screen X along the same non-flat lane floor it renders');
+});
+
+test('walk profile authoring never aliases collision-mesh ownership', () => {
+    const root = path.resolve(__dirname, '..', '..', '..');
+    const baseStudio = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
+    const plateStudio = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
+    const workspace = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'thestra-workspace-state.js'), 'utf8');
+    assert.match(baseStudio, /ThestraWalkProfileAuthoring/);
+    assert.match(baseStudio, /onMoveGroundProfilePoint/);
+    assert.match(baseStudio, /WorldView\.groundHeight\([\s\S]*?lane\.groundProfile/,
+        '3D bounded-lane Event references must follow the live authored floor without rewriting Event placement');
+    assert.match(plateStudio, /ThestraPlateWalkProfileAuthoring/);
+    assert.match(plateStudio, /ThestraPlatePlayerPreview/,
+        'plate Walk Profile mode must show the live baked player footing');
+    assert.match(plateStudio, /const ground = View\.groundHeight\(lane\.groundProfile/,
+        'player footing must consume the same shared ground semantic as Events and runtime');
+    assert.match(plateStudio, /worldYZAtScreenOnDepthPlane/);
+    assert.match(workspace, /'lane-profile': Object\.freeze\(\{[\s\S]*?bundleRefresh: false/,
+        'profile drags must update local semantic presentation without asking LÖVE to rebuild environment geometry');
 });
 
 test('fully 3D interior exits carry their authored transition-marker model', () => {

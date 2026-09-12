@@ -61,44 +61,86 @@ export function createCompositionViewport(container, options) {
     walkOverlay.name = 'ThestraPlateWalkLane';
     walkOverlay.visible = false;
     scene.add(walkOverlay);
+    const walkProfileControls = new THREE.Group();
+    walkProfileControls.name = 'ThestraPlateWalkProfileAuthoring';
+    walkProfileControls.visible = false;
+    scene.add(walkProfileControls);
     const gizmo = createMoveGizmo(camera, renderer.domElement, ['X'], ['Z', 'Y', 'X']);
     scene.add(gizmo.getHelper());
     const scenePlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
         new THREE.MeshBasicMaterial({ transparent: true }));
     const foregroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
         new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+    const playerPreview = new THREE.Group();
+    playerPreview.name = 'ThestraPlatePlayerPreview';
+    playerPreview.visible = false;
     scenePlane.renderOrder = -10;
     foregroundPlane.renderOrder = 10;
-    scene.add(scenePlane, foregroundPlane);
+    scene.add(scenePlane, foregroundPlane, playerPreview);
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
-    let walkMeshVisible = false;
+    let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null;
     const events = new Map(), hitTargets = [];
+    const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
     function semantic(event) { return { kind: 'event', key: `event:${event.id}`, id: event.id }; }
-    function pick(event) {
+    function updatePointer(event) {
         const rect = renderer.domElement.getBoundingClientRect();
         pointer.set((event.clientX - rect.left) / rect.width * 2 - 1,
             1 - (event.clientY - rect.top) / rect.height * 2);
         raycaster.setFromCamera(pointer, camera);
+    }
+    function pick(event) {
+        updatePointer(event);
         return raycaster.intersectObjects(hitTargets, false)[0]?.object.userData.event || null;
     }
+    function pickWalkProfile(event) {
+        if (!walkProfileEditing) return null;
+        updatePointer(event);
+        return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
+    }
     const disposeNavigation = installNavigation(renderer.domElement, [controls], {
-        planar: true, canPan: event => !gizmo.axis && !gizmo.dragging && !pick(event)
+        planar: true, canPan: event => !gizmo.axis && !gizmo.dragging
+            && !(walkProfileEditing ? pickWalkProfile(event) : pick(event))
     });
     function refreshOverlay() {
-        const record = events.get(String(selectedId));
-        overlay.visible = !!record;
-        gizmo.enabled = !!record;
-        if (!record) { gizmo.detach(); return; }
-        const box = new THREE.Box3().setFromObject(record.group);
+        const profileObject = walkProfileEditing && walkProfileSelection
+            ? walkProfileObjects.get(walkProfileSelection.key) : null;
+        const record = !profileObject ? events.get(String(selectedId)) : null;
+        const object = profileObject || record?.group || null;
+        const profilePoint = !!(profileObject && walkProfileSelection?.kind === 'walk-profile-point');
+        overlay.visible = !!object;
+        gizmo.enabled = !!object && (!profileObject || profilePoint);
+        gizmo.showX = !!object;
+        gizmo.showY = profilePoint;
+        gizmo.showZ = false;
+        gizmo.showXY = profilePoint;
+        gizmo.showXZ = false;
+        gizmo.showYZ = false;
+        if (!object) { gizmo.detach(); return; }
+        const box = new THREE.Box3().setFromObject(object);
         box.getCenter(overlay.position);
         box.getSize(overlay.scale);
         overlay.scale.z = Math.max(overlay.scale.z, 0.2);
-        if (gizmo.object !== record.group) gizmo.attach(record.group);
+        if (profileObject && !profilePoint) gizmo.detach();
+        else if (gizmo.object !== object) gizmo.attach(object);
     }
-    function select(id) { selectedId = id; refreshOverlay(); }
+    function setSemanticSelection(selection) {
+        if (selection && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')) {
+            walkProfileSelection = selection;
+            selectedId = null;
+        } else {
+            walkProfileSelection = null;
+            selectedId = selection?.kind === 'event' ? selection.id : null;
+        }
+        refreshOverlay();
+    }
+    function select(id) {
+        walkProfileSelection = null;
+        selectedId = id;
+        refreshOverlay();
+    }
     function resize() {
         const rect = container.getBoundingClientRect();
         renderer.setSize(Math.max(1, rect.width), Math.max(1, rect.height));
@@ -132,6 +174,89 @@ export function createCompositionViewport(container, options) {
             child.geometry?.dispose(); child.material?.dispose();
         }
     }
+    function clearWalkProfileControls() {
+        gizmo.detach();
+        while (walkProfileControls.children.length) {
+            const child = walkProfileControls.children[walkProfileControls.children.length - 1];
+            walkProfileControls.remove(child);
+            child.geometry?.dispose(); child.material?.dispose();
+        }
+        walkProfileObjects.clear();
+        walkProfileHitTargets.length = 0;
+    }
+
+    function profileScreenSegment(start, end, semantic) {
+        const dx = end.x - start.x, dy = end.y - start.y;
+        const length = Math.max(Math.hypot(dx, dy), 1);
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(length, 7),
+            new THREE.MeshBasicMaterial({
+                color: 0x38d0f4, transparent: true, opacity: 0.5,
+                depthTest: false, depthWrite: false, side: THREE.DoubleSide
+            })
+        );
+        mesh.position.set((start.x + end.x) * 0.5, -(start.y + end.y) * 0.5, 3.6);
+        mesh.rotation.z = -Math.atan2(dy, dx);
+        mesh.renderOrder = 28;
+        mesh.userData.thestraSelection = semantic;
+        return mesh;
+    }
+
+    function rebuildWalkProfileControls() {
+        clearWalkProfileControls();
+        if (!plate || !model) return;
+        const lane = model.map.source.traversal.lane;
+        const profile = lane && lane.groundProfile;
+        if (!Array.isArray(profile) || profile.length < 2) {
+            walkProfileControls.visible = walkProfileEditing;
+            return;
+        }
+        const points = profile.map(point => platePoint(
+            Number(lane.depthX), Number(point.y), Number(point.z)));
+        for (let index = 0; index < points.length - 1; index++) {
+            const semantic = {
+                kind: 'walk-profile-segment',
+                key: `walk-profile-segment:${index}`,
+                index
+            };
+            const segment = profileScreenSegment(points[index], points[index + 1], semantic);
+            walkProfileControls.add(segment);
+            walkProfileHitTargets.push(segment);
+            walkProfileObjects.set(semantic.key, segment);
+        }
+        points.forEach((screen, index) => {
+            const semantic = {
+                kind: 'walk-profile-point',
+                key: `walk-profile-point:${index}`,
+                index
+            };
+            const point = new THREE.Mesh(
+                new THREE.CircleGeometry(5, 16),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffd45a, depthTest: false, depthWrite: false
+                })
+            );
+            point.position.set(screen.x, -screen.y, 4);
+            point.renderOrder = 29;
+            point.userData.thestraSelection = semantic;
+            walkProfileControls.add(point);
+            walkProfileHitTargets.push(point);
+            walkProfileObjects.set(semantic.key, point);
+        });
+        walkProfileControls.visible = walkProfileEditing;
+        refreshOverlay();
+    }
+
+    function setWalkProfileEditing(enabled) {
+        walkProfileEditing = !!enabled;
+        walkProfileControls.visible = walkProfileEditing;
+        walkOverlay.visible = walkMeshVisible || walkProfileEditing;
+        playerPreview.visible = walkProfileEditing;
+        if (!walkProfileEditing) walkProfileSelection = null;
+        rebuildPlayerPreview();
+        refreshOverlay();
+    }
+
     function eventScreen(record) {
         const event = sourceEvent(record);
         const position = event.worldPosition;
@@ -335,8 +460,33 @@ export function createCompositionViewport(container, options) {
             line.renderOrder = 26;
             walkOverlay.add(line);
         }
-        walkOverlay.visible = walkMeshVisible;
+        walkOverlay.visible = walkMeshVisible || walkProfileEditing;
     }
+    function rebuildPlayerPreview() {
+        while (playerPreview.children.length) {
+            const child = playerPreview.children[playerPreview.children.length - 1];
+            playerPreview.remove(child);
+            child.geometry?.dispose();
+            child.material?.dispose();
+        }
+        if (!model || !plate) return;
+        const lane = model.map.source.traversal.lane;
+        const groundZ = Number(lane.groundZ || 0);
+        const ground = View.groundHeight(lane.groundProfile, groundZ, plate.sliceY);
+        const footY = Number(plate.player.screenY)
+            - (ground - groundZ) * Number(plate.player.pixelsPerRuntimeY || 0);
+        const width = Number(plate.player.width || 12);
+        const height = Number(plate.player.height || 28);
+        const { cube, edges } = createEventBox(width, height, 0.16);
+        cube.material.opacity = 0.08;
+        cube.position.y = edges.position.y = height / 2;
+        const group = new THREE.Group();
+        group.position.set(Number(plate.player.centerX), -footY, 3.2);
+        group.add(cube, edges);
+        playerPreview.add(group);
+        playerPreview.visible = walkProfileEditing;
+    }
+
     function rebuildEvents() {
         clearEvents();
         if (!model || !plate) return;
@@ -403,6 +553,8 @@ export function createCompositionViewport(container, options) {
         }
         rebuildEvents();
         rebuildWalkOverlay();
+        rebuildWalkProfileControls();
+        rebuildPlayerPreview();
         if (changedPlate) fit();
         return true;
     }
@@ -414,25 +566,77 @@ export function createCompositionViewport(container, options) {
     renderer.domElement.addEventListener('pointerdown', event => {
         renderer.domElement.focus({ preventScroll: true });
         if (event.button !== 0 || gizmo.axis || gizmo.dragging) return;
+        if (walkProfileEditing) {
+            const selection = pickWalkProfile(event);
+            setSemanticSelection(selection);
+            options.onSelection?.(selection);
+            return;
+        }
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);
     });
     renderer.domElement.addEventListener('dblclick', event => {
+        if (walkProfileEditing) return;
         const hit = pick(event); if (hit) options.onOpenAt?.(semantic(hit));
     });
     renderer.domElement.addEventListener('keydown', event => {
         if (event.code === 'Home') { event.preventDefault(); fit(); }
     });
     gizmo.addEventListener('mouseDown', () => {
-        const record = events.get(String(selectedId));
-        if (record) gesture = { record, origin: record.group.position.clone() };
+        if (walkProfileEditing && walkProfileSelection?.kind === 'walk-profile-point') {
+            const object = walkProfileObjects.get(walkProfileSelection.key);
+            const source = model.map.source.traversal.lane.groundProfile?.[walkProfileSelection.index];
+            if (object && source) {
+                gesture = {
+                    kind: 'walk-profile-point',
+                    selection: walkProfileSelection,
+                    object,
+                    source: { y: Number(source.y), z: Number(source.z) },
+                    origin: object.position.clone()
+                };
+            }
+        } else {
+            const record = events.get(String(selectedId));
+            if (record) gesture = { kind: 'event', record, origin: record.group.position.clone() };
+        }
         controls.enabled = false;
     });
     gizmo.addEventListener('objectChange', refreshOverlay);
     gizmo.addEventListener('mouseUp', () => {
         controls.enabled = true;
         if (!gesture) return;
-        const { record, origin } = gesture; gesture = null;
+        const completed = gesture; gesture = null;
         const lane = model.map.source.traversal.lane;
+        if (completed.kind === 'walk-profile-point') {
+            const screenX = completed.object.position.x;
+            const screenY = -completed.object.position.y;
+            let world;
+            try {
+                world = View.worldYZAtScreenOnDepthPlane(
+                    plate.camera, plate.width, plate.height, Number(lane.depthX),
+                    plate.sliceY, Number(lane.groundZ || 0),
+                    Number(plate.player.centerX), Number(plate.player.screenY),
+                    screenX, screenY, completed.source.y, completed.source.z);
+            } catch (error) {
+                completed.object.position.copy(completed.origin);
+                refreshOverlay();
+                return;
+            }
+            const result = options.onMoveGroundProfilePoint?.(
+                completed.selection.index, world.y, world.z);
+            if (!result?.ok) {
+                completed.object.position.copy(completed.origin);
+            } else {
+                walkProfileSelection = result.selection || completed.selection;
+                rebuildWalkOverlay();
+                rebuildWalkProfileControls();
+                rebuildPlayerPreview();
+                rebuildEvents();
+                options.onSelection?.(walkProfileSelection);
+            }
+            refreshOverlay();
+            return;
+        }
+        const { record, origin } = completed;
         const position = record.event.worldPosition.slice();
         const modelPath = record.record.asset?.model;
         if (modelPath) {
@@ -468,10 +672,23 @@ export function createCompositionViewport(container, options) {
         controls.update(); renderer.render(scene, camera);
     }());
     return {
-        setSceneModel, show, select, hide,
+        setSceneModel, show, select, hide, setSemanticSelection,
         isPlate: () => !!plate,
-        setWalkMeshVisible(visible) { walkMeshVisible = !!visible; walkOverlay.visible = walkMeshVisible; },
+        isVisible: () => visible,
+        setWalkMeshVisible(visible) {
+            walkMeshVisible = !!visible;
+            walkOverlay.visible = walkMeshVisible || walkProfileEditing;
+        },
         getWalkMeshVisible: () => walkMeshVisible,
+        setWalkProfileEditing,
+        getWalkProfileEditing: () => walkProfileEditing,
+        getWalkProfileSelection: () => walkProfileSelection,
+        refreshWalkProfile() {
+            rebuildWalkOverlay();
+            rebuildWalkProfileControls();
+            rebuildPlayerPreview();
+            rebuildEvents();
+        },
         descriptor: () => plate?.descriptor || null,
         dispose() {
             disposed = true; serial += 1; disposeNavigation(); observer.disconnect();

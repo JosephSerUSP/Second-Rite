@@ -1505,7 +1505,14 @@ function cli.runTownProofFrames(loader)
     local function townSession(mapId, horizontalY, changed)
         local vSession = makeHarnessSession(loader)
         exploration.loadMap(vSession, loader.getMapIndex(mapId))
-        if horizontalY then vSession.townTraversal.y = horizontalY end
+        if horizontalY then
+            -- This harness teleports to deterministic west/centre/east
+            -- samples instead of walking there. Keep the actor root coherent:
+            -- update(nil) refreshes presentation state but deliberately does
+            -- not pretend movement occurred, so it does not recompute Z.
+            vSession.townTraversal.y = horizontalY
+            vSession.townTraversal.z = lane.groundAt(vSession, horizontalY)
+        end
         if changed then vSession.flags.town_room_changed = true end
         lane.update(vSession)
         return vSession

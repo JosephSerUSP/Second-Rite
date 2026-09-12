@@ -164,6 +164,33 @@
                 return result;
             },
 
+            createGroundProfile() {
+                const result = window.SecondRiteEditorCommands.createGroundProfile(dbPayload, currentMapIndex);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
+            splitGroundProfileSegment(segmentIndex, amount) {
+                const result = window.SecondRiteEditorCommands.splitGroundProfileSegment(
+                    dbPayload, currentMapIndex, segmentIndex, amount);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
+            moveGroundProfilePoint(pointIndex, y, z) {
+                const result = window.SecondRiteEditorCommands.moveGroundProfilePoint(
+                    dbPayload, currentMapIndex, pointIndex, y, z);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
+            deleteGroundProfilePoint(pointIndex) {
+                const result = window.SecondRiteEditorCommands.deleteGroundProfilePoint(
+                    dbPayload, currentMapIndex, pointIndex);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
             moveEvent(eventId, x, y) {
                 const result = window.SecondRiteEditorCommands.moveEvent(dbPayload, currentMapIndex, eventId, x, y);
                 if (result.changed) {

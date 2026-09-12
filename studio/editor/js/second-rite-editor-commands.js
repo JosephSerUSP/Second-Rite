@@ -107,6 +107,83 @@
                 cell: { x: event.x, y: event.y } } };
     }
 
+    function laneAt(payload, mapIndex) {
+        const map = mapAt(payload, mapIndex);
+        if (!map?.traversal || map.traversal.provider !== 'bounded_lane') return null;
+        const lane = map.traversal.lane;
+        if (!lane || typeof lane !== 'object' || Array.isArray(lane)) return null;
+        return lane;
+    }
+
+    function profileSelection(index) {
+        return { kind: 'walk-profile-point', key: `walk-profile-point:${index}`, index };
+    }
+
+    function createGroundProfile(payload, mapIndex) {
+        const lane = laneAt(payload, mapIndex);
+        if (!lane) return { ok: false, reason: 'missing-bounded-lane' };
+        if (Array.isArray(lane.groundProfile) && lane.groundProfile.length) {
+            return { ok: true, changed: false, profile: lane.groundProfile, selection: profileSelection(0) };
+        }
+        const minimum = Number(lane.minY), maximum = Number(lane.maxY);
+        const groundZ = Number(lane.groundZ || 0);
+        if (![minimum, maximum, groundZ].every(Number.isFinite) || maximum < minimum) {
+            return { ok: false, reason: 'invalid-bounded-lane' };
+        }
+        lane.groundProfile = [{ y: minimum, z: groundZ }, { y: maximum, z: groundZ }];
+        return { ok: true, changed: true, profile: lane.groundProfile, selection: profileSelection(0) };
+    }
+
+    function splitGroundProfileSegment(payload, mapIndex, segmentIndex, amount = 0.5) {
+        const lane = laneAt(payload, mapIndex);
+        const profile = lane && lane.groundProfile;
+        const index = Number(segmentIndex), t = Number(amount);
+        if (!Array.isArray(profile) || profile.length < 2) return { ok: false, reason: 'missing-ground-profile' };
+        if (!Number.isInteger(index) || index < 0 || index >= profile.length - 1) {
+            return { ok: false, reason: 'invalid-profile-segment' };
+        }
+        if (!Number.isFinite(t) || t <= 0 || t >= 1) return { ok: false, reason: 'invalid-split-amount' };
+        const left = profile[index], right = profile[index + 1];
+        const point = {
+            y: Number(left.y) + (Number(right.y) - Number(left.y)) * t,
+            z: Number(left.z) + (Number(right.z) - Number(left.z)) * t
+        };
+        if (![point.y, point.z].every(Number.isFinite)) return { ok: false, reason: 'invalid-ground-profile' };
+        profile.splice(index + 1, 0, point);
+        return { ok: true, changed: true, profile, point, selection: profileSelection(index + 1) };
+    }
+
+    function moveGroundProfilePoint(payload, mapIndex, pointIndex, y, z) {
+        const lane = laneAt(payload, mapIndex);
+        const profile = lane && lane.groundProfile;
+        const index = Number(pointIndex), nextY = Number(y), nextZ = Number(z);
+        if (!Array.isArray(profile) || profile.length < 2) return { ok: false, reason: 'missing-ground-profile' };
+        if (!Number.isInteger(index) || index < 0 || index >= profile.length) {
+            return { ok: false, reason: 'invalid-profile-point' };
+        }
+        if (!Number.isFinite(nextY) || !Number.isFinite(nextZ)) return { ok: false, reason: 'invalid-profile-point' };
+        const previous = index > 0 ? Number(profile[index - 1].y) : -Infinity;
+        const following = index + 1 < profile.length ? Number(profile[index + 1].y) : Infinity;
+        if (nextY < previous || nextY > following) return { ok: false, reason: 'profile-order' };
+        const point = profile[index];
+        const changed = Number(point.y) !== nextY || Number(point.z) !== nextZ;
+        if (changed) { point.y = nextY; point.z = nextZ; }
+        return { ok: true, changed, profile, point, selection: profileSelection(index) };
+    }
+
+    function deleteGroundProfilePoint(payload, mapIndex, pointIndex) {
+        const lane = laneAt(payload, mapIndex);
+        const profile = lane && lane.groundProfile;
+        const index = Number(pointIndex);
+        if (!Array.isArray(profile) || profile.length < 2) return { ok: false, reason: 'missing-ground-profile' };
+        if (!Number.isInteger(index) || index <= 0 || index >= profile.length - 1) {
+            return { ok: false, reason: 'profile-endpoint' };
+        }
+        const removed = profile.splice(index, 1)[0];
+        const selected = Math.min(index, profile.length - 1);
+        return { ok: true, changed: true, profile, removed, selection: profileSelection(selected) };
+    }
+
     function lightAtIndex(map, lightIndex) {
         if (!map || !Array.isArray(map.lightObjects)) return null;
         const index = Number(lightIndex);
@@ -141,5 +218,10 @@
         return result;
     }
 
-    return { TILE_BY_TOOL, tileForTool, cellBounds, validateCell, paintCell, eventById, canMoveEvent, moveEvent, moveWorldEvent, canMoveLight, moveLight };
+    return {
+        TILE_BY_TOOL, tileForTool, cellBounds, validateCell, paintCell, eventById,
+        canMoveEvent, moveEvent, moveWorldEvent,
+        createGroundProfile, splitGroundProfileSegment, moveGroundProfilePoint, deleteGroundProfilePoint,
+        canMoveLight, moveLight
+    };
 }));

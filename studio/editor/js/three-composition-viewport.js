@@ -71,9 +71,12 @@ export function createCompositionViewport(container, options) {
         new THREE.MeshBasicMaterial({ transparent: true }));
     const foregroundPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
         new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+    const playerPreview = new THREE.Group();
+    playerPreview.name = 'ThestraPlatePlayerPreview';
+    playerPreview.visible = false;
     scenePlane.renderOrder = -10;
     foregroundPlane.renderOrder = 10;
-    scene.add(scenePlane, foregroundPlane);
+    scene.add(scenePlane, foregroundPlane, playerPreview);
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
@@ -248,7 +251,9 @@ export function createCompositionViewport(container, options) {
         walkProfileEditing = !!enabled;
         walkProfileControls.visible = walkProfileEditing;
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
+        playerPreview.visible = walkProfileEditing;
         if (!walkProfileEditing) walkProfileSelection = null;
+        rebuildPlayerPreview();
         refreshOverlay();
     }
 
@@ -457,6 +462,31 @@ export function createCompositionViewport(container, options) {
         }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
     }
+    function rebuildPlayerPreview() {
+        while (playerPreview.children.length) {
+            const child = playerPreview.children[playerPreview.children.length - 1];
+            playerPreview.remove(child);
+            child.geometry?.dispose();
+            child.material?.dispose();
+        }
+        if (!model || !plate) return;
+        const lane = model.map.source.traversal.lane;
+        const groundZ = Number(lane.groundZ || 0);
+        const ground = View.groundHeight(lane.groundProfile, groundZ, plate.sliceY);
+        const footY = Number(plate.player.screenY)
+            - (ground - groundZ) * Number(plate.player.pixelsPerRuntimeY || 0);
+        const width = Number(plate.player.width || 12);
+        const height = Number(plate.player.height || 28);
+        const { cube, edges } = createEventBox(width, height, 0.16);
+        cube.material.opacity = 0.08;
+        cube.position.y = edges.position.y = height / 2;
+        const group = new THREE.Group();
+        group.position.set(Number(plate.player.centerX), -footY, 3.2);
+        group.add(cube, edges);
+        playerPreview.add(group);
+        playerPreview.visible = walkProfileEditing;
+    }
+
     function rebuildEvents() {
         clearEvents();
         if (!model || !plate) return;
@@ -524,6 +554,7 @@ export function createCompositionViewport(container, options) {
         rebuildEvents();
         rebuildWalkOverlay();
         rebuildWalkProfileControls();
+        rebuildPlayerPreview();
         if (changedPlate) fit();
         return true;
     }
@@ -598,6 +629,7 @@ export function createCompositionViewport(container, options) {
                 walkProfileSelection = result.selection || completed.selection;
                 rebuildWalkOverlay();
                 rebuildWalkProfileControls();
+                rebuildPlayerPreview();
                 rebuildEvents();
                 options.onSelection?.(walkProfileSelection);
             }
@@ -654,6 +686,7 @@ export function createCompositionViewport(container, options) {
         refreshWalkProfile() {
             rebuildWalkOverlay();
             rebuildWalkProfileControls();
+            rebuildPlayerPreview();
             rebuildEvents();
         },
         descriptor: () => plate?.descriptor || null,

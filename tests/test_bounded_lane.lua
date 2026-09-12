@@ -178,6 +178,31 @@ for _ = 1, 400 do lane.move(game, -1) end
 check(math.abs(floor.y - 0) < 0.001, "a stepped floor does not stop the walk back west")
 check(math.abs(floor.z - (-1.5)) < 0.001, "walking back west returns the actor to the upper floor")
 
+-- Studio provides immediate ordering feedback, but executable validity remains
+-- the runtime lane's contract. Prove the real initializer still rejects a
+-- west-to-east reversal rather than treating the editor guard as authority.
+local invalidProfileMap = {
+    id = 901,
+    traversal = {
+        provider = "bounded_lane",
+        environmentPackage = floorMap.traversal.environmentPackage,
+        spawnAnchor = "spawn_player",
+        lane = {
+            minY = 0, maxY = 10, depthX = 7.8, groundZ = -1.5, speed = 3.4,
+            groundProfile = {
+                { y = 0, z = -1.5 }, { y = 7, z = -2.0 }, { y = 6, z = -2.5 },
+            },
+        },
+        blockedRanges = {},
+        camera = floorMap.traversal.camera,
+        doorways = {},
+    },
+    events = {},
+}
+local invalidOk, invalidErr = pcall(lane.initialize, game, invalidProfileMap, floorEnv, nil)
+check(not invalidOk and tostring(invalidErr):find("west to east", 1, true) ~= nil,
+    "runtime validator rejects a ground profile whose y coordinates reverse")
+
 -- A screen with no authored profile is flat, which is what every existing
 -- screen relies on.
 exploration.loadMap(game, loader.getMapIndex(PRACA))

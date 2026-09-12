@@ -581,6 +581,9 @@
                     ? `X ${state.camera.projectionFrame.canonicalCenterX} · horizon Y ${state.camera.projectionFrame.canonicalHorizonY}`
                     : '—',
                 'WorldCamera projection-frame fact; not the baked plate anchor.'));
+            camera.appendChild(calibrationRow('Projection window',
+                `X ${state.camera.projectionWindowOffsetX ?? 0} · Y ${state.camera.projectionWindowOffsetY ?? 0}`,
+                'Authored projection-window offsets, separate from tracking bounds and plate anchoring.'));
             camera.appendChild(calibrationRow('Tracking',
                 state.camera.tracking
                     ? `center ${state.camera.tracking.center} · offsets ${state.camera.tracking.minOffsetX}…${state.camera.tracking.maxOffsetX}`

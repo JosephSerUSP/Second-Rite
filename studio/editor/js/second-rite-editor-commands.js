@@ -109,7 +109,8 @@
 
     function laneAt(payload, mapIndex) {
         const map = mapAt(payload, mapIndex);
-        const lane = map && map.traversal && map.traversal.lane;
+        if (!map?.traversal || map.traversal.provider !== 'bounded_lane') return null;
+        const lane = map.traversal.lane;
         if (!lane || typeof lane !== 'object' || Array.isArray(lane)) return null;
         return lane;
     }

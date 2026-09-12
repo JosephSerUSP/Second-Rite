@@ -182,6 +182,25 @@ close(nextOptics.yScale * anchoredY - nextOptics.centerNdcY, cursorNdcY,
 close(world_view.groundHeight({ { y = 0, z = 0 }, { y = 2, z = 1 } }, 0, 1),
     0.5, "lane ground interpolation")
 
+local portCamera = world_view.resolveTownCamera({
+    target = { x = 7.8, y = 14.802, z = 0 }, distance = 18.666666666666668,
+    yawDegrees = 0, pitchDegrees = -17.5, eyeHeight = 2.2604166666666665,
+    fovDegrees = 28.072486935852957, projectionScale = { x = 1, y = 1 },
+    projectionFrame = { compositionWidth = 256, canonicalCenterX = 213, canonicalHorizonY = 66 },
+})
+local portProfile = {
+    { y = -4.6667, z = 0 }, { y = 25.2292, z = 0 },
+    { y = 29.6042, z = 0.5833 }, { y = 34.1615, z = 0.5833 },
+}
+local portY = 28.6927
+local portBase = world_view.projectPerspective(portCamera, 1065, 240, 7.8, 14.802, 0)
+local portPoint = world_view.projectPerspective(portCamera, 1065, 240, 7.8, portY,
+    world_view.groundHeight(portProfile, 0, portY) + 0.22)
+local portScreenX = 533.998 + portPoint.x - portBase.x
+close(world_view.worldYAtScreenXOnGroundProfile(
+    portCamera, 1065, 240, 7.8, portProfile, 0, 14.802, 533.998,
+    portScreenX, 0, 29.604, 0.22), portY, "Port sloped-floor plate inverse", 1e-7)
+
 local function bench(fn, iterations)
     for _ = 1, 2000 do fn() end
     local started = love.timer.getTime()

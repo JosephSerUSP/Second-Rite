@@ -312,69 +312,6 @@
           "arrival": "west_praca"
         }
       ]
-    },
-    {
-      "id": 1791,
-      "instanceId": "st-maria-praca-camera-test-lamp",
-      "name": "Camera Test Lamp",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        7.0,
-        0.0
-      ],
-      "trigger": "interact",
-      "model": "assets/models/town/town_street_lamp.obj",
-      "modelScale": 3.0,
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "Camera test: street lamp."
-        }
-      ]
-    },
-    {
-      "id": 1792,
-      "instanceId": "st-maria-praca-camera-test-barrels",
-      "name": "Camera Test Barrels",
-      "x": 0,
-      "y": 14.5,
-      "worldPosition": [
-        7.8,
-        14.5,
-        0.0
-      ],
-      "trigger": "interact",
-      "model": "assets/models/town/town_barrel_stack.obj",
-      "modelScale": 3.0,
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "Camera test: barrel stack."
-        }
-      ]
-    },
-    {
-      "id": 1793,
-      "instanceId": "st-maria-praca-camera-test-sign",
-      "name": "Camera Test Sign",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        19.0,
-        0.0
-      ],
-      "trigger": "interact",
-      "model": "assets/models/town/town_wooden_sign.obj",
-      "modelScale": 3.0,
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "Camera test: wooden sign."
-        }
-      ]
     }
   ],
   "treasures": [],

@@ -23,6 +23,17 @@ function laneFixture(profile) {
         traversal: { provider: 'bounded_lane', lane }, events: [] }] };
 }
 
+test('walk profile commands are unavailable outside the bounded-lane provider', () => {
+    const payload = laneFixture();
+    payload.maps[0].traversal.provider = 'future_surface';
+    const before = JSON.stringify(payload);
+    const result = Commands.createGroundProfile(payload, 0);
+    assert.equal(result.ok, false);
+    assert.equal(result.reason, 'missing-bounded-lane');
+    assert.equal(JSON.stringify(payload), before,
+        'a different future traversal provider must not be interpreted as bounded-lane schema');
+});
+
 test('walk profile creation is explicit and flat lanes remain absent until requested', () => {
     const payload = laneFixture();
     const before = JSON.stringify(payload);

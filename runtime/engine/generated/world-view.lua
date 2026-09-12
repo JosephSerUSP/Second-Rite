@@ -580,7 +580,7 @@ do
             )
             return {x = centerX + projected.x - base.x, y = centerY + projected.y - base.y}
         end
-        local epsilon = 1e-4
+        local epsilon = 0.0001
         do
             local iteration = 0
             while iteration < 12 do

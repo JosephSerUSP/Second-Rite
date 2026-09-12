@@ -6,8 +6,11 @@ on:
       - "shared/semantics/world-view.ts"
       - "runtime/engine/bounded_lane.lua"
       - "runtime/engine/cli_tools.lua"
+      - "runtime/presentation/viewport_3d.lua"
       - "runtime/engine/generated/world-view.lua"
       - "runtime/presentation/viewport_3d.lua"
+      - "studio/editor/environment-package-authoring.js"
+      - "studio/editor/server.js"
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
       - "studio/editor/js/event_presentation.js"
@@ -21,6 +24,8 @@ on:
       - "studio/editor/tests/test-world-event-authoring.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
+      - "studio/editor/test-environment-package-authoring.js"
+      - "studio/editor/test-plate-calibration-runtime.js"
       - "tests/test_bounded_lane.lua"
       - ".github/workflows/spatial-studio.yml"
   push:
@@ -29,8 +34,11 @@ on:
       - "shared/semantics/world-view.ts"
       - "runtime/engine/bounded_lane.lua"
       - "runtime/engine/cli_tools.lua"
+      - "runtime/presentation/viewport_3d.lua"
       - "runtime/engine/generated/world-view.lua"
       - "runtime/presentation/viewport_3d.lua"
+      - "studio/editor/environment-package-authoring.js"
+      - "studio/editor/server.js"
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
       - "studio/editor/js/event_presentation.js"
@@ -44,6 +52,8 @@ on:
       - "studio/editor/tests/test-world-event-authoring.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
+      - "studio/editor/test-environment-package-authoring.js"
+      - "studio/editor/test-plate-calibration-runtime.js"
       - "tests/test_bounded_lane.lua"
       - ".github/workflows/spatial-studio.yml"
   workflow_dispatch:
@@ -67,9 +77,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Walk-profile command and surface contracts
+      - name: Spatial authoring contracts
         shell: pwsh
         run: |
+          node --test studio/editor/test-environment-package-authoring.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test studio/editor/tests/test-world-event-authoring.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node studio/editor/tests/test-world-presentation.js
@@ -77,6 +89,8 @@ jobs:
       - name: Syntax-check touched browser modules
         shell: pwsh
         run: |
+          node --check studio/editor/environment-package-authoring.js
+          node --check studio/editor/server.js
           node --check studio/editor/js/second-rite-editor-commands.js
           node --check studio/editor/js/event_presentation.js
           node --check studio/editor/js/thestra-editor-workspace.js
@@ -114,3 +128,29 @@ jobs:
         run: |
           $dirty = git status --porcelain --untracked-files=no
           if ($dirty) { Write-Host $dirty; throw "Spatial Studio runtime proof modified tracked source" }
+
+  calibration-proof:
+    name: Plate camera calibration proof
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      SDL_AUDIODRIVER: "dummy"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
+      - name: Prove Map camera and environment plate calibration independently
+        shell: pwsh
+        run: node --test studio/editor/test-plate-calibration-runtime.js
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Plate calibration runtime proof modified tracked source" }

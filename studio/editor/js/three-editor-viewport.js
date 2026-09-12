@@ -320,6 +320,9 @@ export function createThreeEditorViewport(container, options = {}) {
         getPlateCalibration() {
             return compositionAuthoring.getCalibrationState?.() || { available: false };
         },
+        setPlateCalibrationPreviewVisible(visible) {
+            compositionAuthoring.setCalibrationPreviewVisible?.(visible);
+        },
         setTownCameraField(field, value) {
             const result = options.onSetTownCameraField?.(field, value)
                 || { ok: false, reason: 'camera-authoring-unavailable' };

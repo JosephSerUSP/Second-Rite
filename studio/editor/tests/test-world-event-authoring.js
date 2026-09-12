@@ -19,7 +19,8 @@ function fixture() {
 function laneFixture(profile) {
     const lane = { minY: 0, maxY: 10, depthX: 7.8, groundZ: 1, speed: 3.4 };
     if (profile !== undefined) lane.groundProfile = profile;
-    return { maps: [{ id: 31, safe: true, layout: ['.'], traversal: { lane }, events: [] }] };
+    return { maps: [{ id: 31, safe: true, layout: ['.'],
+        traversal: { provider: 'bounded_lane', lane }, events: [] }] };
 }
 
 test('walk profile creation is explicit and flat lanes remain absent until requested', () => {

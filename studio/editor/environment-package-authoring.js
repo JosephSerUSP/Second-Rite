@@ -83,15 +83,20 @@ function writeCalibration(projectRoot, value, patch, expectedVersion) {
     }
 
     const projection = current.value.preRendered.playerProjection;
-    for (const key of keys) projection[key] = finite(patch[key], `playerProjection.${key}`);
+    let changed = false;
+    for (const key of keys) {
+        const nextValue = finite(patch[key], `playerProjection.${key}`);
+        if (projection[key] !== nextValue) changed = true;
+        projection[key] = nextValue;
+    }
 
     const nextRaw = JSON.stringify(current.value, null, 2) + '\n';
-    fs.writeFileSync(current.file, nextRaw, 'utf8');
+    if (changed) fs.writeFileSync(current.file, nextRaw, 'utf8');
     return {
         path: current.path,
-        version: token(nextRaw),
+        version: changed ? token(nextRaw) : current.version,
         value: current.value,
-        changed: nextRaw !== fs.readFileSync(current.file, 'utf8') ? false : true
+        changed
     };
 }
 

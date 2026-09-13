@@ -449,15 +449,25 @@
         splitProfile.type = 'button';
         splitProfile.className = 'win98-btn';
         splitProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        splitProfile.title = 'Legacy discoverability control: select a segment (2) and subdivide it. Blender-style component editing is the primary workflow.';
-        splitProfile.textContent = 'Split Segment';
+        splitProfile.title = 'Subdivide all selected Walk Profile segments. Use 2 for segment mode; Shift+click selects multiple edges.';
+        splitProfile.textContent = 'Subdivide';
+
+        const subdivideCuts = document.createElement('input');
+        subdivideCuts.type = 'number';
+        subdivideCuts.className = 'win98-input';
+        subdivideCuts.min = '1';
+        subdivideCuts.max = '64';
+        subdivideCuts.step = '1';
+        subdivideCuts.value = '1';
+        subdivideCuts.style.cssText = 'width:42px;height:20px;font-size:9px;display:none;';
+        subdivideCuts.title = 'Number of evenly spaced cuts per selected segment.';
 
         const deleteProfile = document.createElement('button');
         deleteProfile.type = 'button';
         deleteProfile.className = 'win98-btn';
         deleteProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
         deleteProfile.title = 'Dissolve the selected interior point. X/Delete performs the same operation; endpoints are protected.';
-        deleteProfile.textContent = 'Delete Point';
+        deleteProfile.textContent = 'Dissolve';
 
         function syncWalkProfile() {
             const viewport = viewportApi();
@@ -466,12 +476,15 @@
             for (const control of [walkProfile, createProfile, splitProfile, deleteProfile]) {
                 control.style.display = show ? '' : 'none';
             }
+            subdivideCuts.style.display = show && status?.editing && status?.componentMode === 'segment'
+                ? '' : 'none';
             if (!show) return;
             walkProfile.classList.toggle('active', !!status.editing);
             const component = status.componentMode === 'segment' ? 'Segments' : 'Points';
             walkProfile.textContent = status.editing ? `Walk Profile · ${component}` : 'Walk Profile';
             createProfile.disabled = !!status.authored;
             splitProfile.disabled = !status.editing || !status.authored
+                || status.componentMode !== 'segment'
                 || status.selection?.kind !== 'walk-profile-segment';
             const endpoint = status.selection?.kind === 'walk-profile-point'
                 && (status.selection.index === 0 || status.selection.index === status.pointCount - 1);
@@ -507,11 +520,13 @@
             syncWalkProfile();
         });
         splitProfile.addEventListener('click', () => {
-            viewportApi()?.splitSelectedGroundProfileSegment?.(0.5);
+            const cuts = Math.max(1, Math.min(64, Math.trunc(Number(subdivideCuts.value) || 1)));
+            subdivideCuts.value = String(cuts);
+            viewportApi()?.subdivideSelectedGroundProfileSegments?.(cuts);
             syncWalkProfile();
         });
         deleteProfile.addEventListener('click', () => {
-            viewportApi()?.deleteSelectedGroundProfilePoint?.();
+            viewportApi()?.deleteSelectedGroundProfilePoints?.();
             syncWalkProfile();
         });
         sceneSelect.addEventListener('change', () => {
@@ -522,12 +537,12 @@
 
         toolbar.mount('world-presentation', [
             free, runtime, walkMesh,
-            walkProfile, createProfile, splitProfile, deleteProfile,
+            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
             sceneSelect, info
         ]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
-            walkProfile, createProfile, splitProfile, deleteProfile, syncWalkProfile,
+            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };
         updateRuntimeControls();

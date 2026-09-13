@@ -6,9 +6,12 @@ import { MTLLoader } from '/vendor/three/MTLLoader.js';
 import '/js/thestra-viewport-contract.js';
 import '/js/three-world-fidelity-core.js';
 import '/js/three-definition-consumer.js';
+import '/js/spatial-interaction.js';
 
 const Contract = globalThis.ThestraViewportContract;
 if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
+const SpatialInteraction = globalThis.ThestraSpatialInteraction;
+if (!SpatialInteraction) throw new Error('Shared spatial interaction core failed to load.');
 const WorldFidelity = globalThis.ThestraThreeWorldFidelityCore;
 if (!WorldFidelity) throw new Error('Thestra world fidelity core failed to load.');
 const DirectDefinitions = globalThis.ThestraThreeDefinitionConsumer;
@@ -235,7 +238,9 @@ export function createThreeEditorViewport(container, options = {}) {
     const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
     const topControls = new OrbitControls(top, renderer.domElement);
-    const moveGizmo = createMoveGizmo(perspective, renderer.domElement);
+    const moveGizmo = createMoveGizmo(
+        perspective, renderer.domElement, ['X', 'Z'], SpatialInteraction.viewportAxisColorSources()
+    );
     scene.add(moveGizmo.getHelper());
 
     topControls.enabled = false;

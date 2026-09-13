@@ -9,7 +9,7 @@
     "maxCatchUp": 8
   },
   "terminal": {
-    "reached": "v.gameOver == true or v.gameWon == true"
+    "reached": "v.gameOver == 1 or v.gameWon == 1"
   },
   "windows": [
     {
@@ -40,7 +40,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.gameOver and 'GAME OVER' or (v.gameWon and 'YOU WIN' or '')}"
+          "text": "{v.gameOver == 1 and 'GAME OVER' or (v.gameWon == 1 and 'YOU WIN' or '')}"
         }
       ]
     },
@@ -95,8 +95,8 @@
     {
       "id": "brick_1",
       "rect": {
-        "x": "v.b1 and (1 + 1 + 4) or 100",
-        "y": "v.b1 and (5 + 1 + 3) or 100",
+        "x": "v.b1 == 1 and (1 + 1 + 4) or 100",
+        "y": "v.b1 == 1 and (5 + 1 + 3) or 100",
         "w": 4,
         "h": 1
       },
@@ -111,8 +111,8 @@
     {
       "id": "brick_2",
       "rect": {
-        "x": "v.b2 and (1 + 1 + 10) or 100",
-        "y": "v.b2 and (5 + 1 + 3) or 100",
+        "x": "v.b2 == 1 and (1 + 1 + 10) or 100",
+        "y": "v.b2 == 1 and (5 + 1 + 3) or 100",
         "w": 4,
         "h": 1
       },
@@ -127,8 +127,8 @@
     {
       "id": "brick_3",
       "rect": {
-        "x": "v.b3 and (1 + 1 + 16) or 100",
-        "y": "v.b3 and (5 + 1 + 3) or 100",
+        "x": "v.b3 == 1 and (1 + 1 + 16) or 100",
+        "y": "v.b3 == 1 and (5 + 1 + 3) or 100",
         "w": 4,
         "h": 1
       },
@@ -143,8 +143,8 @@
     {
       "id": "brick_4",
       "rect": {
-        "x": "v.b4 and (1 + 1 + 22) or 100",
-        "y": "v.b4 and (5 + 1 + 3) or 100",
+        "x": "v.b4 == 1 and (1 + 1 + 22) or 100",
+        "y": "v.b4 == 1 and (5 + 1 + 3) or 100",
         "w": 4,
         "h": 1
       },
@@ -159,8 +159,8 @@
     {
       "id": "brick_5",
       "rect": {
-        "x": "v.b5 and (1 + 1 + 4) or 100",
-        "y": "v.b5 and (5 + 1 + 5) or 100",
+        "x": "v.b5 == 1 and (1 + 1 + 4) or 100",
+        "y": "v.b5 == 1 and (5 + 1 + 5) or 100",
         "w": 4,
         "h": 1
       },
@@ -175,8 +175,8 @@
     {
       "id": "brick_6",
       "rect": {
-        "x": "v.b6 and (1 + 1 + 10) or 100",
-        "y": "v.b6 and (5 + 1 + 5) or 100",
+        "x": "v.b6 == 1 and (1 + 1 + 10) or 100",
+        "y": "v.b6 == 1 and (5 + 1 + 5) or 100",
         "w": 4,
         "h": 1
       },
@@ -191,8 +191,8 @@
     {
       "id": "brick_7",
       "rect": {
-        "x": "v.b7 and (1 + 1 + 16) or 100",
-        "y": "v.b7 and (5 + 1 + 5) or 100",
+        "x": "v.b7 == 1 and (1 + 1 + 16) or 100",
+        "y": "v.b7 == 1 and (5 + 1 + 5) or 100",
         "w": 4,
         "h": 1
       },
@@ -207,8 +207,8 @@
     {
       "id": "brick_8",
       "rect": {
-        "x": "v.b8 and (1 + 1 + 22) or 100",
-        "y": "v.b8 and (5 + 1 + 5) or 100",
+        "x": "v.b8 == 1 and (1 + 1 + 22) or 100",
+        "y": "v.b8 == 1 and (5 + 1 + 5) or 100",
         "w": 4,
         "h": 1
       },
@@ -223,8 +223,8 @@
     {
       "id": "brick_9",
       "rect": {
-        "x": "v.b9 and (1 + 1 + 4) or 100",
-        "y": "v.b9 and (5 + 1 + 7) or 100",
+        "x": "v.b9 == 1 and (1 + 1 + 4) or 100",
+        "y": "v.b9 == 1 and (5 + 1 + 7) or 100",
         "w": 4,
         "h": 1
       },
@@ -239,8 +239,8 @@
     {
       "id": "brick_10",
       "rect": {
-        "x": "v.b10 and (1 + 1 + 10) or 100",
-        "y": "v.b10 and (5 + 1 + 7) or 100",
+        "x": "v.b10 == 1 and (1 + 1 + 10) or 100",
+        "y": "v.b10 == 1 and (5 + 1 + 7) or 100",
         "w": 4,
         "h": 1
       },
@@ -255,8 +255,8 @@
     {
       "id": "brick_11",
       "rect": {
-        "x": "v.b11 and (1 + 1 + 16) or 100",
-        "y": "v.b11 and (5 + 1 + 7) or 100",
+        "x": "v.b11 == 1 and (1 + 1 + 16) or 100",
+        "y": "v.b11 == 1 and (5 + 1 + 7) or 100",
         "w": 4,
         "h": 1
       },
@@ -271,8 +271,8 @@
     {
       "id": "brick_12",
       "rect": {
-        "x": "v.b12 and (1 + 1 + 22) or 100",
-        "y": "v.b12 and (5 + 1 + 7) or 100",
+        "x": "v.b12 == 1 and (1 + 1 + 22) or 100",
+        "y": "v.b12 == 1 and (5 + 1 + 7) or 100",
         "w": 4,
         "h": 1
       },
@@ -340,59 +340,59 @@
           },
           {
             "name": "gameOver",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "gameWon",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "b1",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b2",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b3",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b4",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b5",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b6",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b7",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b8",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b9",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b10",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b11",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b12",
-            "value": "true"
+            "value": 1
           }
         ]
       }
@@ -451,59 +451,59 @@
           },
           {
             "name": "gameOver",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "gameWon",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "b1",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b2",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b3",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b4",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b5",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b6",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b7",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b8",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b9",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b10",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b11",
-            "value": "true"
+            "value": 1
           },
           {
             "name": "b12",
-            "value": "true"
+            "value": 1
           }
         ]
       }
@@ -511,7 +511,7 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v.gameOver == false and v.gameWon == false",
+        "condition": "v.gameOver == 0 and v.gameWon == 0",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -578,8 +578,12 @@
             "then": [
               {
                 "cmd": "SET_VAR",
-                "name": "gameOver",
-                "value": "true"
+                "assignments": [
+                  {
+                    "name": "gameOver",
+                    "value": 1
+                  }
+                ]
               }
             ]
           },
@@ -611,112 +615,112 @@
             "assignments": [
               {
                 "name": "hit_b1",
-                "value": "v.b1 and (v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 2.0 and v.ballY <= 4.0)"
+                "value": "(v.b1 == 1 and v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 2.0 and v.ballY <= 4.0) and 1 or 0"
               },
               {
                 "name": "hit_b2",
-                "value": "v.b2 and (v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 2.0 and v.ballY <= 4.0)"
+                "value": "(v.b2 == 1 and v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 2.0 and v.ballY <= 4.0) and 1 or 0"
               },
               {
                 "name": "hit_b3",
-                "value": "v.b3 and (v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 2.0 and v.ballY <= 4.0)"
+                "value": "(v.b3 == 1 and v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 2.0 and v.ballY <= 4.0) and 1 or 0"
               },
               {
                 "name": "hit_b4",
-                "value": "v.b4 and (v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 2.0 and v.ballY <= 4.0)"
+                "value": "(v.b4 == 1 and v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 2.0 and v.ballY <= 4.0) and 1 or 0"
               },
               {
                 "name": "hit_b5",
-                "value": "v.b5 and (v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 4.0 and v.ballY <= 6.0)"
+                "value": "(v.b5 == 1 and v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 4.0 and v.ballY <= 6.0) and 1 or 0"
               },
               {
                 "name": "hit_b6",
-                "value": "v.b6 and (v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 4.0 and v.ballY <= 6.0)"
+                "value": "(v.b6 == 1 and v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 4.0 and v.ballY <= 6.0) and 1 or 0"
               },
               {
                 "name": "hit_b7",
-                "value": "v.b7 and (v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 4.0 and v.ballY <= 6.0)"
+                "value": "(v.b7 == 1 and v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 4.0 and v.ballY <= 6.0) and 1 or 0"
               },
               {
                 "name": "hit_b8",
-                "value": "v.b8 and (v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 4.0 and v.ballY <= 6.0)"
+                "value": "(v.b8 == 1 and v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 4.0 and v.ballY <= 6.0) and 1 or 0"
               },
               {
                 "name": "hit_b9",
-                "value": "v.b9 and (v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 6.0 and v.ballY <= 8.0)"
+                "value": "(v.b9 == 1 and v.ballX >= 3.0 and v.ballX <= 8.0 and v.ballY >= 6.0 and v.ballY <= 8.0) and 1 or 0"
               },
               {
                 "name": "hit_b10",
-                "value": "v.b10 and (v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 6.0 and v.ballY <= 8.0)"
+                "value": "(v.b10 == 1 and v.ballX >= 9.0 and v.ballX <= 14.0 and v.ballY >= 6.0 and v.ballY <= 8.0) and 1 or 0"
               },
               {
                 "name": "hit_b11",
-                "value": "v.b11 and (v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 6.0 and v.ballY <= 8.0)"
+                "value": "(v.b11 == 1 and v.ballX >= 15.0 and v.ballX <= 20.0 and v.ballY >= 6.0 and v.ballY <= 8.0) and 1 or 0"
               },
               {
                 "name": "hit_b12",
-                "value": "v.b12 and (v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 6.0 and v.ballY <= 8.0)"
+                "value": "(v.b12 == 1 and v.ballX >= 21.0 and v.ballX <= 26.0 and v.ballY >= 6.0 and v.ballY <= 8.0) and 1 or 0"
               },
               {
                 "name": "any_hit",
-                "value": "v.hit_b1 or v.hit_b2 or v.hit_b3 or v.hit_b4 or v.hit_b5 or v.hit_b6 or v.hit_b7 or v.hit_b8 or v.hit_b9 or v.hit_b10 or v.hit_b11 or v.hit_b12"
+                "value": "(v.hit_b1 == 1 or v.hit_b2 == 1 or v.hit_b3 == 1 or v.hit_b4 == 1 or v.hit_b5 == 1 or v.hit_b6 == 1 or v.hit_b7 == 1 or v.hit_b8 == 1 or v.hit_b9 == 1 or v.hit_b10 == 1 or v.hit_b11 == 1 or v.hit_b12 == 1) and 1 or 0"
               }
             ]
           },
           {
             "cmd": "IF",
-            "condition": "v.any_hit",
+            "condition": "v.any_hit == 1",
             "then": [
               {
                 "cmd": "SET_VAR",
                 "assignments": [
                   {
                     "name": "b1",
-                    "value": "v.b1 and not v.hit_b1"
+                    "value": "(v.b1 == 1 and v.hit_b1 == 0) and 1 or 0"
                   },
                   {
                     "name": "b2",
-                    "value": "v.b2 and not v.hit_b2"
+                    "value": "(v.b2 == 1 and v.hit_b2 == 0) and 1 or 0"
                   },
                   {
                     "name": "b3",
-                    "value": "v.b3 and not v.hit_b3"
+                    "value": "(v.b3 == 1 and v.hit_b3 == 0) and 1 or 0"
                   },
                   {
                     "name": "b4",
-                    "value": "v.b4 and not v.hit_b4"
+                    "value": "(v.b4 == 1 and v.hit_b4 == 0) and 1 or 0"
                   },
                   {
                     "name": "b5",
-                    "value": "v.b5 and not v.hit_b5"
+                    "value": "(v.b5 == 1 and v.hit_b5 == 0) and 1 or 0"
                   },
                   {
                     "name": "b6",
-                    "value": "v.b6 and not v.hit_b6"
+                    "value": "(v.b6 == 1 and v.hit_b6 == 0) and 1 or 0"
                   },
                   {
                     "name": "b7",
-                    "value": "v.b7 and not v.hit_b7"
+                    "value": "(v.b7 == 1 and v.hit_b7 == 0) and 1 or 0"
                   },
                   {
                     "name": "b8",
-                    "value": "v.b8 and not v.hit_b8"
+                    "value": "(v.b8 == 1 and v.hit_b8 == 0) and 1 or 0"
                   },
                   {
                     "name": "b9",
-                    "value": "v.b9 and not v.hit_b9"
+                    "value": "(v.b9 == 1 and v.hit_b9 == 0) and 1 or 0"
                   },
                   {
                     "name": "b10",
-                    "value": "v.b10 and not v.hit_b10"
+                    "value": "(v.b10 == 1 and v.hit_b10 == 0) and 1 or 0"
                   },
                   {
                     "name": "b11",
-                    "value": "v.b11 and not v.hit_b11"
+                    "value": "(v.b11 == 1 and v.hit_b11 == 0) and 1 or 0"
                   },
                   {
                     "name": "b12",
-                    "value": "v.b12 and not v.hit_b12"
+                    "value": "(v.b12 == 1 and v.hit_b12 == 0) and 1 or 0"
                   },
                   {
                     "name": "ballVY",
@@ -728,7 +732,7 @@
                   },
                   {
                     "name": "gameWon",
-                    "value": "not (v.b1 or v.b2 or v.b3 or v.b4 or v.b5 or v.b6 or v.b7 or v.b8 or v.b9 or v.b10 or v.b11 or v.b12)"
+                    "value": "not (v.b1 == 1 or v.b2 == 1 or v.b3 == 1 or v.b4 == 1 or v.b5 == 1 or v.b6 == 1 or v.b7 == 1 or v.b8 == 1 or v.b9 == 1 or v.b10 == 1 or v.b11 == 1 or v.b12 == 1) and 1 or 0"
                   }
                 ]
               }
@@ -740,15 +744,23 @@
     "on_left": [
       {
         "cmd": "SET_VAR",
-        "name": "moveInput",
-        "value": -1
+        "assignments": [
+          {
+            "name": "moveInput",
+            "value": -1
+          }
+        ]
       }
     ],
     "on_right": [
       {
         "cmd": "SET_VAR",
-        "name": "moveInput",
-        "value": 1
+        "assignments": [
+          {
+            "name": "moveInput",
+            "value": 1
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -764,6 +776,12 @@
       "wait": 1.0
     },
     {
+      "key": "right"
+    },
+    {
+      "wait": 0.5
+    },
+    {
       "wait": 2.0
     },
     {
@@ -774,6 +792,12 @@
     },
     {
       "key": "right"
+    },
+    {
+      "wait": 2.0
+    },
+    {
+      "wait": 2.0
     },
     {
       "wait": 2.0

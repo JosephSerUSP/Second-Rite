@@ -1945,7 +1945,11 @@ export function createThreeEditorViewport(container, options = {}) {
             if (transaction) options.onSpatialTransaction?.(transaction);
             clearModalExtrudePreview(gesture);
             rebuildWalkProfile();
-            emitSelection(result.selection || gesture.semantic);
+            if (gesture.kind === 'extrude' || gesture.targets.length === 1) {
+                emitSelection(result.selection || gesture.semantic);
+            } else {
+                setSelection(gesture.semantic);
+            }
         } else {
             gesture.targets.forEach(target => target.object.position.copy(target.origin));
             clearModalExtrudePreview(gesture);

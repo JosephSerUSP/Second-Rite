@@ -74,3 +74,40 @@ test('spatial rejection reasons are author-facing instead of raw command codes',
     assert.match(Spatial.reasonMessage('profile-fixed-depth'), /authored Y or Z/i);
     assert.equal(Spatial.reasonMessage('future-reason'), 'future reason');
 });
+
+
+test('projected semantic axis solver remains usable when the profile plane is edge-on', () => {
+    assert.equal(Spatial.projectedAxisDelta(
+        { x: 100, y: 100 },
+        { x: 120, y: 110 },
+        { x: 10, y: 5 }
+    ), 2.0);
+
+    assert.equal(Spatial.projectedAxisDelta(
+        { x: 0, y: 0 },
+        { x: 50, y: 50 },
+        { x: 0.01, y: 0.01 }
+    ), null, 'an axis projected nearly into the camera is explicitly unavailable');
+});
+
+test('committed spatial transactions preserve immutable before/after semantic values', () => {
+    const selection = { kind: 'walk-profile-point', key: 'walk-profile-point:2', index: 2 };
+    const before = { Y: 1, Z: 0.5 };
+    const after = { Y: 2, Z: 1.25 };
+    const transaction = Spatial.createTransaction('move', selection, before, after);
+
+    assert.deepEqual(transaction, {
+        kind: 'move',
+        target: selection,
+        before,
+        after
+    });
+    assert.equal(Object.isFrozen(transaction), true);
+
+    selection.index = 99;
+    before.Y = -100;
+    after.Z = -100;
+    assert.equal(transaction.target.index, 2);
+    assert.equal(transaction.before.Y, 1);
+    assert.equal(transaction.after.Z, 1.25);
+});

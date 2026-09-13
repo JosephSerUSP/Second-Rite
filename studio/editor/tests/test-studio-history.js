@@ -51,3 +51,78 @@ test('history shortcuts preserve native focused-input undo', () => {
     }), null);
     assert.equal(History.historyShortcut(event('KeyZ')), null);
 });
+
+
+test('Walk Profile move transactions normalize to exact resource snapshots', () => {
+    const after = [
+        { y: 0, z: 0 },
+        { y: 6, z: 3 },
+        { y: 10, z: 0 }
+    ];
+    const single = History.normalizeWalkProfileTransaction({
+        kind: 'move',
+        target: { kind: 'walk-profile-point', index: 1 },
+        before: { Y: 5, Z: 1 },
+        after: { Y: 6, Z: 3 }
+    }, after, 31);
+    assert.deepEqual(single.before.profile, [
+        { y: 0, z: 0 },
+        { y: 5, z: 1 },
+        { y: 10, z: 0 }
+    ]);
+    assert.deepEqual(single.after.profile, after);
+    assert.equal(single.target.mapId, 31);
+
+    const multi = History.normalizeWalkProfileTransaction({
+        kind: 'move',
+        target: { kind: 'walk-profile-point', index: 2 },
+        before: { points: [
+            { index: 1, Y: 3, Z: 1 },
+            { index: 2, Y: 6, Z: 1 }
+        ] },
+        after: { points: [] }
+    }, [
+        { y: 0, z: 0 },
+        { y: 4, z: 2 },
+        { y: 7, z: 2 },
+        { y: 10, z: 0 }
+    ], 31);
+    assert.deepEqual(multi.before.profile, [
+        { y: 0, z: 0 },
+        { y: 3, z: 1 },
+        { y: 6, z: 1 },
+        { y: 10, z: 0 }
+    ]);
+});
+
+test('Walk Profile extrusion normalization removes the committed outer endpoint for undo', () => {
+    const left = History.normalizeWalkProfileTransaction({
+        kind: 'extrude',
+        target: { kind: 'walk-profile-point', index: 0 },
+        before: { Y: 0, Z: 0 },
+        after: { Y: -2, Z: 1 }
+    }, [
+        { y: -2, z: 1 },
+        { y: 0, z: 0 },
+        { y: 10, z: 0 }
+    ], 31);
+    assert.deepEqual(left.before.profile, [
+        { y: 0, z: 0 },
+        { y: 10, z: 0 }
+    ]);
+
+    const right = History.normalizeWalkProfileTransaction({
+        kind: 'extrude',
+        target: { kind: 'walk-profile-point', index: 1 },
+        before: { Y: 10, Z: 0 },
+        after: { Y: 12, Z: 1 }
+    }, [
+        { y: 0, z: 0 },
+        { y: 10, z: 0 },
+        { y: 12, z: 1 }
+    ], 31);
+    assert.deepEqual(right.before.profile, [
+        { y: 0, z: 0 },
+        { y: 10, z: 0 }
+    ]);
+});

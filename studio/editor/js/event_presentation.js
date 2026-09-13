@@ -219,6 +219,13 @@
                 return result;
             },
 
+            replaceGroundProfile(profile) {
+                const result = window.SecondRiteEditorCommands.replaceGroundProfile(
+                    dbPayload, currentMapIndex, profile);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
             moveEvent(eventId, x, y) {
                 const result = window.SecondRiteEditorCommands.moveEvent(dbPayload, currentMapIndex, eventId, x, y);
                 if (result.changed) {
@@ -267,6 +274,7 @@
             .then(() => loadScript('/js/vertex-shading.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))
             .then(() => loadScript('/js/thestra-workspace-state.js'))
+            .then(() => loadScript('/js/studio-history.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))
             .then(() => loadScript('/js/map-inspector.js'))
             .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));

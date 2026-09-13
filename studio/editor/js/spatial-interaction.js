@@ -70,6 +70,8 @@
         'profile-view-underdetermined': 'This view sees the Walk Profile edge-on; constrain to Y or Z, or orbit to reveal the profile plane.',
         'profile-axis-edge-on': 'That axis points into the current view; choose another axis or orbit the viewport.',
         'profile-endpoint': 'Walk Profile endpoints cannot be deleted.',
+        'profile-endpoint-required': 'Extrude requires the active Walk Profile point to be an endpoint.',
+        'invalid-subdivision-count': 'Subdivision cuts must be a whole number from 1 to 64.',
         'no-profile-segment-selected': 'Select a Walk Profile segment first.',
         'no-profile-point-selected': 'Select a Walk Profile point first.',
         'invalid-ground-profile': 'The Walk Profile contains invalid coordinates.',

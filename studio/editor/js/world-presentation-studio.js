@@ -435,7 +435,7 @@
         walkProfile.type = 'button';
         walkProfile.className = 'win98-btn';
         walkProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        walkProfile.title = 'Edit Map-owned bounded-lane groundProfile control points. This never edits collision mesh geometry.';
+        walkProfile.title = 'Walk Profile Edit Mode · Tab toggles · 1 point mode · 2 segment mode · G moves · Y/Z constrain · X/Delete dissolves interior points.';
         walkProfile.textContent = 'Walk Profile';
 
         const createProfile = document.createElement('button');
@@ -449,14 +449,14 @@
         splitProfile.type = 'button';
         splitProfile.className = 'win98-btn';
         splitProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        splitProfile.title = 'Select a Walk Profile segment, then split it at its interpolated midpoint.';
+        splitProfile.title = 'Legacy discoverability control: select a segment (2) and subdivide it. Blender-style component editing is the primary workflow.';
         splitProfile.textContent = 'Split Segment';
 
         const deleteProfile = document.createElement('button');
         deleteProfile.type = 'button';
         deleteProfile.className = 'win98-btn';
         deleteProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        deleteProfile.title = 'Select an interior Walk Profile point to remove it. Endpoints are protected.';
+        deleteProfile.title = 'Dissolve the selected interior point. X/Delete performs the same operation; endpoints are protected.';
         deleteProfile.textContent = 'Delete Point';
 
         function syncWalkProfile() {
@@ -468,7 +468,8 @@
             }
             if (!show) return;
             walkProfile.classList.toggle('active', !!status.editing);
-            walkProfile.textContent = status.editing ? 'Walk Profile: Editing' : 'Walk Profile';
+            const component = status.componentMode === 'segment' ? 'Segments' : 'Points';
+            walkProfile.textContent = status.editing ? `Walk Profile · ${component}` : 'Walk Profile';
             createProfile.disabled = !!status.authored;
             splitProfile.disabled = !status.editing || !status.authored
                 || status.selection?.kind !== 'walk-profile-segment';

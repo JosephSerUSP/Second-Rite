@@ -469,12 +469,20 @@
         deleteProfile.title = 'Dissolve the selected interior point. X/Delete performs the same operation; endpoints are protected.';
         deleteProfile.textContent = 'Dissolve';
 
+        const profileYLabel = document.createElement('span');
+        profileYLabel.textContent = 'Y Lane';
+        profileYLabel.style.cssText = 'font-size:9px;color:var(--win-dark-shadow);display:none;';
+
         const profileY = document.createElement('input');
         profileY.type = 'number';
         profileY.step = '0.01';
         profileY.className = 'win98-input';
         profileY.style.cssText = 'width:62px;height:20px;font-size:9px;display:none;';
         profileY.title = 'Active Walk Profile point · Lane Y';
+
+        const profileZLabel = document.createElement('span');
+        profileZLabel.textContent = 'Z Elev';
+        profileZLabel.style.cssText = 'font-size:9px;color:var(--win-dark-shadow);display:none;';
 
         const profileZ = document.createElement('input');
         profileZ.type = 'number';
@@ -494,7 +502,9 @@
                 ? '' : 'none';
             const precisePoint = show && status?.editing && status?.componentMode === 'point'
                 && status?.selectionCount === 1 && status?.activePoint;
+            profileYLabel.style.display = precisePoint ? '' : 'none';
             profileY.style.display = precisePoint ? '' : 'none';
+            profileZLabel.style.display = precisePoint ? '' : 'none';
             profileZ.style.display = precisePoint ? '' : 'none';
             if (precisePoint) {
                 if (document.activeElement !== profileY) profileY.value = String(status.activePoint.y);
@@ -569,12 +579,12 @@
         toolbar.mount('world-presentation', [
             free, runtime, walkMesh,
             walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
-            profileY, profileZ, sceneSelect, info
+            profileYLabel, profileY, profileZLabel, profileZ, sceneSelect, info
         ]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
             walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
-            profileY, profileZ, syncWalkProfile,
+            profileYLabel, profileY, profileZLabel, profileZ, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };
         updateRuntimeControls();

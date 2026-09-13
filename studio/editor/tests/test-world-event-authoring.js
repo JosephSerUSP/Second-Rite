@@ -97,7 +97,8 @@ test('walk profile multi-point move preserves relative shape and ordering', () =
     assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
         { y: 0, z: 0 }, { y: 4, z: 3 }, { y: 7, z: 3 }, { y: 10, z: 0 }
     ]);
-    assert.deepEqual(moved.selection.indices, [1, 2]);
+    assert.deepEqual(moved.selections.map(selection => selection.index), [1, 2]);
+    assert.equal(moved.selection.index, 2);
 
     const rejected = Commands.moveGroundProfilePoints(payload, 0, [1, 2], 4, 0);
     assert.equal(rejected.ok, false);
@@ -141,6 +142,9 @@ test('walk profile subdivision supports multiple selected edges and cuts', () =>
         { y: 12, z: 0 }
     ]);
     assert.deepEqual(result.insertedIndices, [1, 2, 4, 5]);
+    assert.deepEqual(result.segmentIndices, [0, 1, 2, 3, 4, 5]);
+    assert.deepEqual(result.selections.map(selection => selection.kind),
+        Array(6).fill('walk-profile-segment'));
 });
 
 test('walk profile multi-delete dissolves interior points only', () => {

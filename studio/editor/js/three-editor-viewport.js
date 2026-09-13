@@ -88,10 +88,23 @@ export function createThreeEditorViewport(container, options = {}) {
         spatialInteraction.setSelection(selection);
         options.onSelection?.(selection);
     }
+    function syncSelectionViews(snapshot) {
+        base?.setSelection?.(snapshot.selection || null);
+        compositionAuthoring?.setSemanticSelection?.(snapshot.selection || null);
+        options.onSelection?.(snapshot.selection || null);
+        return snapshot;
+    }
+    function toggleSpatialSelection(selection) {
+        return syncSelectionViews(spatialInteraction.toggleSelection(selection));
+    }
+    function setSpatialSelectionSet(selections, activeSelection) {
+        return syncSelectionViews(spatialInteraction.setSelectionSet(selections, activeSelection));
+    }
     const base = createBaseViewport(container, {
         ...options,
         spatialInteraction,
         onSelection: emitSelection,
+        onToggleSelection: toggleSpatialSelection,
         getOpticalNavigation: () => opticalSlot.current?.active() ? opticalSlot.current : null
     });
     const cameraRig = base.getCameraRig?.();
@@ -239,7 +252,8 @@ export function createThreeEditorViewport(container, options = {}) {
     const compositionAuthoring = createCompositionViewport(container, {
         ...options,
         spatialInteraction,
-        onSelection(selection) { base.setSelection(selection); emitSelection(selection); }
+        onSelection(selection) { base.setSelection(selection); emitSelection(selection); },
+        onToggleSelection: toggleSpatialSelection
     });
     opticalSlot.current = {
         // Runtime preview fixes the camera pose, but its projection window is
@@ -290,6 +304,8 @@ export function createThreeEditorViewport(container, options = {}) {
             spatialInteraction.setSelection(selection);
         },
         getSpatialInteractionState: () => spatialInteraction.snapshot(),
+        getWalkProfileSelections: () => spatialInteraction.snapshot().selectionSet.filter(selection =>
+            selection?.kind === 'walk-profile-point' || selection?.kind === 'walk-profile-segment'),
         setRenderableBundle(bundle) {
             spatialCamera = bundle && bundle.spatialCamera || null;
             // An environment bundle has a resolved runtime camera.  Letting
@@ -423,6 +439,36 @@ export function createThreeEditorViewport(container, options = {}) {
             if (result?.selection) api.setSelection(result.selection);
             return result;
         },
+        deleteSelectedGroundProfilePoints() {
+            const indices = api.getWalkProfileSelections()
+                .filter(selection => selection.kind === 'walk-profile-point')
+                .map(selection => selection.index);
+            if (!indices.length) return { ok: false, reason: 'no-profile-point-selected' };
+            return api.deleteGroundProfilePoints(indices);
+        },
+        selectAllWalkProfileComponents() {
+            const status = api.getWalkProfileStatus();
+            if (!status.authored || !status.editing) return null;
+            const selections = [];
+            if (status.componentMode === 'segment') {
+                for (let index = 0; index < Math.max(0, status.pointCount - 1); index++) {
+                    selections.push({
+                        kind: 'walk-profile-segment',
+                        key: `walk-profile-segment:${index}`,
+                        index
+                    });
+                }
+            } else {
+                for (let index = 0; index < status.pointCount; index++) {
+                    selections.push({
+                        kind: 'walk-profile-point',
+                        key: `walk-profile-point:${index}`,
+                        index
+                    });
+                }
+            }
+            return setSpatialSelectionSet(selections, selections[selections.length - 1] || null);
+        },
         deleteSelectedGroundProfilePoint() {
             const selection = api.getWalkProfileSelection();
             if (!selection || selection.kind !== 'walk-profile-point') {
@@ -495,10 +541,15 @@ export function createThreeEditorViewport(container, options = {}) {
             api.setWalkProfileComponentMode('segment');
             return;
         }
+        if (event.code === 'KeyA') {
+            event.preventDefault();
+            api.selectAllWalkProfileComponents();
+            return;
+        }
         if ((event.code === 'KeyX' || event.code === 'Delete')
                 && status.componentMode === 'point') {
             event.preventDefault();
-            rejectProfileAction(api.deleteSelectedGroundProfilePoint());
+            rejectProfileAction(api.deleteSelectedGroundProfilePoints());
         }
     }
 

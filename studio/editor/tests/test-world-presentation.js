@@ -215,6 +215,14 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'segment component mode must use Blender-style 2');
     assert.match(viewportSource, /event\.code === 'KeyX'/,
         'point dissolve must be available through Blender-style X/Delete');
+    assert.match(viewportSource, /event\.code === 'KeyA'/,
+        'A must select all components in the active profile component mode');
+    assert.match(viewportBaseSource, /event\.shiftKey && profileSelection/,
+        'free 3D profile editing must support Shift+click selection toggles');
+    assert.match(compositionSource, /event\.shiftKey && selection/,
+        'plate profile editing must support the same Shift+click selection toggles');
+    assert.match(viewportBaseSource, /onMoveGroundProfilePoints/,
+        'modal G must route multi-point movement through the semantic command boundary');
     assert.match(viewportBaseSource, /walkProfileComponentMode/,
         'free 3D picking must respect explicit Walk Profile component modes');
     assert.match(compositionSource, /walkProfileComponentMode/,

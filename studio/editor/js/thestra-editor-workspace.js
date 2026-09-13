@@ -47,50 +47,8 @@
     }
 
     function normalizeSpatialTransaction(transaction) {
-        if (!transaction) return null;
-        if (transaction.kind === 'walk-profile') return transaction;
-
-        const afterProfile = currentProfileSnapshot();
-        if (!afterProfile) return null;
-        let beforeProfile = cloneProfile(afterProfile);
-
-        if (transaction.kind === 'move') {
-            if (Array.isArray(transaction.before?.points)) {
-                for (const point of transaction.before.points) {
-                    const index = Number(point.index);
-                    if (!Number.isInteger(index) || !beforeProfile[index]) return null;
-                    beforeProfile[index] = { y: Number(point.Y), z: Number(point.Z) };
-                }
-            } else {
-                const index = Number(transaction.target?.index);
-                if (!Number.isInteger(index) || !beforeProfile[index]) return null;
-                beforeProfile[index] = {
-                    y: Number(transaction.before?.Y),
-                    z: Number(transaction.before?.Z)
-                };
-            }
-            return {
-                kind: 'walk-profile',
-                target: { mapId: currentMapId() },
-                before: { profile: beforeProfile },
-                after: { profile: afterProfile },
-                label: 'Move Walk Profile'
-            };
-        }
-
-        if (transaction.kind === 'extrude') {
-            const index = Number(transaction.target?.index);
-            if (!Number.isInteger(index) || afterProfile.length < 3) return null;
-            beforeProfile = index === 0 ? afterProfile.slice(1) : afterProfile.slice(0, -1);
-            return {
-                kind: 'walk-profile',
-                target: { mapId: currentMapId() },
-                before: { profile: beforeProfile },
-                after: { profile: afterProfile },
-                label: 'Extrude Walk Profile'
-            };
-        }
-        return null;
+        return StudioHistory.normalizeWalkProfileTransaction(
+            transaction, currentProfileSnapshot(), currentMapId());
     }
 
     async function applyHistoryEntry(entry, side) {

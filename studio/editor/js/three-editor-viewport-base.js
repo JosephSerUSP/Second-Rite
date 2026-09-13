@@ -294,6 +294,7 @@ export function createThreeEditorViewport(container, options = {}) {
     // like part of the collision mesh, especially in the narrow town rooms.
     let collisionVisible = false;
     let walkProfileEditing = false;
+    let walkProfileHover = null;
     const walkProfileSelectable = [];
     const walkProfileObjects = new Map();
 
@@ -1199,6 +1200,7 @@ export function createThreeEditorViewport(container, options = {}) {
             });
         }
         walkProfileContent.visible = walkProfileEditing;
+        refreshWalkProfileVisualState();
     }
 
     function pickWalkProfile(event) {
@@ -1208,9 +1210,37 @@ export function createThreeEditorViewport(container, options = {}) {
         return hits[0]?.object?.userData?.thestraSelection || null;
     }
 
+    function refreshWalkProfileVisualState() {
+        const selectedKey = selection
+            && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
+            ? selection.key : null;
+        const hoverKey = walkProfileHover?.key || null;
+        for (const [key, object] of walkProfileObjects.entries()) {
+            const semantic = object.userData.thestraSelection;
+            const selected = key === selectedKey;
+            const hovered = key === hoverKey && !selected;
+            if (semantic?.kind === 'walk-profile-point') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
+                object.scale.setScalar(selected ? 1.35 : hovered ? 1.18 : 1);
+            } else if (semantic?.kind === 'walk-profile-segment') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
+                object.material.opacity = selected ? 1 : hovered ? 1 : 0.9;
+            }
+        }
+    }
+
+    function setWalkProfileHover(next) {
+        const hover = next || null;
+        if (walkProfileHover?.key === hover?.key) return;
+        walkProfileHover = hover;
+        options.spatialInteraction?.setHover?.(hover);
+        refreshWalkProfileVisualState();
+    }
+
     function setWalkProfileEditing(enabled) {
         walkProfileEditing = !!enabled;
         walkProfileContent.visible = walkProfileEditing;
+        if (!walkProfileEditing) setWalkProfileHover(null);
         if (!walkProfileEditing && selection
                 && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')) {
             setSelection(null);
@@ -1394,6 +1424,7 @@ export function createThreeEditorViewport(container, options = {}) {
     function setSelection(next) {
         selection = next || null;
         selectionOverlay.visible = false;
+        refreshWalkProfileVisualState();
         if (!selection || !sceneModel) {
             syncMoveGizmo();
             return;
@@ -1758,6 +1789,9 @@ export function createThreeEditorViewport(container, options = {}) {
         if (modalMoveGesture) {
             updateModalProfileMove(event);
             return;
+        }
+        if (walkProfileEditing && !moveGizmo.dragging && !moveGizmo.axis && !editGesture) {
+            setWalkProfileHover(pickWalkProfile(event));
         }
         if (!editGesture) return;
         paintSelection(pickCell(event));

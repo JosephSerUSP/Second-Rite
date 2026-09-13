@@ -321,6 +321,7 @@ export function createThreeEditorViewport(container, options = {}) {
             const active = !!enabled;
             base.setWalkProfileEditing?.(active);
             compositionAuthoring.setWalkProfileEditing?.(active);
+            if (!active) emitSelection(null);
         },
         getWalkProfileEditing() {
             return compositionAuthoring.isVisible?.()

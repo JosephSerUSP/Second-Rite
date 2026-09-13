@@ -300,6 +300,36 @@
         };
     }
 
+    function replaceGroundProfile(payload, mapIndex, nextProfile) {
+        const lane = laneAt(payload, mapIndex);
+        if (!lane) return { ok: false, reason: 'missing-bounded-lane' };
+        if (nextProfile == null) {
+            const changed = Object.prototype.hasOwnProperty.call(lane, 'groundProfile');
+            if (changed) delete lane.groundProfile;
+            return { ok: true, changed, profile: null, selection: null };
+        }
+        if (!Array.isArray(nextProfile) || nextProfile.length < 2) {
+            return { ok: false, reason: 'invalid-ground-profile' };
+        }
+        const candidate = nextProfile.map(point => ({
+            y: Number(point?.y),
+            z: Number(point?.z)
+        }));
+        if (!profileOrderValid(candidate)) {
+            return { ok: false, reason: 'invalid-ground-profile' };
+        }
+        const prior = Array.isArray(lane.groundProfile)
+            ? lane.groundProfile.map(point => ({ y: Number(point.y), z: Number(point.z) }))
+            : null;
+        const changed = JSON.stringify(prior) !== JSON.stringify(candidate);
+        if (changed) lane.groundProfile = candidate;
+        return {
+            ok: true, changed,
+            profile: lane.groundProfile || candidate,
+            selection: null
+        };
+    }
+
     function deleteGroundProfilePoints(payload, mapIndex, pointIndices) {
         const profile = profileAt(payload, mapIndex);
         if (!profile) return { ok: false, reason: 'missing-ground-profile' };
@@ -369,7 +399,7 @@
         canMoveEvent, moveEvent, moveWorldEvent,
         createGroundProfile, splitGroundProfileSegment, moveGroundProfilePoint, deleteGroundProfilePoint,
         moveGroundProfilePoints, extrudeGroundProfileEndpoint,
-        subdivideGroundProfileSegments, deleteGroundProfilePoints,
+        subdivideGroundProfileSegments, deleteGroundProfilePoints, replaceGroundProfile,
         canMoveLight, moveLight
     };
 }));

@@ -417,6 +417,11 @@
                         detail: snapshot
                     }));
                 },
+                onSpatialTransaction(transaction) {
+                    window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
+                        detail: transaction
+                    }));
+                },
                 onPaintCell(cell) {
                     return handleMutationResult(
                         host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null,

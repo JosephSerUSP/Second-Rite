@@ -469,6 +469,20 @@
         deleteProfile.title = 'Dissolve the selected interior point. X/Delete performs the same operation; endpoints are protected.';
         deleteProfile.textContent = 'Dissolve';
 
+        const profileY = document.createElement('input');
+        profileY.type = 'number';
+        profileY.step = '0.01';
+        profileY.className = 'win98-input';
+        profileY.style.cssText = 'width:62px;height:20px;font-size:9px;display:none;';
+        profileY.title = 'Active Walk Profile point · Lane Y';
+
+        const profileZ = document.createElement('input');
+        profileZ.type = 'number';
+        profileZ.step = '0.01';
+        profileZ.className = 'win98-input';
+        profileZ.style.cssText = 'width:62px;height:20px;font-size:9px;display:none;';
+        profileZ.title = 'Active Walk Profile point · Elevation Z';
+
         function syncWalkProfile() {
             const viewport = viewportApi();
             const status = viewport?.getWalkProfileStatus?.();
@@ -478,6 +492,14 @@
             }
             subdivideCuts.style.display = show && status?.editing && status?.componentMode === 'segment'
                 ? '' : 'none';
+            const precisePoint = show && status?.editing && status?.componentMode === 'point'
+                && status?.selectionCount === 1 && status?.activePoint;
+            profileY.style.display = precisePoint ? '' : 'none';
+            profileZ.style.display = precisePoint ? '' : 'none';
+            if (precisePoint) {
+                if (document.activeElement !== profileY) profileY.value = String(status.activePoint.y);
+                if (document.activeElement !== profileZ) profileZ.value = String(status.activePoint.z);
+            }
             if (!show) return;
             walkProfile.classList.toggle('active', !!status.editing);
             const component = status.componentMode === 'segment' ? 'Segments' : 'Points';
@@ -529,6 +551,15 @@
             viewportApi()?.deleteSelectedGroundProfilePoints?.();
             syncWalkProfile();
         });
+
+        function commitPreciseProfilePoint() {
+            const y = Number(profileY.value), z = Number(profileZ.value);
+            if (!Number.isFinite(y) || !Number.isFinite(z)) return;
+            viewportApi()?.setSelectedGroundProfilePoint?.(y, z);
+            syncWalkProfile();
+        }
+        profileY.addEventListener('change', commitPreciseProfilePoint);
+        profileZ.addEventListener('change', commitPreciseProfilePoint);
         sceneSelect.addEventListener('change', () => {
             runtimeSceneId = sceneSelect.value;
             if (previewState.mode() === 'runtime') applyRuntimePreview();
@@ -538,11 +569,12 @@
         toolbar.mount('world-presentation', [
             free, runtime, walkMesh,
             walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
-            sceneSelect, info
+            profileY, profileZ, sceneSelect, info
         ]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
-            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile, syncWalkProfile,
+            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
+            profileY, profileZ, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };
         updateRuntimeControls();

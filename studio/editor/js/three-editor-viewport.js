@@ -122,6 +122,25 @@ export function createThreeEditorViewport(container, options = {}) {
     let lastRuntimeCamera = null;
     let opticalState = { x: 0, y: 0, scale: 1 };
 
+    function profileSnapshot() {
+        const profile = currentSceneModel?.map?.source?.traversal?.lane?.groundProfile;
+        return Array.isArray(profile)
+            ? profile.map(point => ({ y: Number(point.y), z: Number(point.z) }))
+            : null;
+    }
+
+    function emitProfileTransaction(label, beforeProfile, afterProfile, targetSelection) {
+        const mapId = currentSceneModel?.map?.source?.id;
+        if (mapId == null) return;
+        options.onSpatialTransaction?.({
+            kind: 'walk-profile',
+            target: { mapId, selection: targetSelection || null },
+            before: { profile: beforeProfile },
+            after: { profile: afterProfile },
+            label
+        });
+    }
+
     const nativePerspectiveProjection = perspective.updateProjectionMatrix.bind(perspective);
     perspective.updateProjectionMatrix = function () {
         nativePerspectiveProjection();
@@ -384,10 +403,12 @@ export function createThreeEditorViewport(container, options = {}) {
             };
         },
         createGroundProfile() {
+            const beforeProfile = profileSnapshot();
             const result = options.onCreateGroundProfile?.();
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Create Walk Profile', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
@@ -397,10 +418,12 @@ export function createThreeEditorViewport(container, options = {}) {
             if (!selection || selection.kind !== 'walk-profile-point') {
                 return { ok: false, reason: 'no-profile-point-selected' };
             }
+            const beforeProfile = profileSnapshot();
             const result = options.onMoveGroundProfilePoint?.(selection.index, Number(y), Number(z));
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Edit Walk Profile Point', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
@@ -410,10 +433,12 @@ export function createThreeEditorViewport(container, options = {}) {
             if (!selection || selection.kind !== 'walk-profile-segment') {
                 return { ok: false, reason: 'no-profile-segment-selected' };
             }
+            const beforeProfile = profileSnapshot();
             const result = options.onSplitGroundProfileSegment?.(selection.index, amount);
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Subdivide Walk Profile', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
@@ -423,10 +448,12 @@ export function createThreeEditorViewport(container, options = {}) {
                 .filter(selection => selection.kind === 'walk-profile-segment')
                 .map(selection => selection.index);
             if (!segments.length) return { ok: false, reason: 'no-profile-segment-selected' };
+            const beforeProfile = profileSnapshot();
             const result = options.onSubdivideGroundProfileSegments?.(segments, cuts);
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Subdivide Walk Profile', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selections?.length) {
                 setSpatialSelectionSet(result.selections, result.selection);
@@ -440,10 +467,12 @@ export function createThreeEditorViewport(container, options = {}) {
             if (!selection || selection.kind !== 'walk-profile-point') {
                 return { ok: false, reason: 'no-profile-point-selected' };
             }
+            const beforeProfile = profileSnapshot();
             const result = options.onExtrudeGroundProfileEndpoint?.(selection.index, y, z);
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Extrude Walk Profile', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
@@ -467,10 +496,12 @@ export function createThreeEditorViewport(container, options = {}) {
             return result;
         },
         deleteGroundProfilePoints(pointIndices) {
+            const beforeProfile = profileSnapshot();
             const result = options.onDeleteGroundProfilePoints?.(pointIndices);
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
+                emitProfileTransaction('Dissolve Walk Profile', beforeProfile, profileSnapshot(), result.selection);
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
@@ -510,13 +541,7 @@ export function createThreeEditorViewport(container, options = {}) {
             if (!selection || selection.kind !== 'walk-profile-point') {
                 return { ok: false, reason: 'no-profile-point-selected' };
             }
-            const result = options.onDeleteGroundProfilePoint?.(selection.index);
-            if (result?.changed) {
-                base.refreshWalkProfile?.();
-                compositionAuthoring.refreshWalkProfile?.();
-            }
-            if (result?.selection) api.setSelection(result.selection);
-            return result;
+            return api.deleteGroundProfilePoints([selection.index]);
         },
         showComposition(frameId) {
             const frame = compositionAuthoring.descriptor()?.frames.find(candidate => candidate.id === frameId);

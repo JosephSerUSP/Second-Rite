@@ -2042,14 +2042,52 @@ export function createThreeEditorViewport(container, options = {}) {
     moveGizmo.addEventListener('mouseDown', () => {
         const object = selectedMovableObject();
         if (!object || !selection) return;
-        moveGesture = { semantic: selection, origin: object.position.clone() };
+        if (selection.kind === 'walk-profile-point') {
+            const selectedPoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+                .filter(item => item?.kind === 'walk-profile-point');
+            const effective = selectedPoints.some(item => item.key === selection.key)
+                ? selectedPoints : [selection];
+            const targets = effective.map(semantic => {
+                const targetObject = walkProfileObjects.get(semantic.key);
+                if (!targetObject) return null;
+                const origin = targetObject.position.clone();
+                const runtime = Contract.thestraPositionToRuntime(origin.toArray());
+                return {
+                    semantic,
+                    object: targetObject,
+                    origin,
+                    before: { Y: runtime[1], Z: runtime[2] }
+                };
+            }).filter(Boolean);
+            const activeBefore = Contract.thestraPositionToRuntime(object.position.toArray());
+            moveGesture = {
+                semantic: selection,
+                origin: object.position.clone(),
+                targets,
+                before: { Y: activeBefore[1], Z: activeBefore[2] }
+            };
+            options.spatialInteraction?.beginMove?.();
+        } else {
+            moveGesture = { semantic: selection, origin: object.position.clone() };
+        }
         setControlsEnabled(false);
     });
 
     moveGizmo.addEventListener('objectChange', () => {
         if (!moveGesture || !moveGizmo.object) return;
         if (moveGesture.semantic.kind === 'walk-profile-point') {
+            const delta = moveGizmo.object.position.clone().sub(moveGesture.origin);
+            (moveGesture.targets || []).forEach(target => {
+                if (target.object !== moveGizmo.object) {
+                    target.object.position.copy(target.origin).add(delta);
+                }
+            });
             syncWalkProfileSegmentsFromPoints();
+            const runtime = Contract.thestraPositionToRuntime(moveGizmo.object.position.toArray());
+            options.spatialInteraction?.setValue?.({
+                Y: runtime[1] - moveGesture.before.Y,
+                Z: runtime[2] - moveGesture.before.Z
+            });
             return;
         }
         if (moveGizmo.object.userData.worldPosition) return;
@@ -2068,15 +2106,41 @@ export function createThreeEditorViewport(container, options = {}) {
         if (!object) return;
         if (gesture.semantic.kind === 'walk-profile-point') {
             const runtime = Contract.thestraPositionToRuntime(object.position.toArray());
-            const result = options.onMoveGroundProfilePoint
-                ? options.onMoveGroundProfilePoint(gesture.semantic.index, runtime[1], runtime[2])
-                : null;
-            if (result && result.ok) {
+            const deltaY = runtime[1] - gesture.before.Y;
+            const deltaZ = runtime[2] - gesture.before.Z;
+            const targets = gesture.targets || [];
+            const indices = targets.map(target => target.semantic.index);
+            const result = indices.length > 1
+                ? options.onMoveGroundProfilePoints?.(indices, deltaY, deltaZ)
+                : options.onMoveGroundProfilePoint?.(
+                    gesture.semantic.index, runtime[1], runtime[2]);
+            if (result?.ok) {
+                const before = targets.length > 1
+                    ? { points: targets.map(target => ({
+                        index: target.semantic.index, Y: target.before.Y, Z: target.before.Z
+                    })) }
+                    : gesture.before;
+                const after = targets.length > 1
+                    ? { points: targets.map(target => ({
+                        index: target.semantic.index,
+                        Y: target.before.Y + deltaY,
+                        Z: target.before.Z + deltaZ
+                    })) }
+                    : { Y: runtime[1], Z: runtime[2] };
+                const transaction = result.changed
+                    ? SpatialInteraction.createTransaction('move', gesture.semantic, before, after)
+                    : null;
+                options.spatialInteraction?.confirm?.();
+                if (transaction) options.onSpatialTransaction?.(transaction);
                 moveGizmo.detach();
                 rebuildWalkProfile();
-                emitSelection(result.selection || gesture.semantic);
+                if (targets.length > 1) setSelection(gesture.semantic);
+                else emitSelection(result.selection || gesture.semantic);
             } else {
-                object.position.copy(gesture.origin);
+                targets.forEach(target => target.object.position.copy(target.origin));
+                syncWalkProfileSegmentsFromPoints();
+                options.spatialInteraction?.cancel?.();
+                options.spatialInteraction?.reject?.(result?.reason || 'invalid-profile-point');
             }
             return;
         }

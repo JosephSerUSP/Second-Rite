@@ -223,6 +223,12 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         '3D extrusion must preview topology before committing authored data');
     assert.match(compositionSource, /walk-profile-extrude-preview/,
         'plate extrusion must use the same cancel-safe preview topology');
+    assert.match(compositionSource, /handleModalProfileKey/,
+        'plate composition must own the same semantic modal G grammar as free 3D');
+    assert.match(compositionSource, /beginModalProfileExtrude/,
+        'plate composition must own cancel-safe modal E extrusion');
+    assert.match(compositionSource, /selectedProfilePoints > 1/,
+        'plate multi-selection must not fall back to a single-point screen-space gizmo');
     assert.match(studioSource, /Subdivide/,
         'selected segments expose a real Subdivide operator rather than midpoint-only Split');
     assert.match(studioSource, /Y Lane/,

@@ -66,6 +66,7 @@
 
     const REASON_MESSAGES = Object.freeze({
         'profile-order': 'Cannot move this profile point past an adjacent profile point.',
+        'profile-fixed-depth': 'Walk Profile depth X is fixed; move along authored Y or Z.',
         'profile-endpoint': 'Walk Profile endpoints cannot be deleted.',
         'no-profile-segment-selected': 'Select a Walk Profile segment first.',
         'no-profile-point-selected': 'Select a Walk Profile point first.',
@@ -136,11 +137,13 @@
                 const semantic = normalizedAxis(axis);
                 if (!semantic) return cloneState(state);
                 state.constraint = semantic;
+                state.feedback = null;
                 return emit();
             },
             setValue(value) {
                 if (!state.operation) return cloneState(state);
                 state.value = value;
+                state.feedback = null;
                 return emit();
             },
             reject(reason) {

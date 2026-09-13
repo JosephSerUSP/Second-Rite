@@ -38,6 +38,58 @@
         });
     }
 
+    function cloneProfile(profile) {
+        return Array.isArray(profile)
+            ? profile.map(point => ({ y: Number(point.y), z: Number(point.z) }))
+            : null;
+    }
+
+    function normalizeWalkProfileTransaction(transaction, afterProfile, mapId) {
+        if (!transaction) return null;
+        if (transaction.kind === 'walk-profile') return normalizeEntry(transaction);
+        const after = cloneProfile(afterProfile);
+        if (!after) return null;
+        let before = cloneProfile(after);
+
+        if (transaction.kind === 'move') {
+            if (Array.isArray(transaction.before?.points)) {
+                for (const point of transaction.before.points) {
+                    const index = Number(point.index);
+                    if (!Number.isInteger(index) || !before[index]) return null;
+                    before[index] = { y: Number(point.Y), z: Number(point.Z) };
+                }
+            } else {
+                const index = Number(transaction.target?.index);
+                if (!Number.isInteger(index) || !before[index]) return null;
+                before[index] = {
+                    y: Number(transaction.before?.Y),
+                    z: Number(transaction.before?.Z)
+                };
+            }
+            return normalizeEntry({
+                kind: 'walk-profile',
+                target: { mapId },
+                before: { profile: before },
+                after: { profile: after },
+                label: 'Move Walk Profile'
+            });
+        }
+
+        if (transaction.kind === 'extrude') {
+            const index = Number(transaction.target?.index);
+            if (!Number.isInteger(index) || after.length < 3) return null;
+            before = index === 0 ? after.slice(1) : after.slice(0, -1);
+            return normalizeEntry({
+                kind: 'walk-profile',
+                target: { mapId },
+                before: { profile: before },
+                after: { profile: after },
+                label: 'Extrude Walk Profile'
+            });
+        }
+        return null;
+    }
+
     function createHistory(options = {}) {
         const limit = Number.isInteger(options.limit) && options.limit > 0 ? options.limit : 100;
         const past = [];
@@ -97,5 +149,5 @@
         };
     }
 
-    return { createHistory, historyShortcut };
+    return { createHistory, historyShortcut, normalizeWalkProfileTransaction };
 }));

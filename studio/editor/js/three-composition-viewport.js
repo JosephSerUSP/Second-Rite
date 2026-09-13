@@ -107,21 +107,26 @@ export function createCompositionViewport(container, options) {
     }
 
     function refreshWalkProfileVisualState() {
-        const selectedKey = walkProfileSelection?.key || null;
+        const spatial = options.spatialInteraction?.snapshot?.() || null;
+        const selectedKeys = new Set((spatial?.selectionSet || []).map(item => item?.key).filter(Boolean));
+        const activeKey = spatial?.selection?.key || walkProfileSelection?.key || null;
         const hoverKey = walkProfileHover?.key || null;
         for (const [key, object] of walkProfileObjects.entries()) {
             const semantic = object.userData.thestraSelection;
-            const selected = key === selectedKey;
-            const hovered = key === hoverKey && !selected;
+            const selected = selectedKeys.has(key) || key === activeKey;
+            const active = key === activeKey;
+            const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
                 const activeType = walkProfileComponentMode === 'point';
                 object.material.transparent = !activeType;
                 object.material.opacity = activeType ? 1 : 0.35;
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
-                object.scale.setScalar(selected ? 1.3 : hovered ? 1.15 : 1);
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
+                object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
                 const activeType = walkProfileComponentMode === 'segment';
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
                 object.material.opacity = selected ? 0.95 : hovered ? 0.8 : (activeType ? 0.5 : 0.2);
             }
         }
@@ -630,8 +635,14 @@ export function createCompositionViewport(container, options) {
         if (event.button !== 0 || gizmo.axis || gizmo.dragging) return;
         if (walkProfileEditing) {
             const selection = pickWalkProfile(event);
-            setSemanticSelection(selection);
-            options.onSelection?.(selection);
+            if (event.shiftKey && selection && options.onToggleSelection) {
+                options.onToggleSelection(selection);
+                const active = options.spatialInteraction?.snapshot?.().selection || null;
+                setSemanticSelection(active);
+            } else {
+                setSemanticSelection(selection);
+                options.onSelection?.(selection);
+            }
             return;
         }
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);

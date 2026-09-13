@@ -367,6 +367,51 @@ export function createThreeEditorViewport(container, options = {}) {
             if (result?.selection) api.setSelection(result.selection);
             return result;
         },
+        subdivideSelectedGroundProfileSegments(cuts = 1) {
+            const selection = api.getWalkProfileSelection();
+            const segments = selection?.kind === 'walk-profile-segment'
+                ? [selection.index]
+                : selection?.kind === 'walk-profile-segments' ? selection.indices : null;
+            if (!segments?.length) return { ok: false, reason: 'no-profile-segment-selected' };
+            const result = options.onSubdivideGroundProfileSegments?.(segments, cuts);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        extrudeSelectedGroundProfileEndpoint(y, z) {
+            const selection = api.getWalkProfileSelection();
+            if (!selection || selection.kind !== 'walk-profile-point') {
+                return { ok: false, reason: 'no-profile-point-selected' };
+            }
+            const result = options.onExtrudeGroundProfileEndpoint?.(selection.index, y, z);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        moveGroundProfilePoints(pointIndices, deltaY, deltaZ) {
+            const result = options.onMoveGroundProfilePoints?.(pointIndices, deltaY, deltaZ);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        deleteGroundProfilePoints(pointIndices) {
+            const result = options.onDeleteGroundProfilePoints?.(pointIndices);
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
         deleteSelectedGroundProfilePoint() {
             const selection = api.getWalkProfileSelection();
             if (!selection || selection.kind !== 'walk-profile-point') {

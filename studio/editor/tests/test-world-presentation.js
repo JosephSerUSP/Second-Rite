@@ -134,6 +134,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     const cameraLua = fs.readFileSync(path.join(ROOT, 'runtime', 'presentation', 'world_camera.lua'), 'utf8');
     const validatorLua = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'project_validator_rules.lua'), 'utf8');
     const viewportSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+    const viewportBaseSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
     const compositionSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
     const navigationSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-authoring-tools.js'), 'utf8');
     const studioSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
@@ -194,11 +195,11 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'flat lanes require an explicit author action before a groundProfile exists');
     assert.match(studioSource, /thestra-spatial-interaction-changed/,
         'profile operator availability must resync when semantic selection changes');
-    assert.match(viewportSource, /handleSpatialTransformShortcut/,
+    assert.match(viewportBaseSource, /handleSpatialTransformShortcut/,
         'the 3D viewport must consume the shared modal spatial transform grammar');
-    assert.match(viewportSource, /beginModalProfileMove/,
+    assert.match(viewportBaseSource, /beginModalProfileMove/,
         'Walk Profile points must have a real keyboard-initiated modal move path');
-    assert.match(viewportSource, /setWalkProfileHover/,
+    assert.match(viewportBaseSource, /setWalkProfileHover/,
         'free 3D profile editing exposes hover before selection');
     assert.match(compositionSource, /setWalkProfileHover/,
         'plate profile editing exposes the same hover-state grammar');

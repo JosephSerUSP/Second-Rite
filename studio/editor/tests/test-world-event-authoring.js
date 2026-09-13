@@ -147,6 +147,28 @@ test('walk profile subdivision supports multiple selected edges and cuts', () =>
         Array(6).fill('walk-profile-segment'));
 });
 
+test('walk profile history replacement restores exact authored profile snapshots', () => {
+    const payload = laneFixture([
+        { y: 0, z: 0 }, { y: 5, z: 1 }, { y: 10, z: 0 }
+    ]);
+    const restored = Commands.replaceGroundProfile(payload, 0, [
+        { y: -2, z: 0.25 }, { y: 4, z: 2 }, { y: 11, z: 0.5 }
+    ]);
+    assert.equal(restored.ok, true);
+    assert.equal(restored.changed, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
+        { y: -2, z: 0.25 }, { y: 4, z: 2 }, { y: 11, z: 0.5 }
+    ]);
+
+    const invalid = Commands.replaceGroundProfile(payload, 0, [
+        { y: 4, z: 0 }, { y: 1, z: 0 }
+    ]);
+    assert.equal(invalid.ok, false);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
+        { y: -2, z: 0.25 }, { y: 4, z: 2 }, { y: 11, z: 0.5 }
+    ]);
+});
+
 test('walk profile multi-delete dissolves interior points only', () => {
     const payload = laneFixture([
         { y: 0, z: 0 }, { y: 2, z: 1 }, { y: 4, z: 2 }, { y: 6, z: 1 }, { y: 8, z: 0 }

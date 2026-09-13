@@ -428,7 +428,11 @@ export function createThreeEditorViewport(container, options = {}) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
             }
-            if (result?.selection) api.setSelection(result.selection);
+            if (result?.selections?.length) {
+                setSpatialSelectionSet(result.selections, result.selection);
+            } else if (result?.selection) {
+                api.setSelection(result.selection);
+            }
             return result;
         },
         extrudeSelectedGroundProfileEndpoint(y, z) {
@@ -455,7 +459,11 @@ export function createThreeEditorViewport(container, options = {}) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();
             }
-            if (result?.selection) api.setSelection(result.selection);
+            if (result?.selections?.length) {
+                setSpatialSelectionSet(result.selections, result.selection);
+            } else if (result?.selection) {
+                api.setSelection(result.selection);
+            }
             return result;
         },
         deleteGroundProfilePoints(pointIndices) {

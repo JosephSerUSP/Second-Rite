@@ -255,6 +255,7 @@ export function createThreeEditorViewport(container, options = {}) {
         onSelection(selection) { base.setSelection(selection); emitSelection(selection); },
         onToggleSelection: toggleSpatialSelection
     });
+    const compositionCanvas = compositionAuthoring.getCanvas?.() || null;
     opticalSlot.current = {
         // Runtime preview fixes the camera pose, but its projection window is
         // still the in-game camera's pan/zoom surface.  Do not make a locked
@@ -508,6 +509,9 @@ export function createThreeEditorViewport(container, options = {}) {
                 canvas.removeEventListener('keydown', suppressRuntimeNavigation, true);
                 canvas.removeEventListener('keydown', onWalkProfileKeyDown);
             }
+            if (compositionCanvas && compositionCanvas !== canvas) {
+                compositionCanvas.removeEventListener('keydown', onWalkProfileKeyDown);
+            }
             if (globalThis.ThestraRuntimeCameraViewport === api) delete globalThis.ThestraRuntimeCameraViewport;
             rawDispose();
         }
@@ -553,6 +557,9 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     if (canvas) canvas.addEventListener('keydown', onWalkProfileKeyDown);
+    if (compositionCanvas && compositionCanvas !== canvas) {
+        compositionCanvas.addEventListener('keydown', onWalkProfileKeyDown);
+    }
     globalThis.ThestraRuntimeCameraViewport = api;
     window.dispatchEvent(new CustomEvent('thestra-runtime-camera-viewport-ready'));
     return api;

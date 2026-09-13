@@ -87,6 +87,74 @@ test('walk profile deletion is interior-only and keeps a usable polyline', () =>
         [{ y: 0, z: 0 }, { y: 10, z: 0 }]);
 });
 
+
+test('walk profile multi-point move preserves relative shape and ordering', () => {
+    const payload = laneFixture([
+        { y: 0, z: 0 }, { y: 3, z: 1 }, { y: 6, z: 1 }, { y: 10, z: 0 }
+    ]);
+    const moved = Commands.moveGroundProfilePoints(payload, 0, [1, 2], 1, 2);
+    assert.equal(moved.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
+        { y: 0, z: 0 }, { y: 4, z: 3 }, { y: 7, z: 3 }, { y: 10, z: 0 }
+    ]);
+    assert.deepEqual(moved.selection.indices, [1, 2]);
+
+    const rejected = Commands.moveGroundProfilePoints(payload, 0, [1, 2], 4, 0);
+    assert.equal(rejected.ok, false);
+    assert.equal(rejected.reason, 'profile-order');
+});
+
+test('walk profile endpoint extrusion extends only outward ends', () => {
+    const payload = laneFixture([{ y: 0, z: 0 }, { y: 10, z: 1 }]);
+    const left = Commands.extrudeGroundProfileEndpoint(payload, 0, 0, -4, -1);
+    assert.equal(left.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile[0], { y: -4, z: -1 });
+
+    const last = payload.maps[0].traversal.lane.groundProfile.length - 1;
+    const right = Commands.extrudeGroundProfileEndpoint(payload, 0, last, 14, 2);
+    assert.equal(right.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile.at(-1), { y: 14, z: 2 });
+
+    assert.equal(
+        Commands.extrudeGroundProfileEndpoint(payload, 0, 1, 5, 0).reason,
+        'profile-endpoint-required'
+    );
+    assert.equal(
+        Commands.extrudeGroundProfileEndpoint(payload, 0, 0, 1, 0).reason,
+        'profile-order'
+    );
+});
+
+test('walk profile subdivision supports multiple selected edges and cuts', () => {
+    const payload = laneFixture([
+        { y: 0, z: 0 }, { y: 6, z: 3 }, { y: 12, z: 0 }
+    ]);
+    const result = Commands.subdivideGroundProfileSegments(payload, 0, [0, 1], 2);
+    assert.equal(result.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
+        { y: 0, z: 0 },
+        { y: 2, z: 1 },
+        { y: 4, z: 2 },
+        { y: 6, z: 3 },
+        { y: 8, z: 2 },
+        { y: 10, z: 1 },
+        { y: 12, z: 0 }
+    ]);
+    assert.deepEqual(result.insertedIndices, [1, 2, 4, 5]);
+});
+
+test('walk profile multi-delete dissolves interior points only', () => {
+    const payload = laneFixture([
+        { y: 0, z: 0 }, { y: 2, z: 1 }, { y: 4, z: 2 }, { y: 6, z: 1 }, { y: 8, z: 0 }
+    ]);
+    const result = Commands.deleteGroundProfilePoints(payload, 0, [1, 3]);
+    assert.equal(result.ok, true);
+    assert.deepEqual(payload.maps[0].traversal.lane.groundProfile, [
+        { y: 0, z: 0 }, { y: 4, z: 2 }, { y: 8, z: 0 }
+    ]);
+    assert.equal(Commands.deleteGroundProfilePoints(payload, 0, [0]).reason, 'profile-endpoint');
+});
+
 test('world Event movement retains depth, identity and all other authored facts', () => {
     const payload = fixture();
     const first = JSON.stringify(payload.maps[0].events[0]);

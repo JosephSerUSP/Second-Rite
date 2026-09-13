@@ -5,7 +5,8 @@
     const Adapter = window.SecondRiteEditorAdapter;
     const WorkspaceState = window.ThestraWorkspaceState;
     const InteractionState = window.ThestraInteractionState;
-    if (!host || !Adapter || !WorkspaceState || !InteractionState) return;
+    const StudioHistory = window.ThestraStudioHistory;
+    if (!host || !Adapter || !WorkspaceState || !InteractionState || !StudioHistory) return;
 
     const legacyCanvas = document.getElementById('map-canvas');
     const area = legacyCanvas && legacyCanvas.parentElement;
@@ -22,6 +23,94 @@
     let loadedMapIndex = null;
     let bundleStatus = 'runtime geometry';
     const workspaceReadiness = WorkspaceState.createReadiness();
+    const history = StudioHistory.createHistory({
+        onChange(state) {
+            window.dispatchEvent(new CustomEvent('thestra-history-changed', { detail: state }));
+        }
+    });
+
+    function cloneProfile(profile) {
+        return Array.isArray(profile)
+            ? profile.map(point => ({ y: Number(point.y), z: Number(point.z) }))
+            : null;
+    }
+
+    function currentProfileSnapshot() {
+        const payload = host.getPayload();
+        const map = payload?.maps?.[host.getMapIndex()];
+        return cloneProfile(map?.traversal?.lane?.groundProfile);
+    }
+
+    function currentMapId() {
+        const payload = host.getPayload();
+        return payload?.maps?.[host.getMapIndex()]?.id ?? null;
+    }
+
+    function normalizeSpatialTransaction(transaction) {
+        if (!transaction) return null;
+        if (transaction.kind === 'walk-profile') return transaction;
+
+        const afterProfile = currentProfileSnapshot();
+        if (!afterProfile) return null;
+        let beforeProfile = cloneProfile(afterProfile);
+
+        if (transaction.kind === 'move') {
+            if (Array.isArray(transaction.before?.points)) {
+                for (const point of transaction.before.points) {
+                    const index = Number(point.index);
+                    if (!Number.isInteger(index) || !beforeProfile[index]) return null;
+                    beforeProfile[index] = { y: Number(point.Y), z: Number(point.Z) };
+                }
+            } else {
+                const index = Number(transaction.target?.index);
+                if (!Number.isInteger(index) || !beforeProfile[index]) return null;
+                beforeProfile[index] = {
+                    y: Number(transaction.before?.Y),
+                    z: Number(transaction.before?.Z)
+                };
+            }
+            return {
+                kind: 'walk-profile',
+                target: { mapId: currentMapId() },
+                before: { profile: beforeProfile },
+                after: { profile: afterProfile },
+                label: 'Move Walk Profile'
+            };
+        }
+
+        if (transaction.kind === 'extrude') {
+            const index = Number(transaction.target?.index);
+            if (!Number.isInteger(index) || afterProfile.length < 3) return null;
+            beforeProfile = index === 0 ? afterProfile.slice(1) : afterProfile.slice(0, -1);
+            return {
+                kind: 'walk-profile',
+                target: { mapId: currentMapId() },
+                before: { profile: beforeProfile },
+                after: { profile: afterProfile },
+                label: 'Extrude Walk Profile'
+            };
+        }
+        return null;
+    }
+
+    async function applyHistoryEntry(entry, side) {
+        if (!entry || entry.kind !== 'walk-profile') return false;
+        if (String(entry.target?.mapId) !== String(currentMapId())) return false;
+        const profile = entry?.[side]?.profile;
+        const result = host.replaceGroundProfile ? host.replaceGroundProfile(profile) : null;
+        if (!result?.ok) return false;
+        await refreshSemanticScene();
+        return result;
+    }
+
+    async function handleHistoryShortcut(event) {
+        if (!mapSurfaceIsActive()) return;
+        const action = StudioHistory.historyShortcut(event);
+        if (!action) return;
+        event.preventDefault();
+        if (action === 'undo') await history.undo(applyHistoryEntry);
+        else await history.redo(applyHistoryEntry);
+    }
 
     area.style.position = 'relative';
 
@@ -418,8 +507,10 @@
                     }));
                 },
                 onSpatialTransaction(transaction) {
+                    const normalized = normalizeSpatialTransaction(transaction);
+                    if (normalized) history.commit(normalized);
                     window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
-                        detail: transaction
+                        detail: normalized || transaction
                     }));
                 },
                 onPaintCell(cell) {
@@ -657,6 +748,7 @@
     const originalLoadActiveMap = window.loadActiveMap;
     if (typeof originalLoadActiveMap === 'function') {
         window.loadActiveMap = function () {
+            history.clear();
             const result = originalLoadActiveMap.apply(this, arguments);
             renderVertexShadingPanel();
             refreshAll({ clearBundle: true }).catch(console.error);
@@ -686,6 +778,19 @@
     document.addEventListener('change', inspectorMutation);
     window.addEventListener('thestra-map-inspection-changed', () => {
         refreshAll({ clearBundle: true }).catch(console.error);
+    });
+    document.addEventListener('keydown', event => {
+        handleHistoryShortcut(event).catch(error => {
+            console.error('Studio history shortcut failed:', error);
+            setStatus('Undo/Redo failed', error.message);
+        });
+    }, true);
+
+    window.ThestraStudioHistorySession = Object.freeze({
+        snapshot: () => history.snapshot(),
+        undo: () => history.undo(applyHistoryEntry),
+        redo: () => history.redo(applyHistoryEntry),
+        clear: () => history.clear()
     });
 
     legacyCanvas.style.visibility = 'hidden';

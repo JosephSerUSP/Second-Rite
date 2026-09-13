@@ -111,3 +111,24 @@ test('committed spatial transactions preserve immutable before/after semantic va
     assert.equal(transaction.before.Y, 1);
     assert.equal(transaction.after.Z, 1.25);
 });
+
+
+test('spatial selection state tracks active component inside a selected set', () => {
+    const state = Spatial.createState();
+    const a = { kind: 'walk-profile-point', key: 'walk-profile-point:1', index: 1 };
+    const b = { kind: 'walk-profile-point', key: 'walk-profile-point:2', index: 2 };
+
+    state.setSelection(a);
+    let snapshot = state.toggleSelection(b);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key, b.key]);
+    assert.equal(snapshot.selection.key, b.key);
+
+    snapshot = state.toggleSelection(b);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key]);
+    assert.equal(snapshot.selection.key, a.key);
+
+    snapshot = state.setSelectionSet([a, b, a], a);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key, b.key],
+        'selection sets deduplicate by semantic key');
+    assert.equal(snapshot.selection.key, a.key);
+});

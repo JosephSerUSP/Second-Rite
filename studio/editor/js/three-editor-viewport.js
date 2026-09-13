@@ -395,11 +395,10 @@ export function createThreeEditorViewport(container, options = {}) {
             return result;
         },
         subdivideSelectedGroundProfileSegments(cuts = 1) {
-            const selection = api.getWalkProfileSelection();
-            const segments = selection?.kind === 'walk-profile-segment'
-                ? [selection.index]
-                : selection?.kind === 'walk-profile-segments' ? selection.indices : null;
-            if (!segments?.length) return { ok: false, reason: 'no-profile-segment-selected' };
+            const segments = api.getWalkProfileSelections()
+                .filter(selection => selection.kind === 'walk-profile-segment')
+                .map(selection => selection.index);
+            if (!segments.length) return { ok: false, reason: 'no-profile-segment-selected' };
             const result = options.onSubdivideGroundProfileSegments?.(segments, cuts);
             if (result?.changed) {
                 base.refreshWalkProfile?.();

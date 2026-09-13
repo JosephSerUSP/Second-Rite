@@ -80,7 +80,8 @@ export function createCompositionViewport(container, options) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
-    let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null, walkProfileHover = null;
+    let walkMeshVisible = false, walkProfileEditing = false, walkProfileComponentMode = 'point';
+    let walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
@@ -98,7 +99,11 @@ export function createCompositionViewport(container, options) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing) return null;
         updatePointer(event);
-        return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
+        const wantedKind = walkProfileComponentMode === 'segment'
+            ? 'walk-profile-segment' : 'walk-profile-point';
+        const targets = walkProfileHitTargets.filter(object =>
+            object.userData?.thestraSelection?.kind === wantedKind);
+        return raycaster.intersectObjects(targets, false)[0]?.object.userData.thestraSelection || null;
     }
 
     function refreshWalkProfileVisualState() {
@@ -109,11 +114,15 @@ export function createCompositionViewport(container, options) {
             const selected = key === selectedKey;
             const hovered = key === hoverKey && !selected;
             if (semantic?.kind === 'walk-profile-point') {
+                const activeType = walkProfileComponentMode === 'point';
+                object.material.transparent = !activeType;
+                object.material.opacity = activeType ? 1 : 0.35;
                 object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
                 object.scale.setScalar(selected ? 1.3 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
+                const activeType = walkProfileComponentMode === 'segment';
                 object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : 0.5;
+                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : (activeType ? 0.5 : 0.2);
             }
         }
     }
@@ -284,6 +293,22 @@ export function createCompositionViewport(container, options) {
             setWalkProfileHover(null);
         }
         rebuildPlayerPreview();
+        refreshOverlay();
+    }
+
+    function setWalkProfileComponentMode(mode) {
+        if (mode !== 'point' && mode !== 'segment') {
+            throw new Error(`Unsupported Walk Profile component mode '${mode}'.`);
+        }
+        if (mode === walkProfileComponentMode) return;
+        walkProfileComponentMode = mode;
+        setWalkProfileHover(null);
+        if ((mode === 'point' && walkProfileSelection?.kind === 'walk-profile-segment')
+                || (mode === 'segment' && walkProfileSelection?.kind === 'walk-profile-point')) {
+            setSemanticSelection(null);
+            options.onSelection?.(null);
+        }
+        refreshWalkProfileVisualState();
         refreshOverlay();
     }
 
@@ -719,6 +744,8 @@ export function createCompositionViewport(container, options) {
         getWalkMeshVisible: () => walkMeshVisible,
         setWalkProfileEditing,
         getWalkProfileEditing: () => walkProfileEditing,
+        setWalkProfileComponentMode,
+        getWalkProfileComponentMode: () => walkProfileComponentMode,
         getWalkProfileSelection: () => walkProfileSelection,
         refreshWalkProfile() {
             rebuildWalkOverlay();

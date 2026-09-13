@@ -1216,23 +1216,28 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function refreshWalkProfileVisualState() {
-        const selectedKey = selection
+        const spatial = options.spatialInteraction?.snapshot?.() || null;
+        const selectedKeys = new Set((spatial?.selectionSet || []).map(item => item?.key).filter(Boolean));
+        const activeKey = spatial?.selection?.key || (selection
             && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
-            ? selection.key : null;
+            ? selection.key : null);
         const hoverKey = walkProfileHover?.key || null;
         for (const [key, object] of walkProfileObjects.entries()) {
             const semantic = object.userData.thestraSelection;
-            const selected = key === selectedKey;
-            const hovered = key === hoverKey && !selected;
+            const selected = selectedKeys.has(key) || key === activeKey;
+            const active = key === activeKey;
+            const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
                 const activeType = walkProfileComponentMode === 'point';
                 object.material.transparent = !activeType;
                 object.material.opacity = activeType ? 1 : 0.35;
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
-                object.scale.setScalar(selected ? 1.35 : hovered ? 1.18 : 1);
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
+                object.scale.setScalar(active ? 1.35 : selected ? 1.22 : hovered ? 1.18 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
                 const activeType = walkProfileComponentMode === 'segment';
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
                 object.material.opacity = selected ? 1 : hovered ? 1 : (activeType ? 0.9 : 0.3);
             }
         }
@@ -1715,10 +1720,27 @@ export function createThreeEditorViewport(container, options = {}) {
         const startPointer = lastPointerEvent || originScreen;
         const hit = profilePlaneIntersection(startPointer, plane);
         const runtimeOrigin = Contract.thestraPositionToRuntime(origin.toArray());
+        const spatialSelections = options.spatialInteraction?.snapshot?.().selectionSet || [];
+        const pointSelections = spatialSelections.filter(item => item?.kind === 'walk-profile-point');
+        const effectiveSelections = pointSelections.some(item => item.key === selection.key)
+            ? pointSelections : [selection];
+        const targets = effectiveSelections.map(semantic => {
+            const targetObject = walkProfileObjects.get(semantic.key);
+            if (!targetObject) return null;
+            const targetOrigin = targetObject.position.clone();
+            const runtime = Contract.thestraPositionToRuntime(targetOrigin.toArray());
+            return {
+                semantic,
+                object: targetObject,
+                origin: targetOrigin,
+                before: { Y: runtime[1], Z: runtime[2] }
+            };
+        }).filter(Boolean);
         modalMoveGesture = {
             semantic: selection,
             object,
             origin,
+            targets,
             plane,
             startPointer,
             planeGrabOffset: hit ? origin.clone().sub(hit) : null,
@@ -1757,7 +1779,10 @@ export function createThreeEditorViewport(container, options = {}) {
             next = hit.add(gesture.planeGrabOffset);
             next.x = gesture.origin.x;
         }
-        gesture.object.position.copy(next);
+        const viewportDelta = next.clone().sub(gesture.origin);
+        gesture.targets.forEach(target => {
+            target.object.position.copy(target.origin).add(viewportDelta);
+        });
         selectionOverlay.position.copy(next);
         const runtimeOrigin = Contract.thestraPositionToRuntime(gesture.origin.toArray());
         const runtimeNext = Contract.thestraPositionToRuntime(next.toArray());
@@ -1774,26 +1799,40 @@ export function createThreeEditorViewport(container, options = {}) {
         modalMoveGesture = null;
         setControlsEnabled(true);
         if (!commit) {
-            gesture.object.position.copy(gesture.origin);
+            gesture.targets.forEach(target => target.object.position.copy(target.origin));
             setSelection(gesture.semantic);
             options.spatialInteraction?.cancel?.();
             return true;
         }
         const runtime = Contract.thestraPositionToRuntime(gesture.object.position.toArray());
-        const result = options.onMoveGroundProfilePoint
-            ? options.onMoveGroundProfilePoint(gesture.semantic.index, runtime[1], runtime[2])
-            : null;
+        const deltaY = runtime[1] - gesture.before.Y;
+        const deltaZ = runtime[2] - gesture.before.Z;
+        const pointIndices = gesture.targets.map(target => target.semantic.index);
+        const result = pointIndices.length > 1
+            ? options.onMoveGroundProfilePoints?.(pointIndices, deltaY, deltaZ)
+            : options.onMoveGroundProfilePoint?.(gesture.semantic.index, runtime[1], runtime[2]);
         if (result?.ok) {
-            const after = { Y: runtime[1], Z: runtime[2] };
+            const before = gesture.targets.length > 1
+                ? { points: gesture.targets.map(target => ({
+                    index: target.semantic.index, Y: target.before.Y, Z: target.before.Z
+                })) }
+                : gesture.before;
+            const after = gesture.targets.length > 1
+                ? { points: gesture.targets.map(target => ({
+                    index: target.semantic.index,
+                    Y: target.before.Y + deltaY,
+                    Z: target.before.Z + deltaZ
+                })) }
+                : { Y: runtime[1], Z: runtime[2] };
             const transaction = result.changed
-                ? SpatialInteraction.createTransaction('move', gesture.semantic, gesture.before, after)
+                ? SpatialInteraction.createTransaction('move', gesture.semantic, before, after)
                 : null;
             options.spatialInteraction?.confirm?.();
             if (transaction) options.onSpatialTransaction?.(transaction);
             rebuildWalkProfile();
             emitSelection(result.selection || gesture.semantic);
         } else {
-            gesture.object.position.copy(gesture.origin);
+            gesture.targets.forEach(target => target.object.position.copy(target.origin));
             rebuildWalkProfile();
             setSelection(gesture.semantic);
             options.spatialInteraction?.cancel?.();
@@ -1834,7 +1873,11 @@ export function createThreeEditorViewport(container, options = {}) {
         if (moveGizmo.dragging || moveGizmo.axis) return;
         if (walkProfileEditing) {
             const profileSelection = pickWalkProfile(event);
-            emitSelection(profileSelection);
+            if (event.shiftKey && profileSelection && options.onToggleSelection) {
+                options.onToggleSelection(profileSelection);
+            } else {
+                emitSelection(profileSelection);
+            }
             return;
         }
         const layer = interactionLayer();

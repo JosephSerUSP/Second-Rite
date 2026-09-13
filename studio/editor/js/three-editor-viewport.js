@@ -5,9 +5,12 @@ import '/js/world-presentation-studio.js';
 import { createCompositionViewport } from '/js/three-composition-viewport.js';
 import '/js/scene-timing-authoring.js';
 import '/js/scene-timing-studio.js';
+import '/js/spatial-interaction.js';
 
 const View = globalThis.ThestraWorldViewSemantics;
 if (!View) throw new Error('Generated shared world-view semantics failed to load.');
+const SpatialInteraction = globalThis.ThestraSpatialInteraction;
+if (!SpatialInteraction) throw new Error('Shared spatial interaction core failed to load.');
 
 function copyVector(vector) {
     return [vector.x, vector.y, vector.z];
@@ -78,8 +81,16 @@ function runtimeKey(event) {
 
 export function createThreeEditorViewport(container, options = {}) {
     const opticalSlot = { current: null };
+    const spatialInteraction = SpatialInteraction.createState(snapshot => {
+        options.onSpatialStateChange?.(snapshot);
+    });
+    function emitSelection(selection) {
+        spatialInteraction.setSelection(selection);
+        options.onSelection?.(selection);
+    }
     const base = createBaseViewport(container, {
         ...options,
+        onSelection: emitSelection,
         getOpticalNavigation: () => opticalSlot.current?.active() ? opticalSlot.current : null
     });
     const cameraRig = base.getCameraRig?.();
@@ -226,7 +237,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const canvas = container.querySelector('canvas');
     const compositionAuthoring = createCompositionViewport(container, {
         ...options,
-        onSelection(selection) { base.setSelection(selection); options.onSelection?.(selection); }
+        onSelection(selection) { base.setSelection(selection); emitSelection(selection); }
     });
     opticalSlot.current = {
         // Runtime preview fixes the camera pose, but its projection window is
@@ -274,7 +285,9 @@ export function createThreeEditorViewport(container, options = {}) {
         setSelection(selection) {
             base.setSelection(selection);
             compositionAuthoring.setSemanticSelection(selection);
+            spatialInteraction.setSelection(selection);
         },
+        getSpatialInteractionState: () => spatialInteraction.snapshot(),
         setRenderableBundle(bundle) {
             spatialCamera = bundle && bundle.spatialCamera || null;
             // An environment bundle has a resolved runtime camera.  Letting

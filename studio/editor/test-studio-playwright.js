@@ -178,6 +178,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-playwright-'));
     const projectRoot = path.join(tempRoot, 'project');
     const termsPath = path.join(projectRoot, 'data', 'terms.json');
+    const mapPath = path.join(projectRoot, 'data', 'maps', '1.json');
     const diagnostics = [];
     let app = null;
     let electronProcess = null;
@@ -190,6 +191,24 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             name: 'Playwright Fixture',
         });
         assert.equal(readJson(termsPath).project.title, 'Playwright Fixture');
+
+        const authoredMap = readJson(mapPath);
+        authoredMap.traversal = {
+            provider: 'bounded_lane',
+            lane: {
+                minY: 0,
+                maxY: 10,
+                depthX: 0,
+                groundZ: 0,
+                speed: 3.4,
+                groundProfile: [
+                    { y: 0, z: 0 },
+                    { y: 5, z: 1 },
+                    { y: 10, z: 0 },
+                ],
+            },
+        };
+        writeJson(mapPath, authoredMap);
 
         const [editorPort, bridgePort] = await Promise.all([freePort(), freePort()]);
         app = await electron.launch({
@@ -212,6 +231,108 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         attachDiagnostics(mainPage, 'main', diagnostics);
         await awaitSurfaceReady(mainPage, 'main');
         mark(t, 'main Studio renderer reached semantic Database readiness');
+
+        await mainPage.waitForFunction(() =>
+            !!window.ThestraRuntimeCameraViewport?.getWalkProfileStatus?.()?.available,
+        null, { timeout: SURFACE_BOOT_TIMEOUT });
+        const mapCanvas = mainPage.locator('#thestra-map-viewport canvas').first();
+        await mapCanvas.focus();
+
+        await mapCanvas.press('Tab');
+        await mainPage.waitForFunction(() =>
+            window.ThestraRuntimeCameraViewport?.getWalkProfileEditing?.() === true);
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getWalkProfileComponentMode()), 'point');
+        mark(t, 'Tab entered Walk Profile Edit Mode through the real Map canvas');
+
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-point',
+                key: 'walk-profile-point:1',
+                index: 1,
+            });
+        });
+        await mainPage.waitForFunction(() => {
+            const input = document.querySelector('input[title="Active Walk Profile point · Lane Y"]');
+            return !!input && input.getClientRects().length > 0 && input.value === '5';
+        });
+        assert.equal(await mainPage.evaluate(() => {
+            const input = document.querySelector('input[title="Active Walk Profile point · Elevation Z"]');
+            return input?.value;
+        }), '1', 'active-point inspector must expose authored elevation Z');
+        mark(t, 'active Walk Profile point exposed precise semantic Y/Z fields');
+
+        await mapCanvas.press('2');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-segment',
+                key: 'walk-profile-segment:0',
+                index: 0,
+            });
+        });
+        await mainPage.waitForFunction(() => {
+            const button = Array.from(document.querySelectorAll('button'))
+                .find(candidate => candidate.textContent.trim() === 'Subdivide');
+            return !!button && !button.disabled && button.getClientRects().length > 0;
+        });
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getWalkProfileComponentMode()), 'segment');
+        mark(t, 'segment selection immediately enabled Subdivide in the live toolbar');
+
+        await mapCanvas.press('1');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-point',
+                key: 'walk-profile-point:1',
+                index: 1,
+            });
+        });
+        await mapCanvas.press('a');
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getSpatialInteractionState().selectionSet.length), 3,
+        'A must select all Walk Profile points in point mode');
+
+        const beforeMove = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].traversal.lane.groundProfile));
+        await mapCanvas.press('g');
+        await mapCanvas.press('z');
+        await mainPage.waitForFunction(() => {
+            const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
+            return state.operation === 'move' && state.constraint === 'Z';
+        });
+        await mapCanvas.press('Escape');
+        assert.equal(await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].traversal.lane.groundProfile)), beforeMove,
+        'Esc-canceled modal G must not mutate authored profile data');
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getSpatialInteractionState().operation), null);
+        mark(t, 'G Z entered semantic modal move and Esc canceled without authored mutation');
+
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-point',
+                key: 'walk-profile-point:0',
+                index: 0,
+            });
+        });
+        const beforeExtrude = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].traversal.lane.groundProfile));
+        await mapCanvas.press('e');
+        await mainPage.waitForFunction(() =>
+            window.ThestraRuntimeCameraViewport.getSpatialInteractionState().operation === 'move');
+        await mapCanvas.press('Escape');
+        assert.equal(await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].traversal.lane.groundProfile)), beforeExtrude,
+        'Esc-canceled E extrusion must leave Map profile byte-for-byte unchanged');
+        mark(t, 'E created only temporary endpoint topology until confirmation');
+
+        await mapCanvas.press('Tab');
+        await mainPage.waitForFunction(() =>
+            window.ThestraRuntimeCameraViewport?.getWalkProfileEditing?.() === false);
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getSpatialInteractionState().selection), null,
+        'leaving Edit Mode must clear the shared profile selection');
+        mark(t, 'Tab exited Walk Profile Edit Mode and cleared shared selection');
 
         let databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database', diagnostics);

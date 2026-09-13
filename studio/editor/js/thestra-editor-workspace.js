@@ -404,6 +404,15 @@
                     setStatus(describeSelection(selection));
                 },
                 onSpatialStateChange(snapshot) {
+                    if (snapshot?.feedback) {
+                        setStatus(`Spatial · ${snapshot.feedback}`);
+                    } else if (snapshot?.operation === 'move') {
+                        const constraint = snapshot.constraint ? ` · ${snapshot.constraint}` : ' · YZ';
+                        const value = snapshot.value && typeof snapshot.value === 'object'
+                            ? ` · ΔY ${Number(snapshot.value.Y || 0).toFixed(3)} · ΔZ ${Number(snapshot.value.Z || 0).toFixed(3)}`
+                            : '';
+                        setStatus(`Move${constraint}${value} · Enter/LMB confirm · Esc/RMB cancel`);
+                    }
                     window.dispatchEvent(new CustomEvent('thestra-spatial-interaction-changed', {
                         detail: snapshot
                     }));

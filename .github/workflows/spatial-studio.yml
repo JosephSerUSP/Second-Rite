@@ -84,6 +84,8 @@ jobs:
         shell: pwsh
         run: |
           node --check studio/editor/js/spatial-interaction.js
+          node --check studio/editor/js/three-editor-viewport-base.js
+          node --check studio/editor/js/three-editor-viewport.js
           node --check studio/editor/js/second-rite-editor-commands.js
           node --check studio/editor/js/event_presentation.js
           node --check studio/editor/js/thestra-editor-workspace.js

@@ -145,15 +145,6 @@
         return true;
     }
 
-    function profileSelectionSet(indices, activeIndex) {
-        return {
-            kind: 'walk-profile-points',
-            key: `walk-profile-points:${indices.join(',')}`,
-            indices: indices.slice(),
-            activeIndex: activeIndex == null ? indices[indices.length - 1] : activeIndex
-        };
-    }
-
     function createGroundProfile(payload, mapIndex) {
         const lane = laneAt(payload, mapIndex);
         if (!lane) return { ok: false, reason: 'missing-bounded-lane' };

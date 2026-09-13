@@ -217,6 +217,18 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'point dissolve must be available through Blender-style X/Delete');
     assert.match(viewportSource, /event\.code === 'KeyA'/,
         'A must select all components in the active profile component mode');
+    assert.match(viewportSource, /event\.code === 'KeyE'/,
+        'endpoint extrusion must use Blender-style E');
+    assert.match(viewportBaseSource, /walk-profile-extrude-preview/,
+        '3D extrusion must preview topology before committing authored data');
+    assert.match(compositionSource, /walk-profile-extrude-preview/,
+        'plate extrusion must use the same cancel-safe preview topology');
+    assert.match(studioSource, /Subdivide/,
+        'selected segments expose a real Subdivide operator rather than midpoint-only Split');
+    assert.match(studioSource, /Y Lane/,
+        'precise point editing labels authored lane Y explicitly');
+    assert.match(studioSource, /Z Elev/,
+        'precise point editing labels authored elevation Z explicitly');
     assert.match(viewportBaseSource, /event\.shiftKey && profileSelection/,
         'free 3D profile editing must support Shift+click selection toggles');
     assert.match(compositionSource, /event\.shiftKey && selection/,

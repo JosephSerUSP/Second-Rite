@@ -159,6 +159,75 @@ export function createCompositionViewport(container, options) {
         return true;
     }
 
+    function beginModalProfileExtrude() {
+        if (!walkProfileEditing || walkProfileSelection?.kind !== 'walk-profile-point') {
+            return { ok: false, reason: 'no-profile-point-selected' };
+        }
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        const index = walkProfileSelection.index;
+        if (!Array.isArray(profile) || profile.length < 2) {
+            return { ok: false, reason: 'missing-ground-profile' };
+        }
+        if (index !== 0 && index !== profile.length - 1) {
+            return { ok: false, reason: 'profile-endpoint-required' };
+        }
+        const anchorObject = walkProfileObjects.get(walkProfileSelection.key);
+        const source = profile[index];
+        if (!anchorObject || !source) return { ok: false, reason: 'invalid-profile-point' };
+
+        const previewPoint = new THREE.Mesh(
+            new THREE.CircleGeometry(5, 16),
+            new THREE.MeshBasicMaterial({
+                color: 0xffa24d, depthTest: false, depthWrite: false
+            })
+        );
+        previewPoint.position.copy(anchorObject.position);
+        previewPoint.renderOrder = 31;
+        const screen = { x: anchorObject.position.x, y: -anchorObject.position.y };
+        const previewSegment = profileScreenSegment(
+            screen, screen,
+            { kind: 'walk-profile-extrude-preview', key: 'walk-profile-extrude-preview' });
+        previewSegment.material.color.setHex(0xffa24d);
+        previewSegment.renderOrder = 30;
+        walkProfileControls.add(previewSegment, previewPoint);
+
+        const pointerPoint = scenePointAtPointer(lastPointerEvent, previewPoint.position.z);
+        modalProfileMove = {
+            kind: 'extrude',
+            selection: walkProfileSelection,
+            endpointIndex: index,
+            anchorObject,
+            activeObject: previewPoint,
+            activeSource: { y: Number(source.y), z: Number(source.z) },
+            targets: [{
+                selection: walkProfileSelection,
+                object: previewPoint,
+                origin: previewPoint.position.clone(),
+                source: { y: Number(source.y), z: Number(source.z) }
+            }],
+            previewPoint,
+            previewSegment,
+            grabOffset: pointerPoint
+                ? previewPoint.position.clone().sub(pointerPoint)
+                : new THREE.Vector3()
+        };
+        gizmo.detach();
+        controls.enabled = false;
+        options.spatialInteraction?.beginMove?.();
+        return { ok: true };
+    }
+
+    function clearModalExtrudePreview(move) {
+        if (!move || move.kind !== 'extrude') return;
+        for (const object of [move.previewSegment, move.previewPoint]) {
+            if (!object) continue;
+            walkProfileControls.remove(object);
+            object.geometry?.dispose();
+            object.material?.dispose();
+        }
+    }
+
     function updateModalProfileMove(event) {
         const move = modalProfileMove;
         if (!move) return false;
@@ -188,6 +257,10 @@ export function createCompositionViewport(container, options) {
             target.object.position.set(screen.x, -screen.y, 4);
         });
         syncWalkProfileSegmentsFromPoints();
+        if (move.kind === 'extrude') {
+            syncPlateSegmentObject(
+                move.previewSegment, move.anchorObject.position, move.previewPoint.position);
+        }
         refreshOverlay();
         options.spatialInteraction?.setValue?.({ Y: deltaY, Z: deltaZ });
         return true;
@@ -200,6 +273,7 @@ export function createCompositionViewport(container, options) {
         controls.enabled = true;
         if (!commit) {
             move.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(move);
             syncWalkProfileSegmentsFromPoints();
             refreshOverlay();
             options.spatialInteraction?.cancel?.();
@@ -209,14 +283,20 @@ export function createCompositionViewport(container, options) {
         const deltaY = Number(state?.value?.Y || 0);
         const deltaZ = Number(state?.value?.Z || 0);
         const indices = move.targets.map(target => target.selection.index);
-        const result = indices.length > 1
-            ? options.onMoveGroundProfilePoints?.(indices, deltaY, deltaZ)
-            : options.onMoveGroundProfilePoint?.(
-                move.selection.index,
+        const result = move.kind === 'extrude'
+            ? options.onExtrudeGroundProfileEndpoint?.(
+                move.endpointIndex,
                 move.activeSource.y + deltaY,
-                move.activeSource.z + deltaZ);
+                move.activeSource.z + deltaZ)
+            : indices.length > 1
+                ? options.onMoveGroundProfilePoints?.(indices, deltaY, deltaZ)
+                : options.onMoveGroundProfilePoint?.(
+                    move.selection.index,
+                    move.activeSource.y + deltaY,
+                    move.activeSource.z + deltaZ);
         if (!result?.ok) {
             move.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(move);
             syncWalkProfileSegmentsFromPoints();
             refreshOverlay();
             options.spatialInteraction?.cancel?.();
@@ -232,10 +312,13 @@ export function createCompositionViewport(container, options) {
             Z: target.source.z + deltaZ
         })) };
         const transaction = result.changed
-            ? SpatialInteraction.createTransaction('move', move.selection, before, after)
+            ? SpatialInteraction.createTransaction(
+                move.kind === 'extrude' ? 'extrude' : 'move',
+                move.selection, before, after)
             : null;
         options.spatialInteraction?.confirm?.();
         if (transaction) options.onSpatialTransaction?.(transaction);
+        clearModalExtrudePreview(move);
         rebuildWalkOverlay();
         rebuildWalkProfileControls();
         rebuildPlayerPreview();
@@ -403,6 +486,18 @@ export function createCompositionViewport(container, options) {
         return mesh;
     }
 
+    function syncPlateSegmentObject(segment, leftPosition, rightPosition) {
+        if (!segment || !leftPosition || !rightPosition) return;
+        const start = { x: leftPosition.x, y: -leftPosition.y };
+        const end = { x: rightPosition.x, y: -rightPosition.y };
+        const dx = end.x - start.x, dy = end.y - start.y;
+        const length = Math.max(Math.hypot(dx, dy), 1);
+        segment.geometry?.dispose();
+        segment.geometry = new THREE.PlaneGeometry(length, 7);
+        segment.position.set((start.x + end.x) * 0.5, -(start.y + end.y) * 0.5, 3.6);
+        segment.rotation.z = -Math.atan2(dy, dx);
+    }
+
     function syncWalkProfileSegmentsFromPoints() {
         const lane = model?.map?.source?.traversal?.lane;
         const profile = lane?.groundProfile;
@@ -412,14 +507,7 @@ export function createCompositionViewport(container, options) {
             const left = walkProfileObjects.get(`walk-profile-point:${index}`);
             const right = walkProfileObjects.get(`walk-profile-point:${index + 1}`);
             if (!segment || !left || !right) continue;
-            const start = { x: left.position.x, y: -left.position.y };
-            const end = { x: right.position.x, y: -right.position.y };
-            const dx = end.x - start.x, dy = end.y - start.y;
-            const length = Math.max(Math.hypot(dx, dy), 1);
-            segment.geometry?.dispose();
-            segment.geometry = new THREE.PlaneGeometry(length, 7);
-            segment.position.set((start.x + end.x) * 0.5, -(start.y + end.y) * 0.5, 3.6);
-            segment.rotation.z = -Math.atan2(dy, dx);
+            syncPlateSegmentObject(segment, left.position, right.position);
         }
     }
 
@@ -962,6 +1050,7 @@ export function createCompositionViewport(container, options) {
         getWalkProfileEditing: () => walkProfileEditing,
         setWalkProfileComponentMode,
         getWalkProfileComponentMode: () => walkProfileComponentMode,
+        beginWalkProfileExtrude: beginModalProfileExtrude,
         getWalkProfileSelection: () => walkProfileSelection,
         refreshWalkProfile() {
             rebuildWalkOverlay();

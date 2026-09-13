@@ -119,6 +119,10 @@
         return { kind: 'walk-profile-point', key: `walk-profile-point:${index}`, index };
     }
 
+    function profileSegmentSelection(index) {
+        return { kind: 'walk-profile-segment', key: `walk-profile-segment:${index}`, index };
+    }
+
     function profileAt(payload, mapIndex) {
         const lane = laneAt(payload, mapIndex);
         const profile = lane && lane.groundProfile;
@@ -224,11 +228,10 @@
                 profile[index].z = candidate[index].z;
             });
         }
+        const selections = indices.map(profileSelection);
         return {
-            ok: true, changed, profile, indices,
-            selection: indices.length === 1
-                ? profileSelection(indices[0])
-                : profileSelectionSet(indices, indices[indices.length - 1])
+            ok: true, changed, profile, indices, selections,
+            selection: selections[selections.length - 1]
         };
     }
 
@@ -273,10 +276,12 @@
         const selected = new Set(segments);
         const next = [];
         const insertedIndices = [];
+        const selectedSegmentIndices = [];
         for (let index = 0; index < profile.length - 1; index++) {
             const left = profile[index], right = profile[index + 1];
             next.push(left);
             if (!selected.has(index)) continue;
+            const firstChildSegment = next.length - 1;
             for (let cut = 1; cut <= count; cut++) {
                 const t = cut / (count + 1);
                 const point = {
@@ -289,14 +294,18 @@
                 insertedIndices.push(next.length);
                 next.push(point);
             }
+            for (let child = 0; child <= count; child++) {
+                selectedSegmentIndices.push(firstChildSegment + child);
+            }
         }
         next.push(profile[profile.length - 1]);
         profile.splice(0, profile.length, ...next);
+        const selections = selectedSegmentIndices.map(profileSegmentSelection);
         return {
             ok: true, changed: true, profile, insertedIndices,
-            selection: insertedIndices.length === 1
-                ? profileSelection(insertedIndices[0])
-                : profileSelectionSet(insertedIndices, insertedIndices[insertedIndices.length - 1])
+            segmentIndices: selectedSegmentIndices,
+            selections,
+            selection: selections[selections.length - 1] || null
         };
     }
 

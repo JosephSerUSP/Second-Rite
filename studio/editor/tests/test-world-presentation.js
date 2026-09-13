@@ -199,6 +199,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'the 3D viewport must consume the shared modal spatial transform grammar');
     assert.match(viewportBaseSource, /beginModalProfileMove/,
         'Walk Profile points must have a real keyboard-initiated modal move path');
+    assert.ok(viewportBaseSource.includes('projectedAxisDelta'),
+        'semantic axis constraints must survive edge-on profile camera views');
+    assert.ok(viewportBaseSource.includes('onSpatialTransaction'),
+        'successful modal moves must emit explicit before/after transactions');
     assert.match(viewportBaseSource, /setWalkProfileHover/,
         'free 3D profile editing exposes hover before selection');
     assert.match(compositionSource, /setWalkProfileHover/,

@@ -198,6 +198,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'the 3D viewport must consume the shared modal spatial transform grammar');
     assert.match(viewportSource, /beginModalProfileMove/,
         'Walk Profile points must have a real keyboard-initiated modal move path');
+    assert.match(viewportSource, /setWalkProfileHover/,
+        'free 3D profile editing exposes hover before selection');
+    assert.match(compositionSource, /setWalkProfileHover/,
+        'plate profile editing exposes the same hover-state grammar');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

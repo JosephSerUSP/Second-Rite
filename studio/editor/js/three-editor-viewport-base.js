@@ -1148,6 +1148,18 @@ export function createThreeEditorViewport(container, options = {}) {
         return mesh;
     }
 
+    function syncProfileSegmentObject(segment, leftPosition, rightPosition) {
+        if (!segment || !leftPosition || !rightPosition) return;
+        const delta = rightPosition.clone().sub(leftPosition);
+        const length = Math.max(delta.length(), 0.001);
+        segment.geometry?.dispose();
+        segment.geometry = new THREE.CylinderGeometry(0.035, 0.035, length, 8);
+        segment.position.copy(leftPosition).add(rightPosition).multiplyScalar(0.5);
+        if (delta.lengthSq() > 1e-12) {
+            segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+        }
+    }
+
     function syncWalkProfileSegmentsFromPoints() {
         const lane = walkProfileLane();
         const profile = lane?.groundProfile;
@@ -1157,14 +1169,7 @@ export function createThreeEditorViewport(container, options = {}) {
             const left = walkProfileObjects.get(`walk-profile-point:${index}`);
             const right = walkProfileObjects.get(`walk-profile-point:${index + 1}`);
             if (!segment || !left || !right) continue;
-            const delta = right.position.clone().sub(left.position);
-            const length = Math.max(delta.length(), 0.001);
-            segment.geometry?.dispose();
-            segment.geometry = new THREE.CylinderGeometry(0.035, 0.035, length, 8);
-            segment.position.copy(left.position).add(right.position).multiplyScalar(0.5);
-            if (delta.lengthSq() > 1e-12) {
-                segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
-            }
+            syncProfileSegmentObject(segment, left.position, right.position);
         }
     }
 
@@ -1757,6 +1762,7 @@ export function createThreeEditorViewport(container, options = {}) {
             };
         }).filter(Boolean);
         modalMoveGesture = {
+            kind: 'move',
             semantic: selection,
             object,
             origin,
@@ -1774,6 +1780,83 @@ export function createThreeEditorViewport(container, options = {}) {
         setControlsEnabled(false);
         options.spatialInteraction?.beginMove?.();
         return true;
+    }
+
+    function beginModalProfileExtrude() {
+        if (!walkProfileEditing || selection?.kind !== 'walk-profile-point') {
+            return { ok: false, reason: 'no-profile-point-selected' };
+        }
+        const lane = walkProfileLane();
+        const profile = lane?.groundProfile;
+        const index = selection.index;
+        if (!Array.isArray(profile) || profile.length < 2) {
+            return { ok: false, reason: 'missing-ground-profile' };
+        }
+        if (index !== 0 && index !== profile.length - 1) {
+            return { ok: false, reason: 'profile-endpoint-required' };
+        }
+        const anchorObject = walkProfileObjects.get(selection.key);
+        if (!anchorObject) return { ok: false, reason: 'invalid-profile-point' };
+        const source = profile[index];
+        const origin = anchorObject.position.clone();
+        const previewPoint = new THREE.Mesh(
+            new THREE.SphereGeometry(0.12, 12, 8),
+            new THREE.MeshBasicMaterial({
+                color: 0xffa24d, depthTest: false, depthWrite: false
+            })
+        );
+        previewPoint.position.copy(origin);
+        previewPoint.renderOrder = 1002;
+        const previewSegment = profileSegmentMesh(
+            origin.toArray(), origin.toArray(),
+            { kind: 'walk-profile-extrude-preview', key: 'walk-profile-extrude-preview' });
+        previewSegment.material.color.setHex(0xffa24d);
+        previewSegment.renderOrder = 1001;
+        walkProfileContent.add(previewSegment, previewPoint);
+
+        const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), -origin.x);
+        const originScreen = worldPointToClient(origin);
+        const startPointer = lastPointerEvent || originScreen;
+        const hit = profilePlaneIntersection(startPointer, plane);
+        const runtimeOrigin = Contract.thestraPositionToRuntime(origin.toArray());
+        modalMoveGesture = {
+            kind: 'extrude',
+            semantic: selection,
+            endpointIndex: index,
+            anchorObject,
+            previewPoint,
+            previewSegment,
+            object: previewPoint,
+            origin,
+            targets: [{
+                semantic: selection,
+                object: previewPoint,
+                origin: origin.clone(),
+                before: { Y: runtimeOrigin[1], Z: runtimeOrigin[2] }
+            }],
+            plane,
+            startPointer,
+            planeGrabOffset: hit ? origin.clone().sub(hit) : null,
+            axisPixels: {
+                Y: semanticAxisPixels(origin, 'Y'),
+                Z: semanticAxisPixels(origin, 'Z')
+            },
+            before: { Y: Number(source.y), Z: Number(source.z) }
+        };
+        moveGizmo.detach();
+        setControlsEnabled(false);
+        options.spatialInteraction?.beginMove?.();
+        return { ok: true };
+    }
+
+    function clearModalExtrudePreview(gesture) {
+        if (!gesture || gesture.kind !== 'extrude') return;
+        for (const object of [gesture.previewSegment, gesture.previewPoint]) {
+            if (!object) continue;
+            walkProfileContent.remove(object);
+            object.geometry?.dispose();
+            object.material?.dispose();
+        }
     }
 
     function updateModalProfileMove(event) {
@@ -1804,6 +1887,10 @@ export function createThreeEditorViewport(container, options = {}) {
             target.object.position.copy(target.origin).add(viewportDelta);
         });
         syncWalkProfileSegmentsFromPoints();
+        if (gesture.kind === 'extrude') {
+            syncProfileSegmentObject(
+                gesture.previewSegment, gesture.anchorObject.position, gesture.previewPoint.position);
+        }
         selectionOverlay.position.copy(next);
         const runtimeOrigin = Contract.thestraPositionToRuntime(gesture.origin.toArray());
         const runtimeNext = Contract.thestraPositionToRuntime(next.toArray());
@@ -1821,6 +1908,7 @@ export function createThreeEditorViewport(container, options = {}) {
         setControlsEnabled(true);
         if (!commit) {
             gesture.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(gesture);
             setSelection(gesture.semantic);
             options.spatialInteraction?.cancel?.();
             return true;
@@ -1829,16 +1917,19 @@ export function createThreeEditorViewport(container, options = {}) {
         const deltaY = runtime[1] - gesture.before.Y;
         const deltaZ = runtime[2] - gesture.before.Z;
         const pointIndices = gesture.targets.map(target => target.semantic.index);
-        const result = pointIndices.length > 1
-            ? options.onMoveGroundProfilePoints?.(pointIndices, deltaY, deltaZ)
-            : options.onMoveGroundProfilePoint?.(gesture.semantic.index, runtime[1], runtime[2]);
+        const result = gesture.kind === 'extrude'
+            ? options.onExtrudeGroundProfileEndpoint?.(
+                gesture.endpointIndex, runtime[1], runtime[2])
+            : pointIndices.length > 1
+                ? options.onMoveGroundProfilePoints?.(pointIndices, deltaY, deltaZ)
+                : options.onMoveGroundProfilePoint?.(gesture.semantic.index, runtime[1], runtime[2]);
         if (result?.ok) {
-            const before = gesture.targets.length > 1
+            const before = gesture.targets.length > 1 && gesture.kind !== 'extrude'
                 ? { points: gesture.targets.map(target => ({
                     index: target.semantic.index, Y: target.before.Y, Z: target.before.Z
                 })) }
                 : gesture.before;
-            const after = gesture.targets.length > 1
+            const after = gesture.targets.length > 1 && gesture.kind !== 'extrude'
                 ? { points: gesture.targets.map(target => ({
                     index: target.semantic.index,
                     Y: target.before.Y + deltaY,
@@ -1846,14 +1937,18 @@ export function createThreeEditorViewport(container, options = {}) {
                 })) }
                 : { Y: runtime[1], Z: runtime[2] };
             const transaction = result.changed
-                ? SpatialInteraction.createTransaction('move', gesture.semantic, before, after)
+                ? SpatialInteraction.createTransaction(
+                    gesture.kind === 'extrude' ? 'extrude' : 'move',
+                    gesture.semantic, before, after)
                 : null;
             options.spatialInteraction?.confirm?.();
             if (transaction) options.onSpatialTransaction?.(transaction);
+            clearModalExtrudePreview(gesture);
             rebuildWalkProfile();
             emitSelection(result.selection || gesture.semantic);
         } else {
             gesture.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(gesture);
             rebuildWalkProfile();
             setSelection(gesture.semantic);
             options.spatialInteraction?.cancel?.();
@@ -2081,6 +2176,7 @@ export function createThreeEditorViewport(container, options = {}) {
             && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
             ? selection : null,
         refreshWalkProfile: rebuildWalkProfile,
+        beginWalkProfileExtrude: beginModalProfileExtrude,
         markCellsProvisional,
         setMode,
         transitionToMode,

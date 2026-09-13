@@ -90,6 +90,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const base = createBaseViewport(container, {
         ...options,
+        spatialInteraction,
         onSelection: emitSelection,
         getOpticalNavigation: () => opticalSlot.current?.active() ? opticalSlot.current : null
     });
@@ -237,6 +238,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const canvas = container.querySelector('canvas');
     const compositionAuthoring = createCompositionViewport(container, {
         ...options,
+        spatialInteraction,
         onSelection(selection) { base.setSelection(selection); emitSelection(selection); }
     });
     opticalSlot.current = {

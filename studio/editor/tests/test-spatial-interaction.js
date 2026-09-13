@@ -72,6 +72,8 @@ test('spatial rejection reasons are author-facing instead of raw command codes',
     assert.match(Spatial.reasonMessage('profile-order'), /Cannot move/i);
     assert.match(Spatial.reasonMessage('profile-endpoint'), /cannot be deleted/i);
     assert.match(Spatial.reasonMessage('profile-fixed-depth'), /authored Y or Z/i);
+    assert.match(Spatial.reasonMessage('profile-endpoint-required'), /endpoint/i);
+    assert.match(Spatial.reasonMessage('invalid-subdivision-count'), /1 to 64/i);
     assert.equal(Spatial.reasonMessage('future-reason'), 'future reason');
 });
 

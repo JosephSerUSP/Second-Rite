@@ -403,7 +403,10 @@ export function createCompositionViewport(container, options) {
         const object = profileObject || record?.group || null;
         const profilePoint = !!(profileObject && walkProfileSelection?.kind === 'walk-profile-point');
         overlay.visible = !!object;
-        gizmo.enabled = !!object && (!profileObject || profilePoint);
+        const selectedProfilePoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+            .filter(item => item?.kind === 'walk-profile-point').length;
+        gizmo.enabled = !!object && (!profileObject || profilePoint)
+            && !(profilePoint && selectedProfilePoints > 1);
         gizmo.showX = !!object;
         gizmo.showY = profilePoint;
         gizmo.showZ = false;

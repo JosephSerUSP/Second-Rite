@@ -106,6 +106,43 @@
           "cmd": "CONDITIONAL_BRANCH"
         }
       ]
+    },
+    {
+      "id": 4,
+      "instanceId": "event:stratum3-descent-stairs",
+      "name": "Stairs Down to Stratum III",
+      "label": "Stairs Down to Stratum III",
+      "x": 8,
+      "y": 14,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Abaixo do santuário, uma fenda fria revela degraus de concreto modernos e pastilhas azuis com o símbolo de uma linha férrea subterrânea. Descer ao Terceiro Estrato?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Descer ao Metrô",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 32,
+                  "x": 3,
+                  "y": 3,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar no Santuário"
+            }
+          ]
+        }
+      ]
     }
   ],
   "encounters": [

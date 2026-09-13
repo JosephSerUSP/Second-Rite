@@ -1,0 +1,1006 @@
+{
+  "id": 33,
+  "name": "Stratum III - Linha 2: Verde",
+  "title": "Stratum III - Linha 2: Verde",
+  "intro": "O granito polido e as placas verdes da Avenida Paulista ecoam vibrações da superfície distante.",
+  "depth": 8,
+  "safe": true,
+  "generation": "Fixed",
+  "tileset": "metro_station_l2",
+  "music": "dungeon1",
+  "layout": [
+    "################################",
+    "################################",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "##............................##",
+    "####........................####",
+    "................................",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################",
+    "################################"
+  ],
+  "spawn": {
+    "x": 3,
+    "y": 2,
+    "dir": "S"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Baldeação Paraíso -> Linha 1 (Azul)",
+      "x": 3,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/map_door_001.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Subir as escadas rolantes e retornar à Linha 1-Azul (Estação Paraíso)?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ir para Linha 1 (Azul)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 32,
+                  "x": 19,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Permanecer na Linha 2"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 2,
+      "name": "Totem Paraíso",
+      "x": 5,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO PARAÍSO - LINHA 2-VERDE]\nConexão com a Linha 1-Azul.\nSentido Vila Madalena: Próxima parada Brigadeiro."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 3,
+      "name": "Brigadeiro Dripping Bucket & Chest",
+      "x": 7,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "commands": [
+        {
+          "cmd": "GAIN_GOLD",
+          "amount": 300
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Você encontrou 300 ouros e placas de cobre na caixa de ferramentas!"
+        },
+        {
+          "cmd": "ERASE_EVENT"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 4,
+      "name": "Totem Brigadeiro",
+      "x": 9,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO BRIGADEIRO - LINHA 2-VERDE]\nPróxima parada: Estação Trianon-MASP."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 5,
+      "name": "Trianon Mimic Art Showcase",
+      "x": 15,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Um nicho de concreto expõe uma escultura cúbica de ferro... Ela se mexe!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "sentinel_talos",
+          "onVictory": [
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": 1200
+            },
+            {
+              "cmd": "TEXT",
+              "text": "O sentinela tombou, revelando 1.200 ouros!"
+            }
+          ]
+        },
+        {
+          "cmd": "ERASE_EVENT"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 6,
+      "name": "Totem Trianon",
+      "x": 13,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO TRIANON-MASP - LINHA 2-VERDE]\nAcesso ao Museu de Arte de São Paulo e ao Parque Trianon."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 7,
+      "name": "Túnel da Paulista -> Linha 4 (Amarela)",
+      "x": 19,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[TÚNEL DA PAULISTA]\nUm corredor ladrilhado com esteiras rolantes leva à estação Paulista da Linha 4-Amarela. Atravessar?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ir para Linha 4 (Amarela)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 35,
+                  "x": 3,
+                  "y": 2,
+                  "dir": "S"
+                }
+              ]
+            },
+            {
+              "label": "Ficar na Linha 2"
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 8,
+      "name": "Totem Consolação",
+      "x": 17,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO CONSOLAÇÃO - LINHA 2-VERDE]\nTransferência para a Linha 4-Amarela pelo Túnel da Paulista."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 9,
+      "name": "Clínicas Medical Station",
+      "x": 23,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Um armário de primeiros socorros intacto emite um aroma de antisséptico."
+        },
+        {
+          "cmd": "RECOVER_PARTY"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Os ferimentos do grupo foram tratados e a energia restaurada!"
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 10,
+      "name": "Chácara Klabin Escalator Shaft -> Linha 5",
+      "x": 27,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_shutter.png",
+      "pages": [
+        {
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "[ACESSO LINHA 5 - LILÁS]\nUm bloqueio elétrico trava o poço das escadas rolantes profundas. É necessária a Chave de Manobra (encontrada no Pátio do Brás na Linha 3) para desarmar a trava."
+            }
+          ]
+        },
+        {
+          "condition": "flag:metro_track_key",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Você possui a Chave de Manobra! Deseja inseri-la no cilindro mestre?"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Girar a Chave de Manobra",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "metro_klabin_unlocked",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "A trava se recolhe com um estrondo! O caminho para as profundezas da Linha 5-Lilás está aberto!"
+                    }
+                  ]
+                },
+                {
+                  "label": "Ainda não"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "flag:metro_klabin_unlocked",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Descer o poço profundo em direção à Linha 5-Lilás?"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Descer para Linha 5 (Lilás)",
+                  "commands": [
+                    {
+                      "cmd": "LOAD_MAP",
+                      "mapId": 36,
+                      "x": 3,
+                      "y": 2,
+                      "dir": "S"
+                    }
+                  ]
+                },
+                {
+                  "label": "Ficar na Linha 2"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 11,
+      "name": "Totem Chácara Klabin",
+      "x": 25,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO CHÁCARA KLABIN - LINHA 2-VERDE]\nIntercâmbio para a Linha 5-Lilás (requer Chave de Manobra)."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 12,
+      "name": "Totem Clínicas",
+      "x": 21,
+      "y": 1,
+      "trigger": "bump",
+      "sprite": "assets/sprites/metro_totem.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[ESTAÇÃO CLÍNICAS - LINHA 2-VERDE]\nPosto avançado de pronto socorro e ambulatório subterrâneo."
+        }
+      ],
+      "wallEvent": true
+    },
+    {
+      "id": 300,
+      "name": "Trem Stratum III - Linha 2: Verde",
+      "x": 15,
+      "y": 9,
+      "model": "assets/models/metro/metro_wagon_l2.obj",
+      "mover": {
+        "type": "path",
+        "speed": 3.5,
+        "mode": "ping_pong",
+        "carryPlayer": true,
+        "initialWaypoint": 2,
+        "sway": {
+          "pitch": 0.006,
+          "roll": 0.016,
+          "frequency": 12
+        },
+        "doorAnimation": {
+          "openModel": "assets/models/metro/metro_wagon_l2.obj",
+          "halfModel": "assets/models/metro/metro_wagon_half_l2.obj",
+          "closedModel": "assets/models/metro/metro_wagon_closed_l2.obj",
+          "duration": 0.6
+        },
+        "consist": [
+          {
+            "offset": -3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_rear_l2.obj",
+            "boarding": [
+              {
+                "dx": 0,
+                "dy": 0
+              }
+            ],
+            "stateModels": {
+              "open": "assets/models/metro/metro_wagon_rear_l2.obj",
+              "half": "assets/models/metro/metro_wagon_rear_half_l2.obj",
+              "closed": "assets/models/metro/metro_wagon_rear_closed_l2.obj"
+            }
+          },
+          {
+            "offset": 0,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_l2.obj",
+            "boarding": [
+              {
+                "dx": 0,
+                "dy": 0
+              }
+            ],
+            "stateModels": {
+              "open": "assets/models/metro/metro_wagon_l2.obj",
+              "half": "assets/models/metro/metro_wagon_half_l2.obj",
+              "closed": "assets/models/metro/metro_wagon_closed_l2.obj"
+            }
+          },
+          {
+            "offset": 3,
+            "doors": true,
+            "model": "assets/models/metro/metro_wagon_lead_l2.obj",
+            "boarding": [
+              {
+                "dx": 0,
+                "dy": 0
+              }
+            ],
+            "stateModels": {
+              "open": "assets/models/metro/metro_wagon_lead_l2.obj",
+              "half": "assets/models/metro/metro_wagon_lead_half_l2.obj",
+              "closed": "assets/models/metro/metro_wagon_lead_closed_l2.obj"
+            }
+          }
+        ],
+        "waypoints": [
+          {
+            "x": 1,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Clínicas"
+          },
+          {
+            "x": 15,
+            "y": 9,
+            "dwell": 14,
+            "dockDir": "N",
+            "name": "Estação Consolação"
+          },
+          {
+            "x": 30,
+            "y": 9,
+            "dwell": 3,
+            "name": "Túnel Chácara Klabin"
+          }
+        ],
+        "barrierMaterials": [
+          "metro_rails",
+          "metro_rails_ns"
+        ],
+        "footprint": {
+          "minX": -1,
+          "maxX": 1,
+          "minY": 0,
+          "maxY": 0
+        }
+      }
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "materials": [
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "metro_column",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "metro_tactile_edge",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails",
+      "metro_rails"
+    ],
+    [
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall",
+      "metro_tunnel_wall_warning",
+      "metro_tunnel_wall"
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  ]
+}

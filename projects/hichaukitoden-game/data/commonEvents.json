@@ -2489,5 +2489,382 @@
         "cmd": "CONDITIONAL_BRANCH"
       }
     ]
+  },
+  "100": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: Tiradentes -> Luz",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 14,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "101": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: Luz -> São Bento",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 24,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "102": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: São Bento -> Sé",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 24,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "103": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: Sé -> Liberdade",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 14,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "104": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: Liberdade -> Paraíso",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 4,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "105": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul: Paraíso -> Santa Cruz",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 4,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "106": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 1 - Azul (Loop): Santa Cruz -> Tiradentes",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 32,
+        "x": 4,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "110": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde: Paraíso -> Brigadeiro",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 11,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "111": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde: Brigadeiro -> Trianon-MASP",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 21,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "112": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde: Trianon-MASP -> Consolação",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 28,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "113": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde: Consolação -> Clínicas",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 5,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "114": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde: Clínicas -> Chácara Klabin",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 5,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "115": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 2 - Verde (Loop): Chácara Klabin -> Paraíso",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 33,
+        "x": 4,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "120": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha: Sé -> Anhangabaú",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 14,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "121": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha: Anhangabaú -> República",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 24,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "122": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha: República -> Santa Cecília",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 28,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "123": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha: Santa Cecília -> Bresser-Mooca",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 14,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "124": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha: Bresser-Mooca -> Pátio do Brás",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 5,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "125": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 3 - Vermelha (Loop): Pátio do Brás -> Sé",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 34,
+        "x": 4,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "130": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 4 - Amarela: Paulista -> República",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 35,
+        "x": 14,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "131": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 4 - Amarela: República -> Luz",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 35,
+        "x": 24,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "132": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 4 - Amarela: Luz -> Faria Lima",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 35,
+        "x": 5,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "133": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 4 - Amarela: Faria Lima -> Pinheiros",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 35,
+        "x": 14,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "134": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 4 - Amarela (Loop): Pinheiros -> Paulista",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 35,
+        "x": 4,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "140": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 5 - Lilás: Chácara Klabin -> Hospital São Paulo",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 36,
+        "x": 11,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "141": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 5 - Lilás: Hospital São Paulo -> Eucaliptos",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 36,
+        "x": 21,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
+  },
+  "142": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 5 - Lilás: Eucaliptos -> Moema",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 36,
+        "x": 5,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "143": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 5 - Lilás: Moema -> Caverna do Tatuzão",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 36,
+        "x": 14,
+        "y": 5,
+        "dir": "S"
+      }
+    ]
+  },
+  "144": {
+    "name": "Metrô SP",
+    "label": "Trem Linha 5 - Lilás (Loop): Caverna do Tatuzão -> Chácara Klabin",
+    "commands": [
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 36,
+        "x": 4,
+        "y": 3,
+        "dir": "S"
+      }
+    ]
   }
 }

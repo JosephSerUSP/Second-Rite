@@ -192,6 +192,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
+    assert.match(studioSource, /thestra-spatial-interaction-changed/,
+        'profile operator availability must resync when semantic selection changes');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

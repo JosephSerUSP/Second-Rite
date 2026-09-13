@@ -445,6 +445,11 @@ export function createThreeEditorViewport(container, options = {}) {
             if (result?.selection) api.setSelection(result.selection);
             return result;
         },
+        beginSelectedGroundProfileExtrude() {
+            const editor = compositionAuthoring.isVisible?.() ? compositionAuthoring : base;
+            return editor.beginWalkProfileExtrude?.()
+                || { ok: false, reason: 'no-profile-point-selected' };
+        },
         moveGroundProfilePoints(pointIndices, deltaY, deltaZ) {
             const result = options.onMoveGroundProfilePoints?.(pointIndices, deltaY, deltaZ);
             if (result?.changed) {
@@ -571,6 +576,11 @@ export function createThreeEditorViewport(container, options = {}) {
         if (event.code === 'KeyA') {
             event.preventDefault();
             api.selectAllWalkProfileComponents();
+            return;
+        }
+        if (event.code === 'KeyE' && status.componentMode === 'point') {
+            event.preventDefault();
+            rejectProfileAction(api.beginSelectedGroundProfileExtrude());
             return;
         }
         if ((event.code === 'KeyX' || event.code === 'Delete')

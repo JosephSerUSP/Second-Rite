@@ -955,13 +955,32 @@ export function createCompositionViewport(container, options) {
             const object = walkProfileObjects.get(walkProfileSelection.key);
             const source = model.map.source.traversal.lane.groundProfile?.[walkProfileSelection.index];
             if (object && source) {
+                const selectedPoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+                    .filter(item => item?.kind === 'walk-profile-point');
+                const effective = selectedPoints.some(item => item.key === walkProfileSelection.key)
+                    ? selectedPoints : [walkProfileSelection];
+                const profile = model.map.source.traversal.lane.groundProfile;
+                const targets = effective.map(selection => {
+                    const targetObject = walkProfileObjects.get(selection.key);
+                    const targetSource = profile?.[selection.index];
+                    return targetObject && targetSource ? {
+                        selection,
+                        object: targetObject,
+                        origin: targetObject.position.clone(),
+                        source: { y: Number(targetSource.y), z: Number(targetSource.z) }
+                    } : null;
+                }).filter(Boolean);
                 gesture = {
                     kind: 'walk-profile-point',
                     selection: walkProfileSelection,
                     object,
                     source: { y: Number(source.y), z: Number(source.z) },
-                    origin: object.position.clone()
+                    origin: object.position.clone(),
+                    targets,
+                    deltaY: 0,
+                    deltaZ: 0
                 };
+                options.spatialInteraction?.beginMove?.();
             }
         } else {
             const record = events.get(String(selectedId));

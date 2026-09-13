@@ -323,9 +323,18 @@ export function createCompositionViewport(container, options) {
         rebuildWalkProfileControls();
         rebuildPlayerPreview();
         rebuildEvents();
-        const active = options.spatialInteraction?.snapshot?.().selection || result.selection || move.selection;
-        setSemanticSelection(active);
-        options.onSelection?.(active);
+        if (move.kind === 'extrude') {
+            const active = result.selection || move.selection;
+            setSemanticSelection(active);
+            options.onSelection?.(active);
+        } else if (move.targets.length > 1) {
+            const active = options.spatialInteraction?.snapshot?.().selection || move.selection;
+            setSemanticSelection(active);
+        } else {
+            const active = result.selection || move.selection;
+            setSemanticSelection(active);
+            options.onSelection?.(active);
+        }
         return true;
     }
 

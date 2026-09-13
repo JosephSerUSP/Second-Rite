@@ -67,6 +67,8 @@
     const REASON_MESSAGES = Object.freeze({
         'profile-order': 'Cannot move this profile point past an adjacent profile point.',
         'profile-fixed-depth': 'Walk Profile depth X is fixed; move along authored Y or Z.',
+        'profile-view-underdetermined': 'This view sees the Walk Profile edge-on; constrain to Y or Z, or orbit to reveal the profile plane.',
+        'profile-axis-edge-on': 'That axis points into the current view; choose another axis or orbit the viewport.',
         'profile-endpoint': 'Walk Profile endpoints cannot be deleted.',
         'no-profile-segment-selected': 'Select a Walk Profile segment first.',
         'no-profile-point-selected': 'Select a Walk Profile point first.',
@@ -80,6 +82,35 @@
     function reasonMessage(reason) {
         if (!reason) return 'The spatial operation could not be completed.';
         return REASON_MESSAGES[reason] || String(reason).replace(/-/g, ' ');
+    }
+
+    function projectedAxisDelta(startPointer, currentPointer, axisPixels, minimumLength = 0.5) {
+        if (!startPointer || !currentPointer || !axisPixels) return null;
+        const ax = Number(axisPixels.x), ay = Number(axisPixels.y);
+        const lengthSq = ax * ax + ay * ay;
+        if (!Number.isFinite(lengthSq) || lengthSq < minimumLength * minimumLength) return null;
+        const dx = Number(currentPointer.x) - Number(startPointer.x);
+        const dy = Number(currentPointer.y) - Number(startPointer.y);
+        if (![dx, dy].every(Number.isFinite)) return null;
+        return (dx * ax + dy * ay) / lengthSq;
+    }
+
+    function cloneRecord(value) {
+        if (value == null || typeof value !== 'object') return value;
+        if (Array.isArray(value)) return value.map(cloneRecord);
+        const copy = {};
+        Object.keys(value).forEach(key => { copy[key] = cloneRecord(value[key]); });
+        return copy;
+    }
+
+    function createTransaction(kind, selection, before, after) {
+        if (!kind || !selection || before == null || after == null) return null;
+        return Object.freeze({
+            kind: String(kind),
+            target: cloneRecord(selection),
+            before: cloneRecord(before),
+            after: cloneRecord(after)
+        });
     }
 
     function cloneState(state) {
@@ -177,6 +208,8 @@
         viewportAxisColorSources,
         transformShortcut,
         reasonMessage,
+        projectedAxisDelta,
+        createTransaction,
         createState
     };
 }));

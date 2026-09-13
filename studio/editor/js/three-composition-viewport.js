@@ -80,7 +80,7 @@ export function createCompositionViewport(container, options) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
-    let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null;
+    let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
@@ -99,6 +99,31 @@ export function createCompositionViewport(container, options) {
         if (!walkProfileEditing) return null;
         updatePointer(event);
         return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
+    }
+
+    function refreshWalkProfileVisualState() {
+        const selectedKey = walkProfileSelection?.key || null;
+        const hoverKey = walkProfileHover?.key || null;
+        for (const [key, object] of walkProfileObjects.entries()) {
+            const semantic = object.userData.thestraSelection;
+            const selected = key === selectedKey;
+            const hovered = key === hoverKey && !selected;
+            if (semantic?.kind === 'walk-profile-point') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
+                object.scale.setScalar(selected ? 1.3 : hovered ? 1.15 : 1);
+            } else if (semantic?.kind === 'walk-profile-segment') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
+                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : 0.5;
+            }
+        }
+    }
+
+    function setWalkProfileHover(next) {
+        const hover = next || null;
+        if (walkProfileHover?.key === hover?.key) return;
+        walkProfileHover = hover;
+        options.spatialInteraction?.setHover?.(hover);
+        refreshWalkProfileVisualState();
     }
     const disposeNavigation = installNavigation(renderer.domElement, [controls], {
         planar: true, canPan: event => !gizmo.axis && !gizmo.dragging
@@ -134,6 +159,7 @@ export function createCompositionViewport(container, options) {
             walkProfileSelection = null;
             selectedId = selection?.kind === 'event' ? selection.id : null;
         }
+        refreshWalkProfileVisualState();
         refreshOverlay();
     }
     function select(id) {
@@ -244,6 +270,7 @@ export function createCompositionViewport(container, options) {
             walkProfileObjects.set(semantic.key, point);
         });
         walkProfileControls.visible = walkProfileEditing;
+        refreshWalkProfileVisualState();
         refreshOverlay();
     }
 
@@ -252,7 +279,10 @@ export function createCompositionViewport(container, options) {
         walkProfileControls.visible = walkProfileEditing;
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
         playerPreview.visible = walkProfileEditing;
-        if (!walkProfileEditing) walkProfileSelection = null;
+        if (!walkProfileEditing) {
+            walkProfileSelection = null;
+            setWalkProfileHover(null);
+        }
         rebuildPlayerPreview();
         refreshOverlay();
     }
@@ -563,6 +593,13 @@ export function createCompositionViewport(container, options) {
         layer.style.display = 'block'; visible = true; refreshOverlay();
     }
     function hide() { visible = false; layer.style.display = 'none'; }
+    renderer.domElement.addEventListener('pointermove', event => {
+        if (!walkProfileEditing || gizmo.dragging || gizmo.axis) return;
+        setWalkProfileHover(pickWalkProfile(event));
+    });
+    renderer.domElement.addEventListener('pointerleave', () => {
+        if (walkProfileEditing) setWalkProfileHover(null);
+    });
     renderer.domElement.addEventListener('pointerdown', event => {
         renderer.domElement.focus({ preventScroll: true });
         if (event.button !== 0 || gizmo.axis || gizmo.dragging) return;

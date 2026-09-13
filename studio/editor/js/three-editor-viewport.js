@@ -364,17 +364,41 @@ export function createThreeEditorViewport(container, options = {}) {
             const traversal = currentSceneModel?.map?.source?.traversal;
             const lane = traversal?.provider === 'bounded_lane' ? traversal.lane : null;
             const profile = lane?.groundProfile;
+            const selection = api.getWalkProfileSelection();
+            const selections = api.getWalkProfileSelections();
+            const activePoint = selection?.kind === 'walk-profile-point'
+                && Array.isArray(profile) && profile[selection.index]
+                ? {
+                    index: selection.index,
+                    y: Number(profile[selection.index].y),
+                    z: Number(profile[selection.index].z)
+                } : null;
             return {
                 available: !!lane,
                 authored: Array.isArray(profile) && profile.length >= 2,
                 pointCount: Array.isArray(profile) ? profile.length : 0,
                 editing: api.getWalkProfileEditing(),
                 componentMode: api.getWalkProfileComponentMode(),
-                selection: api.getWalkProfileSelection()
+                selection,
+                selectionCount: selections.length,
+                activePoint
             };
         },
         createGroundProfile() {
             const result = options.onCreateGroundProfile?.();
+            if (result?.changed) {
+                base.refreshWalkProfile?.();
+                compositionAuthoring.refreshWalkProfile?.();
+            }
+            if (result?.selection) api.setSelection(result.selection);
+            return result;
+        },
+        setSelectedGroundProfilePoint(y, z) {
+            const selection = api.getWalkProfileSelection();
+            if (!selection || selection.kind !== 'walk-profile-point') {
+                return { ok: false, reason: 'no-profile-point-selected' };
+            }
+            const result = options.onMoveGroundProfilePoint?.(selection.index, Number(y), Number(z));
             if (result?.changed) {
                 base.refreshWalkProfile?.();
                 compositionAuthoring.refreshWalkProfile?.();

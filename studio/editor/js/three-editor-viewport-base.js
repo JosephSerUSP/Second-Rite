@@ -1148,6 +1148,26 @@ export function createThreeEditorViewport(container, options = {}) {
         return mesh;
     }
 
+    function syncWalkProfileSegmentsFromPoints() {
+        const lane = walkProfileLane();
+        const profile = lane?.groundProfile;
+        if (!Array.isArray(profile) || profile.length < 2) return;
+        for (let index = 0; index < profile.length - 1; index++) {
+            const segment = walkProfileObjects.get(`walk-profile-segment:${index}`);
+            const left = walkProfileObjects.get(`walk-profile-point:${index}`);
+            const right = walkProfileObjects.get(`walk-profile-point:${index + 1}`);
+            if (!segment || !left || !right) continue;
+            const delta = right.position.clone().sub(left.position);
+            const length = Math.max(delta.length(), 0.001);
+            segment.geometry?.dispose();
+            segment.geometry = new THREE.CylinderGeometry(0.035, 0.035, length, 8);
+            segment.position.copy(left.position).add(right.position).multiplyScalar(0.5);
+            if (delta.lengthSq() > 1e-12) {
+                segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+            }
+        }
+    }
+
     function rebuildWalkProfile() {
         if (moveGizmo.object && walkProfileContent.getObjectById(moveGizmo.object.id)) moveGizmo.detach();
         clearGroup(walkProfileContent);
@@ -1783,6 +1803,7 @@ export function createThreeEditorViewport(container, options = {}) {
         gesture.targets.forEach(target => {
             target.object.position.copy(target.origin).add(viewportDelta);
         });
+        syncWalkProfileSegmentsFromPoints();
         selectionOverlay.position.copy(next);
         const runtimeOrigin = Contract.thestraPositionToRuntime(gesture.origin.toArray());
         const runtimeNext = Contract.thestraPositionToRuntime(next.toArray());
@@ -1928,7 +1949,10 @@ export function createThreeEditorViewport(container, options = {}) {
 
     moveGizmo.addEventListener('objectChange', () => {
         if (!moveGesture || !moveGizmo.object) return;
-        if (moveGesture.semantic.kind === 'walk-profile-point') return;
+        if (moveGesture.semantic.kind === 'walk-profile-point') {
+            syncWalkProfileSegmentsFromPoints();
+            return;
+        }
         if (moveGizmo.object.userData.worldPosition) return;
         moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
         moveGizmo.object.position.y = moveGesture.origin.y;

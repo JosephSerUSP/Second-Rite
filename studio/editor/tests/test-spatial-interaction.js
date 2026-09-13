@@ -34,6 +34,10 @@ test('shared spatial state propagates selection and modal transform state', () =
     state.reject('profile-order');
     assert.match(state.snapshot().feedback, /adjacent profile point/i);
 
+    state.constrain('Y');
+    assert.equal(state.snapshot().feedback, null,
+        'a valid constraint clears stale rejection feedback');
+
     state.cancel();
     assert.equal(state.snapshot().operation, null);
     assert.equal(state.snapshot().constraint, null);
@@ -67,5 +71,6 @@ test('Blender-style transform shortcuts are viewport-scoped and form-safe', () =
 test('spatial rejection reasons are author-facing instead of raw command codes', () => {
     assert.match(Spatial.reasonMessage('profile-order'), /Cannot move/i);
     assert.match(Spatial.reasonMessage('profile-endpoint'), /cannot be deleted/i);
+    assert.match(Spatial.reasonMessage('profile-fixed-depth'), /authored Y or Z/i);
     assert.equal(Spatial.reasonMessage('future-reason'), 'future reason');
 });

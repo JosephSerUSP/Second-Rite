@@ -468,6 +468,34 @@
                         'lane-profile'
                     );
                 },
+                onMoveGroundProfilePoints(pointIndices, deltaY, deltaZ) {
+                    return handleMutationResult(
+                        host.moveGroundProfilePoints
+                            ? host.moveGroundProfilePoints(pointIndices, deltaY, deltaZ) : null,
+                        'lane-profile'
+                    );
+                },
+                onExtrudeGroundProfileEndpoint(pointIndex, y, z) {
+                    return handleMutationResult(
+                        host.extrudeGroundProfileEndpoint
+                            ? host.extrudeGroundProfileEndpoint(pointIndex, y, z) : null,
+                        'lane-profile'
+                    );
+                },
+                onSubdivideGroundProfileSegments(segmentIndices, cuts) {
+                    return handleMutationResult(
+                        host.subdivideGroundProfileSegments
+                            ? host.subdivideGroundProfileSegments(segmentIndices, cuts) : null,
+                        'lane-profile'
+                    );
+                },
+                onDeleteGroundProfilePoints(pointIndices) {
+                    return handleMutationResult(
+                        host.deleteGroundProfilePoints
+                            ? host.deleteGroundProfilePoints(pointIndices) : null,
+                        'lane-profile'
+                    );
+                },
                 canMoveLight(lightSelection, cell) {
                     return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
                 },

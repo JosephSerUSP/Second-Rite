@@ -207,6 +207,18 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'free 3D profile editing exposes hover before selection');
     assert.match(compositionSource, /setWalkProfileHover/,
         'plate profile editing exposes the same hover-state grammar');
+    assert.match(viewportSource, /event\.code === 'Tab'/,
+        'Walk Profile editing must be reachable through Blender-style Tab');
+    assert.match(viewportSource, /event\.code === 'Digit1'/,
+        'point component mode must use Blender-style 1');
+    assert.match(viewportSource, /event\.code === 'Digit2'/,
+        'segment component mode must use Blender-style 2');
+    assert.match(viewportSource, /event\.code === 'KeyX'/,
+        'point dissolve must be available through Blender-style X/Delete');
+    assert.match(viewportBaseSource, /walkProfileComponentMode/,
+        'free 3D picking must respect explicit Walk Profile component modes');
+    assert.match(compositionSource, /walkProfileComponentMode/,
+        'plate picking must respect the same Walk Profile component modes');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

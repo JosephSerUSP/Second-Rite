@@ -1,0 +1,234 @@
+{
+  "id": "b003_bedroom",
+  "terminal": {
+    "none": "conversation specimen, not a scored loop"
+  },
+  "name": "B003 - Rearranging a Bedroom",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Rearranging a Bedroom" }
+      ]
+    },
+    {
+      "id": "room_state",
+      "rect": { "x": 1, "y": 4, "w": 30, "h": 8 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "Desk: {v.desk_item}" },
+        { "type": "text", "y": 2, "text": "Bed: {v.bed_item}" },
+        { "type": "text", "y": 4, "text": "Shelf: {v.shelf_item}" }
+      ]
+    },
+    {
+      "id": "feedback_box",
+      "rect": { "x": 1, "y": 12, "w": 30, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.feedback_1}" },
+        { "type": "text", "y": 1, "text": "{v.feedback_2}" }
+      ]
+    },
+    {
+      "id": "action_menu",
+      "rect": { "x": 1, "y": 16, "w": 30, "h": 6 },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b003.{v.menu_type}",
+          "cursor": "v.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          { "name": "desk_item", "value": "'Diary'" },
+          { "name": "bed_item", "value": "'Locket'" },
+          { "name": "shelf_item", "value": "'Pen'" },
+          { "name": "idx", "value": 1 },
+          { "name": "menu_type", "value": "'options'" },
+          { "name": "selected_item", "value": "''" },
+          { "name": "feedback_1", "value": "'The room is quiet.'" },
+          { "name": "feedback_2", "value": "''" }
+        ]
+      }
+    ],
+    "on_up": [
+      { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 4 or v.idx - 1" }
+    ],
+    "on_down": [
+      { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 4 and 1 or v.idx + 1" }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v.menu_type == 'destinations'",
+        "then": [
+          { "cmd": "SET_VAR", "name": "menu_type", "value": "'options'" },
+          { "cmd": "SET_VAR", "name": "idx", "value": 1 },
+          { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Decided not to move anything.'" },
+          { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+        ],
+        "else": [
+          { "cmd": "SCENE_EVENT", "kind": "pop" }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.menu_type == 'options'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 1",
+            "then": [
+              { "cmd": "SET_VAR", "name": "selected_item", "value": "'Diary'" },
+              { "cmd": "SET_VAR", "name": "menu_type", "value": "'destinations'" },
+              { "cmd": "SET_VAR", "name": "idx", "value": 1 },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Where should the Diary go?'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 2",
+            "then": [
+              { "cmd": "SET_VAR", "name": "selected_item", "value": "'Locket'" },
+              { "cmd": "SET_VAR", "name": "menu_type", "value": "'destinations'" },
+              { "cmd": "SET_VAR", "name": "idx", "value": 1 },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Where should the Locket go?'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 3",
+            "then": [
+              { "cmd": "SET_VAR", "name": "selected_item", "value": "'Pen'" },
+              { "cmd": "SET_VAR", "name": "menu_type", "value": "'destinations'" },
+              { "cmd": "SET_VAR", "name": "idx", "value": 1 },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Where should the Pen go?'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 4",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.desk_item == 'Diary' and v.bed_item == 'Locket' and v.shelf_item == 'Pen'",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Everything is exactly as she left it.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'It feels frozen in time.'" }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "v.desk_item == 'Pen' and v.bed_item == 'Diary'",
+                    "then": [
+                      { "cmd": "SET_VAR", "name": "feedback_1", "value": "'The pen on the desk, the diary on the bed.'" },
+                      { "cmd": "SET_VAR", "name": "feedback_2", "value": "'Ready to write at a moment\\'s notice.'" }
+                    ],
+                    "else": [
+                      { "cmd": "SET_VAR", "name": "feedback_1", "value": "'The room feels different now.'" },
+                      { "cmd": "SET_VAR", "name": "feedback_2", "value": "'Slightly less empty.'" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "v.menu_type == 'destinations'",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.idx == 1",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "temp_item", "value": "v.desk_item" },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.bed_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "bed_item", "value": "v.temp_item" } ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.shelf_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "shelf_item", "value": "v.temp_item" } ]
+                  },
+                  { "cmd": "SET_VAR", "name": "desk_item", "value": "v.selected_item" }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.idx == 2",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "temp_item", "value": "v.bed_item" },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.desk_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "desk_item", "value": "v.temp_item" } ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.shelf_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "shelf_item", "value": "v.temp_item" } ]
+                  },
+                  { "cmd": "SET_VAR", "name": "bed_item", "value": "v.selected_item" }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.idx == 3",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "temp_item", "value": "v.shelf_item" },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.desk_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "desk_item", "value": "v.temp_item" } ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "v.bed_item == v.selected_item",
+                    "then": [ { "cmd": "SET_VAR", "name": "bed_item", "value": "v.temp_item" } ]
+                  },
+                  { "cmd": "SET_VAR", "name": "shelf_item", "value": "v.selected_item" }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.idx == 4",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Decided not to move anything.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+                ],
+                "else": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Moved ' .. v.selected_item .. '.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+                ]
+              },
+              { "cmd": "SET_VAR", "name": "menu_type", "value": "'options'" },
+              { "cmd": "SET_VAR", "name": "idx", "value": 1 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

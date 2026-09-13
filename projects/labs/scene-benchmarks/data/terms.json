@@ -12,6 +12,7 @@
       "A001  Pong",
       "B002  Argument as Combat",
       "A002  Breakout",
+      "B003  Rearranging a Bedroom",
       "B005  Lockpicking",
       "B006  Dialogue Portrait Stage",
       "B010  Falling Blocks",
@@ -37,6 +38,20 @@
     "options": [
       "Ask about history.",
       "Conclude interview."
+    ]
+  },
+  "b003": {
+    "options": [
+      "Move Diary",
+      "Move Locket",
+      "Move Pen",
+      "Assess Room"
+    ],
+    "destinations": [
+      "To the Desk",
+      "To the Bed",
+      "To the Shelf",
+      "Cancel"
     ]
   }
 }

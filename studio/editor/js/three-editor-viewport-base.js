@@ -1660,18 +1660,48 @@ export function createThreeEditorViewport(container, options = {}) {
         return raycaster.ray.intersectPlane(plane, new THREE.Vector3());
     }
 
+    function worldPointToClient(world) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        const projected = world.clone().project(activeCamera());
+        return {
+            x: rect.left + (projected.x + 1) * 0.5 * rect.width,
+            y: rect.top + (1 - projected.y) * 0.5 * rect.height
+        };
+    }
+
+    function semanticAxisPixels(origin, semanticAxis) {
+        const viewportAxis = SpatialInteraction.semanticAxisToViewport(semanticAxis);
+        if (!viewportAxis) return null;
+        const end = origin.clone();
+        if (viewportAxis === 'X') end.x += 1;
+        else if (viewportAxis === 'Y') end.y += 1;
+        else if (viewportAxis === 'Z') end.z += 1;
+        const a = worldPointToClient(origin);
+        const b = worldPointToClient(end);
+        return { x: b.x - a.x, y: b.y - a.y };
+    }
+
     function beginModalProfileMove() {
         const object = selectedMovableObject();
         if (!walkProfileEditing || !object || selection?.kind !== 'walk-profile-point') return false;
         const origin = object.position.clone();
         const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), -origin.x);
-        const hit = profilePlaneIntersection(lastPointerEvent, plane);
+        const originScreen = worldPointToClient(origin);
+        const startPointer = lastPointerEvent || originScreen;
+        const hit = profilePlaneIntersection(startPointer, plane);
+        const runtimeOrigin = Contract.thestraPositionToRuntime(origin.toArray());
         modalMoveGesture = {
             semantic: selection,
             object,
             origin,
             plane,
-            grabOffset: hit ? origin.clone().sub(hit) : new THREE.Vector3()
+            startPointer,
+            planeGrabOffset: hit ? origin.clone().sub(hit) : null,
+            axisPixels: {
+                Y: semanticAxisPixels(origin, 'Y'),
+                Z: semanticAxisPixels(origin, 'Z')
+            },
+            before: { Y: runtimeOrigin[1], Z: runtimeOrigin[2] }
         };
         moveGizmo.detach();
         setControlsEnabled(false);
@@ -1682,14 +1712,26 @@ export function createThreeEditorViewport(container, options = {}) {
     function updateModalProfileMove(event) {
         const gesture = modalMoveGesture;
         if (!gesture) return false;
-        const hit = profilePlaneIntersection(event, gesture.plane);
-        if (!hit) return true;
-        const next = hit.add(gesture.grabOffset);
-        next.x = gesture.origin.x;
         const constraint = options.spatialInteraction?.snapshot?.().constraint || null;
-        // Authored Y is Three Z; authored Z/elevation is Three Y.
-        if (constraint === 'Y') next.y = gesture.origin.y;
-        else if (constraint === 'Z') next.z = gesture.origin.z;
+        let next = gesture.origin.clone();
+        if (constraint === 'Y' || constraint === 'Z') {
+            const delta = SpatialInteraction.projectedAxisDelta(
+                gesture.startPointer, pointerSnapshot(event), gesture.axisPixels[constraint]);
+            if (delta == null) {
+                options.spatialInteraction?.reject?.('profile-axis-edge-on');
+                return true;
+            }
+            if (constraint === 'Y') next.z += delta; // authored Y -> Three Z
+            else next.y += delta; // authored Z -> Three Y
+        } else {
+            const hit = profilePlaneIntersection(event, gesture.plane);
+            if (!hit || !gesture.planeGrabOffset) {
+                options.spatialInteraction?.reject?.('profile-view-underdetermined');
+                return true;
+            }
+            next = hit.add(gesture.planeGrabOffset);
+            next.x = gesture.origin.x;
+        }
         gesture.object.position.copy(next);
         selectionOverlay.position.copy(next);
         const runtimeOrigin = Contract.thestraPositionToRuntime(gesture.origin.toArray());
@@ -1717,7 +1759,12 @@ export function createThreeEditorViewport(container, options = {}) {
             ? options.onMoveGroundProfilePoint(gesture.semantic.index, runtime[1], runtime[2])
             : null;
         if (result?.ok) {
+            const after = { Y: runtime[1], Z: runtime[2] };
+            const transaction = result.changed
+                ? SpatialInteraction.createTransaction('move', gesture.semantic, gesture.before, after)
+                : null;
             options.spatialInteraction?.confirm?.();
+            if (transaction) options.onSpatialTransaction?.(transaction);
             rebuildWalkProfile();
             emitSelection(result.selection || gesture.semantic);
         } else {

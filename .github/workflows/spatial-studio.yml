@@ -11,6 +11,7 @@ on:
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
       - "studio/editor/js/spatial-interaction.js"
+      - "studio/editor/js/studio-history.js"
       - "studio/editor/js/event_presentation.js"
       - "studio/editor/js/thestra-editor-workspace.js"
       - "studio/editor/js/thestra-workspace-state.js"
@@ -21,6 +22,7 @@ on:
       - "studio/editor/js/world-presentation-studio.js"
       - "studio/editor/tests/test-world-event-authoring.js"
       - "studio/editor/tests/test-spatial-interaction.js"
+      - "studio/editor/tests/test-studio-history.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
       - "tests/test_bounded_lane.lua"
@@ -36,6 +38,7 @@ on:
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
       - "studio/editor/js/spatial-interaction.js"
+      - "studio/editor/js/studio-history.js"
       - "studio/editor/js/event_presentation.js"
       - "studio/editor/js/thestra-editor-workspace.js"
       - "studio/editor/js/thestra-workspace-state.js"
@@ -46,6 +49,7 @@ on:
       - "studio/editor/js/world-presentation-studio.js"
       - "studio/editor/tests/test-world-event-authoring.js"
       - "studio/editor/tests/test-spatial-interaction.js"
+      - "studio/editor/tests/test-studio-history.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
       - "tests/test_bounded_lane.lua"
@@ -76,6 +80,8 @@ jobs:
         run: |
           node --test studio/editor/tests/test-spatial-interaction.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test studio/editor/tests/test-studio-history.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test studio/editor/tests/test-world-event-authoring.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node studio/editor/tests/test-world-presentation.js
@@ -84,6 +90,7 @@ jobs:
         shell: pwsh
         run: |
           node --check studio/editor/js/spatial-interaction.js
+          node --check studio/editor/js/studio-history.js
           node --check studio/editor/js/three-editor-viewport-base.js
           node --check studio/editor/js/three-editor-viewport.js
           node --check studio/editor/js/three-composition-viewport.js

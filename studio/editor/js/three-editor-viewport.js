@@ -348,7 +348,6 @@ export function createThreeEditorViewport(container, options = {}) {
         setWalkProfileComponentMode(mode) {
             base.setWalkProfileComponentMode?.(mode);
             compositionAuthoring.setWalkProfileComponentMode?.(mode);
-            emitSelection(null);
         },
         getWalkProfileComponentMode() {
             return compositionAuthoring.isVisible?.()

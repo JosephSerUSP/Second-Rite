@@ -262,6 +262,50 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         }), '1', 'active-point inspector must expose authored elevation Z');
         mark(t, 'active Walk Profile point exposed precise semantic Y/Z fields');
 
+        const elevationInput = mainPage.locator('input[title="Active Walk Profile point · Elevation Z"]');
+        await elevationInput.evaluate(input => {
+            input.value = '2';
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await mainPage.waitForFunction(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile[1].z === 2);
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraStudioHistorySession.snapshot().undoCount), 1,
+        'precise profile edit must commit one Studio history entry');
+
+        await elevationInput.focus();
+        await elevationInput.press('Control+z');
+        assert.equal(await mainPage.evaluate(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile[1].z), 2,
+        'focused numeric input must retain native Ctrl-Z ownership');
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraStudioHistorySession.snapshot().undoCount), 1,
+        'input-native Ctrl-Z must not consume Studio history');
+
+        await mapCanvas.focus();
+        await mapCanvas.press('Control+z');
+        await mainPage.waitForFunction(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile[1].z === 1);
+        assert.deepEqual(await mainPage.evaluate(() =>
+            window.ThestraStudioHistorySession.snapshot()), {
+                undoCount: 0,
+                redoCount: 1,
+                undoLabel: null,
+                redoLabel: 'Edit Walk Profile Point',
+            });
+        mark(t, 'Ctrl-Z restored exact authored Walk Profile data through Studio history');
+
+        await mapCanvas.press('Control+Shift+z');
+        await mainPage.waitForFunction(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile[1].z === 2);
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraStudioHistorySession.snapshot().undoCount), 1);
+        mark(t, 'Ctrl-Shift-Z reapplied exact authored Walk Profile data');
+
+        await mapCanvas.press('Control+z');
+        await mainPage.waitForFunction(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile[1].z === 1);
+
         await mapCanvas.press('2');
         await mainPage.evaluate(() => {
             window.ThestraRuntimeCameraViewport.setSelection({

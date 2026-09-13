@@ -328,6 +328,16 @@ export function createThreeEditorViewport(container, options = {}) {
                 ? !!compositionAuthoring.getWalkProfileEditing?.()
                 : !!base.getWalkProfileEditing?.();
         },
+        setWalkProfileComponentMode(mode) {
+            base.setWalkProfileComponentMode?.(mode);
+            compositionAuthoring.setWalkProfileComponentMode?.(mode);
+            emitSelection(null);
+        },
+        getWalkProfileComponentMode() {
+            return compositionAuthoring.isVisible?.()
+                ? compositionAuthoring.getWalkProfileComponentMode?.() || 'point'
+                : base.getWalkProfileComponentMode?.() || 'point';
+        },
         getWalkProfileSelection() {
             return compositionAuthoring.isVisible?.()
                 ? compositionAuthoring.getWalkProfileSelection?.() || null
@@ -342,6 +352,7 @@ export function createThreeEditorViewport(container, options = {}) {
                 authored: Array.isArray(profile) && profile.length >= 2,
                 pointCount: Array.isArray(profile) ? profile.length : 0,
                 editing: api.getWalkProfileEditing(),
+                componentMode: api.getWalkProfileComponentMode(),
                 selection: api.getWalkProfileSelection()
             };
         },
@@ -448,11 +459,50 @@ export function createThreeEditorViewport(container, options = {}) {
             runtimeLocked = false;
             runtimeProjection = null;
             opticalSlot.current = null;
-            if (canvas) canvas.removeEventListener('keydown', suppressRuntimeNavigation, true);
+            if (canvas) {
+                canvas.removeEventListener('keydown', suppressRuntimeNavigation, true);
+                canvas.removeEventListener('keydown', onWalkProfileKeyDown);
+            }
             if (globalThis.ThestraRuntimeCameraViewport === api) delete globalThis.ThestraRuntimeCameraViewport;
             rawDispose();
         }
     });
+
+    function rejectProfileAction(result) {
+        if (result?.ok === false) spatialInteraction.reject(result.reason);
+        return result;
+    }
+
+    function onWalkProfileKeyDown(event) {
+        if (runtimeLocked || event.metaKey || event.altKey || event.ctrlKey) return;
+        const status = api.getWalkProfileStatus();
+        if (!status.available) return;
+
+        if (event.code === 'Tab') {
+            event.preventDefault();
+            api.setWalkProfileEditing(!status.editing);
+            return;
+        }
+        if (!status.editing) return;
+
+        if (event.code === 'Digit1') {
+            event.preventDefault();
+            api.setWalkProfileComponentMode('point');
+            return;
+        }
+        if (event.code === 'Digit2') {
+            event.preventDefault();
+            api.setWalkProfileComponentMode('segment');
+            return;
+        }
+        if ((event.code === 'KeyX' || event.code === 'Delete')
+                && status.componentMode === 'point') {
+            event.preventDefault();
+            rejectProfileAction(api.deleteSelectedGroundProfilePoint());
+        }
+    }
+
+    if (canvas) canvas.addEventListener('keydown', onWalkProfileKeyDown);
     globalThis.ThestraRuntimeCameraViewport = api;
     window.dispatchEvent(new CustomEvent('thestra-runtime-camera-viewport-ready'));
     return api;

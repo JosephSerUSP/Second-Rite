@@ -242,6 +242,26 @@ export function createCompositionViewport(container, options) {
         return mesh;
     }
 
+    function syncWalkProfileSegmentsFromPoints() {
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        if (!Array.isArray(profile) || profile.length < 2) return;
+        for (let index = 0; index < profile.length - 1; index++) {
+            const segment = walkProfileObjects.get(`walk-profile-segment:${index}`);
+            const left = walkProfileObjects.get(`walk-profile-point:${index}`);
+            const right = walkProfileObjects.get(`walk-profile-point:${index + 1}`);
+            if (!segment || !left || !right) continue;
+            const start = { x: left.position.x, y: -left.position.y };
+            const end = { x: right.position.x, y: -right.position.y };
+            const dx = end.x - start.x, dy = end.y - start.y;
+            const length = Math.max(Math.hypot(dx, dy), 1);
+            segment.geometry?.dispose();
+            segment.geometry = new THREE.PlaneGeometry(length, 7);
+            segment.position.set((start.x + end.x) * 0.5, -(start.y + end.y) * 0.5, 3.6);
+            segment.rotation.z = -Math.atan2(dy, dx);
+        }
+    }
+
     function rebuildWalkProfileControls() {
         clearWalkProfileControls();
         if (!plate || !model) return;
@@ -673,7 +693,12 @@ export function createCompositionViewport(container, options) {
         }
         controls.enabled = false;
     });
-    gizmo.addEventListener('objectChange', refreshOverlay);
+    gizmo.addEventListener('objectChange', () => {
+        if (walkProfileEditing && walkProfileSelection?.kind === 'walk-profile-point') {
+            syncWalkProfileSegmentsFromPoints();
+        }
+        refreshOverlay();
+    });
     gizmo.addEventListener('mouseUp', () => {
         controls.enabled = true;
         if (!gesture) return;

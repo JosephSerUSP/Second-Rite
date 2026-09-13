@@ -194,6 +194,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'flat lanes require an explicit author action before a groundProfile exists');
     assert.match(studioSource, /thestra-spatial-interaction-changed/,
         'profile operator availability must resync when semantic selection changes');
+    assert.match(viewportSource, /handleSpatialTransformShortcut/,
+        'the 3D viewport must consume the shared modal spatial transform grammar');
+    assert.match(viewportSource, /beginModalProfileMove/,
+        'Walk Profile points must have a real keyboard-initiated modal move path');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

@@ -1,0 +1,97 @@
+{
+  "id": "b003_bedroom",
+  "terminal": {
+    "none": "benchmark specimen"
+  },
+  "name": "B003 — Rearranging a Bedroom",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "heading",
+      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Rearranging the Bedroom" }
+      ]
+    },
+    {
+      "id": "objects",
+      "rect": { "x": 1, "y": 4, "w": 10, "h": 8 },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        { "type": "list", "listId": "term:b003.objects", "cursor": "v.obj_idx" }
+      ]
+    },
+    {
+      "id": "locations",
+      "rect": { "x": 11, "y": 4, "w": 20, "h": 8 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "Urn: {v.urn == 1 and 'Desk' or (v.urn == 2 and 'Window' or 'Floor')}" },
+        { "type": "text", "y": 1, "text": "Diary: {v.diary == 1 and 'Desk' or (v.diary == 2 and 'Window' or 'Floor')}" },
+        { "type": "text", "y": 2, "text": "Chair: {v.chair == 1 and 'Desk' or (v.chair == 2 and 'Window' or 'Floor')}" }
+      ]
+    },
+    {
+      "id": "narrative",
+      "rect": { "x": 1, "y": 12, "w": 30, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "{(v.urn == 2 and v.chair == 2) and 'The urn faces the window, where the chair waits. A memory of watching the rain.' or ''}" },
+        { "type": "text", "y": 1, "text": "{(v.diary == 1 and v.urn == 1) and 'The diary lies next to the urn. Unspoken words next to ash.' or ''}" },
+        { "type": "text", "y": 2, "text": "{((v.urn ~= 2 or v.chair ~= 2) and (v.diary ~= 1 or v.urn ~= 1)) and 'The room is silent. The objects mean nothing together.' or ''}" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_boot": [
+      { "cmd": "SET_VAR", "name": "obj_idx", "value": 1 },
+      { "cmd": "SET_VAR", "name": "urn", "value": 3 },
+      { "cmd": "SET_VAR", "name": "diary", "value": 3 },
+      { "cmd": "SET_VAR", "name": "chair", "value": 1 }
+    ],
+    "on_up": [
+      { "cmd": "SET_VAR", "name": "obj_idx", "value": "v.obj_idx == 1 and 4 or v.obj_idx - 1" }
+    ],
+    "on_down": [
+      { "cmd": "SET_VAR", "name": "obj_idx", "value": "v.obj_idx == 4 and 1 or v.obj_idx + 1" }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.obj_idx == 1",
+        "then": [ { "cmd": "SET_VAR", "name": "urn", "value": "v.urn == 3 and 1 or v.urn + 1" } ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.obj_idx == 2",
+        "then": [ { "cmd": "SET_VAR", "name": "diary", "value": "v.diary == 3 and 1 or v.diary + 1" } ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.obj_idx == 3",
+        "then": [ { "cmd": "SET_VAR", "name": "chair", "value": "v.chair == 3 and 1 or v.chair + 1" } ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.obj_idx == 4",
+        "then": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
+      }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "goldenScript": [
+    { "wait": 0.5 },
+    { "key": "accept", "wait": 0.5 },
+    { "key": "accept", "wait": 0.5 },
+    { "key": "down", "wait": 0.5 },
+    { "key": "accept", "wait": 0.5 },
+    { "key": "down", "wait": 0.5 },
+    { "key": "accept", "wait": 0.5 },
+    { "key": "cancel", "wait": 0.5 }
+  ]
+}

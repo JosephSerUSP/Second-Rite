@@ -46,7 +46,7 @@
     }
   ],
   "hooks": {
-    "on_boot": [
+    "on_enter": [
       { "cmd": "SET_VAR", "name": "obj_idx", "value": 1 },
       { "cmd": "SET_VAR", "name": "urn", "value": 3 },
       { "cmd": "SET_VAR", "name": "diary", "value": 3 },

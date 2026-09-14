@@ -19,6 +19,7 @@
       "B007  Tactics Microboard",
       "C002  Splitting Pong",
       "C003  Breakout With Moving Bricks",
+      "B003  Rearranging a Bedroom",
       "Exit"
     ]
   },
@@ -37,6 +38,14 @@
     "options": [
       "Ask about history.",
       "Conclude interview."
+    ]
+  },
+  "b003": {
+    "objects": [
+      "Urn",
+      "Diary",
+      "Chair",
+      "Finish"
     ]
   }
 }

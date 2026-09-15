@@ -134,6 +134,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     const cameraLua = fs.readFileSync(path.join(ROOT, 'runtime', 'presentation', 'world_camera.lua'), 'utf8');
     const validatorLua = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'project_validator_rules.lua'), 'utf8');
     const viewportSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+    const viewportBaseSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
     const compositionSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
     const navigationSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-authoring-tools.js'), 'utf8');
     const studioSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
@@ -192,6 +193,20 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
+    assert.match(studioSource, /thestra-spatial-interaction-changed/,
+        'profile operator availability must resync when semantic selection changes');
+    assert.match(viewportBaseSource, /handleSpatialTransformShortcut/,
+        'the 3D viewport must consume the shared modal spatial transform grammar');
+    assert.match(viewportBaseSource, /beginModalProfileMove/,
+        'Walk Profile points must have a real keyboard-initiated modal move path');
+    assert.ok(viewportBaseSource.includes('projectedAxisDelta'),
+        'semantic axis constraints must survive edge-on profile camera views');
+    assert.ok(viewportBaseSource.includes('onSpatialTransaction'),
+        'successful modal moves must emit explicit before/after transactions');
+    assert.match(viewportBaseSource, /setWalkProfileHover/,
+        'free 3D profile editing exposes hover before selection');
+    assert.match(compositionSource, /setWalkProfileHover/,
+        'plate profile editing exposes the same hover-state grammar');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

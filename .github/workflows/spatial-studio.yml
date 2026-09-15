@@ -10,6 +10,7 @@ on:
       - "runtime/presentation/viewport_3d.lua"
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
+      - "studio/editor/js/spatial-interaction.js"
       - "studio/editor/js/event_presentation.js"
       - "studio/editor/js/thestra-editor-workspace.js"
       - "studio/editor/js/thestra-workspace-state.js"
@@ -19,6 +20,7 @@ on:
       - "studio/editor/js/three-editor-viewport.js"
       - "studio/editor/js/world-presentation-studio.js"
       - "studio/editor/tests/test-world-event-authoring.js"
+      - "studio/editor/tests/test-spatial-interaction.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
       - "tests/test_bounded_lane.lua"
@@ -33,6 +35,7 @@ on:
       - "runtime/presentation/viewport_3d.lua"
       - "studio/editor/js/generated/world-view.js"
       - "studio/editor/js/second-rite-editor-commands.js"
+      - "studio/editor/js/spatial-interaction.js"
       - "studio/editor/js/event_presentation.js"
       - "studio/editor/js/thestra-editor-workspace.js"
       - "studio/editor/js/thestra-workspace-state.js"
@@ -42,6 +45,7 @@ on:
       - "studio/editor/js/three-editor-viewport.js"
       - "studio/editor/js/world-presentation-studio.js"
       - "studio/editor/tests/test-world-event-authoring.js"
+      - "studio/editor/tests/test-spatial-interaction.js"
       - "studio/editor/tests/test-world-presentation.js"
       - "studio/editor/test-walk-profile-runtime.js"
       - "tests/test_bounded_lane.lua"
@@ -70,6 +74,8 @@ jobs:
       - name: Walk-profile command and surface contracts
         shell: pwsh
         run: |
+          node --test studio/editor/tests/test-spatial-interaction.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test studio/editor/tests/test-world-event-authoring.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node studio/editor/tests/test-world-presentation.js
@@ -77,6 +83,10 @@ jobs:
       - name: Syntax-check touched browser modules
         shell: pwsh
         run: |
+          node --check studio/editor/js/spatial-interaction.js
+          node --check studio/editor/js/three-editor-viewport-base.js
+          node --check studio/editor/js/three-editor-viewport.js
+          node --check studio/editor/js/three-composition-viewport.js
           node --check studio/editor/js/second-rite-editor-commands.js
           node --check studio/editor/js/event_presentation.js
           node --check studio/editor/js/thestra-editor-workspace.js

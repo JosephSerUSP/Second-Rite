@@ -540,6 +540,7 @@
         installRuntimeToolbar();
     }, { once: true });
     root.addEventListener('thestra-runtime-camera-viewport-ready', () => updateRuntimeControls());
+    root.addEventListener('thestra-spatial-interaction-changed', () => updateRuntimeControls());
     let initialCompositionMap = null;
     root.addEventListener('thestra-composition-preview-ready', () => {
         const composition = viewportApi()?.getCompositionPreview?.();

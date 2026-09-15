@@ -339,6 +339,8 @@
         if (selection.kind === 'light') return `${layerLabel()} · Light ${selection.cell.x}, ${selection.cell.y}`;
         if (selection.kind === 'override') return `${layerLabel()} · Override ${selection.cell.x}, ${selection.cell.y}`;
         if (selection.kind === 'spawn') return `${layerLabel()} · Player Start`;
+        if (selection.kind === 'walk-profile-point') return `Walk Profile · Point ${selection.index + 1}`;
+        if (selection.kind === 'walk-profile-segment') return `Walk Profile · Segment ${selection.index + 1}`;
         return `${layerLabel()} · ${selection.kind}`;
     }
 
@@ -379,6 +381,14 @@
 
     function handleMutationResult(result, kind, detail) {
         if (result && result.changed) scheduleMutation(kind, detail);
+        if (result && result.ok === false) {
+            const message = window.ThestraSpatialInteraction?.reasonMessage?.(result.reason)
+                || String(result.reason || 'Spatial operation rejected').replace(/-/g, ' ');
+            setStatus(`${layerLabel()} · ${message}`);
+            window.dispatchEvent(new CustomEvent('thestra-spatial-operation-rejected', {
+                detail: { reason: result.reason || null, message }
+            }));
+        }
         return result;
     }
 
@@ -392,6 +402,25 @@
                 onSelection(selection) {
                     if (host.selectSemantic) host.selectSemantic(selection);
                     setStatus(describeSelection(selection));
+                },
+                onSpatialStateChange(snapshot) {
+                    if (snapshot?.feedback) {
+                        setStatus(`Spatial · ${snapshot.feedback}`);
+                    } else if (snapshot?.operation === 'move') {
+                        const constraint = snapshot.constraint ? ` · ${snapshot.constraint}` : ' · YZ';
+                        const value = snapshot.value && typeof snapshot.value === 'object'
+                            ? ` · ΔY ${Number(snapshot.value.Y || 0).toFixed(3)} · ΔZ ${Number(snapshot.value.Z || 0).toFixed(3)}`
+                            : '';
+                        setStatus(`Move${constraint}${value} · Enter/LMB confirm · Esc/RMB cancel`);
+                    }
+                    window.dispatchEvent(new CustomEvent('thestra-spatial-interaction-changed', {
+                        detail: snapshot
+                    }));
+                },
+                onSpatialTransaction(transaction) {
+                    window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
+                        detail: transaction
+                    }));
                 },
                 onPaintCell(cell) {
                     return handleMutationResult(

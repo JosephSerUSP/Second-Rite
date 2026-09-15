@@ -6,9 +6,12 @@ import { MTLLoader } from '/vendor/three/MTLLoader.js';
 import '/js/thestra-viewport-contract.js';
 import '/js/three-world-fidelity-core.js';
 import '/js/three-definition-consumer.js';
+import '/js/spatial-interaction.js';
 
 const Contract = globalThis.ThestraViewportContract;
 if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
+const SpatialInteraction = globalThis.ThestraSpatialInteraction;
+if (!SpatialInteraction) throw new Error('Shared spatial interaction core failed to load.');
 const WorldFidelity = globalThis.ThestraThreeWorldFidelityCore;
 if (!WorldFidelity) throw new Error('Thestra world fidelity core failed to load.');
 const DirectDefinitions = globalThis.ThestraThreeDefinitionConsumer;
@@ -235,14 +238,16 @@ export function createThreeEditorViewport(container, options = {}) {
     const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
     const topControls = new OrbitControls(top, renderer.domElement);
-    const moveGizmo = createMoveGizmo(perspective, renderer.domElement);
+    const moveGizmo = createMoveGizmo(
+        perspective, renderer.domElement, ['X', 'Z'], SpatialInteraction.viewportAxisColorSources()
+    );
     scene.add(moveGizmo.getHelper());
 
     topControls.enabled = false;
 
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
         canPan(event) {
-            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture) return false;
+            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture || modalMoveGesture) return false;
             if (walkProfileEditing) return !pickWalkProfile(event);
             if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
             return !pickSemantic(event, ['event', 'light', 'override']);
@@ -258,6 +263,8 @@ export function createThreeEditorViewport(container, options = {}) {
     let hasAuthoritativeBundle = false;
     let editGesture = null;
     let moveGesture = null;
+    let modalMoveGesture = null;
+    let lastPointerEvent = null;
     let lastPaintKey = null;
     let priorMapIdentity = null;
     let cameraTransition = null;
@@ -287,6 +294,7 @@ export function createThreeEditorViewport(container, options = {}) {
     // like part of the collision mesh, especially in the narrow town rooms.
     let collisionVisible = false;
     let walkProfileEditing = false;
+    let walkProfileHover = null;
     const walkProfileSelectable = [];
     const walkProfileObjects = new Map();
 
@@ -717,7 +725,15 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function onCameraKeyDown(event) {
-        const action = Contract.cameraShortcut(event, document.activeElement === renderer.domElement);
+        const focused = document.activeElement === renderer.domElement;
+        const spatialState = options.spatialInteraction?.snapshot?.() || null;
+        const transformAction = SpatialInteraction.transformShortcut(
+            event, focused, spatialState?.operation || null);
+        if (transformAction && handleSpatialTransformShortcut(transformAction)) {
+            event.preventDefault();
+            return;
+        }
+        const action = Contract.cameraShortcut(event, focused);
         if (!action || moveGizmo.dragging) return;
         event.preventDefault();
         if (action === 'toggle-projection') requestProjectionToggle();
@@ -898,7 +914,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const object = selectedMovableObject();
         const profilePoint = !!(object && selection?.kind === 'walk-profile-point');
         moveGizmo.camera = activeCamera();
-        moveGizmo.enabled = !!object && !cameraTransition;
+        moveGizmo.enabled = !!object && !cameraTransition && !modalMoveGesture;
         moveGizmo.showX = !!object && !profilePoint;
         moveGizmo.showY = !!object && (profilePoint || object.userData.worldPosition);
         moveGizmo.showZ = !!object;
@@ -1184,6 +1200,7 @@ export function createThreeEditorViewport(container, options = {}) {
             });
         }
         walkProfileContent.visible = walkProfileEditing;
+        refreshWalkProfileVisualState();
     }
 
     function pickWalkProfile(event) {
@@ -1193,9 +1210,37 @@ export function createThreeEditorViewport(container, options = {}) {
         return hits[0]?.object?.userData?.thestraSelection || null;
     }
 
+    function refreshWalkProfileVisualState() {
+        const selectedKey = selection
+            && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')
+            ? selection.key : null;
+        const hoverKey = walkProfileHover?.key || null;
+        for (const [key, object] of walkProfileObjects.entries()) {
+            const semantic = object.userData.thestraSelection;
+            const selected = key === selectedKey;
+            const hovered = key === hoverKey && !selected;
+            if (semantic?.kind === 'walk-profile-point') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
+                object.scale.setScalar(selected ? 1.35 : hovered ? 1.18 : 1);
+            } else if (semantic?.kind === 'walk-profile-segment') {
+                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
+                object.material.opacity = selected ? 1 : hovered ? 1 : 0.9;
+            }
+        }
+    }
+
+    function setWalkProfileHover(next) {
+        const hover = next || null;
+        if (walkProfileHover?.key === hover?.key) return;
+        walkProfileHover = hover;
+        options.spatialInteraction?.setHover?.(hover);
+        refreshWalkProfileVisualState();
+    }
+
     function setWalkProfileEditing(enabled) {
         walkProfileEditing = !!enabled;
         walkProfileContent.visible = walkProfileEditing;
+        if (!walkProfileEditing) setWalkProfileHover(null);
         if (!walkProfileEditing && selection
                 && (selection.kind === 'walk-profile-point' || selection.kind === 'walk-profile-segment')) {
             setSelection(null);
@@ -1379,6 +1424,7 @@ export function createThreeEditorViewport(container, options = {}) {
     function setSelection(next) {
         selection = next || null;
         selectionOverlay.visible = false;
+        refreshWalkProfileVisualState();
         if (!selection || !sceneModel) {
             syncMoveGizmo();
             return;
@@ -1604,7 +1650,161 @@ export function createThreeEditorViewport(container, options = {}) {
         return { ok: true, changed: true };
     }
 
+    function pointerSnapshot(event) {
+        return event ? { clientX: event.clientX, clientY: event.clientY } : null;
+    }
+
+    function profilePlaneIntersection(event, plane) {
+        if (!event || !plane) return null;
+        updatePointer(event);
+        return raycaster.ray.intersectPlane(plane, new THREE.Vector3());
+    }
+
+    function worldPointToClient(world) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        const projected = world.clone().project(activeCamera());
+        return {
+            x: rect.left + (projected.x + 1) * 0.5 * rect.width,
+            y: rect.top + (1 - projected.y) * 0.5 * rect.height
+        };
+    }
+
+    function semanticAxisPixels(origin, semanticAxis) {
+        const viewportAxis = SpatialInteraction.semanticAxisToViewport(semanticAxis);
+        if (!viewportAxis) return null;
+        const end = origin.clone();
+        if (viewportAxis === 'X') end.x += 1;
+        else if (viewportAxis === 'Y') end.y += 1;
+        else if (viewportAxis === 'Z') end.z += 1;
+        const a = worldPointToClient(origin);
+        const b = worldPointToClient(end);
+        return { x: b.x - a.x, y: b.y - a.y };
+    }
+
+    function beginModalProfileMove() {
+        const object = selectedMovableObject();
+        if (!walkProfileEditing || !object || selection?.kind !== 'walk-profile-point') return false;
+        const origin = object.position.clone();
+        const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), -origin.x);
+        const originScreen = worldPointToClient(origin);
+        const startPointer = lastPointerEvent || originScreen;
+        const hit = profilePlaneIntersection(startPointer, plane);
+        const runtimeOrigin = Contract.thestraPositionToRuntime(origin.toArray());
+        modalMoveGesture = {
+            semantic: selection,
+            object,
+            origin,
+            plane,
+            startPointer,
+            planeGrabOffset: hit ? origin.clone().sub(hit) : null,
+            axisPixels: {
+                Y: semanticAxisPixels(origin, 'Y'),
+                Z: semanticAxisPixels(origin, 'Z')
+            },
+            before: { Y: runtimeOrigin[1], Z: runtimeOrigin[2] }
+        };
+        moveGizmo.detach();
+        setControlsEnabled(false);
+        options.spatialInteraction?.beginMove?.();
+        return true;
+    }
+
+    function updateModalProfileMove(event) {
+        const gesture = modalMoveGesture;
+        if (!gesture) return false;
+        const constraint = options.spatialInteraction?.snapshot?.().constraint || null;
+        let next = gesture.origin.clone();
+        if (constraint === 'Y' || constraint === 'Z') {
+            const delta = SpatialInteraction.projectedAxisDelta(
+                gesture.startPointer, pointerSnapshot(event), gesture.axisPixels[constraint]);
+            if (delta == null) {
+                options.spatialInteraction?.reject?.('profile-axis-edge-on');
+                return true;
+            }
+            if (constraint === 'Y') next.z += delta; // authored Y -> Three Z
+            else next.y += delta; // authored Z -> Three Y
+        } else {
+            const hit = profilePlaneIntersection(event, gesture.plane);
+            if (!hit || !gesture.planeGrabOffset) {
+                options.spatialInteraction?.reject?.('profile-view-underdetermined');
+                return true;
+            }
+            next = hit.add(gesture.planeGrabOffset);
+            next.x = gesture.origin.x;
+        }
+        gesture.object.position.copy(next);
+        selectionOverlay.position.copy(next);
+        const runtimeOrigin = Contract.thestraPositionToRuntime(gesture.origin.toArray());
+        const runtimeNext = Contract.thestraPositionToRuntime(next.toArray());
+        options.spatialInteraction?.setValue?.({
+            Y: runtimeNext[1] - runtimeOrigin[1],
+            Z: runtimeNext[2] - runtimeOrigin[2]
+        });
+        return true;
+    }
+
+    function endModalProfileMove(commit) {
+        const gesture = modalMoveGesture;
+        if (!gesture) return false;
+        modalMoveGesture = null;
+        setControlsEnabled(true);
+        if (!commit) {
+            gesture.object.position.copy(gesture.origin);
+            setSelection(gesture.semantic);
+            options.spatialInteraction?.cancel?.();
+            return true;
+        }
+        const runtime = Contract.thestraPositionToRuntime(gesture.object.position.toArray());
+        const result = options.onMoveGroundProfilePoint
+            ? options.onMoveGroundProfilePoint(gesture.semantic.index, runtime[1], runtime[2])
+            : null;
+        if (result?.ok) {
+            const after = { Y: runtime[1], Z: runtime[2] };
+            const transaction = result.changed
+                ? SpatialInteraction.createTransaction('move', gesture.semantic, gesture.before, after)
+                : null;
+            options.spatialInteraction?.confirm?.();
+            if (transaction) options.onSpatialTransaction?.(transaction);
+            rebuildWalkProfile();
+            emitSelection(result.selection || gesture.semantic);
+        } else {
+            gesture.object.position.copy(gesture.origin);
+            rebuildWalkProfile();
+            setSelection(gesture.semantic);
+            options.spatialInteraction?.cancel?.();
+            options.spatialInteraction?.reject?.(result?.reason || 'invalid-profile-point');
+        }
+        return true;
+    }
+
+    function handleSpatialTransformShortcut(action) {
+        if (!action) return false;
+        if (action.kind === 'begin-move') return beginModalProfileMove();
+        if (!modalMoveGesture) return false;
+        if (action.kind === 'constraint') {
+            if (action.axis === 'X') {
+                options.spatialInteraction?.reject?.('profile-fixed-depth');
+                return true;
+            }
+            options.spatialInteraction?.constrain?.(action.axis);
+            if (lastPointerEvent) updateModalProfileMove(lastPointerEvent);
+            return true;
+        }
+        if (action.kind === 'confirm') return endModalProfileMove(true);
+        if (action.kind === 'cancel') return endModalProfileMove(false);
+        return false;
+    }
+
     function onPointerDown(event) {
+        lastPointerEvent = pointerSnapshot(event);
+        if (modalMoveGesture) {
+            if (event.button === 0) endModalProfileMove(true);
+            else if (event.button === 2) endModalProfileMove(false);
+            if (event.button === 0 || event.button === 2) {
+                event.preventDefault();
+                return;
+            }
+        }
         if (!sceneModel || event.button !== 0) return;
         if (moveGizmo.dragging || moveGizmo.axis) return;
         if (walkProfileEditing) {
@@ -1632,6 +1832,14 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function onPointerMove(event) {
+        lastPointerEvent = pointerSnapshot(event);
+        if (modalMoveGesture) {
+            updateModalProfileMove(event);
+            return;
+        }
+        if (walkProfileEditing && !moveGizmo.dragging && !moveGizmo.axis && !editGesture) {
+            setWalkProfileHover(pickWalkProfile(event));
+        }
         if (!editGesture) return;
         paintSelection(pickCell(event));
     }

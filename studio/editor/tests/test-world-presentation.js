@@ -157,6 +157,12 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'indoor optical zoom must preserve the cursor focus through shared projection semantics');
     assert.match(navigationSource, /optical\.zoom\(event\.deltaY, event\.clientX - rect\.left, event\.clientY - rect\.top, rect\)/,
         'navigation must supply cursor coordinates to the shared optical adapter');
+    assert.match(navigationSource, /control\.mouseButtons\.LEFT = null/,
+        'LMB must have one stable owner: authored selection/editing');
+    assert.match(navigationSource, /control\.mouseButtons\.MIDDLE = planar \? THREE\.MOUSE\.PAN : THREE\.MOUSE\.ROTATE/,
+        'MMB must use a stable Blender-like navigation contract');
+    assert.doesNotMatch(navigationSource, /mouseButtons\.LEFT = canPan\(event\)/,
+        'navigation must never remap LMB after an authored hit test');
     assert.doesNotMatch(viewportSource, /!runtimeProjection \|\| runtimeLocked \|\| compositionAuthoring\.isPlate\(\)/,
         'runtime locking forbids free orbit, never game-style projection-window navigation');
     assert.doesNotMatch(viewportSource, /base\.setDisplayAspect\(/,
@@ -193,6 +199,20 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
+    assert.match(studioSource, /Point 1/,
+        'Edit Mode must expose point selection as an explicit component state');
+    assert.match(studioSource, /Edge 2/,
+        'Edit Mode must expose edge selection as an explicit component state');
+    assert.match(studioSource, /G Y \/ G Z constrain/,
+        'the toolbar must teach semantic authored-axis constraints in place');
+    assert.match(studioSource, /walkMesh\.style\.display = editing \? 'none' : ''/,
+        'walk-mesh inspection and Walk Profile editing must be visually distinct states');
+    assert.match(viewportBaseSource, /data-walk-profile-hud|walkProfileHud/,
+        'the viewport itself must identify Walk Profile Edit Mode');
+    assert.match(viewportBaseSource, /refreshWalkProfileScreenScale/,
+        '3D profile handles must preserve screen-legible interaction size');
+    assert.match(viewportBaseSource, /PROFILE_POINT_RADIUS_PX/,
+        'point picking must be sized by viewport interaction scale, not only world scale');
     assert.match(studioSource, /thestra-spatial-interaction-changed/,
         'profile operator availability must resync when semantic selection changes');
     assert.match(viewportBaseSource, /handleSpatialTransformShortcut/,

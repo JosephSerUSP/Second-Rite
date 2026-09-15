@@ -372,6 +372,7 @@ export function createThreeEditorViewport(container, options = {}) {
                     y: Number(profile[selection.index].y),
                     z: Number(profile[selection.index].z)
                 } : null;
+            const interaction = spatialInteraction.snapshot();
             return {
                 available: !!lane,
                 authored: Array.isArray(profile) && profile.length >= 2,
@@ -379,8 +380,12 @@ export function createThreeEditorViewport(container, options = {}) {
                 editing: api.getWalkProfileEditing(),
                 componentMode: api.getWalkProfileComponentMode(),
                 selection,
+                selections,
                 selectionCount: selections.length,
-                activePoint
+                activePoint,
+                operation: interaction.operation,
+                constraint: interaction.constraint,
+                feedback: interaction.feedback
             };
         },
         createGroundProfile() {

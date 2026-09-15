@@ -246,11 +246,9 @@ export function createThreeEditorViewport(container, options = {}) {
     topControls.enabled = false;
 
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
-        canPan(event) {
-            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture || modalMoveGesture) return false;
-            if (walkProfileEditing) return !pickWalkProfile(event);
-            if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
-            return !pickSemantic(event, ['event', 'light', 'override']);
+        canPan() {
+            return !!sceneModel && !moveGizmo.axis && !moveGizmo.dragging
+                && !editGesture && !modalMoveGesture;
         },
         getOpticalNavigation: options.getOpticalNavigation || null
     });
@@ -2212,7 +2210,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
     if (navigationHelp) {
-        navigationHelp.title = 'Drag empty space, MMB or RMB to pan; wheel zooms; Alt+MMB orbits 3D. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
+        navigationHelp.title = 'LMB selects/edits only. MMB orbits 3D; Shift+MMB or RMB pans; wheel zooms. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
     }
 
     const resizeObserver = new ResizeObserver(resize);

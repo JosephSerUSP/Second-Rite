@@ -336,6 +336,7 @@ export function createThreeEditorViewport(container, options = {}) {
         },
         setWalkProfileEditing(enabled) {
             const active = !!enabled;
+            if (active) api.setWalkMeshVisible(false);
             base.setWalkProfileEditing?.(active);
             compositionAuthoring.setWalkProfileEditing?.(active);
             if (!active) emitSelection(null);

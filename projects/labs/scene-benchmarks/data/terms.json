@@ -19,6 +19,7 @@
       "B007  Tactics Microboard",
       "C002  Splitting Pong",
       "C003  Breakout With Moving Bricks",
+      "B004  Rain / Distance / Embarrassment",
       "Exit"
     ]
   },
@@ -37,6 +38,14 @@
     "options": [
       "Ask about history.",
       "Conclude interview."
+    ]
+  },
+  "b004": {
+    "options": [
+      "1. Step Closer",
+      "2. Wait in Silence",
+      "3. Share Umbrella",
+      "4. Step Away"
     ]
   }
 }

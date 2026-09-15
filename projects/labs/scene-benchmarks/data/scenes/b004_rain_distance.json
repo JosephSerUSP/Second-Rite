@@ -1,0 +1,155 @@
+{
+  "id": "b004_rain_distance",
+  "terminal": {
+    "none": "conceptual state machine, no loop to finish"
+  },
+  "name": "B004 — Rain / Distance / Embarrassment",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Waiting in the Rain" }
+      ]
+    },
+    {
+      "id": "status",
+      "rect": { "x": 1, "y": 4, "w": 30, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "Distance: {v.distance} paces" },
+        { "type": "text", "y": 1, "text": "Embarrassment: {v.embarrassment} / 100" },
+        { "type": "text", "y": 3, "text": "Rain Intensity: {v.rain_intensity} / 10" },
+        { "type": "text", "y": 4, "text": "Drenched: {v.wetness} / 100" }
+      ]
+    },
+    {
+      "id": "feedback_box",
+      "rect": { "x": 1, "y": 10, "w": 30, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.feedback_1}" },
+        { "type": "text", "y": 1, "text": "{v.feedback_2}" }
+      ]
+    },
+    {
+      "id": "action_menu",
+      "rect": { "x": 1, "y": 14, "w": 30, "h": 7 },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b004.options",
+          "cursor": "v.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          { "name": "distance", "value": 10 },
+          { "name": "embarrassment", "value": 10 },
+          { "name": "rain_intensity", "value": 2 },
+          { "name": "wetness", "value": 0 },
+          { "name": "idx", "value": 1 },
+          { "name": "feedback_1", "value": "'You stand far apart.'" },
+          { "name": "feedback_2", "value": "'It is starting to rain.'" },
+          { "name": "state", "value": "'active'" }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 4 or v.idx - 1" }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 4 and 1 or v.idx + 1" }
+        ]
+      }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 1",
+            "then": [
+              { "cmd": "SET_VAR", "name": "distance", "value": "v.distance > 0 and v.distance - 1 or 0" },
+              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment + 15" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You step closer.'" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 2",
+            "then": [
+              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment > 5 and v.embarrassment - 5 or 0" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You wait in silence.'" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 3",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.distance <= 2",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment + 30" },
+                  { "cmd": "SET_VAR", "name": "wetness", "value": "v.wetness > 20 and v.wetness - 20 or 0" },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You share the umbrella.'" }
+                ],
+                "else": [
+                  { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment + 5" },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You are too far away!'" }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 4",
+            "then": [
+              { "cmd": "SET_VAR", "name": "distance", "value": "v.distance + 2" },
+              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment > 10 and v.embarrassment - 10 or 0" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You step away.'" }
+            ]
+          },
+          { "cmd": "SET_VAR", "name": "rain_intensity", "value": "v.rain_intensity < 10 and v.rain_intensity + 1 or 10" },
+          { "cmd": "SET_VAR", "name": "wetness", "value": "v.wetness + v.rain_intensity * 2" },
+          { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The rain falls harder.'" },
+          {
+            "cmd": "IF",
+            "condition": "v.wetness >= 100",
+            "then": [
+              { "cmd": "SET_VAR", "name": "state", "value": "'end'" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You are completely soaked.'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'You both leave.'" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

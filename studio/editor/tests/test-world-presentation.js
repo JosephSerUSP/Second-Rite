@@ -229,6 +229,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'plate profile editing exposes the same hover-state grammar');
     assert.match(viewportSource, /event\.code === 'Tab'/,
         'Walk Profile editing must be reachable through Blender-style Tab');
+    assert.match(viewportSource, /if \(!status\.authored\) \{[\s\S]*spatialInteraction\.reject\('missing-ground-profile'\)/,
+        'Tab must not enter an empty Edit Mode before an authored profile exists');
     assert.match(viewportSource, /event\.code === 'Digit1'/,
         'point component mode must use Blender-style 1');
     assert.match(viewportSource, /event\.code === 'Digit2'/,

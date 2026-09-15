@@ -62,8 +62,12 @@ npm ci
 Then launch:
 
 ```bat
-runEditor.bat
+runStudioInteractionReview.bat
 ```
+
+This opens Thestra Studio directly on the authored Second Gate Project for
+OWNER INTERACTION REVIEW. `runEditor.bat` remains the generic no-project
+launcher.
 
 or:
 

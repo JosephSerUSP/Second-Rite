@@ -72,6 +72,8 @@ test('spatial rejection reasons are author-facing instead of raw command codes',
     assert.match(Spatial.reasonMessage('profile-order'), /Cannot move/i);
     assert.match(Spatial.reasonMessage('profile-endpoint'), /cannot be deleted/i);
     assert.match(Spatial.reasonMessage('profile-fixed-depth'), /authored Y or Z/i);
+    assert.match(Spatial.reasonMessage('profile-endpoint-required'), /endpoint/i);
+    assert.match(Spatial.reasonMessage('invalid-subdivision-count'), /1 to 64/i);
     assert.equal(Spatial.reasonMessage('future-reason'), 'future reason');
 });
 
@@ -110,4 +112,25 @@ test('committed spatial transactions preserve immutable before/after semantic va
     assert.equal(transaction.target.index, 2);
     assert.equal(transaction.before.Y, 1);
     assert.equal(transaction.after.Z, 1.25);
+});
+
+
+test('spatial selection state tracks active component inside a selected set', () => {
+    const state = Spatial.createState();
+    const a = { kind: 'walk-profile-point', key: 'walk-profile-point:1', index: 1 };
+    const b = { kind: 'walk-profile-point', key: 'walk-profile-point:2', index: 2 };
+
+    state.setSelection(a);
+    let snapshot = state.toggleSelection(b);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key, b.key]);
+    assert.equal(snapshot.selection.key, b.key);
+
+    snapshot = state.toggleSelection(b);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key]);
+    assert.equal(snapshot.selection.key, a.key);
+
+    snapshot = state.setSelectionSet([a, b, a], a);
+    assert.deepEqual(snapshot.selectionSet.map(item => item.key), [a.key, b.key],
+        'selection sets deduplicate by semantic key');
+    assert.equal(snapshot.selection.key, a.key);
 });

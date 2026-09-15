@@ -4,9 +4,12 @@ import { OBJLoader } from '/vendor/three/OBJLoader.js';
 import { MTLLoader } from '/vendor/three/MTLLoader.js';
 import { createSelectionOverlay, createEventBox, createMoveGizmo, configureEventSpriteFrame, installNavigation } from '/js/three-authoring-tools.js';
 import '/js/composition-authoring.js';
+import '/js/spatial-interaction.js';
 
 const View = globalThis.ThestraCompositionAuthoring;
 if (!View) throw new Error('Shared world-view semantics failed to load.');
+const SpatialInteraction = globalThis.ThestraSpatialInteraction;
+if (!SpatialInteraction) throw new Error('Shared spatial interaction core failed to load.');
 
 function projectAsset(path) {
     return path.startsWith('/') ? path : '/' + path;
@@ -80,7 +83,9 @@ export function createCompositionViewport(container, options) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
-    let walkMeshVisible = false, walkProfileEditing = false, walkProfileSelection = null, walkProfileHover = null;
+    let modalProfileMove = null, lastPointerEvent = null;
+    let walkMeshVisible = false, walkProfileEditing = false, walkProfileComponentMode = 'point';
+    let walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
 
@@ -98,22 +103,284 @@ export function createCompositionViewport(container, options) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing) return null;
         updatePointer(event);
-        return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
+        const wantedKind = walkProfileComponentMode === 'segment'
+            ? 'walk-profile-segment' : 'walk-profile-point';
+        const targets = walkProfileHitTargets.filter(object =>
+            object.userData?.thestraSelection?.kind === wantedKind);
+        return raycaster.intersectObjects(targets, false)[0]?.object.userData.thestraSelection || null;
+    }
+
+    function pointerSnapshot(event) {
+        return event ? { clientX: event.clientX, clientY: event.clientY } : null;
+    }
+
+    function scenePointAtPointer(event, z = 4) {
+        if (!event) return null;
+        updatePointer(event);
+        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -z);
+        return raycaster.ray.intersectPlane(plane, new THREE.Vector3());
+    }
+
+    function beginModalProfileMove() {
+        if (!walkProfileEditing || walkProfileSelection?.kind !== 'walk-profile-point') return false;
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        const activeObject = walkProfileObjects.get(walkProfileSelection.key);
+        const activeSource = profile?.[walkProfileSelection.index];
+        if (!lane || !activeObject || !activeSource) return false;
+
+        const selections = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+            .filter(item => item?.kind === 'walk-profile-point');
+        const effectiveSelections = selections.some(item => item.key === walkProfileSelection.key)
+            ? selections : [walkProfileSelection];
+        const targets = effectiveSelections.map(selection => {
+            const object = walkProfileObjects.get(selection.key);
+            const source = profile?.[selection.index];
+            return object && source ? {
+                selection,
+                object,
+                origin: object.position.clone(),
+                source: { y: Number(source.y), z: Number(source.z) }
+            } : null;
+        }).filter(Boolean);
+        const pointerPoint = scenePointAtPointer(lastPointerEvent, activeObject.position.z);
+        modalProfileMove = {
+            selection: walkProfileSelection,
+            activeObject,
+            activeSource: { y: Number(activeSource.y), z: Number(activeSource.z) },
+            targets,
+            grabOffset: pointerPoint
+                ? activeObject.position.clone().sub(pointerPoint)
+                : new THREE.Vector3()
+        };
+        gizmo.detach();
+        controls.enabled = false;
+        options.spatialInteraction?.beginMove?.();
+        return true;
+    }
+
+    function beginModalProfileExtrude() {
+        if (!walkProfileEditing || walkProfileSelection?.kind !== 'walk-profile-point') {
+            return { ok: false, reason: 'no-profile-point-selected' };
+        }
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        const index = walkProfileSelection.index;
+        if (!Array.isArray(profile) || profile.length < 2) {
+            return { ok: false, reason: 'missing-ground-profile' };
+        }
+        if (index !== 0 && index !== profile.length - 1) {
+            return { ok: false, reason: 'profile-endpoint-required' };
+        }
+        const anchorObject = walkProfileObjects.get(walkProfileSelection.key);
+        const source = profile[index];
+        if (!anchorObject || !source) return { ok: false, reason: 'invalid-profile-point' };
+
+        const previewPoint = new THREE.Mesh(
+            new THREE.CircleGeometry(5, 16),
+            new THREE.MeshBasicMaterial({
+                color: 0xffa24d, depthTest: false, depthWrite: false
+            })
+        );
+        previewPoint.position.copy(anchorObject.position);
+        previewPoint.renderOrder = 31;
+        const screen = { x: anchorObject.position.x, y: -anchorObject.position.y };
+        const previewSegment = profileScreenSegment(
+            screen, screen,
+            { kind: 'walk-profile-extrude-preview', key: 'walk-profile-extrude-preview' });
+        previewSegment.material.color.setHex(0xffa24d);
+        previewSegment.renderOrder = 30;
+        walkProfileControls.add(previewSegment, previewPoint);
+
+        const pointerPoint = scenePointAtPointer(lastPointerEvent, previewPoint.position.z);
+        modalProfileMove = {
+            kind: 'extrude',
+            selection: walkProfileSelection,
+            endpointIndex: index,
+            anchorObject,
+            activeObject: previewPoint,
+            activeSource: { y: Number(source.y), z: Number(source.z) },
+            targets: [{
+                selection: walkProfileSelection,
+                object: previewPoint,
+                origin: previewPoint.position.clone(),
+                source: { y: Number(source.y), z: Number(source.z) }
+            }],
+            previewPoint,
+            previewSegment,
+            grabOffset: pointerPoint
+                ? previewPoint.position.clone().sub(pointerPoint)
+                : new THREE.Vector3()
+        };
+        gizmo.detach();
+        controls.enabled = false;
+        options.spatialInteraction?.beginMove?.();
+        return { ok: true };
+    }
+
+    function clearModalExtrudePreview(move) {
+        if (!move || move.kind !== 'extrude') return;
+        for (const object of [move.previewSegment, move.previewPoint]) {
+            if (!object) continue;
+            walkProfileControls.remove(object);
+            object.geometry?.dispose();
+            object.material?.dispose();
+        }
+    }
+
+    function updateModalProfileMove(event) {
+        const move = modalProfileMove;
+        if (!move) return false;
+        const lane = model.map.source.traversal.lane;
+        const hit = scenePointAtPointer(event, move.activeObject.position.z);
+        if (!hit) return true;
+        const desired = hit.add(move.grabOffset);
+        let world;
+        try {
+            world = View.worldYZAtScreenOnDepthPlane(
+                plate.camera, plate.width, plate.height, Number(lane.depthX),
+                plate.sliceY, Number(lane.groundZ || 0),
+                Number(plate.player.centerX), Number(plate.player.screenY),
+                desired.x, -desired.y, move.activeSource.y, move.activeSource.z);
+        } catch (error) {
+            options.spatialInteraction?.reject?.('profile-view-underdetermined');
+            return true;
+        }
+        const constraint = options.spatialInteraction?.snapshot?.().constraint || null;
+        if (constraint === 'Y') world.z = move.activeSource.z;
+        else if (constraint === 'Z') world.y = move.activeSource.y;
+        const deltaY = world.y - move.activeSource.y;
+        const deltaZ = world.z - move.activeSource.z;
+        move.targets.forEach(target => {
+            const screen = platePoint(
+                Number(lane.depthX), target.source.y + deltaY, target.source.z + deltaZ);
+            target.object.position.set(screen.x, -screen.y, 4);
+        });
+        syncWalkProfileSegmentsFromPoints();
+        if (move.kind === 'extrude') {
+            syncPlateSegmentObject(
+                move.previewSegment, move.anchorObject.position, move.previewPoint.position);
+        }
+        refreshOverlay();
+        options.spatialInteraction?.setValue?.({ Y: deltaY, Z: deltaZ });
+        return true;
+    }
+
+    function endModalProfileMove(commit) {
+        const move = modalProfileMove;
+        if (!move) return false;
+        modalProfileMove = null;
+        controls.enabled = true;
+        if (!commit) {
+            move.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(move);
+            syncWalkProfileSegmentsFromPoints();
+            refreshOverlay();
+            options.spatialInteraction?.cancel?.();
+            return true;
+        }
+        const state = options.spatialInteraction?.snapshot?.();
+        const deltaY = Number(state?.value?.Y || 0);
+        const deltaZ = Number(state?.value?.Z || 0);
+        const indices = move.targets.map(target => target.selection.index);
+        const result = move.kind === 'extrude'
+            ? options.onExtrudeGroundProfileEndpoint?.(
+                move.endpointIndex,
+                move.activeSource.y + deltaY,
+                move.activeSource.z + deltaZ)
+            : indices.length > 1
+                ? options.onMoveGroundProfilePoints?.(indices, deltaY, deltaZ)
+                : options.onMoveGroundProfilePoint?.(
+                    move.selection.index,
+                    move.activeSource.y + deltaY,
+                    move.activeSource.z + deltaZ);
+        if (!result?.ok) {
+            move.targets.forEach(target => target.object.position.copy(target.origin));
+            clearModalExtrudePreview(move);
+            syncWalkProfileSegmentsFromPoints();
+            refreshOverlay();
+            options.spatialInteraction?.cancel?.();
+            options.spatialInteraction?.reject?.(result?.reason || 'invalid-profile-point');
+            return true;
+        }
+        const before = { points: move.targets.map(target => ({
+            index: target.selection.index, Y: target.source.y, Z: target.source.z
+        })) };
+        const after = { points: move.targets.map(target => ({
+            index: target.selection.index,
+            Y: target.source.y + deltaY,
+            Z: target.source.z + deltaZ
+        })) };
+        const transaction = result.changed
+            ? SpatialInteraction.createTransaction(
+                move.kind === 'extrude' ? 'extrude' : 'move',
+                move.selection, before, after)
+            : null;
+        options.spatialInteraction?.confirm?.();
+        if (transaction) options.onSpatialTransaction?.(transaction);
+        clearModalExtrudePreview(move);
+        rebuildWalkOverlay();
+        rebuildWalkProfileControls();
+        rebuildPlayerPreview();
+        rebuildEvents();
+        if (move.kind === 'extrude') {
+            const active = result.selection || move.selection;
+            setSemanticSelection(active);
+            options.onSelection?.(active);
+        } else if (move.targets.length > 1) {
+            const active = options.spatialInteraction?.snapshot?.().selection || move.selection;
+            setSemanticSelection(active);
+        } else {
+            const active = result.selection || move.selection;
+            setSemanticSelection(active);
+            options.onSelection?.(active);
+        }
+        return true;
+    }
+
+    function handleModalProfileKey(event) {
+        const state = options.spatialInteraction?.snapshot?.() || null;
+        const action = SpatialInteraction.transformShortcut(
+            event, document.activeElement === renderer.domElement, state.operation);
+        if (!action) return false;
+        if (action.kind === 'begin-move') return beginModalProfileMove();
+        if (!modalProfileMove) return false;
+        if (action.kind === 'constraint') {
+            if (action.axis === 'X') {
+                options.spatialInteraction?.reject?.('profile-fixed-depth');
+                return true;
+            }
+            options.spatialInteraction?.constrain?.(action.axis);
+            if (lastPointerEvent) updateModalProfileMove(lastPointerEvent);
+            return true;
+        }
+        if (action.kind === 'confirm') return endModalProfileMove(true);
+        if (action.kind === 'cancel') return endModalProfileMove(false);
+        return false;
     }
 
     function refreshWalkProfileVisualState() {
-        const selectedKey = walkProfileSelection?.key || null;
+        const spatial = options.spatialInteraction?.snapshot?.() || null;
+        const selectedKeys = new Set((spatial?.selectionSet || []).map(item => item?.key).filter(Boolean));
+        const activeKey = spatial?.selection?.key || walkProfileSelection?.key || null;
         const hoverKey = walkProfileHover?.key || null;
         for (const [key, object] of walkProfileObjects.entries()) {
             const semantic = object.userData.thestraSelection;
-            const selected = key === selectedKey;
-            const hovered = key === hoverKey && !selected;
+            const selected = selectedKeys.has(key) || key === activeKey;
+            const active = key === activeKey;
+            const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0xffd45a);
-                object.scale.setScalar(selected ? 1.3 : hovered ? 1.15 : 1);
+                const activeType = walkProfileComponentMode === 'point';
+                object.material.transparent = !activeType;
+                object.material.opacity = activeType ? 1 : 0.35;
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
+                object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
-                object.material.color.setHex(selected ? 0xffa24d : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : 0.5;
+                const activeType = walkProfileComponentMode === 'segment';
+                object.material.color.setHex(active ? 0xffa24d
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
+                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : (activeType ? 0.5 : 0.2);
             }
         }
     }
@@ -136,7 +403,10 @@ export function createCompositionViewport(container, options) {
         const object = profileObject || record?.group || null;
         const profilePoint = !!(profileObject && walkProfileSelection?.kind === 'walk-profile-point');
         overlay.visible = !!object;
-        gizmo.enabled = !!object && (!profileObject || profilePoint);
+        const selectedProfilePoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+            .filter(item => item?.kind === 'walk-profile-point').length;
+        gizmo.enabled = !!object && (!profileObject || profilePoint)
+            && !(profilePoint && selectedProfilePoints > 1);
         gizmo.showX = !!object;
         gizmo.showY = profilePoint;
         gizmo.showZ = false;
@@ -228,6 +498,31 @@ export function createCompositionViewport(container, options) {
         return mesh;
     }
 
+    function syncPlateSegmentObject(segment, leftPosition, rightPosition) {
+        if (!segment || !leftPosition || !rightPosition) return;
+        const start = { x: leftPosition.x, y: -leftPosition.y };
+        const end = { x: rightPosition.x, y: -rightPosition.y };
+        const dx = end.x - start.x, dy = end.y - start.y;
+        const length = Math.max(Math.hypot(dx, dy), 1);
+        segment.geometry?.dispose();
+        segment.geometry = new THREE.PlaneGeometry(length, 7);
+        segment.position.set((start.x + end.x) * 0.5, -(start.y + end.y) * 0.5, 3.6);
+        segment.rotation.z = -Math.atan2(dy, dx);
+    }
+
+    function syncWalkProfileSegmentsFromPoints() {
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        if (!Array.isArray(profile) || profile.length < 2) return;
+        for (let index = 0; index < profile.length - 1; index++) {
+            const segment = walkProfileObjects.get(`walk-profile-segment:${index}`);
+            const left = walkProfileObjects.get(`walk-profile-point:${index}`);
+            const right = walkProfileObjects.get(`walk-profile-point:${index + 1}`);
+            if (!segment || !left || !right) continue;
+            syncPlateSegmentObject(segment, left.position, right.position);
+        }
+    }
+
     function rebuildWalkProfileControls() {
         clearWalkProfileControls();
         if (!plate || !model) return;
@@ -284,6 +579,22 @@ export function createCompositionViewport(container, options) {
             setWalkProfileHover(null);
         }
         rebuildPlayerPreview();
+        refreshOverlay();
+    }
+
+    function setWalkProfileComponentMode(mode) {
+        if (mode !== 'point' && mode !== 'segment') {
+            throw new Error(`Unsupported Walk Profile component mode '${mode}'.`);
+        }
+        if (mode === walkProfileComponentMode) return;
+        walkProfileComponentMode = mode;
+        setWalkProfileHover(null);
+        if ((mode === 'point' && walkProfileSelection?.kind === 'walk-profile-segment')
+                || (mode === 'segment' && walkProfileSelection?.kind === 'walk-profile-point')) {
+            setSemanticSelection(null);
+            options.onSelection?.(null);
+        }
+        refreshWalkProfileVisualState();
         refreshOverlay();
     }
 
@@ -594,6 +905,11 @@ export function createCompositionViewport(container, options) {
     }
     function hide() { visible = false; layer.style.display = 'none'; }
     renderer.domElement.addEventListener('pointermove', event => {
+        lastPointerEvent = pointerSnapshot(event);
+        if (modalProfileMove) {
+            updateModalProfileMove(event);
+            return;
+        }
         if (!walkProfileEditing || gizmo.dragging || gizmo.axis) return;
         setWalkProfileHover(pickWalkProfile(event));
     });
@@ -602,11 +918,26 @@ export function createCompositionViewport(container, options) {
     });
     renderer.domElement.addEventListener('pointerdown', event => {
         renderer.domElement.focus({ preventScroll: true });
+        lastPointerEvent = pointerSnapshot(event);
+        if (modalProfileMove) {
+            if (event.button === 0) endModalProfileMove(true);
+            else if (event.button === 2) endModalProfileMove(false);
+            if (event.button === 0 || event.button === 2) {
+                event.preventDefault();
+                return;
+            }
+        }
         if (event.button !== 0 || gizmo.axis || gizmo.dragging) return;
         if (walkProfileEditing) {
             const selection = pickWalkProfile(event);
-            setSemanticSelection(selection);
-            options.onSelection?.(selection);
+            if (event.shiftKey && selection && options.onToggleSelection) {
+                options.onToggleSelection(selection);
+                const active = options.spatialInteraction?.snapshot?.().selection || null;
+                setSemanticSelection(active);
+            } else {
+                setSemanticSelection(selection);
+                options.onSelection?.(selection);
+            }
             return;
         }
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);
@@ -616,6 +947,10 @@ export function createCompositionViewport(container, options) {
         const hit = pick(event); if (hit) options.onOpenAt?.(semantic(hit));
     });
     renderer.domElement.addEventListener('keydown', event => {
+        if (handleModalProfileKey(event)) {
+            event.preventDefault();
+            return;
+        }
         if (event.code === 'Home') { event.preventDefault(); fit(); }
     });
     gizmo.addEventListener('mouseDown', () => {
@@ -623,13 +958,32 @@ export function createCompositionViewport(container, options) {
             const object = walkProfileObjects.get(walkProfileSelection.key);
             const source = model.map.source.traversal.lane.groundProfile?.[walkProfileSelection.index];
             if (object && source) {
+                const selectedPoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
+                    .filter(item => item?.kind === 'walk-profile-point');
+                const effective = selectedPoints.some(item => item.key === walkProfileSelection.key)
+                    ? selectedPoints : [walkProfileSelection];
+                const profile = model.map.source.traversal.lane.groundProfile;
+                const targets = effective.map(selection => {
+                    const targetObject = walkProfileObjects.get(selection.key);
+                    const targetSource = profile?.[selection.index];
+                    return targetObject && targetSource ? {
+                        selection,
+                        object: targetObject,
+                        origin: targetObject.position.clone(),
+                        source: { y: Number(targetSource.y), z: Number(targetSource.z) }
+                    } : null;
+                }).filter(Boolean);
                 gesture = {
                     kind: 'walk-profile-point',
                     selection: walkProfileSelection,
                     object,
                     source: { y: Number(source.y), z: Number(source.z) },
-                    origin: object.position.clone()
+                    origin: object.position.clone(),
+                    targets,
+                    deltaY: 0,
+                    deltaZ: 0
                 };
+                options.spatialInteraction?.beginMove?.();
             }
         } else {
             const record = events.get(String(selectedId));
@@ -637,7 +991,12 @@ export function createCompositionViewport(container, options) {
         }
         controls.enabled = false;
     });
-    gizmo.addEventListener('objectChange', refreshOverlay);
+    gizmo.addEventListener('objectChange', () => {
+        if (walkProfileEditing && walkProfileSelection?.kind === 'walk-profile-point') {
+            syncWalkProfileSegmentsFromPoints();
+        }
+        refreshOverlay();
+    });
     gizmo.addEventListener('mouseUp', () => {
         controls.enabled = true;
         if (!gesture) return;
@@ -712,6 +1071,7 @@ export function createCompositionViewport(container, options) {
         setSceneModel, show, select, hide, setSemanticSelection,
         isPlate: () => !!plate,
         isVisible: () => visible,
+        getCanvas: () => renderer.domElement,
         setWalkMeshVisible(visible) {
             walkMeshVisible = !!visible;
             walkOverlay.visible = walkMeshVisible || walkProfileEditing;
@@ -719,6 +1079,9 @@ export function createCompositionViewport(container, options) {
         getWalkMeshVisible: () => walkMeshVisible,
         setWalkProfileEditing,
         getWalkProfileEditing: () => walkProfileEditing,
+        setWalkProfileComponentMode,
+        getWalkProfileComponentMode: () => walkProfileComponentMode,
+        beginWalkProfileExtrude: beginModalProfileExtrude,
         getWalkProfileSelection: () => walkProfileSelection,
         refreshWalkProfile() {
             rebuildWalkOverlay();

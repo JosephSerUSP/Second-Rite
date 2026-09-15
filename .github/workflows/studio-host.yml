@@ -60,6 +60,13 @@ jobs:
           npm run studio:host:check
           if ($LASTEXITCODE -ne 0) { throw "Studio host currentness check failed (exit $LASTEXITCODE)" }
 
+      - name: Run real Electron Studio behavioral workflow
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm run test:studio-playwright
+          if ($LASTEXITCODE -ne 0) { throw "Studio Playwright behavioral workflow failed (exit $LASTEXITCODE)" }
+
       - name: Assert generated host is disposable and tracked source stayed clean
         shell: pwsh
         run: |

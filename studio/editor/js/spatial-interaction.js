@@ -70,6 +70,8 @@
         'profile-view-underdetermined': 'This view sees the Walk Profile edge-on; constrain to Y or Z, or orbit to reveal the profile plane.',
         'profile-axis-edge-on': 'That axis points into the current view; choose another axis or orbit the viewport.',
         'profile-endpoint': 'Walk Profile endpoints cannot be deleted.',
+        'profile-endpoint-required': 'Extrude requires the active Walk Profile point to be an endpoint.',
+        'invalid-subdivision-count': 'Subdivision cuts must be a whole number from 1 to 64.',
         'no-profile-segment-selected': 'Select a Walk Profile segment first.',
         'no-profile-point-selected': 'Select a Walk Profile point first.',
         'invalid-ground-profile': 'The Walk Profile contains invalid coordinates.',
@@ -117,6 +119,7 @@
         return {
             hover: state.hover,
             selection: state.selection,
+            selectionSet: state.selectionSet.slice(),
             operation: state.operation,
             constraint: state.constraint,
             value: state.value,
@@ -129,6 +132,7 @@
         const state = {
             hover: null,
             selection: null,
+            selectionSet: [],
             operation: null,
             constraint: null,
             value: null,
@@ -152,6 +156,37 @@
             },
             setSelection(selection) {
                 state.selection = selection || null;
+                state.selectionSet = selection ? [selection] : [];
+                state.feedback = null;
+                return emit();
+            },
+            setSelectionSet(selections, activeSelection) {
+                const unique = [];
+                const seen = new Set();
+                (Array.isArray(selections) ? selections : []).forEach(selection => {
+                    const key = selection && selection.key;
+                    if (!selection || !key || seen.has(key)) return;
+                    seen.add(key);
+                    unique.push(selection);
+                });
+                let active = activeSelection || null;
+                if (active && !seen.has(active.key)) active = null;
+                if (!active) active = unique[unique.length - 1] || null;
+                state.selectionSet = unique;
+                state.selection = active;
+                state.feedback = null;
+                return emit();
+            },
+            toggleSelection(selection) {
+                if (!selection?.key) return cloneState(state);
+                const next = state.selectionSet.slice();
+                const existing = next.findIndex(candidate => candidate.key === selection.key);
+                if (existing >= 0) next.splice(existing, 1);
+                else next.push(selection);
+                state.selectionSet = next;
+                state.selection = existing >= 0
+                    ? (next[next.length - 1] || null)
+                    : selection;
                 state.feedback = null;
                 return emit();
             },

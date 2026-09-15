@@ -207,6 +207,44 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'free 3D profile editing exposes hover before selection');
     assert.match(compositionSource, /setWalkProfileHover/,
         'plate profile editing exposes the same hover-state grammar');
+    assert.match(viewportSource, /event\.code === 'Tab'/,
+        'Walk Profile editing must be reachable through Blender-style Tab');
+    assert.match(viewportSource, /event\.code === 'Digit1'/,
+        'point component mode must use Blender-style 1');
+    assert.match(viewportSource, /event\.code === 'Digit2'/,
+        'segment component mode must use Blender-style 2');
+    assert.match(viewportSource, /event\.code === 'KeyX'/,
+        'point dissolve must be available through Blender-style X/Delete');
+    assert.match(viewportSource, /event\.code === 'KeyA'/,
+        'A must select all components in the active profile component mode');
+    assert.match(viewportSource, /event\.code === 'KeyE'/,
+        'endpoint extrusion must use Blender-style E');
+    assert.match(viewportBaseSource, /walk-profile-extrude-preview/,
+        '3D extrusion must preview topology before committing authored data');
+    assert.match(compositionSource, /walk-profile-extrude-preview/,
+        'plate extrusion must use the same cancel-safe preview topology');
+    assert.match(compositionSource, /handleModalProfileKey/,
+        'plate composition must own the same semantic modal G grammar as free 3D');
+    assert.match(compositionSource, /beginModalProfileExtrude/,
+        'plate composition must own cancel-safe modal E extrusion');
+    assert.match(compositionSource, /selectedProfilePoints > 1/,
+        'plate multi-selection must not fall back to a single-point screen-space gizmo');
+    assert.match(studioSource, /Subdivide/,
+        'selected segments expose a real Subdivide operator rather than midpoint-only Split');
+    assert.match(studioSource, /Y Lane/,
+        'precise point editing labels authored lane Y explicitly');
+    assert.match(studioSource, /Z Elev/,
+        'precise point editing labels authored elevation Z explicitly');
+    assert.match(viewportBaseSource, /event\.shiftKey && profileSelection/,
+        'free 3D profile editing must support Shift+click selection toggles');
+    assert.match(compositionSource, /event\.shiftKey && selection/,
+        'plate profile editing must support the same Shift+click selection toggles');
+    assert.match(viewportBaseSource, /onMoveGroundProfilePoints/,
+        'modal G must route multi-point movement through the semantic command boundary');
+    assert.match(viewportBaseSource, /walkProfileComponentMode/,
+        'free 3D picking must respect explicit Walk Profile component modes');
+    assert.match(compositionSource, /walkProfileComponentMode/,
+        'plate picking must respect the same Walk Profile component modes');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

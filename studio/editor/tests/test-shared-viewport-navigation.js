@@ -39,7 +39,7 @@ test('plate and 3D controls keep authored LMB separate from stable camera naviga
 test('plate and 3D previews crop the authored sprite frame before sizing it', () => {
     const source = fs.readFileSync(require.resolve('../js/three-authoring-tools.js'), 'utf8');
     const start = source.indexOf('export function configureEventSpriteFrame');
-    const end = source.indexOf('// One navigation policy', start);
+    const end = source.indexOf('export function installNavigation', start);
     const context = {};
     vm.createContext(context);
     vm.runInContext(source.slice(start, end).replace('export ', ''), context);

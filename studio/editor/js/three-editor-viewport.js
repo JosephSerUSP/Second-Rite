@@ -571,6 +571,10 @@ export function createThreeEditorViewport(container, options = {}) {
 
         if (event.code === 'Tab') {
             event.preventDefault();
+            if (!status.authored) {
+                spatialInteraction.reject('missing-ground-profile');
+                return;
+            }
             api.setWalkProfileEditing(!status.editing);
             return;
         }

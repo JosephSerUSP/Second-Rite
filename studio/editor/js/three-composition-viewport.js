@@ -393,8 +393,8 @@ export function createCompositionViewport(container, options) {
         refreshWalkProfileVisualState();
     }
     const disposeNavigation = installNavigation(renderer.domElement, [controls], {
-        planar: true, canPan: event => !gizmo.axis && !gizmo.dragging
-            && !(walkProfileEditing ? pickWalkProfile(event) : pick(event))
+        planar: true,
+        canPan: () => !gizmo.axis && !gizmo.dragging && !modalProfileMove
     });
     function refreshOverlay() {
         const profileObject = walkProfileEditing && walkProfileSelection

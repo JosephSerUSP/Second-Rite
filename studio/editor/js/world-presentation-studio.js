@@ -524,7 +524,7 @@
             const pointMode = editing && status.componentMode === 'point';
             const edgeMode = editing && status.componentMode === 'segment';
 
-            walkProfile.style.display = show ? '' : 'none';
+            walkProfile.style.display = show && authored ? '' : 'none';
             walkMesh.style.display = editing ? 'none' : '';
             createProfile.style.display = show && !authored && !editing ? '' : 'none';
             profilePointMode.style.display = authored && editing ? '' : 'none';
@@ -561,7 +561,9 @@
             deleteProfile.disabled = !pointMode || selectedPoints.length === 0 || includesEndpoint;
 
             if (!authored) {
-                profileHelp.textContent = 'No authored Walk Profile · Create Profile to begin.';
+                profileHelp.textContent = status.feedback
+                    ? `${status.feedback} Create Profile to begin.`
+                    : 'No authored Walk Profile · Create Profile to begin.';
             } else if (!editing) {
                 profileHelp.textContent = 'Tab or Edit Walk Profile · then 1 Point / 2 Edge.';
             } else if (pointMode) {

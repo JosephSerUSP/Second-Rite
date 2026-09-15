@@ -27,10 +27,12 @@ test('projection and orientation are independent in the Three viewport', () => {
 test('Blender-like mouse and numpad integration preserves authored left click', () => {
     assert.match(navigation, /control\.mouseButtons\.LEFT = null/,
         'left click remains owned by map authoring');
-    assert.match(navigation, /control\.mouseButtons\.MIDDLE = THREE\.MOUSE\.PAN/,
-        'middle drag must pan with the game camera on planar maps');
-    assert.match(navigation, /event\.altKey && !planar \? THREE\.MOUSE\.ROTATE : THREE\.MOUSE\.PAN/,
-        'Alt+middle may orbit only fully 3D maps');
+    assert.match(navigation, /control\.mouseButtons\.MIDDLE = planar \? THREE\.MOUSE\.PAN : THREE\.MOUSE\.ROTATE/,
+        'middle drag must pan planar views and orbit fully 3D views');
+    assert.match(navigation, /control\.mouseButtons\.RIGHT = THREE\.MOUSE\.PAN/,
+        'right drag remains a predictable pan gesture outside modal transforms');
+    assert.doesNotMatch(navigation, /control\.mouseButtons\.LEFT = canPan\(event\)/,
+        'authored LMB ownership must not depend on per-gesture hit testing');
     assert.match(viewport, /action === 'toggle-projection'[\s\S]*requestProjectionToggle\(\)/);
     assert.match(viewport, /\['front', 'back', 'right', 'left', 'top', 'bottom'\]/);
     assert.match(viewport, /\['orbit-down', 'orbit-left', 'orbit-right', 'orbit-up'\]/);

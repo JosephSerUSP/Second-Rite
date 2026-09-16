@@ -437,8 +437,8 @@
         walkProfile.type = 'button';
         walkProfile.className = 'win98-btn';
         walkProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        walkProfile.title = 'Enter/exit authored Walk Profile Edit Mode. Tab performs the same action.';
-        walkProfile.textContent = 'Edit Walk Profile';
+        walkProfile.title = 'Enter/exit the direct Ground Profile editor. Tab performs the same action.';
+        walkProfile.textContent = 'Edit Ground Profile';
 
         const createProfile = document.createElement('button');
         createProfile.type = 'button';
@@ -447,43 +447,19 @@
         createProfile.title = 'Explicitly create a flat two-point groundProfile from the current lane bounds and groundZ.';
         createProfile.textContent = 'Create Profile';
 
-        const profilePointMode = document.createElement('button');
-        profilePointMode.type = 'button';
-        profilePointMode.className = 'win98-btn';
-        profilePointMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        profilePointMode.title = 'Select Walk Profile points. Shortcut: 1.';
-        profilePointMode.textContent = 'Point mode (1)';
-
-        const profileSegmentMode = document.createElement('button');
-        profileSegmentMode.type = 'button';
-        profileSegmentMode.className = 'win98-btn';
-        profileSegmentMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        profileSegmentMode.title = 'Select Walk Profile edges. Shortcut: 2.';
-        profileSegmentMode.textContent = 'Edge mode (2)';
-
-        const splitProfile = document.createElement('button');
-        splitProfile.type = 'button';
-        splitProfile.className = 'win98-btn';
-        splitProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        splitProfile.title = 'Subdivide all selected Walk Profile edges. Shift+LMB selects multiple edges.';
-        splitProfile.textContent = 'Subdivide';
-
-        const subdivideCuts = document.createElement('input');
-        subdivideCuts.type = 'number';
-        subdivideCuts.className = 'win98-input';
-        subdivideCuts.min = '1';
-        subdivideCuts.max = '64';
-        subdivideCuts.step = '1';
-        subdivideCuts.value = '1';
-        subdivideCuts.style.cssText = 'width:42px;height:20px;font-size:9px;display:none;';
-        subdivideCuts.title = 'Number of evenly spaced cuts per selected edge.';
+        const insertProfilePoint = document.createElement('button');
+        insertProfilePoint.type = 'button';
+        insertProfilePoint.className = 'win98-btn';
+        insertProfilePoint.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        insertProfilePoint.title = 'Insert a new point halfway along the selected profile segment.';
+        insertProfilePoint.textContent = 'Insert point';
 
         const deleteProfile = document.createElement('button');
         deleteProfile.type = 'button';
         deleteProfile.className = 'win98-btn';
         deleteProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        deleteProfile.title = 'Dissolve selected interior points. X/Delete performs the same operation; endpoints are protected.';
-        deleteProfile.textContent = 'Dissolve';
+        deleteProfile.title = 'Delete selected interior points. Endpoints are protected.';
+        deleteProfile.textContent = 'Delete point';
 
         const profileHelp = document.createElement('span');
         profileHelp.style.cssText = [
@@ -497,10 +473,10 @@
         legendTitle.textContent = 'READING THE VIEW';
         profileLegend.appendChild(legendTitle);
         for (const [kind, label, meaning] of [
-            ['active', 'Orange', 'active component'],
-            ['selected', 'Gold', 'selected components'],
-            ['edge', 'Cyan line', 'Walk Profile edge'],
-            ['face', 'Blue fill', 'walkable face / lane'],
+            ['active', 'Orange', 'hovered point or segment'],
+            ['selected', 'Gold', 'selected point or segment'],
+            ['edge', 'Cyan line', 'authored ground profile'],
+            ['face', 'Blue fill', 'derived walkable surface'],
         ]) {
             const row = document.createElement('div');
             row.className = 'thestra-toolbar-legend-row';
@@ -514,7 +490,7 @@
         const selectionReadout = document.createElement('div');
         selectionReadout.className = 'thestra-toolbar-selection-readout';
         profileLegend.appendChild(selectionReadout);
-        profileHelp.title = 'Walk Profile workflow and active-mode help.';
+        profileHelp.title = 'Ground Profile workflow help.';
 
         const profileYLabel = document.createElement('span');
         profileYLabel.textContent = 'Y Lane';
@@ -574,22 +550,24 @@
             const show = !!status?.available;
             const editing = show && !!status.editing;
             const authored = show && !!status.authored;
-            const pointMode = editing && status.componentMode === 'point';
-            const edgeMode = editing && status.componentMode === 'segment';
+            const selectedEdges = (status?.selections || [])
+                .filter(selection => selection?.kind === 'walk-profile-segment');
+            const selectedPoints = (status?.selections || [])
+                .filter(selection => selection?.kind === 'walk-profile-point');
+            const pointSelected = selectedPoints.length > 0;
+            const edgeSelected = selectedEdges.length > 0;
 
             walkProfile.style.display = show && authored ? '' : 'none';
             walkMesh.style.display = editing ? 'none' : '';
             createProfile.style.display = show && !authored && !editing ? '' : 'none';
-            profilePointMode.style.display = authored && editing ? '' : 'none';
-            profileSegmentMode.style.display = authored && editing ? '' : 'none';
-            splitProfile.style.display = authored && edgeMode ? '' : 'none';
-            subdivideCuts.style.display = authored && edgeMode ? '' : 'none';
-            deleteProfile.style.display = authored && pointMode ? '' : 'none';
+            insertProfilePoint.style.display = authored && editing && edgeSelected ? '' : 'none';
+            deleteProfile.style.display = authored && editing && pointSelected ? '' : 'none';
             profileHelp.style.display = show ? '' : 'none';
             profileGroup.style.display = show ? '' : 'none';
             profileLegend.style.display = editing ? '' : 'none';
 
-            const precisePoint = authored && pointMode
+            const precisePoint = authored && editing && status.selectionCount === 1
+                && status.selection?.kind === 'walk-profile-point'
                 && status.selectionCount === 1 && status.activePoint;
             profileYLabel.style.display = precisePoint ? '' : 'none';
             profileY.style.display = precisePoint ? '' : 'none';
@@ -602,36 +580,30 @@
 
             if (!show) return;
             walkProfile.classList.toggle('active', editing);
-            walkProfile.textContent = editing ? 'Exit Walk Profile Edit' : 'Edit Walk Profile';
-            profilePointMode.classList.toggle('active', pointMode);
-            profileSegmentMode.classList.toggle('active', edgeMode);
-
-            const selectedEdges = (status.selections || [])
-                .filter(selection => selection?.kind === 'walk-profile-segment');
-            const selectedPoints = (status.selections || [])
-                .filter(selection => selection?.kind === 'walk-profile-point');
+            walkProfile.textContent = editing ? 'Exit Ground Profile Edit' : 'Edit Ground Profile';
             selectionReadout.textContent = selectedPoints.length
                 ? `Selection: ${selectedPoints.length} point${selectedPoints.length === 1 ? '' : 's'}`
                 : selectedEdges.length
                     ? `Selection: ${selectedEdges.length} edge${selectedEdges.length === 1 ? '' : 's'}`
                     : 'Selection: none';
-            splitProfile.disabled = !edgeMode || selectedEdges.length === 0;
+            insertProfilePoint.disabled = selectedEdges.length !== 1;
             const includesEndpoint = selectedPoints.some(selection =>
                 selection.index === 0 || selection.index === status.pointCount - 1);
-            deleteProfile.disabled = !pointMode || selectedPoints.length === 0 || includesEndpoint;
+            deleteProfile.disabled = selectedPoints.length === 0 || includesEndpoint;
 
             if (!authored) {
                 profileHelp.textContent = status.feedback
                     ? `${status.feedback} Create Profile to begin.`
                     : 'No authored Walk Profile · Create Profile to begin.';
             } else if (!editing) {
-                profileHelp.textContent = 'Tab or Edit Walk Profile · Point mode (1) / Edge mode (2).';
-            } else if (pointMode) {
-                profileHelp.textContent = status.feedback
-                    || 'POINT MODE · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · Enter/LMB confirm · Esc/RMB cancel · E endpoint · X/Delete dissolve';
+                profileHelp.textContent = 'Edit Ground Profile to shape the walkable surface. Inspect Walk Mesh shows the derived mesh.';
             } else {
                 profileHelp.textContent = status.feedback
-                    || 'EDGE MODE · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 returns to points · Tab exits';
+                    || (selectedPoints.length
+                        ? 'Point selected · drag or G move · G Y / G Z constrain · E extend endpoint · Delete remove'
+                        : selectedEdges.length
+                            ? 'Segment selected · Insert point to add a control point here'
+                            : 'Click a point to move it, or click a segment to select it · Shift-click adds/removes');
             }
         }
 
@@ -659,24 +631,14 @@
             syncWalkMesh();
             syncWalkProfile();
         });
-        profilePointMode.addEventListener('click', () => {
-            viewportApi()?.setWalkProfileComponentMode?.('point');
-            syncWalkProfile();
-        });
-        profileSegmentMode.addEventListener('click', () => {
-            viewportApi()?.setWalkProfileComponentMode?.('segment');
-            syncWalkProfile();
-        });
         createProfile.addEventListener('click', () => {
             const viewport = viewportApi();
             const result = viewport?.createGroundProfile?.();
             if (result?.ok) viewport.setWalkProfileEditing(true);
             syncWalkProfile();
         });
-        splitProfile.addEventListener('click', () => {
-            const cuts = Math.max(1, Math.min(64, Math.trunc(Number(subdivideCuts.value) || 1)));
-            subdivideCuts.value = String(cuts);
-            viewportApi()?.subdivideSelectedGroundProfileSegments?.(cuts);
+        insertProfilePoint.addEventListener('click', () => {
+            viewportApi()?.insertSelectedGroundProfilePoint?.();
             syncWalkProfile();
         });
         deleteProfile.addEventListener('click', () => {
@@ -699,15 +661,13 @@
         });
 
         profileControls.append(
-            walkProfile, profilePointMode, profileSegmentMode,
-            splitProfile, subdivideCuts, deleteProfile
+            walkProfile, insertProfilePoint, deleteProfile
         );
         sceneGroup.append(sceneSelect, info);
         toolbar.mount('world-presentation', [cameraGroup, profileGroup, sceneGroup]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
-            walkProfile, createProfile, profilePointMode, profileSegmentMode,
-            splitProfile, subdivideCuts, deleteProfile,
+            walkProfile, createProfile, insertProfilePoint, deleteProfile,
             profileYLabel, profileY, profileZLabel, profileZ, profileHelp, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };

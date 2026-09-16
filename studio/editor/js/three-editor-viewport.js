@@ -424,6 +424,9 @@ export function createThreeEditorViewport(container, options = {}) {
             if (result?.selection) api.setSelection(result.selection);
             return result;
         },
+        insertSelectedGroundProfilePoint() {
+            return api.splitSelectedGroundProfileSegment(0.5);
+        },
         subdivideSelectedGroundProfileSegments(cuts = 1) {
             const segments = api.getWalkProfileSelections()
                 .filter(selection => selection.kind === 'walk-profile-segment')

@@ -199,10 +199,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
-    assert.match(studioSource, /Point mode \(1\)/,
-        'Edit Mode must expose point selection as an explicit component state');
-    assert.match(studioSource, /Edge mode \(2\)/,
-        'Edit Mode must expose edge selection as an explicit component state');
+    assert.doesNotMatch(studioSource, /Point mode \(1\)|Edge mode \(2\)/,
+        'Ground Profile editing must not expose separate point and edge modes');
+    assert.match(studioSource, /Insert point/,
+        'a selected profile segment must expose a direct insert-point action');
     assert.match(studioSource, /G Y \/ G Z constrain/,
         'the toolbar must teach semantic authored-axis constraints in place');
     assert.match(studioSource, /walkMesh\.style\.display = editing \? 'none' : ''/,
@@ -251,8 +251,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'plate composition must own cancel-safe modal E extrusion');
     assert.match(compositionSource, /selectedProfilePoints > 1/,
         'plate multi-selection must not fall back to a single-point screen-space gizmo');
-    assert.match(studioSource, /Subdivide/,
-        'selected segments expose a real Subdivide operator rather than midpoint-only Split');
+    assert.match(studioSource, /Click a point to move it, or click a segment to select it/,
+        'the toolbar must explain the unified point-and-segment workflow');
     assert.match(studioSource, /Y Lane/,
         'precise point editing labels authored lane Y explicitly');
     assert.match(studioSource, /Z Elev/,

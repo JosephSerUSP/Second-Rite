@@ -340,7 +340,6 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         [0, 5, 10], 'rejected numeric crossing must preserve authored profile ordering');
         mark(t, 'invalid profile crossing stayed cancel-safe and surfaced a local reason');
 
-        await mapCanvas.press('2');
         await mainPage.evaluate(() => {
             window.ThestraRuntimeCameraViewport.setSelection({
                 kind: 'walk-profile-segment',
@@ -350,12 +349,10 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         });
         await mainPage.waitForFunction(() => {
             const button = Array.from(document.querySelectorAll('button'))
-                .find(candidate => candidate.textContent.trim() === 'Subdivide');
+                .find(candidate => candidate.textContent.trim() === 'Insert point');
             return !!button && !button.disabled && button.getClientRects().length > 0;
         });
-        assert.equal(await mainPage.evaluate(() =>
-            window.ThestraRuntimeCameraViewport.getWalkProfileComponentMode()), 'segment');
-        mark(t, 'segment selection immediately enabled Subdivide in the live toolbar');
+        mark(t, 'segment selection immediately enabled Insert point in the unified toolbar');
 
         await mapCanvas.press('1');
         await mainPage.evaluate(() => {
@@ -404,7 +401,6 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         'Esc-canceled E extrusion must leave Map profile byte-for-byte unchanged');
         mark(t, 'E created only temporary endpoint topology until confirmation');
 
-        await mapCanvas.press('2');
         await mainPage.evaluate(() => {
             window.ThestraRuntimeCameraViewport.setSelection({
                 kind: 'walk-profile-segment',
@@ -412,13 +408,13 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
                 index: 0,
             });
         });
-        const beforeSubdivideCount = await mainPage.evaluate(() =>
+        const beforeInsertCount = await mainPage.evaluate(() =>
             dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length);
-        await mainPage.locator('button', { hasText: /^Subdivide$/ }).click();
+        await mainPage.locator('button', { hasText: /^Insert point$/ }).click();
         await mainPage.waitForFunction(count =>
             dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length === count + 1,
-        beforeSubdivideCount);
-        mark(t, 'live Subdivide toolbar action inserted authored profile topology');
+        beforeInsertCount);
+        mark(t, 'live Insert point action added authored profile topology');
 
         await mapCanvas.focus();
         await mapCanvas.press('1');

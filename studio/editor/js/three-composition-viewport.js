@@ -103,11 +103,7 @@ export function createCompositionViewport(container, options) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing) return null;
         updatePointer(event);
-        const wantedKind = walkProfileComponentMode === 'segment'
-            ? 'walk-profile-segment' : 'walk-profile-point';
-        const targets = walkProfileHitTargets.filter(object =>
-            object.userData?.thestraSelection?.kind === wantedKind);
-        return raycaster.intersectObjects(targets, false)[0]?.object.userData.thestraSelection || null;
+        return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
     }
 
     function pointerSnapshot(event) {
@@ -370,17 +366,15 @@ export function createCompositionViewport(container, options) {
             const active = key === activeKey;
             const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                const activeType = walkProfileComponentMode === 'point';
-                object.material.transparent = !activeType;
-                object.material.opacity = activeType ? 1 : 0.35;
+                object.material.transparent = false;
+                object.material.opacity = 1;
                 object.material.color.setHex(active ? 0xffa24d
                     : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
                 object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
-                const activeType = walkProfileComponentMode === 'segment';
                 object.material.color.setHex(active ? 0xffa24d
                     : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : (activeType ? 0.5 : 0.2);
+                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : 0.55;
             }
         }
     }

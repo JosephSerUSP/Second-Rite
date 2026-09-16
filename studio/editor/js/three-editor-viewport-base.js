@@ -1257,11 +1257,7 @@ export function createThreeEditorViewport(container, options = {}) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing || !sceneModel) return null;
         updatePointer(event);
-        const wantedKind = walkProfileComponentMode === 'segment'
-            ? 'walk-profile-segment' : 'walk-profile-point';
-        const targets = walkProfileSelectable.filter(object =>
-            object.userData?.thestraSelection?.kind === wantedKind);
-        const hits = raycaster.intersectObjects(targets, false);
+        const hits = raycaster.intersectObjects(walkProfileSelectable, false);
         return hits[0]?.object?.userData?.thestraSelection || null;
     }
 
@@ -1326,19 +1322,16 @@ export function createThreeEditorViewport(container, options = {}) {
             const active = key === activeKey;
             const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                const activeType = walkProfileComponentMode === 'point';
-                object.material.transparent = !activeType;
-                object.material.opacity = activeType ? 1 : 0.25;
+                object.material.transparent = false;
+                object.material.opacity = 1;
                 object.material.color.setHex(active ? 0xff8a33
                     : selected ? 0xffd45a : hovered ? 0xffffff : 0x776e45);
                 object.userData.thestraStateScale = active ? 1.45
                     : selected ? 1.28 : hovered ? 1.18 : 1;
             } else if (semantic?.kind === 'walk-profile-segment') {
-                const activeType = walkProfileComponentMode === 'segment';
                 object.material.color.setHex(active ? 0xff8a33
                     : selected ? 0xffd45a : hovered ? 0xffffff : 0x31b9d9);
-                object.material.opacity = active ? 1
-                    : selected ? 1 : hovered ? 1 : (activeType ? 0.92 : 0.22);
+                object.material.opacity = active ? 1 : selected ? 1 : hovered ? 1 : 0.82;
                 object.userData.thestraStateScale = active ? 1.75
                     : selected ? 1.5 : hovered ? 1.35 : 1;
             }

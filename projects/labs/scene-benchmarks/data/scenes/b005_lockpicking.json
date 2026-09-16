@@ -112,7 +112,7 @@
             "assignments": [
               { "name": "cursor_pos", "value": "v.cursor_pos + (v.cursor_speed * v.cursor_dir * v.time.dt)" },
               { "name": "cursor_dir", "value": "v.cursor_pos > 100 and -1 or (v.cursor_pos < 0 and 1 or v.cursor_dir)" },
-              { "name": "cursor_pos", "value": "math.max(0, math.min(100, v.cursor_pos))" }
+              { "name": "cursor_pos", "value": "clamp(v.cursor_pos, 0, 100)" }
             ]
           }
         ]

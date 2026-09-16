@@ -487,10 +487,9 @@
 
         const profileHelp = document.createElement('span');
         profileHelp.style.cssText = [
-            'font-size:9px', 'color:var(--win-dark-shadow)', 'display:none',
-            'max-width:520px', 'overflow:hidden', 'text-overflow:ellipsis',
-            'white-space:nowrap', 'flex:1 1 260px'
+            'font-size:9px', 'color:var(--win-dark-shadow)', 'display:none'
         ].join(';');
+        profileHelp.className = 'thestra-toolbar-help';
         profileHelp.title = 'Walk Profile workflow and active-mode help.';
 
         const profileYLabel = document.createElement('span');
@@ -515,6 +514,36 @@
         profileZ.style.cssText = 'width:62px;height:20px;font-size:9px;display:none;';
         profileZ.title = 'Active Walk Profile point · Elevation Z';
 
+        const profileGroup = document.createElement('div');
+        profileGroup.className = 'thestra-toolbar-group thestra-toolbar-profile';
+        profileGroup.style.display = 'none';
+        const profileTitle = document.createElement('div');
+        profileTitle.className = 'thestra-toolbar-group-title';
+        profileTitle.textContent = 'WALK PROFILE';
+        const profileControls = document.createElement('div');
+        profileControls.className = 'thestra-toolbar-profile-controls';
+        const profileCoordinates = document.createElement('div');
+        profileCoordinates.className = 'thestra-toolbar-profile-coordinates';
+        profileCoordinates.append(profileYLabel, profileY, profileZLabel, profileZ);
+        profileGroup.append(profileTitle, profileControls, profileCoordinates, profileHelp);
+
+        const cameraGroup = document.createElement('div');
+        cameraGroup.className = 'thestra-toolbar-group';
+        const cameraTitle = document.createElement('div');
+        cameraTitle.className = 'thestra-toolbar-group-title';
+        cameraTitle.textContent = 'CAMERA / GEOMETRY';
+        const cameraControls = document.createElement('div');
+        cameraControls.className = 'thestra-toolbar-profile-controls';
+        cameraGroup.append(cameraTitle, cameraControls);
+        cameraControls.append(free, runtime, walkMesh, createProfile);
+
+        const sceneGroup = document.createElement('div');
+        sceneGroup.className = 'thestra-toolbar-group';
+        const sceneTitle = document.createElement('div');
+        sceneTitle.className = 'thestra-toolbar-group-title';
+        sceneTitle.textContent = 'RUNTIME SCENE';
+        sceneGroup.append(sceneTitle);
+
         function syncWalkProfile() {
             const viewport = viewportApi();
             const status = viewport?.getWalkProfileStatus?.();
@@ -533,6 +562,7 @@
             subdivideCuts.style.display = authored && edgeMode ? '' : 'none';
             deleteProfile.style.display = authored && pointMode ? '' : 'none';
             profileHelp.style.display = show ? '' : 'none';
+            profileGroup.style.display = show ? '' : 'none';
 
             const precisePoint = authored && pointMode
                 && status.selectionCount === 1 && status.activePoint;
@@ -638,13 +668,12 @@
             updateRuntimeControls();
         });
 
-        toolbar.mount('world-presentation', [
-            free, runtime, walkMesh,
-            walkProfile, createProfile, profilePointMode, profileSegmentMode,
-            splitProfile, subdivideCuts, deleteProfile,
-            profileYLabel, profileY, profileZLabel, profileZ, profileHelp,
-            sceneSelect, info
-        ]);
+        profileControls.append(
+            walkProfile, profilePointMode, profileSegmentMode,
+            splitProfile, subdivideCuts, deleteProfile
+        );
+        sceneGroup.append(sceneSelect, info);
+        toolbar.mount('world-presentation', [cameraGroup, profileGroup, sceneGroup]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
             walkProfile, createProfile, profilePointMode, profileSegmentMode,

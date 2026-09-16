@@ -34,11 +34,12 @@
     toolbar.id = 'thestra-map-view-toolbar';
     toolbar.style.cssText = [
         'position:absolute', 'top:6px', 'right:6px', 'z-index:20', 'display:flex',
-        'flex-wrap:wrap', 'max-width:calc(100% - 12px)',
-        'gap:2px', 'align-items:center', 'padding:2px', 'background:var(--win-gray)',
+        'flex-direction:column', 'width:276px', 'max-width:calc(100% - 12px)',
+        'max-height:calc(100% - 12px)', 'overflow:auto', 'gap:6px',
+        'align-items:stretch', 'padding:6px', 'background:var(--win-gray)',
         'border:2px solid',
         'border-color:var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white)',
-        'font-size:10px'
+        'font-size:10px', 'box-shadow:2px 2px 0 rgba(0,0,0,.35)'
     ].join(';');
 
     const status = document.createElement('span');
@@ -93,9 +94,12 @@
     navigationHelp.type = 'button';
     navigationHelp.className = 'win98-btn';
     navigationHelp.style.cssText = 'font-size:10px;padding:2px 6px;';
-    navigationHelp.textContent = 'Keys';
+    navigationHelp.textContent = 'Navigation help';
     navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . / , frame selection.';
     navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
+    const navigationHint = document.createElement('div');
+    navigationHint.style.cssText = 'grid-column:1 / -1;font-size:9px;color:var(--win-dark-shadow);line-height:1.25;';
+    navigationHint.textContent = 'MMB orbit / pan · RMB pan · wheel zoom · LMB select';
     // Declared extension membrane: the Map workspace owns its toolbar DOM.
     // Other surfaces may contribute controls only through this mount API; they
     // never query/mutate the workspace toolbar or depend on child position.
@@ -121,7 +125,19 @@
             return [perspectiveButton, topButton];
         },
     });
-    toolbar.append(toolbarExtensions, perspectiveButton, topButton, navigationHelp, status);
+    const viewGroup = document.createElement('div');
+    viewGroup.className = 'thestra-toolbar-group';
+    const viewTitle = document.createElement('div');
+    viewTitle.className = 'thestra-toolbar-group-title';
+    viewTitle.textContent = 'VIEWPORT';
+    const viewControls = document.createElement('div');
+    viewControls.className = 'thestra-toolbar-group-controls';
+    viewControls.append(perspectiveButton, topButton, navigationHelp, navigationHint);
+    viewGroup.append(viewTitle, viewControls);
+    const statusGroup = document.createElement('div');
+    statusGroup.className = 'thestra-toolbar-status';
+    statusGroup.append(status);
+    toolbar.append(viewGroup, toolbarExtensions, statusGroup);
     area.appendChild(toolbar);
 
     // #482: vertex shading is map/environment authoring, not another spatial

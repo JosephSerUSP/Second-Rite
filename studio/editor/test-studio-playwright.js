@@ -271,6 +271,33 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         }), '1', 'active-point inspector must expose authored elevation Z');
         mark(t, 'active Walk Profile point exposed precise semantic Y/Z fields');
 
+        const toolbarLayout = await mainPage.evaluate(() => {
+            const panel = document.querySelector('#thestra-map-view-toolbar');
+            const profile = document.querySelector('.thestra-toolbar-profile');
+            const help = document.querySelector('.thestra-toolbar-help');
+            if (!panel || !profile || !help) return { ok: false, reason: 'missing toolbar regions' };
+            const rect = node => node.getBoundingClientRect();
+            const overlaps = (a, b) => a.left < b.right && a.right > b.left
+                && a.top < b.bottom && a.bottom > b.top;
+            const helpRect = rect(help);
+            const visibleControls = Array.from(profile.querySelectorAll('button, input'))
+                .filter(node => node.getClientRects().length > 0)
+                .map(node => ({ label: node.textContent || node.title, rect: rect(node) }));
+            return {
+                ok: panel.getClientRects().length > 0 && profile.getClientRects().length > 0
+                    && help.getClientRects().length > 0,
+                helpOverlapsControl: visibleControls.some(item => overlaps(helpRect, item.rect)),
+                helpFitsPanel: helpRect.left >= rect(panel).left && helpRect.right <= rect(panel).right,
+                helpText: help.textContent
+            };
+        });
+        assert.equal(toolbarLayout.ok, true, 'Walk Profile inspector must be visible');
+        assert.equal(toolbarLayout.helpOverlapsControl, false,
+            'Walk Profile help must occupy its own non-overlapping region');
+        assert.equal(toolbarLayout.helpFitsPanel, true,
+            'Walk Profile help must remain inside the contextual panel');
+        mark(t, 'Walk Profile controls and help occupy separate readable panel regions');
+
         const navigationBox = await mapCanvas.boundingBox();
         assert.ok(navigationBox, 'Map canvas must have a real pointer target');
         const beforeNavigation = await mainPage.evaluate(() =>

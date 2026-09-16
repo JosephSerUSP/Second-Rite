@@ -67,6 +67,10 @@ export function createCompositionViewport(container, options) {
     const walkProfileControls = new THREE.Group();
     walkProfileControls.name = 'ThestraPlateWalkProfileAuthoring';
     walkProfileControls.visible = false;
+    // Profile controls are an authoring overlay, not scene geometry. Keep the
+    // whole group in a final render band so the plate's foreground texture
+    // cannot occlude the controls when a point lies on the artwork.
+    walkProfileControls.renderOrder = 100;
     scene.add(walkProfileControls);
     const gizmo = createMoveGizmo(camera, renderer.domElement, ['X'], ['Z', 'Y', 'X']);
     scene.add(gizmo.getHelper());
@@ -546,21 +550,21 @@ export function createCompositionViewport(container, options) {
                 index
             };
             const point = new THREE.Mesh(
-                new THREE.CircleGeometry(8, 16),
+            new THREE.CircleGeometry(4, 16),
                 new THREE.MeshBasicMaterial({
                     color: 0xffff66, depthTest: false, depthWrite: false
                 })
             );
-            point.position.set(screen.x, -screen.y, 4);
-            point.renderOrder = 29;
+            point.position.set(screen.x, -screen.y, 20);
+            point.renderOrder = 101;
             point.userData.thestraSelection = semantic;
             const outline = new THREE.Mesh(
-                new THREE.RingGeometry(9, 12, 16),
+                new THREE.RingGeometry(5, 7, 16),
                 new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
             );
             outline.position.copy(point.position);
-            outline.position.z = 3.95;
-            outline.renderOrder = 28;
+            outline.position.z = 19.5;
+            outline.renderOrder = 100;
             walkProfileControls.add(outline);
             walkProfileControls.add(point);
             walkProfileHitTargets.push(point);

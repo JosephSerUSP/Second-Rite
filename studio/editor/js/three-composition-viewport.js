@@ -831,7 +831,10 @@ export function createCompositionViewport(container, options) {
                 new THREE.MeshBasicMaterial({ color: 0x111820,
                     depthTest: false, depthWrite: false })
             );
-            halo.position.set(x, y, 3.35);
+            // Keep mesh vertices in front of the plate image. The mesh ribbon
+            // is intentionally behind authored profile controls, but these
+            // inspection markers must remain visible over the plate itself.
+            halo.position.set(x, y, 4.2);
             halo.renderOrder = 40;
             walkOverlay.add(halo);
             const core = new THREE.Mesh(
@@ -839,7 +842,7 @@ export function createCompositionViewport(container, options) {
                 new THREE.MeshBasicMaterial({ color: 0xb8ff40,
                     depthTest: false, depthWrite: false })
             );
-            core.position.set(x, y, 3.36);
+            core.position.set(x, y, 4.21);
             core.renderOrder = 41;
             walkOverlay.add(core);
         }

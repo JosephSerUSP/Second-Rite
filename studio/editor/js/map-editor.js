@@ -216,10 +216,15 @@
                 currentMapIndex = idx;
                 loadActiveMap();
             };
-            mapItem.ondblclick = () => {
+            // Double-clicking a map is an easy mouse slip while navigating the
+            // hierarchy. Loading the map is safe; opening the legacy modal is
+            // not an implicit navigation action. Map Properties remains an
+            // explicit Inspector/menu command.
+            mapItem.ondblclick = event => {
+                event.preventDefault();
+                event.stopPropagation();
                 currentMapIndex = idx;
                 loadActiveMap();
-                openMapProperties();
             };
             mapItem.oncontextmenu = (e) => {
                 showMapContextMenu(e, idx);

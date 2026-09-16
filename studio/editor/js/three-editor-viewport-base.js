@@ -1232,18 +1232,19 @@ export function createThreeEditorViewport(container, options = {}) {
                 const point = new THREE.Mesh(
                     new THREE.SphereGeometry(PROFILE_POINT_RADIUS, 12, 8),
                     new THREE.MeshBasicMaterial({
-                        color: 0xffd45a, depthTest: false, depthWrite: false
+                        color: 0xffff66, depthTest: false, depthWrite: false
                     })
                 );
                 point.position.fromArray(position);
                 point.renderOrder = 1000;
                 point.userData.thestraSelection = semantic;
                 const outline = new THREE.Mesh(
-                    new THREE.SphereGeometry(PROFILE_POINT_RADIUS * 1.45, 12, 8),
+                    new THREE.SphereGeometry(PROFILE_POINT_RADIUS * 1.9, 12, 8),
                     new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
                 );
                 outline.position.copy(position);
                 outline.renderOrder = 999;
+                point.userData.thestraProfileOutline = outline;
                 walkProfileContent.add(outline);
                 walkProfileContent.add(point);
                 walkProfileSelectable.push(point);
@@ -1283,6 +1284,7 @@ export function createThreeEditorViewport(container, options = {}) {
                 const screenScale = Math.max(
                     1, PROFILE_POINT_RADIUS_PX * unitsPerPixel / PROFILE_POINT_RADIUS);
                 object.scale.setScalar(screenScale * emphasis);
+                object.userData.thestraProfileOutline?.scale.setScalar(screenScale * emphasis);
             } else if (semantic?.kind === 'walk-profile-segment') {
                 const radialScale = Math.max(
                     1, PROFILE_SEGMENT_RADIUS_PX * unitsPerPixel / PROFILE_SEGMENT_RADIUS);
@@ -1330,8 +1332,8 @@ export function createThreeEditorViewport(container, options = {}) {
             if (semantic?.kind === 'walk-profile-point') {
                 object.material.transparent = false;
                 object.material.opacity = 1;
-                object.material.color.setHex(active ? 0xff8a33
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0xffd45a);
+                object.material.color.setHex(active ? 0xff6b1a
+                    : selected ? 0xffa800 : hovered ? 0xffffff : 0xffff66);
                 object.userData.thestraStateScale = active ? 1.45
                     : selected ? 1.28 : hovered ? 1.18 : 1;
             } else if (semantic?.kind === 'walk-profile-segment') {

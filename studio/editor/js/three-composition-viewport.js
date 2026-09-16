@@ -368,8 +368,8 @@ export function createCompositionViewport(container, options) {
             if (semantic?.kind === 'walk-profile-point') {
                 object.material.transparent = false;
                 object.material.opacity = 1;
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0xffd45a);
+                object.material.color.setHex(active ? 0xff6b1a
+                    : selected ? 0xffa800 : hovered ? 0xffffff : 0xffff66);
                 object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
                 object.material.color.setHex(active ? 0xffa24d
@@ -546,16 +546,16 @@ export function createCompositionViewport(container, options) {
                 index
             };
             const point = new THREE.Mesh(
-                new THREE.CircleGeometry(5, 16),
+                new THREE.CircleGeometry(8, 16),
                 new THREE.MeshBasicMaterial({
-                    color: 0xffd45a, depthTest: false, depthWrite: false
+                    color: 0xffff66, depthTest: false, depthWrite: false
                 })
             );
             point.position.set(screen.x, -screen.y, 4);
             point.renderOrder = 29;
             point.userData.thestraSelection = semantic;
             const outline = new THREE.Mesh(
-                new THREE.RingGeometry(8, 10, 16),
+                new THREE.RingGeometry(9, 12, 16),
                 new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
             );
             outline.position.copy(point.position);

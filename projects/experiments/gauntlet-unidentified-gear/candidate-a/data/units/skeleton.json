@@ -1,0 +1,52 @@
+{
+  "id": "skeleton",
+  "name": "Vanguard Skeleton",
+  "level": 3,
+  "role": "Attacker",
+  "smallBattler": "Skeleton",
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "elements": [
+    "Black"
+  ],
+  "favoriteFoods": [
+    1
+  ],
+  "baseParams": {
+    "maxHp": 48,
+    "atk": 22,
+    "def": 14,
+    "mat": 5,
+    "mdf": 8,
+    "asp": 8,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 20,
+      "mat": 15,
+      "mdf": 15
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 35,
+      "def": 30,
+      "mat": 25,
+      "mdf": 25
+    }
+  ],
+  "skills": [
+    "boneRush"
+  ],
+  "passives": [
+    "undeadFortitude"
+  ]
+}

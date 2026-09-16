@@ -1,0 +1,219 @@
+[
+  {
+    "id": 1,
+    "name": "Medicinal Herb",
+    "type": "consumable",
+    "description": "Restores 35 HP to one ally.",
+    "icon": 51,
+    "effects": [
+      {
+        "type": "hp",
+        "value": 35
+      }
+    ]
+  },
+  {
+    "id": 101,
+    "name": "Identify Scroll",
+    "type": "consumable",
+    "description": "Ancient parchment that reveals true item traits.",
+    "icon": 55,
+    "effects": []
+  },
+  {
+    "id": 201,
+    "name": "Blood-Stained ????",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "A heavy broadsword caked in dark crimson rust. The blade hums with ominous warmth (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 32
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": -6
+      },
+      {
+        "code": "HRG",
+        "value": -0.1
+      }
+    ]
+  },
+  {
+    "id": 202,
+    "name": "Vanguard Blood-Drinker",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "The cursed blade of a fallen captain (+32 ATK, -6 DEF). Bleeds the wielder for 10% HP each combat round.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 32
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": -6
+      },
+      {
+        "code": "HRG",
+        "value": -0.1
+      }
+    ]
+  },
+  {
+    "id": 203,
+    "name": "Obsidian ?????",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "Jet-black plate armor forged from volcanic glass. Exceptionally heavy, with faint heat inside (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 26
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mdf",
+        "value": 14
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -5
+      },
+      {
+        "code": "ELEMENT_RESIST",
+        "dataId": "Red",
+        "value": 1.6
+      }
+    ]
+  },
+  {
+    "id": 204,
+    "name": "Obsidian Bulwark",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "Dense volcanic armor (+26 DEF, +14 MDF, -5 ASP). Its crystalline structure makes the wearer 60% more vulnerable to Fire attacks.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 26
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mdf",
+        "value": 14
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -5
+      },
+      {
+        "code": "ELEMENT_RESIST",
+        "dataId": "Red",
+        "value": 1.6
+      }
+    ]
+  },
+  {
+    "id": 205,
+    "name": "Wicked Ring ????",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "A sinister bone ring that pulsates against the skin (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 12
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 12
+      },
+      {
+        "code": "PARAM_RATE",
+        "dataId": "maxHp",
+        "value": 0.8
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "name": "Ring of Desperate Zeal",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "A zealot ring (+12 ATK, +12 MAT). Reduces Max HP by 20% in exchange for raw offensive ferocity.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 12
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 12
+      },
+      {
+        "code": "PARAM_RATE",
+        "dataId": "maxHp",
+        "value": 0.8
+      }
+    ]
+  },
+  {
+    "id": 207,
+    "name": "Ancient Relic ????",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "An unweathered silver shortsword sealed with faint white script (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 16
+      },
+      {
+        "code": "ELEMENT_ATTACK",
+        "dataId": "White"
+      }
+    ]
+  },
+  {
+    "id": 208,
+    "name": "Blessed Silver Blade",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "A consecrated shortsword (+16 ATK). Infuses basic attacks with Holy Light, devastating undead.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 16
+      },
+      {
+        "code": "ELEMENT_ATTACK",
+        "dataId": "White"
+      }
+    ]
+  }
+]

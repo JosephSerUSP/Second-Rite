@@ -1,0 +1,35 @@
+{
+  "id": "map",
+  "name": "Map",
+  "kind": "map",
+  "draw": "world",
+  "world": "map",
+  "config": {},
+  "hooks": {
+    "on_up": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ]
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "id": 2,
+  "title": "Sunken Catacomb",
+  "intro": "Submerged crypts consecrated by ancient saints now corrupted by demons.",
+  "depth": 1,
+  "tileset": "dungeon_default",
+  "ceilingStyle": "stone",
+  "music": "dungeon1",
+  "layout": [
+    "#########",
+    "#.......#",
+    "#.###.#.#",
+    "#.#...#.#",
+    "#.#.###.#",
+    "#...#...#",
+    "#####.###",
+    "#.......#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs to Cathedral",
+      "x": 4,
+      "y": 7,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Demonic Reliquary 1",
+      "x": 1,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:catacomb_chest1_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The dark reliquary is empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You wrench open the demonic reliquary! Acquired Tarnished Blade ???? (+20 ATK, -4 DEF) and Corrupted Mail ???? (+24 DEF, -10 ASP)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 201,
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 203,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "catacomb_chest1_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Demonic Reliquary 2",
+      "x": 7,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:catacomb_chest2_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The chest is already empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You claim the Demon's Clasp ???? (+16 ATK, +16 MAT, ???????)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 205,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "catacomb_chest2_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Sacred Purification Font",
+      "x": 4,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "The Sacred Purification Font radiates warm golden light. Dip a corrupted item to cleanse and transfigure it:"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Purify Tarnished Blade ???? -> Radiant Sunblade",
+              "condition": "hasItem:201",
+              "commands": [
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 201,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 202,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The blade blazes with holy fire! Transfigured into Radiant Sunblade (+24 ATK, +4 DEF, Light, +5% HP regen per round)!"
+                }
+              ]
+            },
+            {
+              "label": "Purify Corrupted Mail ???? -> Paladin's Cuirass",
+              "condition": "hasItem:203",
+              "commands": [
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 203,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 204,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The dark miasma clears! Transfigured into Paladin's Cuirass (+28 DEF, +12 MDF, -2 ASP, Poison Immunity)!"
+                }
+              ]
+            },
+            {
+              "label": "Purify Demon's Clasp ???? -> Saint's Reliquary",
+              "condition": "hasItem:205",
+              "commands": [
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 205,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 206,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The demonic skull dissolves into gold! Transfigured into Saint's Reliquary (+16 ATK, +16 MAT, +8 DEF, Ward against Death)!"
+                }
+              ]
+            },
+            {
+              "label": "Leave the font",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Demon Stalker Encounter",
+      "x": 3,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A ferocious Corrupt Demon bars the pathway!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "troop_demon"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Boss Sanctum: Corrupted Seraph Diablos",
+      "x": 4,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Before the grand altar looms Corrupted Seraph Diablos, wielding abyssal dark magic!"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Challenge Diablos now?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Challenge Corrupted Seraph Diablos",
+              "commands": [
+                {
+                  "cmd": "BATTLE",
+                  "troop": "troop_boss_diablos"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Diablos falls! Sanctity is restored! Candidate C completed!"
+                }
+              ]
+            },
+            {
+              "label": "Step back to prepare",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

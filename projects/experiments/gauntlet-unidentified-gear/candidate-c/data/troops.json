@@ -1,0 +1,58 @@
+{
+  "base": {
+    "id": "base",
+    "name": "Every Battle",
+    "abstract": true,
+    "description": "Base battle logic",
+    "members": [],
+    "events": []
+  },
+  "troop_imps": {
+    "id": "troop_imps",
+    "name": "Imp Raiders",
+    "members": [
+      {
+        "actor": "imp",
+        "level": 3
+      },
+      {
+        "actor": "imp",
+        "level": 3
+      }
+    ]
+  },
+  "troop_demon": {
+    "id": "troop_demon",
+    "name": "Demon Stalker",
+    "members": [
+      {
+        "actor": "demon",
+        "level": 4
+      }
+    ]
+  },
+  "troop_demon_pack": {
+    "id": "troop_demon_pack",
+    "name": "Demonic Vanguard",
+    "members": [
+      {
+        "actor": "demon",
+        "level": 4
+      },
+      {
+        "actor": "imp",
+        "level": 3
+      }
+    ]
+  },
+  "troop_boss_diablos": {
+    "id": "troop_boss_diablos",
+    "name": "Corrupted Seraph",
+    "members": [
+      {
+        "actor": "diablos",
+        "level": 6
+      }
+    ]
+  }
+}

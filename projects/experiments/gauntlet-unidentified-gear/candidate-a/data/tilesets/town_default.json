@@ -1,0 +1,55 @@
+{
+  "id": "town_default",
+  "name": "Town Sanctuary",
+  "texture": "assets/tilesets/town_stMaria.png",
+  "tileWidth": 64,
+  "tileHeight": 64,
+  "base": {
+    "walls": [
+      {
+        "id": "town_wall_1",
+        "role": "base_wall",
+        "middle": [
+          1,
+          0
+        ],
+        "weight": 100
+      }
+    ],
+    "floors": [
+      {
+        "id": "town_floor_1",
+        "role": "base_floor",
+        "atlas": [
+          0,
+          1
+        ],
+        "weight": 100,
+        "heightOffset": 0
+      }
+    ],
+    "ceilings": [
+      {
+        "id": "town_ceiling",
+        "role": "base_ceiling",
+        "atlas": [
+          0,
+          0
+        ],
+        "weight": 100
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "town_door",
+      "role": "door",
+      "atlas": [
+        1,
+        1
+      ]
+    }
+  ],
+  "features": [],
+  "fixturePrefabs": []
+}

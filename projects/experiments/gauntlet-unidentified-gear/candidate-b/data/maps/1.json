@@ -1,0 +1,76 @@
+{
+  "id": 1,
+  "title": "Alchemist Laboratory Base",
+  "intro": "A sterile spire workshop overlooking the testing corridors.",
+  "depth": 0,
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "#########",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Chief Alchemist Vesper",
+      "x": 4,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Vesper: \"Greetings, Alchemist. The Spire testing chambers contain experimental relics.\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Vesper: \"Each unidentified relic displays stat fingerprints. An electrum ring with +8 ASP might secretly grant a second turn action; a wand with +14 MAT might trigger ice freezes or severe elemental vulnerabilities!\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Vesper: \"There is a Divination Altar located halfway through the spire that will inspect one relic for free.\""
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Spire Laboratory Workbench",
+      "x": 2,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Laboratory Workbench: Rest here to restore your party to full vigor."
+        },
+        {
+          "cmd": "RECOVER_PARTY"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Spire Entry Gate",
+      "x": 4,
+      "y": 1,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Entering the Alchemical Spire Testing Corridors..."
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 2
+        }
+      ]
+    }
+  ]
+}

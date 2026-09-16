@@ -1,0 +1,229 @@
+[
+  {
+    "id": 1,
+    "name": "Alchemical Salve",
+    "type": "consumable",
+    "description": "Restores 40 HP to one ally.",
+    "icon": 51,
+    "effects": [
+      {
+        "type": "hp",
+        "value": 40
+      }
+    ]
+  },
+  {
+    "id": 101,
+    "name": "Divination Charm",
+    "type": "consumable",
+    "description": "Arcane lens that reveals the true name and traits of unknown relics.",
+    "icon": 55,
+    "effects": []
+  },
+  {
+    "id": 201,
+    "name": "Vibrant Ring ????",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "A lightweight electrum band vibrating at a dizzying frequency (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": 8
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 2
+      },
+      {
+        "code": "ACTION_PLUS",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": 202,
+    "name": "Chronos Humming Ring",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "Masterwork time-dilation ring (+8 ASP, +2 ATK). Grants the wearer 1 additional action every battle turn.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": 8
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 2
+      },
+      {
+        "code": "ACTION_PLUS",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": 203,
+    "name": "Glacial Shard ????",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "A crystal rod rimmed with eternal frost. Heavy, chilling the fingertips (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 14
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 4
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -3
+      },
+      {
+        "code": "ELEMENT_ATTACK",
+        "dataId": "Blue"
+      },
+      {
+        "code": "ATTACK_STATE",
+        "dataId": "freeze",
+        "value": 0.35
+      }
+    ]
+  },
+  {
+    "id": 204,
+    "name": "Crystalline Frost-Wand",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "Cryo-attuned rod (+14 MAT, +4 DEF, -3 ASP). Infuses attacks with Ice and inflicts Freeze on strike.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 14
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 4
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -3
+      },
+      {
+        "code": "ELEMENT_ATTACK",
+        "dataId": "Blue"
+      },
+      {
+        "code": "ATTACK_STATE",
+        "dataId": "freeze",
+        "value": 0.35
+      }
+    ]
+  },
+  {
+    "id": 205,
+    "name": "Volatile Conduit ????",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "A cracked conductive sphere crackling with raw arcane surge (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 22
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mdf",
+        "value": -10
+      },
+      {
+        "code": "ELEMENT_RESIST",
+        "dataId": "Black",
+        "value": 1.7
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "name": "Surge Overload Conduit",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "Unstable capacitor (+22 MAT, -10 MDF). Vastly boosts spell power, but increases damage taken from Lightning/Dark attacks by 70%.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 22
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mdf",
+        "value": -10
+      },
+      {
+        "code": "ELEMENT_RESIST",
+        "dataId": "Black",
+        "value": 1.7
+      }
+    ]
+  },
+  {
+    "id": 207,
+    "name": "Heavy Plated ????",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "A reinforced alloy cuirass of colossal density (???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 30
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -8
+      }
+    ]
+  },
+  {
+    "id": 208,
+    "name": "Giga-Alloy Carapace",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "Fortress-grade armor (+30 DEF, -8 ASP). Greatly reduces physical damage at the expense of turn speed.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 30
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -8
+      }
+    ]
+  }
+]

@@ -1,0 +1,150 @@
+{
+  "issue": 993,
+  "generatedAt": "2026-09-15T09:07:25.180Z",
+  "rule": "A must run authored goldenScript; B is equivalent timing with gameplay input neutralized.",
+  "specimens": [
+    {
+      "sceneId": "a002_breakout",
+      "authored": {
+        "declared": true,
+        "reached": true,
+        "reachedAtStep": 1,
+        "sceneAfter": "a002_breakout",
+        "sceneId": "a002_breakout",
+        "sceneName": "A002 Breakout Benchmark",
+        "scriptSource": "goldenScript",
+        "stepsRun": 1,
+        "stepsTotal": 2,
+        "terminalFormula": "v.gameOver == true or v.gameWon == true",
+        "terminalKind": "reached"
+      },
+      "neutralized": {
+        "declared": true,
+        "reached": true,
+        "reachedAtStep": 1,
+        "sceneAfter": "a002_breakout",
+        "sceneId": "a002_breakout",
+        "sceneName": "A002 Breakout Benchmark",
+        "scriptSource": "terminal.script",
+        "stepsRun": 1,
+        "stepsTotal": 2,
+        "terminalFormula": "v.gameOver == true or v.gameWon == true",
+        "terminalKind": "reached"
+      },
+      "verdict": "NOT-PLAYED-CONTROL-EQUIVALENT",
+      "evidence": {
+        "sameTerminal": true,
+        "causalInput": false,
+        "authoredMeaningfulState": {
+          "ballX": 12.399999999999999,
+          "ballY": 14.000000000000004,
+          "gameOver": true,
+          "gameWon": false,
+          "padX": 10,
+          "score": 0
+        },
+        "neutralizedMeaningfulState": {
+          "ballX": 12.399999999999999,
+          "ballY": 14.000000000000004,
+          "gameOver": true,
+          "gameWon": false,
+          "padX": 10,
+          "score": 0
+        }
+      }
+    },
+    {
+      "sceneId": "a003_snake",
+      "authored": {
+        "declared": true,
+        "reached": false,
+        "sceneId": "a003_snake",
+        "sceneName": "A003 - Snake",
+        "scriptSource": "goldenScript",
+        "stepsRun": 6,
+        "stepsTotal": 6,
+        "terminalFormula": "v.lost == true",
+        "terminalKind": "reached"
+      },
+      "neutralized": {
+        "declared": true,
+        "reached": false,
+        "sceneAfter": "a003_snake",
+        "sceneId": "a003_snake",
+        "sceneName": "A003 - Snake",
+        "scriptSource": "terminal.script",
+        "stepsRun": 6,
+        "stepsTotal": 6,
+        "terminalFormula": "v.lost == true",
+        "terminalKind": "reached"
+      },
+      "verdict": "PLAYED",
+      "evidence": {
+        "sameTerminal": false,
+        "causalInput": true,
+        "authoredMeaningfulState": {
+          "lost": false,
+          "targetX": 2,
+          "targetY": 2
+        },
+        "neutralizedMeaningfulState": {
+          "lost": false,
+          "targetX": 2,
+          "targetY": 2
+        }
+      }
+    },
+    {
+      "sceneId": "c003_moving_breakout",
+      "authored": {
+        "declared": true,
+        "reached": true,
+        "reachedAtStep": 36,
+        "sceneAfter": "c003_moving_breakout",
+        "sceneId": "c003_moving_breakout",
+        "sceneName": "C003 — Breakout With Moving Bricks",
+        "scriptSource": "goldenScript",
+        "stepsRun": 36,
+        "stepsTotal": 100,
+        "terminalFormula": "v.gameWon == 1 or v.gameOver == 1",
+        "terminalKind": "reached"
+      },
+      "neutralized": {
+        "declared": true,
+        "reached": true,
+        "reachedAtStep": 18,
+        "sceneAfter": "c003_moving_breakout",
+        "sceneId": "c003_moving_breakout",
+        "sceneName": "C003 — Breakout With Moving Bricks",
+        "scriptSource": "terminal.script",
+        "stepsRun": 18,
+        "stepsTotal": 100,
+        "terminalFormula": "v.gameWon == 1 or v.gameOver == 1",
+        "terminalKind": "reached"
+      },
+      "verdict": "PLAYED",
+      "evidence": {
+        "sameTerminal": true,
+        "causalInput": false,
+        "authoredMeaningfulState": {
+          "ballX": 13.800000000000018,
+          "ballY": 13.066666666666656,
+          "brickMoveDir": 1,
+          "gameOver": 1,
+          "gameWon": 0,
+          "paddleX": 8,
+          "score": 10
+        },
+        "neutralizedMeaningfulState": {
+          "ballX": 13.800000000000018,
+          "ballY": 13.066666666666656,
+          "brickMoveDir": 1,
+          "gameOver": 1,
+          "gameWon": 0,
+          "paddleX": 8,
+          "score": 10
+        }
+      }
+    }
+  ]
+}

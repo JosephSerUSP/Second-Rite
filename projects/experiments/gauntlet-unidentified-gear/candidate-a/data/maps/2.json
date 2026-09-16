@@ -1,0 +1,188 @@
+{
+  "id": 2,
+  "title": "Crypt of the Cursed Vanguard",
+  "intro": "Ancient burial halls echoing with demonic whispers.",
+  "depth": 1,
+  "tileset": "dungeon_default",
+  "ceilingStyle": "stone",
+  "music": "dungeon1",
+  "layout": [
+    "#########",
+    "#.......#",
+    "#.###.#.#",
+    "#.#...#.#",
+    "#.#.###.#",
+    "#...#...#",
+    "#####.###",
+    "#.......#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Ascent Stairs to Camp",
+      "x": 4,
+      "y": 7,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Sarcophagus of the Captain",
+      "x": 1,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:chest_weapon_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The sarcophagus is empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You open the iron sarcophagus and retrieve a Blood-Stained ???? (+32 ATK, -6 DEF preview) and an Ancient Relic ???? (+16 ATK)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 201,
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 207,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "chest_weapon_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Vanguard Armory Vault",
+      "x": 7,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:chest_armor_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The weapon rack has already been scavenged."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You discover Obsidian ????? (+26 DEF, +14 MDF, -5 ASP preview) and a Wicked Ring ???? (+12 ATK, +12 MAT)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 203,
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 205,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "chest_armor_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Skeleton Vanguard Guard",
+      "x": 3,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Skeletal guardians rattle forward with rusty blades!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "troop_skeletons"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Lurking Crypt Ghoul",
+      "x": 5,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A foul crypt ghoul emerges from the shadows!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "troop_ghoul"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Boss Door: Tomb Sentinel Sanctum",
+      "x": 4,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A colossal three-headed hellhound, the Tomb Sentinel Cerberus, guards the inner crypt! It breathes devastating hellfire!"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Do you challenge the Tomb Sentinel?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Engage the Tomb Sentinel in Combat",
+              "commands": [
+                {
+                  "cmd": "BATTLE",
+                  "troop": "troop_boss_sentinel"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Tomb Sentinel collapses in an explosion of ash! You have triumphed over Candidate A!"
+                }
+              ]
+            },
+            {
+              "label": "Fall back and prepare gear",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

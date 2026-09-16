@@ -1,0 +1,30 @@
+{
+  "Summoner": {
+    "name": "Summoner",
+    "description": "The player character."
+  },
+  "Attacker": {
+    "name": "Attacker",
+    "description": "High offense front-liner."
+  },
+  "Defender": {
+    "name": "Defender",
+    "description": "Soaks damage for the party."
+  },
+  "Tank": {
+    "name": "Tank",
+    "description": "Heavy guardian."
+  },
+  "Support": {
+    "name": "Support",
+    "description": "Buffs allies and restores health."
+  },
+  "Healer": {
+    "name": "Healer",
+    "description": "Restores HP."
+  },
+  "None": {
+    "name": "None",
+    "description": "No specialization."
+  }
+}

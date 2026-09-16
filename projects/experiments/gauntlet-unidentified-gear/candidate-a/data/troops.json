@@ -1,0 +1,54 @@
+{
+  "base": {
+    "id": "base",
+    "name": "Every Battle",
+    "abstract": true,
+    "description": "Base battle logic",
+    "members": [],
+    "events": []
+  },
+  "troop_skeletons": {
+    "id": "troop_skeletons",
+    "name": "Skeleton Patrol",
+    "members": [
+      {
+        "actor": "skeleton",
+        "level": 3
+      },
+      {
+        "actor": "skeleton",
+        "level": 3
+      }
+    ]
+  },
+  "troop_ghoul": {
+    "id": "troop_ghoul",
+    "name": "Lurking Ghoul",
+    "members": [
+      {
+        "actor": "ghoul",
+        "level": 4
+      }
+    ]
+  },
+  "troop_mimic": {
+    "id": "troop_mimic",
+    "name": "Hungry Mimic",
+    "members": [
+      {
+        "actor": "mimic",
+        "level": 4
+      }
+    ]
+  },
+  "troop_boss_sentinel": {
+    "id": "troop_boss_sentinel",
+    "name": "Tomb Sentinel",
+    "members": [
+      {
+        "actor": "cerberus",
+        "level": 6
+      }
+    ]
+  }
+}

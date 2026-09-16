@@ -1,0 +1,37 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 4,
+    "y": 7,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 80,
+    "goldMax": 80,
+    "party": {
+      "fixedMembers": [
+        {
+          "id": "angel",
+          "level": 3,
+          "name": "Seraph",
+          "slot": 1
+        },
+        {
+          "id": "imp",
+          "level": 3,
+          "name": "Fizz",
+          "slot": 2
+        }
+      ]
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "undeadFortitude": {
+    "id": "undeadFortitude",
+    "name": "Undead Fortitude",
+    "description": "Immune to poison and decay.",
+    "icon": 103,
+    "traits": [
+      {
+        "code": "STATE_IMMUNITY",
+        "dataId": "poison"
+      }
+    ]
+  },
+  "swiftReflexes": {
+    "id": "swiftReflexes",
+    "name": "Swift Reflexes",
+    "description": "Boosts evasion and action speed.",
+    "icon": 103,
+    "traits": [
+      {
+        "code": "EVA",
+        "value": 0.15
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": 3
+      }
+    ]
+  },
+  "arcaneFocus": {
+    "id": "arcaneFocus",
+    "name": "Arcane Focus",
+    "description": "Boosts spell damage.",
+    "icon": 103,
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 5
+      }
+    ]
+  }
+}

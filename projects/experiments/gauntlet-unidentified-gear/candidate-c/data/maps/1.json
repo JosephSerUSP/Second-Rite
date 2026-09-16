@@ -1,0 +1,72 @@
+{
+  "id": 1,
+  "title": "Sacred Cathedral Outpost",
+  "intro": "A consecrated redoubt bordering the Sunken Catacomb.",
+  "depth": 0,
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "#########",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "High Priestess Althea",
+      "x": 4,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Althea: \"Blessings upon you, Summoner. The catacomb below is choked with corrupted demonic gear.\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Althea: \"You can equip these corrupted relics directly for immediate brute strength, but their curses will wither your soul.\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Althea: \"If you carry them to the Sacred Purification Font in the depths of the catacomb, you can transform them permanently into divine artifacts!\""
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Cathedral Altar of Rest",
+      "x": 2,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "RECOVER_PARTY"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Catacomb Descent",
+      "x": 4,
+      "y": 1,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Descending into the Sunken Catacomb..."
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 2
+        }
+      ]
+    }
+  ]
+}

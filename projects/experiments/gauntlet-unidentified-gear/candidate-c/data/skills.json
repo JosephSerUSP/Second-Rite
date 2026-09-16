@@ -1,0 +1,313 @@
+{
+  "peck": {
+    "id": "peck",
+    "name": "Beak Strike",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 1,
+    "description": "[Enemy] A swift piercing peck.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.2,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "flurry": {
+    "id": "flurry",
+    "name": "Feather Flurry",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 2,
+    "description": "[Enemy] Strike with rapid agility.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.4,
+        "power": "atk"
+      }
+    ],
+    "charges": "5"
+  },
+  "spark": {
+    "id": "spark",
+    "name": "Spark",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Zap an enemy with lightning energy.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.3,
+        "power": "mat"
+      }
+    ],
+    "charges": "6"
+  },
+  "heal": {
+    "id": "heal",
+    "name": "Healing Touch",
+    "target": "ally-any",
+    "scope": "always",
+    "element": "White",
+    "icon": 4,
+    "description": "[Ally] Restore HP to an ally.",
+    "effects": [
+      {
+        "type": "hp_heal",
+        "formula": "a.mat * 0.8 + 30"
+      }
+    ],
+    "charges": "5"
+  },
+  "boneRush": {
+    "id": "boneRush",
+    "name": "Bone Rush",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Crushing skeleton charge.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.35,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "ghoulBite": {
+    "id": "ghoulBite",
+    "name": "Venomous Bite",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 2,
+    "description": "[Enemy] Bite that can inflict poison.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.1,
+        "power": "atk"
+      },
+      {
+        "type": "add_status",
+        "status": "poison",
+        "chance": 0.6,
+        "duration": 3
+      }
+    ],
+    "charges": "99"
+  },
+  "cerberusBite": {
+    "id": "cerberusBite",
+    "name": "Infernal Crunch",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[Enemy] Double jaws of hellfire.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.5,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "cerberusBreath": {
+    "id": "cerberusBreath",
+    "name": "Hellfire Breath",
+    "target": "enemies-all",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[All Enemies] Engulf in hellfire.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.2,
+        "power": "mat"
+      }
+    ],
+    "charges": "3"
+  },
+  "waterPulse": {
+    "id": "waterPulse",
+    "name": "Water Pulse",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Enemy] Arcane rush of high-pressure water.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.35,
+        "power": "mat"
+      }
+    ],
+    "charges": "6"
+  },
+  "iceShard": {
+    "id": "iceShard",
+    "name": "Ice Shard",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Enemy] Chilling spear of frost.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.2,
+        "power": "mat"
+      },
+      {
+        "type": "add_status",
+        "status": "freeze",
+        "chance": 0.35,
+        "duration": 2
+      }
+    ],
+    "charges": "4"
+  },
+  "heavySlam": {
+    "id": "heavySlam",
+    "name": "Colossal Slam",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Heavy crushing blow.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.4,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "guard": {
+    "id": "guard",
+    "name": "Stone Bulwark",
+    "target": "self",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Self] Brace for impact.",
+    "effects": [],
+    "charges": "99"
+  },
+  "automatonOverload": {
+    "id": "automatonOverload",
+    "name": "Arcane Overload",
+    "target": "enemies-all",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[All Enemies] Discharge destructive beam.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.3,
+        "power": "mat"
+      }
+    ],
+    "charges": "3"
+  },
+  "lightStrike": {
+    "id": "lightStrike",
+    "name": "Light Strike",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Enemy] Infuse blade with holy power.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.3,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "shadowClaw": {
+    "id": "shadowClaw",
+    "name": "Shadow Claw",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Sneak attack from behind.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.4,
+        "power": "atk"
+      }
+    ],
+    "charges": "6"
+  },
+  "quickStab": {
+    "id": "quickStab",
+    "name": "Quick Stab",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Fast strike.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.15,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "demonRend": {
+    "id": "demonRend",
+    "name": "Demon Rend",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Tears at flesh and spirit.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.45,
+        "power": "atk"
+      }
+    ],
+    "charges": "99"
+  },
+  "darkWave": {
+    "id": "darkWave",
+    "name": "Abyssal Wave",
+    "target": "enemies-all",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[All Enemies] Dark flood.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.25,
+        "power": "mat"
+      }
+    ],
+    "charges": "3"
+  }
+}

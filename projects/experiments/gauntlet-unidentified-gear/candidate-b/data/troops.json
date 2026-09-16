@@ -1,0 +1,58 @@
+{
+  "base": {
+    "id": "base",
+    "name": "Every Battle",
+    "abstract": true,
+    "description": "Base battle logic",
+    "members": [],
+    "events": []
+  },
+  "troop_wisps": {
+    "id": "troop_wisps",
+    "name": "Wisp Duo",
+    "members": [
+      {
+        "actor": "wisp",
+        "level": 3
+      },
+      {
+        "actor": "wisp",
+        "level": 3
+      }
+    ]
+  },
+  "troop_lamia": {
+    "id": "troop_lamia",
+    "name": "Spire Lamia",
+    "members": [
+      {
+        "actor": "lamia",
+        "level": 4
+      }
+    ]
+  },
+  "troop_homunculi": {
+    "id": "troop_homunculi",
+    "name": "Homunculus Guard",
+    "members": [
+      {
+        "actor": "homunculus",
+        "level": 4
+      },
+      {
+        "actor": "homunculus",
+        "level": 4
+      }
+    ]
+  },
+  "troop_boss_automaton": {
+    "id": "troop_boss_automaton",
+    "name": "Arch-Automaton Proteus",
+    "members": [
+      {
+        "actor": "proteus",
+        "level": 6
+      }
+    ]
+  }
+}

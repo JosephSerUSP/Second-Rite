@@ -1,0 +1,37 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 4,
+    "y": 7,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 100,
+    "goldMax": 100,
+    "party": {
+      "fixedMembers": [
+        {
+          "id": "undine",
+          "level": 3,
+          "name": "Aqua",
+          "slot": 1
+        },
+        {
+          "id": "golem",
+          "level": 3,
+          "name": "Slate",
+          "slot": 2
+        }
+      ]
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

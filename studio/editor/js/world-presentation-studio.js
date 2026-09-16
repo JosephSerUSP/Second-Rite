@@ -490,6 +490,30 @@
             'font-size:9px', 'color:var(--win-dark-shadow)', 'display:none'
         ].join(';');
         profileHelp.className = 'thestra-toolbar-help';
+
+        const profileLegend = document.createElement('div');
+        profileLegend.className = 'thestra-toolbar-legend';
+        const legendTitle = document.createElement('strong');
+        legendTitle.textContent = 'READING THE VIEW';
+        profileLegend.appendChild(legendTitle);
+        for (const [kind, label, meaning] of [
+            ['active', 'Orange', 'active component'],
+            ['selected', 'Gold', 'selected components'],
+            ['edge', 'Cyan line', 'Walk Profile edge'],
+            ['face', 'Blue fill', 'walkable face / lane'],
+        ]) {
+            const row = document.createElement('div');
+            row.className = 'thestra-toolbar-legend-row';
+            const swatch = document.createElement('span');
+            swatch.className = `thestra-toolbar-swatch ${kind}`;
+            const text = document.createElement('span');
+            text.textContent = `${label} · ${meaning}`;
+            row.append(swatch, text);
+            profileLegend.appendChild(row);
+        }
+        const selectionReadout = document.createElement('div');
+        selectionReadout.className = 'thestra-toolbar-selection-readout';
+        profileLegend.appendChild(selectionReadout);
         profileHelp.title = 'Walk Profile workflow and active-mode help.';
 
         const profileYLabel = document.createElement('span');
@@ -525,7 +549,7 @@
         const profileCoordinates = document.createElement('div');
         profileCoordinates.className = 'thestra-toolbar-profile-coordinates';
         profileCoordinates.append(profileYLabel, profileY, profileZLabel, profileZ);
-        profileGroup.append(profileTitle, profileControls, profileCoordinates, profileHelp);
+        profileGroup.append(profileTitle, profileLegend, profileControls, profileCoordinates, profileHelp);
 
         const cameraGroup = document.createElement('div');
         cameraGroup.className = 'thestra-toolbar-group';
@@ -563,6 +587,7 @@
             deleteProfile.style.display = authored && pointMode ? '' : 'none';
             profileHelp.style.display = show ? '' : 'none';
             profileGroup.style.display = show ? '' : 'none';
+            profileLegend.style.display = editing ? '' : 'none';
 
             const precisePoint = authored && pointMode
                 && status.selectionCount === 1 && status.activePoint;
@@ -585,6 +610,11 @@
                 .filter(selection => selection?.kind === 'walk-profile-segment');
             const selectedPoints = (status.selections || [])
                 .filter(selection => selection?.kind === 'walk-profile-point');
+            selectionReadout.textContent = selectedPoints.length
+                ? `Selection: ${selectedPoints.length} point${selectedPoints.length === 1 ? '' : 's'}`
+                : selectedEdges.length
+                    ? `Selection: ${selectedEdges.length} edge${selectedEdges.length === 1 ? '' : 's'}`
+                    : 'Selection: none';
             splitProfile.disabled = !edgeMode || selectedEdges.length === 0;
             const includesEndpoint = selectedPoints.some(selection =>
                 selection.index === 0 || selection.index === status.pointCount - 1);

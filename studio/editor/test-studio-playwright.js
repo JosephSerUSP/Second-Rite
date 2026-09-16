@@ -250,7 +250,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mainPage.waitForFunction(() => {
             const hud = document.querySelector('[data-walk-profile-hud="true"]');
             return !!hud && hud.getClientRects().length > 0
-                && /WALK PROFILE · EDIT · POINT/.test(hud.textContent || '');
+                && /WALK PROFILE EDIT[\s\S]*POINT/.test(hud.textContent || '');
         });
         mark(t, 'viewport HUD made Walk Profile Edit/Point state explicit');
 

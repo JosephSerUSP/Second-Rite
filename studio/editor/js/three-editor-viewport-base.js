@@ -1304,11 +1304,12 @@ export function createThreeEditorViewport(container, options = {}) {
         const modeLabel = walkProfileComponentMode === 'segment' ? 'EDGE' : 'POINT';
         const operation = spatial?.operation === 'move'
             ? ` · MOVE${spatial.constraint ? ` ${spatial.constraint}` : ' YZ'}` : '';
+        const selectionCount = (spatial?.selectionSet || []).length;
         const help = walkProfileComponentMode === 'segment'
-            ? '2 Edge · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 points · Tab exit'
-            : '1 Point · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · E endpoint · X/Delete dissolve · Enter/LMB confirm · Esc/RMB cancel';
+            ? 'EDGE MODE (2) · LMB select · Shift+LMB multi-select · Subdivide · 1 point mode'
+            : 'POINT MODE (1) · LMB select · Shift+LMB multi-select · G move · E extrude · X dissolve';
         const feedback = spatial?.feedback ? `\n${spatial.feedback}` : '';
-        walkProfileHud.textContent = `WALK PROFILE · EDIT · ${modeLabel}${operation}\n${help}${feedback}`;
+        walkProfileHud.textContent = `WALK PROFILE EDIT\n${modeLabel}${operation} · Selection: ${selectionCount}\n${help}${feedback}`;
         walkProfileHud.style.display = 'block';
     }
 

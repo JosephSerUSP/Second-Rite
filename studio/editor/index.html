@@ -951,6 +951,43 @@
             line-height: 1.25;
             overflow-wrap: anywhere;
         }
+        .thestra-toolbar-legend {
+            display: grid;
+            gap: 3px;
+            padding: 4px;
+            background: #eef7f8;
+            border: 1px solid #6e9298;
+            color: #263c40;
+            line-height: 1.2;
+        }
+        .thestra-toolbar-legend strong {
+            font-size: 9px;
+            letter-spacing: .06em;
+        }
+        .thestra-toolbar-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+        }
+        .thestra-toolbar-swatch {
+            display: inline-block;
+            width: 14px;
+            height: 8px;
+            flex: 0 0 14px;
+            border: 1px solid #111820;
+        }
+        .thestra-toolbar-swatch.active { background: #ff8a33; }
+        .thestra-toolbar-swatch.selected { background: #ffd45a; }
+        .thestra-toolbar-swatch.edge { background: #38d0f4; }
+        .thestra-toolbar-swatch.face { background: #168bb4; opacity: .75; }
+        .thestra-toolbar-selection-readout {
+            margin-top: 2px;
+            padding-top: 3px;
+            border-top: 1px solid #9ab6ba;
+            font-weight: bold;
+            font-size: 9px;
+        }
 
         /* --- MAP HIERARCHY TREE --- */
         .map-tree-container {

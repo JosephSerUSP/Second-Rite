@@ -199,9 +199,9 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
-    assert.match(studioSource, /Point 1/,
+    assert.match(studioSource, /Point mode \(1\)/,
         'Edit Mode must expose point selection as an explicit component state');
-    assert.match(studioSource, /Edge 2/,
+    assert.match(studioSource, /Edge mode \(2\)/,
         'Edit Mode must expose edge selection as an explicit component state');
     assert.match(studioSource, /G Y \/ G Z constrain/,
         'the toolbar must teach semantic authored-axis constraints in place');

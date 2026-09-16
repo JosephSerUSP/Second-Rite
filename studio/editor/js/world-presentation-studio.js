@@ -451,15 +451,15 @@
         profilePointMode.type = 'button';
         profilePointMode.className = 'win98-btn';
         profilePointMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        profilePointMode.title = 'Point component selection mode (1).';
-        profilePointMode.textContent = 'Point 1';
+        profilePointMode.title = 'Select Walk Profile points. Shortcut: 1.';
+        profilePointMode.textContent = 'Point mode (1)';
 
         const profileSegmentMode = document.createElement('button');
         profileSegmentMode.type = 'button';
         profileSegmentMode.className = 'win98-btn';
         profileSegmentMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        profileSegmentMode.title = 'Edge/segment component selection mode (2).';
-        profileSegmentMode.textContent = 'Edge 2';
+        profileSegmentMode.title = 'Select Walk Profile edges. Shortcut: 2.';
+        profileSegmentMode.textContent = 'Edge mode (2)';
 
         const splitProfile = document.createElement('button');
         splitProfile.type = 'button';
@@ -595,13 +595,13 @@
                     ? `${status.feedback} Create Profile to begin.`
                     : 'No authored Walk Profile · Create Profile to begin.';
             } else if (!editing) {
-                profileHelp.textContent = 'Tab or Edit Walk Profile · then 1 Point / 2 Edge.';
+                profileHelp.textContent = 'Tab or Edit Walk Profile · Point mode (1) / Edge mode (2).';
             } else if (pointMode) {
                 profileHelp.textContent = status.feedback
-                    || 'POINT · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · Enter/LMB confirm · Esc/RMB cancel · E endpoint · X/Delete dissolve';
+                    || 'POINT MODE · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · Enter/LMB confirm · Esc/RMB cancel · E endpoint · X/Delete dissolve';
             } else {
                 profileHelp.textContent = status.feedback
-                    || 'EDGE · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 returns to points · Tab exits';
+                    || 'EDGE MODE · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 returns to points · Tab exits';
             }
         }
 

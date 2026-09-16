@@ -1,0 +1,52 @@
+name: LOVE 12 shadow observer
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: love12-shadow-observer-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  observe:
+    if: github.head_ref == 'compat/love12'
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Surface latest compat/love12 push benchmark
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $raw = gh run list --repo $env:GITHUB_REPOSITORY --workflow love12-shadow.yml --branch compat/love12 --event push --limit 1 --json databaseId,headSha,status,conclusion,url,createdAt,updatedAt
+          $runs = $raw | ConvertFrom-Json
+          if (-not $runs -or $runs.Count -lt 1) { throw 'No compat/love12 push shadow run found' }
+          $run = @($runs)[0]
+          Write-Host 'LOVE12 SHADOW OBSERVER'
+          $run | ConvertTo-Json -Depth 5
+          $runId = [string]$run.databaseId
+
+          if ($run.status -ne 'completed') {
+            Write-Warning "Latest shadow run $runId is still $($run.status); observer records current state only."
+            exit 0
+          }
+
+          if ($run.conclusion -ne 'success') {
+            Write-Warning "Latest shadow run $runId concluded $($run.conclusion). Failed log follows."
+            gh run view $runId --repo $env:GITHUB_REPOSITORY --log-failed
+            exit 0
+          }
+
+          $out = Join-Path $env:RUNNER_TEMP 'love12-shadow-observed'
+          New-Item -ItemType Directory $out -Force | Out-Null
+          gh run download $runId --repo $env:GITHUB_REPOSITORY --name love12-shadow-current-main --dir $out
+          $summary = Get-ChildItem $out -Recurse -Filter summary.json | Select-Object -First 1
+          if (-not $summary) { throw "Shadow run $runId succeeded but summary.json artifact is missing" }
+          Write-Host 'LOVE12 SHADOW SUMMARY ARTIFACT'
+          Get-Content $summary.FullName -Raw

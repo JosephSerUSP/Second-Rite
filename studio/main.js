@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const semanticRoots = require('../tools/semantic-roots');
@@ -98,6 +98,13 @@ const windowStateStore = createJsonWindowStateStore({
 const windowManager = new StudioWindowManager({
     createWindow: options => new BrowserWindow(options),
     stateStore: windowStateStore,
+    getDisplays: () => {
+        try {
+            return screen.getAllDisplays();
+        } catch (_) {
+            return [];
+        }
+    },
 });
 const readySurfaces = new Set();
 let projectWatcher = null;
@@ -207,17 +214,22 @@ function installSurfaceSmokeDiagnostics(surfaceId, win) {
 
 windowManager.register('main', {
     defaultState: { width: 1440, height: 900, isMaximized: false },
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1440,
-        height: state.height || 900,
-        title: PRODUCT_NAME,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const options = {
+            width: state.width || 1440,
+            height: state.height || 900,
+            title: PRODUCT_NAME,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            webPreferences: studioWebPreferences(),
+        };
+        if (typeof state.x === 'number' && typeof state.y === 'number') {
+            options.x = state.x;
+            options.y = state.y;
+        }
+        return options;
+    },
     requestClose: (mainWindow, decide) => {
         shutdownCoordinator.requestMainClose(mainWindow, decide);
     },
@@ -233,19 +245,24 @@ windowManager.register('main', {
 windowManager.register('database', {
     defaultState: { width: 1280, height: 800, isMaximized: false },
     autoShow: false,
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1280,
-        height: state.height || 800,
-        minWidth: 900,
-        minHeight: 560,
-        title: `Database - ${PRODUCT_NAME}`,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const options = {
+            width: state.width || 1280,
+            height: state.height || 800,
+            minWidth: 900,
+            minHeight: 560,
+            title: `Database - ${PRODUCT_NAME}`,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            webPreferences: studioWebPreferences(),
+        };
+        if (typeof state.x === 'number' && typeof state.y === 'number') {
+            options.x = state.x;
+            options.y = state.y;
+        }
+        return options;
+    },
     requestClose: (databaseWindow, decide) => {
         studioIpc.requestClose('database', databaseWindow, decide);
     },
@@ -260,19 +277,24 @@ windowManager.register('database', {
 windowManager.register('engine', {
     defaultState: { width: 1200, height: 760, isMaximized: false },
     autoShow: false,
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1200,
-        height: state.height || 760,
-        minWidth: 900,
-        minHeight: 560,
-        title: `Engine Editor - ${PRODUCT_NAME}`,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const options = {
+            width: state.width || 1200,
+            height: state.height || 760,
+            minWidth: 900,
+            minHeight: 560,
+            title: `Engine Editor - ${PRODUCT_NAME}`,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            webPreferences: studioWebPreferences(),
+        };
+        if (typeof state.x === 'number' && typeof state.y === 'number') {
+            options.x = state.x;
+            options.y = state.y;
+        }
+        return options;
+    },
     requestClose: (engineWindow, decide) => {
         studioIpc.requestClose('engine', engineWindow, decide);
     },
@@ -287,19 +309,24 @@ windowManager.register('engine', {
 windowManager.register('tileset', {
     defaultState: { width: 1320, height: 820, isMaximized: false },
     autoShow: false,
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1320,
-        height: state.height || 820,
-        minWidth: 980,
-        minHeight: 620,
-        title: `Tileset Studio - ${PRODUCT_NAME}`,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const options = {
+            width: state.width || 1320,
+            height: state.height || 820,
+            minWidth: 980,
+            minHeight: 620,
+            title: `Tileset Studio - ${PRODUCT_NAME}`,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            webPreferences: studioWebPreferences(),
+        };
+        if (typeof state.x === 'number' && typeof state.y === 'number') {
+            options.x = state.x;
+            options.y = state.y;
+        }
+        return options;
+    },
     requestClose: (tilesetWindow, decide) => {
         studioIpc.requestClose('tileset', tilesetWindow, decide);
     },

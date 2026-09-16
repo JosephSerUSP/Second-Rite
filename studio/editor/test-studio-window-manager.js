@@ -29,9 +29,11 @@ class FakeWindow extends EventEmitter {
         this.focusCount = 0;
         this.restoreCount = 0;
         this.closeCount = 0;
+        this.normalBounds = null;
     }
 
     getBounds() { return { ...this.bounds }; }
+    getNormalBounds() { return this.normalBounds ? { ...this.normalBounds } : { ...this.bounds }; }
     isMaximized() { return this.maximized; }
     maximize() { this.maximized = true; }
     isMinimized() { return this.minimized; }
@@ -306,4 +308,136 @@ test('closeAndWait resolves true only after an approved BrowserWindow actually c
     assert.equal(await outcome, true);
     assert.equal(win.destroyed, true);
     assert.equal(manager.has('database'), false);
+});
+
+test('corrupted or minimized coordinates (-32000) on load are sanitized to safe defaults', () => {
+    const stateStore = {
+        load() {
+            return { x: -32000, y: -32000, width: 160, height: 39, isMaximized: false };
+        },
+        save() {},
+    };
+    const { manager, created } = makeManager(stateStore);
+    manager.register('main', {
+        defaultState: { width: 1440, height: 900, isMaximized: false },
+        buildOptions: state => ({
+            x: state.x,
+            y: state.y,
+            width: state.width,
+            height: state.height,
+        }),
+    });
+
+    const win = manager.open('main');
+    assert.equal(created.length, 1);
+    assert.equal(win.options.x, undefined);
+    assert.equal(win.options.y, undefined);
+    assert.equal(win.options.width, 1440);
+    assert.equal(win.options.height, 900);
+});
+
+test('closing a minimized window preserves previous valid bounds rather than saving -32000', () => {
+    const saves = [];
+    const stateStore = {
+        load() {
+            return { x: 100, y: 150, width: 1200, height: 800, isMaximized: false };
+        },
+        save(surfaceId, state) {
+            saves.push({ surfaceId, state });
+        },
+    };
+    const { manager } = makeManager(stateStore);
+    manager.register('main', {
+        defaultState: { width: 1440, height: 900, isMaximized: false },
+        buildOptions: state => ({
+            x: state.x,
+            y: state.y,
+            width: state.width,
+            height: state.height,
+        }),
+    });
+
+    const win = manager.open('main');
+    win.minimized = true;
+    win.bounds = { x: -32000, y: -32000, width: 160, height: 39 };
+    win.close();
+
+    assert.equal(saves.length, 1);
+    assert.equal(saves[0].surfaceId, 'main');
+    assert.equal(saves[0].state.x, 100);
+    assert.equal(saves[0].state.y, 150);
+    assert.equal(saves[0].state.width, 1200);
+    assert.equal(saves[0].state.height, 800);
+});
+
+test('closing a minimized window retrieves normal bounds if available', () => {
+    const saves = [];
+    const stateStore = {
+        load() {
+            return { x: 50, y: 50, width: 1000, height: 700, isMaximized: false };
+        },
+        save(surfaceId, state) {
+            saves.push({ surfaceId, state });
+        },
+    };
+    const { manager } = makeManager(stateStore);
+    manager.register('main', {
+        defaultState: { width: 1440, height: 900, isMaximized: false },
+        buildOptions: state => ({
+            x: state.x,
+            y: state.y,
+            width: state.width,
+            height: state.height,
+        }),
+    });
+
+    const win = manager.open('main');
+    win.minimized = true;
+    win.bounds = { x: -32000, y: -32000, width: 160, height: 39 };
+    win.normalBounds = { x: 250, y: 180, width: 1300, height: 850 };
+    win.close();
+
+    assert.equal(saves.length, 1);
+    assert.deepEqual(saves[0].state, {
+        x: 250,
+        y: 180,
+        width: 1300,
+        height: 850,
+        isMaximized: false,
+    });
+});
+
+test('coordinates outside all active displays are cleared so the window can center', () => {
+    const stateStore = {
+        load() {
+            return { x: 3500, y: 500, width: 1200, height: 800, isMaximized: false };
+        },
+        save() {},
+    };
+    const manager = new StudioWindowManager({
+        createWindow(options) {
+            return new FakeWindow(options);
+        },
+        stateStore,
+        getDisplays() {
+            return [
+                { bounds: { x: 0, y: 0, width: 1920, height: 1080 } },
+            ];
+        },
+    });
+    manager.register('main', {
+        defaultState: { width: 1440, height: 900, isMaximized: false },
+        buildOptions: state => ({
+            x: state.x,
+            y: state.y,
+            width: state.width,
+            height: state.height,
+        }),
+    });
+
+    const win = manager.open('main');
+    assert.equal(win.options.x, undefined);
+    assert.equal(win.options.y, undefined);
+    assert.equal(win.options.width, 1200);
+    assert.equal(win.options.height, 800);
 });

@@ -2,15 +2,132 @@
 
 const path = require('path');
 
-function snapshotWindowState(win) {
-    const bounds = win.getBounds();
-    return {
-        x: bounds.x,
-        y: bounds.y,
+function isFiniteNumber(val) {
+    return typeof val === 'number' && Number.isFinite(val);
+}
+
+function isUsableBounds(bounds) {
+    if (!bounds || typeof bounds !== 'object') return false;
+    if (!isFiniteNumber(bounds.width) || bounds.width < 200) return false;
+    if (!isFiniteNumber(bounds.height) || bounds.height < 100) return false;
+    if (isFiniteNumber(bounds.x) && bounds.x <= -10000) return false;
+    if (isFiniteNumber(bounds.y) && bounds.y <= -10000) return false;
+    return true;
+}
+
+function boundsIntersectDisplay(bounds, display) {
+    const area = display.workArea || display.bounds;
+    if (!area) return false;
+    const minOverlapX = Math.min(100, bounds.width);
+    const minOverlapY = Math.min(50, bounds.height);
+    const overlapX = Math.max(0, Math.min(bounds.x + bounds.width, area.x + area.width) - Math.max(bounds.x, area.x));
+    const overlapY = Math.max(0, Math.min(bounds.y + bounds.height, area.y + area.height) - Math.max(bounds.y, area.y));
+    return overlapX >= minOverlapX && overlapY >= minOverlapY;
+}
+
+function sanitizeWindowState(state, defaults = {}, displays = null) {
+    const fallback = { ...(defaults || {}) };
+    const raw = (state && typeof state === 'object' && !Array.isArray(state)) ? state : {};
+
+    let width = isFiniteNumber(raw.width) && raw.width >= 200 ? Math.round(raw.width) : fallback.width;
+    let height = isFiniteNumber(raw.height) && raw.height >= 100 ? Math.round(raw.height) : fallback.height;
+    if (!isFiniteNumber(width) || width < 200) width = 1440;
+    if (!isFiniteNumber(height) || height < 100) height = 900;
+
+    let x = isFiniteNumber(raw.x) ? Math.round(raw.x) : undefined;
+    let y = isFiniteNumber(raw.y) ? Math.round(raw.y) : undefined;
+
+    // Check for Win32 minimized dummy coordinates (-32000) or corrupt offscreen coordinates
+    if (x !== undefined && (x <= -10000 || y <= -10000)) {
+        x = undefined;
+        y = undefined;
+    }
+
+    // If coordinates exist and display topology is known, ensure window intersects at least one display
+    if (x !== undefined && y !== undefined && Array.isArray(displays) && displays.length > 0) {
+        const candidate = { x, y, width, height };
+        const visible = displays.some(display => boundsIntersectDisplay(candidate, display));
+        if (!visible) {
+            x = undefined;
+            y = undefined;
+        }
+    }
+
+    const result = {
+        width,
+        height,
+        isMaximized: Boolean(raw.isMaximized),
+    };
+    if (x !== undefined && y !== undefined) {
+        result.x = x;
+        result.y = y;
+    }
+    return result;
+}
+
+function snapshotWindowState(win, previousState = {}) {
+    if (!win) return { ...(previousState || {}) };
+
+    const isMinimized = typeof win.isMinimized === 'function' && win.isMinimized();
+    const isMaximized = typeof win.isMaximized === 'function' && win.isMaximized();
+
+    let bounds = null;
+    if ((isMinimized || isMaximized) && typeof win.getNormalBounds === 'function') {
+        try {
+            const normal = win.getNormalBounds();
+            if (isUsableBounds(normal)) {
+                bounds = normal;
+            }
+        } catch (_) {
+            bounds = null;
+        }
+    }
+
+    if (!bounds && typeof win.getBounds === 'function') {
+        try {
+            bounds = win.getBounds();
+        } catch (_) {
+            bounds = null;
+        }
+    }
+
+    if (isMinimized || !isUsableBounds(bounds)) {
+        if (isUsableBounds(bounds)) {
+            const res = {
+                width: bounds.width,
+                height: bounds.height,
+                isMaximized: isMaximized || (previousState && Boolean(previousState.isMaximized)),
+            };
+            if (isFiniteNumber(bounds.x) && isFiniteNumber(bounds.y)) {
+                res.x = bounds.x;
+                res.y = bounds.y;
+            }
+            return res;
+        }
+
+        const fallback = { ...(previousState || {}) };
+        const res = {
+            width: isFiniteNumber(fallback.width) && fallback.width >= 200 ? fallback.width : 1440,
+            height: isFiniteNumber(fallback.height) && fallback.height >= 100 ? fallback.height : 900,
+            isMaximized: isMaximized || Boolean(fallback.isMaximized),
+        };
+        if (isFiniteNumber(fallback.x) && isFiniteNumber(fallback.y) && fallback.x > -10000 && fallback.y > -10000) {
+            res.x = fallback.x;
+            res.y = fallback.y;
+        }
+        return res;
+    }
+
+    const res = {
         width: bounds.width,
         height: bounds.height,
-        isMaximized: win.isMaximized(),
+        isMaximized,
     };
+    if (isFiniteNumber(bounds.x) && isFiniteNumber(bounds.y)) {
+        res.x = bounds.x;
+        res.y = bounds.y;
+    }
+    return res;
 }
 
 function createJsonWindowStateStore(options) {
@@ -32,7 +149,7 @@ function createJsonWindowStateStore(options) {
                 if (!fs.existsSync(file)) return fallback;
                 const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
                 if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fallback;
-                return { ...fallback, ...parsed };
+                return sanitizeWindowState(parsed, fallback);
             } catch (error) {
                 logger.error(`Failed to load window state for ${surfaceId}:`, error);
                 return fallback;
@@ -42,7 +159,8 @@ function createJsonWindowStateStore(options) {
         save(surfaceId, state) {
             const file = statePath(surfaceId);
             try {
-                fs.writeFileSync(file, JSON.stringify(state, null, 2));
+                const cleanState = sanitizeWindowState(state);
+                fs.writeFileSync(file, JSON.stringify(cleanState, null, 2));
             } catch (error) {
                 logger.error(`Failed to save window state for ${surfaceId}:`, error);
             }
@@ -66,8 +184,10 @@ class StudioWindowManager {
 
         this.createWindow = options.createWindow;
         this.stateStore = options.stateStore;
+        this.getDisplays = typeof options.getDisplays === 'function' ? options.getDisplays : null;
         this.definitions = new Map();
         this.windows = new Map();
+        this.surfaceStates = new Map();
         this.closeWaiters = new Map();
     }
 
@@ -118,7 +238,11 @@ class StudioWindowManager {
             return existing;
         }
 
-        const state = this.stateStore.load(surfaceId, definition.defaultState || {});
+        const rawState = this.stateStore.load(surfaceId, definition.defaultState || {});
+        const displays = typeof this.getDisplays === 'function' ? this.getDisplays() : null;
+        const state = sanitizeWindowState(rawState, definition.defaultState || {}, displays);
+        this.surfaceStates.set(surfaceId, { ...state });
+
         const win = this.createWindow(definition.buildOptions(state));
         this.windows.set(surfaceId, win);
         let approvedClose = false;
@@ -144,6 +268,17 @@ class StudioWindowManager {
         }
 
         if (typeof win.on === 'function') {
+            const updateTrackedBounds = () => {
+                if (typeof win.isMinimized === 'function' && win.isMinimized()) return;
+                const prev = this.surfaceStates.get(surfaceId) || definition.defaultState || {};
+                const snap = snapshotWindowState(win, prev);
+                if (isUsableBounds(snap)) {
+                    this.surfaceStates.set(surfaceId, snap);
+                }
+            };
+            win.on('resize', updateTrackedBounds);
+            win.on('move', updateTrackedBounds);
+
             win.on('close', event => {
                 if (typeof definition.requestClose === 'function' && !approvedClose) {
                     if (event && typeof event.preventDefault === 'function') event.preventDefault();
@@ -165,10 +300,14 @@ class StudioWindowManager {
                 // Consume the approval: if another listener prevents this close,
                 // a later native close request must ask the surface again.
                 approvedClose = false;
-                this.stateStore.save(surfaceId, snapshotWindowState(win));
+                const prev = this.surfaceStates.get(surfaceId) || definition.defaultState || {};
+                const nextState = snapshotWindowState(win, prev);
+                this.surfaceStates.set(surfaceId, nextState);
+                this.stateStore.save(surfaceId, nextState);
             });
             win.on('closed', () => {
                 if (this.windows.get(surfaceId) === win) this.windows.delete(surfaceId);
+                this.surfaceStates.delete(surfaceId);
                 this.settleCloseWaiters(surfaceId, true);
             });
         }
@@ -209,4 +348,6 @@ module.exports = {
     StudioWindowManager,
     createJsonWindowStateStore,
     snapshotWindowState,
+    sanitizeWindowState,
+    isUsableBounds,
 };

@@ -21,6 +21,7 @@
     let bundleTimer = null;
     let loadedMapIndex = null;
     let bundleStatus = 'runtime geometry';
+    let toolbarExpanded = true;
     const workspaceReadiness = WorkspaceState.createReadiness();
 
     area.style.position = 'relative';
@@ -95,11 +96,11 @@
     navigationHelp.className = 'win98-btn';
     navigationHelp.style.cssText = 'font-size:10px;padding:2px 6px;';
     navigationHelp.textContent = 'Navigation help';
-    navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . / , frame selection.';
+    navigationHelp.title = 'Blender-like viewport: N toggles this inspector; Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . / , frame selection.';
     navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
     const navigationHint = document.createElement('div');
     navigationHint.style.cssText = 'grid-column:1 / -1;font-size:9px;color:var(--win-dark-shadow);line-height:1.25;';
-    navigationHint.textContent = 'MMB orbit / pan · RMB pan · wheel zoom · LMB select';
+    navigationHint.textContent = 'N panel · MMB orbit / pan · RMB pan · wheel zoom · LMB select';
     // Declared extension membrane: the Map workspace owns its toolbar DOM.
     // Other surfaces may contribute controls only through this mount API; they
     // never query/mutate the workspace toolbar or depend on child position.
@@ -321,9 +322,25 @@
 
     function syncWorkspaceVisibility() {
         const active = mapSurfaceIsActive();
-        setDisplayIfNeeded(toolbar, active ? 'flex' : 'none');
+        setDisplayIfNeeded(toolbar, active && toolbarExpanded ? 'flex' : 'none');
         setDisplayIfNeeded(viewport, active ? 'block' : 'none');
     }
+
+    function toggleToolbar() {
+        toolbarExpanded = !toolbarExpanded;
+        toolbar.setAttribute('aria-hidden', toolbarExpanded ? 'false' : 'true');
+        syncWorkspaceVisibility();
+    }
+
+    window.addEventListener('keydown', event => {
+        if (event.code !== 'KeyN' || event.ctrlKey || event.altKey || event.metaKey) return;
+        const target = event.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
+            || target.tagName === 'SELECT' || target.isContentEditable)) return;
+        if (!mapSurfaceIsActive()) return;
+        event.preventDefault();
+        toggleToolbar();
+    });
 
     // Interaction ownership comes from the semantic Studio contract. The Map
     // renderer observes only its own host canvas for local visibility changes;

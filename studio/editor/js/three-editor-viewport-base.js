@@ -317,7 +317,10 @@ export function createThreeEditorViewport(container, options = {}) {
     function setCollisionVisible(visible) {
         collisionVisible = !!visible;
         renderableContent.traverse(object => {
-            if (object.userData.thestraSource?.surface === 'collision') object.visible = collisionVisible;
+            if (object.userData.thestraSource?.surface === 'collision'
+                || object.parent?.userData.thestraSource?.surface === 'collision') {
+                object.visible = collisionVisible;
+            }
         });
     }
     const raycaster = new THREE.Raycaster();
@@ -1470,8 +1473,27 @@ export function createThreeEditorViewport(container, options = {}) {
         function addMesh(mesh, source, materialId, order) {
             if (source && source.kind === 'environment' && source.surface === 'collision') {
                 mesh.material = new THREE.MeshBasicMaterial({ color: 0x31dd90, wireframe: true,
-                    transparent: true, opacity: 0.35, depthWrite: false, depthTest: false });
+                    transparent: true, opacity: 0.42, depthWrite: false, depthTest: false,
+                    side: THREE.DoubleSide });
                 mesh.visible = collisionVisible;
+                const edgeGeometry = new THREE.EdgesGeometry(mesh.geometry, 1);
+                const edges = new THREE.LineSegments(edgeGeometry, new THREE.LineBasicMaterial({
+                    color: 0x9dffb9, transparent: true, opacity: 0.95,
+                    depthWrite: false, depthTest: false
+                }));
+                edges.renderOrder = 1001;
+                edges.visible = collisionVisible;
+                mesh.add(edges);
+                const position = mesh.geometry.getAttribute('position');
+                if (position) {
+                    const points = new THREE.Points(mesh.geometry, new THREE.PointsMaterial({
+                        color: 0xffd45a, size: 5, sizeAttenuation: false,
+                        depthWrite: false, depthTest: false
+                    }));
+                    points.renderOrder = 1002;
+                    points.visible = collisionVisible;
+                    mesh.add(points);
+                }
             }
             mesh.userData.thestraSource = source || null;
             mesh.userData.thestraMaterialId = materialId || null;

@@ -784,21 +784,37 @@ export function createCompositionViewport(container, options) {
         const surface = new THREE.BufferGeometry();
         surface.setAttribute('position', new THREE.Float32BufferAttribute(ribbon, 3));
         const mesh = new THREE.Mesh(surface, new THREE.MeshBasicMaterial({ color: 0x168bb4,
-            transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
+            transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
         mesh.renderOrder = 24;
         walkOverlay.add(mesh);
+        const faceWire = new THREE.Mesh(surface.clone(), new THREE.MeshBasicMaterial({ color: 0x8ff5ff,
+            wireframe: true, transparent: true, opacity: 0.72, depthTest: false, depthWrite: false }));
+        faceWire.renderOrder = 25;
+        walkOverlay.add(faceWire);
         const wire = new THREE.BufferGeometry();
         wire.setAttribute('position', new THREE.Float32BufferAttribute(ribs, 3));
         const ribsLine = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color: 0x38d0f4,
             transparent: true, opacity: 0.72, depthTest: false, depthWrite: false }));
-        ribsLine.renderOrder = 25;
+        ribsLine.renderOrder = 26;
         walkOverlay.add(ribsLine);
+        const vertexGeometry = new THREE.BufferGeometry();
+        const vertices = [];
+        for (let index = 0; index < nearEdge.length; index += 3) {
+            vertices.push(nearEdge[index], nearEdge[index + 1], nearEdge[index + 2] + 0.02);
+            vertices.push(farEdge[index], farEdge[index + 1], farEdge[index + 2] + 0.02);
+        }
+        vertexGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        const vertexPoints = new THREE.Points(vertexGeometry, new THREE.PointsMaterial({
+            color: 0xffd45a, size: 6, sizeAttenuation: false, depthTest: false, depthWrite: false
+        }));
+        vertexPoints.renderOrder = 27;
+        walkOverlay.add(vertexPoints);
         for (const points of [nearEdge, farEdge, centerLine]) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
             const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: points === centerLine ? 0x55ef83 : 0x38d0f4,
                 transparent: true, opacity: 0.92, depthTest: false, depthWrite: false }));
-            line.renderOrder = 26;
+            line.renderOrder = 28;
             walkOverlay.add(line);
         }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;

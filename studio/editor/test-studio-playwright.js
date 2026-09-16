@@ -245,8 +245,8 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             window.ThestraRuntimeCameraViewport.getWalkProfileComponentMode()), 'point');
         mark(t, 'Tab entered Walk Profile Edit Mode through the real Map canvas');
         assert.equal(await mainPage.evaluate(() =>
-            window.ThestraRuntimeCameraViewport.getWalkMeshVisible()), false,
-        'Walk Mesh inspection must be off while authored Walk Profile Edit Mode is active');
+            window.ThestraRuntimeCameraViewport.getWalkMeshVisible()), true,
+        'derived Walk Mesh topology must remain visible while editing the authored profile');
         await mainPage.waitForFunction(() => {
             const hud = document.querySelector('[data-walk-profile-hud="true"]');
             return !!hud && hud.getClientRects().length > 0

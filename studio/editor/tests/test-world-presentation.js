@@ -205,8 +205,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'a selected profile segment must expose a direct insert-point action');
     assert.match(studioSource, /G Y \/ G Z constrain/,
         'the toolbar must teach semantic authored-axis constraints in place');
-    assert.match(studioSource, /walkMesh\.style\.display = editing \? 'none' : ''/,
-        'walk-mesh inspection and Walk Profile editing must be visually distinct states');
+    assert.match(studioSource, /walkMesh\.style\.display = show \? '' : 'none'/,
+        'walk-mesh inspection must remain available while editing the authored profile');
     assert.match(viewportBaseSource, /data-walk-profile-hud|walkProfileHud/,
         'the viewport itself must identify Walk Profile Edit Mode');
     assert.match(viewportBaseSource, /refreshWalkProfileScreenScale/,

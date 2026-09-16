@@ -477,6 +477,7 @@
             ['selected', 'Gold', 'selected point or segment'],
             ['edge', 'Cyan line', 'authored ground profile'],
             ['face', 'Blue fill', 'derived walkable surface'],
+            ['mesh', 'Green wireframe', 'derived walk mesh vertices'],
         ]) {
             const row = document.createElement('div');
             row.className = 'thestra-toolbar-legend-row';
@@ -558,7 +559,7 @@
             const edgeSelected = selectedEdges.length > 0;
 
             walkProfile.style.display = show && authored ? '' : 'none';
-            walkMesh.style.display = editing ? 'none' : '';
+            walkMesh.style.display = show ? '' : 'none';
             createProfile.style.display = show && !authored && !editing ? '' : 'none';
             insertProfilePoint.style.display = authored && editing && edgeSelected ? '' : 'none';
             deleteProfile.style.display = authored && editing && pointSelected ? '' : 'none';
@@ -626,7 +627,7 @@
             const viewport = viewportApi();
             if (!viewport?.setWalkProfileEditing) return;
             const next = !viewport.getWalkProfileEditing();
-            if (next && viewport.setWalkMeshVisible) viewport.setWalkMeshVisible(false);
+            if (next && viewport.setWalkMeshVisible) viewport.setWalkMeshVisible(true);
             viewport.setWalkProfileEditing(next);
             syncWalkMesh();
             syncWalkProfile();

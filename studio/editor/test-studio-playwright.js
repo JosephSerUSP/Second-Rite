@@ -250,9 +250,9 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mainPage.waitForFunction(() => {
             const hud = document.querySelector('[data-walk-profile-hud="true"]');
             return !!hud && hud.getClientRects().length > 0
-                && /WALK PROFILE EDIT[\s\S]*POINT/.test(hud.textContent || '');
+                && /GROUND PROFILE EDIT[\s\S]*selection/i.test(hud.textContent || '');
         });
-        mark(t, 'viewport HUD made Walk Profile Edit/Point state explicit');
+        mark(t, 'viewport HUD explained the unified Ground Profile selection state');
 
         await mainPage.evaluate(() => {
             window.ThestraRuntimeCameraViewport.setSelection({

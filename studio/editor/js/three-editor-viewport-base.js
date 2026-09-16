@@ -311,7 +311,7 @@ export function createThreeEditorViewport(container, options = {}) {
 
     const PROFILE_POINT_RADIUS = 0.12;
     const PROFILE_SEGMENT_RADIUS = 0.035;
-    const PROFILE_POINT_RADIUS_PX = 7;
+    const PROFILE_POINT_RADIUS_PX = 11;
     const PROFILE_SEGMENT_RADIUS_PX = 2.5;
 
     function setCollisionVisible(visible) {
@@ -1297,15 +1297,21 @@ export function createThreeEditorViewport(container, options = {}) {
             return;
         }
         const spatial = options.spatialInteraction?.snapshot?.() || null;
-        const modeLabel = walkProfileComponentMode === 'segment' ? 'EDGE' : 'POINT';
         const operation = spatial?.operation === 'move'
             ? ` · MOVE${spatial.constraint ? ` ${spatial.constraint}` : ' YZ'}` : '';
-        const selectionCount = (spatial?.selectionSet || []).length;
-        const help = walkProfileComponentMode === 'segment'
-            ? 'EDGE MODE (2) · LMB select · Shift+LMB multi-select · Subdivide · 1 point mode'
-            : 'POINT MODE (1) · LMB select · Shift+LMB multi-select · G move · E extrude · X dissolve';
+        const selections = spatial?.selectionSet || [];
+        const active = spatial?.selection || selection;
+        const selectionCount = selections.length;
+        const selectionLabel = active?.kind === 'walk-profile-point'
+            ? 'point'
+            : active?.kind === 'walk-profile-segment' ? 'segment' : 'none';
+        const help = active?.kind === 'walk-profile-point'
+            ? 'DRAG point · G move · E extend endpoint · Delete remove'
+            : active?.kind === 'walk-profile-segment'
+                ? 'CLICK segment · Insert point in the Ground Profile panel'
+                : 'DRAG a point to shape the ground · CLICK a segment to select it';
         const feedback = spatial?.feedback ? `\n${spatial.feedback}` : '';
-        walkProfileHud.textContent = `WALK PROFILE EDIT\n${modeLabel}${operation} · Selection: ${selectionCount}\n${help}${feedback}`;
+        walkProfileHud.textContent = `GROUND PROFILE EDIT\n${selectionLabel} selection: ${selectionCount}${operation}\n${help}${feedback}`;
         walkProfileHud.style.display = 'block';
     }
 
@@ -1325,7 +1331,7 @@ export function createThreeEditorViewport(container, options = {}) {
                 object.material.transparent = false;
                 object.material.opacity = 1;
                 object.material.color.setHex(active ? 0xff8a33
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x776e45);
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0xffd45a);
                 object.userData.thestraStateScale = active ? 1.45
                     : selected ? 1.28 : hovered ? 1.18 : 1;
             } else if (semantic?.kind === 'walk-profile-segment') {
@@ -2096,6 +2102,9 @@ export function createThreeEditorViewport(container, options = {}) {
                 options.onToggleSelection(profileSelection);
             } else {
                 emitSelection(profileSelection);
+                if (profileSelection?.kind === 'walk-profile-point') {
+                    beginModalProfileMove();
+                }
             }
             return;
         }
@@ -2132,6 +2141,10 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function onPointerUp() {
+        if (modalMoveGesture) {
+            endModalProfileMove(true);
+            return;
+        }
         if (!editGesture) return;
         editGesture = null;
         lastPaintKey = null;

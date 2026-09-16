@@ -173,7 +173,7 @@ export function createCompositionViewport(container, options) {
         if (!anchorObject || !source) return { ok: false, reason: 'invalid-profile-point' };
 
         const previewPoint = new THREE.Mesh(
-            new THREE.CircleGeometry(5, 16),
+                    new THREE.CircleGeometry(7, 16),
             new THREE.MeshBasicMaterial({
                 color: 0xffa24d, depthTest: false, depthWrite: false
             })
@@ -369,7 +369,7 @@ export function createCompositionViewport(container, options) {
                 object.material.transparent = false;
                 object.material.opacity = 1;
                 object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0xffd45a);
                 object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
                 object.material.color.setHex(active ? 0xffa24d
@@ -555,7 +555,7 @@ export function createCompositionViewport(container, options) {
             point.renderOrder = 29;
             point.userData.thestraSelection = semantic;
             const outline = new THREE.Mesh(
-                new THREE.RingGeometry(6, 8, 16),
+                new THREE.RingGeometry(8, 10, 16),
                 new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
             );
             outline.position.copy(point.position);
@@ -956,11 +956,18 @@ export function createCompositionViewport(container, options) {
             } else {
                 setSemanticSelection(selection);
                 options.onSelection?.(selection);
+                if (selection?.kind === 'walk-profile-point') {
+                    beginModalProfileMove();
+                }
             }
             return;
         }
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);
     });
+    const onProfilePointerUp = () => {
+        if (modalProfileMove) endModalProfileMove(true);
+    };
+    window.addEventListener('pointerup', onProfilePointerUp);
     renderer.domElement.addEventListener('dblclick', event => {
         if (walkProfileEditing) return;
         const hit = pick(event); if (hit) options.onOpenAt?.(semantic(hit));
@@ -1111,6 +1118,7 @@ export function createCompositionViewport(container, options) {
         descriptor: () => plate?.descriptor || null,
         dispose() {
             disposed = true; serial += 1; disposeNavigation(); observer.disconnect();
+            window.removeEventListener('pointerup', onProfilePointerUp);
             gizmo.dispose(); controls.dispose();
             scenePlane.material.map?.dispose(); foregroundPlane.material.map?.dispose();
             scene.traverse(object => { object.geometry?.dispose(); object.material?.dispose(); });

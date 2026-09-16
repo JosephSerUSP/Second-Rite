@@ -110,6 +110,24 @@ test('autoShow false surfaces stay hidden across repeated opens until renderer r
     assert.equal(win.focusCount, 1);
 });
 
+test('ordinary surfaces reveal after document load when ready-to-show is absent', () => {
+    const stateStore = {
+        load() { return { width: 800, height: 600, isMaximized: false }; },
+        save() {},
+    };
+    const { manager } = makeManager(stateStore);
+    manager.register('main', {
+        buildOptions: state => ({ width: state.width, height: state.height }),
+    });
+
+    const win = manager.open('main');
+    win.emit('did-finish-load');
+    win.emit('ready-to-show');
+
+    assert.equal(win.showCount, 1);
+    assert.equal(win.visible, true);
+});
+
 test('window lifecycle restores persisted state and saves state on close', () => {
     const saves = [];
     const stateStore = {

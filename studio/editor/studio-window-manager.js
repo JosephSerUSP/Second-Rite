@@ -126,9 +126,21 @@ class StudioWindowManager {
         if (state.isMaximized && typeof win.maximize === 'function') win.maximize();
 
         if (definition.autoShow !== false && typeof win.once === 'function') {
-            win.once('ready-to-show', () => {
+            // Electron normally emits ready-to-show, but a renderer that is
+            // slow to paint (or is recovering after a forced process close)
+            // can leave the BrowserWindow alive and permanently hidden. A
+            // completed document load is sufficient for the ordinary Studio
+            // surface and gives the user a recoverable window instead of a
+            // "live but dead" process. The guard keeps the two events from
+            // revealing/focusing the same surface twice.
+            let revealed = false;
+            const reveal = () => {
+                if (revealed) return;
+                revealed = true;
                 if (typeof win.show === 'function') win.show();
-            });
+            };
+            win.once('ready-to-show', reveal);
+            win.once('did-finish-load', reveal);
         }
 
         if (typeof win.on === 'function') {

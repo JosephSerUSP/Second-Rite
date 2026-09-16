@@ -11,5 +11,11 @@ if not exist "node_modules\chokidar\package.json" (
 )
 
 echo Starting Thestra Studio...
-call npm start
-exit /b %errorlevel%
+call npm start -- --project "%~dp0projects\hichaukitoden-game"
+set "EXIT_CODE=%ERRORLEVEL%"
+if not "%EXIT_CODE%"=="0" (
+  echo.
+  echo Thestra Studio failed to start. Leave this window open and check the error above.
+  pause
+)
+exit /b %EXIT_CODE%

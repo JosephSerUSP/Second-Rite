@@ -882,6 +882,113 @@
             background-color: #dfdfdf;
         }
 
+        /* Spatial authoring is a contextual inspector, not a ribbon. Keep
+           controls in a stable vertical reading order like Blender's N panel. */
+        .thestra-toolbar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 5px;
+            background: #d4d0c8;
+            border: 1px solid var(--win-shadow);
+            box-shadow: inset 1px 1px 0 var(--win-white);
+        }
+        .thestra-toolbar-group-title {
+            color: var(--win-dark-shadow);
+            font-size: 9px;
+            font-weight: bold;
+            letter-spacing: .08em;
+        }
+        .thestra-toolbar-group-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 3px;
+        }
+        .thestra-toolbar-group-controls .win98-btn {
+            width: auto;
+            min-width: 0;
+            justify-content: center;
+        }
+        .thestra-toolbar-status {
+            padding: 3px 4px;
+            background: #fff;
+            border: 1px solid var(--win-shadow);
+        }
+        .thestra-toolbar-status span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .thestra-toolbar-profile {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .thestra-toolbar-profile-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 3px;
+        }
+        .thestra-toolbar-profile-controls .win98-btn {
+            width: auto;
+            min-width: 0;
+            white-space: normal;
+            min-height: 24px;
+        }
+        .thestra-toolbar-profile-coordinates {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+            gap: 3px;
+            align-items: center;
+        }
+        .thestra-toolbar-help {
+            display: block;
+            padding: 5px;
+            color: var(--win-dark-shadow);
+            background: #fff;
+            border: 1px solid var(--win-shadow);
+            white-space: normal;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+        .thestra-toolbar-legend {
+            display: grid;
+            gap: 3px;
+            padding: 4px;
+            background: #eef7f8;
+            border: 1px solid #6e9298;
+            color: #263c40;
+            line-height: 1.2;
+        }
+        .thestra-toolbar-legend strong {
+            font-size: 9px;
+            letter-spacing: .06em;
+        }
+        .thestra-toolbar-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+        }
+        .thestra-toolbar-swatch {
+            display: inline-block;
+            width: 14px;
+            height: 8px;
+            flex: 0 0 14px;
+            border: 1px solid #111820;
+        }
+        .thestra-toolbar-swatch.active { background: #ff8a33; }
+        .thestra-toolbar-swatch.selected { background: #ffd45a; }
+        .thestra-toolbar-swatch.edge { background: #38d0f4; }
+        .thestra-toolbar-swatch.face { background: #168bb4; opacity: .75; }
+        .thestra-toolbar-selection-readout {
+            margin-top: 2px;
+            padding-top: 3px;
+            border-top: 1px solid #9ab6ba;
+            font-weight: bold;
+            font-size: 9px;
+        }
+
         /* --- MAP HIERARCHY TREE --- */
         .map-tree-container {
             height: 180px;

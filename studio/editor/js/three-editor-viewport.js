@@ -336,6 +336,7 @@ export function createThreeEditorViewport(container, options = {}) {
         },
         setWalkProfileEditing(enabled) {
             const active = !!enabled;
+            if (active) api.setWalkMeshVisible(true);
             base.setWalkProfileEditing?.(active);
             compositionAuthoring.setWalkProfileEditing?.(active);
             if (!active) emitSelection(null);
@@ -372,6 +373,7 @@ export function createThreeEditorViewport(container, options = {}) {
                     y: Number(profile[selection.index].y),
                     z: Number(profile[selection.index].z)
                 } : null;
+            const interaction = spatialInteraction.snapshot();
             return {
                 available: !!lane,
                 authored: Array.isArray(profile) && profile.length >= 2,
@@ -379,8 +381,12 @@ export function createThreeEditorViewport(container, options = {}) {
                 editing: api.getWalkProfileEditing(),
                 componentMode: api.getWalkProfileComponentMode(),
                 selection,
+                selections,
                 selectionCount: selections.length,
-                activePoint
+                activePoint,
+                operation: interaction.operation,
+                constraint: interaction.constraint,
+                feedback: interaction.feedback
             };
         },
         createGroundProfile() {
@@ -417,6 +423,9 @@ export function createThreeEditorViewport(container, options = {}) {
             }
             if (result?.selection) api.setSelection(result.selection);
             return result;
+        },
+        insertSelectedGroundProfilePoint() {
+            return api.splitSelectedGroundProfileSegment(0.5);
         },
         subdivideSelectedGroundProfileSegments(cuts = 1) {
             const segments = api.getWalkProfileSelections()
@@ -565,6 +574,10 @@ export function createThreeEditorViewport(container, options = {}) {
 
         if (event.code === 'Tab') {
             event.preventDefault();
+            if (!status.authored) {
+                spatialInteraction.reject('missing-ground-profile');
+                return;
+            }
             api.setWalkProfileEditing(!status.editing);
             return;
         }

@@ -204,6 +204,18 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
+    const walkProfileHud = document.createElement('div');
+    walkProfileHud.dataset.walkProfileHud = 'true';
+    walkProfileHud.style.cssText = [
+        'position:absolute', 'left:8px', 'top:8px', 'z-index:40',
+        'display:none', 'pointer-events:none', 'max-width:520px',
+        'padding:6px 8px', 'border:1px solid rgba(255,255,255,.28)',
+        'background:rgba(20,24,28,.86)', 'color:#f4f4f4',
+        'font:11px/1.35 monospace', 'white-space:pre-line',
+        'box-shadow:0 1px 6px rgba(0,0,0,.45)'
+    ].join(';');
+    container.appendChild(walkProfileHud);
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x24282d);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x30343a, 2.0));
@@ -246,11 +258,9 @@ export function createThreeEditorViewport(container, options = {}) {
     topControls.enabled = false;
 
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
-        canPan(event) {
-            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture || modalMoveGesture) return false;
-            if (walkProfileEditing) return !pickWalkProfile(event);
-            if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
-            return !pickSemantic(event, ['event', 'light', 'override']);
+        canPan() {
+            return !!sceneModel && !moveGizmo.axis && !moveGizmo.dragging
+                && !editGesture && !modalMoveGesture;
         },
         getOpticalNavigation: options.getOpticalNavigation || null
     });
@@ -299,10 +309,18 @@ export function createThreeEditorViewport(container, options = {}) {
     const walkProfileSelectable = [];
     const walkProfileObjects = new Map();
 
+    const PROFILE_POINT_RADIUS = 0.12;
+    const PROFILE_SEGMENT_RADIUS = 0.035;
+    const PROFILE_POINT_RADIUS_PX = 11;
+    const PROFILE_SEGMENT_RADIUS_PX = 2.5;
+
     function setCollisionVisible(visible) {
         collisionVisible = !!visible;
         renderableContent.traverse(object => {
-            if (object.userData.thestraSource?.surface === 'collision') object.visible = collisionVisible;
+            if (object.userData.thestraSource?.surface === 'collision'
+                || object.parent?.userData.thestraSource?.surface === 'collision') {
+                object.visible = collisionVisible;
+            }
         });
     }
     const raycaster = new THREE.Raycaster();
@@ -1135,7 +1153,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const delta = b.clone().sub(a);
         const length = Math.max(delta.length(), 0.001);
         const mesh = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.035, 0.035, length, 8),
+            new THREE.CylinderGeometry(PROFILE_SEGMENT_RADIUS, PROFILE_SEGMENT_RADIUS, length, 8),
             new THREE.MeshBasicMaterial({
                 color: 0x38d0f4, transparent: true, opacity: 0.9,
                 depthTest: false, depthWrite: false
@@ -1153,7 +1171,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const delta = rightPosition.clone().sub(leftPosition);
         const length = Math.max(delta.length(), 0.001);
         segment.geometry?.dispose();
-        segment.geometry = new THREE.CylinderGeometry(0.035, 0.035, length, 8);
+        segment.geometry = new THREE.CylinderGeometry(PROFILE_SEGMENT_RADIUS, PROFILE_SEGMENT_RADIUS, length, 8);
         segment.position.copy(leftPosition).add(rightPosition).multiplyScalar(0.5);
         if (delta.lengthSq() > 1e-12) {
             segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
@@ -1212,14 +1230,22 @@ export function createThreeEditorViewport(container, options = {}) {
                     index
                 };
                 const point = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.12, 12, 8),
+                    new THREE.SphereGeometry(PROFILE_POINT_RADIUS, 12, 8),
                     new THREE.MeshBasicMaterial({
-                        color: 0xffd45a, depthTest: false, depthWrite: false
+                        color: 0xffff66, depthTest: false, depthWrite: false
                     })
                 );
                 point.position.fromArray(position);
                 point.renderOrder = 1000;
                 point.userData.thestraSelection = semantic;
+                const outline = new THREE.Mesh(
+                    new THREE.SphereGeometry(PROFILE_POINT_RADIUS * 1.9, 12, 8),
+                    new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
+                );
+                outline.position.copy(position);
+                outline.renderOrder = 999;
+                point.userData.thestraProfileOutline = outline;
+                walkProfileContent.add(outline);
                 walkProfileContent.add(point);
                 walkProfileSelectable.push(point);
                 walkProfileObjects.set(semantic.key, point);
@@ -1232,12 +1258,63 @@ export function createThreeEditorViewport(container, options = {}) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing || !sceneModel) return null;
         updatePointer(event);
-        const wantedKind = walkProfileComponentMode === 'segment'
-            ? 'walk-profile-segment' : 'walk-profile-point';
-        const targets = walkProfileSelectable.filter(object =>
-            object.userData?.thestraSelection?.kind === wantedKind);
-        const hits = raycaster.intersectObjects(targets, false);
+        const hits = raycaster.intersectObjects(walkProfileSelectable, false);
         return hits[0]?.object?.userData?.thestraSelection || null;
+    }
+
+    function worldUnitsPerPixelAt(position) {
+        const camera = activeCamera();
+        const rect = renderer.domElement.getBoundingClientRect();
+        const height = Math.max(1, rect.height);
+        if (camera.isOrthographicCamera) {
+            return Math.abs(camera.top - camera.bottom)
+                / Math.max(0.001, camera.zoom) / height;
+        }
+        const distance = Math.max(0.001, camera.position.distanceTo(position));
+        return 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) / height;
+    }
+
+    function refreshWalkProfileScreenScale() {
+        if (!walkProfileEditing) return;
+        for (const object of walkProfileObjects.values()) {
+            const semantic = object.userData.thestraSelection;
+            const unitsPerPixel = worldUnitsPerPixelAt(object.position);
+            const emphasis = Number(object.userData.thestraStateScale) || 1;
+            if (semantic?.kind === 'walk-profile-point') {
+                const screenScale = Math.max(
+                    1, PROFILE_POINT_RADIUS_PX * unitsPerPixel / PROFILE_POINT_RADIUS);
+                object.scale.setScalar(screenScale * emphasis);
+                object.userData.thestraProfileOutline?.scale.setScalar(screenScale * emphasis);
+            } else if (semantic?.kind === 'walk-profile-segment') {
+                const radialScale = Math.max(
+                    1, PROFILE_SEGMENT_RADIUS_PX * unitsPerPixel / PROFILE_SEGMENT_RADIUS);
+                object.scale.set(radialScale * emphasis, 1, radialScale * emphasis);
+            }
+        }
+    }
+
+    function refreshWalkProfileHud() {
+        if (!walkProfileEditing) {
+            walkProfileHud.style.display = 'none';
+            return;
+        }
+        const spatial = options.spatialInteraction?.snapshot?.() || null;
+        const operation = spatial?.operation === 'move'
+            ? ` · MOVE${spatial.constraint ? ` ${spatial.constraint}` : ' YZ'}` : '';
+        const selections = spatial?.selectionSet || [];
+        const active = spatial?.selection || selection;
+        const selectionCount = selections.length;
+        const selectionLabel = active?.kind === 'walk-profile-point'
+            ? 'point'
+            : active?.kind === 'walk-profile-segment' ? 'segment' : 'none';
+        const help = active?.kind === 'walk-profile-point'
+            ? 'DRAG point · G move · E extend endpoint · Delete remove'
+            : active?.kind === 'walk-profile-segment'
+                ? 'CLICK segment · Insert point in the Ground Profile panel'
+                : 'DRAG a point to shape the ground · CLICK a segment to select it';
+        const feedback = spatial?.feedback ? `\n${spatial.feedback}` : '';
+        walkProfileHud.textContent = `GROUND PROFILE EDIT\n${selectionLabel} selection: ${selectionCount}${operation}\n${help}${feedback}`;
+        walkProfileHud.style.display = 'block';
     }
 
     function refreshWalkProfileVisualState() {
@@ -1253,19 +1330,22 @@ export function createThreeEditorViewport(container, options = {}) {
             const active = key === activeKey;
             const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                const activeType = walkProfileComponentMode === 'point';
-                object.material.transparent = !activeType;
-                object.material.opacity = activeType ? 1 : 0.35;
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
-                object.scale.setScalar(active ? 1.35 : selected ? 1.22 : hovered ? 1.18 : 1);
+                object.material.transparent = false;
+                object.material.opacity = 1;
+                object.material.color.setHex(active ? 0xff6b1a
+                    : selected ? 0xffa800 : hovered ? 0xffffff : 0xffff66);
+                object.userData.thestraStateScale = active ? 1.45
+                    : selected ? 1.28 : hovered ? 1.18 : 1;
             } else if (semantic?.kind === 'walk-profile-segment') {
-                const activeType = walkProfileComponentMode === 'segment';
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 1 : hovered ? 1 : (activeType ? 0.9 : 0.3);
+                object.material.color.setHex(active ? 0xff8a33
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x31b9d9);
+                object.material.opacity = active ? 1 : selected ? 1 : hovered ? 1 : 0.82;
+                object.userData.thestraStateScale = active ? 1.75
+                    : selected ? 1.5 : hovered ? 1.35 : 1;
             }
         }
+        refreshWalkProfileScreenScale();
+        refreshWalkProfileHud();
     }
 
     function setWalkProfileHover(next) {
@@ -1286,6 +1366,7 @@ export function createThreeEditorViewport(container, options = {}) {
         } else {
             syncMoveGizmo();
         }
+        refreshWalkProfileVisualState();
     }
 
     function setWalkProfileComponentMode(mode) {
@@ -1401,8 +1482,34 @@ export function createThreeEditorViewport(container, options = {}) {
         function addMesh(mesh, source, materialId, order) {
             if (source && source.kind === 'environment' && source.surface === 'collision') {
                 mesh.material = new THREE.MeshBasicMaterial({ color: 0x31dd90, wireframe: true,
-                    transparent: true, opacity: 0.35, depthWrite: false, depthTest: false });
+                    transparent: true, opacity: 0.42, depthWrite: false, depthTest: false,
+                    side: THREE.DoubleSide });
                 mesh.visible = collisionVisible;
+                const edgeGeometry = new THREE.EdgesGeometry(mesh.geometry, 1);
+                const edges = new THREE.LineSegments(edgeGeometry, new THREE.LineBasicMaterial({
+                    color: 0x9dffb9, transparent: true, opacity: 0.95,
+                    depthWrite: false, depthTest: false
+                }));
+                edges.renderOrder = 1001;
+                edges.visible = collisionVisible;
+                mesh.add(edges);
+                const position = mesh.geometry.getAttribute('position');
+                if (position) {
+                    const outline = new THREE.Points(mesh.geometry, new THREE.PointsMaterial({
+                        color: 0x111820, size: 10, sizeAttenuation: false,
+                        depthWrite: false, depthTest: false
+                    }));
+                    outline.renderOrder = 1002;
+                    outline.visible = collisionVisible;
+                    mesh.add(outline);
+                    const points = new THREE.Points(mesh.geometry, new THREE.PointsMaterial({
+                        color: 0xffd45a, size: 5, sizeAttenuation: false,
+                        depthWrite: false, depthTest: false
+                    }));
+                    points.renderOrder = 1003;
+                    points.visible = collisionVisible;
+                    mesh.add(points);
+                }
             }
             mesh.userData.thestraSource = source || null;
             mesh.userData.thestraMaterialId = materialId || null;
@@ -1997,6 +2104,9 @@ export function createThreeEditorViewport(container, options = {}) {
                 options.onToggleSelection(profileSelection);
             } else {
                 emitSelection(profileSelection);
+                if (profileSelection?.kind === 'walk-profile-point') {
+                    beginModalProfileMove();
+                }
             }
             return;
         }
@@ -2033,6 +2143,10 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function onPointerUp() {
+        if (modalMoveGesture) {
+            endModalProfileMove(true);
+            return;
+        }
         if (!editGesture) return;
         editGesture = null;
         lastPaintKey = null;
@@ -2212,7 +2326,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
     if (navigationHelp) {
-        navigationHelp.title = 'Drag empty space, MMB or RMB to pan; wheel zooms; Alt+MMB orbits 3D. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
+        navigationHelp.title = 'LMB selects/edits only. MMB orbits 3D; Shift+MMB or RMB pans; wheel zooms. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -2225,6 +2339,8 @@ export function createThreeEditorViewport(container, options = {}) {
         syncLiveAuthoringLighting();
         perspectiveControls.update();
         topControls.update();
+        refreshWalkProfileScreenScale();
+        refreshWalkProfileHud();
         renderer.render(scene, activeCamera());
         requestAnimationFrame(animate);
     }());
@@ -2276,6 +2392,7 @@ export function createThreeEditorViewport(container, options = {}) {
             disposeObject(semanticContent);
             disposeObject(renderableContent);
             disposeObject(walkProfileContent);
+            walkProfileHud.remove();
             selectionOverlay.geometry.dispose();
             selectionOverlay.material.dispose();
             moveGizmo.detach();

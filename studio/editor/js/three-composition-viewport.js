@@ -51,6 +51,13 @@ export function createCompositionViewport(container, options) {
     renderer.domElement.setAttribute('aria-label', 'Plate map viewport; drag Events along the authored lane, world Y.');
     renderer.domElement.title = 'Plate Events move along the authored lane (world Y).';
     layer.appendChild(renderer.domElement);
+    // Profile controls are screen-space authoring affordances. Keeping their
+    // visuals in a DOM/SVG overlay prevents the plate texture from occluding
+    // them through WebGL depth or transparent-material sorting.
+    const profileSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    profileSvg.setAttribute('aria-hidden', 'true');
+    profileSvg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3;display:none;';
+    layer.appendChild(profileSvg);
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 5000);
     camera.position.z = 1000;
@@ -67,6 +74,10 @@ export function createCompositionViewport(container, options) {
     const walkProfileControls = new THREE.Group();
     walkProfileControls.name = 'ThestraPlateWalkProfileAuthoring';
     walkProfileControls.visible = false;
+    // Profile controls are an authoring overlay, not scene geometry. Keep the
+    // whole group in a final render band so the plate's foreground texture
+    // cannot occlude the controls when a point lies on the artwork.
+    walkProfileControls.renderOrder = 100;
     scene.add(walkProfileControls);
     const gizmo = createMoveGizmo(camera, renderer.domElement, ['X'], ['Z', 'Y', 'X']);
     scene.add(gizmo.getHelper());
@@ -88,6 +99,7 @@ export function createCompositionViewport(container, options) {
     let walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
+    const walkProfileSvgObjects = new Map();
 
     function semantic(event) { return { kind: 'event', key: `event:${event.id}`, id: event.id }; }
     function updatePointer(event) {
@@ -103,11 +115,7 @@ export function createCompositionViewport(container, options) {
     function pickWalkProfile(event) {
         if (!walkProfileEditing) return null;
         updatePointer(event);
-        const wantedKind = walkProfileComponentMode === 'segment'
-            ? 'walk-profile-segment' : 'walk-profile-point';
-        const targets = walkProfileHitTargets.filter(object =>
-            object.userData?.thestraSelection?.kind === wantedKind);
-        return raycaster.intersectObjects(targets, false)[0]?.object.userData.thestraSelection || null;
+        return raycaster.intersectObjects(walkProfileHitTargets, false)[0]?.object.userData.thestraSelection || null;
     }
 
     function pointerSnapshot(event) {
@@ -177,7 +185,7 @@ export function createCompositionViewport(container, options) {
         if (!anchorObject || !source) return { ok: false, reason: 'invalid-profile-point' };
 
         const previewPoint = new THREE.Mesh(
-            new THREE.CircleGeometry(5, 16),
+                    new THREE.CircleGeometry(7, 16),
             new THREE.MeshBasicMaterial({
                 color: 0xffa24d, depthTest: false, depthWrite: false
             })
@@ -370,19 +378,20 @@ export function createCompositionViewport(container, options) {
             const active = key === activeKey;
             const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                const activeType = walkProfileComponentMode === 'point';
-                object.material.transparent = !activeType;
-                object.material.opacity = activeType ? 1 : 0.35;
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
+                const color = active ? '#ff6b1a' : selected ? '#ffa800' : hovered ? '#ffffff' : '#ffff66';
+                const svg = walkProfileSvgObjects.get(key);
+                svg?.point?.setAttribute('fill', color);
+                svg?.outline?.setAttribute('stroke', active || selected ? '#ffffff' : '#111820');
+                svg?.outline?.setAttribute('stroke-width', active || selected ? '2' : '1');
                 object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
-                const activeType = walkProfileComponentMode === 'segment';
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : (activeType ? 0.5 : 0.2);
+                const color = active ? '#ffa24d' : selected ? '#ffd45a' : hovered ? '#ffffff' : '#38d0f4';
+                const svg = walkProfileSvgObjects.get(key);
+                svg?.segment?.setAttribute('stroke', color);
+                svg?.segment?.setAttribute('opacity', selected || hovered || active ? '1' : '0.9');
             }
         }
+        syncWalkProfileSvg();
     }
 
     function setWalkProfileHover(next) {
@@ -393,8 +402,8 @@ export function createCompositionViewport(container, options) {
         refreshWalkProfileVisualState();
     }
     const disposeNavigation = installNavigation(renderer.domElement, [controls], {
-        planar: true, canPan: event => !gizmo.axis && !gizmo.dragging
-            && !(walkProfileEditing ? pickWalkProfile(event) : pick(event))
+        planar: true,
+        canPan: () => !gizmo.axis && !gizmo.dragging && !modalProfileMove
     });
     function refreshOverlay() {
         const profileObject = walkProfileEditing && walkProfileSelection
@@ -479,6 +488,45 @@ export function createCompositionViewport(container, options) {
         }
         walkProfileObjects.clear();
         walkProfileHitTargets.length = 0;
+        while (profileSvg.firstChild) profileSvg.removeChild(profileSvg.firstChild);
+        walkProfileSvgObjects.clear();
+    }
+
+    function profileSvgPoint(screen) {
+        const projected = new THREE.Vector3(screen.x, -screen.y, 20).project(camera);
+        const rect = renderer.domElement.getBoundingClientRect();
+        return {
+            x: (projected.x + 1) * 0.5 * rect.width,
+            y: (1 - projected.y) * 0.5 * rect.height
+        };
+    }
+
+    function syncWalkProfileSvg() {
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        if (!walkProfileEditing || !plate || !Array.isArray(profile) || profile.length < 2) {
+            profileSvg.style.display = 'none';
+            return;
+        }
+        profileSvg.style.display = 'block';
+        const points = profile.map(point => profileSvgPoint(platePoint(
+            Number(lane.depthX), Number(point.y), Number(point.z))));
+        for (let index = 0; index < points.length - 1; index++) {
+            const node = walkProfileSvgObjects.get(`walk-profile-segment:${index}`)?.segment;
+            if (!node) continue;
+            node.setAttribute('x1', points[index].x);
+            node.setAttribute('y1', points[index].y);
+            node.setAttribute('x2', points[index + 1].x);
+            node.setAttribute('y2', points[index + 1].y);
+        }
+        points.forEach((point, index) => {
+            const node = walkProfileSvgObjects.get(`walk-profile-point:${index}`);
+            if (!node) return;
+            for (const circle of [node.outline, node.point]) {
+                circle.setAttribute('cx', point.x);
+                circle.setAttribute('cy', point.y);
+            }
+        });
     }
 
     function profileScreenSegment(start, end, semantic) {
@@ -544,6 +592,13 @@ export function createCompositionViewport(container, options) {
             walkProfileControls.add(segment);
             walkProfileHitTargets.push(segment);
             walkProfileObjects.set(semantic.key, segment);
+            const svgSegment = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            svgSegment.setAttribute('stroke', '#38d0f4');
+            svgSegment.setAttribute('stroke-width', '3');
+            svgSegment.setAttribute('stroke-linecap', 'round');
+            svgSegment.setAttribute('opacity', '0.9');
+            profileSvg.appendChild(svgSegment);
+            walkProfileSvgObjects.set(semantic.key, { segment: svgSegment });
         }
         points.forEach((screen, index) => {
             const semantic = {
@@ -552,20 +607,39 @@ export function createCompositionViewport(container, options) {
                 index
             };
             const point = new THREE.Mesh(
-                new THREE.CircleGeometry(5, 16),
+                new THREE.CircleGeometry(4, 16),
                 new THREE.MeshBasicMaterial({
-                    color: 0xffd45a, depthTest: false, depthWrite: false
+                    color: 0xffff66, transparent: true, opacity: 0,
+                    depthTest: false, depthWrite: false
                 })
             );
-            point.position.set(screen.x, -screen.y, 4);
-            point.renderOrder = 29;
+            point.position.set(screen.x, -screen.y, 20);
+            point.renderOrder = 101;
             point.userData.thestraSelection = semantic;
+            const outline = new THREE.Mesh(
+                new THREE.RingGeometry(5, 7, 16),
+                new THREE.MeshBasicMaterial({ color: 0x111820, transparent: true, opacity: 0,
+                    depthTest: false, depthWrite: false })
+            );
+            outline.position.copy(point.position);
+            outline.position.z = 19.5;
+            outline.renderOrder = 100;
+            walkProfileControls.add(outline);
             walkProfileControls.add(point);
             walkProfileHitTargets.push(point);
             walkProfileObjects.set(semantic.key, point);
+            const svgOutline = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            svgOutline.setAttribute('r', '7');
+            svgOutline.setAttribute('fill', '#111820');
+            const svgPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            svgPoint.setAttribute('r', '4');
+            svgPoint.setAttribute('fill', '#ffff66');
+            profileSvg.append(svgOutline, svgPoint);
+            walkProfileSvgObjects.set(semantic.key, { outline: svgOutline, point: svgPoint });
         });
         walkProfileControls.visible = walkProfileEditing;
         refreshWalkProfileVisualState();
+        syncWalkProfileSvg();
         refreshOverlay();
     }
 
@@ -578,7 +652,9 @@ export function createCompositionViewport(container, options) {
             walkProfileSelection = null;
             setWalkProfileHover(null);
         }
+        profileSvg.style.display = walkProfileEditing ? 'block' : 'none';
         rebuildPlayerPreview();
+        syncWalkProfileSvg();
         refreshOverlay();
     }
 
@@ -760,45 +836,47 @@ export function createCompositionViewport(container, options) {
         const bounds = plate.bounds || [];
         const nearX = Number.isFinite(Number(bounds[0])) ? Number(bounds[0]) : Number(lane.depthX) - 1;
         const farX = Number.isFinite(Number(bounds[3])) ? Number(bounds[3]) : Number(lane.depthX) + 1;
-        const ribbon = [], ribs = [], nearEdge = [], farEdge = [], centerLine = [];
-        const samples = 48;
-        for (let index = 0; index <= samples; index++) {
-            const y = minimum + (maximum - minimum) * index / samples;
-            const z = View.groundHeight(lane.groundProfile, Number(lane.groundZ || 0), y);
+        const profile = Array.isArray(lane.groundProfile) && lane.groundProfile.length >= 2
+            ? lane.groundProfile
+            : [{ y: minimum, z: Number(lane.groundZ || 0) },
+                { y: maximum, z: Number(lane.groundZ || 0) }];
+        const ribbon = [], nearEdge = [], farEdge = [], centerLine = [];
+        const projectedProfile = profile.map(point => {
+            const y = Number(point.y), z = Number(point.z);
             const near = platePoint(nearX, y, z + 0.015);
             const far = platePoint(farX, y, z + 0.015);
             const center = platePoint(Number(lane.depthX), y, z + 0.02);
             nearEdge.push(near.x, -near.y, 2.8);
             farEdge.push(far.x, -far.y, 2.8);
             centerLine.push(center.x, -center.y, 2.9);
-            if (index < samples) {
-                const nextY = minimum + (maximum - minimum) * (index + 1) / samples;
-                const nextZ = View.groundHeight(lane.groundProfile, Number(lane.groundZ || 0), nextY);
-                const nextNear = platePoint(nearX, nextY, nextZ + 0.015);
-                const nextFar = platePoint(farX, nextY, nextZ + 0.015);
-                ribbon.push(near.x, -near.y, 2.7, far.x, -far.y, 2.7, nextFar.x, -nextFar.y, 2.7,
-                    near.x, -near.y, 2.7, nextFar.x, -nextFar.y, 2.7, nextNear.x, -nextNear.y, 2.7);
-                if (index % 4 === 0) ribs.push(near.x, -near.y, 2.85, far.x, -far.y, 2.85);
-            }
+            return { near, far };
+        });
+        for (let index = 0; index < projectedProfile.length - 1; index++) {
+            const current = projectedProfile[index], next = projectedProfile[index + 1];
+            // Each authored profile segment is one visual walk plane. The
+            // renderer may triangulate the quad internally, but no triangle
+            // edges or sampled subdivision vertices are exposed to authors.
+            ribbon.push(
+                current.near.x, -current.near.y, 2.7,
+                current.far.x, -current.far.y, 2.7,
+                next.far.x, -next.far.y, 2.7,
+                current.near.x, -current.near.y, 2.7,
+                next.far.x, -next.far.y, 2.7,
+                next.near.x, -next.near.y, 2.7
+            );
         }
         const surface = new THREE.BufferGeometry();
         surface.setAttribute('position', new THREE.Float32BufferAttribute(ribbon, 3));
         const mesh = new THREE.Mesh(surface, new THREE.MeshBasicMaterial({ color: 0x168bb4,
-            transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
+            transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
         mesh.renderOrder = 24;
         walkOverlay.add(mesh);
-        const wire = new THREE.BufferGeometry();
-        wire.setAttribute('position', new THREE.Float32BufferAttribute(ribs, 3));
-        const ribsLine = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color: 0x38d0f4,
-            transparent: true, opacity: 0.72, depthTest: false, depthWrite: false }));
-        ribsLine.renderOrder = 25;
-        walkOverlay.add(ribsLine);
         for (const points of [nearEdge, farEdge, centerLine]) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
             const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: points === centerLine ? 0x55ef83 : 0x38d0f4,
                 transparent: true, opacity: 0.92, depthTest: false, depthWrite: false }));
-            line.renderOrder = 26;
+            line.renderOrder = 31;
             walkOverlay.add(line);
         }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
@@ -937,11 +1015,18 @@ export function createCompositionViewport(container, options) {
             } else {
                 setSemanticSelection(selection);
                 options.onSelection?.(selection);
+                if (selection?.kind === 'walk-profile-point') {
+                    beginModalProfileMove();
+                }
             }
             return;
         }
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);
     });
+    const onProfilePointerUp = () => {
+        if (modalProfileMove) endModalProfileMove(true);
+    };
+    window.addEventListener('pointerup', onProfilePointerUp);
     renderer.domElement.addEventListener('dblclick', event => {
         if (walkProfileEditing) return;
         const hit = pick(event); if (hit) options.onOpenAt?.(semantic(hit));
@@ -1065,7 +1150,9 @@ export function createCompositionViewport(container, options) {
         if (disposed) return;
         requestAnimationFrame(animate);
         if (!visible) return;
-        controls.update(); renderer.render(scene, camera);
+        controls.update();
+        syncWalkProfileSvg();
+        renderer.render(scene, camera);
     }());
     return {
         setSceneModel, show, select, hide, setSemanticSelection,
@@ -1092,6 +1179,7 @@ export function createCompositionViewport(container, options) {
         descriptor: () => plate?.descriptor || null,
         dispose() {
             disposed = true; serial += 1; disposeNavigation(); observer.disconnect();
+            window.removeEventListener('pointerup', onProfilePointerUp);
             gizmo.dispose(); controls.dispose();
             scenePlane.material.map?.dispose(); foregroundPlane.material.map?.dispose();
             scene.traverse(object => { object.geometry?.dispose(); object.material?.dispose(); });

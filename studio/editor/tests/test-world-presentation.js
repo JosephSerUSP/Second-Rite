@@ -157,6 +157,12 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'indoor optical zoom must preserve the cursor focus through shared projection semantics');
     assert.match(navigationSource, /optical\.zoom\(event\.deltaY, event\.clientX - rect\.left, event\.clientY - rect\.top, rect\)/,
         'navigation must supply cursor coordinates to the shared optical adapter');
+    assert.match(navigationSource, /control\.mouseButtons\.LEFT = null/,
+        'LMB must have one stable owner: authored selection/editing');
+    assert.match(navigationSource, /control\.mouseButtons\.MIDDLE = planar \? THREE\.MOUSE\.PAN : THREE\.MOUSE\.ROTATE/,
+        'MMB must use a stable Blender-like navigation contract');
+    assert.doesNotMatch(navigationSource, /mouseButtons\.LEFT = canPan\(event\)/,
+        'navigation must never remap LMB after an authored hit test');
     assert.doesNotMatch(viewportSource, /!runtimeProjection \|\| runtimeLocked \|\| compositionAuthoring\.isPlate\(\)/,
         'runtime locking forbids free orbit, never game-style projection-window navigation');
     assert.doesNotMatch(viewportSource, /base\.setDisplayAspect\(/,
@@ -193,6 +199,20 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'bounded-lane maps expose an explicit profile authoring mode');
     assert.match(studioSource, /Create Profile/,
         'flat lanes require an explicit author action before a groundProfile exists');
+    assert.doesNotMatch(studioSource, /Point mode \(1\)|Edge mode \(2\)/,
+        'Ground Profile editing must not expose separate point and edge modes');
+    assert.match(studioSource, /Insert point/,
+        'a selected profile segment must expose a direct insert-point action');
+    assert.match(studioSource, /G Y \/ G Z constrain/,
+        'the toolbar must teach semantic authored-axis constraints in place');
+    assert.match(studioSource, /walkMesh\.style\.display = show \? '' : 'none'/,
+        'walk-mesh inspection must remain available while editing the authored profile');
+    assert.match(viewportBaseSource, /data-walk-profile-hud|walkProfileHud/,
+        'the viewport itself must identify Walk Profile Edit Mode');
+    assert.match(viewportBaseSource, /refreshWalkProfileScreenScale/,
+        '3D profile handles must preserve screen-legible interaction size');
+    assert.match(viewportBaseSource, /PROFILE_POINT_RADIUS_PX/,
+        'point picking must be sized by viewport interaction scale, not only world scale');
     assert.match(studioSource, /thestra-spatial-interaction-changed/,
         'profile operator availability must resync when semantic selection changes');
     assert.match(viewportBaseSource, /handleSpatialTransformShortcut/,
@@ -209,6 +229,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'plate profile editing exposes the same hover-state grammar');
     assert.match(viewportSource, /event\.code === 'Tab'/,
         'Walk Profile editing must be reachable through Blender-style Tab');
+    assert.match(viewportSource, /if \(!status\.authored\) \{[\s\S]*spatialInteraction\.reject\('missing-ground-profile'\)/,
+        'Tab must not enter an empty Edit Mode before an authored profile exists');
     assert.match(viewportSource, /event\.code === 'Digit1'/,
         'point component mode must use Blender-style 1');
     assert.match(viewportSource, /event\.code === 'Digit2'/,
@@ -229,8 +251,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'plate composition must own cancel-safe modal E extrusion');
     assert.match(compositionSource, /selectedProfilePoints > 1/,
         'plate multi-selection must not fall back to a single-point screen-space gizmo');
-    assert.match(studioSource, /Subdivide/,
-        'selected segments expose a real Subdivide operator rather than midpoint-only Split');
+    assert.match(studioSource, /Click a point to move it, or click a segment to select it/,
+        'the toolbar must explain the unified point-and-segment workflow');
     assert.match(studioSource, /Y Lane/,
         'precise point editing labels authored lane Y explicitly');
     assert.match(studioSource, /Z Elev/,

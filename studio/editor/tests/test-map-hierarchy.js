@@ -81,3 +81,15 @@ test('Studio wires hierarchy authoring through Map Properties and loads the help
     assert.match(editor, /ThestraMapHierarchy\.buildForest/);
     assert.match(editor, /parentMapId/);
 });
+
+test('map hierarchy double-click opens Map Properties only for a tight deliberate gesture', () => {
+    const editor = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'map-editor.js'), 'utf8');
+    const doubleClick = editor.match(/mapItem\.ondblclick\s*=\s*([\s\S]*?);\s*mapItem\.oncontextmenu/);
+    assert.ok(doubleClick, 'map hierarchy must retain an explicit double-click handler');
+    assert.match(doubleClick[1], /openMapProperties\s*\(/,
+        'intentional double-click must retain the Map Properties action');
+    assert.match(editor, /now - lastMapPointerDown\.time <= 280/,
+        'double-click opening must use a tighter interval than the OS default');
+    assert.match(editor, /distance <= 6/,
+        'double-click opening must reject pointer movement');
+});

@@ -202,6 +202,8 @@
         }
 
         const collapsedMapHierarchyIds = new Set();
+        let lastMapPointerDown = null;
+        let mapDoubleClickCandidate = null;
 
         function makeMapTreeItem(map, idx) {
             const mapItem = document.createElement('div');
@@ -216,15 +218,29 @@
                 currentMapIndex = idx;
                 loadActiveMap();
             };
-            // Double-clicking a map is an easy mouse slip while navigating the
-            // hierarchy. Loading the map is safe; opening the legacy modal is
-            // not an implicit navigation action. Map Properties remains an
-            // explicit Inspector/menu command.
+            mapItem.onpointerdown = event => {
+                if (event.button !== 0) return;
+                const now = performance.now();
+                const distance = lastMapPointerDown
+                    ? Math.hypot(event.clientX - lastMapPointerDown.x, event.clientY - lastMapPointerDown.y)
+                    : Infinity;
+                mapDoubleClickCandidate = lastMapPointerDown
+                    && lastMapPointerDown.idx === idx
+                    && now - lastMapPointerDown.time <= 280
+                    && distance <= 6;
+                lastMapPointerDown = { idx, time: now, x: event.clientX, y: event.clientY };
+            };
             mapItem.ondblclick = event => {
                 event.preventDefault();
                 event.stopPropagation();
+                // Keep the intentional action, but do not honor the browser's
+                // broad OS double-click interval for a navigation tree.
+                if (!mapDoubleClickCandidate) return;
                 currentMapIndex = idx;
                 loadActiveMap();
+                openMapProperties();
+                lastMapPointerDown = null;
+                mapDoubleClickCandidate = null;
             };
             mapItem.oncontextmenu = (e) => {
                 showMapContextMenu(e, idx);

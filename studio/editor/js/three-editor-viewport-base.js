@@ -204,6 +204,18 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
+    const walkProfileHud = document.createElement('div');
+    walkProfileHud.dataset.walkProfileHud = 'true';
+    walkProfileHud.style.cssText = [
+        'position:absolute', 'left:8px', 'top:8px', 'z-index:40',
+        'display:none', 'pointer-events:none', 'max-width:520px',
+        'padding:6px 8px', 'border:1px solid rgba(255,255,255,.28)',
+        'background:rgba(20,24,28,.86)', 'color:#f4f4f4',
+        'font:11px/1.35 monospace', 'white-space:pre-line',
+        'box-shadow:0 1px 6px rgba(0,0,0,.45)'
+    ].join(';');
+    container.appendChild(walkProfileHud);
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x24282d);
     scene.add(new THREE.HemisphereLight(0xffffff, 0x30343a, 2.0));
@@ -246,11 +258,9 @@ export function createThreeEditorViewport(container, options = {}) {
     topControls.enabled = false;
 
     const disposeNavigation = installNavigation(renderer.domElement, [perspectiveControls, topControls], {
-        canPan(event) {
-            if (!sceneModel || moveGizmo.axis || moveGizmo.dragging || editGesture || modalMoveGesture) return false;
-            if (walkProfileEditing) return !pickWalkProfile(event);
-            if (interactionLayer() === 'map' && !sceneModel.map.environmentPackage) return false;
-            return !pickSemantic(event, ['event', 'light', 'override']);
+        canPan() {
+            return !!sceneModel && !moveGizmo.axis && !moveGizmo.dragging
+                && !editGesture && !modalMoveGesture;
         },
         getOpticalNavigation: options.getOpticalNavigation || null
     });
@@ -298,6 +308,11 @@ export function createThreeEditorViewport(container, options = {}) {
     let walkProfileHover = null;
     const walkProfileSelectable = [];
     const walkProfileObjects = new Map();
+
+    const PROFILE_POINT_RADIUS = 0.12;
+    const PROFILE_SEGMENT_RADIUS = 0.035;
+    const PROFILE_POINT_RADIUS_PX = 7;
+    const PROFILE_SEGMENT_RADIUS_PX = 2.5;
 
     function setCollisionVisible(visible) {
         collisionVisible = !!visible;
@@ -1135,7 +1150,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const delta = b.clone().sub(a);
         const length = Math.max(delta.length(), 0.001);
         const mesh = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.035, 0.035, length, 8),
+            new THREE.CylinderGeometry(PROFILE_SEGMENT_RADIUS, PROFILE_SEGMENT_RADIUS, length, 8),
             new THREE.MeshBasicMaterial({
                 color: 0x38d0f4, transparent: true, opacity: 0.9,
                 depthTest: false, depthWrite: false
@@ -1153,7 +1168,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const delta = rightPosition.clone().sub(leftPosition);
         const length = Math.max(delta.length(), 0.001);
         segment.geometry?.dispose();
-        segment.geometry = new THREE.CylinderGeometry(0.035, 0.035, length, 8);
+        segment.geometry = new THREE.CylinderGeometry(PROFILE_SEGMENT_RADIUS, PROFILE_SEGMENT_RADIUS, length, 8);
         segment.position.copy(leftPosition).add(rightPosition).multiplyScalar(0.5);
         if (delta.lengthSq() > 1e-12) {
             segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
@@ -1212,7 +1227,7 @@ export function createThreeEditorViewport(container, options = {}) {
                     index
                 };
                 const point = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.12, 12, 8),
+                    new THREE.SphereGeometry(PROFILE_POINT_RADIUS, 12, 8),
                     new THREE.MeshBasicMaterial({
                         color: 0xffd45a, depthTest: false, depthWrite: false
                     })
@@ -1240,6 +1255,53 @@ export function createThreeEditorViewport(container, options = {}) {
         return hits[0]?.object?.userData?.thestraSelection || null;
     }
 
+    function worldUnitsPerPixelAt(position) {
+        const camera = activeCamera();
+        const rect = renderer.domElement.getBoundingClientRect();
+        const height = Math.max(1, rect.height);
+        if (camera.isOrthographicCamera) {
+            return Math.abs(camera.top - camera.bottom)
+                / Math.max(0.001, camera.zoom) / height;
+        }
+        const distance = Math.max(0.001, camera.position.distanceTo(position));
+        return 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) / height;
+    }
+
+    function refreshWalkProfileScreenScale() {
+        if (!walkProfileEditing) return;
+        for (const object of walkProfileObjects.values()) {
+            const semantic = object.userData.thestraSelection;
+            const unitsPerPixel = worldUnitsPerPixelAt(object.position);
+            const emphasis = Number(object.userData.thestraStateScale) || 1;
+            if (semantic?.kind === 'walk-profile-point') {
+                const screenScale = Math.max(
+                    1, PROFILE_POINT_RADIUS_PX * unitsPerPixel / PROFILE_POINT_RADIUS);
+                object.scale.setScalar(screenScale * emphasis);
+            } else if (semantic?.kind === 'walk-profile-segment') {
+                const radialScale = Math.max(
+                    1, PROFILE_SEGMENT_RADIUS_PX * unitsPerPixel / PROFILE_SEGMENT_RADIUS);
+                object.scale.set(radialScale * emphasis, 1, radialScale * emphasis);
+            }
+        }
+    }
+
+    function refreshWalkProfileHud() {
+        if (!walkProfileEditing) {
+            walkProfileHud.style.display = 'none';
+            return;
+        }
+        const spatial = options.spatialInteraction?.snapshot?.() || null;
+        const modeLabel = walkProfileComponentMode === 'segment' ? 'EDGE' : 'POINT';
+        const operation = spatial?.operation === 'move'
+            ? ` · MOVE${spatial.constraint ? ` ${spatial.constraint}` : ' YZ'}` : '';
+        const help = walkProfileComponentMode === 'segment'
+            ? '2 Edge · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 points · Tab exit'
+            : '1 Point · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · E endpoint · X/Delete dissolve · Enter/LMB confirm · Esc/RMB cancel';
+        const feedback = spatial?.feedback ? `\n${spatial.feedback}` : '';
+        walkProfileHud.textContent = `WALK PROFILE · EDIT · ${modeLabel}${operation}\n${help}${feedback}`;
+        walkProfileHud.style.display = 'block';
+    }
+
     function refreshWalkProfileVisualState() {
         const spatial = options.spatialInteraction?.snapshot?.() || null;
         const selectedKeys = new Set((spatial?.selectionSet || []).map(item => item?.key).filter(Boolean));
@@ -1255,17 +1317,23 @@ export function createThreeEditorViewport(container, options = {}) {
             if (semantic?.kind === 'walk-profile-point') {
                 const activeType = walkProfileComponentMode === 'point';
                 object.material.transparent = !activeType;
-                object.material.opacity = activeType ? 1 : 0.35;
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x8f8248);
-                object.scale.setScalar(active ? 1.35 : selected ? 1.22 : hovered ? 1.18 : 1);
+                object.material.opacity = activeType ? 1 : 0.25;
+                object.material.color.setHex(active ? 0xff8a33
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x776e45);
+                object.userData.thestraStateScale = active ? 1.45
+                    : selected ? 1.28 : hovered ? 1.18 : 1;
             } else if (semantic?.kind === 'walk-profile-segment') {
                 const activeType = walkProfileComponentMode === 'segment';
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 1 : hovered ? 1 : (activeType ? 0.9 : 0.3);
+                object.material.color.setHex(active ? 0xff8a33
+                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x31b9d9);
+                object.material.opacity = active ? 1
+                    : selected ? 1 : hovered ? 1 : (activeType ? 0.92 : 0.22);
+                object.userData.thestraStateScale = active ? 1.75
+                    : selected ? 1.5 : hovered ? 1.35 : 1;
             }
         }
+        refreshWalkProfileScreenScale();
+        refreshWalkProfileHud();
     }
 
     function setWalkProfileHover(next) {
@@ -1286,6 +1354,7 @@ export function createThreeEditorViewport(container, options = {}) {
         } else {
             syncMoveGizmo();
         }
+        refreshWalkProfileVisualState();
     }
 
     function setWalkProfileComponentMode(mode) {
@@ -2212,7 +2281,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
     if (navigationHelp) {
-        navigationHelp.title = 'Drag empty space, MMB or RMB to pan; wheel zooms; Alt+MMB orbits 3D. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
+        navigationHelp.title = 'LMB selects/edits only. MMB orbits 3D; Shift+MMB or RMB pans; wheel zooms. Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -2225,6 +2294,8 @@ export function createThreeEditorViewport(container, options = {}) {
         syncLiveAuthoringLighting();
         perspectiveControls.update();
         topControls.update();
+        refreshWalkProfileScreenScale();
+        refreshWalkProfileHud();
         renderer.render(scene, activeCamera());
         requestAnimationFrame(animate);
     }());
@@ -2276,6 +2347,7 @@ export function createThreeEditorViewport(container, options = {}) {
             disposeObject(semanticContent);
             disposeObject(renderableContent);
             disposeObject(walkProfileContent);
+            walkProfileHud.remove();
             selectionOverlay.geometry.dispose();
             selectionOverlay.material.dispose();
             moveGizmo.detach();

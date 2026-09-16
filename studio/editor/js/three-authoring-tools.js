@@ -68,37 +68,38 @@ export function configureEventSpriteFrame(texture, event = {}) {
     return { aspect: frameWidth / frameHeight };
 }
 
-// One navigation policy for all spatial views. Authored interaction reserves
-// its hit targets; empty-space drag pans in the screen plane. Alt+MMB orbits
-// a 3D view, while plain MMB/RMB and the wheel always navigate the screen.
+// One stable navigation policy for all spatial views. LMB belongs only to
+// authored interaction. Camera navigation never depends on a selection hit-test:
+// MMB orbits in 3D (Shift+MMB pans through OrbitControls' modifier grammar),
+// MMB pans planar views, RMB pans everywhere, and the wheel zooms.
 export function installNavigation(canvas, controls, {
     planar = false,
-    canPan = () => false,
+    canPan = () => true,
     getOpticalNavigation = null
 } = {}) {
     for (const control of controls) {
         control.enableDamping = true;
         control.screenSpacePanning = true;
         control.mouseButtons.LEFT = null;
-        control.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
+        control.mouseButtons.MIDDLE = planar ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
         control.mouseButtons.RIGHT = THREE.MOUSE.PAN;
         control.enableRotate = !planar;
     }
     let opticalGesture = null;
+
+    function navigationButton(event) {
+        return event.button === 1 || event.button === 2;
+    }
+
     function pointerDown(event) {
         const optical = getOpticalNavigation && getOpticalNavigation();
-        if (optical && !(event.altKey && event.button === 1) && canPan(event)) {
-            opticalGesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, optical };
-            canvas.setPointerCapture?.(event.pointerId);
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            return;
-        }
-        for (const control of controls) {
-            control.mouseButtons.LEFT = canPan(event) ? THREE.MOUSE.PAN : null;
-            control.mouseButtons.MIDDLE = event.altKey && !planar ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
-        }
+        if (!optical || !navigationButton(event) || !canPan(event)) return;
+        opticalGesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, optical };
+        canvas.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+        event.stopImmediatePropagation();
     }
+
     function pointerMove(event) {
         if (!opticalGesture || event.pointerId !== opticalGesture.pointerId) return;
         const dx = event.clientX - opticalGesture.x, dy = event.clientY - opticalGesture.y;
@@ -106,12 +107,14 @@ export function installNavigation(canvas, controls, {
         opticalGesture.optical.pan(dx, dy, canvas.getBoundingClientRect());
         event.preventDefault(); event.stopImmediatePropagation();
     }
+
     function pointerUp(event) {
         if (!opticalGesture || event.pointerId !== opticalGesture.pointerId) return;
         opticalGesture = null;
         canvas.releasePointerCapture?.(event.pointerId);
         event.preventDefault(); event.stopImmediatePropagation();
     }
+
     function wheel(event) {
         const optical = getOpticalNavigation && getOpticalNavigation();
         if (!optical) return;
@@ -119,6 +122,7 @@ export function installNavigation(canvas, controls, {
         optical.zoom(event.deltaY, event.clientX - rect.left, event.clientY - rect.top, rect);
         event.preventDefault(); event.stopImmediatePropagation();
     }
+
     canvas.addEventListener('pointerdown', pointerDown, true);
     if (getOpticalNavigation) {
         canvas.addEventListener('pointermove', pointerMove, true);

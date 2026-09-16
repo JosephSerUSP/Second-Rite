@@ -426,17 +426,19 @@
         walkMesh.type = 'button';
         walkMesh.className = 'win98-btn';
         walkMesh.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;';
-        walkMesh.title = 'Show the runtime collision mesh for 3D environments or the authored traversal lane for plates. Inspection only.';
+        walkMesh.title = 'Inspect the runtime collision/walk geometry. Inspection is separate from authored Walk Profile Edit Mode.';
         function syncWalkMesh() {
             const viewport = viewportApi();
-            walkMesh.textContent = viewport?.getWalkMeshVisible?.() ? 'Walk Mesh: On' : 'Walk Mesh';
+            walkMesh.textContent = viewport?.getWalkMeshVisible?.()
+                ? 'Inspect Walk Mesh: On' : 'Inspect Walk Mesh';
         }
+
         const walkProfile = document.createElement('button');
         walkProfile.type = 'button';
         walkProfile.className = 'win98-btn';
         walkProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        walkProfile.title = 'Walk Profile Edit Mode · Tab toggles · 1 point mode · 2 segment mode · G moves · Y/Z constrain · X/Delete dissolves interior points.';
-        walkProfile.textContent = 'Walk Profile';
+        walkProfile.title = 'Enter/exit authored Walk Profile Edit Mode. Tab performs the same action.';
+        walkProfile.textContent = 'Edit Walk Profile';
 
         const createProfile = document.createElement('button');
         createProfile.type = 'button';
@@ -445,11 +447,25 @@
         createProfile.title = 'Explicitly create a flat two-point groundProfile from the current lane bounds and groundZ.';
         createProfile.textContent = 'Create Profile';
 
+        const profilePointMode = document.createElement('button');
+        profilePointMode.type = 'button';
+        profilePointMode.className = 'win98-btn';
+        profilePointMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        profilePointMode.title = 'Point component selection mode (1).';
+        profilePointMode.textContent = 'Point 1';
+
+        const profileSegmentMode = document.createElement('button');
+        profileSegmentMode.type = 'button';
+        profileSegmentMode.className = 'win98-btn';
+        profileSegmentMode.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
+        profileSegmentMode.title = 'Edge/segment component selection mode (2).';
+        profileSegmentMode.textContent = 'Edge 2';
+
         const splitProfile = document.createElement('button');
         splitProfile.type = 'button';
         splitProfile.className = 'win98-btn';
         splitProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        splitProfile.title = 'Subdivide all selected Walk Profile segments. Use 2 for segment mode; Shift+click selects multiple edges.';
+        splitProfile.title = 'Subdivide all selected Walk Profile edges. Shift+LMB selects multiple edges.';
         splitProfile.textContent = 'Subdivide';
 
         const subdivideCuts = document.createElement('input');
@@ -460,14 +476,22 @@
         subdivideCuts.step = '1';
         subdivideCuts.value = '1';
         subdivideCuts.style.cssText = 'width:42px;height:20px;font-size:9px;display:none;';
-        subdivideCuts.title = 'Number of evenly spaced cuts per selected segment.';
+        subdivideCuts.title = 'Number of evenly spaced cuts per selected edge.';
 
         const deleteProfile = document.createElement('button');
         deleteProfile.type = 'button';
         deleteProfile.className = 'win98-btn';
         deleteProfile.style.cssText = 'font-size:10px;padding:2px 6px;white-space:nowrap;flex-shrink:0;display:none;';
-        deleteProfile.title = 'Dissolve the selected interior point. X/Delete performs the same operation; endpoints are protected.';
+        deleteProfile.title = 'Dissolve selected interior points. X/Delete performs the same operation; endpoints are protected.';
         deleteProfile.textContent = 'Dissolve';
+
+        const profileHelp = document.createElement('span');
+        profileHelp.style.cssText = [
+            'font-size:9px', 'color:var(--win-dark-shadow)', 'display:none',
+            'max-width:520px', 'overflow:hidden', 'text-overflow:ellipsis',
+            'white-space:nowrap', 'flex:1 1 260px'
+        ].join(';');
+        profileHelp.title = 'Walk Profile workflow and active-mode help.';
 
         const profileYLabel = document.createElement('span');
         profileYLabel.textContent = 'Y Lane';
@@ -495,13 +519,23 @@
             const viewport = viewportApi();
             const status = viewport?.getWalkProfileStatus?.();
             const show = !!status?.available;
-            for (const control of [walkProfile, createProfile, splitProfile, deleteProfile]) {
-                control.style.display = show ? '' : 'none';
-            }
-            subdivideCuts.style.display = show && status?.editing && status?.componentMode === 'segment'
-                ? '' : 'none';
-            const precisePoint = show && status?.editing && status?.componentMode === 'point'
-                && status?.selectionCount === 1 && status?.activePoint;
+            const editing = show && !!status.editing;
+            const authored = show && !!status.authored;
+            const pointMode = editing && status.componentMode === 'point';
+            const edgeMode = editing && status.componentMode === 'segment';
+
+            walkProfile.style.display = show && authored ? '' : 'none';
+            walkMesh.style.display = editing ? 'none' : '';
+            createProfile.style.display = show && !authored && !editing ? '' : 'none';
+            profilePointMode.style.display = authored && editing ? '' : 'none';
+            profileSegmentMode.style.display = authored && editing ? '' : 'none';
+            splitProfile.style.display = authored && edgeMode ? '' : 'none';
+            subdivideCuts.style.display = authored && edgeMode ? '' : 'none';
+            deleteProfile.style.display = authored && pointMode ? '' : 'none';
+            profileHelp.style.display = show ? '' : 'none';
+
+            const precisePoint = authored && pointMode
+                && status.selectionCount === 1 && status.activePoint;
             profileYLabel.style.display = precisePoint ? '' : 'none';
             profileY.style.display = precisePoint ? '' : 'none';
             profileZLabel.style.display = precisePoint ? '' : 'none';
@@ -510,18 +544,35 @@
                 if (document.activeElement !== profileY) profileY.value = String(status.activePoint.y);
                 if (document.activeElement !== profileZ) profileZ.value = String(status.activePoint.z);
             }
+
             if (!show) return;
-            walkProfile.classList.toggle('active', !!status.editing);
-            const component = status.componentMode === 'segment' ? 'Segments' : 'Points';
-            walkProfile.textContent = status.editing ? `Walk Profile · ${component}` : 'Walk Profile';
-            createProfile.disabled = !!status.authored;
-            splitProfile.disabled = !status.editing || !status.authored
-                || status.componentMode !== 'segment'
-                || status.selection?.kind !== 'walk-profile-segment';
-            const endpoint = status.selection?.kind === 'walk-profile-point'
-                && (status.selection.index === 0 || status.selection.index === status.pointCount - 1);
-            deleteProfile.disabled = !status.editing || !status.authored
-                || status.selection?.kind !== 'walk-profile-point' || endpoint;
+            walkProfile.classList.toggle('active', editing);
+            walkProfile.textContent = editing ? 'Exit Walk Profile Edit' : 'Edit Walk Profile';
+            profilePointMode.classList.toggle('active', pointMode);
+            profileSegmentMode.classList.toggle('active', edgeMode);
+
+            const selectedEdges = (status.selections || [])
+                .filter(selection => selection?.kind === 'walk-profile-segment');
+            const selectedPoints = (status.selections || [])
+                .filter(selection => selection?.kind === 'walk-profile-point');
+            splitProfile.disabled = !edgeMode || selectedEdges.length === 0;
+            const includesEndpoint = selectedPoints.some(selection =>
+                selection.index === 0 || selection.index === status.pointCount - 1);
+            deleteProfile.disabled = !pointMode || selectedPoints.length === 0 || includesEndpoint;
+
+            if (!authored) {
+                profileHelp.textContent = status.feedback
+                    ? `${status.feedback} Create Profile to begin.`
+                    : 'No authored Walk Profile · Create Profile to begin.';
+            } else if (!editing) {
+                profileHelp.textContent = 'Tab or Edit Walk Profile · then 1 Point / 2 Edge.';
+            } else if (pointMode) {
+                profileHelp.textContent = status.feedback
+                    || 'POINT · LMB select · Shift+LMB add/remove · A all · G move · G Y / G Z constrain · Enter/LMB confirm · Esc/RMB cancel · E endpoint · X/Delete dissolve';
+            } else {
+                profileHelp.textContent = status.feedback
+                    || 'EDGE · LMB select · Shift+LMB add/remove · A all · Subdivide · 1 returns to points · Tab exits';
+            }
         }
 
         const sceneSelect = document.createElement('select');
@@ -542,7 +593,18 @@
         walkProfile.addEventListener('click', () => {
             const viewport = viewportApi();
             if (!viewport?.setWalkProfileEditing) return;
-            viewport.setWalkProfileEditing(!viewport.getWalkProfileEditing());
+            const next = !viewport.getWalkProfileEditing();
+            if (next && viewport.setWalkMeshVisible) viewport.setWalkMeshVisible(false);
+            viewport.setWalkProfileEditing(next);
+            syncWalkMesh();
+            syncWalkProfile();
+        });
+        profilePointMode.addEventListener('click', () => {
+            viewportApi()?.setWalkProfileComponentMode?.('point');
+            syncWalkProfile();
+        });
+        profileSegmentMode.addEventListener('click', () => {
+            viewportApi()?.setWalkProfileComponentMode?.('segment');
             syncWalkProfile();
         });
         createProfile.addEventListener('click', () => {
@@ -578,13 +640,16 @@
 
         toolbar.mount('world-presentation', [
             free, runtime, walkMesh,
-            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
-            profileYLabel, profileY, profileZLabel, profileZ, sceneSelect, info
+            walkProfile, createProfile, profilePointMode, profileSegmentMode,
+            splitProfile, subdivideCuts, deleteProfile,
+            profileYLabel, profileY, profileZLabel, profileZ, profileHelp,
+            sceneSelect, info
         ]);
         runtimeControls = {
             free, runtime, walkMesh, syncWalkMesh,
-            walkProfile, createProfile, splitProfile, subdivideCuts, deleteProfile,
-            profileYLabel, profileY, profileZLabel, profileZ, syncWalkProfile,
+            walkProfile, createProfile, profilePointMode, profileSegmentMode,
+            splitProfile, subdivideCuts, deleteProfile,
+            profileYLabel, profileY, profileZLabel, profileZ, profileHelp, syncWalkProfile,
             sceneSelect, info, projectionButtons, projectionDisabled: null
         };
         updateRuntimeControls();

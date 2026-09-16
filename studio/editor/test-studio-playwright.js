@@ -244,6 +244,15 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         assert.equal(await mainPage.evaluate(() =>
             window.ThestraRuntimeCameraViewport.getWalkProfileComponentMode()), 'point');
         mark(t, 'Tab entered Walk Profile Edit Mode through the real Map canvas');
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getWalkMeshVisible()), false,
+        'Walk Mesh inspection must be off while authored Walk Profile Edit Mode is active');
+        await mainPage.waitForFunction(() => {
+            const hud = document.querySelector('[data-walk-profile-hud="true"]');
+            return !!hud && hud.getClientRects().length > 0
+                && /WALK PROFILE · EDIT · POINT/.test(hud.textContent || '');
+        });
+        mark(t, 'viewport HUD made Walk Profile Edit/Point state explicit');
 
         await mainPage.evaluate(() => {
             window.ThestraRuntimeCameraViewport.setSelection({
@@ -261,6 +270,48 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             return input?.value;
         }), '1', 'active-point inspector must expose authored elevation Z');
         mark(t, 'active Walk Profile point exposed precise semantic Y/Z fields');
+
+        const navigationBox = await mapCanvas.boundingBox();
+        assert.ok(navigationBox, 'Map canvas must have a real pointer target');
+        const beforeNavigation = await mainPage.evaluate(() =>
+            JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
+        const selectedBeforeNavigation = await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getWalkProfileSelection()?.key);
+        await mainPage.mouse.move(
+            navigationBox.x + navigationBox.width * 0.72,
+            navigationBox.y + navigationBox.height * 0.30);
+        await mainPage.mouse.down({ button: 'middle' });
+        await mainPage.mouse.move(
+            navigationBox.x + navigationBox.width * 0.80,
+            navigationBox.y + navigationBox.height * 0.38,
+            { steps: 4 });
+        await mainPage.mouse.up({ button: 'middle' });
+        await mainPage.waitForTimeout(150);
+        const afterNavigation = await mainPage.evaluate(() =>
+            JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
+        assert.notEqual(afterNavigation, beforeNavigation,
+            'MMB must navigate the 3D camera while profile editing is active');
+        assert.equal(await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getWalkProfileSelection()?.key),
+        selectedBeforeNavigation,
+        'camera navigation must not compete with Walk Profile selection');
+        mark(t, 'MMB camera navigation remained responsive without stealing profile selection');
+
+        await mainPage.evaluate(() => {
+            window.__walkProfileRejection = null;
+            window.addEventListener('thestra-spatial-operation-rejected', event => {
+                window.__walkProfileRejection = event.detail || null;
+            }, { once: true });
+            const input = document.querySelector('input[title="Active Walk Profile point · Lane Y"]');
+            input.value = '11';
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        await mainPage.waitForFunction(() =>
+            window.__walkProfileRejection?.reason === 'profile-order');
+        assert.deepEqual(await mainPage.evaluate(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.map(point => point.y)),
+        [0, 5, 10], 'rejected numeric crossing must preserve authored profile ordering');
+        mark(t, 'invalid profile crossing stayed cancel-safe and surfaced a local reason');
 
         await mapCanvas.press('2');
         await mainPage.evaluate(() => {
@@ -325,6 +376,39 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             JSON.stringify(dbPayload.maps[currentMapIndex].traversal.lane.groundProfile)), beforeExtrude,
         'Esc-canceled E extrusion must leave Map profile byte-for-byte unchanged');
         mark(t, 'E created only temporary endpoint topology until confirmation');
+
+        await mapCanvas.press('2');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-segment',
+                key: 'walk-profile-segment:0',
+                index: 0,
+            });
+        });
+        const beforeSubdivideCount = await mainPage.evaluate(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length);
+        await mainPage.locator('button', { hasText: /^Subdivide$/ }).click();
+        await mainPage.waitForFunction(count =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length === count + 1,
+        beforeSubdivideCount);
+        mark(t, 'live Subdivide toolbar action inserted authored profile topology');
+
+        await mapCanvas.focus();
+        await mapCanvas.press('1');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'walk-profile-point',
+                key: 'walk-profile-point:1',
+                index: 1,
+            });
+        });
+        const beforeDissolveCount = await mainPage.evaluate(() =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length);
+        await mapCanvas.press('Delete');
+        await mainPage.waitForFunction(count =>
+            dbPayload.maps[currentMapIndex].traversal.lane.groundProfile.length === count - 1,
+        beforeDissolveCount);
+        mark(t, 'live Delete shortcut dissolved valid interior profile topology');
 
         await mapCanvas.press('Tab');
         await mainPage.waitForFunction(() =>

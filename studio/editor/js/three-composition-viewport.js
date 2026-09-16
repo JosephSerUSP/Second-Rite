@@ -51,6 +51,13 @@ export function createCompositionViewport(container, options) {
     renderer.domElement.setAttribute('aria-label', 'Plate map viewport; drag Events along the authored lane, world Y.');
     renderer.domElement.title = 'Plate Events move along the authored lane (world Y).';
     layer.appendChild(renderer.domElement);
+    // Profile controls are screen-space authoring affordances. Keeping their
+    // visuals in a DOM/SVG overlay prevents the plate texture from occluding
+    // them through WebGL depth or transparent-material sorting.
+    const profileSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    profileSvg.setAttribute('aria-hidden', 'true');
+    profileSvg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:3;display:none;';
+    layer.appendChild(profileSvg);
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 5000);
     camera.position.z = 1000;
@@ -92,6 +99,7 @@ export function createCompositionViewport(container, options) {
     let walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
     const walkProfileObjects = new Map(), walkProfileHitTargets = [];
+    const walkProfileSvgObjects = new Map();
 
     function semantic(event) { return { kind: 'event', key: `event:${event.id}`, id: event.id }; }
     function updatePointer(event) {
@@ -370,17 +378,20 @@ export function createCompositionViewport(container, options) {
             const active = key === activeKey;
             const hovered = key === hoverKey && !active;
             if (semantic?.kind === 'walk-profile-point') {
-                object.material.transparent = false;
-                object.material.opacity = 1;
-                object.material.color.setHex(active ? 0xff6b1a
-                    : selected ? 0xffa800 : hovered ? 0xffffff : 0xffff66);
+                const color = active ? '#ff6b1a' : selected ? '#ffa800' : hovered ? '#ffffff' : '#ffff66';
+                const svg = walkProfileSvgObjects.get(key);
+                svg?.point?.setAttribute('fill', color);
+                svg?.outline?.setAttribute('stroke', active || selected ? '#ffffff' : '#111820');
+                svg?.outline?.setAttribute('stroke-width', active || selected ? '2' : '1');
                 object.scale.setScalar(active ? 1.3 : selected ? 1.2 : hovered ? 1.15 : 1);
             } else if (semantic?.kind === 'walk-profile-segment') {
-                object.material.color.setHex(active ? 0xffa24d
-                    : selected ? 0xffd45a : hovered ? 0xffffff : 0x38d0f4);
-                object.material.opacity = selected ? 0.95 : hovered ? 0.8 : 0.55;
+                const color = active ? '#ffa24d' : selected ? '#ffd45a' : hovered ? '#ffffff' : '#38d0f4';
+                const svg = walkProfileSvgObjects.get(key);
+                svg?.segment?.setAttribute('stroke', color);
+                svg?.segment?.setAttribute('opacity', selected || hovered || active ? '1' : '0.9');
             }
         }
+        syncWalkProfileSvg();
     }
 
     function setWalkProfileHover(next) {
@@ -477,6 +488,45 @@ export function createCompositionViewport(container, options) {
         }
         walkProfileObjects.clear();
         walkProfileHitTargets.length = 0;
+        while (profileSvg.firstChild) profileSvg.removeChild(profileSvg.firstChild);
+        walkProfileSvgObjects.clear();
+    }
+
+    function profileSvgPoint(screen) {
+        const projected = new THREE.Vector3(screen.x, -screen.y, 20).project(camera);
+        const rect = renderer.domElement.getBoundingClientRect();
+        return {
+            x: (projected.x + 1) * 0.5 * rect.width,
+            y: (1 - projected.y) * 0.5 * rect.height
+        };
+    }
+
+    function syncWalkProfileSvg() {
+        const lane = model?.map?.source?.traversal?.lane;
+        const profile = lane?.groundProfile;
+        if (!walkProfileEditing || !plate || !Array.isArray(profile) || profile.length < 2) {
+            profileSvg.style.display = 'none';
+            return;
+        }
+        profileSvg.style.display = 'block';
+        const points = profile.map(point => profileSvgPoint(platePoint(
+            Number(lane.depthX), Number(point.y), Number(point.z))));
+        for (let index = 0; index < points.length - 1; index++) {
+            const node = walkProfileSvgObjects.get(`walk-profile-segment:${index}`)?.segment;
+            if (!node) continue;
+            node.setAttribute('x1', points[index].x);
+            node.setAttribute('y1', points[index].y);
+            node.setAttribute('x2', points[index + 1].x);
+            node.setAttribute('y2', points[index + 1].y);
+        }
+        points.forEach((point, index) => {
+            const node = walkProfileSvgObjects.get(`walk-profile-point:${index}`);
+            if (!node) return;
+            for (const circle of [node.outline, node.point]) {
+                circle.setAttribute('cx', point.x);
+                circle.setAttribute('cy', point.y);
+            }
+        });
     }
 
     function profileScreenSegment(start, end, semantic) {
@@ -542,6 +592,13 @@ export function createCompositionViewport(container, options) {
             walkProfileControls.add(segment);
             walkProfileHitTargets.push(segment);
             walkProfileObjects.set(semantic.key, segment);
+            const svgSegment = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            svgSegment.setAttribute('stroke', '#38d0f4');
+            svgSegment.setAttribute('stroke-width', '3');
+            svgSegment.setAttribute('stroke-linecap', 'round');
+            svgSegment.setAttribute('opacity', '0.9');
+            profileSvg.appendChild(svgSegment);
+            walkProfileSvgObjects.set(semantic.key, { segment: svgSegment });
         }
         points.forEach((screen, index) => {
             const semantic = {
@@ -550,9 +607,10 @@ export function createCompositionViewport(container, options) {
                 index
             };
             const point = new THREE.Mesh(
-            new THREE.CircleGeometry(4, 16),
+                new THREE.CircleGeometry(4, 16),
                 new THREE.MeshBasicMaterial({
-                    color: 0xffff66, depthTest: false, depthWrite: false
+                    color: 0xffff66, transparent: true, opacity: 0,
+                    depthTest: false, depthWrite: false
                 })
             );
             point.position.set(screen.x, -screen.y, 20);
@@ -560,7 +618,8 @@ export function createCompositionViewport(container, options) {
             point.userData.thestraSelection = semantic;
             const outline = new THREE.Mesh(
                 new THREE.RingGeometry(5, 7, 16),
-                new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
+                new THREE.MeshBasicMaterial({ color: 0x111820, transparent: true, opacity: 0,
+                    depthTest: false, depthWrite: false })
             );
             outline.position.copy(point.position);
             outline.position.z = 19.5;
@@ -569,9 +628,18 @@ export function createCompositionViewport(container, options) {
             walkProfileControls.add(point);
             walkProfileHitTargets.push(point);
             walkProfileObjects.set(semantic.key, point);
+            const svgOutline = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            svgOutline.setAttribute('r', '7');
+            svgOutline.setAttribute('fill', '#111820');
+            const svgPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            svgPoint.setAttribute('r', '4');
+            svgPoint.setAttribute('fill', '#ffff66');
+            profileSvg.append(svgOutline, svgPoint);
+            walkProfileSvgObjects.set(semantic.key, { outline: svgOutline, point: svgPoint });
         });
         walkProfileControls.visible = walkProfileEditing;
         refreshWalkProfileVisualState();
+        syncWalkProfileSvg();
         refreshOverlay();
     }
 
@@ -584,7 +652,9 @@ export function createCompositionViewport(container, options) {
             walkProfileSelection = null;
             setWalkProfileHover(null);
         }
+        profileSvg.style.display = walkProfileEditing ? 'block' : 'none';
         rebuildPlayerPreview();
+        syncWalkProfileSvg();
         refreshOverlay();
     }
 
@@ -1080,7 +1150,9 @@ export function createCompositionViewport(container, options) {
         if (disposed) return;
         requestAnimationFrame(animate);
         if (!visible) return;
-        controls.update(); renderer.render(scene, camera);
+        controls.update();
+        syncWalkProfileSvg();
+        renderer.render(scene, camera);
     }());
     return {
         setSceneModel, show, select, hide, setSemanticSelection,

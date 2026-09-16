@@ -820,6 +820,29 @@ export function createCompositionViewport(container, options) {
             line.renderOrder = 31;
             walkOverlay.add(line);
         }
+        // The wireframe communicates the surface, but a line-only mesh does
+        // not make its topology legible at the editor's scale. Give every
+        // sampled boundary vertex an explicit halo and core so these are read
+        // as mesh vertices rather than texture noise or a thin outline.
+        for (let index = 0; index < vertices.length; index += 3) {
+            const x = vertices[index], y = vertices[index + 1];
+            const halo = new THREE.Mesh(
+                new THREE.CircleGeometry(7, 8),
+                new THREE.MeshBasicMaterial({ color: 0x111820,
+                    depthTest: false, depthWrite: false })
+            );
+            halo.position.set(x, y, 3.35);
+            halo.renderOrder = 40;
+            walkOverlay.add(halo);
+            const core = new THREE.Mesh(
+                new THREE.CircleGeometry(4, 8),
+                new THREE.MeshBasicMaterial({ color: 0xb8ff40,
+                    depthTest: false, depthWrite: false })
+            );
+            core.position.set(x, y, 3.36);
+            core.renderOrder = 41;
+            walkOverlay.add(core);
+        }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
     }
     function rebuildPlayerPreview() {

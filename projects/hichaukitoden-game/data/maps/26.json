@@ -25,28 +25,28 @@
       "minY": -2.844,
       "maxY": 26.906,
       "depthX": 7.8,
-      "groundZ": 0,
+      "groundZ": 0.0,
       "speed": 3.4,
       "groundProfile": [
         {
-          "y": -5.275281572915871,
-          "z": 0
+          "y": -5.2753,
+          "z": 0.0
         },
         {
-          "y": 3.77747358302799,
-          "z": -0.0868423579811814
+          "y": 3.7775,
+          "z": -0.0868
         },
         {
-          "y": 16.658337711835685,
-          "z": -0.8945865703758751
+          "y": 16.6583,
+          "z": -0.8946
         },
         {
-          "y": 18.14554096844444,
-          "z": -1.519636639954045
+          "y": 18.1455,
+          "z": -1.5196
         },
         {
-          "y": 22.611306798962744,
-          "z": -1.6508785202996337
+          "y": 22.6113,
+          "z": -1.6509
         }
       ]
     },
@@ -56,18 +56,18 @@
       "target": {
         "x": 7.8,
         "y": 12.031,
-        "z": 0
+        "z": 0.0
       },
       "distance": 18.666666666666668,
-      "yawDegrees": 0,
+      "yawDegrees": 0.0,
       "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
-      "farPlane": 128,
+      "farPlane": 128.0,
       "projectionScale": {
-        "x": 1,
-        "y": 1
+        "x": 1.0,
+        "y": 1.0
       },
       "projectionFrame": {
         "canonicalCenterX": 213,
@@ -78,9 +78,9 @@
         "center": 12.031,
         "minOffsetX": 0,
         "maxOffsetX": 0,
-        "interpolationSpeed": 12,
-        "movementInterpolationSpeed": 14,
-        "animationFps": 8
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
       }
     },
     "doorways": [
@@ -121,7 +121,7 @@
       "worldPosition": [
         7.8,
         1.8958,
-        0
+        -0.0688
       ],
       "trigger": "interact",
       "commands": [
@@ -204,8 +204,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.889843330087958,
-        0
+        4.8898,
+        -0.1566
       ],
       "trigger": "interact",
       "commands": [
@@ -249,8 +249,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        -2.843800284707021,
-        0
+        -2.8438,
+        -0.0233
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -271,8 +271,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.875332802810526,
-        0
+        7.8753,
+        -0.3438
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -293,8 +293,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        11.326970570829126,
-        0
+        11.327,
+        -0.5603
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -315,8 +315,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        17.234829829230414,
-        0
+        17.2348,
+        -1.1369
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -337,8 +337,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        21.71382995245397,
-        0
+        21.7138,
+        -1.6245
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",

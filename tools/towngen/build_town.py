@@ -275,14 +275,20 @@ SCREENS = {
         id=26, title="St. Maria - The Cortico", plate="backstreet_bg.png",
         intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
+        # The court falls away toward Market Row. Keep the floor authored in
+        # plate pixels here; build_map converts it once into the runtime
+        # world-unit groundProfile consumed by LÖVE and Studio.
+        ground=[(-16.6934, 0.0), (231.6107, -2.3820),
+                (584.9144, -24.5372), (625.7063, -41.6815),
+                (748.1958, -45.2812)],
         npcs=[("scholar", "Scholar", "npc_scholar", 180.0),
-              ("euler", "Euler", "npc_euler", 360.0)],
+              ("euler", "Euler", "npc_euler", 262.1214)],
         doors=[
-            ("west_praca", "The Praca", 17, "east_backstreet", 50.0, None, "left"),
-            ("lodging_door", "Passage House", 25, "exit_door", 415.0, None, "away", 0.9),
-            ("padaria_back", "The padaria's back door", 23, "exit_door", 505.0, None, "away", 1.5),
-            ("port_stair", "Down to the Port", 31, "cortico_stair", 680.0, None, "away", 1.2),
-            ("east_market", "Market Row", 18, "west_cortico", 866.0, None, "right"),
+            ("west_praca", "The Praca", 17, "east_backstreet", 49.9986, None, "left"),
+            ("lodging_door", "Passage House", 25, "exit_door", 344.0091, None, "away", 0.9),
+            ("padaria_back", "The padaria's back door", 23, "exit_door", 438.6826, None, "away", 1.5),
+            ("port_stair", "Down to the Port", 31, "cortico_stair", 600.7268, None, "away", 1.2),
+            ("east_market", "Market Row", 18, "west_cortico", 723.5793, None, "right"),
         ],
     ),
     "market": dict(

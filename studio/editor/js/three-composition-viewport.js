@@ -560,6 +560,14 @@ export function createCompositionViewport(container, options) {
             point.position.set(screen.x, -screen.y, 4);
             point.renderOrder = 29;
             point.userData.thestraSelection = semantic;
+            const outline = new THREE.Mesh(
+                new THREE.RingGeometry(6, 8, 16),
+                new THREE.MeshBasicMaterial({ color: 0x111820, depthTest: false, depthWrite: false })
+            );
+            outline.position.copy(point.position);
+            outline.position.z = 3.95;
+            outline.renderOrder = 28;
+            walkProfileControls.add(outline);
             walkProfileControls.add(point);
             walkProfileHitTargets.push(point);
             walkProfileObjects.set(semantic.key, point);
@@ -787,10 +795,6 @@ export function createCompositionViewport(container, options) {
             transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
         mesh.renderOrder = 24;
         walkOverlay.add(mesh);
-        const faceWire = new THREE.Mesh(surface.clone(), new THREE.MeshBasicMaterial({ color: 0x8ff5ff,
-            wireframe: true, transparent: true, opacity: 0.72, depthTest: false, depthWrite: false }));
-        faceWire.renderOrder = 25;
-        walkOverlay.add(faceWire);
         const wire = new THREE.BufferGeometry();
         wire.setAttribute('position', new THREE.Float32BufferAttribute(ribs, 3));
         const ribsLine = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color: 0x38d0f4,
@@ -804,17 +808,22 @@ export function createCompositionViewport(container, options) {
             vertices.push(farEdge[index], farEdge[index + 1], farEdge[index + 2] + 0.02);
         }
         vertexGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const vertexPoints = new THREE.Points(vertexGeometry, new THREE.PointsMaterial({
+        const vertexOutline = new THREE.Points(vertexGeometry, new THREE.PointsMaterial({
+            color: 0x111820, size: 11, sizeAttenuation: false, depthTest: false, depthWrite: false
+        }));
+        vertexOutline.renderOrder = 29;
+        walkOverlay.add(vertexOutline);
+        const vertexPoints = new THREE.Points(vertexGeometry.clone(), new THREE.PointsMaterial({
             color: 0xffd45a, size: 6, sizeAttenuation: false, depthTest: false, depthWrite: false
         }));
-        vertexPoints.renderOrder = 27;
+        vertexPoints.renderOrder = 30;
         walkOverlay.add(vertexPoints);
         for (const points of [nearEdge, farEdge, centerLine]) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
             const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: points === centerLine ? 0x55ef83 : 0x38d0f4,
                 transparent: true, opacity: 0.92, depthTest: false, depthWrite: false }));
-            line.renderOrder = 28;
+            line.renderOrder = 31;
             walkOverlay.add(line);
         }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;

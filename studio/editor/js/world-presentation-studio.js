@@ -475,9 +475,8 @@
         for (const [kind, label, meaning] of [
             ['active', 'Orange', 'hovered point or segment'],
             ['selected', 'Gold', 'selected point or segment'],
-            ['edge', 'Cyan line', 'authored ground profile'],
+            ['edge', 'Cyan line', 'walk planes and centerline'],
             ['face', 'Blue fill', 'derived walkable surface'],
-            ['mesh', 'Green wireframe', 'derived walk mesh vertices'],
         ]) {
             const row = document.createElement('div');
             row.className = 'thestra-toolbar-legend-row';

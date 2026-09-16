@@ -762,26 +762,34 @@ export function createCompositionViewport(container, options) {
         const bounds = plate.bounds || [];
         const nearX = Number.isFinite(Number(bounds[0])) ? Number(bounds[0]) : Number(lane.depthX) - 1;
         const farX = Number.isFinite(Number(bounds[3])) ? Number(bounds[3]) : Number(lane.depthX) + 1;
-        const ribbon = [], ribs = [], nearEdge = [], farEdge = [], centerLine = [];
-        const samples = 48;
-        for (let index = 0; index <= samples; index++) {
-            const y = minimum + (maximum - minimum) * index / samples;
-            const z = View.groundHeight(lane.groundProfile, Number(lane.groundZ || 0), y);
+        const profile = Array.isArray(lane.groundProfile) && lane.groundProfile.length >= 2
+            ? lane.groundProfile
+            : [{ y: minimum, z: Number(lane.groundZ || 0) },
+                { y: maximum, z: Number(lane.groundZ || 0) }];
+        const ribbon = [], nearEdge = [], farEdge = [], centerLine = [];
+        const projectedProfile = profile.map(point => {
+            const y = Number(point.y), z = Number(point.z);
             const near = platePoint(nearX, y, z + 0.015);
             const far = platePoint(farX, y, z + 0.015);
             const center = platePoint(Number(lane.depthX), y, z + 0.02);
             nearEdge.push(near.x, -near.y, 2.8);
             farEdge.push(far.x, -far.y, 2.8);
             centerLine.push(center.x, -center.y, 2.9);
-            if (index < samples) {
-                const nextY = minimum + (maximum - minimum) * (index + 1) / samples;
-                const nextZ = View.groundHeight(lane.groundProfile, Number(lane.groundZ || 0), nextY);
-                const nextNear = platePoint(nearX, nextY, nextZ + 0.015);
-                const nextFar = platePoint(farX, nextY, nextZ + 0.015);
-                ribbon.push(near.x, -near.y, 2.7, far.x, -far.y, 2.7, nextFar.x, -nextFar.y, 2.7,
-                    near.x, -near.y, 2.7, nextFar.x, -nextFar.y, 2.7, nextNear.x, -nextNear.y, 2.7);
-                if (index % 4 === 0) ribs.push(near.x, -near.y, 2.85, far.x, -far.y, 2.85);
-            }
+            return { near, far };
+        });
+        for (let index = 0; index < projectedProfile.length - 1; index++) {
+            const current = projectedProfile[index], next = projectedProfile[index + 1];
+            // Each authored profile segment is one visual walk plane. The
+            // renderer may triangulate the quad internally, but no triangle
+            // edges or sampled subdivision vertices are exposed to authors.
+            ribbon.push(
+                current.near.x, -current.near.y, 2.7,
+                current.far.x, -current.far.y, 2.7,
+                next.far.x, -next.far.y, 2.7,
+                current.near.x, -current.near.y, 2.7,
+                next.far.x, -next.far.y, 2.7,
+                next.near.x, -next.near.y, 2.7
+            );
         }
         const surface = new THREE.BufferGeometry();
         surface.setAttribute('position', new THREE.Float32BufferAttribute(ribbon, 3));
@@ -789,29 +797,6 @@ export function createCompositionViewport(container, options) {
             transparent: true, opacity: 0.3, side: THREE.DoubleSide, depthTest: false, depthWrite: false }));
         mesh.renderOrder = 24;
         walkOverlay.add(mesh);
-        const wire = new THREE.BufferGeometry();
-        wire.setAttribute('position', new THREE.Float32BufferAttribute(ribs, 3));
-        const ribsLine = new THREE.LineSegments(wire, new THREE.LineBasicMaterial({ color: 0x38d0f4,
-            transparent: true, opacity: 0.72, depthTest: false, depthWrite: false }));
-        ribsLine.renderOrder = 26;
-        walkOverlay.add(ribsLine);
-        const vertexGeometry = new THREE.BufferGeometry();
-        const vertices = [];
-        for (let index = 0; index < nearEdge.length; index += 3) {
-            vertices.push(nearEdge[index], nearEdge[index + 1], nearEdge[index + 2] + 0.02);
-            vertices.push(farEdge[index], farEdge[index + 1], farEdge[index + 2] + 0.02);
-        }
-        vertexGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const vertexOutline = new THREE.Points(vertexGeometry, new THREE.PointsMaterial({
-            color: 0x111820, size: 11, sizeAttenuation: false, depthTest: false, depthWrite: false
-        }));
-        vertexOutline.renderOrder = 29;
-        walkOverlay.add(vertexOutline);
-        const vertexPoints = new THREE.Points(vertexGeometry.clone(), new THREE.PointsMaterial({
-            color: 0xffd45a, size: 6, sizeAttenuation: false, depthTest: false, depthWrite: false
-        }));
-        vertexPoints.renderOrder = 30;
-        walkOverlay.add(vertexPoints);
         for (const points of [nearEdge, farEdge, centerLine]) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
@@ -819,32 +804,6 @@ export function createCompositionViewport(container, options) {
                 transparent: true, opacity: 0.92, depthTest: false, depthWrite: false }));
             line.renderOrder = 31;
             walkOverlay.add(line);
-        }
-        // The wireframe communicates the surface, but a line-only mesh does
-        // not make its topology legible at the editor's scale. Give every
-        // sampled boundary vertex an explicit halo and core so these are read
-        // as mesh vertices rather than texture noise or a thin outline.
-        for (let index = 0; index < vertices.length; index += 3) {
-            const x = vertices[index], y = vertices[index + 1];
-            const halo = new THREE.Mesh(
-                new THREE.CircleGeometry(7, 8),
-                new THREE.MeshBasicMaterial({ color: 0x111820,
-                    depthTest: false, depthWrite: false })
-            );
-            // Keep mesh vertices in front of the plate image. The mesh ribbon
-            // is intentionally behind authored profile controls, but these
-            // inspection markers must remain visible over the plate itself.
-            halo.position.set(x, y, 4.2);
-            halo.renderOrder = 40;
-            walkOverlay.add(halo);
-            const core = new THREE.Mesh(
-                new THREE.CircleGeometry(4, 8),
-                new THREE.MeshBasicMaterial({ color: 0xb8ff40,
-                    depthTest: false, depthWrite: false })
-            );
-            core.position.set(x, y, 4.21);
-            core.renderOrder = 41;
-            walkOverlay.add(core);
         }
         walkOverlay.visible = walkMeshVisible || walkProfileEditing;
     }

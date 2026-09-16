@@ -189,6 +189,30 @@ Classify a new surface before choosing its host:
    request or display these results, but it does not become their authority.
    G6 remains the editor's visual gate; it does not replace G5 or runtime truth.
 
+### 1.1.3 Scene `ctx.v` owner and value boundary (#930)
+
+The Scene host owns the lifetime of `ctx.v`: it belongs to one Scene instance,
+is handed to each hook as that instance's working state, and is not a second
+domain owner for inventory, rosters, battles or other persistent facts. Values
+authored into it must use the value family owned by `runtime/engine/state_value.lua`:
+nil/unset, booleans, finite numbers, strings, dense lists and string-keyed
+records. Functions, userdata, metatables, cycles, aliases and other executable
+or backend object identity do not cross into authored Scene state.
+
+The enforcement boundary is the Scene-state handoff at the end of
+`scene_host.runHook`: after `SCRIPT` and ordinary commands have completed, and
+before presentation or a Scene transition consumes the result. This boundary
+keeps invocation-local Lua helpers legal while making a helper accidentally
+stored in `ctx.v` fail at the owner that is about to publish the state. Fixed
+Scene time (`v.time`) is a read-only, host-provided transient and is excluded
+from this handoff check; it is never authored or retained as Scene state.
+
+Scene transitions copy their seeded variables through the same authority before
+the new Scene's `on_enter` hook. Native semantic owners may retain rich objects
+internally, but authored Scene composition crosses those owners through values,
+stable identities or explicit API operations rather than storing executable
+objects in `ctx.v`.
+
 These classes are not a generic shared-core mandate, a requirement that all
 semantics become TypeScript, or a requirement that all previews become
 browser-local. They are a placement decision: pure rules may be generated for

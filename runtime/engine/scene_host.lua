@@ -1,6 +1,7 @@
 local interpreter = require("engine.interpreter")
 local input_map = require("engine.input_map")
 local scene_update_contract = require("engine.scene_update_contract")
+local state_value = require("engine.state_value")
 
 local scene_host = {}
 
@@ -65,6 +66,19 @@ local function getSceneData(ctx, id)
         end
     end
     return nil
+end
+
+-- Scene v is handed to presentation and to the next Scene hook as authored
+-- state.  Validate that handoff with the one value-kind authority used by
+-- other authored-state owners.  Fixed-clock time is deliberately transient
+-- and read-only; it is removed for the check and restored immediately after.
+local function validateSceneState(state)
+    local transientTime = state.v.time
+    state.v.time = nil
+    local ok, err = pcall(state_value.validate, state.v,
+        "Scene '" .. tostring(state.id) .. "' ctx.v")
+    state.v.time = transientTime
+    if not ok then error(err, 0) end
 end
 
 -- Initialize the host with an active session and loader
@@ -206,6 +220,11 @@ function scene_host.runHook(hookName, ctx)
 
     local events = interpreter.runImmediate(cmds, ctx)
 
+    -- This is the authored-state handoff boundary: SCRIPT and ordinary
+    -- commands have finished mutating v, while the state is still owned by
+    -- this Scene and before presentation/transition consumers observe it.
+    validateSceneState(state)
+
     -- Consume SCENE_EVENT (scene_change) and update the stack
     -- Wait to process these until after the loop so we don't recurse deeply
     -- or mutate sceneStack while iterating.
@@ -278,7 +297,10 @@ function scene_host.push(id, ctx, vars)
     })
     if vars then
         local pushed = sceneStack[#sceneStack]
-        for k, val in pairs(vars) do pushed.v[k] = val end
+        for k, val in pairs(vars) do
+            pushed.v[k] = state_value.copy(val,
+                "Scene '" .. tostring(id) .. "' ctx.v." .. tostring(k))
+        end
     end
 
     local state = sceneStack[#sceneStack]

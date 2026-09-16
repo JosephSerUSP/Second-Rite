@@ -568,6 +568,10 @@ function cli.runPlayScene(sceneId, loader)
             reachedAtStep = nil,
             stepsRun = 0,
             stepsTotal = 0,
+            -- Evidence for the play gate: keep the authored scene state at
+            -- the last driven step so a control can be compared on meaningful
+            -- progress even when the scene deliberately pops itself.
+            lastVars = nil,
         }
 
         local terminal = sceneDef.terminal
@@ -645,6 +649,8 @@ function cli.runPlayScene(sceneId, loader)
                 sh.keyreleased(step.key)
             end
             payload.stepsRun = index
+            local lastState = sh.getCurrentState()
+            payload.lastVars = lastState and lastState.v or payload.lastVars
             if terminalReached() then
                 payload.reached = true
                 payload.reachedAtStep = index

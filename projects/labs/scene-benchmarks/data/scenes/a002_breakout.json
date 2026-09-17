@@ -14,33 +14,494 @@
   "windows": [
     {
       "id": "header",
-      "rect": { "x": 1, "y": 1, "w": 28, "h": 3 },
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 28,
+        "h": 3
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "Breakout   Score: {v.score}" } ]
-    },
-    {
-      "id": "playfield",
-      "rect": { "x": 1, "y": 5, "w": 28, "h": 16 },
-      "style": "frame",
-      "content": [ { "type": "text", "text": "{v.renderedField}" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "Breakout   Score: {v.score}"
+        }
+      ]
     },
     {
       "id": "controls",
-      "rect": { "x": 1, "y": 22, "w": 28, "h": 3 },
+      "rect": {
+        "x": 1,
+        "y": 22,
+        "w": 28,
+        "h": 3
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "LEFT/RIGHT: Move   Enter: Restart   B: Exit" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "LEFT/RIGHT: Move   Enter: Restart   B: Exit"
+        }
+      ]
+    },
+    {
+      "id": "playfield",
+      "rect": {
+        "x": 1,
+        "y": 5,
+        "w": 28,
+        "h": 16
+      },
+      "style": "frame",
+      "content": []
     },
     {
       "id": "paddle_win",
-      "rect": { "x": "1 + 1 + v.padX", "y": "5 + 1 + v.padY", "w": "v.padW", "h": 1 },
+      "rect": {
+        "x": "2 + v.padX",
+        "y": "6 + v.padY",
+        "w": "v.padW",
+        "h": 1
+      },
       "style": "panel",
-      "content": [ { "type": "text", "text": "=====" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "====="
+        }
+      ]
     },
     {
       "id": "ball_win",
-      "rect": { "x": "1 + 1 + v.ballX", "y": "5 + 1 + v.ballY", "w": 1, "h": 1 },
+      "rect": {
+        "x": "2 + v.ballX",
+        "y": "6 + v.ballY",
+        "w": 1,
+        "h": 1
+      },
       "style": "panel",
-      "content": [ { "type": "text", "text": "O" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "brick_1",
+      "rect": {
+        "x": "2 + 2",
+        "y": "6 + 2",
+        "w": "v.b1 and 3 or 0",
+        "h": "v.b1 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_2",
+      "rect": {
+        "x": "2 + 6",
+        "y": "6 + 2",
+        "w": "v.b2 and 3 or 0",
+        "h": "v.b2 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_3",
+      "rect": {
+        "x": "2 + 10",
+        "y": "6 + 2",
+        "w": "v.b3 and 3 or 0",
+        "h": "v.b3 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_4",
+      "rect": {
+        "x": "2 + 14",
+        "y": "6 + 2",
+        "w": "v.b4 and 3 or 0",
+        "h": "v.b4 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_5",
+      "rect": {
+        "x": "2 + 18",
+        "y": "6 + 2",
+        "w": "v.b5 and 3 or 0",
+        "h": "v.b5 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_6",
+      "rect": {
+        "x": "2 + 22",
+        "y": "6 + 2",
+        "w": "v.b6 and 3 or 0",
+        "h": "v.b6 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_7",
+      "rect": {
+        "x": "2 + 2",
+        "y": "6 + 4",
+        "w": "v.b7 and 3 or 0",
+        "h": "v.b7 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_8",
+      "rect": {
+        "x": "2 + 6",
+        "y": "6 + 4",
+        "w": "v.b8 and 3 or 0",
+        "h": "v.b8 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_9",
+      "rect": {
+        "x": "2 + 10",
+        "y": "6 + 4",
+        "w": "v.b9 and 3 or 0",
+        "h": "v.b9 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_10",
+      "rect": {
+        "x": "2 + 14",
+        "y": "6 + 4",
+        "w": "v.b10 and 3 or 0",
+        "h": "v.b10 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_11",
+      "rect": {
+        "x": "2 + 18",
+        "y": "6 + 4",
+        "w": "v.b11 and 3 or 0",
+        "h": "v.b11 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_12",
+      "rect": {
+        "x": "2 + 22",
+        "y": "6 + 4",
+        "w": "v.b12 and 3 or 0",
+        "h": "v.b12 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_13",
+      "rect": {
+        "x": "2 + 2",
+        "y": "6 + 6",
+        "w": "v.b13 and 3 or 0",
+        "h": "v.b13 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_14",
+      "rect": {
+        "x": "2 + 6",
+        "y": "6 + 6",
+        "w": "v.b14 and 3 or 0",
+        "h": "v.b14 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_15",
+      "rect": {
+        "x": "2 + 10",
+        "y": "6 + 6",
+        "w": "v.b15 and 3 or 0",
+        "h": "v.b15 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_16",
+      "rect": {
+        "x": "2 + 14",
+        "y": "6 + 6",
+        "w": "v.b16 and 3 or 0",
+        "h": "v.b16 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_17",
+      "rect": {
+        "x": "2 + 18",
+        "y": "6 + 6",
+        "w": "v.b17 and 3 or 0",
+        "h": "v.b17 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_18",
+      "rect": {
+        "x": "2 + 22",
+        "y": "6 + 6",
+        "w": "v.b18 and 3 or 0",
+        "h": "v.b18 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_19",
+      "rect": {
+        "x": "2 + 2",
+        "y": "6 + 8",
+        "w": "v.b19 and 3 or 0",
+        "h": "v.b19 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_20",
+      "rect": {
+        "x": "2 + 6",
+        "y": "6 + 8",
+        "w": "v.b20 and 3 or 0",
+        "h": "v.b20 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_21",
+      "rect": {
+        "x": "2 + 10",
+        "y": "6 + 8",
+        "w": "v.b21 and 3 or 0",
+        "h": "v.b21 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_22",
+      "rect": {
+        "x": "2 + 14",
+        "y": "6 + 8",
+        "w": "v.b22 and 3 or 0",
+        "h": "v.b22 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_23",
+      "rect": {
+        "x": "2 + 18",
+        "y": "6 + 8",
+        "w": "v.b23 and 3 or 0",
+        "h": "v.b23 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "brick_24",
+      "rect": {
+        "x": "2 + 22",
+        "y": "6 + 8",
+        "w": "v.b24 and 3 or 0",
+        "h": "v.b24 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "msg_gameover",
+      "rect": {
+        "x": 10,
+        "y": 12,
+        "w": "v.gameOver and 10 or 0",
+        "h": "v.gameOver and 3 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "GAME OVER"
+        }
+      ]
+    },
+    {
+      "id": "msg_gamewon",
+      "rect": {
+        "x": 10,
+        "y": 12,
+        "w": "v.gameWon and 10 or 0",
+        "h": "v.gameWon and 3 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "YOU WIN!"
+        }
+      ]
     }
   ],
   "hooks": {
@@ -48,46 +509,319 @@
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "_guard", "value": 0 },
-          { "name": "fieldW", "value": 26 },
-          { "name": "fieldH", "value": 14 },
-          { "name": "padW", "value": 5 },
-          { "name": "padX", "value": 10 },
-          { "name": "padY", "value": 13 },
-          { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 13.5 },
-          { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": 10.0 },
-          { "name": "score", "value": 0 },
-          { "name": "moveInput", "value": 0 },
-          { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          {
+            "name": "fieldW",
+            "value": 26.0
+          },
+          {
+            "name": "fieldH",
+            "value": 14.0
+          },
+          {
+            "name": "padW",
+            "value": 5.0
+          },
+          {
+            "name": "padX",
+            "value": 10.0
+          },
+          {
+            "name": "padY",
+            "value": 13.0
+          },
+          {
+            "name": "ballX",
+            "value": 12.0
+          },
+          {
+            "name": "ballY",
+            "value": 12.0
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": -10.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "moveInput",
+            "value": 0
+          },
+          {
+            "name": "gameOver",
+            "value": "false"
+          },
+          {
+            "name": "gameWon",
+            "value": "false"
+          },
+          {
+            "name": "hit",
+            "value": "false"
+          },
+          {
+            "name": "b1",
+            "value": "true"
+          },
+          {
+            "name": "b2",
+            "value": "true"
+          },
+          {
+            "name": "b3",
+            "value": "true"
+          },
+          {
+            "name": "b4",
+            "value": "true"
+          },
+          {
+            "name": "b5",
+            "value": "true"
+          },
+          {
+            "name": "b6",
+            "value": "true"
+          },
+          {
+            "name": "b7",
+            "value": "true"
+          },
+          {
+            "name": "b8",
+            "value": "true"
+          },
+          {
+            "name": "b9",
+            "value": "true"
+          },
+          {
+            "name": "b10",
+            "value": "true"
+          },
+          {
+            "name": "b11",
+            "value": "true"
+          },
+          {
+            "name": "b12",
+            "value": "true"
+          },
+          {
+            "name": "b13",
+            "value": "true"
+          },
+          {
+            "name": "b14",
+            "value": "true"
+          },
+          {
+            "name": "b15",
+            "value": "true"
+          },
+          {
+            "name": "b16",
+            "value": "true"
+          },
+          {
+            "name": "b17",
+            "value": "true"
+          },
+          {
+            "name": "b18",
+            "value": "true"
+          },
+          {
+            "name": "b19",
+            "value": "true"
+          },
+          {
+            "name": "b20",
+            "value": "true"
+          },
+          {
+            "name": "b21",
+            "value": "true"
+          },
+          {
+            "name": "b22",
+            "value": "true"
+          },
+          {
+            "name": "b23",
+            "value": "true"
+          },
+          {
+            "name": "b24",
+            "value": "true"
+          }
         ]
-      },
-      { "cmd": "SCRIPT", "ref": "setup_bricks" }
+      }
     ],
     "on_select": [
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "fieldW", "value": 26 },
-          { "name": "fieldH", "value": 14 },
-          { "name": "padW", "value": 5 },
-          { "name": "padX", "value": 10 },
-          { "name": "padY", "value": 13 },
-          { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 13.5 },
-          { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": 10.0 },
-          { "name": "score", "value": 0 },
-          { "name": "moveInput", "value": 0 },
-          { "name": "renderedField", "value": "''" },
-          { "name": "gameOver", "value": "false" },
-          { "name": "gameWon", "value": "false" }
+          {
+            "name": "fieldW",
+            "value": 26
+          },
+          {
+            "name": "fieldH",
+            "value": 14
+          },
+          {
+            "name": "padW",
+            "value": 5
+          },
+          {
+            "name": "padX",
+            "value": 10.0
+          },
+          {
+            "name": "padY",
+            "value": 13.0
+          },
+          {
+            "name": "ballX",
+            "value": 12.0
+          },
+          {
+            "name": "ballY",
+            "value": 12.0
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": -10.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "moveInput",
+            "value": 0
+          },
+          {
+            "name": "gameOver",
+            "value": "false"
+          },
+          {
+            "name": "gameWon",
+            "value": "false"
+          },
+          {
+            "name": "hit",
+            "value": "false"
+          },
+          {
+            "name": "b1",
+            "value": "true"
+          },
+          {
+            "name": "b2",
+            "value": "true"
+          },
+          {
+            "name": "b3",
+            "value": "true"
+          },
+          {
+            "name": "b4",
+            "value": "true"
+          },
+          {
+            "name": "b5",
+            "value": "true"
+          },
+          {
+            "name": "b6",
+            "value": "true"
+          },
+          {
+            "name": "b7",
+            "value": "true"
+          },
+          {
+            "name": "b8",
+            "value": "true"
+          },
+          {
+            "name": "b9",
+            "value": "true"
+          },
+          {
+            "name": "b10",
+            "value": "true"
+          },
+          {
+            "name": "b11",
+            "value": "true"
+          },
+          {
+            "name": "b12",
+            "value": "true"
+          },
+          {
+            "name": "b13",
+            "value": "true"
+          },
+          {
+            "name": "b14",
+            "value": "true"
+          },
+          {
+            "name": "b15",
+            "value": "true"
+          },
+          {
+            "name": "b16",
+            "value": "true"
+          },
+          {
+            "name": "b17",
+            "value": "true"
+          },
+          {
+            "name": "b18",
+            "value": "true"
+          },
+          {
+            "name": "b19",
+            "value": "true"
+          },
+          {
+            "name": "b20",
+            "value": "true"
+          },
+          {
+            "name": "b21",
+            "value": "true"
+          },
+          {
+            "name": "b22",
+            "value": "true"
+          },
+          {
+            "name": "b23",
+            "value": "true"
+          },
+          {
+            "name": "b24",
+            "value": "true"
+          }
         ]
-      },
-      { "cmd": "SCRIPT", "ref": "setup_bricks" }
+      }
     ],
     "on_frame": [
       {
@@ -97,71 +831,933 @@
           {
             "cmd": "SET_VAR",
             "assignments": [
-              { "name": "padX", "value": "clamp(v.padX + v.moveInput * 18.0 * v.time.dt, 0, v.fieldW - v.padW)" },
-              { "name": "moveInput", "value": 0 },
-              { "name": "ballX", "value": "v.ballX + v.ballVX * v.time.dt" },
-              { "name": "ballY", "value": "v.ballY + v.ballVY * v.time.dt" }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ballX <= 0 or v.ballX >= v.fieldW - 1",
-            "then": [
               {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  { "name": "ballX", "value": "clamp(v.ballX, 0, v.fieldW - 1)" },
-                  { "name": "ballVX", "value": "-v.ballVX" }
-                ]
+                "name": "padX",
+                "value": "clamp(v.padX + v.moveInput * 18.0 * v.time.dt, 0, v.fieldW - v.padW)"
+              },
+              {
+                "name": "moveInput",
+                "value": 0
+              },
+              {
+                "name": "ballX",
+                "value": "v.ballX + v.ballVX * v.time.dt"
+              },
+              {
+                "name": "ballY",
+                "value": "v.ballY + v.ballVY * v.time.dt"
+              },
+              {
+                "name": "hit",
+                "value": "false"
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and (v.ballX <= 0 or v.ballX >= v.fieldW - 1)",
+        "then": [
           {
-            "cmd": "IF",
-            "condition": "v.ballY <= 0",
-            "then": [
+            "cmd": "SET_VAR",
+            "assignments": [
               {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  { "name": "ballY", "value": 0 },
-                  { "name": "ballVY", "value": "-v.ballVY" }
-                ]
+                "name": "ballX",
+                "value": "clamp(v.ballX, 0, v.fieldW - 1)"
+              },
+              {
+                "name": "ballVX",
+                "value": "-v.ballVX"
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.ballY <= 0",
+        "then": [
           {
-            "cmd": "IF",
-            "condition": "v.ballY >= v.fieldH",
-            "then": [ { "cmd": "SET_VAR", "name": "gameOver", "value": "true" } ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "v.ballY >= v.padY - 0.5 and v.ballY <= v.padY + 0.5 and v.ballVY > 0 and v.ballX >= v.padX - 0.5 and v.ballX <= v.padX + v.padW - 0.5",
-            "then": [
+            "cmd": "SET_VAR",
+            "assignments": [
               {
-                "cmd": "SET_VAR",
-                "assignments": [
-                  { "name": "ballY", "value": "v.padY - 0.5" },
-                  { "name": "ballVY", "value": "-v.ballVY" },
-                  { "name": "ballVX", "value": "v.ballVX + ((v.ballX - (v.padX + v.padW / 2)) / (v.padW / 2)) * 6.0" }
-                ]
+                "name": "ballY",
+                "value": 0
+              },
+              {
+                "name": "ballVY",
+                "value": "abs(v.ballVY)"
               }
             ]
-          },
-          { "cmd": "SCRIPT", "ref": "process_bricks" }
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.ballY >= v.fieldH",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "gameOver",
+            "value": "true"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.ballVY > 0 and v.ballY >= v.padY - 0.5 and v.ballY <= v.padY + 0.5 and v.ballX >= v.padX - 0.5 and v.ballX <= v.padX + v.padW + 0.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "ballY",
+                "value": "v.padY - 0.5"
+              },
+              {
+                "name": "ballVY",
+                "value": "-abs(v.ballVY)"
+              },
+              {
+                "name": "ballVX",
+                "value": "v.ballVX + ((v.ballX - (v.padX + v.padW / 2)) / (v.padW / 2)) * 6.0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b1 == true and v.ballX >= 1.5 and v.ballX <= 5.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b1",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b2 == true and v.ballX >= 5.5 and v.ballX <= 9.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b2",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b3 == true and v.ballX >= 9.5 and v.ballX <= 13.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b3",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b4 == true and v.ballX >= 13.5 and v.ballX <= 17.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b4",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b5 == true and v.ballX >= 17.5 and v.ballX <= 21.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b5",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b6 == true and v.ballX >= 21.5 and v.ballX <= 25.5 and v.ballY >= 1.5 and v.ballY <= 3.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b6",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b7 == true and v.ballX >= 1.5 and v.ballX <= 5.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b7",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b8 == true and v.ballX >= 5.5 and v.ballX <= 9.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b8",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b9 == true and v.ballX >= 9.5 and v.ballX <= 13.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b9",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b10 == true and v.ballX >= 13.5 and v.ballX <= 17.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b10",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b11 == true and v.ballX >= 17.5 and v.ballX <= 21.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b11",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b12 == true and v.ballX >= 21.5 and v.ballX <= 25.5 and v.ballY >= 3.5 and v.ballY <= 5.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b12",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b13 == true and v.ballX >= 1.5 and v.ballX <= 5.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b13",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b14 == true and v.ballX >= 5.5 and v.ballX <= 9.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b14",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b15 == true and v.ballX >= 9.5 and v.ballX <= 13.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b15",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b16 == true and v.ballX >= 13.5 and v.ballX <= 17.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b16",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b17 == true and v.ballX >= 17.5 and v.ballX <= 21.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b17",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b18 == true and v.ballX >= 21.5 and v.ballX <= 25.5 and v.ballY >= 5.5 and v.ballY <= 7.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b18",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b19 == true and v.ballX >= 1.5 and v.ballX <= 5.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b19",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b20 == true and v.ballX >= 5.5 and v.ballX <= 9.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b20",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b21 == true and v.ballX >= 9.5 and v.ballX <= 13.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b21",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b22 == true and v.ballX >= 13.5 and v.ballX <= 17.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b22",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b23 == true and v.ballX >= 17.5 and v.ballX <= 21.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b23",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and v.hit == false and v.b24 == true and v.ballX >= 21.5 and v.ballX <= 25.5 and v.ballY >= 7.5 and v.ballY <= 9.5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "b24",
+                "value": "false"
+              },
+              {
+                "name": "score",
+                "value": "v.score + 10"
+              },
+              {
+                "name": "ballVY",
+                "value": "-v.ballVY"
+              },
+              {
+                "name": "hit",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "not v.gameOver and not v.gameWon and (v.b1 == false and v.b2 == false and v.b3 == false and v.b4 == false and v.b5 == false and v.b6 == false and v.b7 == false and v.b8 == false and v.b9 == false and v.b10 == false and v.b11 == false and v.b12 == false and v.b13 == false and v.b14 == false and v.b15 == false and v.b16 == false and v.b17 == false and v.b18 == false and v.b19 == false and v.b20 == false and v.b21 == false and v.b22 == false and v.b23 == false and v.b24 == false)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "gameWon",
+            "value": "true"
+          }
         ]
       }
     ],
-    "on_left": [ { "cmd": "SET_VAR", "name": "moveInput", "value": -1 } ],
-    "on_right": [ { "cmd": "SET_VAR", "name": "moveInput", "value": 1 } ],
-    "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
-  },
-  "scripts": {
-    "setup_bricks": "\nlocal v = ctx.v\nv.bricks = {}\nfor y = 1, 4 do\n    for x = 2, v.fieldW - 3 do\n        table.insert(v.bricks, {x=x, y=y, intact=true})\n    end\nend\n",
-    "process_bricks": "\nlocal v = ctx.v\nlocal bx, by = math.floor(v.ballX + 0.5), math.floor(v.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(v.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break\n        end\n    end\nend\nif count == 0 then v.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, v.fieldH - 1 do\n    for x = 0, v.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif v.gameOver then out = out .. \"GAME OVER\\n\" end\nif v.gameWon then out = out .. \"YOU WIN!\\n\" end\nv.renderedField = out\n"
+    "on_left": [
+      {
+        "cmd": "SET_VAR",
+        "name": "moveInput",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_VAR",
+        "name": "moveInput",
+        "value": 1
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
   },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "wait": 0.2
+    }
   ]
 }

@@ -511,23 +511,23 @@
         "assignments": [
           {
             "name": "fieldW",
-            "value": 26
+            "value": 26.0
           },
           {
             "name": "fieldH",
-            "value": 14
+            "value": 14.0
           },
           {
             "name": "padW",
-            "value": 5
+            "value": 5.0
           },
           {
             "name": "padX",
-            "value": 10
+            "value": 2.0
           },
           {
             "name": "padY",
-            "value": 13
+            "value": 2.0
           },
           {
             "name": "ballX",
@@ -535,15 +535,15 @@
           },
           {
             "name": "ballY",
-            "value": 12.0
+            "value": 13.5
           },
           {
             "name": "ballVX",
-            "value": 8.0
+            "value": 0.0
           },
           {
             "name": "ballVY",
-            "value": -10.0
+            "value": 50.0
           },
           {
             "name": "score",
@@ -682,11 +682,11 @@
           },
           {
             "name": "padX",
-            "value": 10
+            "value": 2.0
           },
           {
             "name": "padY",
-            "value": 13
+            "value": 2.0
           },
           {
             "name": "ballX",
@@ -694,15 +694,15 @@
           },
           {
             "name": "ballY",
-            "value": 12.0
+            "value": 13.5
           },
           {
             "name": "ballVX",
-            "value": 8.0
+            "value": 0.0
           },
           {
             "name": "ballVY",
-            "value": -10.0
+            "value": 50.0
           },
           {
             "name": "score",
@@ -1610,94 +1610,7 @@
   },
   "goldenScript": [
     {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
-    },
-    {
-      "wait": 1.0
+      "wait": 2.0
     }
   ]
 }

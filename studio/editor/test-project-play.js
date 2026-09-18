@@ -70,8 +70,8 @@ test('external Project staging combines install runtime with compiled Project se
     let stageDir;
     try {
         stageDir = stageProject({ installRoot: install, runtimeRoot: runtime, projectRoot: project, manifestPath });
-        assert.notEqual(stageDir, runtime);
-        assert.notEqual(stageDir, project);
+        assert.notStrictEqual(stageDir, runtime);
+        assert.notStrictEqual(stageDir, project);
         assert.equal(fs.readFileSync(path.join(stageDir, 'main.lua'), 'utf8'), '-- install runtime');
         assert.equal(fs.readFileSync(path.join(stageDir, 'engine', 'runtime.lua'), 'utf8'), '-- engine marker');
         assert.equal(fs.readFileSync(path.join(stageDir, 'assets', 'sprites', 'hero.txt'), 'utf8'), 'asset:external-project');

@@ -75,10 +75,10 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
         const secondStat = fs.statSync(runtimePath);
         assert.equal(secondStat.size, originalStat.size, 'adversarial edit preserves file size');
         assert.equal(secondStat.mtimeMs, originalStat.mtimeMs, 'adversarial edit restores exact representable mtime');
-        assert.notEqual(secondStat.ctimeMs, originalStat.ctimeMs,
+        assert.notStrictEqual(secondStat.ctimeMs, originalStat.ctimeMs,
             'ordinary same-size rewrite still advances filesystem change identity');
         const second = revision(f, digestCache);
-        assert.notEqual(second, first,
+        assert.notStrictEqual(second, first,
             'cached content authority must invalidate despite equal size and restored mtime');
 
         fs.writeFileSync(runtimePath, '-- runtime C\n');
@@ -87,7 +87,7 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
         assert.equal(thirdStat.mtimeMs, originalStat.mtimeMs,
             'rapid second edit also restores the same mtime');
         const third = revision(f, digestCache);
-        assert.notEqual(third, second, 'rapid second same-size edit also invalidates the cached digest');
+        assert.notStrictEqual(third, second, 'rapid second same-size edit also invalidates the cached digest');
     } finally {
         fs.rmSync(f.root, { recursive: true, force: true });
     }

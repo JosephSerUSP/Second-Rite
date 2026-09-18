@@ -73,7 +73,7 @@ try {
     storage.writeRegistryRecord(root, 'tilesets', { id: 'alpha', name: 'Alpha edited' }, fragmentVersion);
     assert.equal(fs.readFileSync(path.join(root, 'tilesets', 'beta.json'), 'utf8'), betaBefore);
     assert.equal(storage.loadRegistry(root, 'tilesets').records.alpha.name, 'Alpha edited');
-    assert.notEqual(storage.versionToken(root, 'tilesets'), fragmentVersion);
+    assert.notStrictEqual(storage.versionToken(root, 'tilesets'), fragmentVersion);
 
     assert.throws(
         () => storage.writeRegistryRecord(root, 'tilesets', { id: 'alpha', name: 'stale' }, fragmentVersion),

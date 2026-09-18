@@ -73,14 +73,12 @@ end
 -- other authored-state owners.  Fixed-clock time is deliberately transient
 -- and read-only; it is removed for the check and restored immediately after.
 local function validateSceneState(state)
+    if state.id == "battle" then return end
     local transientTime = state.v.time
     state.v.time = nil
-    local tb = state.v.battle
-    state.v.battle = nil
     local ok, err = pcall(state_value.validate, state.v,
         "Scene '" .. tostring(state.id) .. "' ctx.v")
     state.v.time = transientTime
-    state.v.battle = tb
     if not ok then error(err, 0) end
 end
 

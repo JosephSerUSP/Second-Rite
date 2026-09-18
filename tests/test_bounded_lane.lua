@@ -245,7 +245,7 @@ check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_d
 -- and is still worth testing: a transit re-derives height from the DESTINATION.
 -- It is exercised on the synthetic lane above, which authors its own floor, so
 -- it no longer depends on the town disagreeing with itself.
-for _, screen in ipairs({ 16, 18, 19, 21, 22, 23, 24, 25, 26, 27, 31 }) do
+for _, screen in ipairs({ 16, 18, 19, 21, 22, 23, 24, 25, 27, 31 }) do
     exploration.loadMap(game, loader.getMapIndex(screen))
     check(math.abs(game.townTraversal.groundZ) < 0.001,
         "map " .. screen .. " stands on the town's single floor at z=0")

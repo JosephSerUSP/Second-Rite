@@ -88,5 +88,58 @@ interpreter.runImmediate({ { cmd = "UNSET_GAME_VARIABLE", name = "visits" } }, e
 check(not variables.has(restored, "visits"),
     "UNSET_GAME_VARIABLE removes persistent state explicitly")
 
+
+
+-- #410 owner-explicit transient state substrate. Local scratch and Scene state
+-- are distinct Formula nouns; SET_SCENE_STATE must never silently fall back to
+-- whichever table an arbitrary immediate host happened to provide.
+local transientCtx = { session = restored, loader = loader, party = restored.party, events = {} }
+interpreter.runImmediate({
+    { cmd = "SET_LOCAL", assignments = {
+        { name = "roll", value = 2 },
+        { name = "scaled", value = "locals.roll + 3" },
+    } },
+}, transientCtx)
+check(transientCtx.locals.roll == 2 and transientCtx.locals.scaled == 5,
+    "SET_LOCAL owns in-order invocation scratch under locals")
+check(transientCtx.v ~= transientCtx.locals and transientCtx.v.roll == nil,
+    "new process locals stay distinct from the legacy v compatibility namespace")
+local firstInvocationLocals = transientCtx.locals
+interpreter.runImmediate({
+    { cmd = "SET_LOCAL", name = "fresh", value = "locals.roll == nil and 1 or 0" },
+}, transientCtx)
+check(transientCtx.locals ~= firstInvocationLocals
+        and transientCtx.locals.roll == nil and transientCtx.locals.fresh == 1,
+    "independent immediate executions receive fresh process-local state")
+
+local sceneState = {}
+local sceneCtx = {
+    session = restored, loader = loader, party = restored.party, events = {},
+    sceneState = sceneState, locals = {}, v = sceneState,
+}
+interpreter.runImmediate({
+    { cmd = "SET_SCENE_STATE", assignments = {
+        { name = "cursor", value = 1 },
+        { name = "nextCursor", value = "sceneState.cursor + 1" },
+    } },
+    { cmd = "SET_LOCAL", name = "guard", value = 1 },
+}, sceneCtx)
+check(sceneState.cursor == 1 and sceneState.nextCursor == 2,
+    "SET_SCENE_STATE mutates the Scene owner and supports in-order reads")
+check(sceneCtx.locals.guard == 1 and sceneState.guard == nil,
+    "Scene invocation locals do not leak into Scene state")
+local noSceneOk = pcall(interpreter.runImmediate,
+    { { cmd = "SET_SCENE_STATE", name = "bad", value = 1 } },
+    { session = restored, loader = loader, events = {} })
+check(not noSceneOk, "SET_SCENE_STATE fails loud without a Scene owner")
+
+local ownerCtx = formula.makeContext({
+    locals = { scratch = 4 },
+    sceneState = { cursor = 2 },
+}, restored)
+local ownerValue, ownerErr = formula.eval("locals.scratch + sceneState.cursor", ownerCtx)
+check(ownerErr == nil and ownerValue == 6,
+    "Formula exposes locals and sceneState as distinct owner nouns")
+
 print(("=== Game Variable Tests: %d passed, %d failed ==="):format(passed, failed))
 if failed > 0 then require("tests.fail_fast")("game variable tests failed", failed) end

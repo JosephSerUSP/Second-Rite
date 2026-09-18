@@ -401,7 +401,10 @@ local function formulaContext(ctx)
         a = ctx.a, b = ctx.b, target = ctx.target, enemy = ctx.enemy, ally = ctx.ally,
         party = ctx.party, enemies = ctx.enemies,
         battle = ctx.battle and { round = ctx.battle.round } or nil,
+        locals = ctx.locals,
+        sceneState = ctx.sceneState,
         v = ctx.v,
+        event = ctx.event,
         self = event_self_state.formulaView(ctx.session, ctx.event),
         -- Crafting scene context: ingredients and crafter stats
         ingredient1 = ctx.ingredient1,
@@ -466,20 +469,36 @@ handlers.FALLBACK = function(cmd, ctx)
 end
 
 
-handlers.SET_VAR = function(cmd, ctx)
-    -- E7 "Control Variables": optional multi-assignment form. Rows are
-    -- evaluated IN ORDER, so later values can read earlier ones via v.
-    -- When assignments is present the legacy name/value pair is ignored;
-    -- the single {name, value} shape keeps working unchanged forever.
+local function assignFormulaRows(cmd, target, ctx)
     if type(cmd.assignments) == "table" and #cmd.assignments > 0 then
         for _, a in ipairs(cmd.assignments) do
             if type(a) == "table" and a.name then
-                ctx.v[a.name] = evalFormula(a.value, ctx)
+                target[a.name] = evalFormula(a.value, ctx)
             end
         end
         return
     end
-    ctx.v[cmd.name] = evalFormula(cmd.value, ctx)
+    target[cmd.name] = evalFormula(cmd.value, ctx)
+end
+
+handlers.SET_LOCAL = function(cmd, ctx)
+    ctx.locals = ctx.locals or {}
+    assignFormulaRows(cmd, ctx.locals, ctx)
+end
+
+handlers.SET_SCENE_STATE = function(cmd, ctx)
+    if type(ctx.sceneState) ~= "table" then
+        error("SET_SCENE_STATE requires a Scene-owned state context", 0)
+    end
+    assignFormulaRows(cmd, ctx.sceneState, ctx)
+end
+
+handlers.SET_VAR = function(cmd, ctx)
+    -- Legacy #410 migration surface. Scene hooks bind v to Scene state; other
+    -- immediate hosts retain their existing host/caller-owned compatibility
+    -- table. New authored content must use SET_SCENE_STATE or
+    -- SET_LOCAL so lifetime is explicit in data.
+    assignFormulaRows(cmd, ctx.v, ctx)
 end
 
 handlers.MUTATE_TILE = function(cmd, ctx)
@@ -2985,6 +3004,8 @@ handlers.SCRIPT = function(cmd, ctx)
         battle = ctx.battle and { round = ctx.battle.round } or nil,
         actor = ctx.a,
         target = ctx.target or ctx.b,
+        locals = ctx.locals,
+        sceneState = ctx.sceneState,
         v = ctx.v,
         -- Scene hooks expose the scene's config as read-only-by-convention
         -- data (D13); nil outside scene contexts.
@@ -3048,6 +3069,12 @@ local function runImmediateCore(commands, ctx)
     assert(ctx.session, "runImmediate requires ctx.session")
     ctx.loader = ctx.loader or ctx.session.loader
     ctx.events = ctx.events or {}
+    -- Explicit process locals are owned by one immediate invocation. The
+    -- public runImmediate boundary refreshes them between independent runs;
+    -- runImmediateCore only supplies a table for internal callers. Legacy v
+    -- remains a separate compatibility namespace so its historical lifetime is
+    -- not silently redefined by the new owner-explicit substrate.
+    ctx.locals = ctx.locals or {}
     ctx.v = ctx.v or {}
     if ctx.battle then
         ctx.party = ctx.party or ctx.battle.allies
@@ -3099,8 +3126,18 @@ end
 
 function interpreter.runImmediate(commands, ctx)
     ctx = ctx or {}
+    -- A reused host context must not accidentally extend process-local lifetime
+    -- across two independent immediate executions. Keep the completed table on
+    -- ctx for diagnostics after a run, but recognize and replace that exact
+    -- table at the next invocation. Hosts may still provide a fresh locals
+    -- table explicitly for the invocation they are starting (SceneHost does).
+    if ctx._completedImmediateLocals ~= nil
+        and ctx.locals == ctx._completedImmediateLocals then
+        ctx.locals = nil
+    end
     local initialEventCount = #(ctx.events or {})
     local events = runImmediateCore(commands, ctx)
+    ctx._completedImmediateLocals = ctx.locals
     local firstNew = initialEventCount + 1
     commitReaps(events, ctx.session, firstNew)
     publishUnstamped(events, ctx.session, firstNew)

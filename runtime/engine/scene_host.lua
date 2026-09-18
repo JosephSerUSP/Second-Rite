@@ -197,8 +197,12 @@ function scene_host.runHook(hookName, ctx)
         return false -- Hook is absent, fallback to legacy Lua block
     end
 
-    -- We have a hook, execute it in immediate mode
-    -- Ensure ctx.v is scoped to the scene instance
+    -- We have a hook, execute it in immediate mode. The Scene instance
+    -- owns sceneState across hooks; locals are fresh for this invocation.
+    -- v remains a temporary alias to Scene state only for the #410 corpus
+    -- migration and is removed with SET_VAR in the follow-up slice.
+    ctx.sceneState = state.v
+    ctx.locals = {}
     ctx.v = state.v
 
     -- Expose the scene definition generically so SCRIPT commands can read

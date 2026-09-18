@@ -36,11 +36,24 @@ test('shared command modal treats stateValue as a Formula-context expression', (
   assert.match(eventsSource, /deterministic persistent-state expression/);
 });
 
-test('Formula help advertises persistent Variable reads separately from flow-local v', () => {
+test('Formula help distinguishes persistent, process-local, Scene-owned, and legacy state', () => {
   const variableHelp = engine.formulaHelp.find(entry => entry.token === 'variables.name');
-  const localHelp = engine.formulaHelp.find(entry => entry.token === 'v');
+  const processLocalHelp = engine.formulaHelp.find(entry => entry.token === 'locals');
+  const sceneStateHelp = engine.formulaHelp.find(entry => entry.token === 'sceneState');
+  const legacyHelp = engine.formulaHelp.find(entry => entry.token === 'v');
+
   assert.ok(variableHelp);
   assert.match(variableHelp.description, /Persistent playthrough Game Variable/);
-  assert.ok(localHelp);
-  assert.match(localHelp.description, /Flow-local variables/);
+
+  assert.ok(processLocalHelp);
+  assert.match(processLocalHelp.description, /Process\/invocation-local scratch state/);
+  assert.match(processLocalHelp.description, /not retained between independent immediate executions/);
+
+  assert.ok(sceneStateHelp);
+  assert.match(sceneStateHelp.description, /current pushed Scene instance/);
+  assert.match(sceneStateHelp.description, /not saved/);
+
+  assert.ok(legacyHelp);
+  assert.match(legacyHelp.description, /Legacy #410 compatibility namespace/);
+  assert.match(legacyHelp.description, /locals or sceneState/);
 });

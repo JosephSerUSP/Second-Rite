@@ -165,8 +165,16 @@
       "description": "The system.json combat table (e.g. combat.victoryExp)."
     },
     {
+      "token": "locals",
+      "description": "Process/invocation-local scratch state authored with SET_LOCAL, e.g. locals.roll. Never persistent and not retained between independent immediate executions."
+    },
+    {
+      "token": "sceneState",
+      "description": "Transient state owned by the current pushed Scene instance and authored with SET_SCENE_STATE, e.g. sceneState.cursor. Survives across that Scene's hooks but is not saved."
+    },
+    {
       "token": "v",
-      "description": "Flow-local variables set via SET_VAR."
+      "description": "Legacy #410 compatibility namespace for SET_VAR. New content must use locals or sceneState so lifetime is explicit."
     },
     {
       "token": "self.switches.<name>",
@@ -266,8 +274,16 @@
       "description": "The target battler handle, when one exists."
     },
     {
+      "token": "ctx.locals",
+      "description": "Current invocation/process-local scratch table; same owner exposed to formulas as locals."
+    },
+    {
+      "token": "ctx.sceneState",
+      "description": "Current pushed Scene's transient state table when SCRIPT runs in a Scene; same owner exposed to formulas as sceneState."
+    },
+    {
       "token": "ctx.v",
-      "description": "Flow-local variables shared with SET_VAR / formulas."
+      "description": "Legacy #410 compatibility table. New SCRIPT code should use ctx.locals or ctx.sceneState explicitly."
     },
     {
       "token": "ctx.rawSession",
@@ -576,6 +592,58 @@
       ],
       "interactive": false,
       "description": "Documentation only; the interpreter skips it entirely."
+    },
+    {
+      "id": "SET_LOCAL",
+      "category": "State",
+      "label": "Set Local",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "value",
+          "type": "formula"
+        },
+        {
+          "key": "assignments",
+          "type": "assignments"
+        }
+      ],
+      "contexts": [
+        "battle_phase",
+        "map",
+        "common",
+        "scene",
+        "unit_reaction"
+      ],
+      "interactive": false,
+      "description": "Sets invocation/process-local scratch state. Read it as locals.<name>. It lasts only for the current immediate execution and is never saved."
+    },
+    {
+      "id": "SET_SCENE_STATE",
+      "category": "State",
+      "label": "Set Scene State",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "value",
+          "type": "formula"
+        },
+        {
+          "key": "assignments",
+          "type": "assignments"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Sets transient state owned by the current pushed Scene instance. Read it as sceneState.<name>. It survives across that Scene's hooks but is not saved with the playthrough."
     },
     {
       "id": "SET_VAR",

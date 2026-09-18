@@ -146,7 +146,7 @@
       ]
     },
     {
-      "id": "board",
+      "id": "board_bg",
       "rect": {
         "x": 6,
         "y": 5,
@@ -154,10 +154,357 @@
         "h": 15
       },
       "style": "frame",
+      "content": []
+    },
+    {
+      "id": "head",
+      "rect": {
+        "x": "6 + v.hx",
+        "y": "5 + v.hy",
+        "w": "v.lost == true and 0 or 1",
+        "h": 1
+      },
+      "style": "panel",
       "content": [
         {
           "type": "text",
-          "text": "{v.boardText}"
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "target",
+      "rect": {
+        "x": "6 + v.tx",
+        "y": "5 + v.ty",
+        "w": "v.lost == true and 0 or 1",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "*"
+        }
+      ]
+    },
+    {
+      "id": "seg_1",
+      "rect": {
+        "x": "6 + v.segX_1",
+        "y": "5 + v.segY_1",
+        "w": "v.length >= 1 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_2",
+      "rect": {
+        "x": "6 + v.segX_2",
+        "y": "5 + v.segY_2",
+        "w": "v.length >= 2 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_3",
+      "rect": {
+        "x": "6 + v.segX_3",
+        "y": "5 + v.segY_3",
+        "w": "v.length >= 3 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_4",
+      "rect": {
+        "x": "6 + v.segX_4",
+        "y": "5 + v.segY_4",
+        "w": "v.length >= 4 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_5",
+      "rect": {
+        "x": "6 + v.segX_5",
+        "y": "5 + v.segY_5",
+        "w": "v.length >= 5 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_6",
+      "rect": {
+        "x": "6 + v.segX_6",
+        "y": "5 + v.segY_6",
+        "w": "v.length >= 6 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_7",
+      "rect": {
+        "x": "6 + v.segX_7",
+        "y": "5 + v.segY_7",
+        "w": "v.length >= 7 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_8",
+      "rect": {
+        "x": "6 + v.segX_8",
+        "y": "5 + v.segY_8",
+        "w": "v.length >= 8 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_9",
+      "rect": {
+        "x": "6 + v.segX_9",
+        "y": "5 + v.segY_9",
+        "w": "v.length >= 9 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_10",
+      "rect": {
+        "x": "6 + v.segX_10",
+        "y": "5 + v.segY_10",
+        "w": "v.length >= 10 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_11",
+      "rect": {
+        "x": "6 + v.segX_11",
+        "y": "5 + v.segY_11",
+        "w": "v.length >= 11 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_12",
+      "rect": {
+        "x": "6 + v.segX_12",
+        "y": "5 + v.segY_12",
+        "w": "v.length >= 12 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_13",
+      "rect": {
+        "x": "6 + v.segX_13",
+        "y": "5 + v.segY_13",
+        "w": "v.length >= 13 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_14",
+      "rect": {
+        "x": "6 + v.segX_14",
+        "y": "5 + v.segY_14",
+        "w": "v.length >= 14 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_15",
+      "rect": {
+        "x": "6 + v.segX_15",
+        "y": "5 + v.segY_15",
+        "w": "v.length >= 15 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_16",
+      "rect": {
+        "x": "6 + v.segX_16",
+        "y": "5 + v.segY_16",
+        "w": "v.length >= 16 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_17",
+      "rect": {
+        "x": "6 + v.segX_17",
+        "y": "5 + v.segY_17",
+        "w": "v.length >= 17 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_18",
+      "rect": {
+        "x": "6 + v.segX_18",
+        "y": "5 + v.segY_18",
+        "w": "v.length >= 18 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_19",
+      "rect": {
+        "x": "6 + v.segX_19",
+        "y": "5 + v.segY_19",
+        "w": "v.length >= 19 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    },
+    {
+      "id": "seg_20",
+      "rect": {
+        "x": "6 + v.segX_20",
+        "y": "5 + v.segY_20",
+        "w": "v.length >= 20 and (v.lost == true and 0 or 1) or 0",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
         }
       ]
     },
@@ -187,34 +534,453 @@
       },
       {
         "cmd": "SET_VAR",
-        "name": "timer",
-        "value": 0.5
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "assignments": [
+          {
+            "name": "hx",
+            "value": 5
+          },
+          {
+            "name": "hy",
+            "value": 5
+          },
+          {
+            "name": "dirX",
+            "value": 0
+          },
+          {
+            "name": "dirY",
+            "value": -1
+          },
+          {
+            "name": "tx",
+            "value": 2
+          },
+          {
+            "name": "ty",
+            "value": 2
+          },
+          {
+            "name": "length",
+            "value": 2
+          },
+          {
+            "name": "lost",
+            "value": "false"
+          },
+          {
+            "name": "timer",
+            "value": 0.5
+          },
+          {
+            "name": "stepTime",
+            "value": 0.5
+          },
+          {
+            "name": "segX_1",
+            "value": 5
+          },
+          {
+            "name": "segY_1",
+            "value": 6
+          },
+          {
+            "name": "segX_2",
+            "value": 5
+          },
+          {
+            "name": "segY_2",
+            "value": 7
+          },
+          {
+            "name": "segX_3",
+            "value": 5
+          },
+          {
+            "name": "segY_3",
+            "value": 8
+          },
+          {
+            "name": "segX_4",
+            "value": 5
+          },
+          {
+            "name": "segY_4",
+            "value": 9
+          },
+          {
+            "name": "segX_5",
+            "value": 5
+          },
+          {
+            "name": "segY_5",
+            "value": 10
+          },
+          {
+            "name": "segX_6",
+            "value": 5
+          },
+          {
+            "name": "segY_6",
+            "value": 11
+          },
+          {
+            "name": "segX_7",
+            "value": 5
+          },
+          {
+            "name": "segY_7",
+            "value": 12
+          },
+          {
+            "name": "segX_8",
+            "value": 5
+          },
+          {
+            "name": "segY_8",
+            "value": 13
+          },
+          {
+            "name": "segX_9",
+            "value": 5
+          },
+          {
+            "name": "segY_9",
+            "value": 14
+          },
+          {
+            "name": "segX_10",
+            "value": 5
+          },
+          {
+            "name": "segY_10",
+            "value": 15
+          },
+          {
+            "name": "segX_11",
+            "value": 5
+          },
+          {
+            "name": "segY_11",
+            "value": 16
+          },
+          {
+            "name": "segX_12",
+            "value": 5
+          },
+          {
+            "name": "segY_12",
+            "value": 17
+          },
+          {
+            "name": "segX_13",
+            "value": 5
+          },
+          {
+            "name": "segY_13",
+            "value": 18
+          },
+          {
+            "name": "segX_14",
+            "value": 5
+          },
+          {
+            "name": "segY_14",
+            "value": 19
+          },
+          {
+            "name": "segX_15",
+            "value": 5
+          },
+          {
+            "name": "segY_15",
+            "value": 20
+          },
+          {
+            "name": "segX_16",
+            "value": 5
+          },
+          {
+            "name": "segY_16",
+            "value": 21
+          },
+          {
+            "name": "segX_17",
+            "value": 5
+          },
+          {
+            "name": "segY_17",
+            "value": 22
+          },
+          {
+            "name": "segX_18",
+            "value": 5
+          },
+          {
+            "name": "segY_18",
+            "value": 23
+          },
+          {
+            "name": "segX_19",
+            "value": 5
+          },
+          {
+            "name": "segY_19",
+            "value": 24
+          },
+          {
+            "name": "segX_20",
+            "value": 5
+          },
+          {
+            "name": "segY_20",
+            "value": 25
+          }
+        ]
       }
     ],
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v.timer > 0",
+        "condition": "v.lost == false",
         "then": [
           {
-            "cmd": "SET_VAR",
-            "name": "timer",
-            "value": "v.timer - v.time.dt"
-          }
-        ],
-        "else": [
-          {
-            "cmd": "SET_VAR",
-            "name": "timer",
-            "value": "v.stepTime"
-          },
-          {
-            "cmd": "SCRIPT",
-            "ref": "update"
+            "cmd": "IF",
+            "condition": "v.timer > 0",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "timer",
+                "value": "v.timer - v.time.dt"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "timer",
+                "value": "v.stepTime"
+              },
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "segX_20",
+                    "value": "v.segX_19"
+                  },
+                  {
+                    "name": "segY_20",
+                    "value": "v.segY_19"
+                  },
+                  {
+                    "name": "segX_19",
+                    "value": "v.segX_18"
+                  },
+                  {
+                    "name": "segY_19",
+                    "value": "v.segY_18"
+                  },
+                  {
+                    "name": "segX_18",
+                    "value": "v.segX_17"
+                  },
+                  {
+                    "name": "segY_18",
+                    "value": "v.segY_17"
+                  },
+                  {
+                    "name": "segX_17",
+                    "value": "v.segX_16"
+                  },
+                  {
+                    "name": "segY_17",
+                    "value": "v.segY_16"
+                  },
+                  {
+                    "name": "segX_16",
+                    "value": "v.segX_15"
+                  },
+                  {
+                    "name": "segY_16",
+                    "value": "v.segY_15"
+                  },
+                  {
+                    "name": "segX_15",
+                    "value": "v.segX_14"
+                  },
+                  {
+                    "name": "segY_15",
+                    "value": "v.segY_14"
+                  },
+                  {
+                    "name": "segX_14",
+                    "value": "v.segX_13"
+                  },
+                  {
+                    "name": "segY_14",
+                    "value": "v.segY_13"
+                  },
+                  {
+                    "name": "segX_13",
+                    "value": "v.segX_12"
+                  },
+                  {
+                    "name": "segY_13",
+                    "value": "v.segY_12"
+                  },
+                  {
+                    "name": "segX_12",
+                    "value": "v.segX_11"
+                  },
+                  {
+                    "name": "segY_12",
+                    "value": "v.segY_11"
+                  },
+                  {
+                    "name": "segX_11",
+                    "value": "v.segX_10"
+                  },
+                  {
+                    "name": "segY_11",
+                    "value": "v.segY_10"
+                  },
+                  {
+                    "name": "segX_10",
+                    "value": "v.segX_9"
+                  },
+                  {
+                    "name": "segY_10",
+                    "value": "v.segY_9"
+                  },
+                  {
+                    "name": "segX_9",
+                    "value": "v.segX_8"
+                  },
+                  {
+                    "name": "segY_9",
+                    "value": "v.segY_8"
+                  },
+                  {
+                    "name": "segX_8",
+                    "value": "v.segX_7"
+                  },
+                  {
+                    "name": "segY_8",
+                    "value": "v.segY_7"
+                  },
+                  {
+                    "name": "segX_7",
+                    "value": "v.segX_6"
+                  },
+                  {
+                    "name": "segY_7",
+                    "value": "v.segY_6"
+                  },
+                  {
+                    "name": "segX_6",
+                    "value": "v.segX_5"
+                  },
+                  {
+                    "name": "segY_6",
+                    "value": "v.segY_5"
+                  },
+                  {
+                    "name": "segX_5",
+                    "value": "v.segX_4"
+                  },
+                  {
+                    "name": "segY_5",
+                    "value": "v.segY_4"
+                  },
+                  {
+                    "name": "segX_4",
+                    "value": "v.segX_3"
+                  },
+                  {
+                    "name": "segY_4",
+                    "value": "v.segY_3"
+                  },
+                  {
+                    "name": "segX_3",
+                    "value": "v.segX_2"
+                  },
+                  {
+                    "name": "segY_3",
+                    "value": "v.segY_2"
+                  },
+                  {
+                    "name": "segX_2",
+                    "value": "v.segX_1"
+                  },
+                  {
+                    "name": "segY_2",
+                    "value": "v.segY_1"
+                  },
+                  {
+                    "name": "segX_1",
+                    "value": "v.hx"
+                  },
+                  {
+                    "name": "segY_1",
+                    "value": "v.hy"
+                  },
+                  {
+                    "name": "hx",
+                    "value": "v.hx + v.dirX"
+                  },
+                  {
+                    "name": "hy",
+                    "value": "v.hy + v.dirY"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.hx < 0 or v.hx >= 12 or v.hy < 0 or v.hy >= 12",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "lost",
+                    "value": "true"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "(v.length >= 1 and v.hx == v.segX_1 and v.hy == v.segY_1) or (v.length >= 2 and v.hx == v.segX_2 and v.hy == v.segY_2) or (v.length >= 3 and v.hx == v.segX_3 and v.hy == v.segY_3) or (v.length >= 4 and v.hx == v.segX_4 and v.hy == v.segY_4) or (v.length >= 5 and v.hx == v.segX_5 and v.hy == v.segY_5) or (v.length >= 6 and v.hx == v.segX_6 and v.hy == v.segY_6) or (v.length >= 7 and v.hx == v.segX_7 and v.hy == v.segY_7) or (v.length >= 8 and v.hx == v.segX_8 and v.hy == v.segY_8) or (v.length >= 9 and v.hx == v.segX_9 and v.hy == v.segY_9) or (v.length >= 10 and v.hx == v.segX_10 and v.hy == v.segY_10) or (v.length >= 11 and v.hx == v.segX_11 and v.hy == v.segY_11) or (v.length >= 12 and v.hx == v.segX_12 and v.hy == v.segY_12) or (v.length >= 13 and v.hx == v.segX_13 and v.hy == v.segY_13) or (v.length >= 14 and v.hx == v.segX_14 and v.hy == v.segY_14) or (v.length >= 15 and v.hx == v.segX_15 and v.hy == v.segY_15) or (v.length >= 16 and v.hx == v.segX_16 and v.hy == v.segY_16) or (v.length >= 17 and v.hx == v.segX_17 and v.hy == v.segY_17) or (v.length >= 18 and v.hx == v.segX_18 and v.hy == v.segY_18) or (v.length >= 19 and v.hx == v.segX_19 and v.hy == v.segY_19) or (v.length >= 20 and v.hx == v.segX_20 and v.hy == v.segY_20)",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "lost",
+                    "value": "true"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "v.hx == v.tx and v.hy == v.ty",
+                "then": [
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "length",
+                    "value": "clamp(v.length + 1, 1, 20)"
+                  },
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "tx",
+                    "value": "(v.hx + 5) % 12"
+                  },
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "ty",
+                    "value": "(v.hy + 7) % 12"
+                  },
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "stepTime",
+                    "value": "clamp(v.stepTime * 0.95, 0.1, 1.0)"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -229,11 +995,11 @@
             "assignments": [
               {
                 "name": "dirX",
-                "value": "0"
+                "value": 0
               },
               {
                 "name": "dirY",
-                "value": "-1"
+                "value": -1
               }
             ]
           }
@@ -250,11 +1016,11 @@
             "assignments": [
               {
                 "name": "dirX",
-                "value": "0"
+                "value": 0
               },
               {
                 "name": "dirY",
-                "value": "1"
+                "value": 1
               }
             ]
           }
@@ -271,11 +1037,11 @@
             "assignments": [
               {
                 "name": "dirX",
-                "value": "-1"
+                "value": -1
               },
               {
                 "name": "dirY",
-                "value": "0"
+                "value": 0
               }
             ]
           }
@@ -292,11 +1058,11 @@
             "assignments": [
               {
                 "name": "dirX",
-                "value": "1"
+                "value": 1
               },
               {
                 "name": "dirY",
-                "value": "0"
+                "value": 0
               }
             ]
           }
@@ -306,12 +1072,208 @@
     "on_select": [
       {
         "cmd": "SET_VAR",
-        "name": "timer",
-        "value": 0.5
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "assignments": [
+          {
+            "name": "hx",
+            "value": 5
+          },
+          {
+            "name": "hy",
+            "value": 5
+          },
+          {
+            "name": "dirX",
+            "value": 0
+          },
+          {
+            "name": "dirY",
+            "value": -1
+          },
+          {
+            "name": "tx",
+            "value": 2
+          },
+          {
+            "name": "ty",
+            "value": 2
+          },
+          {
+            "name": "length",
+            "value": 2
+          },
+          {
+            "name": "lost",
+            "value": "false"
+          },
+          {
+            "name": "timer",
+            "value": 0.5
+          },
+          {
+            "name": "stepTime",
+            "value": 0.5
+          },
+          {
+            "name": "segX_1",
+            "value": 5
+          },
+          {
+            "name": "segY_1",
+            "value": 6
+          },
+          {
+            "name": "segX_2",
+            "value": 5
+          },
+          {
+            "name": "segY_2",
+            "value": 7
+          },
+          {
+            "name": "segX_3",
+            "value": 5
+          },
+          {
+            "name": "segY_3",
+            "value": 8
+          },
+          {
+            "name": "segX_4",
+            "value": 5
+          },
+          {
+            "name": "segY_4",
+            "value": 9
+          },
+          {
+            "name": "segX_5",
+            "value": 5
+          },
+          {
+            "name": "segY_5",
+            "value": 10
+          },
+          {
+            "name": "segX_6",
+            "value": 5
+          },
+          {
+            "name": "segY_6",
+            "value": 11
+          },
+          {
+            "name": "segX_7",
+            "value": 5
+          },
+          {
+            "name": "segY_7",
+            "value": 12
+          },
+          {
+            "name": "segX_8",
+            "value": 5
+          },
+          {
+            "name": "segY_8",
+            "value": 13
+          },
+          {
+            "name": "segX_9",
+            "value": 5
+          },
+          {
+            "name": "segY_9",
+            "value": 14
+          },
+          {
+            "name": "segX_10",
+            "value": 5
+          },
+          {
+            "name": "segY_10",
+            "value": 15
+          },
+          {
+            "name": "segX_11",
+            "value": 5
+          },
+          {
+            "name": "segY_11",
+            "value": 16
+          },
+          {
+            "name": "segX_12",
+            "value": 5
+          },
+          {
+            "name": "segY_12",
+            "value": 17
+          },
+          {
+            "name": "segX_13",
+            "value": 5
+          },
+          {
+            "name": "segY_13",
+            "value": 18
+          },
+          {
+            "name": "segX_14",
+            "value": 5
+          },
+          {
+            "name": "segY_14",
+            "value": 19
+          },
+          {
+            "name": "segX_15",
+            "value": 5
+          },
+          {
+            "name": "segY_15",
+            "value": 20
+          },
+          {
+            "name": "segX_16",
+            "value": 5
+          },
+          {
+            "name": "segY_16",
+            "value": 21
+          },
+          {
+            "name": "segX_17",
+            "value": 5
+          },
+          {
+            "name": "segY_17",
+            "value": 22
+          },
+          {
+            "name": "segX_18",
+            "value": 5
+          },
+          {
+            "name": "segY_18",
+            "value": 23
+          },
+          {
+            "name": "segX_19",
+            "value": 5
+          },
+          {
+            "name": "segY_19",
+            "value": 24
+          },
+          {
+            "name": "segX_20",
+            "value": 5
+          },
+          {
+            "name": "segY_20",
+            "value": 25
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -320,10 +1282,6 @@
         "kind": "pop"
       }
     ]
-  },
-  "scripts": {
-    "init": "\nlocal v = ctx.v\nv.gridWidth = 12\nv.gridHeight = 12\nv.snake = {{x=5, y=5}, {x=5, y=6}, {x=5, y=7}}\nv.dirX = 0\nv.dirY = -1\nv.targetX = 2\nv.targetY = 2\nv.stepTime = 0.5\nv.lost = false\nv.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if v.lost then text = \"GAME OVER\\n\" end\n    for y = 0, v.gridHeight - 1 do\n        for x = 0, v.gridWidth - 1 do\n            local char = \".\"\n            if x == v.targetX and y == v.targetY then\n                char = \"*\"\n            else\n                for _, part in ipairs(v.snake) do\n                    if part.x == x and part.y == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    v.boardText = text\nend\ndraw()\n",
-    "update": "\nlocal v = ctx.v\nif v.lost then return end\nlocal head = v.snake[1]\nlocal nx = head.x + v.dirX\nlocal ny = head.y + v.dirY\n\nif nx < 0 or nx >= v.gridWidth or ny < 0 or ny >= v.gridHeight then\n    v.lost = true\nend\n\nfor _, part in ipairs(v.snake) do\n    if part.x == nx and part.y == ny then\n        v.lost = true\n    end\nend\n\nif not v.lost then\n    table.insert(v.snake, 1, {x=nx, y=ny})\n    if nx == v.targetX and ny == v.targetY then\n        v.targetX = (nx + 5) % v.gridWidth\n        v.targetY = (ny + 7) % v.gridHeight\n        v.stepTime = math.max(0.1, v.stepTime * 0.95)\n    else\n        table.remove(v.snake)\n    end\nend\n\nlocal text = \"\"\nif v.lost then text = \"GAME OVER\\n\" end\nfor y = 0, v.gridHeight - 1 do\n    for x = 0, v.gridWidth - 1 do\n        local char = \".\"\n        if x == v.targetX and y == v.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(v.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n"
   },
   "goldenScript": [
     {

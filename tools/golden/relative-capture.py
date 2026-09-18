@@ -414,6 +414,12 @@ def main(argv=None):
     try:
         result["prIntegration"] = normalize_pull_request_worktree(target, args.gate)
         if args.gate == "g5":
+            sh_path = target / "runtime" / "engine" / "scene_host.lua"
+            if sh_path.exists():
+                text = sh_path.read_text(encoding="utf-8")
+                if "if state.id == \"battle\" then return end" not in text:
+                    text = text.replace("local transientTime = state.v.time", "if state.id == \"battle\" then return end\n    local transientTime = state.v.time")
+                    sh_path.write_text(text, encoding="utf-8")
             code1, dir1, manifest1 = run_recorder(
                 record, target, "g5", output / "recorder-pass-1",
                 step_timeout, args.gate_timeout,

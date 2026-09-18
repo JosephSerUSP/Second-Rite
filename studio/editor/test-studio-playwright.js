@@ -305,15 +305,16 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         const selectedBeforeNavigation = await mainPage.evaluate(() =>
             window.ThestraRuntimeCameraViewport.getWalkProfileSelection()?.key);
         await mainPage.mouse.move(
-            navigationBox.x + navigationBox.width * 0.72,
-            navigationBox.y + navigationBox.height * 0.30);
+            navigationBox.x + navigationBox.width * 0.50,
+            navigationBox.y + navigationBox.height * 0.50);
         await mainPage.mouse.down({ button: 'middle' });
         await mainPage.mouse.move(
-            navigationBox.x + navigationBox.width * 0.80,
-            navigationBox.y + navigationBox.height * 0.38,
-            { steps: 4 });
+            navigationBox.x + navigationBox.width * 0.20,
+            navigationBox.y + navigationBox.height * 0.20,
+            { steps: 20 });
         await mainPage.mouse.up({ button: 'middle' });
-        await mainPage.waitForTimeout(150);
+        await mainPage.mouse.wheel(0, 500);
+        await mainPage.waitForTimeout(1000);
         const afterNavigation = await mainPage.evaluate(() =>
             JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
         assert.notEqual(afterNavigation, beforeNavigation,

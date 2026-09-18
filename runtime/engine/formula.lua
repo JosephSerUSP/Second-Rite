@@ -283,8 +283,9 @@ end
 
 -- Assemble an evaluation context. opts fields (all optional): a, b, target,
 -- enemy, ally (battlers), party, enemies (battler lists), session, battle
--- ({ round = n }), v (flow-locals table). session is also used to resolve
--- params through traits and to pull the combat config table.
+-- ({ round = n }), locals (process/invocation scratch), sceneState
+-- (one pushed Scene instance), and v (legacy compatibility only). session is
+-- also used to resolve params through traits and to pull the combat config.
 function formula.makeContext(opts, session)
     opts = opts or {}
     session = session or opts.session
@@ -296,7 +297,11 @@ function formula.makeContext(opts, session)
     if partyList then ctx.party = formula.groupView(partyList, session) end
     if opts.enemies then ctx.enemies = formula.groupView(opts.enemies, session) end
     if session then
-        ctx.session = formula.sessionView(session, opts.v)
+        -- During the #410 migration old Scenes still author through v. New
+        -- Scenes read sceneState. Both point at the same Scene owner in
+        -- scene_host, so session-derived helpers (itemCount/tab filtering)
+        -- consult the explicit owner first and the compatibility table second.
+        ctx.session = formula.sessionView(session, opts.sceneState or opts.v)
         -- Persistent playthrough Variables are a dedicated read-only Formula
         -- noun. This is a deep copy, so a Formula can never obtain the live
         -- authored store even if the sandbox grows richer expression helpers.
@@ -305,21 +310,22 @@ function formula.makeContext(opts, session)
         ctx.combat = sys and sys.combat or nil
     end
     ctx.battle = opts.battle
+    ctx.locals = opts.locals
+    ctx.sceneState = opts.sceneState
     ctx.v = opts.v
-    -- Domain hosts place a sanitized immutable-by-convention fact view in
-    -- flow-local `v.event`; Formula promotes it to the dedicated `event.*`
-    -- noun. This keeps event facts out of persistent Project Variables and
-    -- prevents Formula from receiving live mutable domain objects.
-    ctx.event = opts.event or (opts.v and opts.v.event) or nil
+    -- Domain hosts publish sanitized facts as invocation locals. Keep the v
+    -- fallback only until the legacy authored corpus is migrated.
+    ctx.event = opts.event or (opts.locals and opts.locals.event)
+        or (opts.v and opts.v.event) or nil
     -- Persistent placed-Event gameplay state is exposed only through the
     -- sanitized SELF view supplied by the Event host; Formula never receives
     -- the live session storage bucket.
     ctx.self = opts.self or nil
-    -- #386 fixed Scene timing is context, not authored state. scene_host keeps
-    -- a transient read-only bridge at v.time while an on_frame logical tick is
-    -- executing so existing interpreter callers need no privileged host API;
-    -- Formula exposes that bridge under the dedicated `time.*` noun.
-    ctx.time = opts.time or (opts.v and opts.v.time) or nil
+    -- #386 fixed Scene timing is context, not authored state. scene_host still
+    -- bridges it through the Scene table during migration; the explicit noun
+    -- wins whenever supplied directly.
+    ctx.time = opts.time or (opts.sceneState and opts.sceneState.time)
+        or (opts.v and opts.v.time) or nil
     if opts.ingredient1 then ctx.ingredient1 = formula.itemView(opts.ingredient1) end
     if opts.ingredient2 then ctx.ingredient2 = formula.itemView(opts.ingredient2) end
     return ctx

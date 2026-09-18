@@ -750,7 +750,7 @@
         // format, same add/edit/delete affordances).
         function describeCommand(cmd) {
             const id = cmdId(cmd);
-            if (id === 'SET_VAR') {
+            if (['SET_VAR', 'SET_LOCAL', 'SET_SCENE_STATE'].includes(id)) {
                 // E7: single form reads as before; multi form summarizes its
                 // rows (truncated) under the Control Variables label.
                 if (Array.isArray(cmd.assignments) && cmd.assignments.length > 0) {
@@ -1827,8 +1827,8 @@
                     const valInp = document.createElement('input');
                     valInp.className = 'win98-input';
                     valInp.style.flex = '1';
-                    valInp.placeholder = 'formula, e.g. v.a * 2';
-                    valInp.title = 'Rows evaluate in order — later formulas can read earlier rows via v.';
+                    valInp.placeholder = 'formula, e.g. 1 + 2';
+                    valInp.title = 'Rows evaluate in order — later formulas can read earlier rows through this command state namespace.';
                     valInp.value = value != null ? value : '';
                     const delBtn = document.createElement('button');
                     delBtn.className = 'win-btn-small outset-bevel';

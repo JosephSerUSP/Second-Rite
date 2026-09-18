@@ -1743,9 +1743,14 @@ validator.run = function(loader)
         local function mockTraits()
             return setmetatable({}, { __index = function() return 0.1 end })
         end
-        local v = {}
+        local v, locals, sceneState = {}, {}, {}
         for k, val in pairs(HOST_SEEDED_VARS) do v[k] = val end
-        for k, val in pairs(seedVars or {}) do v[k] = val end
+        local legacySeeds = seedVars and (seedVars.v or seedVars) or {}
+        local localSeeds = seedVars and seedVars.locals or {}
+        local sceneSeeds = seedVars and seedVars.sceneState or {}
+        for k, val in pairs(legacySeeds) do v[k] = val end
+        for k, val in pairs(localSeeds) do locals[k] = val end
+        for k, val in pairs(sceneSeeds) do sceneState[k] = val end
         return {
                         enemy = { level = 1, hp = 1, maxHp = 1, atk = 1, def = 1, mat = 1, mdf = 1, mpd = 1, trait = mockTraits() },
                         ally = { level = 1, hp = 1, maxHp = 1, atk = 1, def = 1, mat = 1, mdf = 1, mpd = 1, trait = mockTraits() },
@@ -1763,6 +1768,8 @@ validator.run = function(loader)
                         variables = setmetatable({}, { __index = function() return 1 end }),
                         combat = { minEnemies = 1, maxEnemies = 3, victoryGoldMin = 1, victoryGoldMax = 5, victoryGoldBase = 5, victoryGoldPerEnemy = 5, victoryExp = 10, victoryExpBase = 10, victoryExpLevelScale = 0.5, baseFleeChance = 0.5, goldLossOnFleeMin = 1, goldLossOnFleeMax = 5, mpExhaustionDamage = 5 },
                         v = v,
+                        locals = locals,
+                        sceneState = sceneState,
                         -- SELF is owner-scoped at runtime. Formula validation
                         -- only needs a shape-compatible read view so authored
                         -- Page/Event formulas can compile without inventing a
@@ -1808,8 +1815,19 @@ validator.run = function(loader)
     -- another `=` counts. No value comes back, so these seed neutrally.
     local function collectScriptAssignedVars(text, out)
         if type(text) ~= "string" then return out end
+        local function add(name, prefix)
+            table.insert(out, { name = (prefix or "") .. name })
+        end
+        -- Legacy SCRIPT code commonly aliases ctx.v as local v. Until that
+        -- corpus migrates, seed all possible owners for those assignments.
         for name in text:gmatch("v%.([%a_][%w_]*)%s*=[^=]") do
-            table.insert(out, { name = name })
+            add(name); add(name, "locals:"); add(name, "sceneState:")
+        end
+        for name in text:gmatch("ctx%.locals%.([%a_][%w_]*)%s*=[^=]") do
+            add(name, "locals:")
+        end
+        for name in text:gmatch("ctx%.sceneState%.([%a_][%w_]*)%s*=[^=]") do
+            add(name, "sceneState:")
         end
         return out
     end
@@ -1822,15 +1840,31 @@ validator.run = function(loader)
     -- tree's (collected per target scene by collectScenePushedVars).
     local function collectAssignedVars(cmds, out)
         out = out or {}
+        local function add(target, name, value)
+            if type(name) == "string" and name ~= "" then
+                table.insert(out, { name = (target or "") .. name, value = value })
+            end
+        end
         for _, cmd in ipairs(cmds or {}) do
             if type(cmd) == "table" then
-                if cmd.cmd == "SET_VAR" then
-                    if type(cmd.name) == "string" and cmd.name ~= "" then
-                        table.insert(out, { name = cmd.name, value = cmd.value })
-                    end
+                if cmd.cmd == "SET_VAR" or cmd.cmd == "SET_LOCAL" or cmd.cmd == "SET_SCENE_STATE" then
+                    local target = cmd.cmd == "SET_LOCAL" and "locals:"
+                        or (cmd.cmd == "SET_SCENE_STATE" and "sceneState:" or "")
+                    add(target, cmd.name, cmd.value)
                     for _, a in ipairs(cmd.assignments or {}) do
-                        if type(a) == "table" and type(a.name) == "string" and a.name ~= "" then
-                            table.insert(out, { name = a.name, value = a.value })
+                        if type(a) == "table" then add(target, a.name, a.value) end
+                    end
+                    -- Legacy SET_VAR is host-owned. Mirror it into both
+                    -- candidate owners only during migration; explicit command
+                    -- ids never receive this compatibility treatment.
+                    if cmd.cmd == "SET_VAR" then
+                        add("locals:", cmd.name, cmd.value)
+                        add("sceneState:", cmd.name, cmd.value)
+                        for _, a in ipairs(cmd.assignments or {}) do
+                            if type(a) == "table" then
+                                add("locals:", a.name, a.value)
+                                add("sceneState:", a.name, a.value)
+                            end
                         end
                     end
                 elseif cmd.cmd == "SCRIPT" then
@@ -1853,10 +1887,22 @@ validator.run = function(loader)
     -- it stays data-driven like the rest of the seeding.
     local function collectTableShapedVars(node, out, seen)
         out = out or {}
+        local function mark(prefix, name)
+            out[(prefix or "") .. name] = true
+        end
         if type(node) == "string" then
-            for name in node:gmatch("#%s*v%.([%a_][%w_]*)") do out[name] = true end
-            for name in node:gmatch("v%.([%a_][%w_]*)%s*%[") do out[name] = true end
-            for name in node:gmatch("v%.([%a_][%w_]*)%.") do out[name] = true end
+            local function scan(prefix, noun)
+                for name in node:gmatch("#%s*" .. noun .. "%.([%a_][%w_]*)") do mark(prefix, name) end
+                for name in node:gmatch(noun .. "%.([%a_][%w_]*)%s*%[") do mark(prefix, name) end
+                for name in node:gmatch(noun .. "%.([%a_][%w_]*)%.") do mark(prefix, name) end
+            end
+            scan("", "v")
+            scan("locals:", "locals")
+            scan("sceneState:", "sceneState")
+            -- Legacy v may represent either owner during the migration.
+            for name in node:gmatch("v%.([%a_][%w_]*)") do
+                mark("locals:", name); mark("sceneState:", name)
+            end
             return out
         end
         if type(node) ~= "table" then return out end
@@ -1892,40 +1938,52 @@ validator.run = function(loader)
     -- braces.
     local function resolveSeedVars(assigned, tableShaped)
         local formulaEngine = require("engine.formula")
-        local ctx = buildFormulaMockCtx(nil)
-        -- Seeding evaluates speculatively (a pass-1 row may read a local
-        -- pass 2 fills in), so formula.lua's per-expression console warning
-        -- is muted here: those misses are not problems, and printing them
-        -- would bury the real check output. An expression that still fails
-        -- its own check reports through check() with the same error text.
+        local ctx = buildFormulaMockCtx({ v = {}, locals = {}, sceneState = {} })
+        local function ownerFor(encoded)
+            local name = encoded
+            local target = ctx.v
+            if encoded:sub(1, 7) == "locals:" then
+                name = encoded:sub(8); target = ctx.locals
+            elseif encoded:sub(1, 11) == "sceneState:" then
+                name = encoded:sub(12); target = ctx.sceneState
+            end
+            return target, name
+        end
+        -- Seeding evaluates speculatively, so mute formula warnings here; a
+        -- formula that still fails its own check reports through check().
         local realPrint = print
         print = function() end
         for _ = 1, 2 do
             for _, a in ipairs(assigned) do
-                if ctx.v[a.name] == nil then
+                local target, name = ownerFor(a.name)
+                if target[name] == nil then
                     if type(a.value) == "string" then
                         local ok, result, ferr = pcall(formulaEngine.eval, a.value, ctx)
-                        if ok and ferr == nil then ctx.v[a.name] = result end
+                        if ok and ferr == nil then target[name] = result end
                     elseif a.value ~= nil then
-                        ctx.v[a.name] = a.value
+                        target[name] = a.value
                     end
                 end
             end
         end
         print = realPrint
         for _, a in ipairs(assigned) do
-            if ctx.v[a.name] == nil then
-                ctx.v[a.name] = (tableShaped or {})[a.name] and mockTableValue() or 1
+            local target, name = ownerFor(a.name)
+            if target[name] == nil then
+                target[name] = (tableShaped or {})[a.name] and mockTableValue() or 1
             end
         end
-        return ctx.v
+        return { v = ctx.v, locals = ctx.locals, sceneState = ctx.sceneState }
     end
 
     local function seedVarsFor(cmds, pushedVars)
         local assigned = {}
         -- Pushed vars are seeded before the scene's own assignments: they
         -- exist in v before on_enter runs (engine/scene_host.lua push).
-        for _, a in ipairs(pushedVars or {}) do table.insert(assigned, a) end
+        for _, a in ipairs(pushedVars or {}) do
+            table.insert(assigned, a)
+            table.insert(assigned, { name = "sceneState:" .. a.name, value = a.value })
+        end
         collectAssignedVars(cmds, assigned)
         return resolveSeedVars(assigned, collectTableShapedVars(cmds))
     end
@@ -2039,6 +2097,8 @@ validator.run = function(loader)
                     if type(val) == "table" then
                         local formulaEngine = require("engine.formula")
                         local mockCtx = buildFormulaMockCtx(seedVars)
+                        local assignmentTarget = id == "SET_LOCAL" and mockCtx.locals
+                            or (id == "SET_SCENE_STATE" and mockCtx.sceneState or mockCtx.v)
                         for ai, a in ipairs(val) do
                             check(type(a) == "table" and type(a.name) == "string" and a.name ~= "",
                                 ownerDesc .. " command '" .. id .. "' " .. paramDef.key .. "[" .. ai .. "] needs a non-empty string name")
@@ -2048,8 +2108,14 @@ validator.run = function(loader)
                                 if type(a.name) == "string" and a.name ~= "" then
                                     -- Feed the row's result (or a neutral 1)
                                     -- forward for later rows' formulas.
-                                    if ok and result ~= nil then mockCtx.v[a.name] = result
-                                    else mockCtx.v[a.name] = 1 end
+                                    local assignedValue = (ok and result ~= nil) and result or 1
+                                    assignmentTarget[a.name] = assignedValue
+                                    if id == "SET_VAR" then
+                                        -- Compatibility only: old SET_VAR can
+                                        -- still mean either owner until PR 2.
+                                        mockCtx.locals[a.name] = assignedValue
+                                        mockCtx.sceneState[a.name] = assignedValue
+                                    end
                                 end
                             end
                         end

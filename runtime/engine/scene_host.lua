@@ -68,18 +68,16 @@ local function getSceneData(ctx, id)
     return nil
 end
 
--- Scene v is handed to presentation and to the next Scene hook as authored
--- state.  Validate that handoff with the one value-kind authority used by
--- other authored-state owners.  Fixed-clock time is deliberately transient
--- and read-only; it is removed for the check and restored immediately after.
-local function validateSceneState(state)
-    local transientTime = state.v.time
-    state.v.time = nil
-    local ok, err = pcall(state_value.validate, state.v,
-        "Scene '" .. tostring(state.id) .. "' ctx.v")
-    state.v.time = transientTime
-    if not ok then error(err, 0) end
-end
+-- #1160: the per-hook authored-value handoff check (#930, eae3e366) is
+-- deferred, not exempted per scene. Battle stores a live Battle object graph
+-- (metatables + shared identity across v.battle/v.livingMembers/v.eventsQueue)
+-- and reserve stores a live battler view (popupMemberRef.base carries a
+-- metatable) -- both load-bearing on main -- so validating whole ctx.v with
+-- state_value crashes live play and the G5 harness scene after scene, and a
+-- per-scene allowlist just moves the crash. The transition-vars copy below
+-- stays enforced; the handoff returns once #410 migrates live refs out of v.
+-- SPEC 1.1.3 still describes the intended boundary and needs an owner pass
+-- to match this deferral.
 
 -- Initialize the host with an active session and loader
 function scene_host.init(startScene, ctx)
@@ -224,10 +222,9 @@ function scene_host.runHook(hookName, ctx)
 
     local events = interpreter.runImmediate(cmds, ctx)
 
-    -- This is the authored-state handoff boundary: SCRIPT and ordinary
-    -- commands have finished mutating v, while the state is still owned by
-    -- this Scene and before presentation/transition consumers observe it.
-    validateSceneState(state)
+    -- #1160: the #930 handoff validation lived here and is deferred (see
+    -- note above): whole-v state_value validation rejects load-bearing live
+    -- refs on main, so it crashed the owner it was meant to protect.
 
     -- Consume SCENE_EVENT (scene_change) and update the stack
     -- Wait to process these until after the loop so we don't recurse deeply

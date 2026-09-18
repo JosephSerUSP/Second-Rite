@@ -102,8 +102,15 @@ interpreter.runImmediate({
 }, transientCtx)
 check(transientCtx.locals.roll == 2 and transientCtx.locals.scaled == 5,
     "SET_LOCAL owns in-order invocation scratch under locals")
-check(transientCtx.v == transientCtx.locals,
-    "legacy v aliases locals for non-Scene immediate callers during migration")
+check(transientCtx.v ~= transientCtx.locals and transientCtx.v.roll == nil,
+    "new process locals stay distinct from the legacy v compatibility namespace")
+local firstInvocationLocals = transientCtx.locals
+interpreter.runImmediate({
+    { cmd = "SET_LOCAL", name = "fresh", value = "locals.roll == nil and 1 or 0" },
+}, transientCtx)
+check(transientCtx.locals ~= firstInvocationLocals
+        and transientCtx.locals.roll == nil and transientCtx.locals.fresh == 1,
+    "independent immediate executions receive fresh process-local state")
 
 local sceneState = {}
 local sceneCtx = {

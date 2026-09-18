@@ -3069,11 +3069,13 @@ local function runImmediateCore(commands, ctx)
     assert(ctx.session, "runImmediate requires ctx.session")
     ctx.loader = ctx.loader or ctx.session.loader
     ctx.events = ctx.events or {}
-    -- Explicit process locals. Legacy immediate callers that still seed v
-    -- (notably lifecycle event facts) keep one shared table during migration;
-    -- Scene hosts supply a distinct locals table before entering here.
-    ctx.locals = ctx.locals or ctx.v or {}
-    ctx.v = ctx.v or ctx.locals
+    -- Explicit process locals are owned by one immediate invocation. The
+    -- public runImmediate boundary refreshes them between independent runs;
+    -- runImmediateCore only supplies a table for internal callers. Legacy v
+    -- remains a separate compatibility namespace so its historical lifetime is
+    -- not silently redefined by the new owner-explicit substrate.
+    ctx.locals = ctx.locals or {}
+    ctx.v = ctx.v or {}
     if ctx.battle then
         ctx.party = ctx.party or ctx.battle.allies
         ctx.enemies = ctx.enemies or ctx.battle.enemies
@@ -3124,8 +3126,18 @@ end
 
 function interpreter.runImmediate(commands, ctx)
     ctx = ctx or {}
+    -- A reused host context must not accidentally extend process-local lifetime
+    -- across two independent immediate executions. Keep the completed table on
+    -- ctx for diagnostics after a run, but recognize and replace that exact
+    -- table at the next invocation. Hosts may still provide a fresh locals
+    -- table explicitly for the invocation they are starting (SceneHost does).
+    if ctx._completedImmediateLocals ~= nil
+        and ctx.locals == ctx._completedImmediateLocals then
+        ctx.locals = nil
+    end
     local initialEventCount = #(ctx.events or {})
     local events = runImmediateCore(commands, ctx)
+    ctx._completedImmediateLocals = ctx.locals
     local firstNew = initialEventCount + 1
     commitReaps(events, ctx.session, firstNew)
     publishUnstamped(events, ctx.session, firstNew)

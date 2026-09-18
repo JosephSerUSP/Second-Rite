@@ -229,7 +229,7 @@ test('authority revision hashes content across every staged Map authority input'
         const change = (label, filePath, before, after) => {
             sameMetadataEdit(filePath, before, after);
             const current = revision();
-            assert.notEqual(current, previous, `${label} must change authority identity despite same size/mtime`);
+            assert.notStrictEqual(current, previous, `${label} must change authority identity despite same size/mtime`);
             previous = current;
         };
         change('runtime Lua source', path.join(f.runtimeRoot, 'engine', 'runtime.lua'), '-- engine A\n', '-- engine B\n');
@@ -246,7 +246,7 @@ test('authority revision hashes content across every staged Map authority input'
         const originalManifest = fs.readFileSync(f.manifestPath, 'utf8');
         const changedManifest = originalManifest.replace('main.lua', 'boot.lua');
         sameMetadataEdit(f.manifestPath, originalManifest, changedManifest);
-        assert.notEqual(revision(), previous, 'runtime manifest content changes authority identity');
+        assert.notStrictEqual(revision(), previous, 'runtime manifest content changes authority identity');
     } finally {
         fs.rmSync(f.root, { recursive: true, force: true });
     }

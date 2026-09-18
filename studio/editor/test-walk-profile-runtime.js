@@ -97,7 +97,7 @@ test('a Port walk-profile edit changes runtime grounding and only its affected c
             'unaffected west compositor pixels remain byte-identical');
         assert.equal(afterCentre.image, beforeCentre.image,
             'unaffected centre compositor pixels remain byte-identical');
-        assert.notEqual(afterEast.image, beforeEast.image,
+        assert.notStrictEqual(afterEast.image, beforeEast.image,
             'the actual Port east compositor frame changes when its grounded actor rises');
     } finally {
         fs.rmSync(stage, { recursive: true, force: true });

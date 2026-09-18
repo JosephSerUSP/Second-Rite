@@ -52,9 +52,9 @@ test('repository defaults expose installation, runtime, and Second Gate as disti
     assert.equal(parsed.install, INSTALL_ROOT);
     assert.equal(parsed.runtime, RUNTIME_ROOT);
     assert.equal(parsed.runtime, path.join(parsed.install, 'runtime'));
-    assert.notEqual(parsed.runtime, parsed.install, 'runtime implementation must not collapse into installation root');
-    assert.notEqual(parsed.project, parsed.install, 'installation must be visibly distinct from Second Gate Project');
-    assert.notEqual(parsed.project, parsed.runtime, 'Project must not masquerade as runtime implementation');
+    assert.notStrictEqual(parsed.runtime, parsed.install, 'runtime implementation must not collapse into installation root');
+    assert.notStrictEqual(parsed.project, parsed.install, 'installation must be visibly distinct from Second Gate Project');
+    assert.notStrictEqual(parsed.project, parsed.runtime, 'Project must not masquerade as runtime implementation');
     assert.equal(parsed.project, path.join(parsed.install, 'projects', 'hichaukitoden-game'));
 });
 
@@ -67,7 +67,7 @@ test('a minimal project outside the repository can be opened', () => {
         assert.equal(parsed.project, fs.realpathSync(fixture) === fixture ? fixture : parsed.project);
         assert.ok(parsed.project.startsWith(path.resolve(os.tmpdir())),
             'the opened project is the fixture, not the checkout');
-        assert.notEqual(parsed.project, parsed.install,
+        assert.notStrictEqual(parsed.project, parsed.install,
             'project and install roots must be able to differ');
         assert.equal(parsed.install, INSTALL_ROOT);
         assert.equal(parsed.runtime, RUNTIME_ROOT);
@@ -106,7 +106,7 @@ test('a configured project that is missing or not a project fails at boot', () =
         assert.equal(isProjectRoot(empty), false);
 
         const out = resolveInChild(empty);
-        assert.notEqual(out.status, 0, 'a bad project root must fail loudly at require time');
+        assert.notStrictEqual(out.status, 0, 'a bad project root must fail loudly at require time');
         assert.match(out.stderr, /is not a project/);
     } finally {
         fs.rmSync(empty, { recursive: true, force: true });

@@ -208,7 +208,7 @@ test('closed windows are removed so the same surface can be created again', () =
     first.close();
     const second = manager.open('animation');
 
-    assert.notEqual(first, second);
+    assert.notStrictEqual(first, second);
     assert.equal(created.length, 2);
 });
 

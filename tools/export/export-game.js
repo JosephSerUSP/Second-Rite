@@ -93,6 +93,15 @@ function stageRuntimeGame(options = {}) {
     const staged = internal.stageRuntimeGame(normalized.options);
     staged.projectIdentity = materializeReleaseIdentity(staged.stageDir, normalized.roots.projectRoot);
     staged.semanticRoots = normalized.roots;
+    // Live-run stages (Test Play, gates, gauntlet) execute LOVE against the
+    // stage directory, so the native shim must sit beside the game for FFI
+    // and the CWD fallback to find it (#1159). Packed exports deliberately
+    // opt out: a Windows DLL inside a portable .love is dead weight FFI can
+    // never load (archive paths are not real files on disk); the windows-x64
+    // target receives the shim separately via exportWindows.
+    staged.stagedShims = normalized.options.stageNativeShims
+        ? internal.stageNativeShims({ installRoot: normalized.roots.installRoot, stageDir: staged.stageDir })
+        : [];
     return staged;
 }
 

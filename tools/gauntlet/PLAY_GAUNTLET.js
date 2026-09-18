@@ -29,6 +29,8 @@ function stage(project, output) {
         rtpRoot: path.join(ROOT, 'rtp'),
         projectDir: project,
         outputDir: output,
+        // Lab runs execute LOVE against the stage, same as Test Play.
+        stageNativeShims: true,
     }).stageDir;
 }
 

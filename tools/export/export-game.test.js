@@ -5,8 +5,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const test = require('node:test');
-const { declaredEffekseerSymbols, exportWindows, projectNeedsEffekseer, readBuildMetadata, readDllExports,
-    readManifest, stageGame, verifyShim, writeBuildManifest } = require('./export-game');
+const { declaredEffekseerSymbols, effekseerRequired, exportWindows, projectNeedsEffekseer, readBuildMetadata,
+    readDllExports, readManifest, stageGame, stageRuntimeGame, verifyShim, writeBuildManifest } = require('./export-game');
 
 function write(filePath, contents = '') {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -31,6 +31,45 @@ function makeProject(root) {
     const manifestPath = path.join(root, 'manifest.json');
     write(manifestPath, JSON.stringify(MANIFEST));
     return manifestPath;
+}
+
+function writeJson(filePath, value) {
+    write(filePath, JSON.stringify(value));
+}
+
+// Minimal source data the runtime-data compiler accepts, so facade-level
+// stageRuntimeGame tests exercise the real pipeline instead of a mock.
+function makeCompilableData(dataRoot) {
+    writeJson(path.join(dataRoot, 'system.json'), {});
+    writeJson(path.join(dataRoot, 'units', 'index.json'), { files: ['unit-a.json'] });
+    writeJson(path.join(dataRoot, 'units', 'unit-a.json'), { id: 'unit-a', name: 'Unit A' });
+    writeJson(path.join(dataRoot, 'maps', 'index.json'), { files: [] });
+    writeJson(path.join(dataRoot, 'scenes', 'index.json'), { files: ['title.json'] });
+    writeJson(path.join(dataRoot, 'scenes', 'title.json'), { id: 'title', kind: 'menu' });
+    for (const module of ['battle', 'exploration', 'progression', 'quest']) {
+        writeJson(path.join(dataRoot, 'flows', `${module}.json`), { [`${module}.fixture`]: [] });
+    }
+    writeJson(path.join(dataRoot, 'tilesets', 'dungeon_default.json'), {
+        id: 'dungeon_default',
+        texture: 'fixture.png',
+    });
+}
+
+function makeLiveRunRoots(root, { withShims } = {}) {
+    const install = path.join(root, 'install');
+    const runtime = path.join(root, 'runtime');
+    const project = path.join(root, 'project');
+    if (withShims) {
+        write(path.join(install, 'effekseer_shim.dll'), 'fake-shim-bytes');
+        write(path.join(install, 'effekseer_shim.provenance.json'), '{"fake":true}');
+    }
+    write(path.join(runtime, 'main.lua'), 'return true');
+    write(path.join(runtime, 'engine', 'runtime.lua'), 'return true');
+    write(path.join(runtime, 'presentation', 'draw.lua'), 'return true');
+    write(path.join(runtime, 'release-conf.lua'), 't.console = false');
+    write(path.join(project, 'assets', 'sprite.png'), 'png');
+    makeCompilableData(path.join(project, 'data'));
+    return { install, runtime, project };
 }
 
 function makePeWithExports(names) {
@@ -305,6 +344,36 @@ test('projectNeedsEffekseer reads only the Project data root', () => {
     }
 });
 
+test('needs-Effekseer detection covers scene screenEffects, not just animation tracks (#1159)', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        write(path.join(root, 'data', 'animations.json'), '{"a":{"type":"sprite"}}');
+        write(path.join(root, 'data', 'scenes', 'index.json'), '{"files":["title.json"]}');
+        write(path.join(root, 'data', 'scenes', 'title.json'),
+            '{"id":"title","screenEffects":[{"effect":"assets/fx/title.efkefc","x":128,"y":80}]}');
+        write(path.join(root, 'campaigns', 'plain', 'scenes', 'other.json'), '{"screenEffects":[]}');
+        assert.strictEqual(projectNeedsEffekseer(root), true);
+        write(path.join(root, 'data', 'scenes', 'title.json'), '{"id":"title","kind":"menu"}');
+        assert.strictEqual(projectNeedsEffekseer(root), false);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('effekseerRequired sees compiled scene screenEffects in the stage', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        write(path.join(root, 'data', 'animations.json'), '{}');
+        write(path.join(root, 'data', 'scenes.json'),
+            '[{"id":"title","screenEffects":[{"effect":"assets/fx/title.efkefc","x":128,"y":80}]}]');
+        assert.strictEqual(effekseerRequired(root), true);
+        write(path.join(root, 'data', 'scenes.json'), '[{"id":"title"}]');
+        assert.strictEqual(effekseerRequired(root), false);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test('Windows export fails loud when authored Effekseer content has no shim', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
     try {
@@ -315,6 +384,10 @@ test('Windows export fails loud when authored Effekseer content has no shim', ()
         ['love.exe', 'love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll', 'license.txt']
             .forEach(name => write(path.join(loveRuntime, name), 'runtime'));
         assert.throws(() => exportWindows({
+            // Hermetic install root: without this the facade resolves the
+            // real checkout's install root, where a built shim exists, and
+            // the test passes or fails depending on the host (#1159).
+            installRoot: root,
             projectDir: root,
             runtimeDir: root,
             stageDir: path.join(root, 'stage'),
@@ -323,6 +396,54 @@ test('Windows export fails loud when authored Effekseer content has no shim', ()
             loveExe: path.join(loveRuntime, 'love.exe'),
             smoke: false
         }), /effekseer_shim\.dll is required/);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('stageRuntimeGame stages the native shims for live runs when requested (#1159)', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        const { install, runtime, project } = makeLiveRunRoots(root, { withShims: true });
+        const outputDir = path.join(root, 'output');
+        const staged = stageRuntimeGame({
+            installRoot: install, runtimeDir: runtime, projectDir: project, outputDir, stageNativeShims: true,
+        });
+        assert.deepEqual(staged.stagedShims, ['effekseer_shim.dll', 'effekseer_shim.provenance.json']);
+        assert.equal(fs.readFileSync(path.join(outputDir, 'effekseer_shim.dll'), 'utf8'), 'fake-shim-bytes');
+        assert.equal(fs.readFileSync(path.join(outputDir, 'effekseer_shim.provenance.json'), 'utf8'), '{"fake":true}');
+        assert.ok(fs.existsSync(path.join(outputDir, 'main.lua')));
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('stageRuntimeGame leaves packed-export stages without native shims by default', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        const { install, runtime, project } = makeLiveRunRoots(root, { withShims: true });
+        const outputDir = path.join(root, 'output');
+        const staged = stageRuntimeGame({
+            installRoot: install, runtimeDir: runtime, projectDir: project, outputDir,
+        });
+        assert.deepEqual(staged.stagedShims, []);
+        assert.ok(!fs.existsSync(path.join(outputDir, 'effekseer_shim.dll')));
+        assert.ok(!fs.existsSync(path.join(outputDir, 'effekseer_shim.provenance.json')));
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('stageRuntimeGame still stages the game when the install has no shims', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        const { install, runtime, project } = makeLiveRunRoots(root, { withShims: false });
+        const outputDir = path.join(root, 'output');
+        const staged = stageRuntimeGame({
+            installRoot: install, runtimeDir: runtime, projectDir: project, outputDir, stageNativeShims: true,
+        });
+        assert.deepEqual(staged.stagedShims, []);
+        assert.ok(fs.existsSync(path.join(outputDir, 'main.lua')));
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

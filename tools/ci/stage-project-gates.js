@@ -34,6 +34,10 @@ function stageProjectGates(options = {}) {
         rtpRoot: roots.rtpRoot,
         projectDir: roots.projectRoot,
         outputDir,
+        // Gates execute LOVE against this stage; the facade owns the
+        // copy-when-present shim policy (see stageNativeShims), so this
+        // helper states the requirement once instead of copying twice.
+        stageNativeShims: true,
     });
 
     // `unittest` is a repository verification command, not a player capability.
@@ -43,27 +47,12 @@ function stageProjectGates(options = {}) {
     const stageTests = path.join(staged.stageDir, 'tests');
     fs.cpSync(sourceTests, stageTests, { recursive: true, force: true });
 
-    // The Effekseer shim is native code loaded outside LOVE's virtual
-    // filesystem, so a staged tree that lacks it is not a runnable game: the
-    // effects silently do not draw and only the two effect-bearing G5 frames
-    // reveal it. It is gitignored build output rather than repository source,
-    // so it is copied when present and simply absent on hosts that never built
-    // it -- those hosts already run without effects.
-    const shimNames = ['effekseer_shim.dll', 'effekseer_shim.provenance.json'];
-    const stagedShims = [];
-    for (const name of shimNames) {
-        const source = path.join(roots.installRoot, name);
-        if (!fs.existsSync(source)) continue;
-        fs.cpSync(source, path.join(staged.stageDir, name), { force: true });
-        stagedShims.push(name);
-    }
-
     return {
         stageDir: staged.stageDir,
         projectDir: roots.projectRoot,
         runtimeDir: roots.runtimeRoot,
         rtpRoot: roots.rtpRoot,
-        stagedShims,
+        stagedShims: staged.stagedShims,
     };
 }
 

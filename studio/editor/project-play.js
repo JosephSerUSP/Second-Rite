@@ -31,6 +31,10 @@ function stageProject({ installRoot, projectRoot, runtimeRoot, rtpRoot, manifest
             rtpRoot: roots.rtpRoot,
             projectDir: projectRoot,
             outputDir: stageDir,
+            // Test Play executes LOVE against this stage: without the native
+            // shim beside the game every Effekseer effect (including the
+            // effect-only title) silently does not draw (#1159).
+            stageNativeShims: true,
             ...(manifestPath ? { manifestPath } : {}),
         });
         return stageDir;

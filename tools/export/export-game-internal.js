@@ -148,13 +148,67 @@ function packDirectory(sourceDir, zipPath) {
 
 function effekseerRequired(runtimeRoot) {
     const animations = readJson(path.join(runtimeRoot, 'data', 'animations.json'));
-    return JSON.stringify(animations).includes('"effekseer"');
+    return JSON.stringify(animations).includes('"effekseer"')
+        || dataRootDeclaresScreenEffects(path.join(runtimeRoot, 'data'));
+}
+
+// Scene-level screen-space effects (scenes `screenEffects`, e.g. the title
+// logo) declare Effekseer usage outside animations.json, so needs-shim
+// detection must read them too — otherwise a project whose only effects are
+// scene-owned exports a windows-x64 player with no shim and no fail-loud
+// (#1159). Raw-text key match over both layouts (source fragments and the
+// compiled scenes.json stem), parse-proof by design: a false negative ships
+// a silently broken player, while these files are G1-validated JSON anyway.
+function dataRootDeclaresScreenEffects(dataRoot) {
+    if (!dataRoot) return false;
+    const candidates = [path.join(dataRoot, 'scenes.json')];
+    let entries = [];
+    try {
+        entries = fs.readdirSync(path.join(dataRoot, 'scenes'));
+    } catch (error) {
+        entries = [];
+    }
+    for (const entry of entries) {
+        if (entry.toLowerCase().endsWith('.json')) candidates.push(path.join(dataRoot, 'scenes', entry));
+    }
+    for (const file of candidates) {
+        let text = null;
+        try {
+            text = fs.readFileSync(file, 'utf8');
+        } catch (error) {
+            continue;
+        }
+        if (/"screenEffects"\s*:/.test(text)) return true;
+    }
+    return false;
 }
 
 function projectNeedsEffekseer(projectDir) {
-    const file = path.join(projectDataSource(projectDir), 'animations.json');
-    if (!fs.existsSync(file)) return false;
-    return JSON.stringify(readJson(file)).includes('"effekseer"');
+    const dataRoot = projectDataSource(projectDir);
+    const file = path.join(dataRoot, 'animations.json');
+    if (fs.existsSync(file) && JSON.stringify(readJson(file)).includes('"effekseer"')) return true;
+    return dataRootDeclaresScreenEffects(dataRoot);
+}
+
+// Native Effekseer shim files, in stage-root order. The shim loads outside
+// LOVE's virtual filesystem, so a live-run stage (Test Play, gates, gauntlet)
+// that lacks it is not a runnable game for effect-bearing content: effects
+// silently do not draw and only a console line says so. These are gitignored
+// build output rather than repository source, hence copy-when-present: hosts
+// that never built the shim already run without effects, and staging must not
+// fail them.
+const NATIVE_SHIM_FILES = ['effekseer_shim.dll', 'effekseer_shim.provenance.json'];
+
+function stageNativeShims({ installRoot, stageDir } = {}) {
+    if (!installRoot || !stageDir) throw new Error('stageNativeShims requires installRoot and stageDir');
+    const staged = [];
+    for (const name of NATIVE_SHIM_FILES) {
+        const source = path.join(installRoot, name);
+        if (!fs.existsSync(source)) continue;
+        copyFile(source, path.join(stageDir, name));
+        staged.push(name);
+    }
+    return staged;
 }
 
 function declaredEffekseerSymbols(runtimeDir) {
@@ -366,6 +420,7 @@ module.exports = {
     readManifest,
     requiredWindowsRuntime,
     stageGame,
+    stageNativeShims,
     stageRuntimeGame,
     verifyShim,
     windowsPreflight,

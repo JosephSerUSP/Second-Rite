@@ -316,7 +316,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mainPage.waitForTimeout(150);
         const afterNavigation = await mainPage.evaluate(() =>
             JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
-        assert.notEqual(afterNavigation, beforeNavigation,
+        assert.notStrictEqual(afterNavigation, beforeNavigation,
             'MMB must navigate the 3D camera while profile editing is active');
         assert.equal(await mainPage.evaluate(() =>
             window.ThestraRuntimeCameraViewport.getWalkProfileSelection()?.key),

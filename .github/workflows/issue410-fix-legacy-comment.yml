@@ -1,0 +1,32 @@
+name: issue410-fix-legacy-comment
+
+on:
+  push:
+    branches:
+      - issue-410-state-owner-substrate
+    paths:
+      - .github/workflows/issue410-fix-legacy-comment.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: issue-410-state-owner-substrate
+      - name: Correct legacy compatibility wording
+        run: |
+          python -c "from pathlib import Path; p=Path('runtime/engine/interpreter.lua'); s=p.read_text(); old='    -- Legacy #410 migration surface. Its owner is still inferred from the host:\n    -- Scene hooks bind v to Scene state; other immediate hosts bind it to\n    -- invocation locals. New authored content must use SET_SCENE_STATE or\n'; new='    -- Legacy #410 migration surface. Scene hooks bind v to Scene state; other\n    -- immediate hosts retain their existing host/caller-owned compatibility\n    -- table. New authored content must use SET_SCENE_STATE or\n'; assert old in s; p.write_text(s.replace(old,new,1))"
+          grep -F 'host/caller-owned compatibility' runtime/engine/interpreter.lua
+      - name: Commit source change and remove helper
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/issue410-fix-legacy-comment.yml
+          git add runtime/engine/interpreter.lua
+          git commit -m "docs: clarify legacy v compatibility lifetime"
+          git push origin HEAD:issue-410-state-owner-substrate

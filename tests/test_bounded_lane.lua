@@ -235,22 +235,19 @@ local arrivalExit = lane.interact(game)
 check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_door",
     "Up can reopen the shop exit from its arrival spawn")
 
--- The town stands on ONE floor now. The plate lanes used to sit at groundZ -1.5
--- against the modelled rooms at 0.0, which was an authoring accident rather than
--- a design: the Praca blend establishes z=0 as floor level, and it is the file
--- the hand-authored assets and the placement calibration live in. Every screen
--- was moved onto it.
+-- Town lanes share z=0 as their base groundZ, but a lane may layer
+-- generator-owned vertical terrain over that base. Cortico does this through
+-- groundProfile, so the player must land on the destination's effective floor
+-- at its spawn Y rather than blindly on groundZ.
 --
--- The guarantee the old two-convention crossing existed to protect still holds
--- and is still worth testing: a transit re-derives height from the DESTINATION.
--- It is exercised on the synthetic lane above, which authors its own floor, so
--- it no longer depends on the town disagreeing with itself.
+-- The guarantee the old two-convention crossing existed to protect still holds:
+-- a transit re-derives height from the DESTINATION.
 for _, screen in ipairs({ 16, 18, 19, 21, 22, 23, 24, 25, 26, 27, 31 }) do
     exploration.loadMap(game, loader.getMapIndex(screen))
     check(math.abs(game.townTraversal.groundZ) < 0.001,
         "map " .. screen .. " stands on the town's single floor at z=0")
-    check(math.abs(game.townTraversal.z) < 0.001,
-        "map " .. screen .. " puts the player on that floor")
+    check(math.abs(game.townTraversal.z - lane.groundAt(game, game.townTraversal.y)) < 0.001,
+        "map " .. screen .. " puts the player on its authored floor")
 end
 exploration.loadMap(game, loader.getMapIndex(18))
 exploration.loadMap(game, loader.getMapIndex(27), { arrival = "exit_door" })

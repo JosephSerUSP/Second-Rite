@@ -494,9 +494,9 @@ handlers.SET_SCENE_STATE = function(cmd, ctx)
 end
 
 handlers.SET_VAR = function(cmd, ctx)
-    -- Legacy #410 migration surface. Its owner is still inferred from the host:
-    -- Scene hooks bind v to Scene state; other immediate hosts bind it to
-    -- invocation locals. New authored content must use SET_SCENE_STATE or
+    -- Legacy #410 migration surface. Scene hooks bind v to Scene state; other
+    -- immediate hosts retain their existing host/caller-owned compatibility
+    -- table. New authored content must use SET_SCENE_STATE or
     -- SET_LOCAL so lifetime is explicit in data.
     assignFormulaRows(cmd, ctx.v, ctx)
 end

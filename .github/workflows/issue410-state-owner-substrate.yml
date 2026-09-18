@@ -18,6 +18,15 @@ jobs:
           fetch-depth: 0
       - name: Apply owner-aware state substrate
         run: python3 tools/issue410_apply.py
+      - name: Normalize generated Studio copy
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('studio/editor/js/events.js')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace("through this command's state namespace.", "through this command state namespace.")
+          p.write_text(text, encoding='utf-8')
+          PY
       - name: Static checks
         run: |
           python3 -m json.tool rtp/revisions/1.0/data/engine.json >/dev/null

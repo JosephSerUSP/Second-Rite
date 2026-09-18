@@ -75,9 +75,12 @@ end
 local function validateSceneState(state)
     local transientTime = state.v.time
     state.v.time = nil
+    local tb = state.v.battle
+    state.v.battle = nil
     local ok, err = pcall(state_value.validate, state.v,
         "Scene '" .. tostring(state.id) .. "' ctx.v")
     state.v.time = transientTime
+    state.v.battle = tb
     if not ok then error(err, 0) end
 end
 

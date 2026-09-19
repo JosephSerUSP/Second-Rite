@@ -27,7 +27,7 @@ print("[TEST] Starting font option tests...")
 loader.init()
 local vSession = session.GameSession.new(loader)
 local function ctxFor()
-    return { session = vSession, loader = loader, v = {} }
+    return { session = vSession, loader = loader, sceneState = {} }
 end
 
 local currentFont = "monogram-extended-italic"
@@ -51,13 +51,13 @@ check("cycle walks monogram-extended-italic -> monogram-extended -> monogram-ext
     currentFont = "monogram-extended-italic"
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.font = api.cycleFont()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.font = api.cycleFont()" },
     }, ctx)
-    eq(ctx.v.font, "monogram-extended", "first cycle")
+    eq(ctx.sceneState.font, "monogram-extended", "first cycle")
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.font = api.cycleFont()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.font = api.cycleFont()" },
     }, ctx)
-    eq(ctx.v.font, "monogram-extended-italic", "second cycle wraps")
+    eq(ctx.sceneState.font, "monogram-extended-italic", "second cycle wraps")
 end)
 
 check("getFont reports the active font", function()
@@ -65,9 +65,9 @@ check("getFont reports the active font", function()
     currentFont = "monogram-extended"
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.font = api.getFont()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.font = api.getFont()" },
     }, ctx)
-    eq(ctx.v.font, "monogram-extended", "reported font")
+    eq(ctx.sceneState.font, "monogram-extended", "reported font")
 end)
 
 check("setFont switches font and records call", function()
@@ -75,9 +75,9 @@ check("setFont switches font and records call", function()
     currentFont = "monogram-extended-italic"
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.ok = api.setFont('monogram-extended')" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.ok = api.setFont('monogram-extended')" },
     }, ctx)
-    eq(ctx.v.ok, true, "setFont succeeded")
+    eq(ctx.sceneState.ok, true, "setFont succeeded")
     eq(currentFont, "monogram-extended", "font updated")
 end)
 
@@ -85,9 +85,9 @@ check("headless run with no presentation bound degrades gracefully", function()
     interpreter.bindPresentation(nil)
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.font = api.getFont()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.font = api.getFont()" },
     }, ctx)
-    eq(ctx.v.font, "monogram-extended-italic", "headless default")
+    eq(ctx.sceneState.font, "monogram-extended-italic", "headless default")
 end)
 
 user_settings.reset()

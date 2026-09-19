@@ -1,7 +1,7 @@
 {
   "id": "d002_sokoban",
   "terminal": {
-    "reached": "v.win == true"
+    "reached": "sceneState.win == true"
   },
   "name": "D002 — Sokoban as Scene",
   "kind": "menu",
@@ -9,91 +9,188 @@
   "windows": [
     {
       "id": "status",
-      "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
+      "rect": {
+        "x": 5,
+        "y": 2,
+        "w": 22,
+        "h": 4
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.win and 'D002 — YOU WIN!' or 'D002 — Push crates to goals'}" }
+        {
+          "type": "text",
+          "text": "{sceneState.win and 'D002 — YOU WIN!' or 'D002 — Push crates to goals'}"
+        }
       ]
     },
     {
       "id": "board_window",
-      "rect": { "x": 6, "y": 7, "w": 20, "h": 12 },
+      "rect": {
+        "x": 6,
+        "y": 7,
+        "w": 20,
+        "h": 12
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.boardText}" }
+        {
+          "type": "text",
+          "text": "{sceneState.boardText}"
+        }
       ]
     },
     {
       "id": "help",
-      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "rect": {
+        "x": 4,
+        "y": 21,
+        "w": 24,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Arrows move  Enter reset  B back" }
+        {
+          "type": "text",
+          "text": "Arrows move  Enter reset  B back"
+        }
       ]
     }
   ],
   "hooks": {
     "on_enter": [
-      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SCRIPT", "ref": "init" }
+      {
+        "cmd": "SET_LOCAL",
+        "name": "_guard",
+        "value": 0
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
     ],
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "not v.win",
+        "condition": "not sceneState.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": -1 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dy",
+            "value": -1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "move"
+          }
         ]
       }
     ],
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "not v.win",
+        "condition": "not sceneState.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 1 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dy",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "move"
+          }
         ]
       }
     ],
     "on_left": [
       {
         "cmd": "IF",
-        "condition": "not v.win",
+        "condition": "not sceneState.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": -1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dx",
+            "value": -1
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "move"
+          }
         ]
       }
     ],
     "on_right": [
       {
         "cmd": "IF",
-        "condition": "not v.win",
+        "condition": "not sceneState.win",
         "then": [
-          { "cmd": "SET_VAR", "name": "dx", "value": 1 },
-          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
-          { "cmd": "SCRIPT", "ref": "move" }
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dx",
+            "value": 1
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "move"
+          }
         ]
       }
     ],
-    "on_select": [ { "cmd": "SCRIPT", "ref": "init" } ],
-    "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
+    "on_select": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
   },
   "scripts": {
-    "init": "\nlocal v = ctx.v\nv.win = false\n-- Board setup: W = Wall, G = Goal, C = Crate, P = Player, . = Floor\nv.w = 7\nv.h = 6\nv.grid = {\n    'W','W','W','W','W','W','W',\n    'W','G','G','.','.','W','W',\n    'W','W','W','.','C','.','W',\n    'W','.','.','C','P','.','W',\n    'W','W','W','W','W','W','W',\n    'W','W','W','W','W','W','W'\n}\nv.goals = { {1, 1}, {2, 1} }\n\n-- Find player\nfor i, cell in ipairs(v.grid) do\n    if cell == 'P' then\n        v.px = (i - 1) % v.w\n        v.py = math.floor((i - 1) / v.w)\n        v.grid[i] = '.'\n        break\n    end\nend\n\nlocal function redraw()\n    local lines = {}\n    for y = 0, v.h - 1 do\n        local row = \"\"\n        for x = 0, v.w - 1 do\n            local cell = v.grid[y * v.w + x + 1]\n            if x == v.px and y == v.py then\n                row = row .. \"@\"\n            elseif cell == 'W' then\n                row = row .. \"#\"\n            elseif cell == 'C' then\n                row = row .. \"O\"\n            elseif cell == 'G' then\n                row = row .. \".\"\n            else\n                row = row .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    v.boardText = table.concat(lines, \"\\n\")\nend\nv.redraw = redraw\nv.redraw()\n",
-    "move": "\nlocal v = ctx.v\nlocal nx = v.px + v.dx\nlocal ny = v.py + v.dy\n\nlocal function getAt(x, y)\n    if x < 0 or x >= v.w or y < 0 or y >= v.h then return 'W' end\n    return v.grid[y * v.w + x + 1]\nend\n\nlocal function setAt(x, y, val)\n    v.grid[y * v.w + x + 1] = val\nend\n\nlocal dest = getAt(nx, ny)\nif dest == '.' or dest == 'G' then\n    v.px = nx\n    v.py = ny\nelseif dest == 'C' then\n    local nnx = nx + v.dx\n    local nny = ny + v.dy\n    local beyond = getAt(nnx, nny)\n    if beyond == '.' or beyond == 'G' then\n        -- Push crate\n        setAt(nx, ny, '.')\n        -- restore goal if we moved a crate off it\n        for _, g in ipairs(v.goals) do\n            if g[1] == nx and g[2] == ny then\n                setAt(nx, ny, 'G')\n            end\n        end\n        setAt(nnx, nny, 'C')\n        v.px = nx\n        v.py = ny\n    end\nend\n\n-- Check win\nlocal won = true\nfor _, g in ipairs(v.goals) do\n    if getAt(g[1], g[2]) ~= 'C' then\n        won = false\n        break\n    end\nend\nv.win = won\n\nv.redraw()\n"
+    "init": "\nlocal sceneState = ctx.sceneState\nsceneState.win = false\n-- Board setup: W = Wall, G = Goal, C = Crate, P = Player, . = Floor\nsceneState.w = 7\nsceneState.h = 6\nsceneState.grid = {\n    'W','W','W','W','W','W','W',\n    'W','G','G','.','.','W','W',\n    'W','W','W','.','C','.','W',\n    'W','.','.','C','P','.','W',\n    'W','W','W','W','W','W','W',\n    'W','W','W','W','W','W','W'\n}\nsceneState.goals = { {1, 1}, {2, 1} }\n\n-- Find player\nfor i, cell in ipairs(sceneState.grid) do\n    if cell == 'P' then\n        sceneState.px = (i - 1) % sceneState.w\n        sceneState.py = math.floor((i - 1) / sceneState.w)\n        sceneState.grid[i] = '.'\n        break\n    end\nend\n\nlocal function redraw()\n    local lines = {}\n    for y = 0, sceneState.h - 1 do\n        local row = \"\"\n        for x = 0, sceneState.w - 1 do\n            local cell = sceneState.grid[y * sceneState.w + x + 1]\n            if x == sceneState.px and y == sceneState.py then\n                row = row .. \"@\"\n            elseif cell == 'W' then\n                row = row .. \"#\"\n            elseif cell == 'C' then\n                row = row .. \"O\"\n            elseif cell == 'G' then\n                row = row .. \".\"\n            else\n                row = row .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    sceneState.boardText = table.concat(lines, \"\\n\")\nend\nsceneState.redraw = redraw\nsceneState.redraw()\n",
+    "move": "\nlocal sceneState = ctx.sceneState\nlocal nx = sceneState.px + sceneState.dx\nlocal ny = sceneState.py + sceneState.dy\n\nlocal function getAt(x, y)\n    if x < 0 or x >= sceneState.w or y < 0 or y >= sceneState.h then return 'W' end\n    return sceneState.grid[y * sceneState.w + x + 1]\nend\n\nlocal function setAt(x, y, val)\n    sceneState.grid[y * sceneState.w + x + 1] = val\nend\n\nlocal dest = getAt(nx, ny)\nif dest == '.' or dest == 'G' then\n    sceneState.px = nx\n    sceneState.py = ny\nelseif dest == 'C' then\n    local nnx = nx + sceneState.dx\n    local nny = ny + sceneState.dy\n    local beyond = getAt(nnx, nny)\n    if beyond == '.' or beyond == 'G' then\n        -- Push crate\n        setAt(nx, ny, '.')\n        -- restore goal if we moved a crate off it\n        for _, g in ipairs(sceneState.goals) do\n            if g[1] == nx and g[2] == ny then\n                setAt(nx, ny, 'G')\n            end\n        end\n        setAt(nnx, nny, 'C')\n        sceneState.px = nx\n        sceneState.py = ny\n    end\nend\n\n-- Check win\nlocal won = true\nfor _, g in ipairs(sceneState.goals) do\n    if getAt(g[1], g[2]) ~= 'C' then\n        won = false\n        break\n    end\nend\nsceneState.win = won\n\nsceneState.redraw()\n"
   },
   "goldenScript": [
-    { "key": "up" },
-    { "key": "left" },
-    { "key": "left" },
-    { "key": "down" },
-    { "key": "return" },
-    { "key": "escape" }
+    {
+      "key": "up"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
   ]
 }

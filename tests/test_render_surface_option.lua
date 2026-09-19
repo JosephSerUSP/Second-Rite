@@ -29,7 +29,7 @@ print("[TEST] Starting render surface option tests...")
 loader.init()
 local vSession = session.GameSession.new(loader)
 local function ctxFor()
-    return { session = vSession, loader = loader, v = {} }
+    return { session = vSession, loader = loader, sceneState = {} }
 end
 
 -- A fake host, standing in for main.lua's presentation hooks. The real one
@@ -56,17 +56,17 @@ check("cycle walks classic -> four_three -> wide -> classic", function()
     -- than reaching into the per-context api table.
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.cycleRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "four_three", "first cycle")
+    eq(ctx.sceneState.aspect, "four_three", "first cycle")
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.cycleRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "wide", "second cycle")
+    eq(ctx.sceneState.aspect, "wide", "second cycle")
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.cycleRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "classic", "third cycle wraps")
+    eq(ctx.sceneState.aspect, "classic", "third cycle wraps")
 end)
 
 check("getRenderSurface reports the active profile", function()
@@ -74,9 +74,9 @@ check("getRenderSurface reports the active profile", function()
     surface.setProfile("four_three")
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.aspect = api.getRenderSurface()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.getRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "four_three", "reported profile")
+    eq(ctx.sceneState.aspect, "four_three", "reported profile")
 end)
 
 check("an unknown profile is refused, leaving the surface untouched", function()
@@ -84,9 +84,9 @@ check("an unknown profile is refused, leaving the surface untouched", function()
     surface.setProfile("classic")
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.ok = api.setRenderSurface('ultrawide')" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.ok = api.setRenderSurface('ultrawide')" },
     }, ctx)
-    eq(ctx.v.ok, false, "refused")
+    eq(ctx.sceneState.ok, false, "refused")
     eq(surface.getProfileId(), "classic", "profile unchanged")
 end)
 
@@ -97,13 +97,13 @@ check("headless run with no presentation bound degrades to a no-op", function()
     interpreter.bindPresentation(nil)
     local ctx = ctxFor()
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.aspect = api.getRenderSurface()" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.getRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "classic", "defaults to classic")
+    eq(ctx.sceneState.aspect, "classic", "defaults to classic")
     interpreter.runImmediate({
-        { cmd = "SCRIPT", code = "ctx.v.ok = api.setRenderSurface('wide')" },
+        { cmd = "SCRIPT", code = "ctx.sceneState.ok = api.setRenderSurface('wide')" },
     }, ctx)
-    eq(ctx.v.ok, false, "set reports failure rather than erroring")
+    eq(ctx.sceneState.ok, false, "set reports failure rather than erroring")
 end)
 
 check("user settings round-trip and survive a cache reset", function()

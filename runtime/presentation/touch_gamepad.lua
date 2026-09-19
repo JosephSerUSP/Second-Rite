@@ -249,7 +249,7 @@ function touch_gamepad.decorateOptions(scenes)
                             inner = old:sub(2, -2)
                         end
                         if not tostring(old):find("touch_gamepad", 1, true) then
-                            item.formatRight = "{id == 'touch_gamepad' and (v.touchGamepad and 'ON' or 'OFF') or (" .. inner .. ")}"
+                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or (" .. inner .. ")}";
                         end
                     end
                 end

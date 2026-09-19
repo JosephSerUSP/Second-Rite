@@ -140,7 +140,7 @@ local formulaSession = {
 }
 local expectedItemCounts = { [1] = 4, [2] = 1, [3] = 1, [4] = 2 }
 for tab = 1, 4 do
-    local ctx = formula.makeContext({ session = formulaSession, v = { tab = tab } })
+    local ctx = formula.makeContext({ session = formulaSession, sceneState = { tab = tab } })
     check(ctx.session.itemCount == expectedItemCounts[tab],
         ("formula session.itemCount respects inventory tab %d"):format(tab))
 end

@@ -11,16 +11,16 @@ local function assertEq(actual, expected, message)
 end
 
 local sess = session.GameSession.new(loader)
-local ctx = { session = sess, loader = loader, party = sess.party, v = {}, events = {} }
+local ctx = { session = sess, loader = loader, party = sess.party, sceneState = {}, events = {} }
 
 interpreter.runImmediate({ { cmd = "LIST_UNLOCKED_LORE" } }, ctx)
-assertEq(ctx.v.loreCount, 2, "baseline lore count")
-assertEq(ctx.v.loreRows[1].id, "second_rite", "authored lore order")
+assertEq(ctx.sceneState.loreCount, 2, "baseline lore count")
+assertEq(ctx.sceneState.loreRows[1].id, "second_rite", "authored lore order")
 
 interpreter.runImmediate({ { cmd = "UNLOCK_LORE", loreId = "old_gate" } }, ctx)
 interpreter.runImmediate({ { cmd = "LIST_UNLOCKED_LORE" } }, ctx)
-assertEq(ctx.v.loreCount, 3, "unlocked lore count")
-assertEq(ctx.v.loreRows[3].id, "old_gate", "new lore appears in authored order")
+assertEq(ctx.sceneState.loreCount, 3, "unlocked lore count")
+assertEq(ctx.sceneState.loreRows[3].id, "old_gate", "new lore appears in authored order")
 
 local restored = savegame.deserialize(savegame.serialize(sess, loader, "map"), loader)
 assertEq(restored.unlockedLore.old_gate, true, "lore unlock save round-trip")

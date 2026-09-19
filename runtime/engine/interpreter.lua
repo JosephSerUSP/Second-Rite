@@ -113,7 +113,7 @@ end
 --
 -- Task A4b: any command that is NOT one of the legacy interactive ids
 -- compiles into a RUN_IMMEDIATE action node instead. Contiguous runs of
--- such commands share ONE node (so SET_VAR -> IF chains keep their ctx.v
+-- such commands share ONE node (so SET_LOCAL -> IF chains keep their locals
 -- flow-locals), and the host (main.lua handleDialogueAction) executes the
 -- run through interpreter.runImmediate, rendering any emitted text events
 -- as dialogue. This is what makes registry commands with map/common
@@ -133,8 +133,8 @@ function interpreter.compile(nodes, commands, prefix, tailNodeId, ctx)
 
         if not INTERACTIVE_COMPILE_IDS[id] then
             -- Task A4b: collect the contiguous run of non-interactive
-            -- commands into ONE node so ctx.v flow-locals survive across the
-            -- run (SET_VAR -> IF chains). COMMENTs inside the run are
+            -- commands into ONE node so process locals survive across the
+            -- run (SET_LOCAL -> IF chains). COMMENTs inside the run are
             -- swallowed too — they are no-ops in runImmediate, and splitting
             -- the run on them would silently reset v.
             local run = { cmd }
@@ -403,7 +403,6 @@ local function formulaContext(ctx)
         battle = ctx.battle and { round = ctx.battle.round } or nil,
         locals = ctx.locals,
         sceneState = ctx.sceneState,
-        v = ctx.v,
         event = ctx.event,
         self = event_self_state.formulaView(ctx.session, ctx.event),
         -- Crafting scene context: ingredients and crafter stats
@@ -493,14 +492,6 @@ handlers.SET_SCENE_STATE = function(cmd, ctx)
     assignFormulaRows(cmd, ctx.sceneState, ctx)
 end
 
-handlers.SET_VAR = function(cmd, ctx)
-    -- Legacy #410 migration surface. Scene hooks bind v to Scene state; other
-    -- immediate hosts retain their existing host/caller-owned compatibility
-    -- table. New authored content must use SET_SCENE_STATE or
-    -- SET_LOCAL so lifetime is explicit in data.
-    assignFormulaRows(cmd, ctx.v, ctx)
-end
-
 handlers.MUTATE_TILE = function(cmd, ctx)
     local exploration = require("engine.exploration")
     exploration.mutateTile(ctx.session, evalFormula(cmd.x, ctx), evalFormula(cmd.y, ctx), cmd.to)
@@ -512,8 +503,8 @@ handlers.SET_FLAG = function(cmd, ctx)
     ctx.session.flags[cmd.flag] = cmd.value and true or nil
 end
 
--- Persistent playthrough Variables are intentionally distinct from SET_VAR's
--- flow-local ctx.v. Switch is an author-facing boolean affordance over the
+-- Persistent playthrough Variables are intentionally distinct from invocation
+-- locals. Switch is an author-facing boolean affordance over the
 -- same owner, not a parallel flag/storage mechanism (#407).
 handlers.SET_GAME_VARIABLE = function(cmd, ctx)
     local variables = require("engine.game_variables")
@@ -1145,7 +1136,7 @@ local compareIds = require("engine.inventory").compareIds
 handlers.USE_ITEM = function(cmd, ctx)
     local idx = tonumber(evalFormula(cmd.itemIndex, ctx)) or 1
     local targetVal = tonumber(evalFormula(cmd.target, ctx)) or 0
-    local tab = (ctx.v and tonumber(ctx.v.tab)) or 1
+    local tab = (ctx.sceneState and tonumber(ctx.sceneState.tab)) or 1
     local loader = ctx.loader or ctx.session.loader
     local stacks = {}
     for itemId, qty in pairs(ctx.session.inventory or {}) do
@@ -1169,21 +1160,21 @@ handlers.USE_ITEM = function(cmd, ctx)
     table.sort(stacks, compareIds)
     local item = stacks[idx] and loader.getItem(stacks[idx])
     if not item then
-        if ctx.v then
-            ctx.v.lastItemResult = { success = false, reason = "No item found" }
-            ctx.v.state = 3
-            ctx.v.popupTimer = 1.5
-            ctx.v.popupText = "Cannot use: No item found"
+        if ctx.sceneState then
+            ctx.sceneState.lastItemResult = { success = false, reason = "No item found" }
+            ctx.sceneState.state = 3
+            ctx.sceneState.popupTimer = 1.5
+            ctx.sceneState.popupText = "Cannot use: No item found"
         end
         return
     end
 
     if item.type ~= "consumable" then
-        if ctx.v then
-            ctx.v.lastItemResult = { success = false, reason = "Not consumable", itemName = item.name }
-            ctx.v.state = 3
-            ctx.v.popupTimer = 1.5
-            ctx.v.popupText = "Cannot use: Not consumable"
+        if ctx.sceneState then
+            ctx.sceneState.lastItemResult = { success = false, reason = "Not consumable", itemName = item.name }
+            ctx.sceneState.state = 3
+            ctx.sceneState.popupTimer = 1.5
+            ctx.sceneState.popupText = "Cannot use: Not consumable"
         end
         return
     end
@@ -1192,15 +1183,15 @@ handlers.USE_ITEM = function(cmd, ctx)
 
     -- Called from state 1 (targetVal == 0): single target items enter target selection (state 2)
     if targetVal == 0 and not isPartyTarget then
-        if ctx.v then
+        if ctx.sceneState then
             -- The dock's cursor is declarative: the items scene binds it as
             -- `v.state == 2 and v.targetIdx or 0` (scenes.json config.dock), so
             -- setting the two variables IS the cursor move. An explicit
             -- SET_CURSOR on the same window was a second path to the same
             -- result -- and the only reason G3 logged anything at all for this
             -- scene.
-            ctx.v.state = 2
-            ctx.v.targetIdx = 1
+            ctx.sceneState.state = 2
+            ctx.sceneState.targetIdx = 1
         end
         return
     end
@@ -1212,11 +1203,11 @@ handlers.USE_ITEM = function(cmd, ctx)
 
     local ok, reason = usability.canUseItem(item, target or (isPartyTarget and nil or ctx.session.party[1]), { session = ctx.session, isField = (ctx.battle == nil) })
     if not ok then
-        if ctx.v then
-            ctx.v.lastItemResult = { success = false, reason = reason, itemName = item.name }
-            ctx.v.state = 3
-            ctx.v.popupTimer = 1.5
-            ctx.v.popupText = "Cannot use: " .. reason
+        if ctx.sceneState then
+            ctx.sceneState.lastItemResult = { success = false, reason = reason, itemName = item.name }
+            ctx.sceneState.state = 3
+            ctx.sceneState.popupTimer = 1.5
+            ctx.sceneState.popupText = "Cannot use: " .. reason
         end
         return
     end
@@ -1289,8 +1280,8 @@ handlers.USE_ITEM = function(cmd, ctx)
     local detailsStr = #detailsParts > 0 and table.concat(detailsParts, ", ") or nil
     local tName = (not isPartyTarget and target) and target.name or nil
 
-    if ctx.v then
-        ctx.v.lastItemResult = {
+    if ctx.sceneState then
+        ctx.sceneState.lastItemResult = {
             success = true,
             itemName = item.name,
             targetName = tName,
@@ -1298,13 +1289,13 @@ handlers.USE_ITEM = function(cmd, ctx)
             details = detailsStr,
             reason = "OK"
         }
-        ctx.v.state = 3
-        ctx.v.popupTimer = 1.5
+        ctx.sceneState.state = 3
+        ctx.sceneState.popupTimer = 1.5
         local mainText = "Used " .. item.name .. (tName and (" on " .. tName) or "") .. "!"
         if detailsStr then
             mainText = mainText .. "\n" .. detailsStr
         end
-        ctx.v.popupText = mainText
+        ctx.sceneState.popupText = mainText
     end
 end
 
@@ -1347,7 +1338,7 @@ end
 handlers.RESUME_RECRUIT = function(cmd, ctx)
     local session = ctx.session
     if not session then return end
-    local sourceKey = (ctx.v and ctx.v.sourceKey) or (ctx.pendingRecruitResume and ctx.pendingRecruitResume.sourceKey)
+    local sourceKey = (ctx.sceneState and ctx.sceneState.sourceKey) or (ctx.pendingRecruitResume and ctx.pendingRecruitResume.sourceKey)
     if sourceKey and session.recruitNodes and session.recruitNodes[sourceKey] then
         local node = session.recruitNodes[sourceKey]
         if cmd.result == "requirement_satisfied" or cmd.result == nil then
@@ -2136,9 +2127,9 @@ handlers.LIST_SAVES = function(cmd, ctx)
             gold = s and s.gold, dungeonFloor = s and s.dungeonFloor, savedAt = s and s.savedAt,
         })
     end
-    ctx.v = ctx.v or {}
-    ctx.v.saveRows = rows
-    ctx.v.saveCount = #rows
+    ctx.sceneState = ctx.sceneState or {}
+    ctx.sceneState.saveRows = rows
+    ctx.sceneState.saveCount = #rows
 end
 
 -- Saves the current session into the given slot. The scene name recorded is
@@ -2154,9 +2145,9 @@ handlers.SAVE_GAME = function(cmd, ctx)
     local slot = cmd.slot ~= nil and tostring(evalFormula(cmd.slot, ctx)) or "slot1"
     local sceneName = ctx.sceneName or "map"
     local ok, err = savegame.save(ctx.session, ctx.loader or (ctx.session and ctx.session.loader), sceneName, slot)
-    ctx.v = ctx.v or {}
-    ctx.v.saveSucceeded = ok and true or false
-    ctx.v.saveError = ok and nil or tostring(err)
+    ctx.sceneState = ctx.sceneState or {}
+    ctx.sceneState.saveSucceeded = ok and true or false
+    ctx.sceneState.saveError = ok and nil or tostring(err)
 end
 
 -- Loads a slot, rebuilds the GameSession, re-points the renderer/global
@@ -2172,8 +2163,8 @@ handlers.LOAD_GAME = function(cmd, ctx)
     local slot = cmd.slot ~= nil and tostring(evalFormula(cmd.slot, ctx)) or "slot1"
     local data, err = savegame.load(slot, loader)
     if not data then
-        ctx.v = ctx.v or {}
-        ctx.v.loadError = tostring(err)
+        ctx.sceneState = ctx.sceneState or {}
+        ctx.sceneState.loadError = tostring(err)
         return
     end
     local sess, sceneName = savegame.deserialize(data, loader)
@@ -2212,9 +2203,9 @@ handlers.LIST_ACTIVE_QUESTS = function(cmd, ctx)
         if a.completed ~= b.completed then return not a.completed end
         return (a.name or "") < (b.name or "")
     end)
-    ctx.v = ctx.v or {}
-    ctx.v.questRows = rows
-    ctx.v.questCount = #rows
+    ctx.sceneState = ctx.sceneState or {}
+    ctx.sceneState.questRows = rows
+    ctx.sceneState.questCount = #rows
 end
 
 -- Materializes authored lore into scene rows. Unlock state belongs to the
@@ -2240,9 +2231,9 @@ handlers.LIST_UNLOCKED_LORE = function(cmd, ctx)
         if a.category ~= b.category then return a.category < b.category end
         return a.title < b.title
     end)
-    ctx.v = ctx.v or {}
-    ctx.v.loreRows = rows
-    ctx.v.loreCount = #rows
+    ctx.sceneState = ctx.sceneState or {}
+    ctx.sceneState.loreRows = rows
+    ctx.sceneState.loreCount = #rows
 end
 
 -- Fixed display order for the Controls scene's binding list.
@@ -2260,9 +2251,9 @@ handlers.LIST_INPUT_BINDINGS = function(cmd, ctx)
         local key = bindings[button]
         table.insert(rows, { name = button .. " - " .. tostring(key), button = button, key = key })
     end
-    ctx.v = ctx.v or {}
-    ctx.v.bindingRows = rows
-    ctx.v.bindingCount = #rows
+    ctx.sceneState = ctx.sceneState or {}
+    ctx.sceneState.bindingRows = rows
+    ctx.sceneState.bindingCount = #rows
 end
 
 -- Rebinds a SNES button to a raw key via engine.input_map and persists it.
@@ -2277,22 +2268,22 @@ end
 
 handlers.SCENE_EVENT = function(cmd, ctx)
     -- The interpreter never switches scenes itself (S2); scene_host consumes
-    -- this event and performs the transition. Optional `vars` (same
-    -- {name, value} shape as SET_VAR assignments) are resolved NOW, against
-    -- the PUSHING scene's v/session/party — the only point where that
-    -- context is still live — then seeded into the pushed scene's v BEFORE
+    -- this event and performs the transition. Optional `sceneState` (same
+    -- {name, value} shape as SET_SCENE_STATE assignments) is resolved NOW,
+    -- against the PUSHING Scene State/session/party — the only point where
+    -- that context is still live — then seeded into the pushed Scene State BEFORE
     -- its on_enter runs (scene_host.push), so the target scene's setup
     -- hooks can read them (e.g. the ritual scene's ritualMode/targetIndex).
-    local vars = nil
-    if type(cmd.vars) == "table" then
-        vars = {}
-        for _, a in ipairs(cmd.vars) do
+    local sceneState = nil
+    if type(cmd.sceneState) == "table" then
+        sceneState = {}
+        for _, a in ipairs(cmd.sceneState) do
             if type(a) == "table" and a.name then
-                vars[a.name] = evalFormula(a.value, ctx)
+                sceneState[a.name] = evalFormula(a.value, ctx)
             end
         end
     end
-    table.insert(ctx.events, { type = "scene_change", kind = cmd.kind, scene = cmd.scene, vars = vars })
+    table.insert(ctx.events, { type = "scene_change", kind = cmd.kind, scene = cmd.scene, sceneState = sceneState })
 end
 
 handlers.EXPORT_MAP_GEOMETRY = function(_, ctx)
@@ -2301,16 +2292,16 @@ handlers.EXPORT_MAP_GEOMETRY = function(_, ctx)
         -- an ordinary session. The menu itself is reachable only from the
         -- developer-mode host shortcut, so expose that boundary in the scene
         -- instead of making build tools load presentation or crash.
-        ctx.v.statusText = "MAP GEOMETRY EXPORT\n\nAvailable only in developer mode."
+        ctx.sceneState.statusText = "MAP GEOMETRY EXPORT\n\nAvailable only in developer mode."
         return
     end
     local result, err = present("exportMapGeometry", ctx.session)
     if result then
-        ctx.v.statusText = string.format(
+        ctx.sceneState.statusText = string.format(
             "EXPORTED OBJ\n%s\n\n%d triangles  %d vertices\n%d groups\n\nTextures are not included yet.",
             result.relativePath, result.triangleCount, result.vertexCount, result.groupCount)
     else
-        ctx.v.statusText = "EXPORT FAILED\n\n" .. tostring(err or "Presentation export capability is not bound.")
+        ctx.sceneState.statusText = "EXPORT FAILED\n\n" .. tostring(err or "Presentation export capability is not bound.")
     end
 end
 
@@ -2416,19 +2407,19 @@ local function buildScriptApi(ctx)
     local recMod = require("engine.recruitment")
     api.recruitment = setmetatable({
         onEnterRecruitScene = function(sCtx)
-            recMod.onEnterRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), v = (sCtx and sCtx.v) or ctx.v, events = ctx.events, scene = ctx.scene })
+            recMod.onEnterRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), sceneState = (sCtx and sCtx.sceneState) or ctx.sceneState, events = ctx.events, scene = ctx.scene })
         end,
         onNavRecruitScene = function(sCtx, dir)
-            recMod.onNavRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), v = (sCtx and sCtx.v) or ctx.v, events = ctx.events, scene = ctx.scene }, dir)
+            recMod.onNavRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), sceneState = (sCtx and sCtx.sceneState) or ctx.sceneState, events = ctx.events, scene = ctx.scene }, dir)
         end,
         onSelectRecruitScene = function(sCtx)
-            recMod.onSelectRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), v = (sCtx and sCtx.v) or ctx.v, events = ctx.events, scene = ctx.scene })
+            recMod.onSelectRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), sceneState = (sCtx and sCtx.sceneState) or ctx.sceneState, events = ctx.events, scene = ctx.scene })
         end,
         onCancelRecruitScene = function(sCtx)
-            recMod.onCancelRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), v = (sCtx and sCtx.v) or ctx.v, events = ctx.events, scene = ctx.scene })
+            recMod.onCancelRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), sceneState = (sCtx and sCtx.sceneState) or ctx.sceneState, events = ctx.events, scene = ctx.scene })
         end,
         onExitRecruitScene = function(sCtx)
-            recMod.onExitRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), v = (sCtx and sCtx.v) or ctx.v, events = ctx.events, scene = ctx.scene })
+            recMod.onExitRecruitScene({ session = session, loader = ctx.loader or (session and session.loader), sceneState = (sCtx and sCtx.sceneState) or ctx.sceneState, events = ctx.events, scene = ctx.scene })
         end,
     }, { __index = recMod })
     -- Generic read helpers (D13): formula evaluation and data queries, so
@@ -3009,7 +3000,6 @@ handlers.SCRIPT = function(cmd, ctx)
         target = ctx.target or ctx.b,
         locals = ctx.locals,
         sceneState = ctx.sceneState,
-        v = ctx.v,
         -- Scene hooks expose the scene's config as read-only-by-convention
         -- data (D13); nil outside scene contexts.
         config = ctx.scene and ctx.scene.config or nil,
@@ -3074,11 +3064,8 @@ local function runImmediateCore(commands, ctx)
     ctx.events = ctx.events or {}
     -- Explicit process locals are owned by one immediate invocation. The
     -- public runImmediate boundary refreshes them between independent runs;
-    -- runImmediateCore only supplies a table for internal callers. Legacy v
-    -- remains a separate compatibility namespace so its historical lifetime is
-    -- not silently redefined by the new owner-explicit substrate.
+    -- runImmediateCore only supplies a table for internal callers.
     ctx.locals = ctx.locals or {}
-    ctx.v = ctx.v or {}
     if ctx.battle then
         ctx.party = ctx.party or ctx.battle.allies
         ctx.enemies = ctx.enemies or ctx.battle.enemies

@@ -66,14 +66,14 @@ test("USE_ITEM command handles target: 'none' items without single-target select
     local ctx = {
         session = sess,
         loader = loader,
-        v = { tab = 1, state = 1, idx = 1, _guard = 0 }
+        sceneState = { tab = 1, state = 1, idx = 1 }
     }
 
     interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 0 } }, ctx)
 
-    assert(ctx.v.lastItemResult and ctx.v.lastItemResult.success == true, "USE_ITEM should succeed")
-    assert(ctx.v.state == 3, "State should transition to 3 (popup)")
-    assert(ctx.v.popupText:find("joins you"), "Popup text should mention recruitment feedback")
+    assert(ctx.sceneState.lastItemResult and ctx.sceneState.lastItemResult.success == true, "USE_ITEM should succeed")
+    assert(ctx.sceneState.state == 3, "State should transition to 3 (popup)")
+    assert(ctx.sceneState.popupText:find("joins you"), "Popup text should mention recruitment feedback")
     assert((sess.inventory[11] or 0) == 0, "Item should be consumed")
     assert(#sess.party == 3, "Party count should increase from 2 to 3 (recruiting exactly 1 creature, not 4)")
 
@@ -94,13 +94,13 @@ test("USE_ITEM single-target item enters state 2 when usable", function()
     local ctx = {
         session = sess,
         loader = loader,
-        v = { tab = 1, state = 1, idx = 1, _guard = 0 }
+        sceneState = { tab = 1, state = 1, idx = 1 }
     }
 
     interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 0 } }, ctx)
 
-    assert(ctx.v.state == 2, "State should transition to 2 (target selection)")
-    assert(ctx.v.targetIdx == 1, "Target index should default to 1")
+    assert(ctx.sceneState.state == 2, "State should transition to 2 (target selection)")
+    assert(ctx.sceneState.targetIdx == 1, "Target index should default to 1")
     assert((sess.inventory[1] or 0) == 1, "Item should NOT be consumed before target pick")
 end)
 
@@ -115,19 +115,19 @@ test("Detailed effect feedback for stat-up and skill learning", function()
     local ctx = {
         session = sess,
         loader = loader,
-        v = { tab = 1, state = 2, idx = 1, targetIdx = 1, _guard = 0 }
+        sceneState = { tab = 1, state = 2, idx = 1, targetIdx = 1 }
     }
 
     interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
-    assert(ctx.v.lastItemResult.success == true, "Learn skill item should succeed")
-    assert(ctx.v.popupText:find("Hero learns Wind Blade"), "Feedback text should include skill name: " .. tostring(ctx.v.popupText))
+    assert(ctx.sceneState.lastItemResult.success == true, "Learn skill item should succeed")
+    assert(ctx.sceneState.popupText:find("Hero learns Wind Blade"), "Feedback text should include skill name: " .. tostring(ctx.sceneState.popupText))
 
     -- Test Whetstone Draught (param_plus ATK)
-    ctx.v.state = 1
-    ctx.v.idx = 1
+    ctx.sceneState.state = 1
+    ctx.sceneState.idx = 1
     interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
-    assert(ctx.v.lastItemResult.success == true, "Param plus item should succeed")
-    assert(ctx.v.popupText:find("ATK rises by 2"), "Feedback text should include stat boost details: " .. tostring(ctx.v.popupText))
+    assert(ctx.sceneState.lastItemResult.success == true, "Param plus item should succeed")
+    assert(ctx.sceneState.popupText:find("ATK rises by 2"), "Feedback text should include stat boost details: " .. tostring(ctx.sceneState.popupText))
 end)
 
 print("=== Item Menu Tests Completed: " .. passed .. " passed, " .. failed .. " failed ===")

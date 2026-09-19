@@ -1,7 +1,7 @@
 {
   "id": "b009_positioning",
   "terminal": {
-    "reached": "v.ehp <= 0"
+    "reached": "sceneState.ehp <= 0"
   },
   "name": "B009 — Parasite-Eve-Like Positioning Proof",
   "kind": "menu",
@@ -24,7 +24,7 @@
       "content": [
         {
           "type": "text",
-          "text": "B009 — Positioning Proof   State: {v.stateText}"
+          "text": "B009 — Positioning Proof   State: {sceneState.stateText}"
         }
       ]
     },
@@ -42,36 +42,42 @@
     {
       "id": "player",
       "rect": {
-        "x": "2 + 1 + v.px",
-        "y": "4 + 1 + v.py",
+        "x": "2 + 1 + sceneState.px",
+        "y": "4 + 1 + sceneState.py",
         "w": 1,
         "h": 1
       },
       "style": "panel",
       "content": [
-        { "type": "text", "text": "@" }
+        {
+          "type": "text",
+          "text": "@"
+        }
       ]
     },
     {
       "id": "enemy",
       "rect": {
-        "x": "2 + 1 + v.ex",
-        "y": "4 + 1 + v.ey",
+        "x": "2 + 1 + sceneState.ex",
+        "y": "4 + 1 + sceneState.ey",
         "w": 1,
         "h": 1
       },
       "style": "panel",
       "content": [
-        { "type": "text", "text": "E" }
+        {
+          "type": "text",
+          "text": "E"
+        }
       ]
     },
     {
       "id": "target_area",
       "rect": {
-        "x": "2 + 1 + v.px - v.range",
-        "y": "4 + 1 + v.py - v.range",
-        "w": "v.range * 2 + 1",
-        "h": "v.range * 2 + 1"
+        "x": "2 + 1 + sceneState.px - sceneState.range",
+        "y": "4 + 1 + sceneState.py - sceneState.range",
+        "w": "sceneState.range * 2 + 1",
+        "h": "sceneState.range * 2 + 1"
       },
       "style": "frame",
       "content": []
@@ -92,10 +98,18 @@
           "y": 1,
           "width": 12,
           "label": "ATB",
-          "value": "v.atb",
+          "value": "sceneState.atb",
           "max": "100",
-          "color": [0.2, 0.2, 0.2],
-          "fill": [0.0, 1.0, 0.0]
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            0,
+            1,
+            0
+          ]
         }
       ]
     },
@@ -115,10 +129,18 @@
           "y": 1,
           "width": 12,
           "label": "Enemy HP",
-          "value": "v.ehp",
+          "value": "sceneState.ehp",
           "max": "100",
-          "color": [0.2, 0.2, 0.2],
-          "fill": [1.0, 0.0, 0.0]
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            1,
+            0,
+            0
+          ]
         }
       ]
     }
@@ -136,27 +158,52 @@
         "ref": "update"
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
-          { "name": "inputX", "value": 0 },
-          { "name": "inputY", "value": 0 }
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          }
         ]
       }
     ],
     "on_up": [
-      { "cmd": "SET_VAR", "name": "inputY", "value": -1 }
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputY",
+        "value": -1
+      }
     ],
     "on_down": [
-      { "cmd": "SET_VAR", "name": "inputY", "value": 1 }
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputY",
+        "value": 1
+      }
     ],
     "on_left": [
-      { "cmd": "SET_VAR", "name": "inputX", "value": -1 }
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputX",
+        "value": -1
+      }
     ],
     "on_right": [
-      { "cmd": "SET_VAR", "name": "inputX", "value": 1 }
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputX",
+        "value": 1
+      }
     ],
     "on_select": [
-      { "cmd": "SCRIPT", "ref": "action" }
+      {
+        "cmd": "SCRIPT",
+        "ref": "action"
+      }
     ],
     "on_cancel": [
       {
@@ -166,15 +213,25 @@
     ]
   },
   "scripts": {
-    "init": "local v = ctx.v; v.px = 10; v.py = 10; v.ex = 20; v.ey = 5; v.atb = 0; v.ehp = 100; v.stateText = 'Moving'; v.range = 5; v.speed = 10.0; v.mode = 'move'; v.actionTimer = 0; v.inputX = 0; v.inputY = 0;",
-    "update": "local v = ctx.v; local dt = time.dt; if v.mode == 'move' then v.atb = math.min(100, v.atb + 20 * dt); v.px = math.max(0, math.min(25, v.px + v.inputX * v.speed * dt)); v.py = math.max(0, math.min(13, v.py + v.inputY * v.speed * dt)); else v.actionTimer = v.actionTimer - dt; if v.actionTimer <= 0 then v.mode = 'move'; v.stateText = 'Moving' end end; if v.ehp <= 0 then v.stateText = 'VICTORY!' end",
-    "action": "local v = ctx.v; if v.mode == 'move' and v.atb >= 100 then v.mode = 'action'; v.atb = 0; v.actionTimer = 1.0; v.stateText = 'Action Phase!'; local dist = math.abs(v.px - v.ex) + math.abs(v.py - v.ey); if dist <= v.range then v.ehp = math.max(0, v.ehp - 30); v.stateText = 'HIT!' else v.stateText = 'MISSED! (Out of range)' end end"
+    "init": "local sceneState = ctx.sceneState; sceneState.px = 10; sceneState.py = 10; sceneState.ex = 20; sceneState.ey = 5; sceneState.atb = 0; sceneState.ehp = 100; sceneState.stateText = 'Moving'; sceneState.range = 5; sceneState.speed = 10.0; sceneState.mode = 'move'; sceneState.actionTimer = 0; sceneState.inputX = 0; sceneState.inputY = 0;",
+    "update": "local sceneState = ctx.sceneState; local dt = time.dt; if sceneState.mode == 'move' then sceneState.atb = math.min(100, sceneState.atb + 20 * dt); sceneState.px = math.max(0, math.min(25, sceneState.px + sceneState.inputX * sceneState.speed * dt)); sceneState.py = math.max(0, math.min(13, sceneState.py + sceneState.inputY * sceneState.speed * dt)); else sceneState.actionTimer = sceneState.actionTimer - dt; if sceneState.actionTimer <= 0 then sceneState.mode = 'move'; sceneState.stateText = 'Moving' end end; if sceneState.ehp <= 0 then sceneState.stateText = 'VICTORY!' end",
+    "action": "local sceneState = ctx.sceneState; if sceneState.mode == 'move' and sceneState.atb >= 100 then sceneState.mode = 'action'; sceneState.atb = 0; sceneState.actionTimer = 1.0; sceneState.stateText = 'Action Phase!'; local dist = math.abs(sceneState.px - sceneState.ex) + math.abs(sceneState.py - sceneState.ey); if dist <= sceneState.range then sceneState.ehp = math.max(0, sceneState.ehp - 30); sceneState.stateText = 'HIT!' else sceneState.stateText = 'MISSED! (Out of range)' end end"
   },
   "goldenScript": [
-    { "key": "right" },
-    { "key": "right" },
-    { "key": "return" },
-    { "key": "left" },
-    { "key": "b" }
+    {
+      "key": "right"
+    },
+    {
+      "key": "right"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "left"
+    },
+    {
+      "key": "b"
+    }
   ]
 }

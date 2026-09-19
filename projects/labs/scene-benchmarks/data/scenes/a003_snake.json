@@ -1,7 +1,7 @@
 {
   "id": "a003_snake",
   "terminal": {
-    "reached": "v.lost == true",
+    "reached": "sceneState.lost == true",
     "script": [
       {
         "wait": 0.2
@@ -157,7 +157,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.boardText}"
+          "text": "{sceneState.boardText}"
         }
       ]
     },
@@ -181,12 +181,12 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "timer",
         "value": 0.5
       },
@@ -198,19 +198,19 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v.timer > 0",
+        "condition": "sceneState.timer > 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "timer",
-            "value": "v.timer - v.time.dt"
+            "value": "sceneState.timer - sceneState.time.dt"
           }
         ],
         "else": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "timer",
-            "value": "v.stepTime"
+            "value": "sceneState.stepTime"
           },
           {
             "cmd": "SCRIPT",
@@ -222,10 +222,10 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.dirY == 0",
+        "condition": "sceneState.dirY == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "dirX",
@@ -243,10 +243,10 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.dirY == 0",
+        "condition": "sceneState.dirY == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "dirX",
@@ -264,10 +264,10 @@
     "on_left": [
       {
         "cmd": "IF",
-        "condition": "v.dirX == 0",
+        "condition": "sceneState.dirX == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "dirX",
@@ -285,10 +285,10 @@
     "on_right": [
       {
         "cmd": "IF",
-        "condition": "v.dirX == 0",
+        "condition": "sceneState.dirX == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "dirX",
@@ -305,7 +305,7 @@
     ],
     "on_select": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "timer",
         "value": 0.5
       },
@@ -322,8 +322,8 @@
     ]
   },
   "scripts": {
-    "init": "\nlocal v = ctx.v\nv.gridWidth = 12\nv.gridHeight = 12\nv.snake = {{x=5, y=5}, {x=5, y=6}, {x=5, y=7}}\nv.dirX = 0\nv.dirY = -1\nv.targetX = 2\nv.targetY = 2\nv.stepTime = 0.5\nv.lost = false\nv.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if v.lost then text = \"GAME OVER\\n\" end\n    for y = 0, v.gridHeight - 1 do\n        for x = 0, v.gridWidth - 1 do\n            local char = \".\"\n            if x == v.targetX and y == v.targetY then\n                char = \"*\"\n            else\n                for _, part in ipairs(v.snake) do\n                    if part.x == x and part.y == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    v.boardText = text\nend\ndraw()\n",
-    "update": "\nlocal v = ctx.v\nif v.lost then return end\nlocal head = v.snake[1]\nlocal nx = head.x + v.dirX\nlocal ny = head.y + v.dirY\n\nif nx < 0 or nx >= v.gridWidth or ny < 0 or ny >= v.gridHeight then\n    v.lost = true\nend\n\nfor _, part in ipairs(v.snake) do\n    if part.x == nx and part.y == ny then\n        v.lost = true\n    end\nend\n\nif not v.lost then\n    table.insert(v.snake, 1, {x=nx, y=ny})\n    if nx == v.targetX and ny == v.targetY then\n        v.targetX = (nx + 5) % v.gridWidth\n        v.targetY = (ny + 7) % v.gridHeight\n        v.stepTime = math.max(0.1, v.stepTime * 0.95)\n    else\n        table.remove(v.snake)\n    end\nend\n\nlocal text = \"\"\nif v.lost then text = \"GAME OVER\\n\" end\nfor y = 0, v.gridHeight - 1 do\n    for x = 0, v.gridWidth - 1 do\n        local char = \".\"\n        if x == v.targetX and y == v.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(v.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n"
+    "init": "\nlocal sceneState = ctx.sceneState\nsceneState.gridWidth = 12\nsceneState.gridHeight = 12\nsceneState.snake = {{x=5, y=5}, {x=5, y=6}, {x=5, y=7}}\nsceneState.dirX = 0\nsceneState.dirY = -1\nsceneState.targetX = 2\nsceneState.targetY = 2\nsceneState.stepTime = 0.5\nsceneState.lost = false\nsceneState.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if sceneState.lost then text = \"GAME OVER\\n\" end\n    for y = 0, sceneState.gridHeight - 1 do\n        for x = 0, sceneState.gridWidth - 1 do\n            local char = \".\"\n            if x == sceneState.targetX and y == sceneState.targetY then\n                char = \"*\"\n            else\n                for _, part in ipairs(sceneState.snake) do\n                    if part.x == x and part.y == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    sceneState.boardText = text\nend\ndraw()\n",
+    "update": "\nlocal sceneState = ctx.sceneState\nif sceneState.lost then return end\nlocal head = sceneState.snake[1]\nlocal nx = head.x + sceneState.dirX\nlocal ny = head.y + sceneState.dirY\n\nif nx < 0 or nx >= sceneState.gridWidth or ny < 0 or ny >= sceneState.gridHeight then\n    sceneState.lost = true\nend\n\nfor _, part in ipairs(sceneState.snake) do\n    if part.x == nx and part.y == ny then\n        sceneState.lost = true\n    end\nend\n\nif not sceneState.lost then\n    table.insert(sceneState.snake, 1, {x=nx, y=ny})\n    if nx == sceneState.targetX and ny == sceneState.targetY then\n        sceneState.targetX = (nx + 5) % sceneState.gridWidth\n        sceneState.targetY = (ny + 7) % sceneState.gridHeight\n        sceneState.stepTime = math.max(0.1, sceneState.stepTime * 0.95)\n    else\n        table.remove(sceneState.snake)\n    end\nend\n\nlocal text = \"\"\nif sceneState.lost then text = \"GAME OVER\\n\" end\nfor y = 0, sceneState.gridHeight - 1 do\n    for x = 0, sceneState.gridWidth - 1 do\n        local char = \".\"\n        if x == sceneState.targetX and y == sceneState.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(sceneState.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nsceneState.boardText = text\n"
   },
   "goldenScript": [
     {

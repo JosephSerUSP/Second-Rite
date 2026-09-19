@@ -1,22 +1,12 @@
 {
   "level_reached": [
     {
-      "cmd": "SET_VAR",
-      "name": "reachedLevel",
-      "value": "event.level"
-    },
-    {
       "cmd": "APPLY_GROWTH",
       "target": "target",
       "level": "event.level"
     }
   ],
   "level_gain_resolved": [
-    {
-      "cmd": "SET_VAR",
-      "name": "levelsGained",
-      "value": "event.levelsGained"
-    },
     {
       "cmd": "RESTORE_HP",
       "target": "target"

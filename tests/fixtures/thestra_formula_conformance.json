@@ -7,7 +7,7 @@
     "name": "Rite",
     "record": { "value": 9, "nested": { "name": "inside" } },
     "list": [10, 20, 30],
-    "v": { "idx": 2, "items": [{ "cost": 4 }, { "cost": 7 }] }
+    "sceneState": { "idx": 2, "items": [{ "cost": 4 }, { "cost": 7 }] }
   },
   "cases": [
     { "name": "number literal", "expr": "2.5", "expect": 2.5 },
@@ -26,7 +26,7 @@
     { "name": "or fallback", "expr": "nil or 'fallback'", "expect": "fallback" },
     { "name": "dotted access", "expr": "record.nested.name", "expect": "inside" },
     { "name": "bracket indexing is one based", "expr": "list[1] + list[3]", "expect": 40 },
-    { "name": "nested bracket access", "expr": "v.items[v.idx].cost", "expect": 7 },
+    { "name": "nested bracket access", "expr": "sceneState.items[sceneState.idx].cost", "expect": 7 },
     { "name": "list length", "expr": "#list", "expect": 3 },
     { "name": "absent equality", "expr": "record.absent == nil", "expect": true },
     { "name": "absent fallback", "expr": "record.absent or 8", "expect": 8 },

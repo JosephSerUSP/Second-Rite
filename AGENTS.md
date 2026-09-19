@@ -62,12 +62,14 @@ so one stage serves every gate); a caller-supplied root is never deleted.
 | G4 | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches the live engine |
 | G5 | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step |
 | G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `studio/editor` tab and modal |
-| unit | `lovec <gateRoot> unittest` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
-| save | `lovec <gateRoot> savetest` → `SAVETEST OK` | Save/load round-trip |
+| unit | `powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot <gateRoot>` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
+| save | from `<gateRoot>`, `lovec . savetest` → `SAVETEST OK` | Save/load round-trip |
 
-`unit` and `save` have no `.ps1` wrapper: stage once with
-`node tools/ci/stage-project-gates.js --output <gateRoot>` and run both against
-that root, the way the required CI lane does.
+Stage once with `node tools/ci/stage-project-gates.js --output <gateRoot>`. Unit
+tests must use `tools/ci/run-staged-unit.ps1`: it supplies
+`THESTRA_REPOSITORY_ROOT` for repository-verification suites and changes into the
+staged Project so native Effekseer resolves authored effect paths. Save tests have
+no wrapper; run `lovec . savetest` with `<gateRoot>` as the working directory.
 
 `lovec <gateRoot> reachability` is a **report, not a gate** (always exits 0): content that
 resolves but that nothing can produce or trigger — unsellable shops, items no

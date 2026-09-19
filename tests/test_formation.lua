@@ -124,7 +124,21 @@ assert(intercepted, "Saban in slot 1 intercepts attack aimed at Pixie in slot 3"
 
 print("[PASS] Sparse formation Saban-1 / empty-2 / Pixie-3 targeting, rects, & cover")
 
--- 7. Cover Interception Edge Cases
+-- 7. Save v5 preserves sparse formation slots through real JSON encoding.
+local sparseSave = json.decode(json.encode(savegame.serialize(sparseSess, loader, "map")))
+local restoredSparseSess = savegame.deserialize(sparseSave, loader)
+assert(restoredSparseSess.party[1] and restoredSparseSess.party[1].actorData.id == "moa",
+    "save v5 preserves the slot-1 battler")
+assert(restoredSparseSess.party[2] == nil, "save v5 preserves the slot-2 hole")
+assert(restoredSparseSess.party[3] and restoredSparseSess.party[3].actorData.id == "pixie",
+    "save v5 preserves the slot-3 battler")
+assert(restoredSparseSess.party[4] == nil, "save v5 preserves the slot-4 hole")
+assert(formation.slotOf(restoredSparseSess.party, restoredSparseSess.party[3]) == 3,
+    "restored Pixie remains in the back-left formation slot")
+
+print("[PASS] Save v5 sparse formation JSON round-trip")
+
+-- 8. Cover Interception Edge Cases
 -- Case A: Dead protector does NOT cover
 local deadSess = session.GameSession.new(loader)
 local deadSaban = session.Battler.new(loader.getUnit("moa"), 3)

@@ -2153,7 +2153,10 @@ handlers.SAVE_GAME = function(cmd, ctx)
     local savegame = require("engine.savegame")
     local slot = cmd.slot ~= nil and tostring(evalFormula(cmd.slot, ctx)) or "slot1"
     local sceneName = ctx.sceneName or "map"
-    savegame.save(ctx.session, ctx.loader or (ctx.session and ctx.session.loader), sceneName, slot)
+    local ok, err = savegame.save(ctx.session, ctx.loader or (ctx.session and ctx.session.loader), sceneName, slot)
+    ctx.v = ctx.v or {}
+    ctx.v.saveSucceeded = ok and true or false
+    ctx.v.saveError = ok and nil or tostring(err)
 end
 
 -- Loads a slot, rebuilds the GameSession, re-points the renderer/global

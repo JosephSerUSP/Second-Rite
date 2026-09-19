@@ -37,7 +37,7 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 
 - **Domain:** Formations
 - **Missing:** `authorable`, `livePreview`, `goldenFixture`, `parityCovered`, `hardeningCovered`
-- **Notes:** Formation state exists at runtime and round-trips through game state, but no first-class Studio authoring/preview closure is claimed yet.
+- **Notes:** Formation state exists at runtime; tests/test_formation.lua proves a save v5 JSON round-trip preserves sparse slots 1/3 and holes. No first-class Studio authoring/preview closure is claimed yet.
 
 ### Actor database
 

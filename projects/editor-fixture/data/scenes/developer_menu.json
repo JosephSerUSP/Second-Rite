@@ -29,8 +29,8 @@
         {
           "type": "list",
           "listId": "config:developerCommands",
-          "formatRight": "{(id == 'wireframe' and (v.wireframe and 'ON' or 'OFF')) or (id == 'fps' and (v.fps and 'ON' or 'OFF')) or (id == 'perf' and (v.perf and 'ON' or 'OFF')) or (id == 'bounds' and (v.bounds and 'ON' or 'OFF')) or (id == 'server' and (v.server and 'ON' or 'OFF')) or (id == 'phase' and (v.phase and 'ON' or 'OFF')) or ''}",
-          "cursor": "v.idx"
+          "formatRight": "{(id == 'wireframe' and (sceneState.wireframe and 'ON' or 'OFF')) or (id == 'fps' and (sceneState.fps and 'ON' or 'OFF')) or (id == 'perf' and (sceneState.perf and 'ON' or 'OFF')) or (id == 'bounds' and (sceneState.bounds and 'ON' or 'OFF')) or (id == 'server' and (sceneState.server and 'ON' or 'OFF')) or (id == 'phase' and (sceneState.phase and 'ON' or 'OFF')) or ''}",
+          "cursor": "sceneState.idx"
         }
       ]
     }
@@ -49,12 +49,17 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "idx",
             "value": 1
-          },
+          }
+        ]
+      },
+      {
+        "cmd": "SET_LOCAL",
+        "assignments": [
           {
             "name": "_guard",
             "value": 0
@@ -63,18 +68,18 @@
       },
       {
         "cmd": "SCRIPT",
-        "code": "ctx.v.wireframe = api.getWireframe()\nctx.v.fps = api.getFpsToggle()\nctx.v.perf = api.getPerfToggle()\nctx.v.bounds = api.getBoundsOverlay()\nctx.v.server = api.developerServerActive()\nctx.v.phase = api.getPhaseMode()"
+        "code": "ctx.sceneState.wireframe = api.getWireframe()\nctx.sceneState.fps = api.getFpsToggle()\nctx.sceneState.perf = api.getPerfToggle()\nctx.sceneState.bounds = api.getBoundsOverlay()\nctx.sceneState.server = api.developerServerActive()\nctx.sceneState.phase = api.getPhaseMode()"
       }
     ],
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.idx > 1",
+        "condition": "sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx - 1"
+            "value": "sceneState.idx - 1"
           }
         ]
       }
@@ -82,12 +87,12 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < 14",
+        "condition": "sceneState.idx < 14",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx + 1"
+            "value": "sceneState.idx + 1"
           }
         ]
       }
@@ -95,90 +100,90 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 1",
+        "condition": "locals._guard == 0 and sceneState.idx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "wireframe",
-            "value": "not (v.wireframe or false)"
+            "value": "not (sceneState.wireframe or false)"
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.setWireframe(ctx.v.wireframe)"
+            "code": "api.setWireframe(ctx.sceneState.wireframe)"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 2",
+        "condition": "locals._guard == 0 and sceneState.idx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "fps",
-            "value": "not (v.fps or false)"
+            "value": "not (sceneState.fps or false)"
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.setFpsToggle(ctx.v.fps)"
+            "code": "api.setFpsToggle(ctx.sceneState.fps)"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 3",
+        "condition": "locals._guard == 0 and sceneState.idx == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "perf",
-            "value": "not (v.perf or false)"
+            "value": "not (sceneState.perf or false)"
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.setPerfToggle(ctx.v.perf)"
+            "code": "api.setPerfToggle(ctx.sceneState.perf)"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 4",
+        "condition": "locals._guard == 0 and sceneState.idx == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "bounds",
-            "value": "not (v.bounds or false)"
+            "value": "not (sceneState.bounds or false)"
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.setBoundsOverlay(ctx.v.bounds)"
+            "code": "api.setBoundsOverlay(ctx.sceneState.bounds)"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 5",
+        "condition": "locals._guard == 0 and sceneState.idx == 5",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -191,10 +196,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 6",
+        "condition": "locals._guard == 0 and sceneState.idx == 6",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -210,45 +215,45 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 7",
+        "condition": "locals._guard == 0 and sceneState.idx == 7",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.toggleDeveloperServer()\nctx.v.server = api.developerServerActive()"
+            "code": "api.toggleDeveloperServer()\nctx.sceneState.server = api.developerServerActive()"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 8",
+        "condition": "locals._guard == 0 and sceneState.idx == 8",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "phase",
-            "value": "not (v.phase or false)"
+            "value": "not (sceneState.phase or false)"
           },
           {
             "cmd": "SCRIPT",
-            "code": "api.setPhaseMode(ctx.v.phase)"
+            "code": "api.setPhaseMode(ctx.sceneState.phase)"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 9",
+        "condition": "locals._guard == 0 and sceneState.idx == 9",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -260,10 +265,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 10",
+        "condition": "locals._guard == 0 and sceneState.idx == 10",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -275,10 +280,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 11",
+        "condition": "locals._guard == 0 and sceneState.idx == 11",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -290,10 +295,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 12",
+        "condition": "locals._guard == 0 and sceneState.idx == 12",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -305,10 +310,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 13",
+        "condition": "locals._guard == 0 and sceneState.idx == 13",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -321,10 +326,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 14",
+        "condition": "locals._guard == 0 and sceneState.idx == 14",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -339,7 +344,7 @@
         ]
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       }

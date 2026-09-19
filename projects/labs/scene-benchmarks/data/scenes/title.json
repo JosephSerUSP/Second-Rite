@@ -37,7 +37,7 @@
         {
           "type": "list",
           "listId": "term:title.options",
-          "cursor": "v.idx"
+          "cursor": "sceneState.idx"
         }
       ]
     },
@@ -77,12 +77,17 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "idx",
             "value": 1
-          },
+          }
+        ]
+      },
+      {
+        "cmd": "SET_LOCAL",
+        "assignments": [
           {
             "name": "_guard",
             "value": 0
@@ -92,25 +97,25 @@
     ],
     "on_up": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "v.idx == 1 and 16 or v.idx - 1"
+        "value": "sceneState.idx == 1 and 16 or sceneState.idx - 1"
       }
     ],
     "on_down": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "v.idx == 16 and 1 or v.idx + 1"
+        "value": "sceneState.idx == 16 and 1 or sceneState.idx + 1"
       }
     ],
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 1",
+        "condition": "locals._guard == 0 and sceneState.idx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -126,10 +131,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 2",
+        "condition": "locals._guard == 0 and sceneState.idx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -145,10 +150,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 16",
+        "condition": "locals._guard == 0 and sceneState.idx == 16",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -159,10 +164,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 5",
+        "condition": "locals._guard == 0 and sceneState.idx == 5",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -178,10 +183,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 4",
+        "condition": "locals._guard == 0 and sceneState.idx == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -197,10 +202,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 3",
+        "condition": "locals._guard == 0 and sceneState.idx == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -216,10 +221,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 6",
+        "condition": "locals._guard == 0 and sceneState.idx == 6",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -235,10 +240,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 7",
+        "condition": "locals._guard == 0 and sceneState.idx == 7",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -254,10 +259,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 8",
+        "condition": "locals._guard == 0 and sceneState.idx == 8",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -273,10 +278,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 9",
+        "condition": "locals._guard == 0 and sceneState.idx == 9",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -292,10 +297,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 10",
+        "condition": "locals._guard == 0 and sceneState.idx == 10",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -311,10 +316,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 11",
+        "condition": "locals._guard == 0 and sceneState.idx == 11",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -330,10 +335,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 12",
+        "condition": "locals._guard == 0 and sceneState.idx == 12",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -349,10 +354,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 13",
+        "condition": "locals._guard == 0 and sceneState.idx == 13",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -368,10 +373,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 14",
+        "condition": "locals._guard == 0 and sceneState.idx == 14",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -387,10 +392,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 15",
+        "condition": "locals._guard == 0 and sceneState.idx == 15",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -405,7 +410,7 @@
         ]
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       }

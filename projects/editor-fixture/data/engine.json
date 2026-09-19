@@ -283,7 +283,7 @@
       "style": "creatureHeader",
       "title": null,
       "contentY": 0.5,
-      "member": "v.idx"
+      "member": "sceneState.idx"
     },
     "status_skills": {
       "x": 0.5,
@@ -321,7 +321,7 @@
       "height": 12,
       "style": "battlerInfo",
       "title": null,
-      "member": "v.idx",
+      "member": "sceneState.idx",
       "showExp": true
     },
     "equip_slots": {
@@ -414,7 +414,7 @@
       "height": 12,
       "style": "panel",
       "title": "LEVEL UP!",
-      "portrait": "v.levelUpPortrait",
+      "portrait": "sceneState.levelUpPortrait",
       "portraitX": 1,
       "portraitY": 2,
       "portraitW": 7.33,
@@ -484,7 +484,7 @@
       "height": 11,
       "style": "panel",
       "title": null,
-      "portrait": "v.portraitKey",
+      "portrait": "sceneState.portraitKey",
       "portraitX": 1.3,
       "portraitW": 7.33,
       "portraitH": 9
@@ -718,10 +718,10 @@
       "height": 6,
       "style": "statBlock",
       "title": null,
-      "member": "v.idx",
-      "slot": "v.slot",
+      "member": "sceneState.idx",
+      "slot": "sceneState.slot",
       "previewList": "equip_list",
-      "previewWhen": "v.state == 3",
+      "previewWhen": "sceneState.state == 3",
       "contentY": 0.5
     },
     "battle_inspector": {
@@ -821,8 +821,8 @@
               {
                 "type": "list",
                 "listId": "inventory",
-                "cursor": "v.idx",
-                "tabVar": "v.tab"
+                "cursor": "sceneState.idx",
+                "tabVar": "sceneState.tab"
               }
             ],
             "chrome": "none"
@@ -866,18 +866,18 @@
               "h": 12
             },
             "style": "frame",
-            "visible": "v.dialoguePortrait ~= nil and v.dialoguePortrait ~= ''",
+            "visible": "sceneState.dialoguePortrait ~= nil and sceneState.dialoguePortrait ~= ''",
             "content": [
               {
                 "type": "image",
-                "portraitField": "v.dialoguePortrait",
+                "portraitField": "sceneState.dialoguePortrait",
                 "portraitX": 1,
                 "portraitY": 1,
                 "portraitW": 7.5,
                 "portraitH": 10,
                 "portraitOverflow": 0.5,
-                "portraitFrame": "v.dialogueExpression",
-                "portraitName": "v.dialogueSpeaker"
+                "portraitFrame": "sceneState.dialogueExpression",
+                "portraitName": "sceneState.dialogueSpeaker"
               }
             ],
             "chrome": "none"
@@ -896,14 +896,14 @@
               "x": 0,
               "w": 32
             },
-            "visible": "v.dialogueMode == 'text' or v.dialogueMode == 'choice'",
+            "visible": "sceneState.dialogueMode == 'text' or sceneState.dialogueMode == 'choice'",
             "align": "left",
-            "waitInput": "v.dialogueMode == 'text' and v.dialogueWaiting == true",
+            "waitInput": "sceneState.dialogueMode == 'text' and sceneState.dialogueWaiting == true",
             "content": [
               {
                 "type": "text",
-                "text": "{v.dialogueText}",
-                "reveal": "v.dialogueRevealElapsed"
+                "text": "{sceneState.dialogueText}",
+                "reveal": "sceneState.dialogueRevealElapsed"
               }
             ],
             "chrome": "none"
@@ -924,13 +924,13 @@
               "w": 32
             },
             "fitRows": "bottom",
-            "visible": "v.dialogueMode == 'choice'",
+            "visible": "sceneState.dialogueMode == 'choice'",
             "content": [
               {
                 "type": "list",
-                "listId": "v:dialogueOptions",
+                "listId": "sceneState:dialogueOptions",
                 "format": "{name}",
-                "cursor": "v.dialogueCursorIdx"
+                "cursor": "sceneState.dialogueCursorIdx"
               }
             ]
           }
@@ -962,7 +962,7 @@
               "h": 12
             },
             "style": "frame",
-            "visible": "v.combatState ~= 'levelup' and v.combatState ~= 'victory' and not (v.combatState == 'log' and (v.pendingRewardLog ~= nil or v.pendingLevelUpLog == true))",
+            "visible": "sceneState.combatState ~= 'levelup' and sceneState.combatState ~= 'victory' and not (sceneState.combatState == 'log' and (sceneState.pendingRewardLog ~= nil or sceneState.pendingLevelUpLog == true))",
             "content": [],
             "chrome": "none"
           },
@@ -976,11 +976,11 @@
             },
             "style": "frame",
             "title": "Spoils",
-            "visible": "v.combatState == 'victory' or (v.combatState == 'log' and v.pendingRewardLog ~= nil)",
+            "visible": "sceneState.combatState == 'victory' or (sceneState.combatState == 'log' and sceneState.pendingRewardLog ~= nil)",
             "content": [
               {
                 "type": "text",
-                "text": "{v.victorySpoilsText}"
+                "text": "{sceneState.victorySpoilsText}"
               }
             ],
             "chrome": "none"
@@ -995,7 +995,7 @@
             },
             "style": "levelUpStats",
             "title": "Level UP!",
-            "visible": "v.combatState == 'levelup' or (v.combatState == 'log' and v.pendingLevelUpLog == true)",
+            "visible": "sceneState.combatState == 'levelup' or (sceneState.combatState == 'log' and sceneState.pendingLevelUpLog == true)",
             "content": [],
             "chrome": "none"
           },
@@ -1570,5 +1570,8 @@
   },
   "ui": {
     "renderSurfaceProfile": "classic"
-  }
+  },
+  "formulaHelp": [],
+  "scriptingHelp": [],
+  "commands": []
 }

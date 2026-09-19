@@ -22,10 +22,10 @@
     "environmentPackage": "assets/environments/st_maria_town/market/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
+      "minY": 0,
       "maxY": 20.708,
       "depthX": 7.8,
-      "groundZ": 0.0,
+      "groundZ": 0,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -34,18 +34,18 @@
       "target": {
         "x": 7.8,
         "y": 10.354,
-        "z": 0.0
+        "z": 0
       },
       "distance": 18.666666666666668,
-      "yawDegrees": 0.0,
+      "yawDegrees": 0,
       "pitchDegrees": -17.5,
       "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
-      "farPlane": 128.0,
+      "farPlane": 128,
       "projectionScale": {
-        "x": 1.0,
-        "y": 1.0
+        "x": 1,
+        "y": 1
       },
       "projectionFrame": {
         "canonicalCenterX": 213,
@@ -56,9 +56,9 @@
         "center": 10.354,
         "minOffsetX": 0,
         "maxOffsetX": 0,
-        "interpolationSpeed": 12.0,
-        "movementInterpolationSpeed": 14.0,
-        "animationFps": 8.0
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
       }
     },
     "doorways": [
@@ -89,7 +89,7 @@
       "worldPosition": [
         7.8,
         1.6771,
-        0.0
+        0
       ],
       "trigger": "interact",
       "commands": [
@@ -175,7 +175,7 @@
       "worldPosition": [
         7.8,
         6.7812,
-        0.0
+        0
       ],
       "trigger": "interact",
       "commands": [
@@ -198,8 +198,8 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        0.0,
-        0.0
+        0,
+        0
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -221,7 +221,7 @@
       "worldPosition": [
         7.8,
         13.125,
-        0.0
+        0
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -243,7 +243,7 @@
       "worldPosition": [
         7.8,
         20.7083,
-        0.0
+        0
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",

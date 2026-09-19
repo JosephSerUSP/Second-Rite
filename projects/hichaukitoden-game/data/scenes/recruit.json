@@ -66,7 +66,7 @@
     },
     {
       "id": "recruit_onboarding",
-      "visible": "v.showOnboarding",
+      "visible": "sceneState.showOnboarding",
       "content": [
         {
           "type": "text",
@@ -76,60 +76,60 @@
     },
     {
       "id": "recruit_profile",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "text",
-          "text": "Lv.{v.candidateLevel or 1} {v.candidateName or ''}"
+          "text": "Lv.{sceneState.candidateLevel or 1} {sceneState.candidateName or ''}"
         }
       ]
     },
     {
       "id": "recruit_stats",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "text",
-          "text": "HP: {v.candidateHp}/{v.candidateMaxHp}  ATK:{v.atk} DEF:{v.def} MAT:{v.mat} MDF:{v.mdf}"
+          "text": "HP: {sceneState.candidateHp}/{sceneState.candidateMaxHp}  ATK:{sceneState.atk} DEF:{sceneState.def} MAT:{sceneState.mat} MDF:{sceneState.mdf}"
         }
       ]
     },
     {
       "id": "recruit_skills",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "list",
-          "listId": "v:candidateSkills",
+          "listId": "sceneState:candidateSkills",
           "format": "{name}"
         }
       ]
     },
     {
       "id": "recruit_passives",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "list",
-          "listId": "v:candidatePassives",
+          "listId": "sceneState:candidatePassives",
           "format": "{name}"
         }
       ]
     },
     {
       "id": "recruit_equipment",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "list",
-          "listId": "v:candidateEquipment",
+          "listId": "sceneState:candidateEquipment",
           "format": "{name}"
         }
       ]
     },
     {
       "id": "recruit_requirement",
-      "visible": "not v.showOnboarding and (v.mode or 1) == 1",
+      "visible": "not sceneState.showOnboarding and (sceneState.mode or 1) == 1",
       "content": [
         {
           "type": "text",
@@ -139,7 +139,7 @@
     },
     {
       "id": "recruit_formation",
-      "visible": "not v.showOnboarding and v.mode == 2",
+      "visible": "not sceneState.showOnboarding and sceneState.mode == 2",
       "content": [
         {
           "type": "text",
@@ -149,7 +149,7 @@
     },
     {
       "id": "recruit_confirm",
-      "visible": "not v.showOnboarding and v.mode == 3",
+      "visible": "not sceneState.showOnboarding and sceneState.mode == 3",
       "content": [
         {
           "type": "text",

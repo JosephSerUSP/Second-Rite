@@ -5,7 +5,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "idx",
@@ -37,23 +37,23 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.state == 1 and v.idx > 1",
+        "condition": "sceneState.state == 1 and sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx - 1"
+            "value": "sceneState.idx - 1"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.state == 2",
+        "condition": "sceneState.state == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "targetIdx",
-            "value": "((v.targetIdx or 1) > 1 and ((v.targetIdx or 1) - 1) or max(1, party.count))"
+            "value": "((sceneState.targetIdx or 1) > 1 and ((sceneState.targetIdx or 1) - 1) or max(1, party.count))"
           }
         ]
       }
@@ -61,23 +61,23 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.state == 1 and v.idx < session.itemCount",
+        "condition": "sceneState.state == 1 and sceneState.idx < session.itemCount",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx + 1"
+            "value": "sceneState.idx + 1"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.state == 2",
+        "condition": "sceneState.state == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "targetIdx",
-            "value": "((v.targetIdx or 1) < party.count and ((v.targetIdx or 1) + 1) or 1)"
+            "value": "((sceneState.targetIdx or 1) < party.count and ((sceneState.targetIdx or 1) + 1) or 1)"
           }
         ]
       }
@@ -85,14 +85,14 @@
     "on_left": [
       {
         "cmd": "IF",
-        "condition": "v.state == 1",
+        "condition": "sceneState.state == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "tab",
-                "value": "(v.tab or 1) > 1 and ((v.tab or 1) - 1) or 4"
+                "value": "(sceneState.tab or 1) > 1 and ((sceneState.tab or 1) - 1) or 4"
               },
               {
                 "name": "idx",
@@ -106,14 +106,14 @@
     "on_right": [
       {
         "cmd": "IF",
-        "condition": "v.state == 1",
+        "condition": "sceneState.state == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "tab",
-                "value": "(v.tab or 1) < 4 and ((v.tab or 1) + 1) or 1"
+                "value": "(sceneState.tab or 1) < 4 and ((sceneState.tab or 1) + 1) or 1"
               },
               {
                 "name": "idx",
@@ -127,47 +127,47 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 1 and session.itemCount > 0",
+        "condition": "locals._guard == 0 and sceneState.state == 1 and session.itemCount > 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
             "cmd": "USE_ITEM",
-            "itemIndex": "v.idx",
+            "itemIndex": "sceneState.idx",
             "target": 0
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 2",
+        "condition": "locals._guard == 0 and sceneState.state == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
             "cmd": "USE_ITEM",
-            "itemIndex": "v.idx",
-            "target": "v.targetIdx"
+            "itemIndex": "sceneState.idx",
+            "target": "sceneState.targetIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 3",
+        "condition": "locals._guard == 0 and sceneState.state == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "state",
@@ -185,20 +185,20 @@
     "on_cancel": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 2",
+        "condition": "locals._guard == 0 and sceneState.state == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "state",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "targetIdx",
             "value": 1
           }
@@ -206,15 +206,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 3",
+        "condition": "locals._guard == 0 and sceneState.state == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "state",
@@ -230,10 +230,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.state == 1",
+        "condition": "locals._guard == 0 and sceneState.state == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -247,12 +247,12 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "(v.popupTimer or 0) > 0",
+        "condition": "(sceneState.popupTimer or 0) > 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupTimer",
-            "value": "max(0, (v.popupTimer or 0) - 0.016)"
+            "value": "max(0, (sceneState.popupTimer or 0) - 0.016)"
           }
         ]
       }
@@ -261,8 +261,8 @@
   "config": {
     "dock": {
       "variant": "item_inspect",
-      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
-      "cursor": "v.state == 2 and v.targetIdx or 0"
+      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
+      "cursor": "sceneState.state == 2 and sceneState.targetIdx or 0"
     }
   },
   "scripts": {},
@@ -277,7 +277,7 @@
         "w": 20,
         "h": 13
       },
-      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
       "style": "list",
       "title": null,
       "emptyText": "No items.",
@@ -287,14 +287,14 @@
         "Equip",
         "Key"
       ],
-      "tabVar": "v.tab",
+      "tabVar": "sceneState.tab",
       "content": [
         {
           "type": "list",
           "listId": "inventory",
           "format": "{name}",
           "formatRight": "{formatQty(qty)}",
-          "cursor": "v.idx"
+          "cursor": "sceneState.idx"
         }
       ]
     },
@@ -306,25 +306,25 @@
         "w": 11,
         "h": 13
       },
-      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
       "style": "itemModel",
       "title": null,
       "content": [
         {
           "type": "list",
           "listId": "inventory",
-          "cursor": "v.idx",
-          "tabVar": "v.tab"
+          "cursor": "sceneState.idx",
+          "tabVar": "sceneState.tab"
         }
       ]
     },
     {
       "id": "help",
-      "visible": "v.state == 1 or v.state == 2 or v.state == 3",
+      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
       "content": [
         {
           "type": "text",
-          "text": "{((v.popupTimer or 0) > 0 and ('Used ' .. (sel('items_left_panel') and sel('items_left_panel').name or 'item') .. '!')) or (sel('items_left_panel') and sel('items_left_panel').description or '')}"
+          "text": "{((sceneState.popupTimer or 0) > 0 and ('Used ' .. (sel('items_left_panel') and sel('items_left_panel').name or 'item') .. '!')) or (sel('items_left_panel') and sel('items_left_panel').description or '')}"
         }
       ]
     },
@@ -336,14 +336,14 @@
         "w": 16,
         "h": 3
       },
-      "visible": "v.popupTimer > 0",
+      "visible": "sceneState.popupTimer > 0",
       "style": "frame",
       "title": null,
       "align": "center",
       "content": [
         {
           "type": "text",
-          "text": "{v.popupText}"
+          "text": "{sceneState.popupText}"
         }
       ],
       "anim": {

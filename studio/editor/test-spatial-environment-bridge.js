@@ -94,3 +94,43 @@ test('a supported plate Event lane edit changes the real town compositor', { tim
         fs.rmSync(stage, { recursive: true, force: true });
     }
 });
+
+test('camera and plate calibration independently move measured staged composition', { timeout: 180000 }, () => {
+    const previewExe = process.env.LOVEC || process.env.LOVE_PATH;
+    assert.ok(previewExe && fs.existsSync(previewExe), 'Set LOVEC to the console LÖVE executable.');
+    const stage = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-plate-composition-'));
+    try {
+        const staged = spawnSync(process.execPath, [
+            path.join(roots.DEFAULT_INSTALL_ROOT, 'tools', 'ci', 'stage-project-gates.js'), '--output', stage,
+        ], { cwd: roots.DEFAULT_INSTALL_ROOT, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, timeout: 120000 });
+        assert.equal(staged.status, 0, staged.stdout + staged.stderr);
+        const gameRoot = JSON.parse(staged.stdout.match(/PROJECT GATE STAGE OK\s+(\{.*\})/)[1]).stageDir;
+        const before = captureTownFrames(previewExe, gameRoot);
+        const frame = (frames, label) => frames.find(candidate => candidate.label === label);
+        const beforeCentre = frame(before, '24-centre');
+        assert.ok(beforeCentre?.composition, 'runtime proof exposes resolved composition measurements');
+
+        const mapsPath = path.join(gameRoot, 'data', 'maps.json');
+        const maps = JSON.parse(fs.readFileSync(mapsPath, 'utf8'));
+        const map = maps.find(candidate => candidate.id === 24);
+        map.traversal.camera.fovDegrees += 8;
+        fs.writeFileSync(mapsPath, JSON.stringify(maps, null, 2) + '\n');
+        const cameraAfter = captureTownFrames(previewExe, gameRoot);
+        const cameraCentre = frame(cameraAfter, '24-centre');
+        assert.notEqual(cameraCentre.image, beforeCentre.image, 'a Map camera edit changes a real town frame');
+        assert.ok(cameraCentre.composition.cameraFovHalfX > beforeCentre.composition.cameraFovHalfX,
+            'increasing the Map camera FOV increases the resolved runtime camera measurement');
+
+        const manifestPath = path.join(gameRoot, 'assets', 'environments', 'st_maria_town', 'house_alicia', 'environment.json');
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        manifest.preRendered.playerProjection.centerX += 20;
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+        const plateAfter = captureTownFrames(previewExe, gameRoot);
+        const plateCentre = frame(plateAfter, '24-centre');
+        assert.notEqual(plateCentre.image, cameraCentre.image, 'a package calibration edit independently changes a real town frame');
+        assert.ok(plateCentre.composition.platePanX < cameraCentre.composition.platePanX,
+            'increasing playerProjection.centerX moves the bounded plate pan left');
+    } finally {
+        fs.rmSync(stage, { recursive: true, force: true });
+    }
+});

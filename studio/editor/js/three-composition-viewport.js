@@ -94,6 +94,7 @@ export function createCompositionViewport(container, options) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
+    let manifestOverridePath = null, manifestOverride = null;
     let modalProfileMove = null, lastPointerEvent = null;
     let walkMeshVisible = false, walkProfileEditing = false, walkProfileComponentMode = 'point';
     let walkProfileSelection = null, walkProfileHover = null;
@@ -943,9 +944,12 @@ export function createCompositionViewport(container, options) {
         const map = model?.map?.source;
         const revision = ++serial;
         if (!manifestPath || !map?.traversal?.camera) { plate = null; hide(); clearEvents(); return false; }
-        const response = await fetch(projectAsset(manifestPath));
-        if (!response.ok) throw new Error(`Environment package ${manifestPath} returned HTTP ${response.status}.`);
-        const manifest = await response.json();
+        let manifest = manifestOverridePath === manifestPath ? manifestOverride : null;
+        if (!manifest) {
+            const response = await fetch(projectAsset(manifestPath));
+            if (!response.ok) throw new Error(`Environment package ${manifestPath} returned HTTP ${response.status}.`);
+            manifest = await response.json();
+        }
         if (revision !== serial) return false;
         const spec = manifest.preRendered;
         if (!spec) { plate = null; hide(); clearEvents(); return false; }
@@ -1156,6 +1160,12 @@ export function createCompositionViewport(container, options) {
     }());
     return {
         setSceneModel, show, select, hide, setSemanticSelection,
+        setManifestOverride(path, manifest) {
+            manifestOverridePath = path || null;
+            manifestOverride = manifest || null;
+            if (model) return setSceneModel(model);
+            return Promise.resolve(false);
+        },
         isPlate: () => !!plate,
         isVisible: () => visible,
         getCanvas: () => renderer.domElement,

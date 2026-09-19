@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const authoredStorage = require('./authored-storage');
+const plateManifestStorage = require('./plate-manifest-storage');
 const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint');
@@ -135,6 +136,15 @@ function isAllowedStudioOrigin(origin) {
     if (!origin) return true; // local CLI tooling is intentionally supported.
     return origin === `http://127.0.0.1:${PORT}`
         || origin === `http://localhost:${PORT}`;
+}
+
+function notifyRunningGame() {
+    const notifyReq = http.request({
+        hostname: '127.0.0.1', port: GAME_PORT, path: '/reload', method: 'GET', timeout: 500
+    }, () => {});
+    notifyReq.on('error', () => {});
+    notifyReq.on('timeout', () => notifyReq.destroy());
+    notifyReq.end();
 }
 
 const server = http.createServer((req, res) => {
@@ -648,6 +658,32 @@ const server = http.createServer((req, res) => {
 
                 respondPreview(res, previewWorker.run('preview-fog', { spec: fogSpecJson, mapId: mapId }), fail);
         });
+    } else if (req.method === 'GET' && req.url.startsWith('/api/plate-composition')) {
+        const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
+        try {
+            const record = plateManifestStorage.read(PROJECT_ROOT, parsedUrl.searchParams.get('path'));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, ...record }));
+        } catch (error) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: error.message }));
+        }
+    } else if (req.method === 'POST' && req.url === '/api/plate-composition/save') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const parsed = JSON.parse(body || '{}');
+                const record = plateManifestStorage.write(PROJECT_ROOT, parsed.path, parsed.manifest, parsed.version);
+                notifyRunningGame();
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, ...record }));
+            } catch (error) {
+                res.writeHead(error.code === 'STALE_PLATE_MANIFEST' ? 409 : 400,
+                    { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
     } else if (req.method === 'POST' && req.url === '/save') {
         let body = '';
         req.on('data', chunk => { body += chunk; });
@@ -693,21 +729,8 @@ const server = http.createServer((req, res) => {
 
                 authoredStorage.writeResourcesTransactional(DATA_ROOT, pending);
 
-                // Notify Love2D game to reload if it is running
-                const notifyReq = http.request({
-                    hostname: '127.0.0.1',
-                    port: GAME_PORT,
-                    path: '/reload',
-                    method: 'GET',
-                    timeout: 500
-                }, (notifyRes) => {});
-                notifyReq.on('error', (err) => {
-                    // Ignore errors if game is not running
-                });
-                notifyReq.on('timeout', () => {
-                    notifyReq.destroy();
-                });
-                notifyReq.end();
+                // Notify Love2D game to reload if it is running.
+                notifyRunningGame();
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 // Fresh tokens so the editor's next save validates against

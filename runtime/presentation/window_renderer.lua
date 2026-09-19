@@ -108,8 +108,8 @@ local function inventoryRows(session, env, win)
     local tab = 1
     if win and win.tabVar then
         tab = math.floor(tonumber((formula.eval(win.tabVar, env))) or 1)
-    elseif env and env.v and env.v.tab then
-        tab = math.floor(tonumber(env.v.tab) or 1)
+    elseif env and env.sceneState and env.sceneState.tab then
+        tab = math.floor(tonumber(env.sceneState.tab) or 1)
     end
 
     for itemId, qty in pairs(session.inventory) do
@@ -226,7 +226,8 @@ end
 
 local function vRows(state, key)
     local rows = {}
-    local arr = state and state.v and state.v[key]
+    local owner = state and state.v
+    local arr = owner and owner[key]
     for i, entry in ipairs(arr or {}) do
         local r = { index = i }
         if type(entry) == "table" then
@@ -438,6 +439,8 @@ local function resolveRows(win, state, sceneData, ctx, env)
         rows = memberPassiveRows(ctx.session, win, env)
     elseif src:sub(1, 7) == "config:" then
         rows = configRows(sceneData, src:sub(8))
+    elseif src:sub(1, 11) == "sceneState:" then
+        rows = vRows(state, src:sub(12))
     elseif src:sub(1, 2) == "v:" then
         rows = vRows(state, src:sub(3))
     elseif src:sub(1, 7) == "static:" then
@@ -484,7 +487,7 @@ end
 
 local function buildEnv(state, sceneData, ctx, listCache)
     local env = {}
-    env.v = state.v or {}
+    env.sceneState = state.v or {}
     env.config = sceneData and sceneData.config or {}
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
@@ -853,7 +856,7 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
     -- Integrated Tab Header Strip (Option 1 / Approach A):
     local tabs = win.tabs or layout.tabs
     if tabs and #tabs > 0 then
-        local tabVar = win.tabVar or layout.tabVar or "v.tab"
+        local tabVar = win.tabVar or layout.tabVar or "sceneState.tab"
         local activeTab = math.floor(tonumber((formula.eval(tabVar, env))) or 1)
         local tabAreaW = w - ui.toPx(2)
         local totalTabs = #tabs
@@ -1191,7 +1194,7 @@ local function drawPartyGridStyle(layout, rows, cursor, env, x, y, session, titl
     end
 end
 
--- Reserve scene (overhaul-6 F3): while picking a Swap target (v.mode == 4),
+-- Reserve scene (overhaul-6 F3): while picking a Swap target (sceneState.mode == 4),
 -- the source slot is shown as a black silhouette and a ghost of it floats
 -- above, drifting in a sine wave between a -2 and -6 offset (up-left diagonal,
 -- a bit faster). The shadow scales down as the ghost drifts away, selling the
@@ -1200,12 +1203,12 @@ end
 local swapGhostCanvas = nil
 local swapGhostKey = nil
 local function drawSwapIndicator(state, sceneData, ctx)
-    local v = state.v
-    if not v or v.mode ~= 4 then return end
+    local sceneState = state.v
+    if not sceneState or sceneState.mode ~= 4 then return end
     local session = ctx.session
     if not session then return end
-    local isReserve = v.swapSourceIsReserve
-    local srcIdx = v.swapSourceIndex
+    local isReserve = sceneState.swapSourceIsReserve
+    local srcIdx = sceneState.swapSourceIndex
     if not srcIdx then return end
     local arr = isReserve and session.reserve or session.party
     local battler = arr and arr[srcIdx]
@@ -1640,18 +1643,18 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             drawPartyGridStyle(layout, cached.rows, cached.cursor, env, x, y, ctx.session, title, animP)
         end
     elseif style == "enemyRow" then
-        renderer.drawEnemyRowWindow(env.v and env.v.battle)
+        renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle)
     elseif style == "battleLog" then
-        renderer.drawBattleLogWindow(env.v and env.v.combatLog, x, y, w, h)
+        renderer.drawBattleLogWindow(env.sceneState and env.sceneState.combatLog, x, y, w, h)
     elseif style == "victoryPanel" then
-        renderer.drawVictoryPanelWindow(ctx.session, env.v and env.v.victory,
-            env.v and env.v.victoryStage or 0, env.v, x, y, w, h)
+        renderer.drawVictoryPanelWindow(ctx.session, env.sceneState and env.sceneState.victory,
+            env.sceneState and env.sceneState.victoryStage or 0, env.sceneState, x, y, w, h)
     elseif style == "levelUpStats" then
-        renderer.drawLevelUpStatsWindow(env.v and env.v.levelUpRows, x, y, w, h, title)
+        renderer.drawLevelUpStatsWindow(env.sceneState and env.sceneState.levelUpRows, x, y, w, h, title)
     elseif style == "battlerInspector" then
-        renderer.drawBattlerInspector(ctx and ctx.session, env.v, x, y, w, h)
+        renderer.drawBattlerInspector(ctx and ctx.session, env.sceneState, x, y, w, h)
     elseif style == "targetInfo" then
-        renderer.drawTargetInfoWindow(ctx and ctx.session, env.v, x, y, w, h)
+        renderer.drawTargetInfoWindow(ctx and ctx.session, env.sceneState, x, y, w, h)
     elseif style == "creatureHeader" then
         -- A creature's name headline. Its own style rather than a `text`
         -- window, because the rule is that a creature's name ALWAYS carries

@@ -18,7 +18,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v._capturingKey == true and ('Press a key for ' .. tostring(v.selButton) .. '...   ESC: cancel') or 'UP/DOWN: select   ENTER: rebind   ESC: back'}"
+          "text": "{sceneState._capturingKey == true and ('Press a key for ' .. tostring(sceneState.selButton) .. '...   ESC: cancel') or 'UP/DOWN: select   ENTER: rebind   ESC: back'}"
         }
       ]
     },
@@ -36,8 +36,8 @@
       "content": [
         {
           "type": "list",
-          "listId": "v:bindingRows",
-          "cursor": "v.idx"
+          "listId": "sceneState:bindingRows",
+          "cursor": "sceneState.idx"
         }
       ]
     }
@@ -53,7 +53,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "idx",
@@ -76,12 +76,12 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.idx > 1",
+        "condition": "sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx - 1"
+            "value": "sceneState.idx - 1"
           }
         ]
       }
@@ -89,12 +89,12 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < (v.bindingCount or 1)",
+        "condition": "sceneState.idx < (sceneState.bindingCount or 1)",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx + 1"
+            "value": "sceneState.idx + 1"
           }
         ]
       }
@@ -102,19 +102,19 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v._capturingKey ~= true",
+        "condition": "locals._guard == 0 and sceneState._capturingKey ~= true",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "selButton",
-                "value": "(((v.bindingRows or {})[v.idx or 1]) or {}).button or ''"
+                "value": "(((sceneState.bindingRows or {})[sceneState.idx or 1]) or {}).button or ''"
               },
               {
                 "name": "_capturingKey",
@@ -128,10 +128,10 @@
     "on_raw_key": [
       {
         "cmd": "IF",
-        "condition": "v.rawKey == 'escape'",
+        "condition": "sceneState.rawKey == 'escape'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "_capturingKey",
             "value": "false"
           }
@@ -139,14 +139,14 @@
         "else": [
           {
             "cmd": "SET_INPUT_BINDING",
-            "button": "v.selButton or ''",
-            "key": "v.rawKey or ''"
+            "button": "sceneState.selButton or ''",
+            "key": "sceneState.rawKey or ''"
           },
           {
             "cmd": "LIST_INPUT_BINDINGS"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "_capturingKey",
             "value": "false"
           }

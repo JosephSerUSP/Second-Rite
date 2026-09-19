@@ -100,7 +100,8 @@ check(allItemsIdx ~= nil, "the developer menu still offers ADD EVERY ITEM")
 local sceneCtx = {
     session = afterPlainLaunch,
     loader = loader,
-    v = { idx = allItemsIdx, _guard = 0 },
+    sceneState = { idx = allItemsIdx },
+    locals = { _guard = 0 },
     events = {},
     scene = sceneDef,
 }

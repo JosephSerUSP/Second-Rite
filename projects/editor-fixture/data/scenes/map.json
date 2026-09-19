@@ -65,13 +65,13 @@
     ],
     "dock": {
       "variant": "party_status",
-      "cursor": "v.mode == 4 and v.partyIdx or 0"
+      "cursor": "sceneState.mode == 4 and sceneState.partyIdx or 0"
     }
   },
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "mode",
@@ -91,7 +91,7 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.mode == 0",
+        "condition": "sceneState.mode == 0",
         "then": [
           {
             "cmd": "FALLBACK"
@@ -100,87 +100,87 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 1",
+        "condition": "sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cmdIdx",
-            "value": "v.cmdIdx > 1 and v.cmdIdx - 1 or 4"
+            "value": "sceneState.cmdIdx > 1 and sceneState.cmdIdx - 1 or 4"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "battle_command",
-            "index": "v.cmdIdx"
+            "index": "sceneState.cmdIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 4 and v.partyIdx - 2 >= 1",
+        "condition": "sceneState.mode == 4 and sceneState.partyIdx - 2 >= 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "partyIdx",
-            "value": "v.partyIdx - 2"
+            "value": "sceneState.partyIdx - 2"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 2 and v.popupIdx > 1",
+        "condition": "sceneState.mode == 2 and sceneState.popupIdx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx - 1"
+            "value": "sceneState.popupIdx - 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_member_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 5 and v.popupIdx > 1",
+        "condition": "sceneState.mode == 5 and sceneState.popupIdx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx - 1"
+            "value": "sceneState.popupIdx - 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_data_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 6 and v.popupIdx > 1",
+        "condition": "sceneState.mode == 6 and sceneState.popupIdx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx - 1"
+            "value": "sceneState.popupIdx - 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_party_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 3",
+        "condition": "sceneState.mode == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "confirmIdx",
-            "value": "v.confirmIdx == 1 and 2 or 1"
+            "value": "sceneState.confirmIdx == 1 and 2 or 1"
           }
         ]
       }
@@ -188,7 +188,7 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.mode == 0",
+        "condition": "sceneState.mode == 0",
         "then": [
           {
             "cmd": "FALLBACK"
@@ -197,87 +197,87 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 1",
+        "condition": "sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cmdIdx",
-            "value": "v.cmdIdx < 4 and v.cmdIdx + 1 or 1"
+            "value": "sceneState.cmdIdx < 4 and sceneState.cmdIdx + 1 or 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "battle_command",
-            "index": "v.cmdIdx"
+            "index": "sceneState.cmdIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 4 and v.partyIdx + 2 <= 4",
+        "condition": "sceneState.mode == 4 and sceneState.partyIdx + 2 <= 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "partyIdx",
-            "value": "v.partyIdx + 2"
+            "value": "sceneState.partyIdx + 2"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 2 and v.popupIdx < 5",
+        "condition": "sceneState.mode == 2 and sceneState.popupIdx < 5",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx + 1"
+            "value": "sceneState.popupIdx + 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_member_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 5 and v.popupIdx < 2",
+        "condition": "sceneState.mode == 5 and sceneState.popupIdx < 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx + 1"
+            "value": "sceneState.popupIdx + 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_data_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 6 and v.popupIdx < 4",
+        "condition": "sceneState.mode == 6 and sceneState.popupIdx < 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx + 1"
+            "value": "sceneState.popupIdx + 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_party_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 3",
+        "condition": "sceneState.mode == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "confirmIdx",
-            "value": "v.confirmIdx == 1 and 2 or 1"
+            "value": "sceneState.confirmIdx == 1 and 2 or 1"
           }
         ]
       }
@@ -285,7 +285,7 @@
     "on_left": [
       {
         "cmd": "IF",
-        "condition": "v.mode == 0",
+        "condition": "sceneState.mode == 0",
         "then": [
           {
             "cmd": "FALLBACK"
@@ -294,39 +294,39 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 1",
+        "condition": "sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cmdIdx",
-            "value": "v.cmdIdx > 1 and v.cmdIdx - 1 or 4"
+            "value": "sceneState.cmdIdx > 1 and sceneState.cmdIdx - 1 or 4"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "battle_command",
-            "index": "v.cmdIdx"
+            "index": "sceneState.cmdIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 4 and v.partyIdx % 2 == 0",
+        "condition": "sceneState.mode == 4 and sceneState.partyIdx % 2 == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "partyIdx",
-            "value": "v.partyIdx - 1"
+            "value": "sceneState.partyIdx - 1"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 3",
+        "condition": "sceneState.mode == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "confirmIdx",
-            "value": "v.confirmIdx == 1 and 2 or 1"
+            "value": "sceneState.confirmIdx == 1 and 2 or 1"
           }
         ]
       }
@@ -334,7 +334,7 @@
     "on_right": [
       {
         "cmd": "IF",
-        "condition": "v.mode == 0",
+        "condition": "sceneState.mode == 0",
         "then": [
           {
             "cmd": "FALLBACK"
@@ -343,39 +343,39 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 1",
+        "condition": "sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cmdIdx",
-            "value": "v.cmdIdx < 4 and v.cmdIdx + 1 or 1"
+            "value": "sceneState.cmdIdx < 4 and sceneState.cmdIdx + 1 or 1"
           },
           {
             "cmd": "SET_CURSOR",
             "windowId": "battle_command",
-            "index": "v.cmdIdx"
+            "index": "sceneState.cmdIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 4 and v.partyIdx % 2 == 1 and v.partyIdx + 1 <= 4",
+        "condition": "sceneState.mode == 4 and sceneState.partyIdx % 2 == 1 and sceneState.partyIdx + 1 <= 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "partyIdx",
-            "value": "v.partyIdx + 1"
+            "value": "sceneState.partyIdx + 1"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 3",
+        "condition": "sceneState.mode == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "confirmIdx",
-            "value": "v.confirmIdx == 1 and 2 or 1"
+            "value": "sceneState.confirmIdx == 1 and 2 or 1"
           }
         ]
       }
@@ -383,7 +383,7 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v.mode == 0",
+        "condition": "sceneState.mode == 0",
         "then": [
           {
             "cmd": "FALLBACK"
@@ -392,10 +392,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1 and v.cmdIdx == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 1 and sceneState.cmdIdx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -408,20 +408,20 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1 and v.cmdIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 1 and sceneState.cmdIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 6
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
             "value": 1
           },
@@ -437,26 +437,26 @@
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_party_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1 and v.cmdIdx == 3",
+        "condition": "locals._guard == 0 and sceneState.mode == 1 and sceneState.cmdIdx == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 5
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
             "value": 1
           },
@@ -472,16 +472,16 @@
           {
             "cmd": "SET_CURSOR",
             "windowId": "map_data_popup",
-            "index": "v.popupIdx"
+            "index": "sceneState.popupIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1 and v.cmdIdx == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 1 and sceneState.cmdIdx == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -494,15 +494,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 5 and v.popupIdx == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 5 and sceneState.popupIdx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -519,15 +519,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 5 and v.popupIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 5 and sceneState.popupIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -539,7 +539,7 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "save_menu",
-            "vars": [
+            "sceneState": [
               {
                 "name": "mode",
                 "value": "'load'"
@@ -550,15 +550,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 6 and v.popupIdx == 1 and party.count > 0",
+        "condition": "locals._guard == 0 and sceneState.mode == 6 and sceneState.popupIdx == 1 and party.count > 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -579,15 +579,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 6 and v.popupIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 6 and sceneState.popupIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -604,15 +604,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 6 and v.popupIdx == 3",
+        "condition": "locals._guard == 0 and sceneState.mode == 6 and sceneState.popupIdx == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -629,15 +629,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 6 and v.popupIdx == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 6 and sceneState.popupIdx == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -654,7 +654,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 4",
         "then": [
           {
             "cmd": "SCRIPT",
@@ -664,15 +664,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2 and v.popupIdx == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 2 and sceneState.popupIdx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -688,15 +688,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2 and v.popupIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 2 and sceneState.popupIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -708,10 +708,10 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "1",
-            "vars": [
+            "sceneState": [
               {
                 "name": "seededCrafterIdx",
-                "value": "v.memberIdx"
+                "value": "sceneState.memberIdx"
               }
             ]
           }
@@ -719,15 +719,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2 and v.popupIdx == 3",
+        "condition": "locals._guard == 0 and sceneState.mode == 2 and sceneState.popupIdx == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -739,7 +739,7 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "ritual",
-            "vars": [
+            "sceneState": [
               {
                 "name": "ritualMode",
                 "value": "'sacrifice'"
@@ -750,7 +750,7 @@
               },
               {
                 "name": "targetIndex",
-                "value": "v.memberIdx"
+                "value": "sceneState.memberIdx"
               }
             ]
           }
@@ -758,15 +758,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2 and v.popupIdx == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 2 and sceneState.popupIdx == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -783,15 +783,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 5 and v.popupIdx == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 5 and sceneState.popupIdx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -808,15 +808,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 5 and v.popupIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 5 and sceneState.popupIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -828,7 +828,7 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "save_menu",
-            "vars": [
+            "sceneState": [
               {
                 "name": "mode",
                 "value": "'load'"
@@ -839,10 +839,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 3 and v.confirmIdx == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 3 and sceneState.confirmIdx == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -853,15 +853,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 3 and v.confirmIdx == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 3 and sceneState.confirmIdx == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -875,15 +875,15 @@
     "on_cancel": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 3",
+        "condition": "locals._guard == 0 and sceneState.mode == 3",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -895,15 +895,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 4
           },
@@ -915,15 +915,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 5",
+        "condition": "locals._guard == 0 and sceneState.mode == 5",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -935,15 +935,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 6",
+        "condition": "locals._guard == 0 and sceneState.mode == 6",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -955,15 +955,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
@@ -976,15 +976,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 0
           },
@@ -1000,20 +1000,20 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 0",
+        "condition": "locals._guard == 0 and sceneState.mode == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cmdIdx",
             "value": 1
           },
@@ -1029,7 +1029,7 @@
           {
             "cmd": "SET_CURSOR",
             "windowId": "battle_command",
-            "index": "v.cmdIdx"
+            "index": "sceneState.cmdIdx"
           },
           {
             "cmd": "OPEN_WINDOW",
@@ -1045,9 +1045,9 @@
     ]
   },
   "scripts": {
-    "snapPartyIdx": "\nlocal v = ctx.v\nfor i = 1, 4 do\n    local m = api.party(i)\n    if m then\n        v.partyIdx = i\n        break\n    end\nend\n",
-    "selectPartyMember": "\nlocal v = ctx.v\nlocal member = api.party(v.partyIdx)\nif member then\n    v._guard = 1\n    v.mode = 2\n    v.memberIdx = v.partyIdx\n    v.popupIdx = 1\n    api.emit({ type = \"open_window\", windowId = \"map_member_popup\" })\n    api.emit({ type = \"set_list\", windowId = \"map_member_popup\", listId = \"config:unitCommands\" })\n    api.emit({ type = \"set_cursor\", windowId = \"map_member_popup\", index = v.popupIdx })\nend\n",
-    "pushStatus": "\nlocal v = ctx.v\nif v.memberIdx then\n    api.emit({ type = \"scene_change\", kind = \"push\", scene = \"status\", vars = { idx = v.memberIdx } })\nend\n"
+    "snapPartyIdx": "\nlocal sceneState = ctx.sceneState\nfor i = 1, 4 do\n    local m = api.party(i)\n    if m then\n        sceneState.partyIdx = i\n        break\n    end\nend\n",
+    "selectPartyMember": "\nlocal sceneState = ctx.sceneState\nlocal member = api.party(sceneState.partyIdx)\nif member then\n    locals._guard = 1\n    sceneState.mode = 2\n    sceneState.memberIdx = sceneState.partyIdx\n    sceneState.popupIdx = 1\n    api.emit({ type = \"open_window\", windowId = \"map_member_popup\" })\n    api.emit({ type = \"set_list\", windowId = \"map_member_popup\", listId = \"config:unitCommands\" })\n    api.emit({ type = \"set_cursor\", windowId = \"map_member_popup\", index = sceneState.popupIdx })\nend\n",
+    "pushStatus": "\nlocal sceneState = ctx.sceneState\nif sceneState.memberIdx then\n    api.emit({ type = \"scene_change\", kind = \"push\", scene = \"status\", sceneState = { idx = sceneState.memberIdx } })\nend\n"
   },
   "goldenScript": [
     {

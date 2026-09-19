@@ -70,8 +70,8 @@ check(variables.get(restored, "record").nested.count == 2 and variables.getSwitc
     "snapshot restore reproduces values by copy")
 
 -- Event Programs own the write seam. These are deliberately separate from
--- SET_VAR (flow-local v) and SET_FLAG (legacy flag semantics).
-local eventCtx = { session = restored, loader = loader, party = restored.party, events = {}, v = {} }
+-- SET_LOCAL (process scratch) and SET_FLAG (legacy flag semantics).
+local eventCtx = { session = restored, loader = loader, party = restored.party, events = {} }
 interpreter.runImmediate({
     { cmd = "SET_GAME_VARIABLE", name = "visits", value = "variables.record.nested.count + 3" },
     { cmd = "SET_GAME_VARIABLE", name = "journal", value = '{ chapter = "second", marks = { "east", "blue" } }' },
@@ -102,8 +102,6 @@ interpreter.runImmediate({
 }, transientCtx)
 check(transientCtx.locals.roll == 2 and transientCtx.locals.scaled == 5,
     "SET_LOCAL owns in-order invocation scratch under locals")
-check(transientCtx.v ~= transientCtx.locals and transientCtx.v.roll == nil,
-    "new process locals stay distinct from the legacy v compatibility namespace")
 local firstInvocationLocals = transientCtx.locals
 interpreter.runImmediate({
     { cmd = "SET_LOCAL", name = "fresh", value = "locals.roll == nil and 1 or 0" },

@@ -29,17 +29,17 @@ function titleScene(projectName = 'New Project') {
                 rect: { x: 9, y: 14, w: 14, h: 5 },
                 style: 'list',
                 visibleRows: 2,
-                content: [{ type: 'list', listId: 'term:title.options', cursor: 'v.idx' }],
+                content: [{ type: 'list', listId: 'term:title.options', cursor: 'sceneState.idx' }],
             },
         ],
         hooks: {
-            on_enter: [{ cmd: 'SET_VAR', name: 'idx', value: 1 }],
-            on_up: [{ cmd: 'SET_VAR', name: 'idx', value: 'v.idx == 1 and 2 or 1' }],
-            on_down: [{ cmd: 'SET_VAR', name: 'idx', value: 'v.idx == 1 and 2 or 1' }],
+            on_enter: [{ cmd: 'SET_SCENE_STATE', name: 'idx', value: 1 }],
+            on_up: [{ cmd: 'SET_SCENE_STATE', name: 'idx', value: 'sceneState.idx == 1 and 2 or 1' }],
+            on_down: [{ cmd: 'SET_SCENE_STATE', name: 'idx', value: 'sceneState.idx == 1 and 2 or 1' }],
             on_select: [
                 {
                     cmd: 'IF',
-                    condition: 'v.idx == 1',
+                    condition: 'sceneState.idx == 1',
                     then: [
                         { cmd: 'RESET_SESSION' },
                         { cmd: 'LOAD_MAP', mapId: 1 },
@@ -48,7 +48,7 @@ function titleScene(projectName = 'New Project') {
                 },
                 {
                     cmd: 'IF',
-                    condition: 'v.idx == 2',
+                    condition: 'sceneState.idx == 2',
                     then: [{ cmd: 'QUIT_GAME' }],
                 },
             ],

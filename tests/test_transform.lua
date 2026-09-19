@@ -31,7 +31,7 @@ local function rig(unitId, level)
 end
 
 local function run(sess, cmd)
-    local ctx = { session = sess, loader = loader, events = {}, v = {},
+    local ctx = { session = sess, loader = loader, events = {}, locals = {},
                   party = sess.party, target = sess.party[1] }
     interpreter.runImmediate({ cmd }, ctx)
     return ctx.events
@@ -44,15 +44,15 @@ do
     -- replacement rather than a detached old Battler object.
     local sess, b = rig(PIXIE, 8)
     local ctx = {
-        session = sess, loader = loader, events = {}, v = {},
+        session = sess, loader = loader, events = {}, locals = {},
         party = sess.party, target = b, a = b,
         refs = { subject = b },
     }
     interpreter.runImmediate({
         { cmd = "TRANSFORM_ACTOR", target = "subject", actor = SKELETON },
-        { cmd = "SET_VAR", name = "continuedTarget", value = "target.id" },
-        { cmd = "SET_VAR", name = "continuedActor", value = "a.id" },
-        { cmd = "SET_VAR", name = "continuedAlias", value = "subject.id" },
+        { cmd = "SET_LOCAL", name = "continuedTarget", value = "target.id" },
+        { cmd = "SET_LOCAL", name = "continuedActor", value = "a.id" },
+        { cmd = "SET_LOCAL", name = "continuedAlias", value = "subject.id" },
     }, ctx)
 
     local after = sess.party[1]
@@ -60,9 +60,9 @@ do
         "TRANSFORM_ACTOR replaces the concrete Battler object")
     check(ctx.target == after and ctx.a == after and ctx.refs.subject == after,
         "live Event references follow the transformed Unit")
-    check(ctx.v.continuedTarget == SKELETON
-            and ctx.v.continuedActor == SKELETON
-            and ctx.v.continuedAlias == SKELETON,
+    check(ctx.locals.continuedTarget == SKELETON
+            and ctx.locals.continuedActor == SKELETON
+            and ctx.locals.continuedAlias == SKELETON,
         "subsequent Formula commands observe the replacement through every live alias")
 end
 
@@ -73,13 +73,13 @@ do
     local fact, ctx = levelEvent.context(sess, b, 1, 2)
     interpreter.runImmediate({
         { cmd = "TRANSFORM_ACTOR", target = "target", actor = SKELETON },
-        { cmd = "SET_VAR", name = "liveForm", value = "target.id" },
-        { cmd = "SET_VAR", name = "eventForm", value = "event.unit.id" },
+        { cmd = "SET_LOCAL", name = "liveForm", value = "target.id" },
+        { cmd = "SET_LOCAL", name = "eventForm", value = "event.unit.id" },
     }, ctx)
 
-    check(ctx.target == sess.party[1] and ctx.v.liveForm == SKELETON,
+    check(ctx.target == sess.party[1] and ctx.locals.liveForm == SKELETON,
         "LEVEL_REACHED live target follows a transformation")
-    check(fact.unit == b and ctx.v.event.unit.id == PIXIE and ctx.v.eventForm == PIXIE,
+    check(fact.unit == b and ctx.event.unit.id == PIXIE and ctx.locals.eventForm == PIXIE,
         "resolved event.unit remains the immutable pre-transform event snapshot")
 end
 

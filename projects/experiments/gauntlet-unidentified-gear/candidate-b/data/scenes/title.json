@@ -34,7 +34,7 @@
         {
           "type": "list",
           "listId": "term:title.options",
-          "cursor": "v.idx"
+          "cursor": "sceneState.idx"
         }
       ]
     }
@@ -42,29 +42,29 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
         "value": 1
       }
     ],
     "on_up": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "v.idx == 1 and 2 or 1"
+        "value": "sceneState.idx == 1 and 2 or 1"
       }
     ],
     "on_down": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "v.idx == 1 and 2 or 1"
+        "value": "sceneState.idx == 1 and 2 or 1"
       }
     ],
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v.idx == 1",
+        "condition": "sceneState.idx == 1",
         "then": [
           {
             "cmd": "RESET_SESSION"
@@ -82,7 +82,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.idx == 2",
+        "condition": "sceneState.idx == 2",
         "then": [
           {
             "cmd": "QUIT_GAME"

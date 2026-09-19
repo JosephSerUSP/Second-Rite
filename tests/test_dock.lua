@@ -137,7 +137,7 @@ for _, w in ipairs(registry.variants.dialogue.windows or {}) do
 end
 check(dialogueWindows.dialogue_message
         and dialogueWindows.dialogue_message.visible
-            == "v.dialogueMode == 'text' or v.dialogueMode == 'choice'",
+            == "sceneState.dialogueMode == 'text' or sceneState.dialogueMode == 'choice'",
     "dialogue message remains visible behind a choice")
 check(dialogueWindows.dialogue_choices
         and dialogueWindows.dialogue_choices.chrome == "none",

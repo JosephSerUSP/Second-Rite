@@ -29,7 +29,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.mode == 'load' and 'UP/DOWN: select slot   ENTER: load   ESC: back' or 'UP/DOWN: select slot   ENTER: save   ESC: back'}"
+          "text": "{sceneState.mode == 'load' and 'UP/DOWN: select slot   ENTER: load   ESC: back' or 'UP/DOWN: select slot   ENTER: save   ESC: back'}"
         }
       ]
     },
@@ -43,12 +43,12 @@
       },
       "style": "list",
       "visibleRows": 3,
-      "title": "{v.mode == 'load' and 'Load Game' or 'Save Game'}",
+      "title": "{sceneState.mode == 'load' and 'Load Game' or 'Save Game'}",
       "content": [
         {
           "type": "list",
-          "listId": "v:saveRows",
-          "cursor": "v.idx"
+          "listId": "sceneState:saveRows",
+          "cursor": "sceneState.idx"
         }
       ]
     },
@@ -62,11 +62,11 @@
       },
       "style": "frame",
       "title": null,
-      "visible": "v.confirmed == true",
+      "visible": "sceneState.confirmed == true",
       "content": [
         {
           "type": "text",
-          "text": "{v.mode == 'load' and 'Loaded!' or 'Saved!'}"
+          "text": "{sceneState.mode == 'load' and 'Loaded!' or 'Saved!'}"
         }
       ]
     }
@@ -74,7 +74,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "idx",
@@ -86,7 +86,7 @@
           },
           {
             "name": "mode",
-            "value": "v.mode or 'save'"
+            "value": "sceneState.mode or 'save'"
           }
         ]
       },
@@ -97,14 +97,14 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.idx > 1",
+        "condition": "sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "idx",
-                "value": "v.idx - 1"
+                "value": "sceneState.idx - 1"
               },
               {
                 "name": "confirmed",
@@ -118,14 +118,14 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < (v.saveCount or 1)",
+        "condition": "sceneState.idx < (sceneState.saveCount or 1)",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "idx",
-                "value": "v.idx + 1"
+                "value": "sceneState.idx + 1"
               },
               {
                 "name": "confirmed",
@@ -139,22 +139,22 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode ~= 'load'",
+        "condition": "locals._guard == 0 and sceneState.mode ~= 'load'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
             "cmd": "SAVE_GAME",
-            "slot": "(((v.saveRows or {})[v.idx or 1]) or {}).slot or 'slot1'"
+            "slot": "(((sceneState.saveRows or {})[sceneState.idx or 1]) or {}).slot or 'slot1'"
           },
           {
             "cmd": "LIST_SAVES"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "confirmed",
             "value": "true"
           }
@@ -162,16 +162,16 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 'load' and not (((v.saveRows or {})[v.idx or 1]) or {}).empty",
+        "condition": "locals._guard == 0 and sceneState.mode == 'load' and not (((sceneState.saveRows or {})[sceneState.idx or 1]) or {}).empty",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
             "cmd": "LOAD_GAME",
-            "slot": "(((v.saveRows or {})[v.idx or 1]) or {}).slot or 'slot1'"
+            "slot": "(((sceneState.saveRows or {})[sceneState.idx or 1]) or {}).slot or 'slot1'"
           }
         ]
       }

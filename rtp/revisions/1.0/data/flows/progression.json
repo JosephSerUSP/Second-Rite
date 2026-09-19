@@ -1,16 +1,4 @@
 {
-  "level_reached": [
-    {
-      "cmd": "SET_VAR",
-      "name": "reachedLevel",
-      "value": "event.level"
-    }
-  ],
-  "level_gain_resolved": [
-    {
-      "cmd": "SET_VAR",
-      "name": "levelsGained",
-      "value": "event.levelsGained"
-    }
-  ]
+  "level_reached": [],
+  "level_gain_resolved": []
 }

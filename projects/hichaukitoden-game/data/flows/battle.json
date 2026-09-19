@@ -300,13 +300,13 @@
       "text": "Flee roll: base chance + living party FLEE_CHANCE_BONUS; failure costs gold. Mirrors the legacy engine/battle.lua block (task A5c)."
     },
     {
-      "cmd": "SET_VAR",
+      "cmd": "SET_LOCAL",
       "name": "roll",
       "value": "random()"
     },
     {
       "cmd": "IF",
-      "condition": "v.roll < combat.baseFleeChance + party.trait.FLEE_CHANCE_BONUS",
+      "condition": "locals.roll < combat.baseFleeChance + party.trait.FLEE_CHANCE_BONUS",
       "then": [
         {
           "cmd": "EMIT_EVENT",

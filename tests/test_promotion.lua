@@ -46,13 +46,13 @@ end
 
 -- Promotion lives on the SCRIPT api, which is how the ritual scene reaches it,
 -- so the tests drive exactly that path rather than reaching into internals.
--- The body goes in `code`, and `v` comes off ctx -- the idiom every scene
+-- The body goes in `code`, and Scene State comes off ctx -- the idiom every scene
 -- script uses.
 local function runScript(sess, body)
-    local ctx = { session = sess, loader = loader, events = {}, v = {} }
+    local ctx = { session = sess, loader = loader, events = {}, sceneState = {} }
     interpreter.runImmediate({ { cmd = "SCRIPT",
-        code = "local v = ctx.v; " .. body } }, ctx)
-    return ctx.v
+        code = "local v = ctx.sceneState; " .. body } }, ctx)
+    return ctx.sceneState
 end
 
 ------------------------------------------------------------------- eligibility --

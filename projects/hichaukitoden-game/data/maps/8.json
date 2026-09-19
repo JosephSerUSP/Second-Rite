@@ -283,11 +283,6 @@
               "label": "3. Return I (Town Post-F1)",
               "commands": [
                 {
-                  "cmd": "SET_VAR",
-                  "name": "return_count",
-                  "value": 1
-                },
-                {
                   "cmd": "SET_FLAG",
                   "flag": "milestone_return_1",
                   "value": true
@@ -310,11 +305,6 @@
             {
               "label": "5. Return II (Town Post-F2)",
               "commands": [
-                {
-                  "cmd": "SET_VAR",
-                  "name": "return_count",
-                  "value": 2
-                },
                 {
                   "cmd": "SET_FLAG",
                   "flag": "milestone_return_2",

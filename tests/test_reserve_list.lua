@@ -63,9 +63,9 @@ do
     local scripts = reserve.scripts or {}
     local up = assert(scripts.navigateReserveUp, "Reserve up-navigation script missing")
     local down = assert(scripts.navigateReserveDown, "Reserve down-navigation script missing")
-    assert(up:find("v.cursorIdx > 1", 1, true) and up:find("v.cursorIdx = v.cursorIdx - 1", 1, true),
+    assert(up:find("sceneState.cursorIdx > 1", 1, true) and up:find("sceneState.cursorIdx = sceneState.cursorIdx - 1", 1, true),
         "Reserve Up must move one list row at a time")
-    assert(down:find("v.cursorIdx < 4", 1, true) and down:find("v.cursorIdx = v.cursorIdx + 1", 1, true),
+    assert(down:find("sceneState.cursorIdx < 4", 1, true) and down:find("sceneState.cursorIdx = sceneState.cursorIdx + 1", 1, true),
         "Reserve Down must move one list row at a time")
 
     -- NOTE: the assertions below match authored SCRIPT source text, so
@@ -75,12 +75,12 @@ do
     -- implementation of something the engine already does (SPEC: one
     -- implementation, never an approximation). Tracked as its own issue.
     local popup = assert(scripts.executeReservePopup, "Reserve popup script missing")
-    assert(popup:find("v.swapSemanticSourceIndex = v.popupTargetIndex", 1, true),
+    assert(popup:find("sceneState.swapSemanticSourceIndex = sceneState.popupTargetIndex", 1, true),
         "swap gameplay source must be stored independently from presentation")
-    assert(popup:find("v.swapSourceIndex = v.popupTargetIsReserve and nil or v.popupTargetIndex", 1, true),
+    assert(popup:find("sceneState.swapSourceIndex = sceneState.popupTargetIsReserve and nil or sceneState.popupTargetIndex", 1, true),
         "Reserve-origin swaps must not feed the legacy grid ghost coordinate path")
     local swap = assert(scripts.executeSwap, "Reserve swap script missing")
-    assert(swap:find("v.swapSemanticSourceIndex or v.swapSourceIndex", 1, true),
+    assert(swap:find("sceneState.swapSemanticSourceIndex or sceneState.swapSourceIndex", 1, true),
         "swap execution must consume the semantic source index")
 
     -- Recruitment established the vocabulary #145 is standardizing on. Keep

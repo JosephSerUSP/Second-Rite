@@ -1,6 +1,6 @@
 -- Persistent game/playthrough Variables and Switches (#407).
 --
--- The owner is deliberately separate from ctx.v (Scene/process-local state)
+-- The owner is deliberately separate from Scene State and process locals.
 -- and from domain facts such as inventory, quests and battlers. Switch is an
 -- author-facing boolean affordance over the same typed value store rather than
 -- a second persistence engine.

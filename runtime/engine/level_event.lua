@@ -54,9 +54,9 @@ function level_event.context(session, unit, previousLevel, level)
         target = unit,
         event = fact,
         -- Formula's generic Event noun is bridged through v.event so existing
-        -- interpreter callers need no progression-specific evaluator. `v` is
-        -- flow-local and discarded unless the host explicitly keeps it.
-        v = { event = view },
+        -- Interpreter callers need no progression-specific evaluator. Locals
+        -- are flow-local and discarded after this immediate execution.
+        locals = { event = view },
     }
     return fact, ctx
 end
@@ -110,7 +110,7 @@ function level_event.gainResolvedContext(session, unit, previousLevel, level)
         a = unit,
         target = unit,
         event = fact,
-        v = { event = view },
+        locals = { event = view },
     }
     return fact, ctx
 end

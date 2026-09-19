@@ -13,7 +13,7 @@ which replays the authored input script through the same `scene_host.keypressed`
 path real input uses, and then evaluates the terminal condition the specimen
 itself declares:
 
-    "terminal": { "reached": "v.win == true" }
+    "terminal": { "reached": "sceneState.win == true" }
     "terminal": { "none": "conversation, no scored loop" }
 
 A specimen with no `terminal` declaration fails. "This one never ends" is a claim

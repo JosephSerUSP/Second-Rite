@@ -607,7 +607,7 @@ function cli.runPlayScene(sceneId, loader)
             if payload.terminalKind ~= "reached" then return false end
             local st = sh.getCurrentState()
             if not st then return false end -- scene popped itself; nothing to read
-            local fctx = formulaEngine.makeContext({ v = st.v }, vSession)
+            local fctx = formulaEngine.makeContext({ sceneState = st.v }, vSession)
             local value, ferr = formulaEngine.eval(terminal.reached, fctx)
             if ferr then
                 error("terminal formula '" .. tostring(terminal.reached)

@@ -73,6 +73,9 @@ jobs:
       - name: Asset contract and regression
         run: python tools/asset-language/check.py all
 
+      - name: Asset-language regression suite
+        run: python -m unittest discover -s tools/asset-language/tests -t .
+
   repo-hygiene:
     name: repository hygiene
     runs-on: ubuntu-latest

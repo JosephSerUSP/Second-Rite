@@ -10,7 +10,13 @@ class MiniRepo:
         self.tmp=tempfile.TemporaryDirectory(); self.root=Path(self.tmp.name)
         for p in ('data','assets/models','assets/geometry/test_asset','assets/geometry/1_blender_depth_maps'): (self.root/p).mkdir(parents=True,exist_ok=True)
         (self.root/'data/items.json').write_text(json.dumps({'items':[{'model':'assets/models/test_model.obj'}]}))
-        (self.root/'data/tilesets.json').write_text(json.dumps({'tilesets':[{'features':[{'model':'assets/models/test_model.obj'}]}]}))
+        # Tilesets are a fragmented keyed registry. Keeping the legacy
+        # monolith beside fragments makes this fixture invalid before the
+        # regression assertions can run.
+        (self.root/'data/tilesets').mkdir()
+        (self.root/'data/tilesets/test.json').write_text(json.dumps({
+            'id':'test', 'features':[{'model':'assets/models/test_model.obj'}]
+        }))
         (self.root/'assets/models/test_model.obj').write_text('mtllib test_model.mtl\nv 0 0 0\nv 1 0 0\nv 0 1 0\nvt 0 0\nvt 1 0\nvt 0 1\nvn 0 0 1\nusemtl test\nf 1/1/1 2/2/1 3/3/1\n')
         (self.root/'assets/models/test_model.mtl').write_text('newmtl test\nKd 1 1 1\n')
         (self.root/'assets/geometry/test_asset/asset.json').write_text(json.dumps({'id':'test_asset','topology':'plane','role':'surfaceFixture'}))

@@ -538,7 +538,7 @@ function love.load(arg)
         local origGold, origPartyName, origPX, origPY = s.gold, s.party[1] and s.party[1].name, s.playerX, s.playerY
         s.expBank = 42
         s.shopProgression = 5
-        savegame.save(s, loader, "map", "savetest")
+        assert(savegame.save(s, loader, "map", "savetest"))
         local data = savegame.load("savetest", loader)
         assert(data, "load returned nil")
         local loaded, scene = savegame.deserialize(data, loader)
@@ -683,6 +683,7 @@ function love.load(arg)
             "test_map_inspection",
             "test_geometry_compiled_store",
             "test_event_overrides_save_regression",
+            "test_savegame_io",
             "test_event_self_state",
             "test_sprite_sheet",
             "test_lighting_composition",
@@ -2267,8 +2268,12 @@ function love.keypressed(key, scancode, isrepeat)
     if key == "f5" then
         local scene = scene_host.getCurrent()
         if activeSession and scene == "map" then
-            savegame.save(activeSession, loader, scene, "quicksave")
-            print("Game saved.")
+            local saved, saveErr = savegame.save(activeSession, loader, scene, "quicksave")
+            if saved then
+                print("Game saved.")
+            else
+                print("[savegame] quicksave failed: " .. tostring(saveErr))
+            end
         end
         return
     elseif key == "f6" then

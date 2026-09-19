@@ -425,6 +425,139 @@
         return result;
     }
 
+    function cloneHistoryValue(value) {
+        return window.ThestraStudioHistory?.clone
+            ? window.ThestraStudioHistory.clone(value)
+            : JSON.parse(JSON.stringify(value));
+    }
+
+    function currentMapAuthority() {
+        const map = currentMap();
+        return map && map.id != null ? `maps:${map.id}` : null;
+    }
+
+    function currentWalkProfileAuthority() {
+        return currentMapAuthority();
+    }
+
+    function walkProfileSnapshot() {
+        const map = currentMap();
+        const lane = map?.traversal?.provider === 'bounded_lane' ? map.traversal.lane : null;
+        const hasGroundProfile = !!(lane && Object.prototype.hasOwnProperty.call(lane, 'groundProfile'));
+        return {
+            hasGroundProfile,
+            groundProfile: hasGroundProfile ? cloneHistoryValue(lane.groundProfile) : null,
+        };
+    }
+
+    function publishWalkProfileTransaction(kind, authority, before, after) {
+        if (!authority || !before || !after) return;
+        window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
+            detail: {
+                kind,
+                authority,
+                target: { kind: 'walk-profile', key: authority },
+                before,
+                after,
+            }
+        }));
+    }
+
+    function mapSnapshot() {
+        return cloneHistoryValue(currentMap());
+    }
+
+    function sameMapSnapshot(left, right) {
+        return JSON.stringify(left) === JSON.stringify(right);
+    }
+
+    function publishMapTransaction(kind, authority, before, after) {
+        if (!authority || !before || !after || sameMapSnapshot(before, after)) return;
+        window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
+            detail: {
+                kind,
+                authority,
+                target: { kind: 'map', key: authority },
+                before: { map: before },
+                after: { map: after },
+            }
+        }));
+    }
+
+    // This is the one mutation boundary for the first Studio-wide history
+    // consumer.  It takes full authored profile snapshots, so topology edits
+    // remain exact even when point indices shift as part of the operation.
+    function runWalkProfileMutation(kind, operation) {
+        const authority = currentWalkProfileAuthority();
+        const before = walkProfileSnapshot();
+        const result = operation();
+        if (result?.changed) {
+            publishWalkProfileTransaction(kind, authority, before, walkProfileSnapshot());
+        }
+        return result;
+    }
+
+    function applyWalkProfileHistory(record, direction) {
+        if (!record || record.authority !== currentMapAuthority()) return false;
+        if (record.target?.kind === 'map') {
+            const snapshot = direction === 'undo' ? record.before?.map : record.after?.map;
+            const map = currentMap();
+            if (!map || !snapshot || typeof snapshot !== 'object') return false;
+            Object.keys(map).forEach(key => { delete map[key]; });
+            Object.assign(map, cloneHistoryValue(snapshot));
+            host.markMapDirty?.();
+            scheduleMutation('authoritative-property');
+            return true;
+        }
+        if (record.target?.kind !== 'walk-profile') return false;
+        const snapshot = direction === 'undo' ? record.before : record.after;
+        const map = currentMap();
+        const lane = map?.traversal?.provider === 'bounded_lane' ? map.traversal.lane : null;
+        if (!lane || !snapshot || typeof snapshot.hasGroundProfile !== 'boolean') return false;
+        if (snapshot.hasGroundProfile) lane.groundProfile = cloneHistoryValue(snapshot.groundProfile);
+        else delete lane.groundProfile;
+        host.markMapDirty?.();
+        scheduleMutation('lane-profile');
+        return true;
+    }
+
+    const history = window.ThestraStudioHistory?.create?.({
+        getAuthority: currentWalkProfileAuthority,
+        apply: applyWalkProfileHistory,
+    }) || null;
+    if (history) {
+        window.ThestraStudioHistoryController = history;
+        window.addEventListener('thestra-spatial-transaction-committed', event => {
+            history.commit(event.detail);
+        });
+        window.addEventListener('keydown', event => history.handleKeydown(event));
+        window.addEventListener('thestra-studio-authority-changed', () => history.clear());
+        window.addEventListener('thestra-resources-refreshed', event => {
+            if (event.detail?.refreshed?.includes('maps')) history.clear();
+        });
+
+        // Modal/property controls already use their own authoritative mutation
+        // functions. Observe the public commit gesture around that work rather
+        // than duplicating each form's serialization rules in history. Capture
+        // phase sees the pre-commit map; the microtask sees the completed
+        // synchronous form handler, yielding one exact map JSON transaction.
+        function mapAuthoringControl(target) {
+            return target?.closest?.(
+                '#map-properties-modal.active button, #event-modal.active button, '
+                + '#light-object-settings button, #light-object-settings input, '
+                + '#light-object-settings select'
+            );
+        }
+        function observeMapAuthoringCommit(kind, event) {
+            if (!mapAuthoringControl(event.target)) return;
+            const authority = currentMapAuthority();
+            const before = mapSnapshot();
+            queueMicrotask(() => publishMapTransaction(kind, authority, before, mapSnapshot()));
+        }
+        document.addEventListener('click', event => observeMapAuthoringCommit('property', event), true);
+        document.addEventListener('change', event => observeMapAuthoringCommit('property', event), true);
+    }
+
     function ensureBackend() {
         if (backend) return Promise.resolve(backend);
         if (backendPromise) return backendPromise;
@@ -451,9 +584,10 @@
                     }));
                 },
                 onSpatialTransaction(transaction) {
-                    window.dispatchEvent(new CustomEvent('thestra-spatial-transaction-committed', {
-                        detail: transaction
-                    }));
+                    // Walk Profile history is published at the semantic command
+                    // boundary below, where topology and exact JSON snapshots
+                    // are available. The viewport notification is intentionally
+                    // observation-only so a modal drag remains one entry.
                 },
                 onPaintCell(cell) {
                     return handleMutationResult(
@@ -479,53 +613,57 @@
                 },
                 onCreateGroundProfile() {
                     return handleMutationResult(
-                        host.createGroundProfile ? host.createGroundProfile() : null,
+                        runWalkProfileMutation('create', () =>
+                            host.createGroundProfile ? host.createGroundProfile() : null),
                         'lane-profile'
                     );
                 },
                 onSplitGroundProfileSegment(segmentIndex, amount) {
                     return handleMutationResult(
-                        host.splitGroundProfileSegment ? host.splitGroundProfileSegment(segmentIndex, amount) : null,
+                        runWalkProfileMutation('split', () =>
+                            host.splitGroundProfileSegment ? host.splitGroundProfileSegment(segmentIndex, amount) : null),
                         'lane-profile'
                     );
                 },
                 onMoveGroundProfilePoint(pointIndex, y, z) {
                     return handleMutationResult(
-                        host.moveGroundProfilePoint ? host.moveGroundProfilePoint(pointIndex, y, z) : null,
+                        runWalkProfileMutation('move', () =>
+                            host.moveGroundProfilePoint ? host.moveGroundProfilePoint(pointIndex, y, z) : null),
                         'lane-profile'
                     );
                 },
                 onDeleteGroundProfilePoint(pointIndex) {
                     return handleMutationResult(
-                        host.deleteGroundProfilePoint ? host.deleteGroundProfilePoint(pointIndex) : null,
+                        runWalkProfileMutation('dissolve', () =>
+                            host.deleteGroundProfilePoint ? host.deleteGroundProfilePoint(pointIndex) : null),
                         'lane-profile'
                     );
                 },
                 onMoveGroundProfilePoints(pointIndices, deltaY, deltaZ) {
                     return handleMutationResult(
-                        host.moveGroundProfilePoints
-                            ? host.moveGroundProfilePoints(pointIndices, deltaY, deltaZ) : null,
+                        runWalkProfileMutation('move', () => host.moveGroundProfilePoints
+                            ? host.moveGroundProfilePoints(pointIndices, deltaY, deltaZ) : null),
                         'lane-profile'
                     );
                 },
                 onExtrudeGroundProfileEndpoint(pointIndex, y, z) {
                     return handleMutationResult(
-                        host.extrudeGroundProfileEndpoint
-                            ? host.extrudeGroundProfileEndpoint(pointIndex, y, z) : null,
+                        runWalkProfileMutation('extrude', () => host.extrudeGroundProfileEndpoint
+                            ? host.extrudeGroundProfileEndpoint(pointIndex, y, z) : null),
                         'lane-profile'
                     );
                 },
                 onSubdivideGroundProfileSegments(segmentIndices, cuts) {
                     return handleMutationResult(
-                        host.subdivideGroundProfileSegments
-                            ? host.subdivideGroundProfileSegments(segmentIndices, cuts) : null,
+                        runWalkProfileMutation('subdivide', () => host.subdivideGroundProfileSegments
+                            ? host.subdivideGroundProfileSegments(segmentIndices, cuts) : null),
                         'lane-profile'
                     );
                 },
                 onDeleteGroundProfilePoints(pointIndices) {
                     return handleMutationResult(
-                        host.deleteGroundProfilePoints
-                            ? host.deleteGroundProfilePoints(pointIndices) : null,
+                        runWalkProfileMutation('dissolve', () => host.deleteGroundProfilePoints
+                            ? host.deleteGroundProfilePoints(pointIndices) : null),
                         'lane-profile'
                     );
                 },
@@ -690,7 +828,13 @@
     const originalLoadActiveMap = window.loadActiveMap;
     if (typeof originalLoadActiveMap === 'function') {
         window.loadActiveMap = function () {
+            const previousAuthority = currentWalkProfileAuthority();
             const result = originalLoadActiveMap.apply(this, arguments);
+            if (currentWalkProfileAuthority() !== previousAuthority) {
+                window.dispatchEvent(new CustomEvent('thestra-studio-authority-changed', {
+                    detail: { authority: currentWalkProfileAuthority() }
+                }));
+            }
             renderVertexShadingPanel();
             refreshAll({ clearBundle: true }).catch(console.error);
             return result;

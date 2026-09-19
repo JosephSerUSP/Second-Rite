@@ -313,25 +313,16 @@ function savegame.deserialize(data, loader)
     sess.memorial = data.memorial or {}
     if data.autoRedirect ~= nil then sess.autoRedirect = data.autoRedirect end
 
+    -- Save v5 writes a fixed-slot party array with false placeholders for
+    -- holes. Restore by index: formation slots are gameplay state, not a
+    -- display-order convenience. Older development schemas are rejected at
+    -- the version boundary above, so no legacy dense-party migration remains.
     sess.party = {}
-    if data.version == 2 then
-        for i = 1, config.MAX_PARTY_SIZE do
-            local bdata = data.party and data.party[i]
-            if type(bdata) == "table" then
-                sess.party[i] = deserializeBattler(bdata, loader)
-            end
+    for i = 1, config.MAX_PARTY_SIZE do
+        local bdata = data.party and data.party[i]
+        if type(bdata) == "table" then
+            sess.party[i] = deserializeBattler(bdata, loader)
         end
-    else
-        -- Version 1 migration (dense party array without slot / false placeholders)
-        local formation = require("engine.formation")
-        local legacyParty = {}
-        for i = 1, config.MAX_PARTY_SIZE do
-            local bdata = data.party and data.party[i]
-            if type(bdata) == "table" then
-                table.insert(legacyParty, deserializeBattler(bdata, loader))
-            end
-        end
-        sess.party = formation.autoPack(legacyParty, config.MAX_PARTY_SIZE)
     end
 
     sess.reserve = {}
@@ -422,18 +413,31 @@ end
 
 function savegame.save(sessionObj, loader, sceneName, slot)
     slot = slot or "quicksave"
-    love.filesystem.createDirectory(SAVE_DIR)
+    local created, createErr = love.filesystem.createDirectory(SAVE_DIR)
+    if not created then
+        return nil, "failed to create save directory: " .. tostring(createErr)
+    end
     local payload = savegame.serialize(sessionObj, loader, sceneName)
     local body = json.encode(payload)
 
-    love.filesystem.write(slotPath(slot), body)
+    -- The LÖVE save directory is the durable authority. Do not allow the
+    -- optional source-tree mirror below to turn a failed persistent write into
+    -- a reported success. A failed write occurs before any successful save is
+    -- intentionally replaced, so callers can keep using the prior valid slot.
+    local written, writeErr = love.filesystem.write(slotPath(slot), body)
+    if not written then
+        return nil, "failed to write save '" .. tostring(slot) .. "': " .. tostring(writeErr)
+    end
 
     -- Dev-convenience dual-write into the Project source dir.
     local absPath = sourceAbsPath(slotPath(slot))
     local file = io.open(absPath, "w")
     if file then
-        file:write(body)
-        file:close()
+        local mirrorOk, mirrorErr = file:write(body)
+        local closeOk, closeErr = file:close()
+        if not mirrorOk or not closeOk then
+            print("[savegame] source mirror failed: " .. tostring(mirrorErr or closeErr))
+        end
     end
 
     return true

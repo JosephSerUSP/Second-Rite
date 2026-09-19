@@ -131,14 +131,30 @@ const spriteResolutionEndpoint = createSpriteResolutionEndpoint({
     runtimeResolver: createLocalSpriteResolver({ projectRoot: PROJECT_ROOT }),
 });
 
+function isAllowedStudioOrigin(origin) {
+    if (!origin) return true; // local CLI tooling is intentionally supported.
+    return origin === `http://127.0.0.1:${PORT}`
+        || origin === `http://localhost:${PORT}`;
+}
+
 const server = http.createServer((req, res) => {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // The editor binds only to loopback, but a browser page from another origin
+    // can still target loopback. Keep local command-line tooling originless,
+    // while refusing browser reads, preflights, and mutations that did not
+    // originate from this Studio instance.
+    const origin = req.headers.origin;
+    if (!isAllowedStudioOrigin(origin)) {
+        res.writeHead(403, { 'Content-Type': 'application/json', 'Vary': 'Origin' });
+        res.end(JSON.stringify({ success: false, message: 'Studio accepts only its local origin' }));
+        return;
+    }
+    if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
-        res.writeHead(200);
+        res.writeHead(204);
         res.end();
         return;
     }
@@ -671,13 +687,11 @@ const server = http.createServer((req, res) => {
                     const content = payload[name];
                     if (content === undefined || content === null) return;
                     const spec = authoredStorage.resourceSpec(name);
-                    authoredStorage.validateResource(content, name, spec);
+                    authoredStorage.validateWritableResource(DATA_ROOT, name, content, spec);
                     pending.push({ name, content, spec });
                 });
 
-                pending.forEach(({ name, content, spec }) => {
-                    authoredStorage.writeResource(DATA_ROOT, name, content, spec);
-                });
+                authoredStorage.writeResourcesTransactional(DATA_ROOT, pending);
 
                 // Notify Love2D game to reload if it is running
                 const notifyReq = http.request({

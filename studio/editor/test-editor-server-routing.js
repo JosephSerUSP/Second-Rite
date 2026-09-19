@@ -25,19 +25,28 @@ function reservePort() {
     });
 }
 
-function request(port, requestPath) {
+function request(port, requestPath, options = {}) {
     return new Promise((resolve, reject) => {
-        const req = http.get({ hostname: '127.0.0.1', port, path: requestPath }, res => {
+        const req = http.request({
+            hostname: '127.0.0.1',
+            port,
+            path: requestPath,
+            method: options.method || 'GET',
+            headers: options.headers,
+        }, res => {
             let body = '';
             res.setEncoding('utf8');
             res.on('data', chunk => { body += chunk; });
             res.on('end', () => resolve({
                 statusCode: res.statusCode,
                 contentType: res.headers['content-type'],
+                accessControlAllowOrigin: res.headers['access-control-allow-origin'],
                 body,
             }));
         });
         req.once('error', reject);
+        if (options.body) req.write(options.body);
+        req.end();
     });
 }
 
@@ -100,4 +109,40 @@ test('root query URLs serve the same Studio document while API queries keep rout
     assert.equal(ping.statusCode, 200);
     assert.match(ping.contentType || '', /^application\/json(?:;|$)/);
     assert.deepEqual(JSON.parse(ping.body), { success: true });
+});
+
+test('Studio rejects unrelated browser origins before endpoint routing', async t => {
+    const port = await reservePort();
+    const child = await startEditorServer(port);
+    t.after(() => {
+        if (!child.killed) child.kill();
+    });
+
+    const hostileOrigin = 'https://unrelated.example';
+    for (const response of await Promise.all([
+        request(port, '/data', { headers: { Origin: hostileOrigin } }),
+        request(port, '/save', {
+            method: 'POST',
+            headers: { Origin: hostileOrigin, 'Content-Type': 'application/json' },
+            body: '{}',
+        }),
+        request(port, '/save', {
+            method: 'OPTIONS',
+            headers: { Origin: hostileOrigin, 'Access-Control-Request-Method': 'POST' },
+        }),
+    ])) {
+        assert.equal(response.statusCode, 403);
+        assert.equal(response.accessControlAllowOrigin, undefined);
+    }
+
+    const studioOrigin = `http://127.0.0.1:${port}`;
+    const allowedRead = await request(port, '/data', { headers: { Origin: studioOrigin } });
+    assert.equal(allowedRead.statusCode, 200);
+    assert.equal(allowedRead.accessControlAllowOrigin, studioOrigin);
+    const allowedPreflight = await request(port, '/save', {
+        method: 'OPTIONS',
+        headers: { Origin: studioOrigin, 'Access-Control-Request-Method': 'POST' },
+    });
+    assert.equal(allowedPreflight.statusCode, 204);
+    assert.equal(allowedPreflight.accessControlAllowOrigin, studioOrigin);
 });

@@ -119,6 +119,32 @@ try {
     );
     assert.equal(fs.readFileSync(path.join(root, 'chapters', 'index.json'), 'utf8'), beforeInvalid);
 
+    // A bulk save must restore the whole data tree when a later resource
+    // writer fails after an earlier one has already changed a file.
+    const transactionRoot = path.join(root, 'transaction');
+    fs.mkdirSync(transactionRoot, { recursive: true });
+    fs.writeFileSync(path.join(transactionRoot, 'first.txt'), 'before-first');
+    fs.writeFileSync(path.join(transactionRoot, 'second.txt'), 'before-second');
+    const transactionBefore = {
+        first: fs.readFileSync(path.join(transactionRoot, 'first.txt'), 'utf8'),
+        second: fs.readFileSync(path.join(transactionRoot, 'second.txt'), 'utf8'),
+    };
+    assert.throws(() => storage.writeResourcesTransactional(transactionRoot, [
+        { name: 'first', content: 'after-first', spec: null },
+        { name: 'second', content: 'after-second', spec: null },
+    ], {
+        writeResource(writeRoot, name, content) {
+            fs.writeFileSync(path.join(writeRoot, `${name}.txt`), content);
+            if (name === 'second') throw new Error('simulated later write failure');
+        },
+    }), /simulated later write failure/);
+    assert.equal(fs.readFileSync(path.join(transactionRoot, 'first.txt'), 'utf8'), transactionBefore.first,
+        'rollback restores the resource written before a later failure');
+    assert.equal(fs.readFileSync(path.join(transactionRoot, 'second.txt'), 'utf8'), transactionBefore.second,
+        'rollback restores the failing resource too');
+    assert.equal(fs.readdirSync(root).filter(name => name.includes('studio-save-backup')).length, 0,
+        'rollback removes its temporary snapshot after restoration');
+
     const snapshots = path.join(root, 'snapshots');
     const snapshot = storage.snapshotResource(root, 'chapters', snapshots, orderedFragments);
     assert.deepEqual(JSON.parse(fs.readFileSync(snapshot, 'utf8')), chapters.value);

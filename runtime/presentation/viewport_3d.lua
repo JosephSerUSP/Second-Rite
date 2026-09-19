@@ -1334,6 +1334,17 @@ local function drawTownPrerender(session, inspection)
         local x, _, denominator = projectTownPoint(depthX, y, state.groundZ or 0)
         return panX + centerX + (x - plateGroundX), denominator
     end
+    -- Runtime-proof telemetry: this is resolved composition state, captured
+    -- by the CLI harness after the real draw. It is not authoring state and
+    -- never participates in play/save data.
+    local laneScreenX = screenXForTownY(actorY)
+    state.lastPrerenderComposition = {
+        platePanX = panX,
+        actorPlateX = actorPlateX,
+        laneScreenX = laneScreenX,
+        cameraFovHalfX = townCamera.fovHalfX,
+        cameraTargetY = townCamera.targetY,
+    }
 
     -- Where the floor is at a given point along the lane. The camera looks
     -- straight at the facades with no vanishing point, so one scale converts

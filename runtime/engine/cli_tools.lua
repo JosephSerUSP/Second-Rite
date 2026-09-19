@@ -1540,6 +1540,7 @@ function cli.runTownProofFrames(loader)
             image = love.data.encode("string", "base64", png),
             mapId = vSession.currentMapData and vSession.currentMapData.id,
             actor = state and { x = state.x, y = state.y, z = state.z } or nil,
+            composition = state and state.lastPrerenderComposition or nil,
             projectionWindowOffsetX = state and state.camera.projectionWindowOffsetX or nil,
             changedReturn = vSession.flags.town_room_changed == true,
         }

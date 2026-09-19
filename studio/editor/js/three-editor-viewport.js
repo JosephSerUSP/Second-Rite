@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { createThreeEditorViewport as createBaseViewport } from '/js/three-editor-viewport-base.js';
 import '/js/world-presentation.js';
 import '/js/world-presentation-studio.js';
+import '/js/plate-composition-studio.js';
 import { createCompositionViewport } from '/js/three-composition-viewport.js';
 import '/js/scene-timing-authoring.js';
 import '/js/scene-timing-studio.js';
@@ -323,6 +324,9 @@ export function createThreeEditorViewport(container, options = {}) {
         },
         getSpatialCamera: () => spatialCamera,
         getCompositionPreview: () => compositionAuthoring.descriptor(),
+        setPlateManifestOverride(path, manifest) {
+            return compositionAuthoring.setManifestOverride(path, manifest);
+        },
         getCompositionFrame: () => compositionAuthoring.descriptor()?.frames.find(frame => frame.id === compositionFrameId),
         isPlateComposition: () => compositionAuthoring.isPlate(),
         setWalkMeshVisible(visible) {

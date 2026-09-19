@@ -1203,6 +1203,29 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        /* Keep the owner-signed desktop composition, while allowing this dense
+           form to fit inside a 1024x768 authoring window. */
+        @media (max-width: 1100px) {
+            .map-properties-window {
+                width: min(1120px, calc(100vw - 32px)) !important;
+                max-height: calc(100vh - 32px);
+                display: flex;
+                flex-direction: column;
+            }
+            .map-properties-body {
+                overflow: auto;
+                min-height: 0;
+            }
+            .map-properties-columns {
+                display: grid !important;
+                grid-template-columns: minmax(280px, 2fr) repeat(auto-fit, minmax(155px, 1fr));
+                align-items: stretch;
+            }
+            .map-properties-columns > fieldset {
+                min-width: 0;
+            }
+        }
     </style>
     <!-- #277: one import map for every Three.js consumer in Studio. An import
          map must precede the first module import, so declaring it statically
@@ -1970,16 +1993,16 @@
 
     <!-- --- MAP PROPERTIES DIALOG MODAL --- -->
     <div id="map-properties-modal" class="modal-overlay" style="z-index: 1050;">
-        <div class="window outset-bevel" style="width: min(1120px, calc(100vw - 32px)); max-height: calc(100vh - 32px); display: flex; flex-direction: column;">
+        <div class="window outset-bevel map-properties-window" style="width: 720px;">
             <div class="title-bar">
                 <div class="title-bar-text">Map Properties</div>
                 <div class="title-bar-controls">
                     <button class="win-btn-small outset-bevel" onclick="closeMapPropertiesModal()">×</button>
                 </div>
             </div>
-            <div class="window-body" style="display: flex; flex-direction: column; gap: 10px; overflow: auto; min-height: 0;">
-                <div style="display: grid; grid-template-columns: minmax(280px, 2fr) repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; align-items: stretch;">
-                    <fieldset style="min-width: 0;">
+            <div class="window-body map-properties-body" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="map-properties-columns" style="display: flex; gap: 10px;">
+                    <fieldset style="flex: 1;">
                         <legend>General Settings</legend>
                         <div class="field-row-stacked">
                            <label>Map Title:</label>
@@ -2143,7 +2166,7 @@
                         </div>
                     </fieldset>
                     
-                    <fieldset style="min-width: 0; display: flex; flex-direction: column;">
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
                        <legend>Encounters List</legend>
                        <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-enc-list"></div>
                        <div style="display: flex; gap: 4px; margin-top: 6px;">
@@ -2152,7 +2175,7 @@
                        </div>
                     </fieldset>
 
-                    <fieldset style="min-width: 0; display: flex; flex-direction: column;">
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
                        <legend>Recruits Pool</legend>
                        <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-recruits-list"></div>
                        <div style="display: flex; gap: 4px; margin-top: 6px;">
@@ -2161,7 +2184,7 @@
                        </div>
                     </fieldset>
 
-                    <fieldset style="min-width: 0; display: flex; flex-direction: column;">
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
                        <legend>Authored Zones</legend>
                        <label style="font-size: 10px;">JSON rectangles or explicit cells; overlapping records give a cell multiple tags.</label>
                        <textarea id="prop-map-zones" class="win98-input"
@@ -2169,7 +2192,7 @@
                            placeholder='[{"id":"market","x":2,"y":3,"width":6,"height":4}]'></textarea>
                     </fieldset>
 
-                    <fieldset style="min-width: 0; display: flex; flex-direction: column;">
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
                        <legend>Tileset Override</legend>
                        <label style="font-size: 10px;">Sparse JSON delta. Pool entries merge by ID; use {"id":"...","remove":true} to remove one.</label>
                        <textarea id="prop-map-tileset-override" class="win98-input"
@@ -2177,7 +2200,7 @@
                            placeholder='{"features":[{"id":"wall_torch","injectProbability":0.08}]}'></textarea>
                     </fieldset>
 
-                    <fieldset style="min-width: 0; display: flex; flex-direction: column;">
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
                        <legend>Anchors (Pre-authored Rooms)</legend>
                        <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-anchors-list"></div>
                        <div style="display: flex; gap: 4px; margin-top: 6px;">

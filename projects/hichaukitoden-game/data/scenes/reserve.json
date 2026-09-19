@@ -11,27 +11,27 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "mode",
         "value": 1
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "cursorIdx",
         "value": 1
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "focusArea",
         "value": "'party'"
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "statusText",
         "value": "''"
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       }
@@ -39,23 +39,23 @@
     "on_left": [
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'party'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cursorIdx",
-            "value": "v.cursorIdx > 1 and v.cursorIdx - 1 or v.cursorIdx"
+            "value": "sceneState.cursorIdx > 1 and sceneState.cursorIdx - 1 or sceneState.cursorIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'reserve'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cursorIdx",
-            "value": "v.cursorIdx > 1 and v.cursorIdx - 1 or v.cursorIdx"
+            "value": "sceneState.cursorIdx > 1 and sceneState.cursorIdx - 1 or sceneState.cursorIdx"
           }
         ]
       }
@@ -63,23 +63,23 @@
     "on_right": [
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'party'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cursorIdx",
-            "value": "v.cursorIdx < 4 and v.cursorIdx + 1 or v.cursorIdx"
+            "value": "sceneState.cursorIdx < 4 and sceneState.cursorIdx + 1 or sceneState.cursorIdx"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'reserve'",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "cursorIdx",
-            "value": "v.cursorIdx < 4 and v.cursorIdx + 1 or v.cursorIdx"
+            "value": "sceneState.cursorIdx < 4 and sceneState.cursorIdx + 1 or sceneState.cursorIdx"
           }
         ]
       }
@@ -87,28 +87,28 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'party'",
         "then": [
           {
             "cmd": "IF",
-            "condition": "v.cursorIdx > 2",
+            "condition": "sceneState.cursorIdx > 2",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx - 2"
+                "value": "sceneState.cursorIdx - 2"
               }
             ],
             "else": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "focusArea",
                 "value": "'reserve'"
               },
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx + 2"
+                "value": "sceneState.cursorIdx + 2"
               }
             ]
           }
@@ -116,16 +116,16 @@
       },
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'reserve'",
         "then": [
           {
             "cmd": "IF",
-            "condition": "v.cursorIdx > 2",
+            "condition": "sceneState.cursorIdx > 2",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx - 2"
+                "value": "sceneState.cursorIdx - 2"
               }
             ]
           }
@@ -133,12 +133,12 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 2",
+        "condition": "sceneState.mode == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx > 1 and v.popupIdx - 1 or v.popupIdx"
+            "value": "sceneState.popupIdx > 1 and sceneState.popupIdx - 1 or sceneState.popupIdx"
           }
         ]
       }
@@ -146,16 +146,16 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'party'",
         "then": [
           {
             "cmd": "IF",
-            "condition": "v.cursorIdx <= 2",
+            "condition": "sceneState.cursorIdx <= 2",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx + 2"
+                "value": "sceneState.cursorIdx + 2"
               }
             ]
           }
@@ -163,28 +163,28 @@
       },
       {
         "cmd": "IF",
-        "condition": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve'",
+        "condition": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'reserve'",
         "then": [
           {
             "cmd": "IF",
-            "condition": "v.cursorIdx <= 2",
+            "condition": "sceneState.cursorIdx <= 2",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx + 2"
+                "value": "sceneState.cursorIdx + 2"
               }
             ],
             "else": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "focusArea",
                 "value": "'party'"
               },
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "cursorIdx",
-                "value": "v.cursorIdx - 2"
+                "value": "sceneState.cursorIdx - 2"
               }
             ]
           }
@@ -192,12 +192,12 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.mode == 2",
+        "condition": "sceneState.mode == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
-            "value": "v.popupIdx < v.popupCount and v.popupIdx + 1 or v.popupIdx"
+            "value": "sceneState.popupIdx < sceneState.popupCount and sceneState.popupIdx + 1 or sceneState.popupIdx"
           }
         ]
       }
@@ -205,20 +205,20 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 2
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "popupIdx",
             "value": 1
           },
@@ -230,10 +230,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -243,10 +243,10 @@
           },
           {
             "cmd": "IF",
-            "condition": "v.ritualPush == 'summon'",
+            "condition": "sceneState.ritualPush == 'summon'",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "ritualPush",
                 "value": "''"
               },
@@ -254,18 +254,18 @@
                 "cmd": "SCENE_EVENT",
                 "kind": "push",
                 "scene": "ritual",
-                "vars": [
+                "sceneState": [
                   {
                     "name": "ritualMode",
                     "value": "'summon'"
                   },
                   {
                     "name": "targetIsReserve",
-                    "value": "v.popupTargetIsReserve"
+                    "value": "sceneState.popupTargetIsReserve"
                   },
                   {
                     "name": "targetIndex",
-                    "value": "v.popupTargetIndex"
+                    "value": "sceneState.popupTargetIndex"
                   }
                 ]
               }
@@ -273,10 +273,10 @@
           },
           {
             "cmd": "IF",
-            "condition": "v.ritualPush == 'promote'",
+            "condition": "sceneState.ritualPush == 'promote'",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "ritualPush",
                 "value": "''"
               },
@@ -284,18 +284,18 @@
                 "cmd": "SCENE_EVENT",
                 "kind": "push",
                 "scene": "ritual",
-                "vars": [
+                "sceneState": [
                   {
                     "name": "ritualMode",
                     "value": "'promote'"
                   },
                   {
                     "name": "targetIsReserve",
-                    "value": "v.popupTargetIsReserve"
+                    "value": "sceneState.popupTargetIsReserve"
                   },
                   {
                     "name": "targetIndex",
-                    "value": "v.popupTargetIndex"
+                    "value": "sceneState.popupTargetIndex"
                   }
                 ]
               }
@@ -303,10 +303,10 @@
           },
           {
             "cmd": "IF",
-            "condition": "v.ritualPush == 'sacrifice'",
+            "condition": "sceneState.ritualPush == 'sacrifice'",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_SCENE_STATE",
                 "name": "ritualPush",
                 "value": "''"
               },
@@ -314,18 +314,18 @@
                 "cmd": "SCENE_EVENT",
                 "kind": "push",
                 "scene": "ritual",
-                "vars": [
+                "sceneState": [
                   {
                     "name": "ritualMode",
                     "value": "'sacrifice'"
                   },
                   {
                     "name": "targetIsReserve",
-                    "value": "v.popupTargetIsReserve"
+                    "value": "sceneState.popupTargetIsReserve"
                   },
                   {
                     "name": "targetIndex",
-                    "value": "v.popupTargetIndex"
+                    "value": "sceneState.popupTargetIndex"
                   }
                 ]
               }
@@ -335,10 +335,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -352,10 +352,10 @@
     "on_cancel": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 1",
+        "condition": "locals._guard == 0 and sceneState.mode == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
@@ -367,15 +367,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 2",
+        "condition": "locals._guard == 0 and sceneState.mode == 2",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           }
@@ -383,15 +383,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.mode == 4",
+        "condition": "locals._guard == 0 and sceneState.mode == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "mode",
             "value": 1
           }
@@ -400,16 +400,16 @@
     ],
     "on_frame": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       }
     ]
   },
   "scripts": {
-    "setupReservePopup": "\nlocal v = ctx.v\nlocal focusArea = v.focusArea\nlocal cursorIdx = v.cursorIdx\nlocal member = (focusArea == 'party') and api.party(cursorIdx) or api.reserve(cursorIdx)\nlocal options = {}\n\nif member and member.empty then member = nil end\n\nv.popupTargetIsReserve = (focusArea == 'reserve')\nv.popupTargetIndex = cursorIdx\nv.popupMemberName = member and (member.name or \"Unknown\") or nil\nv.popupMemberRef = member\n\n-- Summoning belongs to a town ritual site. Sacrifice is disabled while its\n-- inheritance-based replacement is designed. Expedition reserve only manages\n-- creatures the player already committed to bringing below.\ntable.insert(options, {name = \"Swap\"})\nif member and api.inDungeon() then\n    table.insert(options, {name = \"Dismiss\"})\nend\nif member and api.canPromote(v.popupTargetIsReserve, v.popupTargetIndex) then\n    table.insert(options, {name = \"Promote\"})\nend\ntable.insert(options, {name = \"Cancel\"})\n\nv.popupCount = #options\nv.popupOptions = options\n",
-    "executeReservePopup": "\nlocal v = ctx.v\nlocal opt = v.popupOptions[v.popupIdx].name\nif opt == \"Cancel\" then\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Swap\" then\n    v.mode = 4\n    v.swapSourceIsReserve = v.popupTargetIsReserve\n    v.swapSourceIndex = v.popupTargetIndex\n    v.swapSourceFocus = v.focusArea\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Dismiss\" then\n    local member, result = api.dismissToStorage(v.popupTargetIsReserve, v.popupTargetIndex)\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\n    if member then\n        v.statusText = member.name .. \" returned to town storage (slot \" .. result .. \").\"\n    else\n        v.statusText = result or \"Dismissal failed.\"\n    end\nelseif opt == \"Promote\" then\n    v.ritualPush = \"promote\"\n    v.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nend\n",
-    "executeSwap": "\nlocal v = ctx.v\napi.swap(v.swapSourceIndex, v.swapSourceIsReserve, v.cursorIdx, v.focusArea == 'reserve')\nif api.partyCount() <= 0 then\n    api.swap(v.cursorIdx, v.focusArea == 'reserve', v.swapSourceIndex, v.swapSourceIsReserve)\n    v.statusText = \"Cannot leave the party empty!\"\n    v.mode = 1\n    return\nend\nv.mode = 1\nv.statusText = \"\"\n"
+    "setupReservePopup": "\nlocal sceneState = ctx.sceneState\nlocal focusArea = sceneState.focusArea\nlocal cursorIdx = sceneState.cursorIdx\nlocal member = (focusArea == 'party') and api.party(cursorIdx) or api.reserve(cursorIdx)\nlocal options = {}\n\nif member and member.empty then member = nil end\n\nsceneState.popupTargetIsReserve = (focusArea == 'reserve')\nsceneState.popupTargetIndex = cursorIdx\nsceneState.popupMemberName = member and (member.name or \"Unknown\") or nil\nsceneState.popupMemberRef = member\n\n-- Summoning belongs to a town ritual site. Sacrifice is disabled while its\n-- inheritance-based replacement is designed. Expedition reserve only manages\n-- creatures the player already committed to bringing below.\ntable.insert(options, {name = \"Swap\"})\nif member and api.inDungeon() then\n    table.insert(options, {name = \"Dismiss\"})\nend\nif member and api.canPromote(sceneState.popupTargetIsReserve, sceneState.popupTargetIndex) then\n    table.insert(options, {name = \"Promote\"})\nend\ntable.insert(options, {name = \"Cancel\"})\n\nsceneState.popupCount = #options\nsceneState.popupOptions = options\n",
+    "executeReservePopup": "\nlocal sceneState = ctx.sceneState\nlocal opt = sceneState.popupOptions[sceneState.popupIdx].name\nif opt == \"Cancel\" then\n    sceneState.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Swap\" then\n    sceneState.mode = 4\n    sceneState.swapSourceIsReserve = sceneState.popupTargetIsReserve\n    sceneState.swapSourceIndex = sceneState.popupTargetIndex\n    sceneState.swapSourceFocus = sceneState.focusArea\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nelseif opt == \"Dismiss\" then\n    local member, result = api.dismissToStorage(sceneState.popupTargetIsReserve, sceneState.popupTargetIndex)\n    sceneState.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\n    if member then\n        sceneState.statusText = member.name .. \" returned to town storage (slot \" .. result .. \").\"\n    else\n        sceneState.statusText = result or \"Dismissal failed.\"\n    end\nelseif opt == \"Promote\" then\n    sceneState.ritualPush = \"promote\"\n    sceneState.mode = 1\n    api.emit({ type = \"close_window\", windowId = \"reserve_popup\" })\nend\n",
+    "executeSwap": "\nlocal sceneState = ctx.sceneState\napi.swap(sceneState.swapSourceIndex, sceneState.swapSourceIsReserve, sceneState.cursorIdx, sceneState.focusArea == 'reserve')\nif api.partyCount() <= 0 then\n    api.swap(sceneState.cursorIdx, sceneState.focusArea == 'reserve', sceneState.swapSourceIndex, sceneState.swapSourceIsReserve)\n    sceneState.statusText = \"Cannot leave the party empty!\"\n    sceneState.mode = 1\n    return\nend\nsceneState.mode = 1\nsceneState.statusText = \"\"\n"
   },
   "overlay": true,
   "draw": "windows",
@@ -420,7 +420,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.mode == 4 and 'Select a target to swap with.  ESC: cancel' or ((v.statusText and v.statusText ~= '') and v.statusText or config.terms.help)}"
+          "text": "{sceneState.mode == 4 and 'Select a target to swap with.  ESC: cancel' or ((sceneState.statusText and sceneState.statusText ~= '') and sceneState.statusText or config.terms.help)}"
         }
       ]
     },
@@ -431,7 +431,7 @@
           "type": "list",
           "listId": "party",
           "format": "{name}",
-          "cursor": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'party' and v.cursorIdx or 0"
+          "cursor": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'party' and sceneState.cursorIdx or 0"
         }
       ]
     },
@@ -442,19 +442,19 @@
           "type": "list",
           "listId": "reserve",
           "format": "{name}",
-          "cursor": "(v.mode == 1 or v.mode == 4) and v.focusArea == 'reserve' and v.cursorIdx or 0"
+          "cursor": "(sceneState.mode == 1 or sceneState.mode == 4) and sceneState.focusArea == 'reserve' and sceneState.cursorIdx or 0"
         }
       ]
     },
     {
       "id": "reserve_popup",
-      "visible": "v.mode == 2",
+      "visible": "sceneState.mode == 2",
       "content": [
         {
           "type": "list",
-          "listId": "v:popupOptions",
+          "listId": "sceneState:popupOptions",
           "format": "{name}",
-          "cursor": "v.popupIdx"
+          "cursor": "sceneState.popupIdx"
         }
       ]
     }

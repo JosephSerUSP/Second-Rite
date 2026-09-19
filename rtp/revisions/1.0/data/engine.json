@@ -173,10 +173,6 @@
       "description": "Transient state owned by the current pushed Scene instance and authored with SET_SCENE_STATE, e.g. sceneState.cursor. Survives across that Scene's hooks but is not saved."
     },
     {
-      "token": "v",
-      "description": "Legacy #410 compatibility namespace for SET_VAR. New content must use locals or sceneState so lifetime is explicit."
-    },
-    {
       "token": "self.switches.<name>",
       "description": "Persistent boolean SELF state owned by the currently executing placed Map Event. Unknown Self Switches read false. Available in Map Event execution and Page formulas."
     },
@@ -230,11 +226,11 @@
     },
     {
       "token": "session.skillCount",
-      "description": "Per-party-slot skill counts, e.g. session.skillCount[v.idx] (bounds the status scene's skill-inspector cursor)."
+      "description": "Per-party-slot skill counts, e.g. session.skillCount[sceneState.idx] (bounds the status scene's skill-inspector cursor)."
     },
     {
       "token": "session.passiveCount",
-      "description": "Per-party-slot passive counts, e.g. session.passiveCount[v.idx] (bounds the status scene's passive-inspector cursor)."
+      "description": "Per-party-slot passive counts, e.g. session.passiveCount[sceneState.idx] (bounds the status scene's passive-inspector cursor)."
     },
     {
       "token": "time.dt",
@@ -280,10 +276,6 @@
     {
       "token": "ctx.sceneState",
       "description": "Current pushed Scene's transient state table when SCRIPT runs in a Scene; same owner exposed to formulas as sceneState."
-    },
-    {
-      "token": "ctx.v",
-      "description": "Legacy #410 compatibility table. New SCRIPT code should use ctx.locals or ctx.sceneState explicitly."
     },
     {
       "token": "ctx.rawSession",
@@ -644,34 +636,6 @@
       ],
       "interactive": false,
       "description": "Sets transient state owned by the current pushed Scene instance. Read it as sceneState.<name>. It survives across that Scene's hooks but is not saved with the playthrough."
-    },
-    {
-      "id": "SET_VAR",
-      "category": "Variables",
-      "label": "Control Variables",
-      "params": [
-        {
-          "key": "name",
-          "type": "text"
-        },
-        {
-          "key": "value",
-          "type": "formula"
-        },
-        {
-          "key": "assignments",
-          "type": "assignments"
-        }
-      ],
-      "contexts": [
-        "battle_phase",
-        "map",
-        "common",
-        "scene",
-        "unit_reaction"
-      ],
-      "interactive": false,
-      "description": "Sets one or several flow-local variables, readable as v.name in formulas. Single form: name + value. Multi form: assignments rows, evaluated in order so later values can read earlier ones via v. — when assignments is present, name/value are ignored."
     },
     {
       "id": "SET_GAME_VARIABLE",
@@ -1542,7 +1506,7 @@
           "type": "text"
         },
         {
-          "key": "vars",
+          "key": "sceneState",
           "type": "assignments"
         }
       ],
@@ -1551,7 +1515,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Emits a scene_change event that scene_host consumes; the interpreter never switches scenes itself. Optional vars ({name, value} rows, evaluated against the pushing scene right now) are applied to the pushed scene's v right after its own on_enter runs, e.g. to hand it a chosen party member index."
+      "description": "Emits a scene_change event that scene_host consumes; the interpreter never switches scenes itself. Optional Scene State ({name, value} rows, evaluated against the pushing scene right now) are applied to the pushed scene's Scene State right after its own on_enter runs, e.g. to hand it a chosen party member index."
     },
     {
       "id": "EXPORT_MAP_GEOMETRY",
@@ -1562,7 +1526,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Developer-only: exports the complete current runtime 3D world as a geometry-only OBJ and writes a formatted result into v.statusText."
+      "description": "Developer-only: exports the complete current runtime 3D world as a geometry-only OBJ and writes a formatted result into sceneState.statusText."
     },
     {
       "id": "FALLBACK",
@@ -1675,7 +1639,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Fills v.saveRows (rows: name = display label, slot = slot id, empty = true if unused) and v.saveCount from a fixed set of save slots (default 3, override with count). Used by the Save/Load menus."
+      "description": "Fills sceneState.saveRows (rows: name = display label, slot = slot id, empty = true if unused) and sceneState.saveCount from a fixed set of save slots (default 3, override with count). Used by the Save/Load menus."
     },
     {
       "id": "SAVE_GAME",
@@ -1707,7 +1671,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Loads the given slot, rebuilds the session, and transitions to the scene it was saved from. Sets v.loadError if the slot can't be read."
+      "description": "Loads the given slot, rebuilds the session, and transitions to the scene it was saved from. Sets sceneState.loadError if the slot can't be read."
     },
     {
       "id": "LIST_ACTIVE_QUESTS",
@@ -1718,7 +1682,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Fills v.questRows (rows: name, id, summary, objectives, completed) and v.questCount from quests the session has active or completed (session.flags quest:<id>:active/:completed). Quest-level only, no per-objective tracking."
+      "description": "Fills sceneState.questRows (rows: name, id, summary, objectives, completed) and sceneState.questCount from quests the session has active or completed (session.flags quest:<id>:active/:completed). Quest-level only, no per-objective tracking."
     },
     {
       "id": "LIST_UNLOCKED_LORE",
@@ -1729,7 +1693,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Fills v.loreRows (rows: id, name, title, category, body) and v.loreCount from baseline and session-unlocked lore entries."
+      "description": "Fills sceneState.loreRows (rows: id, name, title, category, body) and sceneState.loreCount from baseline and session-unlocked lore entries."
     },
     {
       "id": "LIST_INPUT_BINDINGS",
@@ -1740,7 +1704,7 @@
         "scene"
       ],
       "interactive": false,
-      "description": "Fills v.bindingRows (rows: name = 'BUTTON - key', button, key) and v.bindingCount from engine.input_map's current SNES-button->key bindings, in a fixed button order. Used by the Controls scene."
+      "description": "Fills sceneState.bindingRows (rows: name = 'BUTTON - key', button, key) and sceneState.bindingCount from engine.input_map's current SNES-button->key bindings, in a fixed button order. Used by the Controls scene."
     },
     {
       "id": "SET_INPUT_BINDING",
@@ -2701,7 +2665,7 @@
         {
           "key": "reduction",
           "type": "number",
-          "min": 1e-06,
+          "min": 0.000001,
           "max": 1
         },
         {

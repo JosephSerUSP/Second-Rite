@@ -3,7 +3,7 @@
   "terminal": {
     "none": "portrait/message staging probe, not a loop with an outcome"
   },
-  "name": "B006 \u2014 Dialogue Portrait Stage",
+  "name": "B006 — Dialogue Portrait Stage",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -19,12 +19,12 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.speakerName}"
+          "text": "{sceneState.speakerName}"
         },
         {
           "type": "text",
           "y": 2,
-          "text": "{v.dialogueText}"
+          "text": "{sceneState.dialogueText}"
         }
       ]
     },
@@ -38,12 +38,12 @@
       },
       "style": "list",
       "visibleRows": 3,
-      "condition": "v.showChoices == 1",
+      "condition": "sceneState.showChoices == 1",
       "content": [
         {
           "type": "list",
           "listId": "term:b006.options",
-          "cursor": "v.choiceIdx"
+          "cursor": "sceneState.choiceIdx"
         }
       ]
     }
@@ -51,7 +51,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
             "name": "step",
@@ -64,7 +64,12 @@
           {
             "name": "showChoices",
             "value": 0
-          },
+          }
+        ]
+      },
+      {
+        "cmd": "SET_LOCAL",
+        "assignments": [
           {
             "name": "_guard",
             "value": 0
@@ -80,7 +85,7 @@
     "update_step": [
       {
         "cmd": "IF",
-        "condition": "v.step == 1",
+        "condition": "sceneState.step == 1",
         "then": [
           {
             "cmd": "SHOW_IMAGE_PICTURE",
@@ -105,12 +110,12 @@
             "layer": "screen"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "speakerName",
             "value": "'Celina'"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "dialogueText",
             "value": "'Welcome to the Dialogue Portrait Stage. We are testing image picture manipulation.'"
           }
@@ -118,7 +123,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.step == 2",
+        "condition": "sceneState.step == 2",
         "then": [
           {
             "cmd": "MOVE_IMAGE_PICTURE",
@@ -135,12 +140,12 @@
             "duration": 0.3
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "speakerName",
             "value": "'Merchant'"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "dialogueText",
             "value": "'Indeed. Notice how I move forward and come into focus when I speak.'"
           }
@@ -148,7 +153,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.step == 3",
+        "condition": "sceneState.step == 3",
         "then": [
           {
             "cmd": "MOVE_IMAGE_PICTURE",
@@ -168,17 +173,17 @@
             "duration": 0.5
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "speakerName",
             "value": "'Celina'"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "dialogueText",
             "value": "'And we can both shift positions smoothly. How should we proceed?'"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "showChoices",
             "value": 1
           }
@@ -186,10 +191,10 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.step == 4",
+        "condition": "sceneState.step == 4",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "showChoices",
             "value": 0
           },
@@ -208,12 +213,12 @@
             "duration": 0.5
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "speakerName",
             "value": "''"
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "dialogueText",
             "value": "'(They depart, concluding the demonstration.)'"
           }
@@ -221,7 +226,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v.step > 4",
+        "condition": "sceneState.step > 4",
         "then": [
           {
             "cmd": "ERASE_IMAGE_PICTURE",
@@ -241,17 +246,17 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.showChoices == 0",
+        "condition": "locals._guard == 0 and sceneState.showChoices == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "step",
-            "value": "v.step + 1"
+            "value": "sceneState.step + 1"
           },
           {
             "cmd": "SCENE_EVENT",
@@ -262,15 +267,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.showChoices == 1",
+        "condition": "locals._guard == 0 and sceneState.showChoices == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "step",
             "value": "4"
           },
@@ -282,7 +287,7 @@
         ]
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_LOCAL",
         "name": "_guard",
         "value": 0
       }
@@ -290,12 +295,12 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.showChoices == 1",
+        "condition": "sceneState.showChoices == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "choiceIdx",
-            "value": "v.choiceIdx == 1 and 2 or v.choiceIdx - 1"
+            "value": "sceneState.choiceIdx == 1 and 2 or sceneState.choiceIdx - 1"
           }
         ]
       }
@@ -303,12 +308,12 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.showChoices == 1",
+        "condition": "sceneState.showChoices == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "choiceIdx",
-            "value": "v.choiceIdx == 2 and 1 or v.choiceIdx + 1"
+            "value": "sceneState.choiceIdx == 2 and 1 or sceneState.choiceIdx + 1"
           }
         ]
       }

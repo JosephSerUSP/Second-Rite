@@ -6,7 +6,9 @@ local state_value = require("engine.state_value")
 local scene_host = {}
 
 -- State container for the active scenes
--- Each element is { id = sceneId, v = {}, windows = {}, focusedWindow = nil }
+-- Each element is { id = sceneId, v = {}, windows = {}, focusedWindow = nil }.
+-- `v` is the private native storage field; authored code reaches it only as
+-- ctx.sceneState.
 local sceneStack = {}
 
 -- Window definitions registered by kind (via scene_host.register).
@@ -70,12 +72,14 @@ end
 
 -- #1160: the per-hook authored-value handoff check (#930, eae3e366) is
 -- deferred, not exempted per scene. Battle stores a live Battle object graph
--- (metatables + shared identity across v.battle/v.livingMembers/v.eventsQueue)
+-- (metatables + shared identity across sceneState.battle/sceneState.livingMembers/
+-- sceneState.eventsQueue)
 -- and reserve stores a live battler view (popupMemberRef.base carries a
--- metatable) -- both load-bearing on main -- so validating whole ctx.v with
+-- metatable) -- both load-bearing on main -- so validating whole Scene State with
 -- state_value crashes live play and the G5 harness scene after scene, and a
--- per-scene allowlist just moves the crash. The transition-vars copy below
--- stays enforced; the handoff returns once #410 migrates live refs out of v.
+-- per-scene allowlist just moves the crash. The transition-state copy below
+-- stays enforced; the handoff returns once #410 migrates live refs out of
+-- Scene State.
 -- SPEC 1.1.3 still describes the intended boundary and needs an owner pass
 -- to match this deferral.
 
@@ -197,20 +201,16 @@ function scene_host.runHook(hookName, ctx)
 
     -- We have a hook, execute it in immediate mode. The Scene instance
     -- owns sceneState across hooks; locals are fresh for this invocation.
-    -- v remains a temporary alias to Scene state only for the #410 corpus
-    -- migration and is removed with SET_VAR in the follow-up slice.
     ctx.sceneState = state.v
-    ctx.locals = {}
-    ctx.v = state.v
+    -- A hook receives a new process scope. `_guard` is deliberately seeded in
+    -- that scope (rather than retained in Scene State) so sequential authored
+    -- IF branches can claim one input without leaking to the next hook.
+    ctx.locals = { _guard = 0 }
 
     -- Expose the scene definition generically so SCRIPT commands can read
     -- scene config and scene-local named scripts (D13) — no per-kind context.
     ctx.scene = sceneData
 
-    -- Reset cascade guard: sequential IF blocks check v._guard == 0
-    -- and set v._guard = 1 when they match, preventing state cascades
-    -- (e.g. IF v.state==1 sets state=2, then IF v.state==2 fires immediately)
-    state.v._guard = 0
 
     -- Save old events list to avoid accumulating transition events across nested hook/push calls
     local oldEvents = ctx.events
@@ -266,9 +266,9 @@ function scene_host.runHook(hookName, ctx)
         elseif ev.kind == "pop" then
             scene_host.pop(ctx)
         elseif ev.kind == "push" and ev.scene then
-            scene_host.push(ev.scene, ctx, ev.vars)
+            scene_host.push(ev.scene, ctx, ev.sceneState)
         elseif ev.kind == "goto" and ev.scene then
-            scene_host.goto_scene(ev.scene, ctx, ev.vars)
+            scene_host.goto_scene(ev.scene, ctx, ev.sceneState)
         end
     end
 
@@ -278,10 +278,10 @@ function scene_host.runHook(hookName, ctx)
     return not fallback
 end
 
--- vars (optional): pre-resolved values from a SCENE_EVENT push/goto, seeded
--- into the new scene's v BEFORE on_enter so its setup hooks can read them
+-- sceneState (optional): pre-resolved values from a SCENE_EVENT push/goto,
+-- seeded into the new scene BEFORE on_enter so its setup hooks can read them
 -- (e.g. the ritual scene's ritualMode/targetIndex).
-function scene_host.push(id, ctx, vars)
+function scene_host.push(id, ctx, sceneState)
     table.insert(sceneStack, {
         id = id,
         v = {},
@@ -296,11 +296,11 @@ function scene_host.push(id, ctx, vars)
         timeElapsed = 0,
         updateConfig = nil,
     })
-    if vars then
+    if sceneState then
         local pushed = sceneStack[#sceneStack]
-        for k, val in pairs(vars) do
+        for k, val in pairs(sceneState) do
             pushed.v[k] = state_value.copy(val,
-                "Scene '" .. tostring(id) .. "' ctx.v." .. tostring(k))
+                "Scene '" .. tostring(id) .. "' ctx.sceneState." .. tostring(k))
         end
     end
 
@@ -349,7 +349,7 @@ function scene_host.pop(ctx)
     end
 end
 
-function scene_host.goto_scene(id, ctx, vars)
+function scene_host.goto_scene(id, ctx, sceneState)
     -- Dock continuity across this transition is not handled here any more:
     -- the dock is a persistent surface that simply notices the incoming
     -- scene wants the same variant and doesn't re-animate (dock.lua).
@@ -361,11 +361,12 @@ function scene_host.goto_scene(id, ctx, vars)
     -- can improve it deliberately instead of this ownership move changing feel
     -- by accident.
     scene_host.pop(ctx)
-    scene_host.push(id, ctx, vars)
+    scene_host.push(id, ctx, sceneState)
 end
 
 -- A fixed Scene's timing view is deliberately transient and Scene-local. The
--- ordinary Formula/SCRIPT surfaces already receive v, so exposing `v.time`
+-- ordinary Formula/SCRIPT surfaces already receive sceneState, so exposing
+-- `sceneState.time`
 -- during `on_frame` gives authored code dt/tick/elapsed without adding raw host
 -- state, global clocks, or a second scripting API. Restore any authored `time`
 -- variable immediately after the hook so this is a logical-tick capability,
@@ -379,16 +380,16 @@ local function runTimedFrameHook(state, step, ctx)
     local timeView = setmetatable({}, {
         __index = values,
         __newindex = function()
-            error("Scene v.time is read-only during a fixed on_frame tick", 2)
+            error("Scene sceneState.time is read-only during a fixed on_frame tick", 2)
         end,
         __metatable = false,
     })
-    local oldVTime = state.v.time
+    local oldSceneStateTime = state.v.time
     local oldCtxTime = ctx.time
     state.v.time = timeView
     ctx.time = timeView
     local ok, handled = pcall(scene_host.runHook, "on_frame", ctx)
-    state.v.time = oldVTime
+    state.v.time = oldSceneStateTime
     ctx.time = oldCtxTime
     if not ok then error(handled, 0) end
     return handled
@@ -504,7 +505,7 @@ end
 
 function scene_host.keypressed(key, ctx)
     -- Raw key capture (e.g. the `controls` scene rebinding a button):
-    -- while the current scene's v._capturingKey is set, the very next
+    -- while the current scene's sceneState._capturingKey is set, the very next
     -- physical key -- WASD/arrows/escape included -- is routed to a
     -- scene-local on_raw_key hook instead of normal logical-button dispatch.
     -- This is an authoring/settings capture exception, not gameplay input.
@@ -513,8 +514,8 @@ function scene_host.keypressed(key, ctx)
         if state.v and state.v._capturingKey then
             local sceneData = getSceneData(ctx, state.id)
             if sceneData and sceneData.hooks and sceneData.hooks.on_raw_key then
-                ctx.v = state.v
-                ctx.v.rawKey = key
+                ctx.sceneState = state.v
+                ctx.sceneState.rawKey = key
                 return scene_host.runHook("on_raw_key", ctx)
             end
         end

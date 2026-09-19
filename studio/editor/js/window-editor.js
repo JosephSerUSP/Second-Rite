@@ -652,7 +652,7 @@
 
             const note = document.createElement('div');
             note.style.cssText = 'font-size: 10px; color: var(--win-dark-shadow); margin-bottom: 4px;';
-            note.textContent = 'Each page overrides any of this window\'s properties (text, contentY, its own gauges, ...) — resolved via pageFormula (e.g. "v.page or 1").';
+            note.textContent = 'Each page overrides any of this window\'s properties (text, contentY, its own gauges, ...) — resolved via pageFormula (e.g. "sceneState.page or 1").';
             box.appendChild(note);
 
             const formulaRow = document.createElement('div');
@@ -661,7 +661,7 @@
             const formulaInp = document.createElement('input');
             formulaInp.className = 'win98-input'; formulaInp.style.flex = '1';
             formulaInp.value = layoutObj.pageFormula || '';
-            formulaInp.placeholder = 'v.page or 1';
+            formulaInp.placeholder = 'sceneState.page or 1';
             formulaInp.oninput = () => { layoutObj.pageFormula = formulaInp.value; setDirty(true); };
             formulaRow.appendChild(formulaLbl); formulaRow.appendChild(formulaInp);
             box.appendChild(formulaRow);
@@ -708,7 +708,7 @@
                     row.appendChild(btnRow);
                 },
                 newItem: () => {
-                    layoutObj.pageFormula = layoutObj.pageFormula || 'v.page or 1';
+                    layoutObj.pageFormula = layoutObj.pageFormula || 'sceneState.page or 1';
                     formulaInp.value = layoutObj.pageFormula;
                     return { text: '' };
                 },

@@ -268,15 +268,15 @@ local itemNode = recruitment.getOrCreateRecruitNode(itemSess, mockLoader,
     })
 local itemCtx = {
     session = itemSess, loader = mockLoader, events = {},
-    v = { sourceKey = "test:item-cost", mode = 1, slotIdx = 1 },
+    sceneState = { sourceKey = "test:item-cost", mode = 1, slotIdx = 1 },
 }
 recruitment.onSelectRecruitScene(itemCtx)
-assert(itemNode.requirementSatisfied and itemCtx.v.mode == 2,
+assert(itemNode.requirementSatisfied and itemCtx.sceneState.mode == 2,
     "Affordable item requirement did not advance to placement")
 assert(itemSess.inventory[1] == 3,
     "Item requirement was consumed before final transaction commit")
 recruitment.onSelectRecruitScene(itemCtx)
-assert(itemCtx.v.mode == 3, "Recruitment did not enter confirmation mode")
+assert(itemCtx.sceneState.mode == 3, "Recruitment did not enter confirmation mode")
 recruitment.onSelectRecruitScene(itemCtx)
 assert(itemSess.inventory[1] == 1, "Item recruitment cost was not charged exactly once")
 assert(itemSess.party[1] and itemSess.party[1].instanceId == itemNode.recruitedInstanceId,
@@ -292,7 +292,7 @@ local goldNode = recruitment.getOrCreateRecruitNode(goldSess, mockLoader,
     })
 local goldCtx = {
     session = goldSess, loader = mockLoader, events = {},
-    v = { sourceKey = "test:gold-cost", mode = 1, slotIdx = 1 },
+    sceneState = { sourceKey = "test:gold-cost", mode = 1, slotIdx = 1 },
 }
 recruitment.onSelectRecruitScene(goldCtx)
 assert(goldNode.requirementSatisfied and goldSess.gold == 50,

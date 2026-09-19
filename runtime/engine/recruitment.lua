@@ -454,7 +454,7 @@ end
 -- ---------------------------------------------------------------------------
 
 function recruitment.onEnterRecruitScene(ctx)
-    local v = ctx.v
+    local v = ctx.sceneState
     local session = ctx.session
     local loader = ctx.loader or session.loader
 
@@ -511,7 +511,7 @@ function recruitment.onEnterRecruitScene(ctx)
 end
 
 function recruitment.onNavRecruitScene(ctx, dir)
-    local v = ctx.v
+    local v = ctx.sceneState
     if v.mode == 2 then
         if dir == "up" then
             v.slotIdx = math.max(1, v.slotIdx - 1)
@@ -526,7 +526,7 @@ function recruitment.onNavRecruitScene(ctx, dir)
 end
 
 function recruitment.onSelectRecruitScene(ctx)
-    local v = ctx.v
+    local v = ctx.sceneState
     local session = ctx.session
     local loader = ctx.loader or session.loader
     local node = session.recruitNodes and session.recruitNodes[v.sourceKey]
@@ -621,7 +621,7 @@ function recruitment.onSelectRecruitScene(ctx)
 end
 
 function recruitment.onCancelRecruitScene(ctx)
-    local v = ctx.v
+    local v = ctx.sceneState
     if v.showOnboarding then
         v.showOnboarding = false
         return
@@ -639,7 +639,7 @@ function recruitment.onCancelRecruitScene(ctx)
 end
 
 function recruitment.onExitRecruitScene(ctx)
-    local v = ctx.v
+    local v = ctx.sceneState
     local outcome = v.outcome or "cancelled"
     if recruitment.onResolved then
         recruitment.onResolved(outcome)

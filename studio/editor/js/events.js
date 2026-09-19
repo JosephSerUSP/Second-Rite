@@ -750,15 +750,15 @@
         // format, same add/edit/delete affordances).
         function describeCommand(cmd) {
             const id = cmdId(cmd);
-            if (['SET_VAR', 'SET_LOCAL', 'SET_SCENE_STATE'].includes(id)) {
+            if (['SET_LOCAL', 'SET_SCENE_STATE'].includes(id)) {
                 // E7: single form reads as before; multi form summarizes its
                 // rows (truncated) under the Control Variables label.
                 if (Array.isArray(cmd.assignments) && cmd.assignments.length > 0) {
                     const rows = cmd.assignments.map(a => `${a.name} = ${a.value}`);
                     const shown = rows.slice(0, 3).join(', ') + (rows.length > 3 ? `, … +${rows.length - 3} more` : '');
-                    return 'Control Variables: ' + shown;
+                    return `${id === 'SET_LOCAL' ? 'Set Local' : 'Set Scene State'}: ` + shown;
                 }
-                return `Set Variable: ${cmd.name} = ${cmd.value}`;
+                return `${id === 'SET_LOCAL' ? 'Set Local' : 'Set Scene State'}: ${cmd.name} = ${cmd.value}`;
             }
             if (id === 'TEXT') {
                 const speakerPrefix = cmd.speaker ? (cmd.speaker + ': ') : '';
@@ -1062,16 +1062,18 @@
                 if (ctx.onChange) ctx.onChange();
             }, ctx.hostCtx, ctx.idx);
 
-            // E7: merge a selected run of SET_VARs into one Control
-            // Variables command (rows keep their order; existing multi
+            // E7: merge a selected run of same-owner assignments into one
+            // explicit-owner command (rows keep their order; existing multi
             // forms are flattened in).
-            const mergeableSetVars = () => {
+            const mergeableAssignments = () => {
                 const ctxs = opCtxs();
                 if (ctxs.length < 2) return null;
-                return ctxs.every(c => cmdId(c.commandsArray[c.idx]) === 'SET_VAR') ? ctxs : null;
+                const firstId = cmdId(ctxs[0].commandsArray[ctxs[0].idx]);
+                if (!['SET_LOCAL', 'SET_SCENE_STATE'].includes(firstId)) return null;
+                return ctxs.every(c => cmdId(c.commandsArray[c.idx]) === firstId) ? ctxs : null;
             };
-            const doMergeSetVars = () => {
-                const ctxs = mergeableSetVars();
+            const doMergeAssignments = () => {
+                const ctxs = mergeableAssignments();
                 if (!ctxs) return;
                 const field = ctxs[0].commandsArray[ctxs[0].idx].cmd !== undefined ? 'cmd' : 'type';
                 const assignments = [];
@@ -1086,7 +1088,7 @@
                 const first = Math.min(...ctxs.map(c => c.idx));
                 ctxs.map(c => c.idx).sort((a, b) => b - a).forEach(i => ctx.commandsArray.splice(i, 1));
                 const merged = { assignments };
-                merged[field] = 'SET_VAR';
+                merged[field] = cmdId(ctxs[0].commandsArray[ctxs[0].idx]);
                 ctx.commandsArray.splice(first, 0, merged);
                 container._sel = null;
                 cmdRestoreTarget = { array: ctx.commandsArray, idx: first + 1 };
@@ -1123,8 +1125,8 @@
                     { label: 'Edit', action: ctx.onEdit, disabled: ctx.placeholder || multi },
                     { label: 'Duplicate', action: doDuplicate, disabled: ctx.placeholder },
                 ];
-                if (multi && mergeableSetVars()) {
-                    menuItems.push({ label: 'Merge into Control Variables', action: doMergeSetVars });
+                if (multi && mergeableAssignments()) {
+                    menuItems.push({ label: 'Merge assignments', action: doMergeAssignments });
                 }
                 showCmdContextMenu(e.clientX, e.clientY, menuItems.concat([
                     '-',
@@ -1806,7 +1808,7 @@
                 input = window.cmdParamWidgets.term(currentValue, () => {});
             } else if (paramDef.type === 'assignments') {
                 // E7: generic repeatable name/value row widget for any
-                // list-of-pairs param (SET_VAR's multi form today). Exposes
+                // list-of-pairs param (explicit assignment commands use it). Exposes
                 // _getRows() for applyCmdDialog; empty rows are dropped so a
                 // command left without rows stays in its single form.
                 input = document.createElement('div');

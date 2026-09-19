@@ -1684,9 +1684,10 @@ validator.run = function(loader)
             "' with no handler in engine/interpreter.lua (stub commands are not allowed)")
     end
 
-    -- Flow-locals (`v.*`) are DATA, not engine surface: a formula reads a
-    -- local because some SET_VAR in the same tree (or a SCENE_EVENT pushing
-    -- into the scene) assigns it. So the mock `v` is not hand-maintained
+    -- Owner-explicit transient state is DATA, not engine surface: a formula reads
+    -- a value because SET_LOCAL/SET_SCENE_STATE in the same tree (or a
+    -- SCENE_EVENT pushing into the scene) assigns it. So the mock namespaces
+    -- are not hand-maintained
     -- here -- every formula check seeds it by PRE-SCANNING the tree it is
     -- about to validate (collectAssignedVars/resolveSeedVars below), which
     -- means adding a new local is pure data work, no engine edit. Seeding
@@ -1695,15 +1696,15 @@ validator.run = function(loader)
     -- and fails G1 -- that is what catches typo'd locals.
     --
     -- Only the entries below survive as hardcoded: the ENGINE puts them in
-    -- `v` as a side effect, no SET_VAR ever names them, so no pre-scan of
+    -- Scene State as a side effect, no authored assignment ever names them, so no pre-scan of
     -- data could find them.
     local HOST_SEEDED_VARS = {
         -- engine/scene_host.lua: raw key of the press being captured, set
-        -- while v._capturingKey is on (controls scene rebinding).
+        -- while sceneState._capturingKey is on (controls scene rebinding).
         rawKey = "escape",
         -- engine/interpreter.lua list-builder commands, each of which fills
         -- a rows list plus its count as a side effect. Row shapes mirror the
-        -- handlers so `v.xRows[i].field` formulas see the real fields.
+        -- handlers so `sceneState.xRows[i].field` formulas see the real fields.
         saveRows = { { name = "Slot 1 - (empty)", slot = "slot1", empty = true,
             gold = 0, dungeonFloor = 1, savedAt = 0 } },
         saveCount = 1,
@@ -1715,7 +1716,7 @@ validator.run = function(loader)
         -- USE_ITEM's result record (engine/interpreter.lua).
         lastItemResult = { success = true, reason = "", itemName = "Mock Item" },
         -- Shop stock the Lua host materializes before pushing the shop scene
-        -- (main.lua openShop / engine/cli_tools.lua), not any SET_VAR.
+        -- (main.lua openShop / engine/cli_tools.lua), not any authored command.
         shopName = "Mock Shop",
         items = { { id = 1, cost = 50, name = "Item 1", stock = 9 },
                   { id = 2, cost = 100, name = "Item 2", stock = 9 },
@@ -1743,12 +1744,12 @@ validator.run = function(loader)
         local function mockTraits()
             return setmetatable({}, { __index = function() return 0.1 end })
         end
-        local v, locals, sceneState = {}, {}, {}
-        for k, val in pairs(HOST_SEEDED_VARS) do v[k] = val end
-        local legacySeeds = seedVars and (seedVars.v or seedVars) or {}
+        local locals, sceneState = {}, {}
+        for k, val in pairs(HOST_SEEDED_VARS) do
+            sceneState[k] = val
+        end
         local localSeeds = seedVars and seedVars.locals or {}
         local sceneSeeds = seedVars and seedVars.sceneState or {}
-        for k, val in pairs(legacySeeds) do v[k] = val end
         for k, val in pairs(localSeeds) do locals[k] = val end
         for k, val in pairs(sceneSeeds) do sceneState[k] = val end
         return {
@@ -1767,7 +1768,6 @@ validator.run = function(loader)
                         -- validated separately through formula.evalStateValue.
                         variables = setmetatable({}, { __index = function() return 1 end }),
                         combat = { minEnemies = 1, maxEnemies = 3, victoryGoldMin = 1, victoryGoldMax = 5, victoryGoldBase = 5, victoryGoldPerEnemy = 5, victoryExp = 10, victoryExpBase = 10, victoryExpLevelScale = 0.5, baseFleeChance = 0.5, goldLossOnFleeMin = 1, goldLossOnFleeMax = 5, mpExhaustionDamage = 5 },
-                        v = v,
                         locals = locals,
                         sceneState = sceneState,
                         -- SELF is owner-scoped at runtime. Formula validation
@@ -1809,7 +1809,8 @@ validator.run = function(loader)
     end
 
     -- A sandboxed SCRIPT body is data too (it lives in scenes.json), and
-    -- `v.invCount = #inv` in one is as much an authored local as a SET_VAR
+    -- `sceneState.invCount = #inv` in one is as much authored state as an
+    -- explicit assignment
     -- row -- so its assignments are pre-scanned out of the source text.
     -- `==`/`~=`/`<=`/`>=` can't match: only a bare `=` not followed by
     -- another `=` counts. No value comes back, so these seed neutrally.
@@ -1818,16 +1819,21 @@ validator.run = function(loader)
         local function add(name, prefix)
             table.insert(out, { name = (prefix or "") .. name })
         end
-        -- Legacy SCRIPT code commonly aliases ctx.v as local v. Until that
-        -- corpus migrates, seed all possible owners for those assignments.
-        for name in text:gmatch("v%.([%a_][%w_]*)%s*=[^=]") do
-            add(name); add(name, "locals:"); add(name, "sceneState:")
-        end
         for name in text:gmatch("ctx%.locals%.([%a_][%w_]*)%s*=[^=]") do
             add(name, "locals:")
         end
         for name in text:gmatch("ctx%.sceneState%.([%a_][%w_]*)%s*=[^=]") do
             add(name, "sceneState:")
+        end
+        -- Migrated scene scripts conventionally alias ctx.sceneState (and
+        -- flow scripts ctx.locals) before assigning.  The static resolver
+        -- must recognise those writes or later formulas are incorrectly
+        -- diagnosed as reading nil.
+        for name in text:gmatch("sceneState%.([%a_][%w_]*)%s*=[^=]") do
+            add(name, "sceneState:")
+        end
+        for name in text:gmatch("locals%.([%a_][%w_]*)%s*=[^=]") do
+            add(name, "locals:")
         end
         return out
     end
@@ -1836,8 +1842,8 @@ validator.run = function(loader)
     -- as { name, value } rows. Nested command lists (IF then/else, FOR_EACH
     -- commands, CHOICE options, ...) are walked generically rather than by
     -- key name, so a new block command needs no change here. A SCENE_EVENT's
-    -- `vars` rows are skipped: they land in the PUSHED scene's v, not this
-    -- tree's (collected per target scene by collectScenePushedVars).
+    -- `sceneState` rows are skipped: they land in the pushed Scene's state,
+    -- not this tree's (collected per target scene by collectScenePushedVars).
     local function collectAssignedVars(cmds, out)
         out = out or {}
         local function add(target, name, value)
@@ -1847,31 +1853,18 @@ validator.run = function(loader)
         end
         for _, cmd in ipairs(cmds or {}) do
             if type(cmd) == "table" then
-                if cmd.cmd == "SET_VAR" or cmd.cmd == "SET_LOCAL" or cmd.cmd == "SET_SCENE_STATE" then
+                if cmd.cmd == "SET_LOCAL" or cmd.cmd == "SET_SCENE_STATE" then
                     local target = cmd.cmd == "SET_LOCAL" and "locals:"
-                        or (cmd.cmd == "SET_SCENE_STATE" and "sceneState:" or "")
+                        or "sceneState:"
                     add(target, cmd.name, cmd.value)
                     for _, a in ipairs(cmd.assignments or {}) do
                         if type(a) == "table" then add(target, a.name, a.value) end
-                    end
-                    -- Legacy SET_VAR is host-owned. Mirror it into both
-                    -- candidate owners only during migration; explicit command
-                    -- ids never receive this compatibility treatment.
-                    if cmd.cmd == "SET_VAR" then
-                        add("locals:", cmd.name, cmd.value)
-                        add("sceneState:", cmd.name, cmd.value)
-                        for _, a in ipairs(cmd.assignments or {}) do
-                            if type(a) == "table" then
-                                add("locals:", a.name, a.value)
-                                add("sceneState:", a.name, a.value)
-                            end
-                        end
                     end
                 elseif cmd.cmd == "SCRIPT" then
                     collectScriptAssignedVars(cmd.code, out)
                 end
                 for key, val in pairs(cmd) do
-                    if type(val) == "table" and key ~= "assignments" and key ~= "vars" then
+                    if type(val) == "table" and key ~= "assignments" and key ~= "sceneState" then
                         collectAssignedVars(val, out)
                     end
                 end
@@ -1914,8 +1907,9 @@ validator.run = function(loader)
     end
 
     -- Stand-in for a table-shaped local: three rows long, and every field
-    -- read off it (or off a row) answers 1, so `#v.pool`, `v.items[v.idx]`
-    -- and `v.items[v.idx].cost` all evaluate without pretending to know the
+    -- read off it (or off a row) answers 1, so `#sceneState.pool`,
+    -- `sceneState.items[sceneState.idx]` and the cost read all evaluate
+    -- without pretending to know the
     -- real row shape.
     local function mockTableValue()
         local anyField = { __index = function() return 1 end }
@@ -1924,11 +1918,11 @@ validator.run = function(loader)
     end
 
     -- Turn pre-scanned assignments into concrete mock values by evaluating
-    -- each assigned expression -- the same thing the SET_VAR handler does at
+    -- each assigned expression -- the same thing the assignment handlers do at
     -- runtime, so a seed carries the real TYPE (index numbers stay numbers,
     -- `'summon'`-style mode strings stay strings). FIRST successful
     -- assignment per name wins: that is the author's initializer (on_enter's
-    -- `idx = 1`), where a later `idx = v.idx - 1` would leave the seed
+        -- `idx = 1`), where a later decrement would leave the seed
     -- drifted out of range. Two passes, so an initializer that reads a local
     -- assigned further down the tree still lands on a real value. Whatever
     -- is left -- SCRIPT-assigned names, self-referential expressions --
@@ -1938,10 +1932,10 @@ validator.run = function(loader)
     -- braces.
     local function resolveSeedVars(assigned, tableShaped)
         local formulaEngine = require("engine.formula")
-        local ctx = buildFormulaMockCtx({ v = {}, locals = {}, sceneState = {} })
+        local ctx = buildFormulaMockCtx({ locals = {}, sceneState = {} })
         local function ownerFor(encoded)
             local name = encoded
-            local target = ctx.v
+            local target = ctx.locals
             if encoded:sub(1, 7) == "locals:" then
                 name = encoded:sub(8); target = ctx.locals
             elseif encoded:sub(1, 11) == "sceneState:" then
@@ -1973,7 +1967,7 @@ validator.run = function(loader)
                 target[name] = (tableShaped or {})[a.name] and mockTableValue() or 1
             end
         end
-        return { v = ctx.v, locals = ctx.locals, sceneState = ctx.sceneState }
+        return { locals = ctx.locals, sceneState = ctx.sceneState }
     end
 
     local function seedVarsFor(cmds, pushedVars)
@@ -1981,26 +1975,25 @@ validator.run = function(loader)
         -- Pushed vars are seeded before the scene's own assignments: they
         -- exist in v before on_enter runs (engine/scene_host.lua push).
         for _, a in ipairs(pushedVars or {}) do
-            table.insert(assigned, a)
             table.insert(assigned, { name = "sceneState:" .. a.name, value = a.value })
         end
         collectAssignedVars(cmds, assigned)
         return resolveSeedVars(assigned, collectTableShapedVars(cmds))
     end
 
-    -- SCENE_EVENT hands `vars` to the scene it pushes, so for the RECEIVING
+    -- SCENE_EVENT hands `sceneState` to the scene it pushes, so for the RECEIVING
     -- scene those names count as assigned even though nothing inside it
-    -- SET_VARs them. Collected once across every host that can push a scene.
+    -- assigns them. Collected once across every host that can push a scene.
     local scenePushedVars = {}
     local function collectScenePushedVars(node, seen)
         if type(node) ~= "table" then return end
         seen = seen or {}
         if seen[node] then return end
         seen[node] = true
-        if node.cmd == "SCENE_EVENT" and node.scene ~= nil and type(node.vars) == "table" then
+        if node.cmd == "SCENE_EVENT" and node.scene ~= nil and type(node.sceneState) == "table" then
             local key = tostring(node.scene)
             scenePushedVars[key] = scenePushedVars[key] or {}
-            for _, a in ipairs(node.vars) do
+            for _, a in ipairs(node.sceneState) do
                 if type(a) == "table" and type(a.name) == "string" and a.name ~= "" then
                     table.insert(scenePushedVars[key], { name = a.name, value = a.value })
                 end
@@ -2109,12 +2102,8 @@ validator.run = function(loader)
                                     -- Feed the row's result (or a neutral 1)
                                     -- forward for later rows' formulas.
                                     local assignedValue = (ok and result ~= nil) and result or 1
-                                    assignmentTarget[a.name] = assignedValue
-                                    if id == "SET_VAR" then
-                                        -- Compatibility only: old SET_VAR can
-                                        -- still mean either owner until PR 2.
-                                        mockCtx.locals[a.name] = assignedValue
-                                        mockCtx.sceneState[a.name] = assignedValue
+                                    if assignmentTarget then
+                                        assignmentTarget[a.name] = assignedValue
                                     end
                                 end
                             end
@@ -3275,15 +3264,15 @@ elseif paramDef.type == "script" then
         -- Task A4b: the interactive-immediate bridge. A mixed command list
         -- must compile its contiguous non-interactive run (COMMENTs swallowed)
         -- into ONE RUN_IMMEDIATE node between the TEXT nodes, and executing
-        -- that run must share flow-locals (SET_VAR -> IF) and emit text.
+        -- that run must share process locals (SET_LOCAL -> IF) and emit text.
         do
             local nodes = {}
             local mixed = {
                 { cmd = "TEXT", text = "before" },
-                { cmd = "SET_VAR", name = "n", value = "2 + 3" },
+                { cmd = "SET_LOCAL", name = "n", value = "2 + 3" },
                 { cmd = "COMMENT", text = "swallowed into the run" },
-                { cmd = "IF", condition = "v.n == 5", ["then"] = {
-                    { cmd = "GAIN_GOLD", amount = "v.n" },
+                { cmd = "IF", condition = "locals.n == 5", ["then"] = {
+                    { cmd = "GAIN_GOLD", amount = "locals.n" },
                     { cmd = "EMIT_TEXT", fallback = "bridge ran" },
                 } },
                 { cmd = "TEXT", text = "after" },
@@ -3295,7 +3284,7 @@ elseif paramDef.type == "script" then
             check(runNode and runNode.type == "ACTION" and runNode.action == "RUN_IMMEDIATE",
                 "A4b: non-interactive run did not compile to RUN_IMMEDIATE")
             if runNode then
-                check(#runNode.commands == 3, "A4b: run should group 3 commands (SET_VAR, COMMENT, IF), got " .. tostring(#runNode.commands))
+                check(#runNode.commands == 3, "A4b: run should group 3 commands (SET_LOCAL, COMMENT, IF), got " .. tostring(#runNode.commands))
                 check(nodes[runNode.next] and nodes[runNode.next].type == "TEXT" and nodes[runNode.next].content == "after",
                     "A4b: RUN_IMMEDIATE must chain to the trailing TEXT node")
                 local goldBefore = tSession.gold
@@ -3303,7 +3292,7 @@ elseif paramDef.type == "script" then
                     { session = tSession, loader = loader, party = tSession.party })
                 check(okRun, "A4b: RUN_IMMEDIATE execution failed: " .. tostring(evs))
                 if okRun then
-                    check(tSession.gold == goldBefore + 5, "A4b: SET_VAR -> IF -> GAIN_GOLD did not share flow-locals across the run")
+                    check(tSession.gold == goldBefore + 5, "A4b: SET_LOCAL -> IF -> GAIN_GOLD did not share process locals across the run")
                     local sawBridgeText = false
                     for _, ev in ipairs(evs) do
                         if ev.type == "text" and ev.text == "bridge ran" then sawBridgeText = true end
@@ -3669,7 +3658,7 @@ elseif paramDef.type == "script" then
                                 local src = block.listId or ""
                                 local knownSources = { inventory = true, party = true, reserve = true,
                                     equipSlots = true, equipment = true, memberSkills = true, memberPassives = true }
-                                if not knownSources[src] and not src:find("^config:") and not src:find("^v:")
+                                if not knownSources[src] and not src:find("^config:") and not src:find("^sceneState:") and not src:find("^v:")
                                     and not src:find("^static:") and not src:find("^term:") then
                                     print("[validator] warning: " .. sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "' content[" .. bi .. "] unknown list source '" .. src .. "'")
                                 end

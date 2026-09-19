@@ -5,7 +5,7 @@
       "text": "Validator-only phase: exercises every non-interactive command in immediate mode."
     },
     {
-      "cmd": "SET_VAR",
+      "cmd": "SET_LOCAL",
       "name": "bonus",
       "value": "floor(session.floor * 2) + random(1, 2)"
     },
@@ -20,7 +20,7 @@
       "then": [
         {
           "cmd": "GAIN_GOLD",
-          "amount": "v.bonus",
+          "amount": "locals.bonus",
           "comment": "per-command comment fields must be ignored"
         }
       ],

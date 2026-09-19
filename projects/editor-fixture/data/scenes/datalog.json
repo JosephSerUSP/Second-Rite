@@ -26,7 +26,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{v.loreCount > 0 and ('UP/DOWN: select entry   ' .. sel('datalog_list').category .. '   ESC: back') or 'No lore has been recorded yet.   ESC: back'}"
+          "text": "{sceneState.loreCount > 0 and ('UP/DOWN: select entry   ' .. sel('datalog_list').category .. '   ESC: back') or 'No lore has been recorded yet.   ESC: back'}"
         }
       ]
     },
@@ -44,10 +44,10 @@
       "content": [
         {
           "type": "list",
-          "listId": "v:loreRows",
+          "listId": "sceneState:loreRows",
           "format": "{name}",
           "formatRight": "{category}",
-          "cursor": "v.idx"
+          "cursor": "sceneState.idx"
         }
       ]
     },
@@ -72,7 +72,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
         "value": 1
       },
@@ -83,12 +83,12 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.idx > 1",
+        "condition": "sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx - 1"
+            "value": "sceneState.idx - 1"
           }
         ]
       }
@@ -96,12 +96,12 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < (v.loreCount or 1)",
+        "condition": "sceneState.idx < (sceneState.loreCount or 1)",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx + 1"
+            "value": "sceneState.idx + 1"
           }
         ]
       }

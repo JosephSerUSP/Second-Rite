@@ -29,7 +29,9 @@ function reactions.run(unit, triggerId, ctx)
     for index, reaction in ipairs((unit.actorData and unit.actorData.reactions) or {}) do
         if reaction.trigger == triggerId then
             if reaction.condition == nil or reaction.condition == ""
-                or formula.eval(reaction.condition, formula.makeContext({ v = ctx.v }, ctx.session)) then
+                or formula.eval(reaction.condition, formula.makeContext({
+                    locals = ctx.locals, sceneState = ctx.sceneState
+                }, ctx.session)) then
                 -- The authored id is stable provenance for diagnostics. It is
                 -- never inferred from array position, while array position is
                 -- the explicit deterministic execution order.

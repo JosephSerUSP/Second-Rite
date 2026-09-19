@@ -97,7 +97,7 @@ be compared, negated, or used in short-circuit fallback, but arithmetic,
 ordered comparison, indexing, and calling it are evaluation errors. `#list`
 returns the contiguous 1-based list length. Authors use parentheses plus
 `and/or` to safely navigate optional values, for example
-`(((v.rows or {})[v.idx or 1]) or {}).name or ''`.
+`(((sceneState.rows or {})[sceneState.idx or 1]) or {}).name or ''`.
 
 The portable helpers are `floor(number)`, `ceil(number)`, `round(number)`
 (halves toward positive infinity), `abs(number)`, `min(number, ...)`,
@@ -189,29 +189,25 @@ Classify a new surface before choosing its host:
    request or display these results, but it does not become their authority.
    G6 remains the editor's visual gate; it does not replace G5 or runtime truth.
 
-### 1.1.3 Scene `ctx.v` owner and value boundary (#930)
+### 1.1.3 Scene State and Process Locals owner boundary (#410)
 
-The Scene host owns the lifetime of `ctx.v`: it belongs to one Scene instance,
-is handed to each hook as that instance's working state, and is not a second
-domain owner for inventory, rosters, battles or other persistent facts. Values
-authored into it must use the value family owned by `runtime/engine/state_value.lua`:
-nil/unset, booleans, finite numbers, strings, dense lists and string-keyed
-records. Functions, userdata, metatables, cycles, aliases and other executable
-or backend object identity do not cross into authored Scene state.
+`sceneState` belongs to one pushed Scene instance. It survives that instance's
+hooks and frames, is discarded when the instance is popped, and is not a second
+domain owner for inventory, rosters, battles, quests, or other persistent facts.
+`SET_SCENE_STATE` is valid only in a Scene context and writes values through the
+deterministic `runtime/engine/state_value.lua` contract. Scene transitions copy
+their `SCENE_EVENT.sceneState` seed into the receiving instance before its
+`on_enter` hook.
 
-The enforcement boundary is the Scene-state handoff at the end of
-`scene_host.runHook`: after `SCRIPT` and ordinary commands have completed, and
-before presentation or a Scene transition consumes the result. This boundary
-keeps invocation-local Lua helpers legal while making a helper accidentally
-stored in `ctx.v` fail at the owner that is about to publish the state. Fixed
-Scene time (`v.time`) is a read-only, host-provided transient and is excluded
-from this handoff check; it is never authored or retained as Scene state.
+`locals` belongs to one immediate invocation. A Scene hook begins with fresh
+locals; a Flow phase, Troop program, or contiguous `RUN_IMMEDIATE` action keeps
+one local table only while that process executes. `SET_LOCAL` makes that short
+lifetime explicit. It must not be used as cross-hook state.
 
-Scene transitions copy their seeded variables through the same authority before
-the new Scene's `on_enter` hook. Native semantic owners may retain rich objects
+Fixed Scene time (`sceneState.time`) is a read-only host-provided transient
+during a fixed `on_frame` tick. Native semantic owners may retain rich objects
 internally, but authored Scene composition crosses those owners through values,
-stable identities or explicit API operations rather than storing executable
-objects in `ctx.v`.
+stable identities, or explicit API operations rather than executable objects.
 
 These classes are not a generic shared-core mandate, a requirement that all
 semantics become TypeScript, or a requirement that all previews become
@@ -408,7 +404,7 @@ scene inventing its own chrome:
 
 - **Top: a "CONTEXT HELP" bar** (style `frame`, full width, docked at
   `y=0`). It never holds a fixed hint string — its `content` text is a
-  formula keyed on scene state (`v.state`, `v.combatState`, …) so the same
+  formula keyed on Scene State (`sceneState.state`, `sceneState.combatState`, …) so the same
   window reads as nav hints in one state and as contextual explanation
   (an item/equip description, victory spoils, …) in another. This replaces
   the old pattern of a separate description/info panel next to a static
@@ -423,7 +419,7 @@ scene inventing its own chrome:
   they want, via `config.dock` in `scenes.json`:
 
   ```json
-  "dock": { "variant": "party_status", "cursor": "v.mode == 4 and v.partyIdx or 0" }
+  "dock": { "variant": "party_status", "cursor": "sceneState.mode == 4 and sceneState.partyIdx or 0" }
   ```
 
   The variants themselves live in `data/engine.json`'s `dock` registry, so
@@ -431,7 +427,7 @@ scene inventing its own chrome:
   apply to the variant's declared `primary` window, and `windows: { <id>: {…} }`
   overrides any field of any window in it. An optional `offsetY` formula
   shifts the whole dock in pixels.
-  Content still binds to the **current** scene, so `v.dialogueText` and
+  Content still binds to the **current** scene, so `sceneState.dialogueText` and
   friends resolve exactly as they did when the scene owned these windows.
 
   A variant declares an ordered, arbitrary-length `shells` array plus the

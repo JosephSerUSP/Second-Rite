@@ -304,13 +304,17 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
         const selectedBeforeNavigation = await mainPage.evaluate(() =>
             window.ThestraRuntimeCameraViewport.getWalkProfileSelection()?.key);
+        // The contextual inspector overlays the canvas at the top right. Use
+        // the unobstructed lower-left viewport region: a smaller Windows CI
+        // window can otherwise send this MMB gesture to the inspector instead
+        // of the Three canvas and turn a camera assertion into a layout flake.
         await mainPage.mouse.move(
-            navigationBox.x + navigationBox.width * 0.72,
-            navigationBox.y + navigationBox.height * 0.30);
+            navigationBox.x + navigationBox.width * 0.25,
+            navigationBox.y + navigationBox.height * 0.55);
         await mainPage.mouse.down({ button: 'middle' });
         await mainPage.mouse.move(
-            navigationBox.x + navigationBox.width * 0.80,
-            navigationBox.y + navigationBox.height * 0.38,
+            navigationBox.x + navigationBox.width * 0.35,
+            navigationBox.y + navigationBox.height * 0.63,
             { steps: 4 });
         await mainPage.mouse.up({ button: 'middle' });
         await mainPage.waitForTimeout(150);

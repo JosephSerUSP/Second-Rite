@@ -530,7 +530,7 @@ end
 -- as real input does, then asks the scene whether it actually finished. A
 -- scene declares that contract itself:
 --
---   "terminal": { "reached": "v.win == true" }   -- must become true
+--   "terminal": { "reached": "sceneState.win == true" }   -- must become true
 --   "terminal": { "none": "conversation, no scored loop" }
 --   "terminal": { "reached": "...", "script": [ {"key":"x"}, {"wait":0.5} ] }
 --
@@ -547,6 +547,7 @@ end
 -- caller (tools/labs/check-specimen-play.py) owns the verdict.
 function cli.runPlayScene(sceneId, loader)
     local json = require("engine.data.json")
+    local state_value = require("engine.state_value")
     local payload
     local ok, err = pcall(function()
         local vSession = makeHarnessSession(loader)
@@ -571,7 +572,7 @@ function cli.runPlayScene(sceneId, loader)
             -- Evidence for the play gate: keep the authored scene state at
             -- the last driven step so a control can be compared on meaningful
             -- progress even when the scene deliberately pops itself.
-            lastVars = nil,
+            lastSceneState = nil,
         }
 
         local terminal = sceneDef.terminal
@@ -650,7 +651,11 @@ function cli.runPlayScene(sceneId, loader)
             end
             payload.stepsRun = index
             local lastState = sh.getCurrentState()
-            payload.lastVars = lastState and lastState.v or payload.lastVars
+            if lastState then
+                local snapshot, snapshotErr = state_value.tryCopy(lastState.v, "Scene State evidence")
+                if snapshotErr then error(snapshotErr, 0) end
+                payload.lastSceneState = snapshot
+            end
             if terminalReached() then
                 payload.reached = true
                 payload.reachedAtStep = index

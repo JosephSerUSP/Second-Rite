@@ -115,7 +115,24 @@ function versionToken(root, stem, spec = physical.resourceSpec(stem)) {
     return engineResolution(root).version;
 }
 
+// Validate the complete semantic write contract without mutating storage. This
+// lets a multi-resource Studio save reject a policy failure before committing
+// an earlier resource.
+function validateWritableResource(root, stem, value, spec = physical.resourceSpec(stem)) {
+    physical.validateResource(value, stem, spec, `<write ${stem}>`);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return;
+    const resolved = engineResolution(root);
+    if (!resolved.baselineValue) return;
+    for (const [key, inherited] of Object.entries(resolved.baselineValue)) {
+        if (!Object.prototype.hasOwnProperty.call(value, key)
+                || JSON.stringify(value[key]) !== JSON.stringify(inherited)) {
+            throw new Error(`Cannot edit inherited engineRegistry key '${key}' through bulk save; Make Local belongs to #392.`);
+        }
+    }
+}
+
 function writeResource(root, stem, value, spec = physical.resourceSpec(stem)) {
+    validateWritableResource(root, stem, value, spec);
     if (spec.representation === 'fragments'
             && (spec.kind === 'ordered_collection' || spec.kind === 'keyed_registry')) {
         if (isExplicitEmptyValue(value, spec)) return writeEmptyMarker(root, stem, spec);
@@ -128,19 +145,46 @@ function writeResource(root, stem, value, spec = physical.resourceSpec(stem)) {
     const resolved = engineResolution(root);
     if (!resolved.baselineValue) return physical.writeResource(root, stem, value, spec);
 
-    physical.validateResource(value, stem, spec, '<write resolved engineRegistry>');
-    for (const [key, inherited] of Object.entries(resolved.baselineValue)) {
-        if (!Object.prototype.hasOwnProperty.call(value, key)
-                || JSON.stringify(value[key]) !== JSON.stringify(inherited)) {
-            throw new Error(`Cannot edit inherited engineRegistry key '${key}' through bulk save; Make Local belongs to #392.`);
-        }
-    }
     const local = {};
     for (const [key, entry] of Object.entries(value)) {
         if (!Object.prototype.hasOwnProperty.call(resolved.baselineValue, key)) local[key] = entry;
     }
     const written = physical.writeResource(root, stem, local, spec);
     return Object.assign({}, written, { version: versionToken(root, stem, spec) });
+}
+
+// Bulk Studio saves have one authored-data outcome: every requested resource
+// is written, or the entire data tree is restored to its prior coherent state.
+// Individual resource writers already replace files atomically; this boundary
+// covers a later writer failing after an earlier resource has committed.
+function writeResourcesTransactional(root, pending, options = {}) {
+    const resolvedRoot = path.resolve(root);
+    const parent = path.dirname(resolvedRoot);
+    const backup = path.join(parent,
+        `.${path.basename(resolvedRoot)}.studio-save-backup.${process.pid}.${Date.now()}`);
+    const writer = options.writeResource || writeResource;
+    let backupPresent = false;
+
+    fs.cpSync(resolvedRoot, backup, { recursive: true, errorOnExist: true });
+    backupPresent = true;
+    try {
+        for (const entry of pending) {
+            writer(resolvedRoot, entry.name, entry.content, entry.spec);
+        }
+    } catch (error) {
+        try {
+            fs.rmSync(resolvedRoot, { recursive: true, force: true });
+            fs.renameSync(backup, resolvedRoot);
+        } catch (rollbackError) {
+            error.message += `; rollback failed: ${rollbackError.message}; backup retained at ${backup}`;
+        }
+        // A successful rename consumed the backup; a failed rollback must
+        // retain it for recovery instead of deleting the only coherent copy.
+        backupPresent = false;
+        throw error;
+    } finally {
+        if (backupPresent) fs.rmSync(backup, { recursive: true, force: true });
+    }
 }
 
 function loadRegistry(root, stem, spec = physical.resourceSpec(stem)) {
@@ -192,7 +236,9 @@ module.exports = Object.assign({}, physical, {
     loadRegistry,
     loadResource,
     snapshotResource,
+    validateWritableResource,
     versionToken,
     writeRegistryRecord,
     writeResource,
+    writeResourcesTransactional,
 });

@@ -1,0 +1,47 @@
+name: issue 410 corpus migration
+
+on:
+  push:
+    branches:
+      - issue-410-corpus-migration
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message, '[410 migration output]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out migration branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Migrate authored transient state
+        run: node tools/migrations/issue-410-corpus.js
+
+      - name: Validate migration diff
+        shell: bash
+        run: |
+          git diff --check
+          git status --short
+          if git diff --quiet; then
+            echo "Migration produced no changes" >&2
+            exit 1
+          fi
+
+      - name: Commit migration output
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: migrate authored transient state [410 migration output]"
+          git push origin HEAD:issue-410-corpus-migration

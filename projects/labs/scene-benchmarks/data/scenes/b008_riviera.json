@@ -1,0 +1,182 @@
+{
+  "id": "b008_riviera",
+  "terminal": {
+    "reached": "v.state == 'done'",
+    "script": [
+      { "wait": 0.2 },
+      { "key": "down" },
+      { "wait": 0.2 },
+      { "key": "return" },
+      { "wait": 0.2 },
+      { "key": "up" },
+      { "wait": 0.2 },
+      { "key": "return" },
+      { "wait": 0.2 },
+      { "key": "down" },
+      { "wait": 0.2 },
+      { "key": "down" },
+      { "wait": 0.2 },
+      { "key": "return" },
+      { "wait": 0.2 },
+      { "key": "down" },
+      { "wait": 0.2 },
+      { "key": "return" }
+    ]
+  },
+  "name": "B008 — Riviera-Style Exploration Screen",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Dusty Study" }
+      ]
+    },
+    {
+      "id": "status",
+      "rect": { "x": 1, "y": 4, "w": 30, "h": 5 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "Key: {v.has_key == 1 and 'Silver Key' or 'None'}" },
+        { "type": "text", "y": 1, "text": "Desk: {v.desk_unlocked == 1 and 'Unlocked' or 'Locked'}" },
+        { "type": "text", "y": 2, "text": "Goal: Find the hidden journal." }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": { "x": 1, "y": 9, "w": 30, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.feedback_1}" },
+        { "type": "text", "y": 1, "text": "{v.feedback_2}" }
+      ]
+    },
+    {
+      "id": "actions",
+      "rect": { "x": 1, "y": 13, "w": 30, "h": 8 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "{v.cursor == 1 and '> ' or '  '}{v.desk_unlocked == 0 and 'Examine Desk' or 'Examine Open Desk'}" },
+        { "type": "text", "y": 1, "text": "{v.cursor == 2 and '> ' or '  '}Look at Painting" },
+        { "type": "text", "y": 2, "text": "{v.cursor == 3 and '> ' or '  '}{v.desk_unlocked == 1 and (v.journal_taken == 0 and 'Take Journal' or 'Journal (Taken)') or '---'}", "color": "v.desk_unlocked == 1 and [1, 1, 1] or [0.4, 0.4, 0.4]" },
+        { "type": "text", "y": 3, "text": "{v.cursor == 4 and '> ' or '  '}Leave Room" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          { "name": "state", "value": "'active'" },
+          { "name": "cursor", "value": 1 },
+          { "name": "has_key", "value": 0 },
+          { "name": "desk_unlocked", "value": 0 },
+          { "name": "journal_taken", "value": 0 },
+          { "name": "feedback_1", "value": "'You enter a dusty study.'" },
+          { "name": "feedback_2", "value": "'What will you do?'" }
+        ]
+      }
+    ],
+    "on_up": [
+      { "cmd": "SET_VAR", "name": "cursor", "value": "v.cursor == 1 and 4 or v.cursor - 1" }
+    ],
+    "on_down": [
+      { "cmd": "SET_VAR", "name": "cursor", "value": "v.cursor == 4 and 1 or v.cursor + 1" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.cursor == 1",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.desk_unlocked == 0",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.has_key == 1",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "desk_unlocked", "value": 1 },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You use the silver key.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The desk drawer clicks open.'" }
+                ],
+                "else": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'The desk drawer is locked.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'It has a small silver keyhole.'" }
+                ]
+              }
+            ],
+            "else": [
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'The desk is already unlocked.'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'There might be something inside.'" }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.cursor == 2",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.has_key == 0",
+            "then": [
+              { "cmd": "SET_VAR", "name": "has_key", "value": 1 },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You look behind the painting.'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'You found a silver key!'" }
+            ],
+            "else": [
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Just a dusty old painting.'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'Nothing else here.'" }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.cursor == 3",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "v.desk_unlocked == 1",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.journal_taken == 0",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "journal_taken", "value": 1 },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You took the hidden journal.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'A secret is revealed.'" }
+                ],
+                "else": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You already took the journal.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+                ]
+              }
+            ],
+            "else": [
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'There is nothing here to interact with.'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.cursor == 4",
+        "then": [
+          { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You left the room.'" },
+          { "cmd": "SET_VAR", "name": "feedback_2", "value": "''" },
+          { "cmd": "SET_VAR", "name": "state", "value": "'done'" }
+        ]
+      }
+    ]
+  }
+}

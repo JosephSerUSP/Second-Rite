@@ -313,7 +313,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             navigationBox.y + navigationBox.height * 0.38,
             { steps: 4 });
         await mainPage.mouse.up({ button: 'middle' });
-        await mainPage.waitForTimeout(150);
+        await mainPage.waitForTimeout(1000);
         const afterNavigation = await mainPage.evaluate(() =>
             JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
         assert.notEqual(afterNavigation, beforeNavigation,

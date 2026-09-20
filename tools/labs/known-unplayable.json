@@ -18,11 +18,6 @@
       "issue": 919,
       "reason": "2 formula errors: v.dialogueText and v.speakerName never set, same SCENE_EVENT kind family",
       "observed": 2
-    },
-    "b010_falling_blocks": {
-      "issue": 931,
-      "reason": "1 formula error: on_enter sets 160 variables but never calls draw_board, so v.boardText is nil until the first update tick. Different cause from the others and a one-line fix",
-      "observed": 1
     }
   },
   "play": {
@@ -34,11 +29,6 @@
     "a004_sokoban": {
       "issue": 917,
       "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",
-      "expect": "not-reached"
-    },
-    "b010_falling_blocks": {
-      "issue": 919,
-      "reason": "all nine of its SCENE_EVENT commands use kind 'custom', which scene_host silently drops, so update_tick never fires and no piece ever falls",
       "expect": "not-reached"
     },
     "d002_sokoban": {

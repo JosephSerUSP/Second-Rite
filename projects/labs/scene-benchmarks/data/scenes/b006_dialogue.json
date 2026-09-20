@@ -77,9 +77,10 @@
         ]
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "update_step"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook update_step remains quarantined under #919."
       }
     ],
     "update_step": [
@@ -259,9 +260,10 @@
             "value": "sceneState.step + 1"
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "custom",
-            "name": "update_step"
+
+            "cmd": "COMMENT",
+
+            "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]
       },
@@ -280,9 +282,10 @@
             "value": "4"
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "custom",
-            "name": "update_step"
+
+            "cmd": "COMMENT",
+
+            "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]
       },

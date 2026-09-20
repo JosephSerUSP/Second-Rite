@@ -134,9 +134,10 @@
         "value": 0.5
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "init_board"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook init_board remains quarantined under #919."
       }
     ],
     "on_frame": [
@@ -157,51 +158,58 @@
             "value": "sceneState.stepTime"
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "custom",
-            "name": "update_tick"
+
+            "cmd": "COMMENT",
+
+            "text": "Legacy scene hook update_tick remains quarantined under #919."
           }
         ]
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "draw_board"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook draw_board remains quarantined under #919."
       }
     ],
     "on_up": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "input_up"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook input_up remains quarantined under #919."
       }
     ],
     "on_down": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "input_down"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook input_down remains quarantined under #919."
       }
     ],
     "on_left": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "input_left"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook input_left remains quarantined under #919."
       }
     ],
     "on_right": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "input_right"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook input_right remains quarantined under #919."
       }
     ],
     "on_select": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "restart_game"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook restart_game remains quarantined under #919."
       }
     ],
     "on_cancel": [
@@ -978,9 +986,10 @@
         "value": "sceneState.stepTime"
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "custom",
-        "name": "init_board"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook init_board remains quarantined under #919."
       }
     ]
   },

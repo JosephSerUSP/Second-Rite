@@ -497,6 +497,18 @@
         return result;
     }
 
+    // Events remain wholly Map-owned.  Their modal transform is just another
+    // authored Map mutation, so capture one exact Map snapshot around the
+    // existing identity-safe command rather than teaching history a second
+    // Event serialization path.
+    function runMapMutation(kind, operation) {
+        const authority = currentMapAuthority();
+        const before = mapSnapshot();
+        const result = operation();
+        if (result?.changed) publishMapTransaction(kind, authority, before, mapSnapshot());
+        return result;
+    }
+
     function applyWalkProfileHistory(record, direction) {
         if (!record || record.authority !== currentMapAuthority()) return false;
         if (record.target?.kind === 'map') {
@@ -573,11 +585,15 @@
                     if (snapshot?.feedback) {
                         setStatus(`Spatial · ${snapshot.feedback}`);
                     } else if (snapshot?.operation === 'move') {
-                        const constraint = snapshot.constraint ? ` · ${snapshot.constraint}` : ' · YZ';
+                        const defaultAxes = snapshot.selection?.kind === 'event' ? 'XYZ' : 'YZ';
+                        const constraint = snapshot.constraint ? ` · ${snapshot.constraint}` : ` · ${defaultAxes}`;
                         const value = snapshot.value && typeof snapshot.value === 'object'
-                            ? ` · ΔY ${Number(snapshot.value.Y || 0).toFixed(3)} · ΔZ ${Number(snapshot.value.Z || 0).toFixed(3)}`
+                            ? Object.entries(snapshot.value)
+                                .filter(([axis, delta]) => /^[XYZ]$/.test(axis) && Number.isFinite(Number(delta)))
+                                .map(([axis, delta]) => `Δ${axis} ${Number(delta).toFixed(3)}`)
+                                .join(' · ')
                             : '';
-                        setStatus(`Move${constraint}${value} · Enter/LMB confirm · Esc/RMB cancel`);
+                        setStatus(`Move${constraint}${value ? ` · ${value}` : ''} · Enter/LMB confirm · Esc/RMB cancel`);
                     }
                     window.dispatchEvent(new CustomEvent('thestra-spatial-interaction-changed', {
                         detail: snapshot
@@ -600,14 +616,14 @@
                     return host.canMoveEvent ? host.canMoveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : { ok: false };
                 },
                 onMoveEvent(eventSelection, cell) {
-                    return handleMutationResult(
-                        host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null,
+                    return handleMutationResult(runMapMutation('event-move', () =>
+                        host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null),
                         'event-move'
                     );
                 },
                 onMoveWorldEvent(eventSelection, position) {
-                    return handleMutationResult(
-                        host.moveWorldEvent ? host.moveWorldEvent(eventSelection.id, position) : null,
+                    return handleMutationResult(runMapMutation('event-move', () =>
+                        host.moveWorldEvent ? host.moveWorldEvent(eventSelection.id, position) : null),
                         'event-move'
                     );
                 },

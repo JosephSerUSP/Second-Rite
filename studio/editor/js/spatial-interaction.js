@@ -78,7 +78,13 @@
         'invalid-profile-point': 'The Walk Profile point is invalid.',
         'invalid-profile-segment': 'The Walk Profile segment is invalid.',
         'missing-ground-profile': 'This lane has no authored Walk Profile.',
-        'missing-bounded-lane': 'Walk Profile editing is only available for bounded lanes.'
+        'missing-bounded-lane': 'Walk Profile editing is only available for bounded lanes.',
+        'event-grid-no-elevation': 'This grid Event has no authored elevation; move it along X or Y.',
+        'event-axis-edge-on': 'That Event axis points into the current view; choose another axis or orbit the viewport.',
+        'event-view-underdetermined': 'This view cannot determine the Event plane; constrain to an axis or orbit the viewport.',
+        'event-lane-y-only': 'Plate Events move only along their authored lane Y; X and Z are preserved.',
+        'event-drop-rejected': 'That Event cannot be placed on the selected cell.',
+        'event-move-rejected': 'The Event move could not be committed.'
     });
 
     function reasonMessage(reason) {
@@ -91,8 +97,13 @@
         const ax = Number(axisPixels.x), ay = Number(axisPixels.y);
         const lengthSq = ax * ax + ay * ay;
         if (!Number.isFinite(lengthSq) || lengthSq < minimumLength * minimumLength) return null;
-        const dx = Number(currentPointer.x) - Number(startPointer.x);
-        const dy = Number(currentPointer.y) - Number(startPointer.y);
+        // DOM PointerEvents expose clientX/clientY while renderer helpers use
+        // x/y.  Modal transforms are semantic, so normalize either boundary
+        // shape here instead of coupling every viewport to a DOM detail.
+        const dx = Number(currentPointer.x ?? currentPointer.clientX)
+            - Number(startPointer.x ?? startPointer.clientX);
+        const dy = Number(currentPointer.y ?? currentPointer.clientY)
+            - Number(startPointer.y ?? startPointer.clientY);
         if (![dx, dy].every(Number.isFinite)) return null;
         return (dx * ax + dy * ay) / lengthSq;
     }

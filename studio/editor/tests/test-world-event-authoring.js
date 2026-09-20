@@ -178,6 +178,28 @@ test('world Event movement retains depth, identity and all other authored facts'
     assert.deepEqual(JSON.parse(JSON.stringify(payload)).maps[0].events[1].worldPosition, position);
 });
 
+test('both Event viewports use the shared modal transform contract, not an immediate Event gizmo', () => {
+    const root = path.resolve(__dirname, '..', '..', '..');
+    const free3d = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
+    const plate = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
+    assert.match(free3d, /function beginModalEventMove\([\s\S]*options\.spatialInteraction\?\.beginMove/);
+    assert.match(free3d, /selection\?\.kind === 'event' \? beginModalEventMove\(\)/,
+        'G must start the Event modal operator when an Event is active');
+    assert.match(free3d, /modalMoveGesture\.kind === 'event-move'[\s\S]*\? endModalEventMove : endModalProfileMove/,
+        'free-3D LMB/RMB must finish the active modal operator, not assume Walk Profile');
+    assert.match(free3d, /selection\?\.kind !== 'event' && !cameraTransition/,
+        'the immediate free-3D Event gizmo must be disabled');
+    assert.match(free3d, /options\.onMoveWorldEvent\?\.\(gesture\.semantic, after\)/,
+        'the modal must retain Event identity at the Map-authoritative write');
+    assert.match(plate, /function beginModalEventMove\([\s\S]*function endModalEventMove/);
+    assert.match(plate, /constraint === 'X' \|\| constraint === 'Z'[\s\S]*event-lane-y-only/,
+        'plate Event transforms must reject axes outside their authored lane Y');
+    assert.match(plate, /gizmo\.enabled = !!profileObject && profilePoint/,
+        'the plate gizmo must remain reserved for Walk Profile editing');
+    assert.match(plate, /options\.onMoveWorldEvent\?\.\(semantic\(move\.record\.event\), position\)/,
+        'the plate modal must retain Event identity at the Map-authoritative write');
+});
+
 // Execute the actual modal entry/apply/delete functions with only DOM widgets
 // stubbed. This catches coordinate-based edits of a different colocated Event.
 function modalHarness(payload) {

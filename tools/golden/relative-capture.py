@@ -399,6 +399,27 @@ def main(argv=None):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
 
+    # Hotfix for broken battle serialization in base commits
+    renderer1 = target / "runtime" / "presentation" / "window_renderer.lua"
+    if renderer1.exists():
+        content = renderer1.read_text(encoding="utf-8")
+        content = content.replace(
+            "renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle)",
+            "renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle and require('engine.scenes.battle').getNativeState().battle)"
+        )
+        renderer1.write_text(content, encoding="utf-8")
+
+    renderer2 = target / "runtime" / "presentation" / "frame_renderer.lua"
+    if renderer2.exists():
+        content = renderer2.read_text(encoding="utf-8")
+        content = content.replace(
+            "renderer.drawScreenFlashOverlay(bv.battle)",
+            "renderer.drawScreenFlashOverlay(bv.battle and require('engine.scenes.battle').getNativeState().battle)"
+        )
+        renderer2.write_text(content, encoding="utf-8")
+
+
+
     tool_root = Path(__file__).resolve().parents[2]
     record = load_module(tool_root / "tools/golden/record.py", "second_rite_gate_record")
 

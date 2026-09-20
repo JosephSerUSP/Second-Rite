@@ -5,18 +5,18 @@
 --   - getState() helper reading from scene_host state
 --   - Exported functions called by main.lua thin wrappers
 --
--- Scene state variables (in scene_host.getCurrentState().v):
---   v.battle             activeBattle (Battle object)
+-- Authored Scene State variables (in scene_host.getCurrentState().v):
+--   v.battle             serializable active marker
 --   v.combatLog          combat log list
 --   v.combatState        "input" or "log"
 --   v.selectedIndex      command cursor position
 --   v.skillSelect        boolean, spell/skill submenu active
---   v.eventsQueue        battle events queue from resolveRound
+--   v.eventsQueue        detached presentation queue projection
 --   v.eventQueueIndex    current position in events queue
 --   v.escaped            boolean, true when flee succeeded
---   v.livingMembers      list of living battlers for input
---   v.activeMemberIdx    which member is currently selecting action
---   v.collectedActions   actions table collected this round
+--   v.livingMembers      detached member views for input
+-- Native owner state keeps the Battle object, Battlers, event queue, and
+-- collected actions out of authored state.
 
 local scene_host = require("engine.scene_host")
 local battleSystem = require("engine.battle")
@@ -47,10 +47,82 @@ function battle.registerKindWindows(host)
     end
 end
 
--- Read battle state from the current scene's v table
+-- Authored state is serializable; rich Battle/Battler graphs live in the
+-- scene instance's runtime-owned native container.
 function battle.getState()
     local state = scene_host.getCurrentState()
     return state and state.v or {}
+end
+
+function battle.getNativeState()
+    return scene_host.getCurrentNativeState() or {}
+end
+
+function battle.memberActor(index)
+    local row = (battle.getNativeState().livingMembers or {})[index]
+    return row and row.actor or nil
+end
+
+function battle.resolveActor(view)
+    if not view then return nil end
+    local n = battle.getNativeState()
+    for _, row in ipairs(n.livingMembers or {}) do
+        local a = row.actor
+        if a == view or (view.id and a.actorData and a.actorData.id == view.id) then return a end
+    end
+    if n.battle then
+        for _, group in ipairs({ n.battle.allies, n.battle.enemies }) do
+            for _, a in ipairs(group or {}) do
+                if a == view or (view.id and a.actorData and a.actorData.id == view.id) then return a end
+            end
+        end
+    end
+    return view
+end
+
+function battle.targetCandidates(memberIndex, spec)
+    local n = battle.getNativeState()
+    local row = (n.livingMembers or {})[memberIndex]
+    if not row or not n.battle then return {} end
+    return require("engine.targeting").getCandidates(row.actor, spec, n.battle)
+end
+
+local function projectMember(row)
+    local actor = row.actor
+    local skills = {}
+    for _, skillId in ipairs((actor and actor.actorData and actor.actorData.skills) or {}) do
+        table.insert(skills, skillId)
+    end
+    local actorView = {
+        id = actor and actor.actorData and actor.actorData.id,
+        name = actor and actor.name,
+        skills = skills,
+    }
+    return { type = row.type, index = row.index,
+        id = actorView.id, name = actorView.name, actor = actorView }
+end
+
+local function projectEvent(ev)
+    return { type = ev.type, text = ev.text, duration = ev.duration,
+        value = ev.value, state = ev.state, animId = ev.animId }
+end
+
+local function publishNativeProjection()
+    local v, n = battle.getState(), battle.getNativeState()
+    v.battle = n.battle ~= nil
+    v.livingMembers = {}
+    for _, row in ipairs(n.livingMembers or {}) do table.insert(v.livingMembers, projectMember(row)) end
+    v.eventsQueue = {}
+    for _, ev in ipairs(n.eventsQueue or {}) do table.insert(v.eventsQueue, projectEvent(ev)) end
+end
+
+local function syncProjectedQueue()
+    local v, n = battle.getState(), battle.getNativeState()
+    n.eventsQueue = n.eventsQueue or {}
+    for i = #n.eventsQueue + 1, #(v.eventsQueue or {}) do
+        local ev = v.eventsQueue[i]
+        if ev and ev.type == "text" then table.insert(n.eventsQueue, { type = "text", text = ev.text }) end
+    end
 end
 
 -- Config accessor with fallback
@@ -77,7 +149,7 @@ function battle.rebuildLivingMembers()
     -- overhaul-6 F1: the summoner is not a battle participant; living
     -- members are the active party creatures only, indexed 1-4 to match
     -- Battle:resolveRound's collectedActions slots directly (no +1 offset).
-    local v = battle.getState()
+    local v, n = battle.getState(), battle.getNativeState()
     local living = {}
     for i = 1, config.MAX_PARTY_SIZE do
         local c = sess().party[i]
@@ -93,14 +165,15 @@ function battle.rebuildLivingMembers()
             end
         end
     end
-    v.livingMembers = living
+    n.livingMembers = living
     v.activeMemberIdx = 1
-    v.collectedActions = {}
+    n.collectedActions = {}
     -- Nobody left to command -- every living creature is compelled. Go straight
     -- to confirmation, or the round could never be submitted: the jump to the
     -- confirm phase normally happens when the last member commits, and with an
     -- empty list nobody ever does.
     v.confirmPhase = (#living == 0)
+    publishNativeProjection()
 end
 
 -------------------------------------------------------------------------------
@@ -143,13 +216,13 @@ function battle.triggerBattle(troopId)
     scene_host.goto_scene("battle", { session = sess(), loader = ldr(), party = sess().party })
 
     -- Now populate the fresh scene state
-    local v = battle.getState()
-    v.battle = battleSystem.Battle.new(sess(), enemyList)
+    local v, n = battle.getState(), battle.getNativeState()
+    n.battle = battleSystem.Battle.new(sess(), enemyList)
     -- The troop rides on the Battle so its events can be found at every phase
     -- without the scene passing it down each time.
-    v.battle.troop = troopData
+    n.battle.troop = troopData
     v.combatLog = { ldr().getTerm("battle.encounter", "A hostile group blocks your path!") }
-    v.eventsQueue = {}
+    n.eventsQueue = {}
     v.eventQueueIndex = 1
     v.combatState = "input"
     v.selectedIndex = 1
@@ -157,6 +230,7 @@ function battle.triggerBattle(troopId)
     v.escaped = false
 
     battle.rebuildLivingMembers()
+    publishNativeProjection()
     renderer.initBattleAnims(enemyList)
 end
 
@@ -178,16 +252,17 @@ function battle.triggerTestBattle()
 
     scene_host.goto_scene("battle", { session = sess(), loader = ldr(), party = sess().party })
 
-    local v = battle.getState()
-    v.battle = battleSystem.Battle.new(sess(), enemyList)
+    local v, n = battle.getState(), battle.getNativeState()
+    n.battle = battleSystem.Battle.new(sess(), enemyList)
     v.combatLog = { "--- BATTLE SCREEN TEST MODE ---", "Press SPACE or P to spawn damage popups!" }
-    v.eventsQueue = {}
+    n.eventsQueue = {}
     v.eventQueueIndex = 1
     v.combatState = "input"
     v.selectedIndex = 1
     v.skillSelect = false
 
     battle.rebuildLivingMembers()
+    publishNativeProjection()
     renderer.initBattleAnims(enemyList)
 end
 
@@ -195,30 +270,40 @@ end
 -- Map a battler to screen coordinates on the battle scene
 -------------------------------------------------------------------------------
 function battle.getTargetCoords(target)
-    local v = battle.getState()
-    return renderer.getBattlerCoords(v.battle, sess(), target)
+    local n = battle.getNativeState()
+    return renderer.getBattlerCoords(n.battle, sess(), target)
 end
 
 -------------------------------------------------------------------------------
 -- Resolve one authoritative round; presentation starts from a detached view
 -------------------------------------------------------------------------------
 function battle.resolveRound()
-    local v = battle.getState()
-    local actBattle = v.battle
+    local v, n = battle.getState(), battle.getNativeState()
+    -- Headless characterization callers from before #930 may seed the old
+    -- fields directly; adopt them once at the owner seam, then clear them.
+    if not n.battle and v.battle and type(v.battle) == "table" then
+        n.battle = v.battle
+        v.battle = nil
+    end
+    if not n.collectedActions and v.collectedActions then
+        n.collectedActions = v.collectedActions
+        v.collectedActions = nil
+    end
+    local actBattle = n.battle
     if not actBattle then return {} end
 
     -- Capture what is currently visible BEFORE domain resolution. From this
     -- point onward the Battle/Battler/GameSession graph is authoritative and is
     -- never rewound. The log advances only this shallow presentation view.
     battle_view.beginRound(actBattle, sess())
-    return actBattle:resolveRound(v.collectedActions)
+    return actBattle:resolveRound(n.collectedActions)
 end
 
 -------------------------------------------------------------------------------
 -- Advances the combat log by one event and formats it
 -------------------------------------------------------------------------------
 local function processEvent(ev)
-    local v = battle.getState()
+    local v, n = battle.getState(), battle.getNativeState()
     local popupX, popupY = battle.getTargetCoords(ev.target)
     local desc = ""
 
@@ -230,8 +315,8 @@ local function processEvent(ev)
     elseif ev.type == "action" then
         desc = ldr().formatTerm("battle.uses_skill", "{0} uses {1} on {2}!", ev.actor.name, ev.skill.name, ev.target.name)
         animation_player.play("system.action_flash", ev.actor)
-        if v.battle then
-            for idx, enemy in ipairs(v.battle.enemies) do
+        if n.battle then
+            for idx, enemy in ipairs(n.battle.enemies) do
                 if enemy == ev.actor then
                     renderer.triggerActionFlash(idx, "action")
                     break
@@ -239,7 +324,7 @@ local function processEvent(ev)
             end
         end
     elseif ev.type == "play_anim" then
-        local target = ev.on or ev.target or (v.battle and v.battle.enemies[1])
+        local target = ev.on or ev.target or (n.battle and n.battle.enemies[1])
         if target then
             animation_player.play(ev.animId, target)
         end
@@ -250,9 +335,9 @@ local function processEvent(ev)
             local color = conf("battle_screen", "popup", {}).damageColor or {1, 0.2, 0.2, 1}
             renderer.addDamagePopup(text, popupX, popupY, color)
             battle_view.apply(ev, { hp = true })
-            if v.battle then
+            if n.battle then
                 local isEnemy = false
-                for idx, enemy in ipairs(v.battle.enemies) do
+                for idx, enemy in ipairs(n.battle.enemies) do
                     if enemy == ev.target then
                         renderer.triggerActionFlash(idx, "damage")
                         isEnemy = true
@@ -284,8 +369,8 @@ local function processEvent(ev)
             local color = conf("battle_screen", "popup", {}).deadColor or {0.6, 0.6, 0.6, 1}
             renderer.addDamagePopup(fmt, popupX, popupY, color)
             battle_view.apply(ev, { hp = true, states = true, maxHp = true })
-            if v.battle then
-                for idx, enemy in ipairs(v.battle.enemies) do
+            if n.battle then
+                for idx, enemy in ipairs(n.battle.enemies) do
                     if enemy == ev.target then
                         renderer.triggerDeathAnim(idx)
                         break
@@ -359,9 +444,10 @@ local function processEvent(ev)
 end
 
 function battle.advanceLog()
-    local v = battle.getState()
-    if v.eventQueueIndex <= #(v.eventsQueue or {}) then
-        local ev = v.eventsQueue[v.eventQueueIndex]
+    local v, n = battle.getState(), battle.getNativeState()
+    syncProjectedQueue()
+    if v.eventQueueIndex <= #(n.eventsQueue or {}) then
+        local ev = n.eventsQueue[v.eventQueueIndex]
         v.eventQueueIndex = v.eventQueueIndex + 1
 
         local desc = processEvent(ev)
@@ -378,8 +464,8 @@ function battle.advanceLog()
 
             -- Process all subsequent no-line events immediately. They may start
             -- animations or advance BattleView, but never mutate domain state.
-            while v.eventQueueIndex <= #(v.eventsQueue or {}) do
-                local nextEv = v.eventsQueue[v.eventQueueIndex]
+            while v.eventQueueIndex <= #(n.eventsQueue or {}) do
+                local nextEv = n.eventsQueue[v.eventQueueIndex]
                 if nextEv.type == "damage" or nextEv.type == "heal" or nextEv.type == "hp_clamp" or
                    nextEv.type == "max_hp_change" or nextEv.type == "death" or
                    nextEv.type == "state_add" or nextEv.type == "state_remove" or nextEv.type == "mp_drain" or
@@ -395,6 +481,7 @@ function battle.advanceLog()
                     break
                 end
             end
+            publishNativeProjection()
         else
             return battle.advanceLog()
         end
@@ -405,8 +492,8 @@ end
 -- Enters target selection mode for choose-mode specs, or commits immediately
 -------------------------------------------------------------------------------
 function battle.startTargetSelection(pendingAction)
-    local v = battle.getState()
-    local memberInfo = (v.livingMembers or {})[v.activeMemberIdx or 1]
+    local v, n = battle.getState(), battle.getNativeState()
+    local memberInfo = (n.livingMembers or {})[v.activeMemberIdx or 1]
     if not memberInfo then return end
 
     local spec = "enemy"
@@ -448,7 +535,7 @@ function battle.startTargetSelection(pendingAction)
         -- self for every other spec, bypassing the resolver entirely).
         -- getCandidates consumes no battle RNG — T2's rule that the
         -- selection path must never perturb AI rolls holds.
-        local candidates = targeting.getCandidates(memberInfo.actor, spec, v.battle)
+        local candidates = targeting.getCandidates(memberInfo.actor, spec, n.battle)
         local target = candidates[1] or memberInfo.actor
         battle.commitAction(memberInfo.index, {
             type = pendingAction.type,
@@ -463,9 +550,9 @@ end
 -- Records the chosen action for the active member; resolves the round once all have acted
 -------------------------------------------------------------------------------
 function battle.commitAction(memberIndex, action)
-    local v = battle.getState()
-    if not v.collectedActions then v.collectedActions = {} end
-    v.collectedActions[memberIndex] = action
+    local v, n = battle.getState(), battle.getNativeState()
+    if not n.collectedActions then n.collectedActions = {} end
+    n.collectedActions[memberIndex] = action
     v.activeMemberIdx = (v.activeMemberIdx or 1) + 1
     v.selectedIndex = 1
     v.skillSelect = false
@@ -481,13 +568,14 @@ end
 -- Submits the queued round after final confirmation
 -------------------------------------------------------------------------------
 function battle.submitRound()
-    local v = battle.getState()
+    local v, n = battle.getState(), battle.getNativeState()
     v.confirmPhase = false
     v.escaped = false
-    v.eventsQueue = battle.resolveRound()
+    n.eventsQueue = battle.resolveRound()
     v.eventQueueIndex = 1
     v.combatLog = {}
     battle.advanceLog()
+    publishNativeProjection()
     v.combatState = "log"
 end
 
@@ -495,7 +583,7 @@ end
 -- Undoes the last committed action
 -------------------------------------------------------------------------------
 function battle.undoAction()
-    local v = battle.getState()
+    local v, n = battle.getState(), battle.getNativeState()
     if v.confirmPhase then
         v.confirmPhase = false
         v.activeMemberIdx = #(v.livingMembers or {})
@@ -507,13 +595,13 @@ function battle.undoAction()
 
     v.activeMemberIdx = v.activeMemberIdx - 1
     
-    local memberInfo = (v.livingMembers or {})[v.activeMemberIdx]
+    local memberInfo = (n.livingMembers or {})[v.activeMemberIdx]
     if not memberInfo then return false end
     
     local memberIndex = memberInfo.index
-    local prevAction = v.collectedActions and v.collectedActions[memberIndex]
-    if v.collectedActions then
-        v.collectedActions[memberIndex] = nil
+    local prevAction = n.collectedActions and n.collectedActions[memberIndex]
+    if n.collectedActions then
+        n.collectedActions[memberIndex] = nil
     end
 
     v.skillSelect = false
@@ -568,7 +656,9 @@ end
 -------------------------------------------------------------------------------
 function battle.handleTransition(action)
     local v = battle.getState()
-    local b = v.battle
+    local n = battle.getNativeState()
+    syncProjectedQueue()
+    local b = n.battle
     if action ~= "select" or not b then return false end
 
     -- B.9: the victory window is showing
@@ -611,7 +701,7 @@ function battle.handleTransition(action)
     end
 
     if v.combatState ~= "log"
-        or v.eventQueueIndex <= #(v.eventsQueue or {}) then return false end
+        or v.eventQueueIndex <= #(n.eventsQueue or {}) then return false end
 
     -- The log may reveal facts later than the engine resolves them, but it no
     -- longer controls whether those facts exist. This guard is presentation
@@ -645,13 +735,14 @@ function battle.handleTransition(action)
         end
         if #reaped == 0 then return false end
         battle_view.syncNonRoster(b, sess())
-        v.eventsQueue = v.eventsQueue or {}
-        local startIdx = #v.eventsQueue + 1
-        for _, ev in ipairs(reaped) do table.insert(v.eventsQueue, ev) end
+        n.eventsQueue = n.eventsQueue or {}
+        local startIdx = #n.eventsQueue + 1
+        for _, ev in ipairs(reaped) do table.insert(n.eventsQueue, ev) end
         v.eventQueueIndex = startIdx
         v.pendingAfterReap = nextState
         v.combatState = "log"
         battle.advanceLog()
+        publishNativeProjection()
         return true
     end
 
@@ -767,10 +858,12 @@ function battle.showMessage(text)
         return
     end
 
-    v.eventsQueue = { { type = "text", text = text } }
+    local n = battle.getNativeState()
+    n.eventsQueue = { { type = "text", text = text } }
     v.eventQueueIndex = 1
     v.combatLog = {}
     battle.advanceLog()
+    publishNativeProjection()
     v.combatState = "log"
 end
 
@@ -795,8 +888,8 @@ local DEFEAT_STAGE1_DUR = 0.7  -- dramatic pause, held black background
 local DEFEAT_STAGE2_DUR = 0.6  -- final fade to full black
 
 function battle.update(dt)
-    local v = battle.getState()
-    if not v or not v.battle then
+    local v, n = battle.getState(), battle.getNativeState()
+    if not v or not n.battle then
         autoAdvanceTimer = 0
         return
     end
@@ -855,7 +948,7 @@ function battle.update(dt)
             return
         end
 
-        if v.eventQueueIndex <= #(v.eventsQueue or {}) then
+        if v.eventQueueIndex <= #(n.eventsQueue or {}) then
             local isAnimPlaying = animation_player.isAnythingPlaying()
 
             if not isRevealing and not isAnimPlaying then
@@ -873,7 +966,7 @@ function battle.update(dt)
             local isAnimPlaying = animation_player.isAnythingPlaying()
 
             if not isRevealing and not isAnimPlaying then
-                local b = v.battle
+                local b = n.battle
                 if not b:isVictory() and not b:isDefeat() and not v.escaped then
                     autoAdvanceTimer = autoAdvanceTimer + dt
                     local delay = conf("battle_screen", "autoAdvanceDelay", 1.2)

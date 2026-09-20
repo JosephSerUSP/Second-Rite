@@ -2335,6 +2335,20 @@ local SCRIPT_API_PROTOTYPE = {
         startTargetSelection = function(pendingAction)
             require("engine.scenes.battle").startTargetSelection(pendingAction)
         end,
+        memberActor = function(index)
+            return require("engine.scenes.battle").memberActor(index)
+        end,
+        targetCandidates = function(index, spec)
+            return require("engine.scenes.battle").targetCandidates(index, spec)
+        end,
+        enqueueText = function(text)
+            local battle = require("engine.scenes.battle")
+            local n = battle.getNativeState()
+            n.eventsQueue = n.eventsQueue or {}
+            table.insert(n.eventsQueue, { type = "text", text = text })
+            local v = battle.getState()
+            v.eventQueueIndex = #n.eventsQueue
+        end,
         undoAction = function()
             return require("engine.scenes.battle").undoAction()
         end,
@@ -2507,7 +2521,8 @@ local function buildScriptApi(ctx)
     -- creature is an authoring act, not a scene edit.
     function api.battleCommands(battler)
         local l = ctx.loader or session.loader
-        return require("engine.battle").commandsFor(battler, l)
+        local battleScene = require("engine.scenes.battle")
+        return require("engine.battle").commandsFor(battleScene.resolveActor(battler), l)
     end
     -- What a skill costs this creature right now, and whether it can be used:
     --   { cost = { {text,color}, ... }, blocked = bool, reason = string|nil }
@@ -2519,6 +2534,8 @@ local function buildScriptApi(ctx)
     function api.skillCost(battler, skillId)
         local l = ctx.loader or session.loader
         local skill = l and l.getSkill and l.getSkill(skillId)
+        local battleScene = require("engine.scenes.battle")
+        battler = battleScene.resolveActor(battler)
         if not skill or not battler then return { cost = {}, blocked = false } end
         local skill_cost = require("engine.skill_cost")
         local reason = skill_cost.blockedReason(skill, battler, session, false)
@@ -2982,6 +2999,19 @@ local function buildScriptApi(ctx)
         return false
     end
     -- targeting moved to prototype
+    -- Targeting remains one shared semantic implementation, but authored
+    -- scripts receive detached actor views and a serializable battle marker.
+    -- Resolve those views back through the native Battle owner at the seam.
+    local rawTargeting = require("engine.targeting")
+    api.targeting = {
+        expand = rawTargeting.expand,
+        getCandidates = function(actor, spec, battleState, actionContext)
+            local battleScene = require("engine.scenes.battle")
+            local nativeActor = battleScene.resolveActor(actor)
+            local nativeBattle = battleScene.getNativeState().battle
+            return rawTargeting.getCandidates(nativeActor, spec, nativeBattle, actionContext)
+        end,
+    }
     return api
 end
 

@@ -135,7 +135,7 @@
           },
           {
             "name": "ballVX",
-            "value": "10"
+            "value": "-10"
           },
           {
             "name": "ballVY",

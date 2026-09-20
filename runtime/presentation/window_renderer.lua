@@ -15,7 +15,7 @@
 --   "party"            party members (fields: index, name, level, spriteKey,
 --                      portraitKey)
 --   "config:<key>"     array from the scene's config (entry fields exposed)
---   "v:<key>"          array stored in scene v by hooks/SCRIPT
+--   "sceneState:<key>" array stored in the current Scene State by hooks/SCRIPT
 --   "static:a,b,c"     inline comma-separated labels
 --   "equipSlots"       a member's 3 gear slots (fields: index, name, item, icon)
 --   "equipment"        inventory gear matching a slot's type, [ UNEQUIP ] first
@@ -28,7 +28,7 @@
 --
 -- Row templates/formulas (SET_LIST format/highlight/filter/priority) are evaluated
 -- with the row's fields merged over the scene env, so "{name} (x{qty})" and
--- "meta.craftKind == config.disciplines[v.selectedDisciplineIdx].kind" work.
+-- "meta.craftKind == config.disciplines[sceneState.selectedDisciplineIdx].kind" work.
 -- The scene env also exposes sel("window_id") -> the selected row of another
 -- window's list, for detail panels.
 
@@ -224,7 +224,7 @@ local function configRows(sceneData, key)
     return rows
 end
 
-local function vRows(state, key)
+local function sceneStateRows(state, key)
     local rows = {}
     local owner = state and state.v
     local arr = owner and owner[key]
@@ -333,7 +333,7 @@ end
 -- pages (owner request: they should be their own pages, individually
 -- selectable, with the description shown in the context-help bar — same
 -- convention as the equip item picker). win.member is the SAME formula
--- convention equipSlots/equipment use (usually "v.idx").
+-- convention equipSlots/equipment use (usually "sceneState.idx").
 local function memberSkillRows(session, win, env)
     local memberIdx = tonumber((formula.eval(win.member, env))) or 1
     local member = session and session.party and session.party[memberIdx]
@@ -440,9 +440,7 @@ local function resolveRows(win, state, sceneData, ctx, env)
     elseif src:sub(1, 7) == "config:" then
         rows = configRows(sceneData, src:sub(8))
     elseif src:sub(1, 11) == "sceneState:" then
-        rows = vRows(state, src:sub(12))
-    elseif src:sub(1, 2) == "v:" then
-        rows = vRows(state, src:sub(3))
+        rows = sceneStateRows(state, src:sub(12))
     elseif src:sub(1, 7) == "static:" then
         rows = staticRows(src:sub(8))
     elseif src:sub(1, 5) == "term:" then
@@ -1902,7 +1900,7 @@ end
 -- scene's `windows` array (data/scenes.json).  The windows array declares
 -- each window's id, rect (expressions), visible (expr), and an array of
 -- typed content blocks (text, list, gauge, image).  Expression evaluation
--- uses the same sandboxed env as scene hooks (v.*, config, sel(), formula
+-- uses the same sandboxed env as scene hooks (sceneState.*, config, sel(), formula
 -- engine).  Unknown content-block types fail soft (log once, skip block);
 -- unknown optional fields in window defs are ignored (extensibility rule).
 --
@@ -1926,7 +1924,7 @@ end
 --              presentation/dock.lua passes its own module-level store so the
 --              persistent dock's animation clocks survive scene transitions.
 --   alpha   -- global alpha multiplier (dock variant cross-fade).
--- Everything else -- env, list resolution, v.* bindings -- still comes from the
+-- Everything else -- env, list resolution, sceneState bindings -- still comes from the
 -- CURRENT scene, so dock windows bind to the live scene's variables.
 function wr.drawWindowFromData(sceneData, state, ctx, opts)
     opts = opts or {}
@@ -2325,7 +2323,7 @@ function wr.draw(state, sceneData, ctx)
         end
     end
 
-    -- Reserve scene (overhaul-6 F3): while picking a Swap target (v.mode == 4),
+    -- Reserve scene (overhaul-6 F3): while picking a Swap target (sceneState.mode == 4),
     -- the source slot is dimmed and a full-opacity ghost of its panel floats
     -- above it (sine drift), as a "select target slot" cue.
     if sceneData and sceneData.id == "reserve" then

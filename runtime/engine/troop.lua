@@ -64,7 +64,7 @@ end
 -- pool slot rolls `count` weighted picks. Level comes from the slot when
 -- authored, then the Unit's own, so a troop only says what it needs to.
 -- `evalFormula` is supplied by the caller rather than reached for here: the
--- interpreter owns what a formula can see (battle, party, v...), and building
+-- interpreter owns what a formula can see (battle, party, locals...), and building
 -- a second context would be a second answer to the same question.
 local function buildSlot(slot, ctx, out, evalFormula)
     local loader = loaderOf(ctx)

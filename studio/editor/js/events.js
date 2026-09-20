@@ -752,7 +752,7 @@
             const id = cmdId(cmd);
             if (['SET_LOCAL', 'SET_SCENE_STATE'].includes(id)) {
                 // E7: single form reads as before; multi form summarizes its
-                // rows (truncated) under the Control Variables label.
+                // rows (truncated) under the explicit state-owner label.
                 if (Array.isArray(cmd.assignments) && cmd.assignments.length > 0) {
                     const rows = cmd.assignments.map(a => `${a.name} = ${a.value}`);
                     const shown = rows.slice(0, 3).join(', ') + (rows.length > 3 ? `, … +${rows.length - 3} more` : '');

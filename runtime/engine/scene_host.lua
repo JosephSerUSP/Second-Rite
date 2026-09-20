@@ -6,9 +6,9 @@ local state_value = require("engine.state_value")
 local scene_host = {}
 
 -- State container for the active scenes
--- Each element is { id = sceneId, v = {}, windows = {}, focusedWindow = nil }.
--- `v` is the private native storage field; authored code reaches it only as
--- ctx.sceneState.
+-- Each element is { id = sceneId, v = {}, native = {}, windows = {}, ... }.
+-- `v` is the authored serializable Scene State; `native` is runtime-owned
+-- storage for rich graphs that must never cross the authored boundary.
 local sceneStack = {}
 
 -- Window definitions registered by kind (via scene_host.register).
@@ -70,16 +70,8 @@ local function getSceneData(ctx, id)
     return nil
 end
 
--- #1160: the per-hook authored-value handoff check (#930, eae3e366) is
--- deferred, not exempted per scene. Battle stores a live Battle object graph
--- (metatables + shared identity across sceneState.battle/sceneState.livingMembers/
--- sceneState.eventsQueue) -- load-bearing on main -- so validating whole Scene State with
--- state_value crashes live play and the G5 harness scene after scene, and a
--- per-scene allowlist just moves the crash. The transition-state copy below
--- stays enforced; the handoff returns once #410 migrates live refs out of
--- Scene State.
--- SPEC 1.1.3 still describes the intended boundary and needs an owner pass
--- to match this deferral.
+-- Native owner graphs belong in each Scene instance's `native` container;
+-- authored hooks are validated as a serializable value tree after every run.
 
 -- Initialize the host with an active session and loader
 function scene_host.init(startScene, ctx)
@@ -107,6 +99,11 @@ end
 function scene_host.getCurrentState()
     if #sceneStack == 0 then return nil end
     return sceneStack[#sceneStack]
+end
+
+function scene_host.getCurrentNativeState()
+    if #sceneStack == 0 then return nil end
+    return sceneStack[#sceneStack].native
 end
 
 -- Player-equivalent observation may ask which authored Scene definition owns
@@ -220,9 +217,12 @@ function scene_host.runHook(hookName, ctx)
 
     local events = interpreter.runImmediate(cmds, ctx)
 
-    -- #1160: the #930 handoff validation lived here and is deferred (see
-    -- note above): whole-v state_value validation rejects load-bearing live
-    -- refs on main, so it crashed the owner it was meant to protect.
+    -- Every authored hook must leave a detached, serializable value tree.
+    -- Native owner graphs live beside (never inside) ctx.sceneState.
+    local transientTime = state.v.time
+    if transientTime ~= nil and type(transientTime) == "table" then state.v.time = nil end
+    state_value.copy(state.v, "Scene '" .. tostring(state.id) .. "' ctx.sceneState")
+    if transientTime ~= nil then state.v.time = transientTime end
 
     -- Consume SCENE_EVENT (scene_change) and update the stack
     -- Wait to process these until after the loop so we don't recurse deeply
@@ -291,6 +291,7 @@ function scene_host.push(id, ctx, sceneState)
     table.insert(sceneStack, {
         id = id,
         v = {},
+        native = {},
         waitTimer = 0,
         windows = {},
         focusedWindow = nil,

@@ -36,11 +36,6 @@
       "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",
       "expect": "not-reached"
     },
-    "b001_fishing": {
-      "issue": 934,
-      "reason": "reads raw keyboard state via _G.love.keyboard.isDown, so no scripted input can drive it",
-      "expect": "fail"
-    },
     "b010_falling_blocks": {
       "issue": 919,
       "reason": "all nine of its SCENE_EVENT commands use kind 'custom', which scene_host silently drops, so update_tick never fires and no piece ever falls",

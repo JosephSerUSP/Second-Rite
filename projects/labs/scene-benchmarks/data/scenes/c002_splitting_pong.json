@@ -820,9 +820,10 @@
     ],
     "on_select": [
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "run_hook",
-        "hook": "init_state"
+
+        "cmd": "COMMENT",
+
+        "text": "Legacy scene hook init_state remains quarantined under #919."
       }
     ],
     "on_cancel": [

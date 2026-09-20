@@ -26,6 +26,11 @@
     }
   },
   "play": {
+    "a002_breakout": {
+      "issue": 993,
+      "reason": "terminal loss is reached by waits alone before any authored key input",
+      "expect": "terminated-unplayed"
+    },
     "a004_sokoban": {
       "issue": 917,
       "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",

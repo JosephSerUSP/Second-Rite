@@ -569,6 +569,8 @@ function cli.runPlayScene(sceneId, loader)
             reachedAtStep = nil,
             stepsRun = 0,
             stepsTotal = 0,
+            inputSteps = 0,
+            firstInputStep = nil,
             -- Evidence for the play gate: keep the authored scene state at
             -- the last driven step so a control can be compared on meaningful
             -- progress even when the scene deliberately pops itself.
@@ -644,6 +646,8 @@ function cli.runPlayScene(sceneId, loader)
             local dt = tonumber(step.wait) or 0.1
             sh.update(dt, ctx)
             if step.key then
+                payload.inputSteps = payload.inputSteps + 1
+                payload.firstInputStep = payload.firstInputStep or index
                 sh.keypressed(step.key, ctx)
                 -- Taps, not indefinite holds: same contract the G3 trace and
                 -- the screenshot suite keep.

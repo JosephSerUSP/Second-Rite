@@ -142,11 +142,25 @@ def main():
         elif payload.get("terminalKind") == "none":
             verdict, detail = "NONE-DECLARED", payload.get("terminalReason", "")
         elif payload.get("reached"):
-            verdict = "PLAYED"
-            detail = (
-                f"reached '{payload.get('terminalFormula')}' at step "
-                f"{payload.get('reachedAtStep')}/{payload.get('stepsTotal')}"
-            )
+            reached_at = payload.get("reachedAtStep")
+            first_input = payload.get("firstInputStep")
+            # A terminal result on the first driven tick with no key input is
+            # the specific false-positive this rung guards: time merely
+            # advanced, so the specimen was not demonstrated. Later
+            # autonomous outcomes remain valid (for example C003), and a
+            # terminal.script may intentionally use waits as its control.
+            if not payload.get("inputSteps", 0) and reached_at is not None and reached_at <= 1:
+                verdict = "TERMINATED-UNPLAYED"
+                detail = (
+                    f"reached '{payload.get('terminalFormula')}' at step "
+                    f"{reached_at}/{payload.get('stepsTotal')} without authored input"
+                )
+            else:
+                verdict = "PLAYED"
+                detail = (
+                    f"reached '{payload.get('terminalFormula')}' at step "
+                    f"{reached_at}/{payload.get('stepsTotal')}"
+                )
         else:
             verdict = "NOT-REACHED"
             detail = (
@@ -154,7 +168,7 @@ def main():
                 f"{payload.get('scriptSource')}; '{payload.get('terminalFormula')}' never became true"
             )
 
-        bad = verdict in ("FAIL", "NOT-REACHED", "HARNESS-FAIL")
+        bad = verdict in ("FAIL", "NOT-REACHED", "TERMINATED-UNPLAYED", "HARNESS-FAIL")
 
         # Quarantine covers a specimen that is failing for a known, open reason.
         # It deliberately does NOT cover a harness failure: that means the check

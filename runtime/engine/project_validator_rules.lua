@@ -28,6 +28,17 @@ local WORLD_CAMERA_PROFILES = {
     town_sideview = true,
 }
 
+-- SCENE_EVENT is consumed by more than one host, but its transition
+-- vocabulary is closed.  Keeping this set here makes a misspelled kind a
+-- validation error instead of an event that disappears at runtime.
+local SCENE_EVENT_KINDS = {
+    pop = true,
+    push = true,
+    goto = true,
+    map = true,
+    defeat = true,
+}
+
 local function nonEmptyPhase(loader, host, name)
     local flows = loader.flows
     local phases = flows and flows[host]
@@ -203,6 +214,15 @@ function validator.run(loader)
                 check(commandIds[node.cmd] == true,
                     where .. " uses command '" .. tostring(node.cmd)
                     .. "' which is not registered by the resolved engine vocabulary")
+            end
+
+            if node.cmd == "SCENE_EVENT" then
+                check(SCENE_EVENT_KINDS[node.kind] == true,
+                    where .. " SCENE_EVENT has unknown kind '" .. tostring(node.kind) .. "'")
+                if node.kind == "push" or node.kind == "goto" or node.kind == "defeat" then
+                    check(nonEmptyString(node.scene),
+                        where .. " SCENE_EVENT kind '" .. tostring(node.kind) .. "' requires a scene")
+                end
             end
 
             if node.cmd == "SCENE_EVENT" and type(node.scene) == "string"

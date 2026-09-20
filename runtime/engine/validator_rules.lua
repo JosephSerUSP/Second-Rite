@@ -1,4 +1,12 @@
 local validator = {}
+
+local SCENE_EVENT_KINDS = {
+    pop = true,
+    push = true,
+    goto = true,
+    map = true,
+    defeat = true,
+}
 local HEAL_TYPES = { hp_heal = true, hp = true, hp_drain = true }
 
 local session = require("engine.session")
@@ -2047,6 +2055,17 @@ validator.run = function(loader)
                 if id == "SCRIPT" then
                     scriptUsageCount = scriptUsageCount + 1
                     check(allowScript, ownerDesc .. " contains a SCRIPT command (S6 zero-SCRIPT rule)")
+                end
+
+                if id == "SCENE_EVENT" then
+                    check(SCENE_EVENT_KINDS[cmd.kind] == true,
+                        ownerDesc .. " command 'SCENE_EVENT' has unknown kind '"
+                        .. tostring(cmd.kind) .. "'")
+                    if cmd.kind == "push" or cmd.kind == "goto" or cmd.kind == "defeat" then
+                        check(type(cmd.scene) == "string" and cmd.scene ~= "",
+                            ownerDesc .. " command 'SCENE_EVENT' kind '"
+                            .. tostring(cmd.kind) .. "' requires a scene")
+                    end
                 end
 
                 if id == "CHOICE" and cmd.cancelOption ~= nil then

@@ -265,10 +265,18 @@ function scene_host.runHook(hookName, ctx)
             interpreter.startCommonEvent(ev.id)
         elseif ev.kind == "pop" then
             scene_host.pop(ctx)
-        elseif ev.kind == "push" and ev.scene then
+        elseif ev.kind == "push" then
+            if type(ev.scene) ~= "string" or ev.scene == "" then
+                error("SCENE_EVENT kind 'push' requires a scene")
+            end
             scene_host.push(ev.scene, ctx, ev.sceneState)
-        elseif ev.kind == "goto" and ev.scene then
+        elseif ev.kind == "goto" then
+            if type(ev.scene) ~= "string" or ev.scene == "" then
+                error("SCENE_EVENT kind 'goto' requires a scene")
+            end
             scene_host.goto_scene(ev.scene, ctx, ev.sceneState)
+        else
+            error("Unknown SCENE_EVENT kind '" .. tostring(ev.kind) .. "'")
         end
     end
 

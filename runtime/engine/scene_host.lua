@@ -73,9 +73,7 @@ end
 -- #1160: the per-hook authored-value handoff check (#930, eae3e366) is
 -- deferred, not exempted per scene. Battle stores a live Battle object graph
 -- (metatables + shared identity across sceneState.battle/sceneState.livingMembers/
--- sceneState.eventsQueue)
--- and reserve stores a live battler view (popupMemberRef.base carries a
--- metatable) -- both load-bearing on main -- so validating whole Scene State with
+-- sceneState.eventsQueue) -- load-bearing on main -- so validating whole Scene State with
 -- state_value crashes live play and the G5 harness scene after scene, and a
 -- per-scene allowlist just moves the crash. The transition-state copy below
 -- stays enforced; the handoff returns once #410 migrates live refs out of

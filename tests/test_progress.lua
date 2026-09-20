@@ -114,15 +114,12 @@ do
     local fact, ctx = level_event.context(sess, b, 1, 2)
     local events = flow.run("progression.level_reached", ctx)
     check(#events == 0, "Project LEVEL_REACHED policy adds no presentation event")
-    check(ctx.v.reachedLevel == 2, "ordinary SET_VAR reads event.level from lifecycle context")
     check((b.growth.maxHp or 0) == growthBefore + (expectedGrowth.maxHp or 0),
         "Project LEVEL_REACHED policy applies the exact seeded growth packet")
-    check(ctx.v.event.unit.id == "pixie" and ctx.v.event.unit.level == 2,
-        "event.unit is a sanitized battler view with stable Unit identity")
     check(fact.level == 2 and fact.previousLevel == 1 and fact.unit == b,
         "resolved LEVEL_REACHED fact retains authoritative Unit identity and crossing values")
 
-    local fctx = formula.makeContext({ v = ctx.v }, sess)
+    local fctx = formula.makeContext({ locals = ctx.locals, event = ctx.event }, sess)
     local visible = formula.eval(
         "event.level == 2 and event.previousLevel == 1 and event.unit.level == event.level",
         fctx)
@@ -141,15 +138,15 @@ do
     local original = unit.reactions
     unit.reactions = {
         { id = "nine", trigger = "LEVEL_REACHED", condition = "event.level == 9",
-          commands = { { cmd = "SET_VAR", name = "first", value = "event.level" } } },
+          commands = { { cmd = "SET_LOCAL", name = "first", value = "event.level" } } },
         { id = "after", trigger = "LEVEL_REACHED", commands = {
-            { cmd = "SET_VAR", name = "second", value = "v.first + 1" }
+            { cmd = "SET_LOCAL", name = "second", value = "locals.first + 1" }
         } },
     }
     local b = sess:recruitActor("pixie", 8)
     b.level = 9
     local _, _, ctx = level_event.publish(sess, b, 8, 9)
-    check(ctx.v.first == 9 and ctx.v.second == 10,
+    check(ctx.locals.first == 9 and ctx.locals.second == 10,
         "Unit LEVEL_REACHED reactions see read-only event.level and run in authored order")
     local reactionHost = require("engine.unit_reactions")
     check(not pcall(reactionHost.run, b, "NOT_A_TRIGGER", ctx),
@@ -185,7 +182,7 @@ do
     b.states = { "dead" }
     local events = interpreter.runImmediate({
         { cmd = "RESTORE_HP", target = "target" },
-    }, { session = sess, loader = loader, target = b, a = b, events = {}, v = {} })
+    }, { session = sess, loader = loader, target = b, a = b, events = {} })
     check(b.hp == b:getMaxHp(sess), "RESTORE_HP sets current HP directly to effective Max HP")
     check(b.states[1] == "dead", "RESTORE_HP does not clear or reinterpret target states")
     check(#events == 0, "RESTORE_HP emits no heal/presentation event")
@@ -218,11 +215,9 @@ do
     local fact, ctx = level_event.gainResolvedContext(sess, b, 1, 4)
     local events = flow.run("progression.level_gain_resolved", ctx)
     check(#events == 0, "LEVEL_GAIN_RESOLVED default adds no presentation event")
-    check(ctx.v.levelsGained == 3,
-        "ordinary SET_VAR reads event.levelsGained from transaction context")
     check(fact.previousLevel == 1 and fact.level == 4 and fact.levelsGained == 3,
         "LEVEL_GAIN_RESOLVED retains the whole committed level span")
-    local fctx = formula.makeContext({ v = ctx.v }, sess)
+    local fctx = formula.makeContext({ locals = ctx.locals, event = ctx.event }, sess)
     check(formula.eval(
             "event.previousLevel == 1 and event.level == 4 and event.levelsGained == 3",
             fctx) == true,
@@ -242,10 +237,10 @@ do
     for k, v in pairs(loader.flows or {}) do bareLoader.flows[k] = v end
     bareLoader.flows.progression = {
         level_reached = {
-            { cmd = "SET_VAR", name = "reachedLevel", value = "event.level" },
+            { cmd = "COMMENT", text = "no progression state" },
         },
         level_gain_resolved = {
-            { cmd = "SET_VAR", name = "levelsGained", value = "event.levelsGained" },
+            { cmd = "COMMENT", text = "no progression state" },
         },
     }
 

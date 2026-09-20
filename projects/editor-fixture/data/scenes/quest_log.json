@@ -26,7 +26,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{(v.questCount or 0) > 0 and 'UP/DOWN: select quest   ESC: back' or 'No active quests.   ESC: back'}"
+          "text": "{(sceneState.questCount or 0) > 0 and 'UP/DOWN: select quest   ESC: back' or 'No active quests.   ESC: back'}"
         }
       ]
     },
@@ -44,8 +44,8 @@
       "content": [
         {
           "type": "list",
-          "listId": "v:questRows",
-          "cursor": "v.idx"
+          "listId": "sceneState:questRows",
+          "cursor": "sceneState.idx"
         }
       ]
     },
@@ -70,7 +70,7 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
         "value": 1
       },
@@ -81,12 +81,12 @@
     "on_up": [
       {
         "cmd": "IF",
-        "condition": "v.idx > 1",
+        "condition": "sceneState.idx > 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx - 1"
+            "value": "sceneState.idx - 1"
           }
         ]
       }
@@ -94,12 +94,12 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < (v.questCount or 1)",
+        "condition": "sceneState.idx < (sceneState.questCount or 1)",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "idx",
-            "value": "v.idx + 1"
+            "value": "sceneState.idx + 1"
           }
         ]
       }

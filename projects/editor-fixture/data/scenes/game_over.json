@@ -89,12 +89,12 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "step",
         "value": -1
       },
       {
-        "cmd": "SET_VAR",
+        "cmd": "SET_SCENE_STATE",
         "name": "idx",
         "value": 1
       },
@@ -135,15 +135,15 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.step == -1",
+        "condition": "locals._guard == 0 and sceneState.step == -1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "step",
             "value": 0
           },
@@ -155,15 +155,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.step == 0",
+        "condition": "locals._guard == 0 and sceneState.step == 0",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "step",
             "value": 1
           },
@@ -175,15 +175,15 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.step == 1",
+        "condition": "locals._guard == 0 and sceneState.step == 1",
         "then": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "_guard",
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_SCENE_STATE",
             "name": "step",
             "value": 2
           }
@@ -193,7 +193,7 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "v.step == 2",
+        "condition": "sceneState.step == 2",
         "then": [
           {
             "cmd": "RESET_SESSION"
@@ -232,7 +232,7 @@
           "duration": 0.45
         }
       },
-      "visible": "v.step >= 0",
+      "visible": "sceneState.step >= 0",
       "content": [
         {
           "type": "text",
@@ -254,7 +254,7 @@
           "duration": 0.3
         }
       },
-      "visible": "v.step >= 1",
+      "visible": "sceneState.step >= 1",
       "content": [
         {
           "type": "text",
@@ -276,7 +276,7 @@
           "duration": 0.25
         }
       },
-      "visible": "v.step >= 2",
+      "visible": "sceneState.step >= 2",
       "content": [
         {
           "type": "list",

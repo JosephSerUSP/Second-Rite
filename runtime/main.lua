@@ -1079,7 +1079,7 @@ end
 
 -- Close the current message before an event action (including fades, map
 -- loads, and scene changes) starts.  The dialogue scene mirrors its TEXT node
--- into v during update, so without this explicit clear a transition begun
+-- into Scene State during update, so without this explicit clear a transition begun
 -- from keypressed() can draw one frame with the previous line still cached.
 -- Choices deliberately retain the preceding question and do not use this.
 local function clearDialogueMessage()
@@ -1103,48 +1103,48 @@ local function syncDialogueWindowState()
         return
     end
     state.v = state.v or {}
-    local v = state.v
+    local sceneState = state.v
 
     if node.type == "TEXT" then
-        v.dialogueMode = "text"
+        sceneState.dialogueMode = "text"
         local speaker = node.speaker
         if speaker and speaker ~= "" then
             local rName = string.gsub(activeWalker.eventName or "??", "%%", "%%%%")
             speaker = string.gsub(speaker, "\\eventName", rName)
         end
-        v.dialogueSpeaker = speaker or ""
-        v.dialogueExpression = math.max(1, math.min(5, math.floor(tonumber(node.expression) or 1)))
+        sceneState.dialogueSpeaker = speaker or ""
+        sceneState.dialogueExpression = math.max(1, math.min(5, math.floor(tonumber(node.expression) or 1)))
         -- The FULL line goes to the window; the window's text widget wraps
         -- and slices it against its own real draw width (see the text
         -- block's `reveal` field in engine.json). This used to re-derive
         -- the wrap width from the static rect here, which was a tile too
         -- wide AND blind to the portrait-driven runtime width -- so the
         -- draw-time printf disagreed and re-flowed words mid-reveal.
-        v.dialogueText = renderer.getDialogueText(node)
-        v.dialogueRevealElapsed = renderer.dialogueRevealElapsed()
+        sceneState.dialogueText = renderer.getDialogueText(node)
+        sceneState.dialogueRevealElapsed = renderer.dialogueRevealElapsed()
         -- Drives the animated waiting-for-input marker on the message
         -- window (waitInput formula), replacing the old "[Press SPACE]".
-        v.dialogueWaiting = not renderer.isDialogueRevealing()
+        sceneState.dialogueWaiting = not renderer.isDialogueRevealing()
         -- Portrait PERSISTS across speakerless narration lines and CHOICE
         -- nodes (only a new speaker/portrait replaces it); the namebox above
         -- clears instead, since it tracks who's speaking line by line. v is
         -- fresh per scene push, so nothing leaks between conversations.
         local portrait = node.speaker or (activeWalker.graph and activeWalker.graph.portrait)
         if portrait and portrait ~= "" then
-            v.dialoguePortrait = portrait
+            sceneState.dialoguePortrait = portrait
         end
     elseif node.type == "CHOICE" then
-        v.dialogueMode = "choice"
+        sceneState.dialogueMode = "choice"
         -- Speaker/portrait intentionally left as whatever the last TEXT node
         -- set -- the question that led to these choices stays visible above
         -- them, same as the legacy renderer kept the same window open.
-        v.dialogueWaiting = false
+        sceneState.dialogueWaiting = false
         local opts = {}
         for _, opt in ipairs(node.options or {}) do
             table.insert(opts, opt.label)
         end
-        v.dialogueOptions = opts
-        v.dialogueCursorIdx = dialogueSelectIdx
+        sceneState.dialogueOptions = opts
+        sceneState.dialogueCursorIdx = dialogueSelectIdx
 
         -- RPG Maker rule: the choice strip grows up from the dialog box's
         -- bottom (fitRows), and when the retained TEXT wouldn't fit in what
@@ -1152,7 +1152,7 @@ local function syncDialogueWindowState()
         -- from the scene's own window defs so layout edits stay data-only;
         -- wrapped-line count is an estimate (measure/width), biased to
         -- clearing early rather than overlapping.
-        local text = v.dialogueText or ""
+        local text = sceneState.dialogueText or ""
         if text ~= "" then
             local ui = require("presentation.ui")
             local sceneDef = loader.getScene("dialogue")
@@ -1169,7 +1169,7 @@ local function syncDialogueWindowState()
                 lines = lines + math.max(1, math.ceil(ui.measureText(chunk) / math.max(1, boxW - 24)))
             end
             if lines * ui.lineHeight > availH then
-                v.dialogueText = ""
+                sceneState.dialogueText = ""
             end
         end
     end

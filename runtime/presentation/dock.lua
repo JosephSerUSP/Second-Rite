@@ -219,7 +219,7 @@ function dock.draw(state, sceneData, ctx)
     local offsetY = 0
     if cfg and cfg.offsetY and state then
         local ok, value = pcall(require("engine.formula").eval,
-            cfg.offsetY, { v = state.v or {} })
+            cfg.offsetY, { sceneState = state.v or {} })
         if ok and type(value) == "number" then offsetY = value end
     end
     if offsetY ~= 0 then

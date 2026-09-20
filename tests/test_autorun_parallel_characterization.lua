@@ -126,7 +126,7 @@ do
         scenes = {
             { id = "probe", kind = "probe", hooks = {
                 on_frame = {
-                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                    { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
                     { cmd = "WAIT", duration = 1 },
                 },
             } },
@@ -160,10 +160,10 @@ do
                     update = { mode = "fixed", step = 0.1, maxCatchUp = maxCatchUp or 8 },
                     hooks = {
                         on_frame = {
-                            { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
-                            { cmd = "SET_VAR", name = "lastDt", value = "v.time.dt" },
-                            { cmd = "SET_VAR", name = "lastTick", value = "v.time.tick" },
-                            { cmd = "SET_VAR", name = "lastElapsed", value = "v.time.elapsed" },
+                            { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
+                            { cmd = "SET_SCENE_STATE", name = "lastDt", value = "sceneState.time.dt" },
+                            { cmd = "SET_SCENE_STATE", name = "lastTick", value = "sceneState.time.tick" },
+                            { cmd = "SET_SCENE_STATE", name = "lastElapsed", value = "sceneState.time.elapsed" },
                         },
                     },
                 },
@@ -208,7 +208,7 @@ do
                 id = "backlog", kind = "probe",
                 update = { mode = "fixed", step = 0.1, maxCatchUp = 2 },
                 hooks = { on_frame = {
-                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                    { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
                 } },
             },
         },
@@ -241,7 +241,7 @@ do
                     id = "fixed_wait", kind = "probe",
                     update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
                     hooks = { on_frame = {
-                        { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                        { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
                         { cmd = "WAIT", duration = 0.2 },
                     } },
                 },
@@ -272,7 +272,7 @@ do
                 id = "from", kind = "probe",
                 update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
                 hooks = { on_frame = {
-                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                    { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
                     { cmd = "SCENE_EVENT", kind = "goto", scene = "to" },
                 } },
             },
@@ -280,9 +280,9 @@ do
                 id = "to", kind = "probe",
                 update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
                 hooks = { on_enter = {
-                    { cmd = "SET_VAR", name = "entered", value = "(v.entered or 0) + 1" },
+                    { cmd = "SET_SCENE_STATE", name = "entered", value = "(sceneState.entered or 0) + 1" },
                 }, on_frame = {
-                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                    { cmd = "SET_SCENE_STATE", name = "frames", value = "(sceneState.frames or 0) + 1" },
                 } },
             },
         },
@@ -314,7 +314,7 @@ end
 
 -- #394: image-picture transforms are authored numeric-or-formula values. The
 -- engine resolves them with the ordinary formula evaluator at command execution
--- time, after preceding SET_VAR writes, and presentation receives numbers only.
+-- time, after preceding Scene State writes, and presentation receives numbers only.
 do
     local s = newSession()
     local json = require("engine.data.json")
@@ -331,7 +331,7 @@ do
     sceneHost.init("picture_formula_probe", ctx)
     local state = sceneHost.getCurrentState()
     check(state.v.ballX == 32 and state.v.ballY == 16,
-        "authored Scene fixture owns picture X/Y in Scene-local v")
+        "authored Scene fixture owns picture X/Y in Scene State")
     check(shown and shown.x == 32 and shown.y == 16
             and shown.opacity == 1 and shown.scale == 1 and shown.rotation == 0
             and type(shown.x) == "number" and type(shown.y) == "number",
@@ -339,16 +339,16 @@ do
 
     sceneHost.runHook("on_right", ctx)
     check(state.v.ballX == 112 and state.v.ballY == 47,
-        "ordinary SET_VAR arithmetic/clamp updates the Scene-local position state")
+        "Scene State arithmetic/clamp updates the Scene-local position state")
     check(moved and moved.x == 112 and moved.y == 47
             and type(moved.x) == "number" and type(moved.y) == "number",
-        "MOVE_IMAGE_PICTURE consumes v/arithmetic/clamp expressions as numeric presentation values")
+        "MOVE_IMAGE_PICTURE consumes Scene State arithmetic/clamp expressions as numeric presentation values")
 
     moved = nil
     interpreter.runImmediate({ {
         cmd = "MOVE_IMAGE_PICTURE", id = 1, x = 9, y = 11,
         opacity = 0.5, scale = 2, rotation = 0.25, duration = 0,
-    } }, { session = s, loader = loader, v = {} })
+    } }, { session = s, loader = loader, sceneState = {} })
     check(moved and moved.x == 9 and moved.y == 11 and moved.opacity == 0.5
             and moved.scale == 2 and moved.rotation == 0.25,
         "literal numeric image transforms preserve their authored values")
@@ -356,10 +356,10 @@ do
     local function rejects(x)
         return not pcall(interpreter.runImmediate, { {
             cmd = "MOVE_IMAGE_PICTURE", id = 1, x = x, duration = 0,
-        } }, { session = s, loader = loader, v = { ballX = 12 } })
+        } }, { session = s, loader = loader, sceneState = { ballX = 12 } })
     end
-    check(rejects("v."), "malformed picture transform formulas fail loudly")
-    check(rejects("v.missing + 1"), "unknown picture variables fail loudly instead of becoming zero")
+    check(rejects("sceneState."), "malformed picture transform formulas fail loudly")
+    check(rejects("sceneState.missing + 1"), "unknown picture variables fail loudly instead of becoming zero")
     check(rejects("'not a number'"), "non-numeric picture formula results fail loudly")
     check(rejects("rawSession.gold"),
         "picture formula context does not gain privileged raw session access")

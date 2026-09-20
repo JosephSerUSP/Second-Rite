@@ -9,19 +9,19 @@
       {
         "id": "ambush",
         "at": "battle_start",
-        "note": "Ambush (BATTLE_START_DAMAGE): the party's summed trait rate hits ONE enemy as the battle opens. v.hit guards the FOR_EACH so only the first living enemy is struck -- no engine-side 'first enemy' ref needed. Lifted out of the battle_start flow so a troop can suppress it: an ambush on a boss that opens with a cutscene reads wrong.",
+        "note": "Ambush (BATTLE_START_DAMAGE): the party's summed trait rate hits ONE enemy as the battle opens. locals.hit guards the FOR_EACH so only the first living enemy is struck -- no engine-side 'first enemy' ref needed. Lifted out of the battle_start flow so a troop can suppress it: an ambush on a boss that opens with a cutscene reads wrong.",
         "commands": [
           {
-            "cmd": "SET_VAR",
+            "cmd": "SET_LOCAL",
             "name": "ambush",
             "value": "party.trait.BATTLE_START_DAMAGE"
           },
           {
             "cmd": "IF",
-            "condition": "v.ambush > 0",
+            "condition": "locals.ambush > 0",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_LOCAL",
                 "name": "hit",
                 "value": "0"
               },
@@ -32,12 +32,12 @@
                 "do": [
                   {
                     "cmd": "IF",
-                    "condition": "v.hit == 0",
+                    "condition": "locals.hit == 0",
                     "then": [
                       {
                         "cmd": "DAMAGE",
                         "target": "enemy",
-                        "amount": "v.ambush",
+                        "amount": "locals.ambush",
                         "pierce": true,
                         "minHp": 1
                       },
@@ -50,7 +50,7 @@
                         ]
                       },
                       {
-                        "cmd": "SET_VAR",
+                        "cmd": "SET_LOCAL",
                         "name": "hit",
                         "value": "1"
                       }
@@ -72,24 +72,24 @@
             "condition": "not session.mapSafe",
             "then": [
               {
-                "cmd": "SET_VAR",
+                "cmd": "SET_LOCAL",
                 "name": "strainMult",
                 "value": "battle.round >= 15 and 16 or (battle.round >= 10 and 8 or (battle.round >= 6 and 4 or 0))"
               },
               {
                 "cmd": "IF",
-                "condition": "v.strainMult > 0 and party.mpd > 0",
+                "condition": "locals.strainMult > 0 and party.mpd > 0",
                 "then": [
                   {
                     "cmd": "CHANGE_MP",
-                    "amount": "-(party.mpd * v.strainMult)"
+                    "amount": "-(party.mpd * locals.strainMult)"
                   },
                   {
                     "cmd": "EMIT_TEXT",
                     "term": "battle.strain",
                     "fallback": "The prolonged battle strains the summoning! (-{0} MP)",
                     "args": [
-                      "party.mpd * v.strainMult"
+                      "party.mpd * locals.strainMult"
                     ]
                   }
                 ]

@@ -47,7 +47,7 @@ local function resolveBackdropFade(sceneData, state)
     local value = fade
     if type(fade) == "string" then
         local ok, result = pcall(require("engine.formula").eval, fade,
-            { v = (state and state.v) or {} })
+            { sceneState = (state and state.v) or {} })
         value = (ok and type(result) == "number") and result or 0
     end
     if type(value) ~= "number" then return 0 end

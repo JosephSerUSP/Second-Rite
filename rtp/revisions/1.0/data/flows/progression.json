@@ -1,16 +1,14 @@
 {
   "level_reached": [
     {
-      "cmd": "SET_VAR",
-      "name": "reachedLevel",
-      "value": "event.level"
+      "cmd": "COMMENT",
+      "text": "No RTP progression policy."
     }
   ],
   "level_gain_resolved": [
     {
-      "cmd": "SET_VAR",
-      "name": "levelsGained",
-      "value": "event.levelsGained"
+      "cmd": "COMMENT",
+      "text": "No RTP progression policy."
     }
   ]
 }

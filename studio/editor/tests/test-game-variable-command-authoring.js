@@ -36,11 +36,10 @@ test('shared command modal treats stateValue as a Formula-context expression', (
   assert.match(eventsSource, /deterministic persistent-state expression/);
 });
 
-test('Formula help distinguishes persistent, process-local, Scene-owned, and legacy state', () => {
+test('Formula help distinguishes persistent, process-local, and Scene-owned state', () => {
   const variableHelp = engine.formulaHelp.find(entry => entry.token === 'variables.name');
   const processLocalHelp = engine.formulaHelp.find(entry => entry.token === 'locals');
   const sceneStateHelp = engine.formulaHelp.find(entry => entry.token === 'sceneState');
-  const legacyHelp = engine.formulaHelp.find(entry => entry.token === 'v');
 
   assert.ok(variableHelp);
   assert.match(variableHelp.description, /Persistent playthrough Game Variable/);
@@ -53,7 +52,6 @@ test('Formula help distinguishes persistent, process-local, Scene-owned, and leg
   assert.match(sceneStateHelp.description, /current pushed Scene instance/);
   assert.match(sceneStateHelp.description, /not saved/);
 
-  assert.ok(legacyHelp);
-  assert.match(legacyHelp.description, /Legacy #410 compatibility namespace/);
-  assert.match(legacyHelp.description, /locals or sceneState/);
+  assert.equal(engine.formulaHelp.some(entry => entry.token === 'v'), false,
+    'the removed shared namespace is not offered to new authors');
 });

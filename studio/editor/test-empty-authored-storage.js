@@ -62,3 +62,18 @@ test('Studio can deliberately clear populated catalogs back to explicit empty st
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dataRoot, 'tilesets', 'index.json'), 'utf8')), { files: [] });
     });
 });
+
+test('explicit empty catalog markers are Project-only and do not relax other validation', () => {
+    const nonProjectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-non-project-storage-'));
+    try {
+        assert.throws(() => storage.writeResource(nonProjectRoot, 'units', []),
+            /ordered collection 'units' must be a non-empty array: <write units>/);
+    } finally {
+        fs.rmSync(nonProjectRoot, { recursive: true, force: true });
+    }
+
+    withSparseProject((_project, dataRoot) => {
+        assert.throws(() => storage.writeResource(dataRoot, 'flows', {}),
+            /semantic config 'flows' is missing module 'battle': <write flows>/);
+    });
+});

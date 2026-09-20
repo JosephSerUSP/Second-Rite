@@ -119,7 +119,16 @@ function versionToken(root, stem, spec = physical.resourceSpec(stem)) {
 // lets a multi-resource Studio save reject a policy failure before committing
 // an earlier resource.
 function validateWritableResource(root, stem, value, spec = physical.resourceSpec(stem)) {
-    physical.validateResource(value, stem, spec, `<write ${stem}>`);
+    // A Project may deliberately own an empty fragmented catalog through the
+    // index.json { files: [] } marker.  That is a storage-level sentinel, not
+    // an invalid ordinary collection: it must pass the same write boundary
+    // that later materializes the marker.  Keep the exception Project-scoped;
+    // physical/RTP storage still requires non-empty collections and every
+    // other resource shape goes through the normal validator.
+    const explicitProjectEmpty = hasProjectSystem(root)
+        && spec.representation === 'fragments'
+        && isExplicitEmptyValue(value, spec);
+    if (!explicitProjectEmpty) physical.validateResource(value, stem, spec, `<write ${stem}>`);
     if (stem !== 'engine' || !hasProjectSystem(root)) return;
     const resolved = engineResolution(root);
     if (!resolved.baselineValue) return;

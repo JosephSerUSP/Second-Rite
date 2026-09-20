@@ -3008,6 +3008,11 @@ handlers.SCRIPT = function(cmd, ctx)
     local env = {
         ctx = scriptCtx,
         api = buildScriptApi(ctx),
+        -- SCRIPT bodies are authored alongside formulas and use the same
+        -- explicit process-local noun.  Keep this as a direct sandbox binding
+        -- (rather than restoring the retired shared `v` table) so scripts can
+        -- write `locals.foo` without reaching through `ctx`.
+        locals = ctx.locals,
     }
     setmetatable(env, SCRIPT_ENV_PROTOTYPE)
     -- Explicitly absent: io, os, love, require, raw loader/session (S6).

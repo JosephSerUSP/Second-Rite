@@ -27,13 +27,13 @@ loader.scenes = {{
     kind = "menu",
     hooks = { on_enter = {{
         cmd = "SCRIPT",
-        code = "local function helper() end; helper(); ctx.sceneState.ok = true",
+        code = "local function helper() end; helper(); locals.marker = 7; ctx.sceneState.ok = locals.marker == 7",
     }}},
 }}
 local ok2, err2 = pcall(scene_host.init, "local_helper_control", ctx)
 assert(ok2, err2)
 assert(scene_host.getCurrentState().v.ok == true,
-    "Scene scripts receive explicit Scene State")
+    "Scene scripts receive explicit Scene State and Process Locals")
 scene_host.init(nil)
 
 -- A SCRIPT-emitted transition uses the same explicit payload noun as

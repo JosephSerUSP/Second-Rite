@@ -1,4 +1,14 @@
 {
-  "level_reached": [],
-  "level_gain_resolved": []
+  "level_reached": [
+    {
+      "cmd": "COMMENT",
+      "text": "No RTP progression policy."
+    }
+  ],
+  "level_gain_resolved": [
+    {
+      "cmd": "COMMENT",
+      "text": "No RTP progression policy."
+    }
+  ]
 }

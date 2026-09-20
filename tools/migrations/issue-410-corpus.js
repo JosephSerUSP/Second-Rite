@@ -124,17 +124,34 @@ function migrateRegistry(file) {
     }
     return [raw, json(raw, transform(data, true, file))];
 }
+function retainRequiredProgressionPhases(value, file) {
+    if (rel(file) !== 'rtp/revisions/1.0/data/flows/progression.json') return value;
+    // The house baseline deliberately has no progression policy.  Its phase
+    // keys still execute for every level crossing, though, so a migration that
+    // deletes their retired SET_VAR-only bodies must leave a registered no-op
+    // rather than an empty Flow (which flow.run correctly rejects).
+    for (const phase of ['level_reached', 'level_gain_resolved']) {
+        if (Array.isArray(value[phase]) && value[phase].length === 0) {
+            value[phase] = [{ cmd: 'COMMENT', text: 'No RTP progression policy.' }];
+        }
+    }
+    return value;
+}
 function migrate(file) {
     const raw = fs.readFileSync(file, 'utf8');
     // Do not parse/re-serialize an unrelated JSON artifact. Apart from making
     // the review unusable, that would turn spelling such as 0.0 into 0 and
     // falsely claim it was migration output.
-    if (!isRtpEngine(file) && !/SET_VAR|\bv\.|ctx\.v|"vars"|v:/.test(raw)) return;
+    if (!isRtpEngine(file)
+            && rel(file) !== 'rtp/revisions/1.0/data/flows/progression.json'
+            && !/SET_VAR|\bv\.|ctx\.v|"vars"|v:/.test(raw)) return;
     // A Project engine.json is a policy overlay, not a registry: never add
     // inherited commands/help to it. Its layout and window formulas are still
     // authored Scene reads and must migrate with the rest of the corpus.
-    const next = isRtpEngine(file) ? migrateRegistry(file)[1]
-        : json(raw, transform(JSON.parse(raw), sceneOwned(file) || isProjectEngine(file), file));
+    const migrated = isRtpEngine(file) ? null
+        : retainRequiredProgressionPhases(
+            transform(JSON.parse(raw), sceneOwned(file) || isProjectEngine(file), file), file);
+    const next = isRtpEngine(file) ? migrateRegistry(file)[1] : json(raw, migrated);
     if (next === raw) return;
     stats.files += 1;
     if (WRITE) fs.writeFileSync(file, next, 'utf8');

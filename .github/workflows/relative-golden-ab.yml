@@ -162,8 +162,6 @@ jobs:
             $work = Join-Path $env:RUNNER_TEMP "g5-$label"
             git worktree add --detach $work $sha
             if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
-            $renderer = Join-Path $work "runtime/presentation/window_renderer.lua"
-            if (Test-Path $renderer) { (Get-Content -Raw $renderer) -replace 'renderer\.drawEnemyRowWindow\(env\.sceneState and env\.sceneState\.battle\)', 'renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle and require("engine.scenes.battle").getNativeState().battle)' | Set-Content $renderer }
             python tools/golden/relative-capture.py --repo-root $work --gate g5 --output (Join-Path $ab $label)
             if ($LASTEXITCODE -ne 0) { throw "G5 relative capture incomplete: $label" }
           }

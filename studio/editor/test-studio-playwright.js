@@ -208,6 +208,18 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
                 ],
             },
         };
+        // Give the real viewport one fully-3D Event, without changing any
+        // committed fixture content. #1181 must keep this Map-owned position
+        // unchanged when its modal operator is canceled.
+        authoredMap.events = [{
+            id: 1,
+            instanceId: 'playwright-modal-event',
+            x: 1,
+            y: 1,
+            name: 'Modal Event',
+            trigger: 'interact',
+            worldPosition: [0, 5, 0],
+        }];
         writeJson(mapPath, authoredMap);
 
         const [editorPort, bridgePort] = await Promise.all([freePort(), freePort()]);
@@ -444,6 +456,61 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             window.ThestraRuntimeCameraViewport.getSpatialInteractionState().selection), null,
         'leaving Edit Mode must clear the shared profile selection');
         mark(t, 'Tab exited Walk Profile Edit Mode and cleared shared selection');
+
+        await mainPage.getByRole('button', { name: 'Event Layer' }).click();
+        await mapCanvas.focus();
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'event', key: 'event:1', id: 1,
+            });
+        });
+        const beforeEventMove = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition));
+        await mapCanvas.press('g');
+        await mapCanvas.press('y');
+        await mainPage.waitForFunction(() => {
+            const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
+            return state.operation === 'move' && state.constraint === 'Y';
+        });
+        await mapCanvas.press('Escape');
+        assert.equal(await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition)), beforeEventMove,
+        'Esc-canceled Event G must preserve the exact Map-owned world position');
+        mark(t, 'Event G Y entered semantic modal move and Esc preserved Map-owned placement');
+
+        const eventMoveBox = await mapCanvas.boundingBox();
+        assert.ok(eventMoveBox, 'Event modal move needs the real Map canvas');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'event', key: 'event:1', id: 1,
+            });
+        });
+        await mapCanvas.focus();
+        await mapCanvas.press('g');
+        await mapCanvas.press('x');
+        await mainPage.mouse.move(
+            eventMoveBox.x + eventMoveBox.width * 0.72,
+            eventMoveBox.y + eventMoveBox.height * 0.58,
+            { steps: 4 });
+        await mainPage.waitForFunction(() => {
+            const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
+            return state.operation === 'move' && state.constraint === 'X' && Math.abs(state.value?.X || 0) > 0.001;
+        });
+        await mapCanvas.press('Enter');
+        await mainPage.waitForFunction(before =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) !== before,
+        beforeEventMove);
+        const committedEventMove = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition));
+        await mainPage.keyboard.press('Control+z');
+        await mainPage.waitForFunction(before =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === before,
+        beforeEventMove);
+        await mainPage.keyboard.press('Control+Shift+z');
+        await mainPage.waitForFunction(committed =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === committed,
+        committedEventMove);
+        mark(t, 'Event modal confirm created one identity-safe Map history transaction with undo and redo');
 
         let databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database', diagnostics);

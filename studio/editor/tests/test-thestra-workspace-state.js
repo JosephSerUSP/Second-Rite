@@ -68,6 +68,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'map painting must be classified as topology');
     assert.match(source, /onMoveEvent[\s\S]*'event-move'/,
         'event movement must use its explicit background-sync class');
+    assert.match(source, /function runMapMutation[\s\S]*publishMapTransaction\(kind, authority, before, mapSnapshot\(\)\)/,
+        'Event moves must publish one exact Map history transaction around the Map-owned command');
+    assert.match(source, /onMoveWorldEvent[\s\S]*runMapMutation\('event-move'/,
+        'plate Event movement must use the same Map history boundary');
     assert.match(source, /onMoveLight[\s\S]*'light-move'/,
         'light movement must use its explicit background-sync class');
     assert.match(source, /light-object-[\s\S]*scheduleMutation\('light-property'\)/,

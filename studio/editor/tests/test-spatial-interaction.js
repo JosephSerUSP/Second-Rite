@@ -74,6 +74,8 @@ test('spatial rejection reasons are author-facing instead of raw command codes',
     assert.match(Spatial.reasonMessage('profile-fixed-depth'), /authored Y or Z/i);
     assert.match(Spatial.reasonMessage('profile-endpoint-required'), /endpoint/i);
     assert.match(Spatial.reasonMessage('invalid-subdivision-count'), /1 to 64/i);
+    assert.match(Spatial.reasonMessage('event-lane-y-only'), /lane Y/i);
+    assert.match(Spatial.reasonMessage('event-grid-no-elevation'), /no authored elevation/i);
     assert.equal(Spatial.reasonMessage('future-reason'), 'future reason');
 });
 
@@ -90,6 +92,14 @@ test('projected semantic axis solver remains usable when the profile plane is ed
         { x: 50, y: 50 },
         { x: 0.01, y: 0.01 }
     ), null, 'an axis projected nearly into the camera is explicitly unavailable');
+});
+
+test('projected semantic axis solver accepts DOM client coordinates', () => {
+    assert.equal(Spatial.projectedAxisDelta(
+        { clientX: 10, clientY: 20 },
+        { clientX: 16, clientY: 20 },
+        { x: 3, y: 0 }
+    ), 2);
 });
 
 test('committed spatial transactions preserve immutable before/after semantic values', () => {

@@ -95,7 +95,7 @@ export function createCompositionViewport(container, options) {
     const pointer = new THREE.Vector2();
     let model = null, plate = null, selectedId, serial = 0, disposed = false, visible = false, gesture = null;
     let manifestOverridePath = null, manifestOverride = null;
-    let modalProfileMove = null, lastPointerEvent = null;
+    let modalProfileMove = null, modalEventMove = null, lastPointerEvent = null;
     let walkMeshVisible = false, walkProfileEditing = false, walkProfileComponentMode = 'point';
     let walkProfileSelection = null, walkProfileHover = null;
     const events = new Map(), hitTargets = [];
@@ -120,7 +120,12 @@ export function createCompositionViewport(container, options) {
     }
 
     function pointerSnapshot(event) {
-        return event ? { clientX: event.clientX, clientY: event.clientY } : null;
+        return event ? {
+            x: event.clientX,
+            y: event.clientY,
+            clientX: event.clientX,
+            clientY: event.clientY
+        } : null;
     }
 
     function scenePointAtPointer(event, z = 4) {
@@ -165,6 +170,84 @@ export function createCompositionViewport(container, options) {
         gizmo.detach();
         controls.enabled = false;
         options.spatialInteraction?.beginMove?.();
+        return true;
+    }
+
+    function eventPositionAtScreenX(record, screenX) {
+        const lane = model.map.source.traversal.lane;
+        const position = record.event.worldPosition.slice();
+        const modelPath = record.record.asset?.model;
+        if (modelPath) {
+            const modelScale = Number(record.event.modelScale) > 0 ? Number(record.event.modelScale) : 1;
+            const zOffset = /transition_arrow\.obj$/i.test(modelPath) ? 0.22 * modelScale : 0;
+            position[1] = View.worldYAtScreenXOnGroundProfile(
+                plate.camera, plate.width, plate.height, Number(lane.depthX),
+                lane.groundProfile, Number(lane.groundZ || 0), plate.sliceY,
+                Number(plate.player.centerX), screenX,
+                Number(lane.minY), Number(lane.maxY), zOffset);
+        } else {
+            const projection = View.horizontalProjection(plate.camera, plate.width, plate.height,
+                Number(lane.depthX), Number(lane.groundZ || 0), plate.sliceY, Number(plate.player.centerX));
+            position[1] = View.worldYAtScreenX(projection, screenX);
+        }
+        return position;
+    }
+
+    function beginModalEventMove() {
+        const record = events.get(String(selectedId));
+        if (!record?.event?.worldPosition || !plate?.camera) return false;
+        const origin = record.group.position.clone();
+        modalEventMove = {
+            record, origin, before: record.event.worldPosition.slice(),
+            startPointer: lastPointerEvent || { clientX: 0, clientY: 0 }
+        };
+        gizmo.detach();
+        controls.enabled = false;
+        options.spatialInteraction?.beginMove?.();
+        return true;
+    }
+
+    function updateModalEventMove(event) {
+        const move = modalEventMove;
+        if (!move) return false;
+        const constraint = options.spatialInteraction?.snapshot?.().constraint || null;
+        if (constraint === 'X' || constraint === 'Z') {
+            options.spatialInteraction?.reject?.('event-lane-y-only');
+            return true;
+        }
+        const hit = scenePointAtPointer(event, move.origin.z);
+        if (!hit) return true;
+        move.record.group.position.x = hit.x;
+        const position = eventPositionAtScreenX(move.record, hit.x);
+        options.spatialInteraction?.setValue?.({ Y: position[1] - move.before[1] });
+        refreshOverlay();
+        return true;
+    }
+
+    function endModalEventMove(commit) {
+        const move = modalEventMove;
+        if (!move) return false;
+        modalEventMove = null;
+        controls.enabled = true;
+        if (!commit) {
+            move.record.group.position.copy(move.origin);
+            options.spatialInteraction?.cancel?.();
+            refreshOverlay();
+            return true;
+        }
+        const position = eventPositionAtScreenX(move.record, move.record.group.position.x);
+        const result = options.onMoveWorldEvent?.(semantic(move.record.event), position);
+        if (!result?.ok) {
+            move.record.group.position.copy(move.origin);
+            options.spatialInteraction?.cancel?.();
+            options.spatialInteraction?.reject?.(result?.reason || 'event-move-rejected');
+        } else {
+            move.record.event.worldPosition = position;
+            options.spatialInteraction?.confirm?.();
+            rebuildEvents();
+            options.onSelection?.(result.selection || semantic(move.record.event));
+        }
+        refreshOverlay();
         return true;
     }
 
@@ -352,7 +435,18 @@ export function createCompositionViewport(container, options) {
         const action = SpatialInteraction.transformShortcut(
             event, document.activeElement === renderer.domElement, state.operation);
         if (!action) return false;
-        if (action.kind === 'begin-move') return beginModalProfileMove();
+        if (action.kind === 'begin-move') {
+            return selectedId != null ? beginModalEventMove() : beginModalProfileMove();
+        }
+        if (modalEventMove) {
+            if (action.kind === 'constraint') {
+                options.spatialInteraction?.constrain?.(action.axis);
+                if (lastPointerEvent) updateModalEventMove(lastPointerEvent);
+                return true;
+            }
+            if (action.kind === 'confirm') return endModalEventMove(true);
+            if (action.kind === 'cancel') return endModalEventMove(false);
+        }
         if (!modalProfileMove) return false;
         if (action.kind === 'constraint') {
             if (action.axis === 'X') {
@@ -404,7 +498,7 @@ export function createCompositionViewport(container, options) {
     }
     const disposeNavigation = installNavigation(renderer.domElement, [controls], {
         planar: true,
-        canPan: () => !gizmo.axis && !gizmo.dragging && !modalProfileMove
+        canPan: () => !gizmo.axis && !gizmo.dragging && !modalProfileMove && !modalEventMove
     });
     function refreshOverlay() {
         const profileObject = walkProfileEditing && walkProfileSelection
@@ -415,7 +509,7 @@ export function createCompositionViewport(container, options) {
         overlay.visible = !!object;
         const selectedProfilePoints = (options.spatialInteraction?.snapshot?.().selectionSet || [])
             .filter(item => item?.kind === 'walk-profile-point').length;
-        gizmo.enabled = !!object && (!profileObject || profilePoint)
+        gizmo.enabled = !!profileObject && profilePoint
             && !(profilePoint && selectedProfilePoints > 1);
         gizmo.showX = !!object;
         gizmo.showY = profilePoint;
@@ -988,6 +1082,10 @@ export function createCompositionViewport(container, options) {
     function hide() { visible = false; layer.style.display = 'none'; }
     renderer.domElement.addEventListener('pointermove', event => {
         lastPointerEvent = pointerSnapshot(event);
+        if (modalEventMove) {
+            updateModalEventMove(event);
+            return;
+        }
         if (modalProfileMove) {
             updateModalProfileMove(event);
             return;
@@ -1001,6 +1099,14 @@ export function createCompositionViewport(container, options) {
     renderer.domElement.addEventListener('pointerdown', event => {
         renderer.domElement.focus({ preventScroll: true });
         lastPointerEvent = pointerSnapshot(event);
+        if (modalEventMove) {
+            if (event.button === 0) endModalEventMove(true);
+            else if (event.button === 2) endModalEventMove(false);
+            if (event.button === 0 || event.button === 2) {
+                event.preventDefault();
+                return;
+            }
+        }
         if (modalProfileMove) {
             if (event.button === 0) endModalProfileMove(true);
             else if (event.button === 2) endModalProfileMove(false);
@@ -1028,6 +1134,7 @@ export function createCompositionViewport(container, options) {
         const hit = pick(event); select(hit?.id); options.onSelection?.(hit ? semantic(hit) : null);
     });
     const onProfilePointerUp = () => {
+        if (modalEventMove) endModalEventMove(true);
         if (modalProfileMove) endModalProfileMove(true);
     };
     window.addEventListener('pointerup', onProfilePointerUp);
@@ -1122,23 +1229,7 @@ export function createCompositionViewport(container, options) {
             return;
         }
         const { record, origin } = completed;
-        const position = record.event.worldPosition.slice();
-        const modelPath = record.record.asset?.model;
-        if (modelPath) {
-            const modelScale = Number(record.event.modelScale) > 0 ? Number(record.event.modelScale) : 1;
-            const zOffset = /transition_arrow\.obj$/i.test(modelPath) ? 0.22 * modelScale : 0;
-            position[1] = View.worldYAtScreenXOnGroundProfile(
-                plate.camera, plate.width, plate.height, Number(lane.depthX),
-                lane.groundProfile, Number(lane.groundZ || 0), plate.sliceY,
-                Number(plate.player.centerX), record.group.position.x,
-                Number(lane.minY), Number(lane.maxY), zOffset);
-        } else {
-            // Runtime plate sprites deliberately keep horizontal projection on
-            // the base plane; elevation only changes their foot-line Y.
-            const projection = View.horizontalProjection(plate.camera, plate.width, plate.height,
-                Number(lane.depthX), Number(lane.groundZ || 0), plate.sliceY, Number(plate.player.centerX));
-            position[1] = View.worldYAtScreenX(projection, record.group.position.x);
-        }
+        const position = eventPositionAtScreenX(record, record.group.position.x);
         const result = options.onMoveWorldEvent?.(semantic(record.event), position);
         if (!result?.ok) record.group.position.copy(origin);
         else {

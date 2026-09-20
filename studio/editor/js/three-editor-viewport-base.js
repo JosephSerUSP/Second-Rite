@@ -933,7 +933,9 @@ export function createThreeEditorViewport(container, options = {}) {
         const object = selectedMovableObject();
         const profilePoint = !!(object && selection?.kind === 'walk-profile-point');
         moveGizmo.camera = activeCamera();
-        moveGizmo.enabled = !!object && !cameraTransition && !modalMoveGesture;
+        // Event placement uses the shared modal transform operator.  Leaving
+        // the immediate gizmo live here would create a second mutation path.
+        moveGizmo.enabled = !!object && selection?.kind !== 'event' && !cameraTransition && !modalMoveGesture;
         moveGizmo.showX = !!object && !profilePoint;
         moveGizmo.showY = !!object && (profilePoint || object.userData.worldPosition);
         moveGizmo.showZ = !!object;
@@ -1813,7 +1815,12 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function pointerSnapshot(event) {
-        return event ? { clientX: event.clientX, clientY: event.clientY } : null;
+        return event ? {
+            x: event.clientX,
+            y: event.clientY,
+            clientX: event.clientX,
+            clientY: event.clientY
+        } : null;
     }
 
     function profilePlaneIntersection(event, plane) {
@@ -1825,10 +1832,9 @@ export function createThreeEditorViewport(container, options = {}) {
     function worldPointToClient(world) {
         const rect = renderer.domElement.getBoundingClientRect();
         const projected = world.clone().project(activeCamera());
-        return {
-            x: rect.left + (projected.x + 1) * 0.5 * rect.width,
-            y: rect.top + (1 - projected.y) * 0.5 * rect.height
-        };
+        const x = rect.left + (projected.x + 1) * 0.5 * rect.width;
+        const y = rect.top + (1 - projected.y) * 0.5 * rect.height;
+        return { x, y, clientX: x, clientY: y };
     }
 
     function semanticAxisPixels(origin, semanticAxis) {
@@ -2068,9 +2074,138 @@ export function createThreeEditorViewport(container, options = {}) {
         return true;
     }
 
+    function beginModalEventMove() {
+        const object = selectedMovableObject();
+        if (!object || selection?.kind !== 'event') return false;
+        const origin = object.position.clone();
+        const worldPosition = !!object.userData.worldPosition;
+        const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(
+            activeCamera().getWorldDirection(new THREE.Vector3()), origin);
+        const originScreen = worldPointToClient(origin);
+        const startPointer = lastPointerEvent || originScreen;
+        const hit = worldPosition ? profilePlaneIntersection(startPointer, plane) : null;
+        const before = worldPosition
+            ? Contract.thestraPositionToRuntime(origin.toArray())
+            : { x: Contract.cellCoordinate(origin.x), y: Contract.cellCoordinate(origin.z) };
+        modalMoveGesture = {
+            kind: 'event-move', semantic: selection, object, origin, worldPosition,
+            plane, startPointer, planeGrabOffset: hit ? origin.clone().sub(hit) : null,
+            axisPixels: {
+                X: semanticAxisPixels(origin, 'X'),
+                Y: semanticAxisPixels(origin, 'Y'),
+                Z: semanticAxisPixels(origin, 'Z')
+            },
+            before
+        };
+        moveGizmo.detach();
+        setControlsEnabled(false);
+        options.spatialInteraction?.beginMove?.();
+        return true;
+    }
+
+    function updateModalEventMove(event) {
+        const gesture = modalMoveGesture;
+        if (!gesture || gesture.kind !== 'event-move') return false;
+        const constraint = options.spatialInteraction?.snapshot?.().constraint || null;
+        let next = gesture.origin.clone();
+        if (!gesture.worldPosition) {
+            if (constraint === 'Z') {
+                options.spatialInteraction?.reject?.('event-grid-no-elevation');
+                return true;
+            }
+            const cell = pickCell(event);
+            if (!cell?.cell) return true;
+            if (constraint === 'X') next.x = Contract.cellCenter(cell.cell.x);
+            else if (constraint === 'Y') next.z = Contract.cellCenter(cell.cell.y);
+            else {
+                next.x = Contract.cellCenter(cell.cell.x);
+                next.z = Contract.cellCenter(cell.cell.y);
+            }
+        } else if (constraint) {
+            const delta = SpatialInteraction.projectedAxisDelta(
+                gesture.startPointer, pointerSnapshot(event), gesture.axisPixels[constraint]);
+            const axis = SpatialInteraction.semanticAxisToViewport(constraint);
+            if (delta == null || !axis) {
+                options.spatialInteraction?.reject?.('event-axis-edge-on');
+                return true;
+            }
+            next[axis.toLowerCase()] += delta;
+        } else {
+            const hit = profilePlaneIntersection(event, gesture.plane);
+            if (!hit || !gesture.planeGrabOffset) {
+                options.spatialInteraction?.reject?.('event-view-underdetermined');
+                return true;
+            }
+            next = hit.add(gesture.planeGrabOffset);
+        }
+        gesture.object.position.copy(next);
+        selectionOverlay.position.copy(next);
+        const after = gesture.worldPosition
+            ? Contract.thestraPositionToRuntime(next.toArray())
+            : { x: Contract.cellCoordinate(next.x), y: Contract.cellCoordinate(next.z) };
+        options.spatialInteraction?.setValue?.(gesture.worldPosition
+            ? { X: after[0] - gesture.before[0], Y: after[1] - gesture.before[1], Z: after[2] - gesture.before[2] }
+            : { X: after.x - gesture.before.x, Y: after.y - gesture.before.y });
+        return true;
+    }
+
+    function endModalEventMove(commit) {
+        const gesture = modalMoveGesture;
+        if (!gesture || gesture.kind !== 'event-move') return false;
+        modalMoveGesture = null;
+        setControlsEnabled(true);
+        if (!commit) {
+            gesture.object.position.copy(gesture.origin);
+            setSelection(gesture.semantic);
+            options.spatialInteraction?.cancel?.();
+            return true;
+        }
+        let result = null, after = null;
+        if (gesture.worldPosition) {
+            after = Contract.thestraPositionToRuntime(gesture.object.position.toArray());
+            result = options.onMoveWorldEvent?.(gesture.semantic, after);
+        } else {
+            const x = Contract.cellCoordinate(gesture.object.position.x);
+            const y = Contract.cellCoordinate(gesture.object.position.z);
+            const entry = (sceneModel.cells || []).find(cell => cell.cell.x === x && cell.cell.y === y);
+            const cell = entry && { kind: 'cell', key: entry.key, cell: entry.cell, role: entry.role };
+            const validation = canDrop('event', gesture.semantic, cell);
+            if (!validation.ok || !validation.changed) result = { ok: false, reason: validation.reason || 'event-drop-rejected' };
+            else {
+                after = { x, y };
+                result = options.onMoveEvent?.(gesture.semantic, cell);
+            }
+        }
+        if (result?.ok) {
+            const transaction = result.changed
+                ? SpatialInteraction.createTransaction('move', gesture.semantic, gesture.before, after)
+                : null;
+            options.spatialInteraction?.confirm?.();
+            if (transaction) options.onSpatialTransaction?.(transaction);
+            emitSelection(result.selection || gesture.semantic);
+        } else {
+            gesture.object.position.copy(gesture.origin);
+            setSelection(gesture.semantic);
+            options.spatialInteraction?.cancel?.();
+            options.spatialInteraction?.reject?.(result?.reason || 'event-move-rejected');
+        }
+        return true;
+    }
+
     function handleSpatialTransformShortcut(action) {
         if (!action) return false;
-        if (action.kind === 'begin-move') return beginModalProfileMove();
+        if (action.kind === 'begin-move') {
+            return selection?.kind === 'event' ? beginModalEventMove() : beginModalProfileMove();
+        }
+        if (modalMoveGesture?.kind === 'event-move') {
+            if (action.kind === 'constraint') {
+                options.spatialInteraction?.constrain?.(action.axis);
+                if (lastPointerEvent) updateModalEventMove(lastPointerEvent);
+                return true;
+            }
+            if (action.kind === 'confirm') return endModalEventMove(true);
+            if (action.kind === 'cancel') return endModalEventMove(false);
+        }
         if (!modalMoveGesture) return false;
         if (action.kind === 'constraint') {
             if (action.axis === 'X') {
@@ -2089,8 +2224,10 @@ export function createThreeEditorViewport(container, options = {}) {
     function onPointerDown(event) {
         lastPointerEvent = pointerSnapshot(event);
         if (modalMoveGesture) {
-            if (event.button === 0) endModalProfileMove(true);
-            else if (event.button === 2) endModalProfileMove(false);
+            const finish = modalMoveGesture.kind === 'event-move'
+                ? endModalEventMove : endModalProfileMove;
+            if (event.button === 0) finish(true);
+            else if (event.button === 2) finish(false);
             if (event.button === 0 || event.button === 2) {
                 event.preventDefault();
                 return;
@@ -2132,7 +2269,8 @@ export function createThreeEditorViewport(container, options = {}) {
     function onPointerMove(event) {
         lastPointerEvent = pointerSnapshot(event);
         if (modalMoveGesture) {
-            updateModalProfileMove(event);
+            if (modalMoveGesture.kind === 'event-move') updateModalEventMove(event);
+            else updateModalProfileMove(event);
             return;
         }
         if (walkProfileEditing && !moveGizmo.dragging && !moveGizmo.axis && !editGesture) {
@@ -2144,7 +2282,8 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function onPointerUp() {
         if (modalMoveGesture) {
-            endModalProfileMove(true);
+            if (modalMoveGesture.kind === 'event-move') endModalEventMove(true);
+            else endModalProfileMove(true);
             return;
         }
         if (!editGesture) return;

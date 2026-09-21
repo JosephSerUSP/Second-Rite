@@ -979,7 +979,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
             -- steps' state changes, and captured to its own file, so it cannot
             -- perturb any other reference.
             if sceneId == "battle" then
-                local bv = require("engine.scenes.battle").getState()
+                local bv = require("engine.scenes.battle").getNativeState()
                 local fixtureTarget = bv and bv.battle and bv.battle.enemies and bv.battle.enemies[1]
                 if fixtureTarget then
                     local animation_player = require("presentation.animation_player")

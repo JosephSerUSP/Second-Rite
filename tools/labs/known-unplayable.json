@@ -18,6 +18,11 @@
       "issue": 919,
       "reason": "2 formula errors: v.dialogueText and v.speakerName never set, same SCENE_EVENT kind family",
       "observed": 2
+    },
+    "d002_sokoban": {
+      "issue": 1197,
+      "reason": "engine/scene_host.lua:224: invalid authored state value at Scene 'd002_sokoban' ctx.sceneState.redraw: unsupported Lua type 'function'",
+      "observed": 1
     }
   },
   "play": {

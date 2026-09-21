@@ -9,7 +9,7 @@
     "maxCatchUp": 8
   },
   "terminal": {
-    "reached": "sceneState.gameOver == true or sceneState.gameWon == true"
+    "none": "Endless benchmark, manually exited"
   },
   "windows": [
     {
@@ -40,7 +40,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.renderedField}"
+          "text": "{sceneState.gameOver and 'GAME OVER' or (sceneState.gameWon and 'YOU WIN!' or '')}"
         }
       ]
     },
@@ -91,6 +91,294 @@
           "text": "O"
         }
       ]
+    },
+    {
+      "id": "win_b0_0",
+      "rect": {
+        "x": "1 + 1 + 2",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_0 and 3 or 0",
+        "h": "v.b0_0 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b0_1",
+      "rect": {
+        "x": "1 + 1 + 6",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_1 and 3 or 0",
+        "h": "v.b0_1 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b0_2",
+      "rect": {
+        "x": "1 + 1 + 10",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_2 and 3 or 0",
+        "h": "v.b0_2 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b0_3",
+      "rect": {
+        "x": "1 + 1 + 14",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_3 and 3 or 0",
+        "h": "v.b0_3 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b0_4",
+      "rect": {
+        "x": "1 + 1 + 18",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_4 and 3 or 0",
+        "h": "v.b0_4 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b0_5",
+      "rect": {
+        "x": "1 + 1 + 22",
+        "y": "5 + 1 + 2",
+        "w": "v.b0_5 and 3 or 0",
+        "h": "v.b0_5 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_0",
+      "rect": {
+        "x": "1 + 1 + 2",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_0 and 3 or 0",
+        "h": "v.b1_0 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_1",
+      "rect": {
+        "x": "1 + 1 + 6",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_1 and 3 or 0",
+        "h": "v.b1_1 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_2",
+      "rect": {
+        "x": "1 + 1 + 10",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_2 and 3 or 0",
+        "h": "v.b1_2 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_3",
+      "rect": {
+        "x": "1 + 1 + 14",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_3 and 3 or 0",
+        "h": "v.b1_3 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_4",
+      "rect": {
+        "x": "1 + 1 + 18",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_4 and 3 or 0",
+        "h": "v.b1_4 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b1_5",
+      "rect": {
+        "x": "1 + 1 + 22",
+        "y": "5 + 1 + 4",
+        "w": "v.b1_5 and 3 or 0",
+        "h": "v.b1_5 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_0",
+      "rect": {
+        "x": "1 + 1 + 2",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_0 and 3 or 0",
+        "h": "v.b2_0 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_1",
+      "rect": {
+        "x": "1 + 1 + 6",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_1 and 3 or 0",
+        "h": "v.b2_1 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_2",
+      "rect": {
+        "x": "1 + 1 + 10",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_2 and 3 or 0",
+        "h": "v.b2_2 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_3",
+      "rect": {
+        "x": "1 + 1 + 14",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_3 and 3 or 0",
+        "h": "v.b2_3 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_4",
+      "rect": {
+        "x": "1 + 1 + 18",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_4 and 3 or 0",
+        "h": "v.b2_4 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
+    },
+    {
+      "id": "win_b2_5",
+      "rect": {
+        "x": "1 + 1 + 22",
+        "y": "5 + 1 + 6",
+        "w": "v.b2_5 and 3 or 0",
+        "h": "v.b2_5 and 1 or 0"
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "###"
+        }
+      ]
     }
   ],
   "hooks": {
@@ -101,6 +389,82 @@
           {
             "name": "_guard",
             "value": 0
+          },
+          {
+            "name": "b0_0",
+            "value": "true"
+          },
+          {
+            "name": "b0_1",
+            "value": "true"
+          },
+          {
+            "name": "b0_2",
+            "value": "true"
+          },
+          {
+            "name": "b0_3",
+            "value": "true"
+          },
+          {
+            "name": "b0_4",
+            "value": "true"
+          },
+          {
+            "name": "b0_5",
+            "value": "true"
+          },
+          {
+            "name": "b1_0",
+            "value": "true"
+          },
+          {
+            "name": "b1_1",
+            "value": "true"
+          },
+          {
+            "name": "b1_2",
+            "value": "true"
+          },
+          {
+            "name": "b1_3",
+            "value": "true"
+          },
+          {
+            "name": "b1_4",
+            "value": "true"
+          },
+          {
+            "name": "b1_5",
+            "value": "true"
+          },
+          {
+            "name": "b2_0",
+            "value": "true"
+          },
+          {
+            "name": "b2_1",
+            "value": "true"
+          },
+          {
+            "name": "b2_2",
+            "value": "true"
+          },
+          {
+            "name": "b2_3",
+            "value": "true"
+          },
+          {
+            "name": "b2_4",
+            "value": "true"
+          },
+          {
+            "name": "b2_5",
+            "value": "true"
+          },
+          {
+            "name": "bricksLeft",
+            "value": 18
           }
         ]
       },
@@ -152,10 +516,6 @@
             "value": 0
           },
           {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
             "name": "gameOver",
             "value": "false"
           },
@@ -164,14 +524,95 @@
             "value": "false"
           }
         ]
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "setup_bricks"
       }
     ],
     "on_select": [
       {
+        "cmd": "SET_LOCAL",
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": 0
+          },
+          {
+            "name": "b0_0",
+            "value": "true"
+          },
+          {
+            "name": "b0_1",
+            "value": "true"
+          },
+          {
+            "name": "b0_2",
+            "value": "true"
+          },
+          {
+            "name": "b0_3",
+            "value": "true"
+          },
+          {
+            "name": "b0_4",
+            "value": "true"
+          },
+          {
+            "name": "b0_5",
+            "value": "true"
+          },
+          {
+            "name": "b1_0",
+            "value": "true"
+          },
+          {
+            "name": "b1_1",
+            "value": "true"
+          },
+          {
+            "name": "b1_2",
+            "value": "true"
+          },
+          {
+            "name": "b1_3",
+            "value": "true"
+          },
+          {
+            "name": "b1_4",
+            "value": "true"
+          },
+          {
+            "name": "b1_5",
+            "value": "true"
+          },
+          {
+            "name": "b2_0",
+            "value": "true"
+          },
+          {
+            "name": "b2_1",
+            "value": "true"
+          },
+          {
+            "name": "b2_2",
+            "value": "true"
+          },
+          {
+            "name": "b2_3",
+            "value": "true"
+          },
+          {
+            "name": "b2_4",
+            "value": "true"
+          },
+          {
+            "name": "b2_5",
+            "value": "true"
+          },
+          {
+            "name": "bricksLeft",
+            "value": 18
+          }
+        ]
+      },
+      {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
@@ -219,10 +660,6 @@
             "value": 0
           },
           {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
             "name": "gameOver",
             "value": "false"
           },
@@ -231,10 +668,6 @@
             "value": "false"
           }
         ]
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "setup_bricks"
       }
     ],
     "on_frame": [
@@ -295,7 +728,7 @@
                   },
                   {
                     "name": "ballVY",
-                    "value": "-sceneState.ballVY"
+                    "value": "abs(sceneState.ballVY)"
                   }
                 ]
               }
@@ -325,7 +758,7 @@
                   },
                   {
                     "name": "ballVY",
-                    "value": "-sceneState.ballVY"
+                    "value": "-abs(sceneState.ballVY)"
                   },
                   {
                     "name": "ballVX",
@@ -336,8 +769,591 @@
             ]
           },
           {
-            "cmd": "SCRIPT",
-            "ref": "process_bricks"
+            "cmd": "IF",
+            "condition": "v.b0_0 and sceneState.ballX >= 1.5 and sceneState.ballX <= 4.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_0",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b0_1 and sceneState.ballX >= 5.5 and sceneState.ballX <= 8.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_1",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b0_2 and sceneState.ballX >= 9.5 and sceneState.ballX <= 12.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_2",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b0_3 and sceneState.ballX >= 13.5 and sceneState.ballX <= 16.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_3",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b0_4 and sceneState.ballX >= 17.5 and sceneState.ballX <= 20.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_4",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b0_5 and sceneState.ballX >= 21.5 and sceneState.ballX <= 24.5 and sceneState.ballY >= 1.5 and sceneState.ballY <= 2.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b0_5",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_0 and sceneState.ballX >= 1.5 and sceneState.ballX <= 4.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_0",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_1 and sceneState.ballX >= 5.5 and sceneState.ballX <= 8.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_1",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_2 and sceneState.ballX >= 9.5 and sceneState.ballX <= 12.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_2",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_3 and sceneState.ballX >= 13.5 and sceneState.ballX <= 16.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_3",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_4 and sceneState.ballX >= 17.5 and sceneState.ballX <= 20.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_4",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b1_5 and sceneState.ballX >= 21.5 and sceneState.ballX <= 24.5 and sceneState.ballY >= 3.5 and sceneState.ballY <= 4.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b1_5",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_0 and sceneState.ballX >= 1.5 and sceneState.ballX <= 4.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_0",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_1 and sceneState.ballX >= 5.5 and sceneState.ballX <= 8.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_1",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_2 and sceneState.ballX >= 9.5 and sceneState.ballX <= 12.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_2",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_3 and sceneState.ballX >= 13.5 and sceneState.ballX <= 16.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_3",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_4 and sceneState.ballX >= 17.5 and sceneState.ballX <= 20.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_4",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.b2_5 and sceneState.ballX >= 21.5 and sceneState.ballX <= 24.5 and sceneState.ballY >= 5.5 and sceneState.ballY <= 6.5",
+            "then": [
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "b2_5",
+                    "value": "false"
+                  },
+                  {
+                    "name": "bricksLeft",
+                    "value": "v.bricksLeft - 1"
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballVY",
+                    "value": "-sceneState.ballVY"
+                  },
+                  {
+                    "name": "score",
+                    "value": "sceneState.score + 10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.bricksLeft <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "gameWon",
+                "value": "true"
+              }
+            ]
           }
         ]
       }
@@ -363,12 +1379,23 @@
       }
     ]
   },
-  "scripts": {
-    "setup_bricks": "\nlocal sceneState = ctx.sceneState\nsceneState.bricks = {}\nfor y = 1, 4 do\n    for x = 2, sceneState.fieldW - 3 do\n        table.insert(sceneState.bricks, {x=x, y=y, intact=true})\n    end\nend\n",
-    "process_bricks": "\nlocal sceneState = ctx.sceneState\nlocal bx, by = math.floor(sceneState.ballX + 0.5), math.floor(sceneState.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(sceneState.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            sceneState.score = sceneState.score + 10\n            sceneState.ballVY = -sceneState.ballVY\n            break\n        end\n    end\nend\nif count == 0 then sceneState.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, sceneState.fieldH - 1 do\n    for x = 0, sceneState.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif sceneState.gameOver then out = out .. \"GAME OVER\\n\" end\nif sceneState.gameWon then out = out .. \"YOU WIN!\\n\" end\nsceneState.renderedField = out\n"
-  },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {
+      "wait": 0.5
+    },
+    {
+      "key": "right",
+      "wait": 0.5
+    },
+    {
+      "wait": 0.5
+    },
+    {
+      "key": "left",
+      "wait": 1.0
+    },
+    {
+      "wait": 3.0
+    }
   ]
 }

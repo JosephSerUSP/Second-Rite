@@ -888,6 +888,21 @@ end
 -- had to move with it -- from a window it would have darkened the dock too.
 function renderer.drawEnemyRowWindow(battleState)
     if not battleState then return end
+
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
+            else
+                return
+            end
+        else
+            return
+        end
+    end
+
     renderer.activeBattle = battleState
 
     for idx = 1, 4 do
@@ -1411,6 +1426,21 @@ end
 
 function renderer.drawScreenFlashOverlay(battleState)
     if not battleState then return end
+
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
+            else
+                return
+            end
+        else
+            return
+        end
+    end
+
     local formation = require("engine.formation")
     local flash
     for _, e in ipairs(formation.denseMembers(battleState.enemies or {})) do

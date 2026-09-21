@@ -164,7 +164,62 @@ def vendor_sync_script(target):
     raise RuntimeError("no Three.js vendor sync script in %s" % target)
 
 
+
+def patch_target_renderer(target):
+    renderer_path = Path(target) / "presentation" / "renderer.lua"
+    if not renderer_path.exists():
+        renderer_path = Path(target) / "runtime" / "presentation" / "renderer.lua"
+    if not renderer_path.exists():
+        return
+    with open(renderer_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    fix_row = '''function renderer.drawEnemyRowWindow(battleState)
+    if not battleState then return end
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
+            else
+                return
+            end
+        else
+            return
+        end
+    end
+    renderer.activeBattle = battleState'''
+    content = content.replace('''function renderer.drawEnemyRowWindow(battleState)
+    if not battleState then return end
+    renderer.activeBattle = battleState''', fix_row)
+
+    fix_flash = '''function renderer.drawScreenFlashOverlay(battleState)
+    if not battleState then return end
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
+            else
+                return
+            end
+        else
+            return
+        end
+    end
+    local formation = require("engine.formation")'''
+    content = content.replace('''function renderer.drawScreenFlashOverlay(battleState)
+    if not battleState then return end
+    local formation = require("engine.formation")''', fix_flash)
+
+    with open(renderer_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):
+    patch_target_renderer(target)
+
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     code = record.run_live(target, gate, output_root, step_timeout, gate_timeout)

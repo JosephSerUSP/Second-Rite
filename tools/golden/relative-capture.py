@@ -166,73 +166,78 @@ def vendor_sync_script(target):
 
 
 
+
+
+
 def patch_target_renderer(target):
+    import re
+    from pathlib import Path
+
+    # Patch renderer
     renderer_path = Path(target) / "presentation" / "renderer.lua"
     if not renderer_path.exists():
         renderer_path = Path(target) / "runtime" / "presentation" / "renderer.lua"
     if renderer_path.exists():
         with open(renderer_path, "r", encoding="utf-8") as f:
-            content = f.read()
+            text = f.read()
 
         fix_row = '''function renderer.drawEnemyRowWindow(battleState)
-        if not battleState then return end
-        if type(battleState) == "boolean" then
-            local battleScene = require('engine.scenes.battle')
-            if battleScene and battleScene.getNativeState then
-                local nativeState = battleScene.getNativeState()
-                if nativeState and nativeState.battle then
-                    battleState = nativeState.battle
-                else
-                    return
-                end
+    if not battleState then return end
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
             else
                 return
             end
+        else
+            return
         end
-        renderer.activeBattle = battleState'''
-        content = content.replace('''function renderer.drawEnemyRowWindow(battleState)
-        if not battleState then return end
-        renderer.activeBattle = battleState''', fix_row)
+    end
+    renderer.activeBattle = battleState'''
+
+        text = re.sub(r"function renderer\.drawEnemyRowWindow\(battleState\)\s*if not battleState then return end\s*renderer\.activeBattle = battleState", fix_row, text)
 
         fix_flash = '''function renderer.drawScreenFlashOverlay(battleState)
-        if not battleState then return end
-        if type(battleState) == "boolean" then
-            local battleScene = require('engine.scenes.battle')
-            if battleScene and battleScene.getNativeState then
-                local nativeState = battleScene.getNativeState()
-                if nativeState and nativeState.battle then
-                    battleState = nativeState.battle
-                else
-                    return
-                end
+    if not battleState then return end
+    if type(battleState) == "boolean" then
+        local battleScene = require('engine.scenes.battle')
+        if battleScene and battleScene.getNativeState then
+            local nativeState = battleScene.getNativeState()
+            if nativeState and nativeState.battle then
+                battleState = nativeState.battle
             else
                 return
             end
+        else
+            return
         end
-        local formation = require("engine.formation")'''
-        content = content.replace('''function renderer.drawScreenFlashOverlay(battleState)
-        if not battleState then return end
-        local formation = require("engine.formation")''', fix_flash)
+    end
+    local formation = require("engine.formation")'''
+
+        text = re.sub(r"function renderer\.drawScreenFlashOverlay\(battleState\)\s*if not battleState then return end\s*local formation = require\(\"engine\.formation\"\)", fix_flash, text)
 
         with open(renderer_path, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(text)
 
+    # Patch cli_tools
     cli_path = Path(target) / "engine" / "cli_tools.lua"
     if not cli_path.exists():
         cli_path = Path(target) / "runtime" / "engine" / "cli_tools.lua"
     if cli_path.exists():
         with open(cli_path, "r", encoding="utf-8") as f:
-            content = f.read()
+            text = f.read()
 
         fix_cli = '''if sceneId == "battle" then
                 local bv = require("engine.scenes.battle").getNativeState()
                 local fixtureTarget = bv and bv.battle and bv.battle.enemies and bv.battle.enemies[1]'''
-        content = content.replace('''if sceneId == "battle" then
-                local bv = require("engine.scenes.battle").getState()
-                local fixtureTarget = bv and bv.battle and bv.battle.enemies and bv.battle.enemies[1]''', fix_cli)
+
+        text = re.sub(r"if sceneId == \"battle\" then\s*local bv = require\(\"engine\.scenes\.battle\"\)\.getState\(\)\s*local fixtureTarget = bv and bv\.battle and bv\.battle\.enemies and bv\.battle\.enemies\[1\]", fix_cli, text)
 
         with open(cli_path, "w", encoding="utf-8") as f:
-            f.write(content)
+            f.write(text)
 
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):
     patch_target_renderer(target)

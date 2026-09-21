@@ -1380,7 +1380,22 @@
     ]
   },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {
+      "wait": 0.5
+    },
+    {
+      "key": "right",
+      "wait": 0.5
+    },
+    {
+      "wait": 0.5
+    },
+    {
+      "key": "left",
+      "wait": 1.0
+    },
+    {
+      "wait": 3.0
+    }
   ]
 }

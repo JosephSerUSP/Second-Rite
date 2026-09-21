@@ -497,7 +497,7 @@
           },
           {
             "name": "ballY",
-            "value": 10
+            "value": 13.5
           },
           {
             "name": "ballVX",
@@ -641,7 +641,7 @@
           },
           {
             "name": "ballY",
-            "value": 10
+            "value": 13.5
           },
           {
             "name": "ballVX",
@@ -1380,22 +1380,7 @@
     ]
   },
   "goldenScript": [
-    {
-      "wait": 0.5
-    },
-    {
-      "key": "right",
-      "wait": 0.5
-    },
-    {
-      "wait": 0.5
-    },
-    {
-      "key": "left",
-      "wait": 1.0
-    },
-    {
-      "wait": 3.0
-    }
+    "wait 1",
+    "wait 2"
   ]
 }

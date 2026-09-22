@@ -181,42 +181,2336 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": "0"
+          },
+          {
+            "name": "timer",
+            "value": "0.5"
+          },
+          {
+            "name": "stepTime",
+            "value": "0.5"
+          },
+          {
+            "name": "dirX",
+            "value": "0"
+          },
+          {
+            "name": "dirY",
+            "value": "-1"
+          },
+          {
+            "name": "hx",
+            "value": "5"
+          },
+          {
+            "name": "hy",
+            "value": "5"
+          },
+          {
+            "name": "step",
+            "value": "3"
+          },
+          {
+            "name": "len",
+            "value": "3"
+          },
+          {
+            "name": "tx",
+            "value": "2"
+          },
+          {
+            "name": "ty",
+            "value": "2"
+          },
+          {
+            "name": "lost",
+            "value": "false"
+          },
+          {
+            "name": "c0_0",
+            "value": "-999"
+          },
+          {
+            "name": "c1_0",
+            "value": "-999"
+          },
+          {
+            "name": "c2_0",
+            "value": "-999"
+          },
+          {
+            "name": "c3_0",
+            "value": "-999"
+          },
+          {
+            "name": "c4_0",
+            "value": "-999"
+          },
+          {
+            "name": "c5_0",
+            "value": "-999"
+          },
+          {
+            "name": "c6_0",
+            "value": "-999"
+          },
+          {
+            "name": "c7_0",
+            "value": "-999"
+          },
+          {
+            "name": "c8_0",
+            "value": "-999"
+          },
+          {
+            "name": "c9_0",
+            "value": "-999"
+          },
+          {
+            "name": "c10_0",
+            "value": "-999"
+          },
+          {
+            "name": "c11_0",
+            "value": "-999"
+          },
+          {
+            "name": "c0_1",
+            "value": "-999"
+          },
+          {
+            "name": "c1_1",
+            "value": "-999"
+          },
+          {
+            "name": "c2_1",
+            "value": "-999"
+          },
+          {
+            "name": "c3_1",
+            "value": "-999"
+          },
+          {
+            "name": "c4_1",
+            "value": "-999"
+          },
+          {
+            "name": "c5_1",
+            "value": "-999"
+          },
+          {
+            "name": "c6_1",
+            "value": "-999"
+          },
+          {
+            "name": "c7_1",
+            "value": "-999"
+          },
+          {
+            "name": "c8_1",
+            "value": "-999"
+          },
+          {
+            "name": "c9_1",
+            "value": "-999"
+          },
+          {
+            "name": "c10_1",
+            "value": "-999"
+          },
+          {
+            "name": "c11_1",
+            "value": "-999"
+          },
+          {
+            "name": "c0_2",
+            "value": "-999"
+          },
+          {
+            "name": "c1_2",
+            "value": "-999"
+          },
+          {
+            "name": "c2_2",
+            "value": "-999"
+          },
+          {
+            "name": "c3_2",
+            "value": "-999"
+          },
+          {
+            "name": "c4_2",
+            "value": "-999"
+          },
+          {
+            "name": "c5_2",
+            "value": "-999"
+          },
+          {
+            "name": "c6_2",
+            "value": "-999"
+          },
+          {
+            "name": "c7_2",
+            "value": "-999"
+          },
+          {
+            "name": "c8_2",
+            "value": "-999"
+          },
+          {
+            "name": "c9_2",
+            "value": "-999"
+          },
+          {
+            "name": "c10_2",
+            "value": "-999"
+          },
+          {
+            "name": "c11_2",
+            "value": "-999"
+          },
+          {
+            "name": "c0_3",
+            "value": "-999"
+          },
+          {
+            "name": "c1_3",
+            "value": "-999"
+          },
+          {
+            "name": "c2_3",
+            "value": "-999"
+          },
+          {
+            "name": "c3_3",
+            "value": "-999"
+          },
+          {
+            "name": "c4_3",
+            "value": "-999"
+          },
+          {
+            "name": "c5_3",
+            "value": "-999"
+          },
+          {
+            "name": "c6_3",
+            "value": "-999"
+          },
+          {
+            "name": "c7_3",
+            "value": "-999"
+          },
+          {
+            "name": "c8_3",
+            "value": "-999"
+          },
+          {
+            "name": "c9_3",
+            "value": "-999"
+          },
+          {
+            "name": "c10_3",
+            "value": "-999"
+          },
+          {
+            "name": "c11_3",
+            "value": "-999"
+          },
+          {
+            "name": "c0_4",
+            "value": "-999"
+          },
+          {
+            "name": "c1_4",
+            "value": "-999"
+          },
+          {
+            "name": "c2_4",
+            "value": "-999"
+          },
+          {
+            "name": "c3_4",
+            "value": "-999"
+          },
+          {
+            "name": "c4_4",
+            "value": "-999"
+          },
+          {
+            "name": "c5_4",
+            "value": "-999"
+          },
+          {
+            "name": "c6_4",
+            "value": "-999"
+          },
+          {
+            "name": "c7_4",
+            "value": "-999"
+          },
+          {
+            "name": "c8_4",
+            "value": "-999"
+          },
+          {
+            "name": "c9_4",
+            "value": "-999"
+          },
+          {
+            "name": "c10_4",
+            "value": "-999"
+          },
+          {
+            "name": "c11_4",
+            "value": "-999"
+          },
+          {
+            "name": "c0_5",
+            "value": "-999"
+          },
+          {
+            "name": "c1_5",
+            "value": "-999"
+          },
+          {
+            "name": "c2_5",
+            "value": "-999"
+          },
+          {
+            "name": "c3_5",
+            "value": "-999"
+          },
+          {
+            "name": "c4_5",
+            "value": "-999"
+          },
+          {
+            "name": "c5_5",
+            "value": "3"
+          },
+          {
+            "name": "c6_5",
+            "value": "-999"
+          },
+          {
+            "name": "c7_5",
+            "value": "-999"
+          },
+          {
+            "name": "c8_5",
+            "value": "-999"
+          },
+          {
+            "name": "c9_5",
+            "value": "-999"
+          },
+          {
+            "name": "c10_5",
+            "value": "-999"
+          },
+          {
+            "name": "c11_5",
+            "value": "-999"
+          },
+          {
+            "name": "c0_6",
+            "value": "-999"
+          },
+          {
+            "name": "c1_6",
+            "value": "-999"
+          },
+          {
+            "name": "c2_6",
+            "value": "-999"
+          },
+          {
+            "name": "c3_6",
+            "value": "-999"
+          },
+          {
+            "name": "c4_6",
+            "value": "-999"
+          },
+          {
+            "name": "c5_6",
+            "value": "2"
+          },
+          {
+            "name": "c6_6",
+            "value": "-999"
+          },
+          {
+            "name": "c7_6",
+            "value": "-999"
+          },
+          {
+            "name": "c8_6",
+            "value": "-999"
+          },
+          {
+            "name": "c9_6",
+            "value": "-999"
+          },
+          {
+            "name": "c10_6",
+            "value": "-999"
+          },
+          {
+            "name": "c11_6",
+            "value": "-999"
+          },
+          {
+            "name": "c0_7",
+            "value": "-999"
+          },
+          {
+            "name": "c1_7",
+            "value": "-999"
+          },
+          {
+            "name": "c2_7",
+            "value": "-999"
+          },
+          {
+            "name": "c3_7",
+            "value": "-999"
+          },
+          {
+            "name": "c4_7",
+            "value": "-999"
+          },
+          {
+            "name": "c5_7",
+            "value": "1"
+          },
+          {
+            "name": "c6_7",
+            "value": "-999"
+          },
+          {
+            "name": "c7_7",
+            "value": "-999"
+          },
+          {
+            "name": "c8_7",
+            "value": "-999"
+          },
+          {
+            "name": "c9_7",
+            "value": "-999"
+          },
+          {
+            "name": "c10_7",
+            "value": "-999"
+          },
+          {
+            "name": "c11_7",
+            "value": "-999"
+          },
+          {
+            "name": "c0_8",
+            "value": "-999"
+          },
+          {
+            "name": "c1_8",
+            "value": "-999"
+          },
+          {
+            "name": "c2_8",
+            "value": "-999"
+          },
+          {
+            "name": "c3_8",
+            "value": "-999"
+          },
+          {
+            "name": "c4_8",
+            "value": "-999"
+          },
+          {
+            "name": "c5_8",
+            "value": "-999"
+          },
+          {
+            "name": "c6_8",
+            "value": "-999"
+          },
+          {
+            "name": "c7_8",
+            "value": "-999"
+          },
+          {
+            "name": "c8_8",
+            "value": "-999"
+          },
+          {
+            "name": "c9_8",
+            "value": "-999"
+          },
+          {
+            "name": "c10_8",
+            "value": "-999"
+          },
+          {
+            "name": "c11_8",
+            "value": "-999"
+          },
+          {
+            "name": "c0_9",
+            "value": "-999"
+          },
+          {
+            "name": "c1_9",
+            "value": "-999"
+          },
+          {
+            "name": "c2_9",
+            "value": "-999"
+          },
+          {
+            "name": "c3_9",
+            "value": "-999"
+          },
+          {
+            "name": "c4_9",
+            "value": "-999"
+          },
+          {
+            "name": "c5_9",
+            "value": "-999"
+          },
+          {
+            "name": "c6_9",
+            "value": "-999"
+          },
+          {
+            "name": "c7_9",
+            "value": "-999"
+          },
+          {
+            "name": "c8_9",
+            "value": "-999"
+          },
+          {
+            "name": "c9_9",
+            "value": "-999"
+          },
+          {
+            "name": "c10_9",
+            "value": "-999"
+          },
+          {
+            "name": "c11_9",
+            "value": "-999"
+          },
+          {
+            "name": "c0_10",
+            "value": "-999"
+          },
+          {
+            "name": "c1_10",
+            "value": "-999"
+          },
+          {
+            "name": "c2_10",
+            "value": "-999"
+          },
+          {
+            "name": "c3_10",
+            "value": "-999"
+          },
+          {
+            "name": "c4_10",
+            "value": "-999"
+          },
+          {
+            "name": "c5_10",
+            "value": "-999"
+          },
+          {
+            "name": "c6_10",
+            "value": "-999"
+          },
+          {
+            "name": "c7_10",
+            "value": "-999"
+          },
+          {
+            "name": "c8_10",
+            "value": "-999"
+          },
+          {
+            "name": "c9_10",
+            "value": "-999"
+          },
+          {
+            "name": "c10_10",
+            "value": "-999"
+          },
+          {
+            "name": "c11_10",
+            "value": "-999"
+          },
+          {
+            "name": "c0_11",
+            "value": "-999"
+          },
+          {
+            "name": "c1_11",
+            "value": "-999"
+          },
+          {
+            "name": "c2_11",
+            "value": "-999"
+          },
+          {
+            "name": "c3_11",
+            "value": "-999"
+          },
+          {
+            "name": "c4_11",
+            "value": "-999"
+          },
+          {
+            "name": "c5_11",
+            "value": "-999"
+          },
+          {
+            "name": "c6_11",
+            "value": "-999"
+          },
+          {
+            "name": "c7_11",
+            "value": "-999"
+          },
+          {
+            "name": "c8_11",
+            "value": "-999"
+          },
+          {
+            "name": "c9_11",
+            "value": "-999"
+          },
+          {
+            "name": "c10_11",
+            "value": "-999"
+          },
+          {
+            "name": "c11_11",
+            "value": "-999"
+          }
+        ]
       },
       {
         "cmd": "SET_SCENE_STATE",
-        "name": "timer",
-        "value": 0.5
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "name": "boardText",
+        "value": "(sceneState.lost and 'GAME OVER\\n' or '') .. (sceneState.step - sceneState.c0_0 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c1_0 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c2_0 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c3_0 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c4_0 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c5_0 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c6_0 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c7_0 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c8_0 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c9_0 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c10_0 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c11_0 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 0 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_1 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c1_1 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c2_1 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c3_1 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c4_1 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c5_1 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c6_1 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c7_1 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c8_1 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c9_1 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c10_1 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c11_1 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 1 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_2 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c1_2 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c2_2 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c3_2 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c4_2 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c5_2 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c6_2 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c7_2 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c8_2 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c9_2 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c10_2 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c11_2 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 2 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_3 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c1_3 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c2_3 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c3_3 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c4_3 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c5_3 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c6_3 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c7_3 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c8_3 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c9_3 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c10_3 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c11_3 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 3 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_4 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c1_4 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c2_4 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c3_4 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c4_4 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c5_4 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c6_4 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c7_4 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c8_4 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c9_4 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c10_4 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c11_4 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 4 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_5 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c1_5 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c2_5 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c3_5 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c4_5 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c5_5 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c6_5 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c7_5 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c8_5 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c9_5 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c10_5 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c11_5 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 5 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_6 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c1_6 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c2_6 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c3_6 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c4_6 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c5_6 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c6_6 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c7_6 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c8_6 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c9_6 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c10_6 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c11_6 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 6 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_7 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c1_7 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c2_7 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c3_7 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c4_7 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c5_7 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c6_7 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c7_7 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c8_7 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c9_7 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c10_7 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c11_7 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 7 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_8 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c1_8 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c2_8 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c3_8 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c4_8 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c5_8 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c6_8 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c7_8 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c8_8 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c9_8 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c10_8 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c11_8 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 8 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_9 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c1_9 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c2_9 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c3_9 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c4_9 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c5_9 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c6_9 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c7_9 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c8_9 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c9_9 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c10_9 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c11_9 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 9 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_10 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c1_10 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c2_10 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c3_10 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c4_10 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c5_10 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c6_10 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c7_10 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c8_10 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c9_10 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c10_10 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c11_10 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 10 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_11 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c1_11 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c2_11 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c3_11 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c4_11 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c5_11 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c6_11 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c7_11 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c8_11 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c9_11 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c10_11 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c11_11 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 11 and '*' or '.')) .. '\\n'"
       }
     ],
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "sceneState.timer > 0",
+        "condition": "sceneState.lost == false",
         "then": [
           {
-            "cmd": "SET_SCENE_STATE",
-            "name": "timer",
-            "value": "sceneState.timer - sceneState.time.dt"
-          }
-        ],
-        "else": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "timer",
-            "value": "sceneState.stepTime"
-          },
-          {
-            "cmd": "SCRIPT",
-            "ref": "update"
+            "cmd": "IF",
+            "condition": "sceneState.timer > 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "timer",
+                "value": "sceneState.timer - sceneState.time.dt"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "timer",
+                "value": "sceneState.stepTime"
+              },
+              {
+                "cmd": "SET_LOCAL",
+                "assignments": [
+                  {
+                    "name": "nx",
+                    "value": "sceneState.hx + sceneState.dirX"
+                  },
+                  {
+                    "name": "ny",
+                    "value": "sceneState.hy + sceneState.dirY"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "locals.nx < 0 or locals.nx >= 12 or locals.ny < 0 or locals.ny >= 12",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "lost",
+                    "value": "true"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not sceneState.lost and ((locals.nx == 0 and locals.ny == 0 and sceneState.step - sceneState.c0_0 < sceneState.len) or (locals.nx == 1 and locals.ny == 0 and sceneState.step - sceneState.c1_0 < sceneState.len) or (locals.nx == 2 and locals.ny == 0 and sceneState.step - sceneState.c2_0 < sceneState.len) or (locals.nx == 3 and locals.ny == 0 and sceneState.step - sceneState.c3_0 < sceneState.len) or (locals.nx == 4 and locals.ny == 0 and sceneState.step - sceneState.c4_0 < sceneState.len) or (locals.nx == 5 and locals.ny == 0 and sceneState.step - sceneState.c5_0 < sceneState.len) or (locals.nx == 6 and locals.ny == 0 and sceneState.step - sceneState.c6_0 < sceneState.len) or (locals.nx == 7 and locals.ny == 0 and sceneState.step - sceneState.c7_0 < sceneState.len) or (locals.nx == 8 and locals.ny == 0 and sceneState.step - sceneState.c8_0 < sceneState.len) or (locals.nx == 9 and locals.ny == 0 and sceneState.step - sceneState.c9_0 < sceneState.len) or (locals.nx == 10 and locals.ny == 0 and sceneState.step - sceneState.c10_0 < sceneState.len) or (locals.nx == 11 and locals.ny == 0 and sceneState.step - sceneState.c11_0 < sceneState.len) or (locals.nx == 0 and locals.ny == 1 and sceneState.step - sceneState.c0_1 < sceneState.len) or (locals.nx == 1 and locals.ny == 1 and sceneState.step - sceneState.c1_1 < sceneState.len) or (locals.nx == 2 and locals.ny == 1 and sceneState.step - sceneState.c2_1 < sceneState.len) or (locals.nx == 3 and locals.ny == 1 and sceneState.step - sceneState.c3_1 < sceneState.len) or (locals.nx == 4 and locals.ny == 1 and sceneState.step - sceneState.c4_1 < sceneState.len) or (locals.nx == 5 and locals.ny == 1 and sceneState.step - sceneState.c5_1 < sceneState.len) or (locals.nx == 6 and locals.ny == 1 and sceneState.step - sceneState.c6_1 < sceneState.len) or (locals.nx == 7 and locals.ny == 1 and sceneState.step - sceneState.c7_1 < sceneState.len) or (locals.nx == 8 and locals.ny == 1 and sceneState.step - sceneState.c8_1 < sceneState.len) or (locals.nx == 9 and locals.ny == 1 and sceneState.step - sceneState.c9_1 < sceneState.len) or (locals.nx == 10 and locals.ny == 1 and sceneState.step - sceneState.c10_1 < sceneState.len) or (locals.nx == 11 and locals.ny == 1 and sceneState.step - sceneState.c11_1 < sceneState.len) or (locals.nx == 0 and locals.ny == 2 and sceneState.step - sceneState.c0_2 < sceneState.len) or (locals.nx == 1 and locals.ny == 2 and sceneState.step - sceneState.c1_2 < sceneState.len) or (locals.nx == 2 and locals.ny == 2 and sceneState.step - sceneState.c2_2 < sceneState.len) or (locals.nx == 3 and locals.ny == 2 and sceneState.step - sceneState.c3_2 < sceneState.len) or (locals.nx == 4 and locals.ny == 2 and sceneState.step - sceneState.c4_2 < sceneState.len) or (locals.nx == 5 and locals.ny == 2 and sceneState.step - sceneState.c5_2 < sceneState.len) or (locals.nx == 6 and locals.ny == 2 and sceneState.step - sceneState.c6_2 < sceneState.len) or (locals.nx == 7 and locals.ny == 2 and sceneState.step - sceneState.c7_2 < sceneState.len) or (locals.nx == 8 and locals.ny == 2 and sceneState.step - sceneState.c8_2 < sceneState.len) or (locals.nx == 9 and locals.ny == 2 and sceneState.step - sceneState.c9_2 < sceneState.len) or (locals.nx == 10 and locals.ny == 2 and sceneState.step - sceneState.c10_2 < sceneState.len) or (locals.nx == 11 and locals.ny == 2 and sceneState.step - sceneState.c11_2 < sceneState.len) or (locals.nx == 0 and locals.ny == 3 and sceneState.step - sceneState.c0_3 < sceneState.len) or (locals.nx == 1 and locals.ny == 3 and sceneState.step - sceneState.c1_3 < sceneState.len) or (locals.nx == 2 and locals.ny == 3 and sceneState.step - sceneState.c2_3 < sceneState.len) or (locals.nx == 3 and locals.ny == 3 and sceneState.step - sceneState.c3_3 < sceneState.len) or (locals.nx == 4 and locals.ny == 3 and sceneState.step - sceneState.c4_3 < sceneState.len) or (locals.nx == 5 and locals.ny == 3 and sceneState.step - sceneState.c5_3 < sceneState.len) or (locals.nx == 6 and locals.ny == 3 and sceneState.step - sceneState.c6_3 < sceneState.len) or (locals.nx == 7 and locals.ny == 3 and sceneState.step - sceneState.c7_3 < sceneState.len) or (locals.nx == 8 and locals.ny == 3 and sceneState.step - sceneState.c8_3 < sceneState.len) or (locals.nx == 9 and locals.ny == 3 and sceneState.step - sceneState.c9_3 < sceneState.len) or (locals.nx == 10 and locals.ny == 3 and sceneState.step - sceneState.c10_3 < sceneState.len) or (locals.nx == 11 and locals.ny == 3 and sceneState.step - sceneState.c11_3 < sceneState.len) or (locals.nx == 0 and locals.ny == 4 and sceneState.step - sceneState.c0_4 < sceneState.len) or (locals.nx == 1 and locals.ny == 4 and sceneState.step - sceneState.c1_4 < sceneState.len) or (locals.nx == 2 and locals.ny == 4 and sceneState.step - sceneState.c2_4 < sceneState.len) or (locals.nx == 3 and locals.ny == 4 and sceneState.step - sceneState.c3_4 < sceneState.len) or (locals.nx == 4 and locals.ny == 4 and sceneState.step - sceneState.c4_4 < sceneState.len) or (locals.nx == 5 and locals.ny == 4 and sceneState.step - sceneState.c5_4 < sceneState.len) or (locals.nx == 6 and locals.ny == 4 and sceneState.step - sceneState.c6_4 < sceneState.len) or (locals.nx == 7 and locals.ny == 4 and sceneState.step - sceneState.c7_4 < sceneState.len) or (locals.nx == 8 and locals.ny == 4 and sceneState.step - sceneState.c8_4 < sceneState.len) or (locals.nx == 9 and locals.ny == 4 and sceneState.step - sceneState.c9_4 < sceneState.len) or (locals.nx == 10 and locals.ny == 4 and sceneState.step - sceneState.c10_4 < sceneState.len) or (locals.nx == 11 and locals.ny == 4 and sceneState.step - sceneState.c11_4 < sceneState.len) or (locals.nx == 0 and locals.ny == 5 and sceneState.step - sceneState.c0_5 < sceneState.len) or (locals.nx == 1 and locals.ny == 5 and sceneState.step - sceneState.c1_5 < sceneState.len) or (locals.nx == 2 and locals.ny == 5 and sceneState.step - sceneState.c2_5 < sceneState.len) or (locals.nx == 3 and locals.ny == 5 and sceneState.step - sceneState.c3_5 < sceneState.len) or (locals.nx == 4 and locals.ny == 5 and sceneState.step - sceneState.c4_5 < sceneState.len) or (locals.nx == 5 and locals.ny == 5 and sceneState.step - sceneState.c5_5 < sceneState.len) or (locals.nx == 6 and locals.ny == 5 and sceneState.step - sceneState.c6_5 < sceneState.len) or (locals.nx == 7 and locals.ny == 5 and sceneState.step - sceneState.c7_5 < sceneState.len) or (locals.nx == 8 and locals.ny == 5 and sceneState.step - sceneState.c8_5 < sceneState.len) or (locals.nx == 9 and locals.ny == 5 and sceneState.step - sceneState.c9_5 < sceneState.len) or (locals.nx == 10 and locals.ny == 5 and sceneState.step - sceneState.c10_5 < sceneState.len) or (locals.nx == 11 and locals.ny == 5 and sceneState.step - sceneState.c11_5 < sceneState.len) or (locals.nx == 0 and locals.ny == 6 and sceneState.step - sceneState.c0_6 < sceneState.len) or (locals.nx == 1 and locals.ny == 6 and sceneState.step - sceneState.c1_6 < sceneState.len) or (locals.nx == 2 and locals.ny == 6 and sceneState.step - sceneState.c2_6 < sceneState.len) or (locals.nx == 3 and locals.ny == 6 and sceneState.step - sceneState.c3_6 < sceneState.len) or (locals.nx == 4 and locals.ny == 6 and sceneState.step - sceneState.c4_6 < sceneState.len) or (locals.nx == 5 and locals.ny == 6 and sceneState.step - sceneState.c5_6 < sceneState.len) or (locals.nx == 6 and locals.ny == 6 and sceneState.step - sceneState.c6_6 < sceneState.len) or (locals.nx == 7 and locals.ny == 6 and sceneState.step - sceneState.c7_6 < sceneState.len) or (locals.nx == 8 and locals.ny == 6 and sceneState.step - sceneState.c8_6 < sceneState.len) or (locals.nx == 9 and locals.ny == 6 and sceneState.step - sceneState.c9_6 < sceneState.len) or (locals.nx == 10 and locals.ny == 6 and sceneState.step - sceneState.c10_6 < sceneState.len) or (locals.nx == 11 and locals.ny == 6 and sceneState.step - sceneState.c11_6 < sceneState.len) or (locals.nx == 0 and locals.ny == 7 and sceneState.step - sceneState.c0_7 < sceneState.len) or (locals.nx == 1 and locals.ny == 7 and sceneState.step - sceneState.c1_7 < sceneState.len) or (locals.nx == 2 and locals.ny == 7 and sceneState.step - sceneState.c2_7 < sceneState.len) or (locals.nx == 3 and locals.ny == 7 and sceneState.step - sceneState.c3_7 < sceneState.len) or (locals.nx == 4 and locals.ny == 7 and sceneState.step - sceneState.c4_7 < sceneState.len) or (locals.nx == 5 and locals.ny == 7 and sceneState.step - sceneState.c5_7 < sceneState.len) or (locals.nx == 6 and locals.ny == 7 and sceneState.step - sceneState.c6_7 < sceneState.len) or (locals.nx == 7 and locals.ny == 7 and sceneState.step - sceneState.c7_7 < sceneState.len) or (locals.nx == 8 and locals.ny == 7 and sceneState.step - sceneState.c8_7 < sceneState.len) or (locals.nx == 9 and locals.ny == 7 and sceneState.step - sceneState.c9_7 < sceneState.len) or (locals.nx == 10 and locals.ny == 7 and sceneState.step - sceneState.c10_7 < sceneState.len) or (locals.nx == 11 and locals.ny == 7 and sceneState.step - sceneState.c11_7 < sceneState.len) or (locals.nx == 0 and locals.ny == 8 and sceneState.step - sceneState.c0_8 < sceneState.len) or (locals.nx == 1 and locals.ny == 8 and sceneState.step - sceneState.c1_8 < sceneState.len) or (locals.nx == 2 and locals.ny == 8 and sceneState.step - sceneState.c2_8 < sceneState.len) or (locals.nx == 3 and locals.ny == 8 and sceneState.step - sceneState.c3_8 < sceneState.len) or (locals.nx == 4 and locals.ny == 8 and sceneState.step - sceneState.c4_8 < sceneState.len) or (locals.nx == 5 and locals.ny == 8 and sceneState.step - sceneState.c5_8 < sceneState.len) or (locals.nx == 6 and locals.ny == 8 and sceneState.step - sceneState.c6_8 < sceneState.len) or (locals.nx == 7 and locals.ny == 8 and sceneState.step - sceneState.c7_8 < sceneState.len) or (locals.nx == 8 and locals.ny == 8 and sceneState.step - sceneState.c8_8 < sceneState.len) or (locals.nx == 9 and locals.ny == 8 and sceneState.step - sceneState.c9_8 < sceneState.len) or (locals.nx == 10 and locals.ny == 8 and sceneState.step - sceneState.c10_8 < sceneState.len) or (locals.nx == 11 and locals.ny == 8 and sceneState.step - sceneState.c11_8 < sceneState.len) or (locals.nx == 0 and locals.ny == 9 and sceneState.step - sceneState.c0_9 < sceneState.len) or (locals.nx == 1 and locals.ny == 9 and sceneState.step - sceneState.c1_9 < sceneState.len) or (locals.nx == 2 and locals.ny == 9 and sceneState.step - sceneState.c2_9 < sceneState.len) or (locals.nx == 3 and locals.ny == 9 and sceneState.step - sceneState.c3_9 < sceneState.len) or (locals.nx == 4 and locals.ny == 9 and sceneState.step - sceneState.c4_9 < sceneState.len) or (locals.nx == 5 and locals.ny == 9 and sceneState.step - sceneState.c5_9 < sceneState.len) or (locals.nx == 6 and locals.ny == 9 and sceneState.step - sceneState.c6_9 < sceneState.len) or (locals.nx == 7 and locals.ny == 9 and sceneState.step - sceneState.c7_9 < sceneState.len) or (locals.nx == 8 and locals.ny == 9 and sceneState.step - sceneState.c8_9 < sceneState.len) or (locals.nx == 9 and locals.ny == 9 and sceneState.step - sceneState.c9_9 < sceneState.len) or (locals.nx == 10 and locals.ny == 9 and sceneState.step - sceneState.c10_9 < sceneState.len) or (locals.nx == 11 and locals.ny == 9 and sceneState.step - sceneState.c11_9 < sceneState.len) or (locals.nx == 0 and locals.ny == 10 and sceneState.step - sceneState.c0_10 < sceneState.len) or (locals.nx == 1 and locals.ny == 10 and sceneState.step - sceneState.c1_10 < sceneState.len) or (locals.nx == 2 and locals.ny == 10 and sceneState.step - sceneState.c2_10 < sceneState.len) or (locals.nx == 3 and locals.ny == 10 and sceneState.step - sceneState.c3_10 < sceneState.len) or (locals.nx == 4 and locals.ny == 10 and sceneState.step - sceneState.c4_10 < sceneState.len) or (locals.nx == 5 and locals.ny == 10 and sceneState.step - sceneState.c5_10 < sceneState.len) or (locals.nx == 6 and locals.ny == 10 and sceneState.step - sceneState.c6_10 < sceneState.len) or (locals.nx == 7 and locals.ny == 10 and sceneState.step - sceneState.c7_10 < sceneState.len) or (locals.nx == 8 and locals.ny == 10 and sceneState.step - sceneState.c8_10 < sceneState.len) or (locals.nx == 9 and locals.ny == 10 and sceneState.step - sceneState.c9_10 < sceneState.len) or (locals.nx == 10 and locals.ny == 10 and sceneState.step - sceneState.c10_10 < sceneState.len) or (locals.nx == 11 and locals.ny == 10 and sceneState.step - sceneState.c11_10 < sceneState.len) or (locals.nx == 0 and locals.ny == 11 and sceneState.step - sceneState.c0_11 < sceneState.len) or (locals.nx == 1 and locals.ny == 11 and sceneState.step - sceneState.c1_11 < sceneState.len) or (locals.nx == 2 and locals.ny == 11 and sceneState.step - sceneState.c2_11 < sceneState.len) or (locals.nx == 3 and locals.ny == 11 and sceneState.step - sceneState.c3_11 < sceneState.len) or (locals.nx == 4 and locals.ny == 11 and sceneState.step - sceneState.c4_11 < sceneState.len) or (locals.nx == 5 and locals.ny == 11 and sceneState.step - sceneState.c5_11 < sceneState.len) or (locals.nx == 6 and locals.ny == 11 and sceneState.step - sceneState.c6_11 < sceneState.len) or (locals.nx == 7 and locals.ny == 11 and sceneState.step - sceneState.c7_11 < sceneState.len) or (locals.nx == 8 and locals.ny == 11 and sceneState.step - sceneState.c8_11 < sceneState.len) or (locals.nx == 9 and locals.ny == 11 and sceneState.step - sceneState.c9_11 < sceneState.len) or (locals.nx == 10 and locals.ny == 11 and sceneState.step - sceneState.c10_11 < sceneState.len) or (locals.nx == 11 and locals.ny == 11 and sceneState.step - sceneState.c11_11 < sceneState.len))",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "lost",
+                    "value": "true"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "not sceneState.lost",
+                "then": [
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == sceneState.tx and locals.ny == sceneState.ty",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "len",
+                            "value": "sceneState.len + 1"
+                          },
+                          {
+                            "name": "tx",
+                            "value": "(locals.nx + 5) % 12"
+                          },
+                          {
+                            "name": "ty",
+                            "value": "(locals.ny + 7) % 12"
+                          },
+                          {
+                            "name": "stepTime",
+                            "value": "max(0.1, sceneState.stepTime * 0.95)"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "step",
+                    "value": "sceneState.step + 1"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "hx",
+                    "value": "locals.nx"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "hy",
+                    "value": "locals.ny"
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_0",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_1",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_2",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_3",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_4",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_5",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_6",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_7",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_8",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_9",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_10",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_11",
+                        "value": "sceneState.step + 1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "boardText",
+        "value": "(sceneState.lost and 'GAME OVER\\n' or '') .. (sceneState.step - sceneState.c0_0 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c1_0 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c2_0 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c3_0 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c4_0 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c5_0 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c6_0 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c7_0 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c8_0 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c9_0 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c10_0 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c11_0 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 0 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_1 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c1_1 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c2_1 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c3_1 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c4_1 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c5_1 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c6_1 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c7_1 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c8_1 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c9_1 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c10_1 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c11_1 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 1 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_2 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c1_2 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c2_2 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c3_2 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c4_2 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c5_2 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c6_2 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c7_2 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c8_2 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c9_2 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c10_2 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c11_2 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 2 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_3 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c1_3 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c2_3 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c3_3 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c4_3 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c5_3 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c6_3 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c7_3 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c8_3 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c9_3 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c10_3 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c11_3 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 3 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_4 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c1_4 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c2_4 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c3_4 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c4_4 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c5_4 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c6_4 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c7_4 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c8_4 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c9_4 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c10_4 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c11_4 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 4 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_5 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c1_5 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c2_5 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c3_5 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c4_5 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c5_5 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c6_5 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c7_5 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c8_5 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c9_5 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c10_5 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c11_5 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 5 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_6 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c1_6 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c2_6 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c3_6 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c4_6 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c5_6 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c6_6 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c7_6 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c8_6 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c9_6 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c10_6 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c11_6 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 6 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_7 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c1_7 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c2_7 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c3_7 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c4_7 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c5_7 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c6_7 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c7_7 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c8_7 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c9_7 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c10_7 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c11_7 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 7 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_8 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c1_8 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c2_8 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c3_8 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c4_8 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c5_8 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c6_8 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c7_8 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c8_8 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c9_8 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c10_8 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c11_8 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 8 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_9 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c1_9 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c2_9 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c3_9 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c4_9 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c5_9 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c6_9 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c7_9 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c8_9 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c9_9 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c10_9 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c11_9 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 9 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_10 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c1_10 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c2_10 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c3_10 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c4_10 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c5_10 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c6_10 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c7_10 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c8_10 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c9_10 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c10_10 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c11_10 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 10 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_11 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c1_11 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c2_11 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c3_11 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c4_11 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c5_11 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c6_11 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c7_11 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c8_11 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c9_11 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c10_11 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c11_11 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 11 and '*' or '.')) .. '\\n'"
       }
     ],
     "on_up": [
@@ -306,12 +2600,637 @@
     "on_select": [
       {
         "cmd": "SET_SCENE_STATE",
-        "name": "timer",
-        "value": 0.5
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": "0"
+          },
+          {
+            "name": "timer",
+            "value": "0.5"
+          },
+          {
+            "name": "stepTime",
+            "value": "0.5"
+          },
+          {
+            "name": "dirX",
+            "value": "0"
+          },
+          {
+            "name": "dirY",
+            "value": "-1"
+          },
+          {
+            "name": "hx",
+            "value": "5"
+          },
+          {
+            "name": "hy",
+            "value": "5"
+          },
+          {
+            "name": "step",
+            "value": "3"
+          },
+          {
+            "name": "len",
+            "value": "3"
+          },
+          {
+            "name": "tx",
+            "value": "2"
+          },
+          {
+            "name": "ty",
+            "value": "2"
+          },
+          {
+            "name": "lost",
+            "value": "false"
+          },
+          {
+            "name": "c0_0",
+            "value": "-999"
+          },
+          {
+            "name": "c1_0",
+            "value": "-999"
+          },
+          {
+            "name": "c2_0",
+            "value": "-999"
+          },
+          {
+            "name": "c3_0",
+            "value": "-999"
+          },
+          {
+            "name": "c4_0",
+            "value": "-999"
+          },
+          {
+            "name": "c5_0",
+            "value": "-999"
+          },
+          {
+            "name": "c6_0",
+            "value": "-999"
+          },
+          {
+            "name": "c7_0",
+            "value": "-999"
+          },
+          {
+            "name": "c8_0",
+            "value": "-999"
+          },
+          {
+            "name": "c9_0",
+            "value": "-999"
+          },
+          {
+            "name": "c10_0",
+            "value": "-999"
+          },
+          {
+            "name": "c11_0",
+            "value": "-999"
+          },
+          {
+            "name": "c0_1",
+            "value": "-999"
+          },
+          {
+            "name": "c1_1",
+            "value": "-999"
+          },
+          {
+            "name": "c2_1",
+            "value": "-999"
+          },
+          {
+            "name": "c3_1",
+            "value": "-999"
+          },
+          {
+            "name": "c4_1",
+            "value": "-999"
+          },
+          {
+            "name": "c5_1",
+            "value": "-999"
+          },
+          {
+            "name": "c6_1",
+            "value": "-999"
+          },
+          {
+            "name": "c7_1",
+            "value": "-999"
+          },
+          {
+            "name": "c8_1",
+            "value": "-999"
+          },
+          {
+            "name": "c9_1",
+            "value": "-999"
+          },
+          {
+            "name": "c10_1",
+            "value": "-999"
+          },
+          {
+            "name": "c11_1",
+            "value": "-999"
+          },
+          {
+            "name": "c0_2",
+            "value": "-999"
+          },
+          {
+            "name": "c1_2",
+            "value": "-999"
+          },
+          {
+            "name": "c2_2",
+            "value": "-999"
+          },
+          {
+            "name": "c3_2",
+            "value": "-999"
+          },
+          {
+            "name": "c4_2",
+            "value": "-999"
+          },
+          {
+            "name": "c5_2",
+            "value": "-999"
+          },
+          {
+            "name": "c6_2",
+            "value": "-999"
+          },
+          {
+            "name": "c7_2",
+            "value": "-999"
+          },
+          {
+            "name": "c8_2",
+            "value": "-999"
+          },
+          {
+            "name": "c9_2",
+            "value": "-999"
+          },
+          {
+            "name": "c10_2",
+            "value": "-999"
+          },
+          {
+            "name": "c11_2",
+            "value": "-999"
+          },
+          {
+            "name": "c0_3",
+            "value": "-999"
+          },
+          {
+            "name": "c1_3",
+            "value": "-999"
+          },
+          {
+            "name": "c2_3",
+            "value": "-999"
+          },
+          {
+            "name": "c3_3",
+            "value": "-999"
+          },
+          {
+            "name": "c4_3",
+            "value": "-999"
+          },
+          {
+            "name": "c5_3",
+            "value": "-999"
+          },
+          {
+            "name": "c6_3",
+            "value": "-999"
+          },
+          {
+            "name": "c7_3",
+            "value": "-999"
+          },
+          {
+            "name": "c8_3",
+            "value": "-999"
+          },
+          {
+            "name": "c9_3",
+            "value": "-999"
+          },
+          {
+            "name": "c10_3",
+            "value": "-999"
+          },
+          {
+            "name": "c11_3",
+            "value": "-999"
+          },
+          {
+            "name": "c0_4",
+            "value": "-999"
+          },
+          {
+            "name": "c1_4",
+            "value": "-999"
+          },
+          {
+            "name": "c2_4",
+            "value": "-999"
+          },
+          {
+            "name": "c3_4",
+            "value": "-999"
+          },
+          {
+            "name": "c4_4",
+            "value": "-999"
+          },
+          {
+            "name": "c5_4",
+            "value": "-999"
+          },
+          {
+            "name": "c6_4",
+            "value": "-999"
+          },
+          {
+            "name": "c7_4",
+            "value": "-999"
+          },
+          {
+            "name": "c8_4",
+            "value": "-999"
+          },
+          {
+            "name": "c9_4",
+            "value": "-999"
+          },
+          {
+            "name": "c10_4",
+            "value": "-999"
+          },
+          {
+            "name": "c11_4",
+            "value": "-999"
+          },
+          {
+            "name": "c0_5",
+            "value": "-999"
+          },
+          {
+            "name": "c1_5",
+            "value": "-999"
+          },
+          {
+            "name": "c2_5",
+            "value": "-999"
+          },
+          {
+            "name": "c3_5",
+            "value": "-999"
+          },
+          {
+            "name": "c4_5",
+            "value": "-999"
+          },
+          {
+            "name": "c5_5",
+            "value": "3"
+          },
+          {
+            "name": "c6_5",
+            "value": "-999"
+          },
+          {
+            "name": "c7_5",
+            "value": "-999"
+          },
+          {
+            "name": "c8_5",
+            "value": "-999"
+          },
+          {
+            "name": "c9_5",
+            "value": "-999"
+          },
+          {
+            "name": "c10_5",
+            "value": "-999"
+          },
+          {
+            "name": "c11_5",
+            "value": "-999"
+          },
+          {
+            "name": "c0_6",
+            "value": "-999"
+          },
+          {
+            "name": "c1_6",
+            "value": "-999"
+          },
+          {
+            "name": "c2_6",
+            "value": "-999"
+          },
+          {
+            "name": "c3_6",
+            "value": "-999"
+          },
+          {
+            "name": "c4_6",
+            "value": "-999"
+          },
+          {
+            "name": "c5_6",
+            "value": "2"
+          },
+          {
+            "name": "c6_6",
+            "value": "-999"
+          },
+          {
+            "name": "c7_6",
+            "value": "-999"
+          },
+          {
+            "name": "c8_6",
+            "value": "-999"
+          },
+          {
+            "name": "c9_6",
+            "value": "-999"
+          },
+          {
+            "name": "c10_6",
+            "value": "-999"
+          },
+          {
+            "name": "c11_6",
+            "value": "-999"
+          },
+          {
+            "name": "c0_7",
+            "value": "-999"
+          },
+          {
+            "name": "c1_7",
+            "value": "-999"
+          },
+          {
+            "name": "c2_7",
+            "value": "-999"
+          },
+          {
+            "name": "c3_7",
+            "value": "-999"
+          },
+          {
+            "name": "c4_7",
+            "value": "-999"
+          },
+          {
+            "name": "c5_7",
+            "value": "1"
+          },
+          {
+            "name": "c6_7",
+            "value": "-999"
+          },
+          {
+            "name": "c7_7",
+            "value": "-999"
+          },
+          {
+            "name": "c8_7",
+            "value": "-999"
+          },
+          {
+            "name": "c9_7",
+            "value": "-999"
+          },
+          {
+            "name": "c10_7",
+            "value": "-999"
+          },
+          {
+            "name": "c11_7",
+            "value": "-999"
+          },
+          {
+            "name": "c0_8",
+            "value": "-999"
+          },
+          {
+            "name": "c1_8",
+            "value": "-999"
+          },
+          {
+            "name": "c2_8",
+            "value": "-999"
+          },
+          {
+            "name": "c3_8",
+            "value": "-999"
+          },
+          {
+            "name": "c4_8",
+            "value": "-999"
+          },
+          {
+            "name": "c5_8",
+            "value": "-999"
+          },
+          {
+            "name": "c6_8",
+            "value": "-999"
+          },
+          {
+            "name": "c7_8",
+            "value": "-999"
+          },
+          {
+            "name": "c8_8",
+            "value": "-999"
+          },
+          {
+            "name": "c9_8",
+            "value": "-999"
+          },
+          {
+            "name": "c10_8",
+            "value": "-999"
+          },
+          {
+            "name": "c11_8",
+            "value": "-999"
+          },
+          {
+            "name": "c0_9",
+            "value": "-999"
+          },
+          {
+            "name": "c1_9",
+            "value": "-999"
+          },
+          {
+            "name": "c2_9",
+            "value": "-999"
+          },
+          {
+            "name": "c3_9",
+            "value": "-999"
+          },
+          {
+            "name": "c4_9",
+            "value": "-999"
+          },
+          {
+            "name": "c5_9",
+            "value": "-999"
+          },
+          {
+            "name": "c6_9",
+            "value": "-999"
+          },
+          {
+            "name": "c7_9",
+            "value": "-999"
+          },
+          {
+            "name": "c8_9",
+            "value": "-999"
+          },
+          {
+            "name": "c9_9",
+            "value": "-999"
+          },
+          {
+            "name": "c10_9",
+            "value": "-999"
+          },
+          {
+            "name": "c11_9",
+            "value": "-999"
+          },
+          {
+            "name": "c0_10",
+            "value": "-999"
+          },
+          {
+            "name": "c1_10",
+            "value": "-999"
+          },
+          {
+            "name": "c2_10",
+            "value": "-999"
+          },
+          {
+            "name": "c3_10",
+            "value": "-999"
+          },
+          {
+            "name": "c4_10",
+            "value": "-999"
+          },
+          {
+            "name": "c5_10",
+            "value": "-999"
+          },
+          {
+            "name": "c6_10",
+            "value": "-999"
+          },
+          {
+            "name": "c7_10",
+            "value": "-999"
+          },
+          {
+            "name": "c8_10",
+            "value": "-999"
+          },
+          {
+            "name": "c9_10",
+            "value": "-999"
+          },
+          {
+            "name": "c10_10",
+            "value": "-999"
+          },
+          {
+            "name": "c11_10",
+            "value": "-999"
+          },
+          {
+            "name": "c0_11",
+            "value": "-999"
+          },
+          {
+            "name": "c1_11",
+            "value": "-999"
+          },
+          {
+            "name": "c2_11",
+            "value": "-999"
+          },
+          {
+            "name": "c3_11",
+            "value": "-999"
+          },
+          {
+            "name": "c4_11",
+            "value": "-999"
+          },
+          {
+            "name": "c5_11",
+            "value": "-999"
+          },
+          {
+            "name": "c6_11",
+            "value": "-999"
+          },
+          {
+            "name": "c7_11",
+            "value": "-999"
+          },
+          {
+            "name": "c8_11",
+            "value": "-999"
+          },
+          {
+            "name": "c9_11",
+            "value": "-999"
+          },
+          {
+            "name": "c10_11",
+            "value": "-999"
+          },
+          {
+            "name": "c11_11",
+            "value": "-999"
+          }
+        ]
       },
       {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "cmd": "SET_SCENE_STATE",
+        "name": "boardText",
+        "value": "(sceneState.lost and 'GAME OVER\\n' or '') .. (sceneState.step - sceneState.c0_0 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c1_0 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c2_0 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c3_0 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c4_0 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c5_0 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c6_0 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c7_0 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c8_0 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c9_0 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c10_0 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 0 and '*' or '.')) .. (sceneState.step - sceneState.c11_0 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 0 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_1 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c1_1 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c2_1 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c3_1 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c4_1 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c5_1 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c6_1 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c7_1 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c8_1 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c9_1 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c10_1 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 1 and '*' or '.')) .. (sceneState.step - sceneState.c11_1 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 1 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_2 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c1_2 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c2_2 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c3_2 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c4_2 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c5_2 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c6_2 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c7_2 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c8_2 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c9_2 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c10_2 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 2 and '*' or '.')) .. (sceneState.step - sceneState.c11_2 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 2 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_3 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c1_3 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c2_3 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c3_3 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c4_3 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c5_3 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c6_3 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c7_3 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c8_3 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c9_3 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c10_3 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 3 and '*' or '.')) .. (sceneState.step - sceneState.c11_3 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 3 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_4 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c1_4 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c2_4 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c3_4 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c4_4 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c5_4 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c6_4 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c7_4 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c8_4 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c9_4 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c10_4 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 4 and '*' or '.')) .. (sceneState.step - sceneState.c11_4 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 4 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_5 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c1_5 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c2_5 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c3_5 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c4_5 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c5_5 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c6_5 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c7_5 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c8_5 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c9_5 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c10_5 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 5 and '*' or '.')) .. (sceneState.step - sceneState.c11_5 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 5 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_6 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c1_6 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c2_6 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c3_6 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c4_6 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c5_6 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c6_6 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c7_6 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c8_6 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c9_6 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c10_6 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 6 and '*' or '.')) .. (sceneState.step - sceneState.c11_6 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 6 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_7 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c1_7 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c2_7 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c3_7 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c4_7 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c5_7 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c6_7 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c7_7 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c8_7 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c9_7 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c10_7 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 7 and '*' or '.')) .. (sceneState.step - sceneState.c11_7 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 7 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_8 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c1_8 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c2_8 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c3_8 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c4_8 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c5_8 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c6_8 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c7_8 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c8_8 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c9_8 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c10_8 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 8 and '*' or '.')) .. (sceneState.step - sceneState.c11_8 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 8 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_9 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c1_9 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c2_9 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c3_9 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c4_9 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c5_9 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c6_9 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c7_9 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c8_9 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c9_9 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c10_9 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 9 and '*' or '.')) .. (sceneState.step - sceneState.c11_9 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 9 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_10 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c1_10 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c2_10 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c3_10 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c4_10 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c5_10 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c6_10 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c7_10 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c8_10 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c9_10 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c10_10 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 10 and '*' or '.')) .. (sceneState.step - sceneState.c11_10 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 10 and '*' or '.')) .. '\\n' .. (sceneState.step - sceneState.c0_11 < sceneState.len and 'O' or (sceneState.tx == 0 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c1_11 < sceneState.len and 'O' or (sceneState.tx == 1 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c2_11 < sceneState.len and 'O' or (sceneState.tx == 2 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c3_11 < sceneState.len and 'O' or (sceneState.tx == 3 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c4_11 < sceneState.len and 'O' or (sceneState.tx == 4 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c5_11 < sceneState.len and 'O' or (sceneState.tx == 5 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c6_11 < sceneState.len and 'O' or (sceneState.tx == 6 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c7_11 < sceneState.len and 'O' or (sceneState.tx == 7 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c8_11 < sceneState.len and 'O' or (sceneState.tx == 8 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c9_11 < sceneState.len and 'O' or (sceneState.tx == 9 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c10_11 < sceneState.len and 'O' or (sceneState.tx == 10 and sceneState.ty == 11 and '*' or '.')) .. (sceneState.step - sceneState.c11_11 < sceneState.len and 'O' or (sceneState.tx == 11 and sceneState.ty == 11 and '*' or '.')) .. '\\n'"
       }
     ],
     "on_cancel": [
@@ -320,10 +3239,6 @@
         "kind": "pop"
       }
     ]
-  },
-  "scripts": {
-    "init": "\nlocal sceneState = ctx.sceneState\nsceneState.gridWidth = 12\nsceneState.gridHeight = 12\nsceneState.snake = {{x=5, y=5}, {x=5, y=6}, {x=5, y=7}}\nsceneState.dirX = 0\nsceneState.dirY = -1\nsceneState.targetX = 2\nsceneState.targetY = 2\nsceneState.stepTime = 0.5\nsceneState.lost = false\nsceneState.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if sceneState.lost then text = \"GAME OVER\\n\" end\n    for y = 0, sceneState.gridHeight - 1 do\n        for x = 0, sceneState.gridWidth - 1 do\n            local char = \".\"\n            if x == sceneState.targetX and y == sceneState.targetY then\n                char = \"*\"\n            else\n                for _, part in ipairs(sceneState.snake) do\n                    if part.x == x and part.y == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    sceneState.boardText = text\nend\ndraw()\n",
-    "update": "\nlocal sceneState = ctx.sceneState\nif sceneState.lost then return end\nlocal head = sceneState.snake[1]\nlocal nx = head.x + sceneState.dirX\nlocal ny = head.y + sceneState.dirY\n\nif nx < 0 or nx >= sceneState.gridWidth or ny < 0 or ny >= sceneState.gridHeight then\n    sceneState.lost = true\nend\n\nfor _, part in ipairs(sceneState.snake) do\n    if part.x == nx and part.y == ny then\n        sceneState.lost = true\n    end\nend\n\nif not sceneState.lost then\n    table.insert(sceneState.snake, 1, {x=nx, y=ny})\n    if nx == sceneState.targetX and ny == sceneState.targetY then\n        sceneState.targetX = (nx + 5) % sceneState.gridWidth\n        sceneState.targetY = (ny + 7) % sceneState.gridHeight\n        sceneState.stepTime = math.max(0.1, sceneState.stepTime * 0.95)\n    else\n        table.remove(sceneState.snake)\n    end\nend\n\nlocal text = \"\"\nif sceneState.lost then text = \"GAME OVER\\n\" end\nfor y = 0, sceneState.gridHeight - 1 do\n    for x = 0, sceneState.gridWidth - 1 do\n        local char = \".\"\n        if x == sceneState.targetX and y == sceneState.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(sceneState.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nsceneState.boardText = text\n"
   },
   "goldenScript": [
     {

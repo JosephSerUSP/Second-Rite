@@ -896,26 +896,11 @@
                           },
                           {
                             "name": "stepTime",
-                            "value": "max(0.1, sceneState.stepTime * 0.95)"
+                            "value": "math.max(0.1, sceneState.stepTime * 0.95)"
                           }
                         ]
                       }
                     ]
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "step",
-                    "value": "sceneState.step + 1"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "hx",
-                    "value": "locals.nx"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "hy",
-                    "value": "locals.ny"
                   },
                   {
                     "cmd": "IF",
@@ -2500,6 +2485,21 @@
                         "value": "sceneState.step + 1"
                       }
                     ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "step",
+                    "value": "sceneState.step + 1"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "hx",
+                    "value": "locals.nx"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "hy",
+                    "value": "locals.ny"
                   }
                 ]
               }

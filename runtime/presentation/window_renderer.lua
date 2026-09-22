@@ -1641,7 +1641,8 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             drawPartyGridStyle(layout, cached.rows, cached.cursor, env, x, y, ctx.session, title, animP)
         end
     elseif style == "enemyRow" then
-        renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle)
+        local actualBattleState = env.sceneState and env.sceneState.battle and require('engine.scenes.battle').getNativeState().battle or nil
+        renderer.drawEnemyRowWindow(actualBattleState)
     elseif style == "battleLog" then
         renderer.drawBattleLogWindow(env.sceneState and env.sceneState.combatLog, x, y, w, h)
     elseif style == "victoryPanel" then

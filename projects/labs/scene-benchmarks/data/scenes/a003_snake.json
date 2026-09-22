@@ -903,1590 +903,6 @@
                     ]
                   },
                   {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 0",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_0",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 1",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_1",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 2",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_2",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 3",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_3",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 4",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_4",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 5",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_5",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 6",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_6",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 7",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_7",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 8",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_8",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 9",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_9",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 10",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_10",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 0 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c0_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 1 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c1_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 2 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c2_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 3 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c3_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 4 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c4_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 5 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c5_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 6 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c6_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 7 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c7_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 8 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c8_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 9 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c9_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 10 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c10_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "locals.nx == 11 and locals.ny == 11",
-                    "then": [
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "c11_11",
-                        "value": "sceneState.step + 1"
-                      }
-                    ]
-                  },
-                  {
                     "cmd": "SET_SCENE_STATE",
                     "name": "step",
                     "value": "sceneState.step + 1"
@@ -2500,6 +916,1590 @@
                     "cmd": "SET_SCENE_STATE",
                     "name": "hy",
                     "value": "locals.ny"
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_0",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 1",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_1",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_2",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 3",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_3",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 4",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_4",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 5",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_5",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 6",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_6",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 7",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_7",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 8",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_8",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 9",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_9",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 10",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_10",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 0 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c0_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 1 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c1_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 2 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c2_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 3 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c3_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 4 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c4_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 5 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c5_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 6 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c6_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 7 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c7_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 8 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c8_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 9 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c9_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 10 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c10_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "locals.nx == 11 and locals.ny == 11",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "name": "c11_11",
+                        "value": "sceneState.step"
+                      }
+                    ]
                   }
                 ]
               }

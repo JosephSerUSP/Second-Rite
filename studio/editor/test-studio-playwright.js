@@ -310,6 +310,85 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             'Walk Profile help must remain inside the contextual panel');
         mark(t, 'Walk Profile controls and help occupy separate readable panel regions');
 
+        const mainWindowSize = await app.evaluate(({ BrowserWindow }) => {
+            const mainWindow = BrowserWindow.getAllWindows().find(candidate =>
+                !candidate.webContents.getURL().includes('surface='));
+            if (!mainWindow) throw new Error('main Studio BrowserWindow not found');
+            const size = mainWindow.getSize();
+            globalThis.__thestraMainWindow = mainWindow;
+            return size;
+        });
+        for (const size of [[960, 720], [1600, 900]]) {
+            await app.evaluate(({ BrowserWindow }, nextSize) => {
+                const mainWindow = globalThis.__thestraMainWindow
+                    || BrowserWindow.getAllWindows()[0];
+                mainWindow.setSize(nextSize[0], nextSize[1]);
+            }, size);
+            await mainPage.waitForTimeout(150);
+            const layout = await mainPage.evaluate(() => {
+                const panel = document.querySelector('#thestra-map-view-toolbar');
+                const viewport = document.querySelector('#thestra-map-viewport');
+                if (!panel || !viewport) return { visible: false };
+                const panelRect = panel.getBoundingClientRect();
+                const viewportRect = viewport.getBoundingClientRect();
+                return {
+                    visible: getComputedStyle(panel).display !== 'none'
+                        && getComputedStyle(panel).visibility !== 'hidden'
+                        && panel.getClientRects().length > 0,
+                    withinViewport: panelRect.left >= viewportRect.left
+                        && panelRect.right <= viewportRect.right,
+                    interactive: Array.from(panel.querySelectorAll('button'))
+                        .some(button => button.textContent.trim() === 'Orthographic'
+                            && button.getClientRects().length > 0 && !button.disabled),
+                    height: panelRect.height,
+                };
+            });
+            assert.equal(layout.visible, true, `docked N panel must be visible at ${size.join('x')}`);
+            assert.equal(layout.withinViewport, true,
+                `docked N panel must fit its viewport at ${size.join('x')}`);
+            assert.equal(layout.interactive, true,
+                `docked N panel controls must remain interactive at ${size.join('x')}`);
+            assert.ok(layout.height > 100, `N panel content must remain readable at ${size.join('x')}`);
+        }
+        await app.evaluate(({ BrowserWindow }, size) => {
+            (globalThis.__thestraMainWindow || BrowserWindow.getAllWindows()[0])
+                .setSize(size[0], size[1]);
+        }, mainWindowSize);
+
+        await mainPage.locator('button[title="Collapse Inspector"]').click();
+        assert.equal(await mainPage.locator('#thestra-map-view-toolbar').evaluate(element =>
+            getComputedStyle(element).display), 'flex',
+        'collapsing the docked Map Inspector must leave the N panel visible');
+        await mainPage.locator('button[title="Expand Inspector"]').click();
+
+        await mapCanvas.focus();
+        await mapCanvas.press('n');
+        await mainPage.waitForFunction(() =>
+            getComputedStyle(document.querySelector('#thestra-map-view-toolbar')).display === 'none');
+        await mapCanvas.press('n');
+        await mainPage.waitForFunction(() =>
+            getComputedStyle(document.querySelector('#thestra-map-view-toolbar')).display === 'flex');
+
+        await mainPage.locator('button[title="Studio Preferences"]').click();
+        const themeIdBefore = await mainPage.locator('#studio-theme-select').inputValue();
+        const themeColorBefore = await mainPage.evaluate(() =>
+            getComputedStyle(document.documentElement).getPropertyValue('--win-gray').trim());
+        await mainPage.locator('#studio-theme-select').selectOption('night');
+        assert.equal(await mainPage.locator('#studio-theme-select').evaluate(element =>
+            getComputedStyle(document.documentElement).getPropertyValue('--win-gray').trim()), '#303030',
+        'theme changes must reach the editor surface');
+        await mainPage.locator('#studio-theme-select').selectOption(themeIdBefore);
+        assert.equal(await mainPage.evaluate(() =>
+            getComputedStyle(document.documentElement).getPropertyValue('--win-gray').trim()),
+        themeColorBefore, 'the previous theme must be restorable before closing preferences');
+        await mainPage.locator('#studio-modal button.win98-btn-success').click();
+        await mainPage.waitForFunction(() =>
+            getComputedStyle(document.querySelector('#thestra-map-view-toolbar')).display === 'flex');
+        assert.equal(await mainPage.evaluate(() =>
+            getComputedStyle(document.documentElement).getPropertyValue('--win-gray').trim()),
+        themeColorBefore,
+        'closing theme preferences must restore the previous editor theme');
+
         const navigationBox = await mapCanvas.boundingBox();
         assert.ok(navigationBox, 'Map canvas must have a real pointer target');
         const beforeNavigation = await mainPage.evaluate(() =>
@@ -476,6 +555,8 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         assert.equal(await mainPage.evaluate(() =>
             JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition)), beforeEventMove,
         'Esc-canceled Event G must preserve the exact Map-owned world position');
+        assert.doesNotMatch(await mainPage.locator('#thestra-map-view-status').textContent(), /^Move/,
+            'canceling G must clear the visible modal status');
         mark(t, 'Event G Y entered semantic modal move and Esc preserved Map-owned placement');
 
         const eventMoveBox = await mapCanvas.boundingBox();
@@ -489,19 +570,38 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mapCanvas.press('g');
         await mapCanvas.press('x');
         await mainPage.mouse.move(
-            eventMoveBox.x + eventMoveBox.width * 0.72,
-            eventMoveBox.y + eventMoveBox.height * 0.58,
+            eventMoveBox.x + eventMoveBox.width * 0.66,
+            eventMoveBox.y + eventMoveBox.height * 0.55,
             { steps: 4 });
         await mainPage.waitForFunction(() => {
             const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
             return state.operation === 'move' && state.constraint === 'X' && Math.abs(state.value?.X || 0) > 0.001;
         });
-        await mapCanvas.press('Enter');
+        const previewDeltaX = await mainPage.evaluate(() =>
+            window.ThestraRuntimeCameraViewport.getSpatialInteractionState().value.X);
+        const confirmPoint = {
+            x: eventMoveBox.x + eventMoveBox.width * 0.72,
+            y: eventMoveBox.y + eventMoveBox.height * 0.58,
+        };
+        await mainPage.evaluate(point => {
+            const canvas = document.querySelector('#thestra-map-viewport canvas');
+            const pointer = {
+                bubbles: true, cancelable: true, clientX: point.x, clientY: point.y,
+                button: 0, pointerId: 1, pointerType: 'mouse',
+            };
+            canvas.dispatchEvent(new PointerEvent('pointerdown', { ...pointer, buttons: 1 }));
+            window.dispatchEvent(new PointerEvent('pointerup', { ...pointer, buttons: 0 }));
+        }, confirmPoint);
         await mainPage.waitForFunction(before =>
             JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) !== before,
         beforeEventMove);
         const committedEventMove = await mainPage.evaluate(() =>
             JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition));
+        const committedDeltaX = await mainPage.evaluate(before =>
+            dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition[0]
+                - JSON.parse(before)[0], beforeEventMove);
+        assert.ok(Math.abs(committedDeltaX - previewDeltaX) > 0.001,
+            'confirming pointerdown must sample its coordinate instead of committing the older preview');
         await mainPage.keyboard.press('Control+z');
         await mainPage.waitForFunction(before =>
             JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === before,
@@ -510,7 +610,47 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mainPage.waitForFunction(committed =>
             JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === committed,
         committedEventMove);
-        mark(t, 'Event modal confirm created one identity-safe Map history transaction with undo and redo');
+        mark(t, 'Perspective G click-confirm created one identity-safe Map history transaction with undo and redo');
+
+        await mainPage.getByRole('button', { name: 'Orthographic' }).click();
+        const orthographicBox = await mapCanvas.boundingBox();
+        assert.ok(orthographicBox, 'Orthographic G translation needs the real Map canvas');
+        await mainPage.evaluate(() => {
+            window.ThestraRuntimeCameraViewport.setSelection({
+                kind: 'event', key: 'event:1', id: 1,
+            });
+        });
+        const beforeOrthographicMove = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition));
+        await mapCanvas.focus();
+        await mapCanvas.press('g');
+        await mapCanvas.press('x');
+        const orthographicTarget = {
+            x: orthographicBox.x + orthographicBox.width * 0.62,
+            y: orthographicBox.y + orthographicBox.height * 0.58,
+        };
+        await mainPage.mouse.move(orthographicTarget.x, orthographicTarget.y, { steps: 4 });
+        await mainPage.waitForFunction(() => {
+            const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
+            return state.operation === 'move' && state.constraint === 'X'
+                && Math.abs(state.value?.X || 0) > 0.001;
+        });
+        await mainPage.mouse.click(orthographicTarget.x, orthographicTarget.y);
+        await mainPage.waitForFunction(before =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) !== before,
+        beforeOrthographicMove);
+        const orthographicMove = await mainPage.evaluate(() =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition));
+        await mainPage.keyboard.press('Control+z');
+        await mainPage.waitForFunction(before =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === before,
+        beforeOrthographicMove);
+        await mainPage.keyboard.press('Control+Shift+z');
+        await mainPage.waitForFunction(committed =>
+            JSON.stringify(dbPayload.maps[currentMapIndex].events.find(event => event.id === 1).worldPosition) === committed,
+        orthographicMove);
+        mark(t, 'Orthographic G click-confirm preserved semantic-axis motion and undo/redo');
+        await mainPage.getByRole('button', { name: 'Perspective' }).click();
 
         let databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database', diagnostics);

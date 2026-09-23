@@ -1,7 +1,12 @@
-### Experiment
-C002 — Splitting Ball Pong
+# Benchmark Report
 
-### Result
+### Benchmark
+ID: C002
+Name: Splitting Ball Pong
+Benchmark Version: Current Main Semantics
+Date: 2026-09-23
+
+### Current Result
 complete
 
 ### Current Implementation Shape
@@ -11,6 +16,15 @@ Authored Scene JSON (`c002_splitting_pong.json`). Cleanly implemented purely usi
 - SCRIPT instances: 0
 - Duplicated physics blocks: 3
 - Formula complexity: High for multiplexed checks.
+- native source files modified: 0
+- new generic semantic commands added: 0
+- Project-owned files required: c002_splitting_pong.json, index.json, title.json, terms.json
+- RTP dependencies: 1.0
+- validation warnings/errors encountered: 0
+- bespoke workarounds: None.
+- unsupported benchmark requirements: None.
+- whether Studio authoring surfaces were sufficient: Yes, JSON structure maps perfectly to standard semantic blocks.
+- whether the artifact runs independently of Second Gate: Yes.
 
 ### Changes Since Previous Attempt
 Removed all `SCRIPT` usage and replaced it entirely with declarative JSON `SET_SCENE_STATE` and `IF` assignments.

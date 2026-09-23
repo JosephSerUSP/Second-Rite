@@ -3,7 +3,7 @@
   "terminal": {
     "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
   },
-  "name": "C002 \u2014 Splitting Ball Pong",
+  "name": "C002 — Splitting Pong",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -24,7 +24,7 @@
       "content": [
         {
           "type": "text",
-          "text": "C002 \u2014 Score: {sceneState.score1} - {sceneState.score2}"
+          "text": "C002 — Splitting Pong   Score: {sceneState.score1} - {sceneState.score2}"
         }
       ]
     },

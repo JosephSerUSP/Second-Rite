@@ -1,0 +1,14 @@
+{
+  "candidateId": "low-900",
+  "startMp": 900,
+  "saveIdentity": {
+    "schemaVersion": 1,
+    "name": "Second Rite Horizon 900",
+    "identity": "SecondRiteHorizon900",
+    "productName": "Second Rite Horizon 900",
+    "executableName": "Second Rite Horizon 900",
+    "buildSlug": "Second-Rite-Horizon-900",
+    "windowTitle": "Second Rite Horizon 900",
+    "productVersion": "0.0.0-dev"
+  }
+}

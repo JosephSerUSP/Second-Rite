@@ -3,7 +3,7 @@
   "terminal": {
     "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
   },
-  "name": "C002 — Splitting Pong",
+  "name": "C002 \u2014 Splitting Ball Pong",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -24,7 +24,7 @@
       "content": [
         {
           "type": "text",
-          "text": "C002 — Splitting Pong   Score: {sceneState.score1} - {sceneState.score2}"
+          "text": "C002 \u2014 Score: {sceneState.score1} - {sceneState.score2}"
         }
       ]
     },
@@ -130,8 +130,12 @@
     "on_enter": [
       {
         "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": 0
+          }
+        ]
       },
       {
         "cmd": "SET_SCENE_STATE",
@@ -173,103 +177,8 @@
             "value": 6
           },
           {
-            "name": "ball2X",
-            "value": 10
-          },
-          {
-            "name": "ball2Y",
-            "value": 6
-          },
-          {
-            "name": "ball2VX",
-            "value": 10
-          },
-          {
-            "name": "ball2VY",
-            "value": 6
-          },
-          {
-            "name": "ball3X",
-            "value": 10
-          },
-          {
-            "name": "ball3Y",
-            "value": 6
-          },
-          {
-            "name": "ball3VX",
-            "value": 10
-          },
-          {
-            "name": "ball3VY",
-            "value": 6
-          },
-          {
             "name": "ball2Active",
             "value": 0
-          },
-          {
-            "name": "ball3Active",
-            "value": 0
-          },
-          {
-            "name": "hits",
-            "value": 0
-          },
-          {
-            "name": "score1",
-            "value": "sceneState.score1 or 0"
-          },
-          {
-            "name": "score2",
-            "value": "sceneState.score2 or 0"
-          },
-          {
-            "name": "inputY",
-            "value": 0
-          }
-        ]
-      }
-    ],
-    "init_state": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "gridW",
-            "value": 20
-          },
-          {
-            "name": "gridH",
-            "value": 13
-          },
-          {
-            "name": "paddle1Y",
-            "value": 6
-          },
-          {
-            "name": "paddle2Y",
-            "value": 6
-          },
-          {
-            "name": "paddleH",
-            "value": 3
-          },
-          {
-            "name": "ball1X",
-            "value": 10
-          },
-          {
-            "name": "ball1Y",
-            "value": 6
-          },
-          {
-            "name": "ball1VX",
-            "value": 10
-          },
-          {
-            "name": "ball1VY",
-            "value": 6
           },
           {
             "name": "ball2X",
@@ -288,6 +197,10 @@
             "value": 6
           },
           {
+            "name": "ball3Active",
+            "value": 0
+          },
+          {
             "name": "ball3X",
             "value": 10
           },
@@ -304,18 +217,6 @@
             "value": 6
           },
           {
-            "name": "ball2Active",
-            "value": 0
-          },
-          {
-            "name": "ball3Active",
-            "value": 0
-          },
-          {
-            "name": "hits",
-            "value": 0
-          },
-          {
             "name": "score1",
             "value": "sceneState.score1 or 0"
           },
@@ -325,6 +226,10 @@
           },
           {
             "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "hits",
             "value": 0
           }
         ]
@@ -336,7 +241,7 @@
         "assignments": [
           {
             "name": "paddle1Y",
-            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle1Y + sceneState.inputY * 15.0 * time.dt))"
+            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle1Y + sceneState.inputY * 15.0 * sceneState.time.dt))"
           },
           {
             "name": "inputY",
@@ -352,7 +257,7 @@
           },
           {
             "name": "paddle2Y",
-            "value": "sceneState.center2 < sceneState.targetBallY - 0.5 and sceneState.paddle2Y + 8.0 * time.dt or (sceneState.center2 > sceneState.targetBallY + 0.5 and sceneState.paddle2Y - 8.0 * time.dt or sceneState.paddle2Y)"
+            "value": "sceneState.center2 < sceneState.targetBallY - 0.5 and sceneState.paddle2Y + 8.0 * sceneState.time.dt or (sceneState.center2 > sceneState.targetBallY + 0.5 and sceneState.paddle2Y - 8.0 * sceneState.time.dt or sceneState.paddle2Y)"
           },
           {
             "name": "paddle2Y",
@@ -360,49 +265,27 @@
           },
           {
             "name": "ball1X",
-            "value": "sceneState.ball1X + sceneState.ball1VX * time.dt"
+            "value": "sceneState.ball1X + sceneState.ball1VX * sceneState.time.dt"
           },
           {
             "name": "ball1Y",
-            "value": "sceneState.ball1Y + sceneState.ball1VY * time.dt"
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.ball2Active > 0",
-        "then": [
+            "value": "sceneState.ball1Y + sceneState.ball1VY * sceneState.time.dt"
+          },
           {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "ball2X",
-                "value": "sceneState.ball2X + sceneState.ball2VX * time.dt"
-              },
-              {
-                "name": "ball2Y",
-                "value": "sceneState.ball2Y + sceneState.ball2VY * time.dt"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.ball3Active > 0",
-        "then": [
+            "name": "ball2X",
+            "value": "sceneState.ball2X + sceneState.ball2VX * sceneState.time.dt"
+          },
           {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "ball3X",
-                "value": "sceneState.ball3X + sceneState.ball3VX * time.dt"
-              },
-              {
-                "name": "ball3Y",
-                "value": "sceneState.ball3Y + sceneState.ball3VY * time.dt"
-              }
-            ]
+            "name": "ball2Y",
+            "value": "sceneState.ball2Y + sceneState.ball2VY * sceneState.time.dt"
+          },
+          {
+            "name": "ball3X",
+            "value": "sceneState.ball3X + sceneState.ball3VX * sceneState.time.dt"
+          },
+          {
+            "name": "ball3Y",
+            "value": "sceneState.ball3Y + sceneState.ball3VY * sceneState.time.dt"
           }
         ]
       },
@@ -416,25 +299,6 @@
               {
                 "name": "ball1Y",
                 "value": 0
-              },
-              {
-                "name": "ball1VY",
-                "value": "-sceneState.ball1VY"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.ball1Y >= sceneState.gridH - 1",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "ball1Y",
-                "value": "sceneState.gridH - 1"
               },
               {
                 "name": "ball1VY",
@@ -465,25 +329,6 @@
       },
       {
         "cmd": "IF",
-        "condition": "sceneState.ball2Active > 0 and sceneState.ball2Y >= sceneState.gridH - 1",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "ball2Y",
-                "value": "sceneState.gridH - 1"
-              },
-              {
-                "name": "ball2VY",
-                "value": "-sceneState.ball2VY"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
         "condition": "sceneState.ball3Active > 0 and sceneState.ball3Y <= 0",
         "then": [
           {
@@ -496,6 +341,44 @@
               {
                 "name": "ball3VY",
                 "value": "-sceneState.ball3VY"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ball1Y >= sceneState.gridH - 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ball1Y",
+                "value": "sceneState.gridH - 1"
+              },
+              {
+                "name": "ball1VY",
+                "value": "-sceneState.ball1VY"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ball2Active > 0 and sceneState.ball2Y >= sceneState.gridH - 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ball2Y",
+                "value": "sceneState.gridH - 1"
+              },
+              {
+                "name": "ball2VY",
+                "value": "-sceneState.ball2VY"
               }
             ]
           }
@@ -820,10 +703,69 @@
     ],
     "on_select": [
       {
-
-        "cmd": "COMMENT",
-
-        "text": "Legacy scene hook init_state remains quarantined under #919."
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 13
+          },
+          {
+            "name": "paddle1Y",
+            "value": 6
+          },
+          {
+            "name": "paddle2Y",
+            "value": 6
+          },
+          {
+            "name": "paddleH",
+            "value": 3
+          },
+          {
+            "name": "ball1X",
+            "value": 10
+          },
+          {
+            "name": "ball1Y",
+            "value": 6
+          },
+          {
+            "name": "ball1VX",
+            "value": 10
+          },
+          {
+            "name": "ball1VY",
+            "value": 6
+          },
+          {
+            "name": "score1",
+            "value": "sceneState.score1 or 0"
+          },
+          {
+            "name": "score2",
+            "value": "sceneState.score2 or 0"
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "ball2Active",
+            "value": 0
+          },
+          {
+            "name": "ball3Active",
+            "value": 0
+          },
+          {
+            "name": "hits",
+            "value": 0
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -833,5 +775,22 @@
       }
     ]
   },
-  "scripts": {}
+  "scripts": {},
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
+  ]
 }

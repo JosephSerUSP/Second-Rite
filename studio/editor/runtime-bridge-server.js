@@ -288,9 +288,7 @@ function createRuntimeBridgeServer(options = {}) {
         workerMain: options.workerMain,
     });
     const compileRenderableRequest = options.renderableCompiler
-        || (request => request.renderableEncoding === 'instances'
-            ? renderableWorker.compile(request)
-            : compileRenderable(request, options));
+        || (request => renderableWorker.compile(request));
     const compileInspectionRequest = options.inspectionCompiler
         || (request => typeof renderableWorker.compileInspection === 'function'
             ? renderableWorker.compileInspection(request)
@@ -350,9 +348,15 @@ function createRuntimeBridgeServer(options = {}) {
                 return respond(400, { error: error.message });
             }
             try {
-                const value = req.url === '/api/map-inspection'
-                    ? await compileInspectionRequest(request)
-                    : await compileRenderableRequest(request);
+                if (req.url === '/api/map-inspection') {
+                    const value = await compileInspectionRequest(request);
+                    respond(200, value);
+                    return;
+                }
+                // The public renderable endpoint has one authoritative wire
+                // representation. Force it at this route boundary so omitted
+                // hints cannot select the cold expanded diagnostic compiler.
+                const value = await compileRenderableRequest({ ...request, renderableEncoding: 'instances' });
                 respond(200, value);
             } catch (error) {
                 respond(500, { error: error.message });

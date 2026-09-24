@@ -1,7 +1,7 @@
 'use strict';
 
 // Issue #696 / #373: immutable per-candidate data overlays on one isolated
-// Project. Each overlay is materialized in a disposable Project and then run
+// Project baseline. Each overlay is materialized in a disposable Project and then run
 // through the ordinary Project staging/Test Play boundary.
 const fs = require('fs');
 const os = require('os');
@@ -17,6 +17,16 @@ const projectLifecycle = require(path.join(repoRoot, 'studio/editor/project-life
 const projectCli = path.join(repoRoot, 'studio/editor/project-cli.js');
 const stageScript = path.join(repoRoot, 'tools/ci/stage-project-gates.js');
 const lovec = process.env.LOVEC_PATH || 'C:\\Program Files\\LOVE\\lovec.exe';
+const executionInputs = [
+    'runtime',
+    'rtp',
+    'tools/export',
+    'tools/semantic-roots.js',
+    'tools/ci/stage-project-gates.js',
+    'studio/editor/project-cli.js',
+    'studio/editor/project-play.js',
+    'studio/editor/project-lifecycle.js',
+];
 
 const candidates = [
     { id: 'control-3000', startMp: 3000, role: 'current authored control' },
@@ -58,6 +68,32 @@ function digestTree(root, prefix) {
         hash.update('\n');
     }
     return hash.digest('hex');
+}
+
+function digestExecutionSources() {
+    const hash = crypto.createHash('sha256');
+    for (const relative of executionInputs) {
+        const absolute = path.join(repoRoot, relative);
+        if (!fs.existsSync(absolute)) throw new Error(`Pinned execution source is missing: ${relative}`);
+        const stat = fs.statSync(absolute);
+        const digest = stat.isDirectory()
+            ? digestTree(absolute, `${relative.replace(/\\/g, '/')}/`)
+            : crypto.createHash('sha256').update(fs.readFileSync(absolute)).digest('hex');
+        hash.update(`${relative.replace(/\\/g, '/')}\0${digest}\n`);
+    }
+    return hash.digest('hex');
+}
+
+function assertRecordedSources(record, context) {
+    const sourceDataSha256 = digestTree(path.join(sourceProject, 'data'), 'data/');
+    const sourceAssetsSha256 = digestTree(path.join(sourceProject, 'assets'), 'assets/');
+    const sourceExecutionSha256 = digestExecutionSources();
+    if (sourceDataSha256 !== record.sourceDataSha256 || sourceAssetsSha256 !== record.sourceAssetsSha256) {
+        throw new Error(`Canonical Project data/assets changed since the experiment baseline was recorded (${context})`);
+    }
+    if (digestExecutionSources() !== record.sourceExecutionSha256) {
+        throw new Error(`Runtime, exporter, or Project launch sources changed since the experiment baseline was recorded (${context}); prepare a new gauntlet to compare that version`);
+    }
 }
 
 function projectDataDigest(projectRoot, overrides = {}) {
@@ -141,12 +177,14 @@ function create() {
         sourceCommit: sourceCommit(),
         sourceDataSha256,
         sourceAssetsSha256,
+        sourceExecutionSha256,
+        executionSourcePolicy: `SHA-256 of ${executionInputs.join(', ')}; checked before materialization and execution`,
         onlyGameplayVariable: 'data/system.json:summoner.startMp',
         candidateDataDigestPolicy: 'SHA-256 over sorted Project-owned data paths and bytes after applying exactly one candidate overlay, including the candidate-specific isolated data/project.json identity.',
         candidates: records,
     };
     fs.writeFileSync(cardsPath, serialize(record));
-    process.stdout.write(`Prepared one isolated Project and ${records.length} immutable candidate overlays\n`);
+    process.stdout.write(`Prepared ${records.length} immutable overlays with hash-pinned Project and execution sources\n`);
 }
 
 function loadRecord() {
@@ -165,18 +203,15 @@ function selectCandidate(id) {
 
 function materializeCandidate(id, tempRoot) {
     const { candidate, overlay } = selectCandidate(id);
+    const record = loadRecord();
+    assertRecordedSources(record, 'before materialization');
     const target = path.join(tempRoot, 'project');
     projectLifecycle.forkProject({ source: sourceProject, target });
     const systemPath = path.join(target, 'data/system.json');
     const system = JSON.parse(fs.readFileSync(systemPath, 'utf8'));
-    const dataSha256 = digestTree(path.join(sourceProject, 'data'), 'data/');
-    const assetsSha256 = digestTree(path.join(sourceProject, 'assets'), 'assets/');
-    const record = loadRecord();
-    if (dataSha256 !== record.sourceDataSha256 || assetsSha256 !== record.sourceAssetsSha256) {
-        throw new Error('Canonical Project data/assets changed since the experiment baseline was recorded');
-    }
+    assertRecordedSources(record, 'after materialization');
     if (!system.summoner || system.summoner.startMp !== 3000) {
-        throw new Error('Immutable base Project no longer has the expected 3000-MP control value');
+        throw new Error('Canonical Project no longer has the expected 3000-MP control value');
     }
     system.summoner.startMp = candidate.startMp;
     fs.writeFileSync(systemPath, serialize(system));
@@ -215,6 +250,7 @@ function runValidate(id) {
         if (validateResult.error) throw validateResult.error;
         if (validateResult.status !== 0) throw new Error(`VALIDATE failed for ${candidate.id} (exit ${validateResult.status})`);
         const record = loadRecord();
+        assertRecordedSources(record, 'after staging and before validation');
         const row = record.candidates.find((item) => item.id === candidate.id);
         row.validation = {
             status: 'PASS',
@@ -285,6 +321,7 @@ async function play(id) {
     try {
         tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-horizon-play-'));
         const materialized = materializeCandidate(id, tempRoot);
+        assertRecordedSources(loadRecord(), 'immediately before Test Play');
         process.stdout.write(`Selected ${candidate.id}; dataSha256=${materialized.selectedDataSha256}\n`);
         process.stdout.write('Launching through studio/editor/project-cli.js play (ordinary Project Test Play)\n');
         child = childProcess.spawn(process.execPath, [projectCli, 'play', materialized.target], {
@@ -307,18 +344,14 @@ async function play(id) {
 
 function verify() {
     const record = loadRecord();
-    const sourceDataSha256 = digestTree(path.join(sourceProject, 'data'), 'data/');
-    const sourceAssetsSha256 = digestTree(path.join(sourceProject, 'assets'), 'assets/');
-    if (sourceDataSha256 !== record.sourceDataSha256 || sourceAssetsSha256 !== record.sourceAssetsSha256) {
-        throw new Error('Canonical Project data/assets changed since provenance cards were produced');
-    }
+    assertRecordedSources(record, 'provenance verification');
     for (const item of record.candidates) {
         const { candidate } = selectCandidate(item.id);
         if (candidateDataDigest(sourceProject, candidate) !== item.selectedDataSha256) {
             throw new Error(`Candidate ${item.id} digest differs from the recorded overlay`);
         }
     }
-    process.stdout.write(`GAUNTLET PROVENANCE OK (${record.candidates.length} immutable overlays; selected data digests match)\n`);
+    process.stdout.write(`GAUNTLET PROVENANCE OK (${record.candidates.length} immutable overlays; Project and execution source digests match)\n`);
 }
 
 function recordLaunchSmoke() {

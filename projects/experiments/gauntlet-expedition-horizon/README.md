@@ -12,13 +12,17 @@ Project content and current gameplay rules constant:
 Only `system.summoner.startMp` changes as a gameplay variable. Each profile also
 uses a unique LÖVE save identity in its disposable Project, so no run reads or
 writes the canonical `SecondRite` save profile or another candidate's saves.
-`run-cards.json` records source commit, canonical Project hashes, each candidate's
-exact selected data digest, and its validation and launch evidence.
+`run-cards.json` records source commit, canonical Project hashes, a digest of the
+runtime, RTP, exporter, and Test Play/staging code, each candidate's exact
+selected data digest, and its validation and launch evidence. `verify`,
+`validate`, and `play` refuse to proceed if either the Project or execution
+sources differ from the recorded baseline. Prepare a new gauntlet to compare a
+different runtime version.
 
 ## Validate and play
 
-Run from the repository root. The selector verifies the canonical Project
-against its recorded source hashes, copies it into a disposable temporary
+Run from the repository root. The selector verifies the canonical Project and
+execution sources against their recorded hashes, copies it into a disposable temporary
 Project, applies one immutable candidate overlay, checks the selected data
 digest, and launches through the ordinary `studio/editor/project-cli.js play`
 path. The temporary Project is removed after LÖVE exits; canonical Project

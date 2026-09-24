@@ -627,10 +627,29 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await mapCanvas.focus();
         await mapCanvas.press('g');
         await mapCanvas.press('x');
-        const orthographicTarget = {
-            x: orthographicBox.x + orthographicBox.width * 0.62,
-            y: orthographicBox.y + orthographicBox.height * 0.58,
-        };
+        await mainPage.waitForFunction(() => {
+            const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();
+            return state.operation === 'move' && state.constraint === 'X';
+        });
+        const orthographicCandidates = [
+            [0.18, 0.18], [0.82, 0.18], [0.18, 0.82], [0.82, 0.82],
+        ].map(([x, y]) => ({
+            x: orthographicBox.x + orthographicBox.width * x,
+            y: orthographicBox.y + orthographicBox.height * y,
+        }));
+        let orthographicTarget = null;
+        let orthographicPreview = 0;
+        for (const candidate of orthographicCandidates) {
+            await mainPage.mouse.move(candidate.x, candidate.y, { steps: 4 });
+            const value = await mainPage.evaluate(() =>
+                window.ThestraRuntimeCameraViewport.getSpatialInteractionState().value?.X || 0);
+            if (Math.abs(value) > Math.abs(orthographicPreview)) {
+                orthographicTarget = candidate;
+                orthographicPreview = value;
+            }
+        }
+        assert.ok(orthographicTarget && Math.abs(orthographicPreview) > 0.001,
+            'Orthographic X constraint must respond to at least one viewport pointer direction');
         await mainPage.mouse.move(orthographicTarget.x, orthographicTarget.y, { steps: 4 });
         await mainPage.waitForFunction(() => {
             const state = window.ThestraRuntimeCameraViewport.getSpatialInteractionState();

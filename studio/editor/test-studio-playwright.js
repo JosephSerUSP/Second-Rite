@@ -613,6 +613,8 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         mark(t, 'Perspective G click-confirm created one identity-safe Map history transaction with undo and redo');
 
         await mainPage.getByRole('button', { name: 'Orthographic' }).click();
+        await mainPage.waitForFunction(() =>
+            window.ThestraRuntimeCameraViewport.getViewState().projection === 'orthographic');
         const orthographicBox = await mapCanvas.boundingBox();
         assert.ok(orthographicBox, 'Orthographic G translation needs the real Map canvas');
         await mainPage.evaluate(() => {

@@ -1,7 +1,7 @@
 {
   "id": "a001_pong",
   "terminal": {
-    "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
+    "none": "Continuous simulation"
   },
   "name": "A001 — Pong",
   "kind": "menu",
@@ -165,7 +165,7 @@
         "assignments": [
           {
             "name": "paddle1Y",
-            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle1Y + sceneState.inputY * 15.0 * sceneState.time.dt))"
+            "value": "clamp(sceneState.paddle1Y + sceneState.inputY * 15.0 * sceneState.time.dt, 0, sceneState.gridH - sceneState.paddleH)"
           },
           {
             "name": "inputY",
@@ -181,7 +181,7 @@
           },
           {
             "name": "paddle2Y",
-            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle2Y))"
+            "value": "clamp(sceneState.paddle2Y, 0, sceneState.gridH - sceneState.paddleH)"
           },
           {
             "name": "ballX",

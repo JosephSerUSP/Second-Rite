@@ -1100,7 +1100,10 @@ export function createCompositionViewport(container, options) {
         renderer.domElement.focus({ preventScroll: true });
         lastPointerEvent = pointerSnapshot(event);
         if (modalEventMove) {
-            if (event.button === 0) endModalEventMove(true);
+            if (event.button === 0) {
+                updateModalEventMove(event);
+                endModalEventMove(true);
+            }
             else if (event.button === 2) endModalEventMove(false);
             if (event.button === 0 || event.button === 2) {
                 event.preventDefault();
@@ -1108,7 +1111,10 @@ export function createCompositionViewport(container, options) {
             }
         }
         if (modalProfileMove) {
-            if (event.button === 0) endModalProfileMove(true);
+            if (event.button === 0) {
+                updateModalProfileMove(event);
+                endModalProfileMove(true);
+            }
             else if (event.button === 2) endModalProfileMove(false);
             if (event.button === 0 || event.button === 2) {
                 event.preventDefault();

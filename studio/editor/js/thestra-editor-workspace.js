@@ -22,6 +22,7 @@
     let loadedMapIndex = null;
     let bundleStatus = 'runtime geometry';
     let toolbarExpanded = true;
+    let spatialStatusActive = false;
     const workspaceReadiness = WorkspaceState.createReadiness();
 
     area.style.position = 'relative';
@@ -583,8 +584,10 @@
                 },
                 onSpatialStateChange(snapshot) {
                     if (snapshot?.feedback) {
+                        spatialStatusActive = true;
                         setStatus(`Spatial · ${snapshot.feedback}`);
                     } else if (snapshot?.operation === 'move') {
+                        spatialStatusActive = true;
                         const defaultAxes = snapshot.selection?.kind === 'event' ? 'XYZ' : 'YZ';
                         const constraint = snapshot.constraint ? ` · ${snapshot.constraint}` : ` · ${defaultAxes}`;
                         const value = snapshot.value && typeof snapshot.value === 'object'
@@ -594,6 +597,9 @@
                                 .join(' · ')
                             : '';
                         setStatus(`Move${constraint}${value ? ` · ${value}` : ''} · Enter/LMB confirm · Esc/RMB cancel`);
+                    } else if (spatialStatusActive) {
+                        spatialStatusActive = false;
+                        setStatus(describeSelection(snapshot?.selection || null));
                     }
                     window.dispatchEvent(new CustomEvent('thestra-spatial-interaction-changed', {
                         detail: snapshot

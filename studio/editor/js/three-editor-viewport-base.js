@@ -2226,7 +2226,11 @@ export function createThreeEditorViewport(container, options = {}) {
         if (modalMoveGesture) {
             const finish = modalMoveGesture.kind === 'event-move'
                 ? endModalEventMove : endModalProfileMove;
-            if (event.button === 0) finish(true);
+            if (event.button === 0) {
+                if (modalMoveGesture.kind === 'event-move') updateModalEventMove(event);
+                else updateModalProfileMove(event);
+                finish(true);
+            }
             else if (event.button === 2) finish(false);
             if (event.button === 0 || event.button === 2) {
                 event.preventDefault();

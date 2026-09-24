@@ -91,7 +91,7 @@ function assertRecordedSources(record, context) {
     if (sourceDataSha256 !== record.sourceDataSha256 || sourceAssetsSha256 !== record.sourceAssetsSha256) {
         throw new Error(`Canonical Project data/assets changed since the experiment baseline was recorded (${context})`);
     }
-    if (digestExecutionSources() !== record.sourceExecutionSha256) {
+    if (sourceExecutionSha256 !== record.sourceExecutionSha256) {
         throw new Error(`Runtime, exporter, or Project launch sources changed since the experiment baseline was recorded (${context}); prepare a new gauntlet to compare that version`);
     }
 }
@@ -146,6 +146,7 @@ function create() {
 
     const sourceDataSha256 = digestTree(path.join(sourceProject, 'data'), 'data/');
     const sourceAssetsSha256 = digestTree(path.join(sourceProject, 'assets'), 'assets/');
+    const sourceExecutionSha256 = digestExecutionSources();
     const records = [];
     for (const candidate of candidates) {
         const overlay = overlayFor(candidate);

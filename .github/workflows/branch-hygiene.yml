@@ -86,9 +86,35 @@ jobs:
               `\`branch-hygiene-${context.runId}\` artifact of [this run](${runUrl}).\n`;
             const stamp = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
             const title = `Branch hygiene census — ${stamp} — main ${process.env.MAIN_SHORT} — run ${context.runId}`;
-            await github.rest.issues.create({
+            const { data: created } = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title,
               body,
             });
+
+            // Each census supersedes the last; close earlier ones so only the current report stays open.
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              creator: 'github-actions[bot]',
+              per_page: 100,
+            });
+            for (const issue of open) {
+              if (issue.pull_request || issue.number === created.number) continue;
+              if (!issue.title.startsWith('Branch hygiene census — ')) continue;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Superseded by the current census, #${created.number}.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'not_planned',
+              });
+            }

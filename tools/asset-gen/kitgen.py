@@ -12,7 +12,7 @@ guarantees by construction and a neural mesh generator cannot.
     own baked texture, which is precisely the mismatch roadmap 5.4 warns about.
   * The budget is tens of triangles, faceted, at a 256x144 framebuffer. Neural
     output is dense and smooth and needs retopo before it is usable.
-  * Deterministic, diffable, regenerable -- same shape as gen_tileset.py.
+  * Deterministic, diffable, regenerable.
 
 TEXEL DENSITY, the standard roadmap 5.4 asks for and this closes:
 

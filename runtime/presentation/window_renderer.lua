@@ -483,9 +483,19 @@ end
 -- Scene env (draw-time formula context)
 -- ---------------------------------------------------------------------------
 
+-- Draw-only view of Scene State plus its native owner graph, kept beside the
+-- env rather than in it: env is the authored formula context, and native
+-- graphs (the live Battle, its rows) must never reach formulas.
+local presentationStates = setmetatable({}, { __mode = "k" })
+
+local function presentationState(env)
+    return presentationStates[env] or env.sceneState
+end
+
 local function buildEnv(state, sceneData, ctx, listCache)
     local env = {}
     env.sceneState = state.v or {}
+    presentationStates[env] = require("engine.scene_host").presentationView(state)
     env.config = sceneData and sceneData.config or {}
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
@@ -1641,7 +1651,7 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             drawPartyGridStyle(layout, cached.rows, cached.cursor, env, x, y, ctx.session, title, animP)
         end
     elseif style == "enemyRow" then
-        renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle)
+        renderer.drawEnemyRowWindow(presentationState(env).battle)
     elseif style == "battleLog" then
         renderer.drawBattleLogWindow(env.sceneState and env.sceneState.combatLog, x, y, w, h)
     elseif style == "victoryPanel" then
@@ -1650,9 +1660,9 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
     elseif style == "levelUpStats" then
         renderer.drawLevelUpStatsWindow(env.sceneState and env.sceneState.levelUpRows, x, y, w, h, title)
     elseif style == "battlerInspector" then
-        renderer.drawBattlerInspector(ctx and ctx.session, env.sceneState, x, y, w, h)
+        renderer.drawBattlerInspector(ctx and ctx.session, presentationState(env), x, y, w, h)
     elseif style == "targetInfo" then
-        renderer.drawTargetInfoWindow(ctx and ctx.session, env.sceneState, x, y, w, h)
+        renderer.drawTargetInfoWindow(ctx and ctx.session, presentationState(env), x, y, w, h)
     elseif style == "creatureHeader" then
         -- A creature's name headline. Its own style rather than a `text`
         -- window, because the rule is that a creature's name ALWAYS carries

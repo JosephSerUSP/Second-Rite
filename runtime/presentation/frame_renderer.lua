@@ -35,7 +35,7 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     scene_host.draw(ctx)
 
     if current == "battle" then
-        local bv = require("engine.scenes.battle").getState()
+        local bv = scene_host.presentationView()
         -- Reticles track battler positions, which battler_geometry authors in
         -- canonical composition coordinates, so they belong inside the frame.
         surface.beginComposition()

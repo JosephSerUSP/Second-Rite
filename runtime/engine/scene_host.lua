@@ -106,6 +106,25 @@ function scene_host.getCurrentNativeState()
     return sceneStack[#sceneStack].native
 end
 
+-- Presentation draws a Scene from its authored State and its native owner
+-- graph together: a native entry shadows its serializable projection (Battle's
+-- `battle` marker resolves to the live Battle, `livingMembers` to the native
+-- rows). Writes land in Scene State. Draw code only -- authored formulas keep
+-- seeing plain ctx.sceneState, so native graphs never cross that boundary.
+function scene_host.presentationView(state)
+    state = state or scene_host.getCurrentState()
+    if not state then return {} end
+    local v, native = state.v or {}, state.native or {}
+    return setmetatable({}, {
+        __index = function(_, key)
+            local value = native[key]
+            if value ~= nil then return value end
+            return v[key]
+        end,
+        __newindex = v,
+    })
+end
+
 -- Player-equivalent observation may ask which authored Scene definition owns
 -- the current visible state, but it receives that definition through the Scene
 -- host rather than reaching into loader/session internals itself.

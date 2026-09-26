@@ -486,6 +486,7 @@ end
 local function buildEnv(state, sceneData, ctx, listCache)
     local env = {}
     env.sceneState = state.v or {}
+    env.nativeState = state.n or {}
     env.config = sceneData and sceneData.config or {}
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
@@ -1641,7 +1642,7 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             drawPartyGridStyle(layout, cached.rows, cached.cursor, env, x, y, ctx.session, title, animP)
         end
     elseif style == "enemyRow" then
-        renderer.drawEnemyRowWindow(env.sceneState and env.sceneState.battle)
+        renderer.drawEnemyRowWindow(env.nativeState and env.nativeState.battle)
     elseif style == "battleLog" then
         renderer.drawBattleLogWindow(env.sceneState and env.sceneState.combatLog, x, y, w, h)
     elseif style == "victoryPanel" then

@@ -1005,7 +1005,10 @@ function love.load(arg)
     
     -- Initialize database loader
     loader.init()
-    
+    -- The window title is the Project's authored display name (#288), not
+    -- the neutral placeholder conf.lua opens the window with.
+    love.window.setTitle(loader.getTerm("game.title", love.window.getTitle()))
+
     -- Build the blank runtime container used by title/options Scene hooks. The
     -- developer flag is set on the module before the first session exists, so
     -- every later session -- RESET_SESSION and savegame.deserialize included --

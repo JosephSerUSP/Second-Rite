@@ -1,8 +1,8 @@
 {
-  "name": "second-rite-editor",
+  "name": "hichaukitoden-maker",
   "version": "1.0.0",
   "private": true,
-  "description": "Second Rite monorepo workspace tooling and shared dependencies",
+  "description": "hichaukitoden-maker workspace tooling and shared dependencies",
   "scripts": {
     "prestart": "node studio/editor/sync-three-vendor.js",
     "start": "node studio/editor/start-studio.js",

@@ -1,6 +1,8 @@
 function love.conf(t)
     t.identity = "SecondRite"
-    t.window.title = "Second Rite"
+    -- Neutral placeholder until love.load sets the Project's terms.json
+    -- game.title (#288); no product name belongs here.
+    t.window.title = "Loading..."
     t.window.width = 768 -- 256 * 3
     t.window.height = 720 -- 240 * 3
     t.window.resizable = true

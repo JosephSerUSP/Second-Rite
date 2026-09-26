@@ -268,6 +268,16 @@ it. Practical consequences an agent must internalize:
   is a *reference*, not a copy. Per-instance state belongs on the instance
   (e.g. ward charges on `battler.wardCharges`, keyed by slot), and anything
   stored there must round-trip through `engine/savegame.lua`.
+- **Identifiers never carry a product name (#288).** Internal identifiers use
+  the permanent codenames `hichaukitoden` (game/runtime) and
+  `hichaukitoden-maker` (engine, Studio, toolchain). Display names — the game's
+  and the Studio's — are authored data: the game's lives in the Project's
+  `terms.json` as `game.title`, and scene text reads it as `{terms.game.title}`.
+  Never introduce a package, directory, env var, workflow or branch name that
+  contains a product or studio name, and never let `hichaukitoden` reach
+  rendered UI. Existing `SECOND_RITE_*` / `second-rite-*` identifiers move only
+  when touched for another reason. "The Second Rite" in `lore.json` is an
+  in-world ritual, not the product name, and stays.
 - **Owner-supervised:** changes to `engine/battle.lua` and
   `engine/scenes/battle.lua` are never made autonomously.
 - **No copy-pasted logic or coordinate math.** Layout/geometry lives in shared

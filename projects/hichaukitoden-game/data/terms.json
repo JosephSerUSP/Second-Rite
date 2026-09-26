@@ -1,4 +1,7 @@
 {
+  "game": {
+    "title": "Second Gate"
+  },
   "battle": {
     "your_party_collapses": "Your party collapses in the dark.",
     "enemies_emerge": "Enemies emerge from the dark!",
@@ -63,7 +66,6 @@
       "AMR",
       "ACC"
     ],
-    "exit_prompt": "Quit Second Rite and exit to the desktop?",
     "exit_options": [
       "YES",
       "NO"
@@ -123,7 +125,7 @@
     "replace_member": "[Recruit] You replace {0} with {1}."
   },
   "title": {
-    "subtitle": "Second Rite: Thestra no Jijou",
+    "subtitle": "Thestra no Jijou",
       "options": [
         "New Game",
         "Continue",

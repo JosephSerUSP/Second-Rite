@@ -497,6 +497,10 @@ local function buildEnv(state, sceneData, ctx, listCache)
     env.sceneState = state.v or {}
     presentationStates[env] = require("engine.scene_host").presentationView(state)
     env.config = sceneData and sceneData.config or {}
+    -- The Project's terms.json, so authored text names the game through
+    -- `{terms.game.title}` instead of hardcoding a display name (#288).
+    local termsLoader = ctx.loader or (ctx.session and ctx.session.loader)
+    env.terms = termsLoader and termsLoader.terms or {}
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
         env.party = formula.groupView(ctx.session.party or {}, ctx.session)

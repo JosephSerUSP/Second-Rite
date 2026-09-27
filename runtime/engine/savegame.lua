@@ -135,6 +135,28 @@ local function serializeMap(sessionObj)
         generatedFeatures = sessionObj.generatedFeatures,
         generatedZones = sessionObj.generatedZones,
         dungeonFloor = sessionObj.dungeonFloor,
+        movers = (function()
+            if not sessionObj.movers or #sessionObj.movers == 0 then return nil end
+            local list = {}
+            for _, m in ipairs(sessionObj.movers) do
+                table.insert(list, {
+                    eventId = m.eventId,
+                    segmentIdx = m.segmentIdx,
+                    nextIdx = m.nextIdx,
+                    direction = m.direction,
+                    phase = m.phase,
+                    timer = m.timer,
+                    doorState = m.doorState,
+                    curX = m.curX,
+                    curY = m.curY,
+                    onboard = m.onboard,
+                    playerOffsetX = m.playerOffsetX,
+                    playerOffsetY = m.playerOffsetY,
+                    transitDuration = m.transitDuration,
+                })
+            end
+            return list
+        end)(),
     }
 end
 
@@ -158,6 +180,9 @@ local function restoreMap(sessionObj, data, loader)
     sessionObj.playerY = data.playerY
     sessionObj.playerDir = data.playerDir
     sessionObj.dungeonFloor = data.dungeonFloor or sessionObj.dungeonFloor
+    sessionObj.movers = nil
+    sessionObj.moverMapId = nil
+    sessionObj.restoredMovers = data.movers
     local presentation = sessionObj.mapPresentationOverrides
         and sessionObj.mapPresentationOverrides[data.mapIndex]
     if presentation then

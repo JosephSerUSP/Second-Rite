@@ -1,0 +1,6 @@
+# Metro Platform Architectural Pillar
+newmtl concrete_pillar
+Kd 0.68 0.70 0.72
+
+newmtl pillar_base
+Kd 0.30 0.32 0.35

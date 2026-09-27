@@ -1,0 +1,62 @@
+{
+  "id": 37,
+  "name": "Carro de Passageiros - Metrô SP",
+  "title": "Carro de Passageiros - Metrô SP",
+  "intro": "O interior prateado do vagão ressoa com o embalo dos trilhos e o murmúrio dos ventiladores de teto.",
+  "depth": 7,
+  "safe": true,
+  "generation": "Fixed",
+  "tileset": "metro_wagon_interior",
+  "music": "dungeon1",
+  "layout": [
+    "#####",
+    "#...#",
+    "#...#",
+    "#...#",
+    "#...#",
+    "#...#",
+    "#####"
+  ],
+  "spawn": {
+    "x": 2,
+    "y": 4,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Commuter Passenger",
+      "x": 1,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/metro_commuter.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "O passageiro lê um jornal com manchetes de 1998 sem desviar os olhos."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "'Atenção aos avisos sonoros e ao vão entre o trem e a plataforma. As estações mudam, mas o trilho nunca tem fim.'"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Route Diagram Map",
+      "x": 2,
+      "y": 1,
+      "trigger": "interact",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "[MAPA DA REDE METROVIÁRIA]\nLinha 1-Azul (Tiradentes - Luz - Sé - Liberdade - Paraíso - Santa Cruz)\nLinha 2-Verde (Paraíso - Brigadeiro - Trianon - Consolação - Clínicas - Klabin)\nLinha 3-Vermelha (Sé - Anhangabaú - República - Santa Cecília - Mooca - Brás)\nLinha 4-Amarela (Paulista - Higienópolis - República - Luz - Faria Lima)\nLinha 5-Lilás (Klabin - Hosp. SP - Moema - Largo Treze - Caverna CCO)"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

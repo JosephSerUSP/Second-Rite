@@ -7,6 +7,7 @@ on:
       - agent/303-structured-blend-export
     paths:
       - ".github/workflows/blender-map-export.yml"
+      - ".github/actions/install-blender/**"
       - "projects/hichaukitoden-game/data/maps/**"
       - "projects/hichaukitoden-game/assets/**"
       - "tools/semantic-roots.js"
@@ -19,6 +20,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/blender-map-export.yml"
+      - ".github/actions/install-blender/**"
       - "projects/hichaukitoden-game/data/maps/**"
       - "projects/hichaukitoden-game/assets/**"
       - "tools/semantic-roots.js"
@@ -46,12 +48,6 @@ jobs:
     env:
       SDL_AUDIODRIVER: dummy
 
-
-
-      BLENDER_VERSION: "5.0.1"
-      BLENDER_URL: "https://download.blender.org/release/Blender5.0/blender-5.0.1-windows-x64.zip"
-      BLENDER_SHA256: "921D77F6C505A35B2C2F6E67D4AD1C10B72418338BA0E0D3EA7F582A5E5FE46E"
-
     steps:
       - name: Check out the commit under test
         uses: actions/checkout@v4
@@ -69,31 +65,9 @@ jobs:
         # Version, URL and digest live in the action, not here (#725).
         uses: ./.github/actions/install-mesa
 
-      - name: Install pinned Blender ${{ env.BLENDER_VERSION }} portable
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "blender.zip"
-          $dest = Join-Path $env:RUNNER_TEMP "blender"
-
-          Invoke-WebRequest -Uri $env:BLENDER_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
-          Write-Host "blender-$env:BLENDER_VERSION-windows-x64.zip SHA256: $sha"
-          if ($sha -ne $env:BLENDER_SHA256) {
-            throw "Blender archive digest mismatch`n  expected: $($env:BLENDER_SHA256)`n  actual:   $sha"
-          }
-
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $blender = Get-ChildItem -Path $dest -Recurse -Filter "blender.exe" |
-                     Select-Object -First 1 -ExpandProperty FullName
-          if (-not $blender) { throw "blender.exe not found under $dest" }
-
-          $reported = & $blender --version 2>&1 | Out-String
-          Write-Host $reported.Trim()
-          if ($reported -notmatch [regex]::Escape($env:BLENDER_VERSION)) {
-            throw "expected Blender $env:BLENDER_VERSION, got: $($reported.Trim())"
-          }
-          "BLENDER_PATH=$blender" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Install pinned Blender
+        # Version, URL and digest live in tools/blender/blender-pin.json (#1254).
+        uses: ./.github/actions/install-blender
 
       - name: WorldCamera -> Blender camera calibration parity
         shell: pwsh
@@ -125,7 +99,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          & $env:BLENDER_PATH --background --factory-startup `
+          & $env:BLENDER_EXECUTABLE --background --factory-startup `
             --python tools/blender/tests/verify_map_blend.py -- $env:CI_MAP_BLEND 8
           if ($LASTEXITCODE -ne 0) { throw "Blender structural verification failed (exit $LASTEXITCODE)" }
 

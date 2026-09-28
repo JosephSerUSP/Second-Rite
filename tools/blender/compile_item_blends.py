@@ -7,9 +7,9 @@ runtime products for CI.
 
 Examples::
 
-    python tools/blender/compile_item_blends.py --blender /path/to/blender
-    python tools/blender/compile_item_blends.py --blender /path/to/blender --check
-    python tools/blender/compile_item_blends.py --blender /path/to/blender \
+    python tools/blender/compile_item_blends.py
+    python tools/blender/compile_item_blends.py --check
+    python tools/blender/compile_item_blends.py \
       --source assets/authoring/items/foo.blend --output-dir /tmp/item-compile
 """
 
@@ -18,13 +18,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+import blender_locator  # noqa: E402
+
 ROOT = SCRIPT_DIR.parents[1]
 DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
 BLENDER_SCRIPT = SCRIPT_DIR / "compile_item_blend.py"
@@ -114,7 +116,6 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, mo
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--blender", default=os.environ.get("BLENDER_BIN") or shutil.which("blender"))
     parser.add_argument(
         "--project-root",
         type=Path,
@@ -132,8 +133,6 @@ def main(argv=None):
         help="compile to a temporary directory and require products to match checked-in OBJ/MTL",
     )
     args = parser.parse_args(argv)
-    if not args.blender:
-        raise SystemExit("Blender executable not found; pass --blender or set BLENDER_BIN")
     if args.check and args.output_dir:
         raise SystemExit("--check and --output-dir are mutually exclusive")
 
@@ -149,16 +148,17 @@ def main(argv=None):
         print(f"No authoritative item .blend sources under {rel}; nothing to compile.")
         return 0
 
+    blender = blender_locator.blender_executable()
     if args.check:
         with tempfile.TemporaryDirectory(prefix="second-rite-item-compile-") as temp:
             output_dir = Path(temp)
             for source in sources:
-                compile_one(args.blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir)
+                compile_one(blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir)
     else:
         output_dir = Path(args.output_dir).resolve() if args.output_dir else model_dir
         output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(args.blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir)
+            compile_one(blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

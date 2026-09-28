@@ -3,13 +3,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLKIT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-BLENDER_BIN="${1:-${BLENDER_BIN:-blender}}"
+BLENDER_EXECUTABLE="${1:-${BLENDER_EXECUTABLE:-blender}}"
 OUTPUT_DIR="${2:-${SECOND_RITE_OUT:-$TOOLKIT_ROOT/output}}"
 
 mkdir -p "$OUTPUT_DIR"
 export SECOND_RITE_OUT="$OUTPUT_DIR"
 
-RUNNER=("$BLENDER_BIN" --background --python "$TOOLKIT_ROOT/build_expanded_item_library.py")
+RUNNER=("$BLENDER_EXECUTABLE" --background --python "$TOOLKIT_ROOT/build_expanded_item_library.py")
 if command -v xvfb-run >/dev/null 2>&1; then
   RUNNER=(xvfb-run -a "${RUNNER[@]}")
 fi

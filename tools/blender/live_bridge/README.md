@@ -49,7 +49,7 @@ The package manifest records add-on, client, and protocol versions. Its test
 audits an exact file allowlist, so project assets, tokens, captures, bytecode,
 and unrelated Blender tools cannot enter the ZIP.
 
-In Blender 5.1:
+In the pinned Blender (`tools/blender/blender-pin.json`):
 
 1. Open **Edit > Preferences > Add-ons**.
 2. Choose **Install from Disk** and select the ZIP.

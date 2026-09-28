@@ -52,7 +52,7 @@ class TestCompileItemBlendsHost(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             empty_project = Path(temp_dir)
             with self.assertRaises(SystemExit) as ctx:
-                compile_item_blends.main(["--blender", "dummy_blender", "--check", "--project-root", str(empty_project)])
+                compile_item_blends.main(["--check", "--project-root", str(empty_project)])
             self.assertIn("cannot verify", str(ctx.exception))
 
     def test_compare_bytes_missing_expected_product(self):

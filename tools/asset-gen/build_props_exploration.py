@@ -7,7 +7,7 @@ Generates 3 distinct design variants for:
 Exports OBJ+MTL models and renders side-by-side comparison sheets.
 
 Run via Blender:
-  & "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe" --background --python tools/asset-gen/build_props_exploration.py
+  & $env:BLENDER_EXECUTABLE --background --python tools/asset-gen/build_props_exploration.py
 """
 
 import bpy

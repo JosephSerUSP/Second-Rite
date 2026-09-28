@@ -81,24 +81,23 @@ Blender `.blend1`, `.blend2`, etc. files are workstation safety backups, not rep
 
 ## Compile
 
-With Blender on `PATH`:
+With `BLENDER_EXECUTABLE` set to the pinned Blender (`tools/blender/blender-pin.json`):
 
 ```text
 python tools/blender/compile_item_blends.py
 ```
 
-Or point at a specific executable/source:
+Or compile one source:
 
 ```text
 python tools/blender/compile_item_blends.py \
-  --blender /path/to/blender \
   --source assets/authoring/items/cerberus_fang.blend
 ```
 
 CI uses `--check`, which compiles into a temporary directory and requires the result to match the checked-in runtime product without dirtying the repository:
 
 ```text
-python tools/blender/compile_item_blends.py --blender /path/to/blender --check
+python tools/blender/compile_item_blends.py --check
 ```
 
 ## A / B / C after the experiments

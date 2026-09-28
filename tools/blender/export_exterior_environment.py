@@ -14,19 +14,20 @@ exactly three ways, and each is a property of the subject rather than a choice:
 
     blender -b -noaudio --python tools/blender/export_exterior_environment.py --         --blend projects/.../st_maria_praca_modelled.blend         --output projects/.../environments/st_maria_town/praca_3d
 
-## Known incomplete: the atlas packs to 9%
+## Atlas coverage
 
 Geometry is exact -- this reproduces the shipped package's 9,304 triangles
-exactly once the off-square duplicate is filtered. The ATLAS is not: it packs
-to roughly 9% non-black coverage against the shipped package's 69%, and against
-41.8% for an interior room through the same pipeline. The consequence is a
-mostly empty atlas and far too few texels on each surface, which reads as a
-dark, muddy street.
+exactly once the off-square duplicate is filtered.
 
-Lighting is staged below because an unlit bake is wrong regardless, and it does
-move the mean from 0.8 to 2.5. Note that per #1023, the atlas transfer defect is
-driven by a circular image dependency on the bake receiver rather than island
-margin. Do not tune the lights to chase brightness until the bake graph is resolved.
+The atlas once packed to roughly 9% non-black coverage against the shipped
+package's 69%. That was the circular bake-image dependency of #1023, closed by
+#1069: ``town_environment_pipeline.py`` now keeps the bake target's image node
+unlinked from the shader until the bake completes. No coverage figure is
+recorded here, because the earlier number described the defect and has not been
+re-measured against the fixed bake; measure "written" pixels as defined in #1023
+before quoting one.
+
+Lighting is still staged below, since an unlit bake is wrong regardless.
 
 ## Not yet generic, and not yet mirrored
 

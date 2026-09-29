@@ -276,3 +276,10 @@ same pattern as ground cover. Worth doing when a screen needs it, not before.
 - [CG Channel: Blender 5.2 LTS key features](https://www.cgchannel.com/2026/07/blender-5-2-lts-is-here-discover-its-5-key-features/)
 - [80.lv: Cycles texture cache in 5.2](https://80.lv/articles/blender-5-2-lts-introduces-new-cycles-texture-cache-system)
 - [Blender developers blog: Geometry Nodes physics](https://code.blender.org/2026/07/geometry-nodes-physics/)
+
+Agent-Signature:
+  platform: Claude Code (cloud session)
+  model: platform-selected/unknown
+  role: research
+  task: "Blender tooling audit; issues #1254-#1257"
+  base: 7e7e231

@@ -131,6 +131,19 @@ test('surface ready can show/focus only the BrowserWindow owned by that renderer
     assert.equal(f.ready.length, 1, 'unowned readiness must never reach the observer');
 });
 
+test('main surface readiness does not reveal the editor before boot readiness', async () => {
+    const f = fixture();
+    const result = await f.ipcMain.invoke(
+        'thestra-studio-surface-ready',
+        { sender: f.mainWebContents },
+        'main'
+    );
+    assert.deepEqual(result, { surfaceId: 'main', shown: false });
+    assert.equal(f.mainWin.showCount || 0, 0);
+    assert.equal(f.mainWin.focusCount || 0, 0);
+    assert.deepEqual(f.ready, [{ surfaceId: 'main', owner: f.mainWin }]);
+});
+
 test('committed resource invalidations go only to sibling Studio renderers', async () => {
     const f = fixture();
 

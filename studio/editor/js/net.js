@@ -113,10 +113,17 @@
 
         async function fetchDatabaseAttempt(retries = 3) {
             let dataLoaded = false;
+            if (window.ThestraBoot) window.ThestraBoot.update('Loading Project data…');
             try {
                 const res = await fetch(`${API_URL}/data`);
                 if (!res.ok) throw new Error('Database server offline');
                 dbPayload = await res.json();
+                const bootIdentity = dbPayload._studioBoot;
+                if (window.ThestraBoot) {
+                    window.ThestraBoot.setStudioName(bootIdentity && bootIdentity.studioName);
+                    window.ThestraBoot.setProject(bootIdentity && bootIdentity.projectName || 'Project identity unavailable');
+                    window.ThestraBoot.update('Project data loaded; preparing editor services…');
+                }
                 dataLoaded = true;
             } catch (err) {
                 if (retries > 0) {
@@ -125,7 +132,11 @@
                 }
                 console.error('Database fetch error:', err);
                 document.getElementById('status-db').textContent = 'Database: Offline';
-                showToast('Failed to connect to Second Rite dev server!\n\nVerify that the editor server is running.');
+                if (window.ThestraBoot && window.ThestraBoot.isMainSurface && window.thestraStudio) {
+                    window.ThestraBoot.fail('Project data could not be loaded. Check that the Studio server is running, then reload.\n\n' + err.message);
+                } else {
+                    showToast('Failed to connect to the Studio server.\n\nVerify that the editor server is running.');
+                }
                 publishDatabaseBootReady(false);
                 return false;
             }

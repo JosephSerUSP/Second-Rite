@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
     openSurface: surfaceId => ipcRenderer.invoke('thestra-studio-open-surface', surfaceId),
     closeSurface: surfaceId => ipcRenderer.invoke('thestra-studio-close-surface', surfaceId),
     surfaceReady: surfaceId => ipcRenderer.invoke('thestra-studio-surface-ready', surfaceId),
+    bootProgress: payload => ipcRenderer.invoke('thestra-boot-splash-progress', payload || {}),
+    bootReady: () => ipcRenderer.invoke('thestra-boot-splash-ready'),
+    bootFailed: message => ipcRenderer.invoke('thestra-boot-splash-failed', String(message || 'Studio could not finish starting.')),
     projectSwitchReady: () => ipcRenderer.invoke('thestra-studio-project-switch-ready'),
     chooseCloseAction: surfaceId => ipcRenderer.invoke('thestra-studio-close-choice', surfaceId),
     announceResourceCommit: (resources, versions) => ipcRenderer.invoke('thestra-studio-resource-commit', {

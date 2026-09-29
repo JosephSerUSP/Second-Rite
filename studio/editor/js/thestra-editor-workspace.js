@@ -68,6 +68,11 @@
     function setStatus(text, detail) {
         status.textContent = text;
         status.title = detail || '';
+        if (window.ThestraBoot && window.ThestraBoot.state === 'loading') {
+            window.dispatchEvent(new CustomEvent('thestra-map-workspace-progress', {
+                detail: { status: text, detail: detail || '' }
+            }));
+        }
     }
 
     function layerLabel() {
@@ -811,6 +816,9 @@
             if (workspaceReadiness.settle(readinessToken)) {
                 status.dataset.workspaceReady = '1';
                 status.dataset.workspaceRevision = String(readinessToken);
+                window.dispatchEvent(new CustomEvent('thestra-map-workspace-ready', {
+                    detail: { status: status.textContent, revision: readinessToken }
+                }));
             }
         }).catch(console.error);
     }
@@ -837,7 +845,11 @@
             setDisplayIfNeeded(viewport, 'block');
             updateButtons();
             syncWorkspaceVisibility();
-            alert('The 3D authoring viewport could not start. Run npm install and launch the editor with npm start so the Three.js vendor files are prepared.\n\n' + error.message);
+            if (window.ThestraBoot && window.ThestraBoot.isMainSurface && window.thestraStudio) {
+                window.ThestraBoot.fail(`The initial workspace could not start. Run npm start to prepare the editor dependencies, then reload Studio.\n\n${error.stack || error.message}`);
+            } else {
+                alert('The 3D authoring viewport could not start. Run npm install and launch the editor with npm start so the Three.js vendor files are prepared.\n\n' + error.message);
+            }
         }
     }
 

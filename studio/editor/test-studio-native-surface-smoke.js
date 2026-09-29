@@ -26,7 +26,7 @@ function terminateProcessTree(child) {
     });
 }
 
-function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
+function startNativeSurfaceSmoke(hostPath, marker, envName = 'THESTRA_STUDIO_SURFACE_SMOKE_MARKER', timeoutMs = 30000) {
     return new Promise((resolve, reject) => {
         const child = childProcess.spawn(hostPath, [STUDIO_ROOT], {
             cwd: REPO_ROOT,
@@ -34,7 +34,7 @@ function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
             stdio: ['ignore', 'pipe', 'pipe'],
             env: {
                 ...process.env,
-                THESTRA_STUDIO_SURFACE_SMOKE_MARKER: marker,
+                [envName]: marker,
                 ELECTRON_DISABLE_GPU: '1',
             },
         });
@@ -149,6 +149,33 @@ test('real Electron host loads main, Database, Engine, and Tileset as separate B
             `Engine renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
         assert.ok(smoke.readySurfaces.includes('tileset'),
             `Tileset renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
+
+test('real Electron host shows a compact splash before revealing the main Studio window', {
+    skip: process.platform !== 'win32',
+    timeout: 120000,
+}, async () => {
+    const host = await ensureWindowsDevHost();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-boot-splash-smoke-'));
+    const marker = path.join(dir, 'boot-splash.json');
+    try {
+        const { smoke } = await startNativeSurfaceSmoke(
+            host.hostPath,
+            marker,
+            'THESTRA_STUDIO_BOOT_SPLASH_SMOKE_MARKER',
+            90000
+        );
+        assert.deepEqual(smoke.splashBounds && {
+            width: smoke.splashBounds.width,
+            height: smoke.splashBounds.height,
+        }, { width: 840, height: 502 });
+        assert.equal(smoke.splashWasVisible, true);
+        assert.equal(smoke.splashImageLoaded, true, 'the selected illustration must finish loading before handoff');
+        assert.equal(smoke.splashClosedAfterReady, true);
+        assert.equal(smoke.mainVisibleAfterSplash, true);
     } finally {
         fs.rmSync(dir, { recursive: true, force: true });
     }

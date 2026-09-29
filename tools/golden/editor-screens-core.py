@@ -912,11 +912,24 @@ class RuntimeBridge(NodeService):
             return  # any HTTP answer means the port is serving
 
 
-def run_capture_set():
-    """Returns [{path, image(bytes)}] for every step in STEPS."""
-    steps = build_steps()
-    server = EditorServer()
-    bridge = RuntimeBridge(editor_port=server.port)
+# #1263: Chrome has answered every setup command and then never replied to the
+# FIRST Page.navigate (hosted run 36592271681: 30 s, no frame, nothing loaded).
+# Nothing had been loaded and nothing had been captured, so a fresh Chrome loses
+# no evidence -- but only that one failure earns a retry (see open_editor_page).
+FIRST_NAVIGATION_ATTEMPTS = 2
+
+
+def discard_chrome(chrome, profile):
+    if chrome:
+        chrome.close()
+    shutil.rmtree(profile, ignore_errors=True)
+
+
+def launch_chrome(bridge):
+    """A Chrome configured for this gate but not yet navigated.
+
+    Returns (chrome, profile); the caller owns both and must discard_chrome().
+    """
     profile = tempfile.mkdtemp(prefix="g6-chrome-")
     chrome = None
     try:
@@ -937,7 +950,55 @@ def run_capture_set():
         chrome.call("Page.addScriptToEvaluateOnNewDocument",
                     source="globalThis.THESTRA_RENDERABLE_URL = %s;"
                            % json.dumps(bridge.url + "/api/map-renderable"))
-        chrome.call("Page.navigate", url=server.url + "/")
+    except BaseException:
+        discard_chrome(chrome, profile)
+        raise
+    return chrome, profile
+
+
+def open_editor_page(editor_url, bridge, launch=None,
+                     attempts=FIRST_NAVIGATION_ATTEMPTS, log=print):
+    """Navigate a gate Chrome to the editor; returns (chrome, profile).
+
+    Only a websocket TIMEOUT on this first Page.navigate is retried, on a
+    brand-new Chrome and profile, and the retry is announced. Everything else --
+    a CDP error, a page that throws, a wait that expires later -- propagates
+    untouched, because those describe the editor and a retry would hide them.
+    When every attempt stalls the result is a HarnessStall, so the gate reports
+    "stalled before pixel comparison" rather than a bare traceback. No frame
+    exists before this call returns, so a retry cannot change a photograph.
+    """
+    launch = launch or launch_chrome
+    last = None
+    for attempt in range(1, attempts + 1):
+        chrome, profile = launch(bridge)
+        try:
+            chrome.call("Page.navigate", url=editor_url + "/")
+            return chrome, profile
+        except websocket.WebSocketTimeoutException as timeout:
+            discard_chrome(chrome, profile)
+            last = timeout
+            if attempt < attempts:
+                log("  G6 harness: Chrome did not answer its first Page.navigate "
+                    "within %.0fs (attempt %d/%d); restarting Chrome. Nothing had "
+                    "loaded, so no frame is affected."
+                    % (STEP_TIMEOUT, attempt, attempts))
+        except BaseException:
+            discard_chrome(chrome, profile)
+            raise
+    raise HarnessStall("the first Chrome navigation (%d attempts)" % attempts,
+                       "Page.navigate " + editor_url + "/", last)
+
+
+def run_capture_set():
+    """Returns [{path, image(bytes)}] for every step in STEPS."""
+    steps = build_steps()
+    server = EditorServer()
+    bridge = RuntimeBridge(editor_port=server.port)
+    chrome = None
+    profile = None
+    try:
+        chrome, profile = open_editor_page(server.url, bridge)
         # Not the status bar: index.html ships the literal text "Database:
         # Connected" as its placeholder, so that field reads green before a
         # single byte has been fetched. Wait on the data and on the tree the
@@ -992,10 +1053,9 @@ def run_capture_set():
         return captures
     finally:
         if chrome:
-            chrome.close()
+            discard_chrome(chrome, profile)
         bridge.close()
         server.close()
-        shutil.rmtree(profile, ignore_errors=True)
 
 
 def safe_relpath(path):

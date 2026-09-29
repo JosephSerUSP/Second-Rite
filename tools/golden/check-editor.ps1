@@ -29,6 +29,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "G6 readiness scoping regression test failed"
 }
 
+# #1263: a stalled FIRST Chrome navigation is retried once on a fresh Chrome, and
+# nothing else is. Pure-Python (fake Chrome), so it runs with the other guards.
+& python "tools/golden/test-g6-first-navigation-retry.py"
+if ($LASTEXITCODE -ne 0) {
+    throw "G6 first-navigation retry regression test failed"
+}
+
 # #646: editor-screens-actual/ is evidence for this run, not an append-only
 # history. Reset it and stamp the run before the harness can write any frame.
 & python "tools/golden/actual_run.py" g6

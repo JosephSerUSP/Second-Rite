@@ -159,6 +159,12 @@ test('real Electron host shows a compact splash before revealing the main Studio
     timeout: 120000,
 }, async () => {
     const host = await ensureWindowsDevHost();
+    // `npm start` prepares the ignored Three.js vendor surface through prestart.
+    // Reproduce that launch contract in this direct branded-host smoke too.
+    childProcess.execFileSync(process.execPath, [path.join(STUDIO_ROOT, 'editor', 'sync-three-vendor.js')], {
+        cwd: REPO_ROOT,
+        stdio: 'pipe',
+    });
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-boot-splash-smoke-'));
     const marker = path.join(dir, 'boot-splash.json');
     try {

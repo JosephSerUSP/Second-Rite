@@ -5,7 +5,11 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from blender_locator import blender_executable  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "tools" / "blender" / "tests" / "fixtures" / "thestra_camera_parity.json"
@@ -31,19 +35,6 @@ def love_executable():
     if direct:
         return direct
     raise SystemExit("LÖVE not found; set LOVE_PATH")
-
-
-def blender_executable():
-    direct = _first_file([
-        os.environ.get("BLENDER_PATH"), os.environ.get("BLENDER"),
-        r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe",
-        r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe",
-        r"C:\Program Files\Blender Foundation\Blender 4.1\blender.exe",
-        shutil.which("blender"),
-    ])
-    if direct:
-        return direct
-    raise SystemExit("Blender not found; set BLENDER_PATH (or BLENDER)")
 
 
 # A failing LOVE script does not exit: it raises into LOVE's error screen and

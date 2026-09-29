@@ -55,8 +55,21 @@ function defaultOutput(map, root) {
     return path.join(root, 'exports', 'maps', `${id}-${name}.blend`);
 }
 
-function blenderExecutable(env = process.env) {
-    return env.BLENDER_PATH || 'blender';
+// The Blender locator is one Python module (blender_locator.py): it reads the
+// one environment variable, asserts the pinned version, and fails loudly. This
+// file runs it instead of re-implementing that contract (#1254).
+function blenderExecutable(run = execFileSync, env = process.env) {
+    const python = process.platform === 'win32' ? 'python' : 'python3';
+    try {
+        return run(python, [path.join(__dirname, 'blender_locator.py')], {
+            encoding: 'utf8',
+            env,
+            stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+    } catch (error) {
+        const detail = error && error.stderr ? String(error.stderr).trim() : '';
+        throw new Error(detail || (error && error.message) || String(error));
+    }
 }
 
 async function exportMapBlend(options) {
@@ -79,9 +92,9 @@ async function exportMapBlend(options) {
     fs.writeFileSync(bundlePath, JSON.stringify(bundle));
     fs.mkdirSync(path.dirname(output), { recursive: true });
 
-    const blender = options.blender || blenderExecutable();
-    const importer = path.join(__dirname, 'import_map_bundle.py');
     const run = options.execFileSync || execFileSync;
+    const blender = options.blender || blenderExecutable(run);
+    const importer = path.join(__dirname, 'import_map_bundle.py');
     try {
         run(blender, [
             '--background',
@@ -91,7 +104,7 @@ async function exportMapBlend(options) {
         ], { stdio: 'inherit', cwd: root });
     } catch (error) {
         if (error && error.code === 'ENOENT') {
-            throw new Error(`Blender executable not found (${blender}); set BLENDER_PATH to blender.exe`);
+            throw new Error(`Blender executable not found (${blender})`);
         }
         throw error;
     } finally {

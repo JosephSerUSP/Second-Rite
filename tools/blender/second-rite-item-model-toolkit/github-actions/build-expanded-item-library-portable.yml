@@ -31,9 +31,9 @@ jobs:
             https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz \
             -o blender.tar.xz
           tar -xf blender.tar.xz
-          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
-          test -n "$BLENDER_BIN"
-          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+          BLENDER_EXECUTABLE=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_EXECUTABLE"
+          echo "BLENDER_EXECUTABLE=$BLENDER_EXECUTABLE" >> "$GITHUB_ENV"
 
       - name: Build and validate
         shell: bash
@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euxo pipefail
           cd tools/blender/item-library
-          xvfb-run -a "$BLENDER_BIN" --background --python build_expanded_item_library.py
+          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python build_expanded_item_library.py
           test -s "$SECOND_RITE_OUT/second_rite_item_model_library_expanded.blend"
           test -s "$SECOND_RITE_OUT/second_rite_item_model_library_expanded_preview.png"
           test "$(find "$SECOND_RITE_OUT/exports" -name '*.obj' | wc -l)" -eq 53

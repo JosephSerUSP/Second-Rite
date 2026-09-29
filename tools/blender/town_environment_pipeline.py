@@ -29,20 +29,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BLENDER_SEARCH = [
-    os.environ.get("BLENDER"),
-    r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe",
-    r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe",
-    r"C:\Program Files\Blender Foundation\Blender 4.1\blender.exe",
-    "blender",
-]
-
-
-def blender_executable():
-    for candidate in BLENDER_SEARCH:
-        if candidate and (candidate == "blender" or Path(candidate).is_file()):
-            return candidate
-    raise SystemExit("Blender not found; set BLENDER or install Blender")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from blender_locator import blender_executable  # noqa: E402
 
 
 def _operator_kwargs(operator, candidate_dict):

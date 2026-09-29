@@ -7,7 +7,7 @@ The geometry authority remains the runtime `map_renderable_bundle`. The launcher
 ## Requirements
 
 - LÖVE 11.5 at the normal development path, or `LOVE_PATH` set for the existing runtime bridge.
-- Blender available as `blender`, or `BLENDER_PATH` set to the Blender executable.
+- The pinned Blender (`tools/blender/blender-pin.json`), with `BLENDER_EXECUTABLE` set to its executable. `tools/blender/blender_locator.py` is the one place it is located; a different Blender version is refused with a message naming both versions.
 - Node.js.
 
 ## Run

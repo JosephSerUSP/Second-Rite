@@ -1,0 +1,74 @@
+name: Install Blender
+description: >
+  Install the pinned Blender and export BLENDER_EXECUTABLE. The version, URLs
+  and digests live in tools/blender/blender-pin.json, which is also what
+  tools/blender/blender_locator.py asserts at run time (#1254) -- do not
+  re-declare a Blender version, URL or digest in a workflow.
+
+outputs:
+  blender:
+    description: Absolute path to the installed, version-verified Blender executable.
+    value: ${{ steps.windows.outputs.blender || steps.linux.outputs.blender }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install pinned Blender (Windows)
+      id: windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $pin = Get-Content "tools/blender/blender-pin.json" -Raw | ConvertFrom-Json
+        $archive = $pin.archives."windows-x64"
+        $zip = Join-Path $env:RUNNER_TEMP "blender.zip"
+        $dest = Join-Path $env:RUNNER_TEMP "blender"
+        Invoke-WebRequest -Uri $archive.url -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+        $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+        Write-Host "$($archive.url) SHA256: $sha"
+        # An unrecorded digest is a failure, not a pass: the pin exists so a
+        # swapped archive cannot reach the gates unnoticed. The digest printed
+        # above is what to compare with blender.org's published checksum and
+        # commit into blender-pin.json.
+        if (-not $archive.sha256) { throw "tools/blender/blender-pin.json has no sha256 for windows-x64; observed $sha" }
+        if ($sha -ne $archive.sha256) {
+          throw "Blender archive digest mismatch`n  expected: $($archive.sha256)`n  actual:   $sha"
+        }
+        Expand-Archive -Path $zip -DestinationPath $dest -Force
+        $blender = Get-ChildItem -Path $dest -Recurse -Filter "blender.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+        if (-not $blender) { throw "blender.exe not found under $dest" }
+        "BLENDER_EXECUTABLE=$blender" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "blender=$blender"            | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        # The locator is the version assertion; run it rather than re-checking here.
+        $env:BLENDER_EXECUTABLE = $blender
+        python tools/blender/blender_locator.py
+        if ($LASTEXITCODE -ne 0) { throw "installed Blender is not the pinned version" }
+
+    - name: Install pinned Blender (Linux)
+      id: linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        set -euo pipefail
+        url="$(python3 -c "import json;print(json.load(open('tools/blender/blender-pin.json'))['archives']['linux-x64']['url'])")"
+        want="$(python3 -c "import json;print(json.load(open('tools/blender/blender-pin.json'))['archives']['linux-x64']['sha256'] or '')")"
+        cd "$RUNNER_TEMP"
+        curl -fL --retry 3 "$url" -o blender.tar.xz
+        got="$(sha256sum blender.tar.xz | cut -d' ' -f1)"
+        echo "$url SHA256: $got"
+        if [ -z "$want" ]; then
+          echo "tools/blender/blender-pin.json has no sha256 for linux-x64; observed $got" >&2
+          exit 1
+        fi
+        if [ "$got" != "$want" ]; then
+          echo "Blender archive digest mismatch: expected $want, actual $got" >&2
+          exit 1
+        fi
+        tar -xf blender.tar.xz
+        blender="$(find "$RUNNER_TEMP"/blender-* -maxdepth 2 -type f -name blender -perm -111 | head -1)"
+        test -n "$blender"
+        echo "BLENDER_EXECUTABLE=$blender" >> "$GITHUB_ENV"
+        echo "blender=$blender" >> "$GITHUB_OUTPUT"
+        cd "$GITHUB_WORKSPACE"
+        BLENDER_EXECUTABLE="$blender" python3 tools/blender/blender_locator.py

@@ -39,13 +39,13 @@
     },
     {
       "path": "github-actions/build-expanded-item-library-original.yml",
-      "bytes": 4488,
-      "sha256": "e7ec4dda488ca2d8215da18607e3ff5b59784cc87edfe34a765ef453e85fd9a4"
+      "bytes": 4530,
+      "sha256": "ceabc590420537548da8ca248a2b6981a8f73988f0396fcf0a9858a5563906a6"
     },
     {
       "path": "github-actions/build-expanded-item-library-portable.yml",
-      "bytes": 2423,
-      "sha256": "fb6d055969f7d83fc470c58f6b2d18c7cdada4c19e1f232dbe492dda2a17da3e"
+      "bytes": 2458,
+      "sha256": "4f09d506257427d847155edfb6233f6a5d371f0284edf09a643ba112a4a9d6a7"
     },
     {
       "path": "reference/ITEM_MODEL_MANIFEST.md",
@@ -54,8 +54,8 @@
     },
     {
       "path": "scripts/build_library_linux.sh",
-      "bytes": 1583,
-      "sha256": "c17908982a1e43b2502b7100899ed6c3ac18de20876068b2f8cb8fdbae6c8523"
+      "bytes": 1604,
+      "sha256": "af84cd79462657dd11d113ea882dd19744360003b56e7ac3d2163835f03deeee"
     },
     {
       "path": "scripts/build_library_windows.ps1",

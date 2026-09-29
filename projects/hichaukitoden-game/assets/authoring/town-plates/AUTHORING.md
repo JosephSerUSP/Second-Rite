@@ -61,7 +61,7 @@ layout for anchor positions, preserves the baseline camera, and writes a
 separate, hand-editable source document:
 
 ```powershell
-& 'C:\Program Files\Blender Foundation\Blender 5.1\blender.exe' `
+& $env:BLENDER_EXECUTABLE `
   --background projects/hichaukitoden-game/assets/authoring/environments/img2imgguide.blend `
   --python tools/towngen/build_port_blender_reference.py -- `
   --output projects/hichaukitoden-game/assets/authoring/environments/st_maria_port_spatial_reference.blend `

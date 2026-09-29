@@ -24,50 +24,27 @@ from tree_generator import PRESETS, generate, preset, reduce_lod, validate  # no
 import tree_material  # noqa: E402
 import tree_mesh  # noqa: E402
 
+BRANCH_SIDES = 6
+
 
 def _branch_mesh(name, skeleton, origin, material, collection):
-    """Build one genuinely connected branch graph.
+    """Build the lab's branches from the shared mesher.
 
-    The former builder emitted a capped cone for every segment.  Coincident
-    endpoints are not topology, so the caps and unrelated ring orientations
-    made the result read as a pile of funnels.  Blender's Skin modifier is a
-    good fit here: skeleton nodes become shared vertices, parent links become
-    edges, and forks receive one manifold junction before conversion.
+    The lab used to skin the skeleton with Blender's Skin modifier while the
+    placement path (``replace_st_maria_tree.py``, the live bridge) used
+    ``tree_mesh.branch_mesh``.  A lab that judges a different mesh from the one
+    that ships approves specimens nobody receives, so the geometry now has
+    exactly one definition.  ``BRANCH_SIDES`` matches ``replace_st_maria_tree``.
     """
-    verts, edges = [], []
-    ox, oy, oz = origin
-    node_for_segment = {}
-    root_node = None
-    for segment in skeleton.segments:
-        if segment.parent is None:
-            root_node = len(verts)
-            verts.append((segment.start[0] + ox, segment.start[1] + oy, segment.start[2] + oz))
-            start_node = root_node
-        else:
-            start_node = node_for_segment[segment.parent]
-        end_node = len(verts)
-        verts.append((segment.end[0] + ox, segment.end[1] + oy, segment.end[2] + oz))
-        edges.append((start_node, end_node)); node_for_segment[segment.index] = end_node
-    mesh = bpy.data.meshes.new(name + "_mesh"); mesh.from_pydata(verts, edges, []); mesh.update()
-    obj = bpy.data.objects.new(name, mesh); collection.objects.link(obj); obj.data.materials.append(material)
-    skin = obj.modifiers.new("Connected branch skin", "SKIN")
-    bpy.context.view_layer.objects.active = obj; obj.select_set(True)
-    bpy.context.view_layer.update()
-    radii = mesh.skin_vertices[0].data
-    if root_node is not None:
-        root_radius = skeleton.segments[0].radius
-        radii[root_node].radius = (root_radius, root_radius)
-    for segment in skeleton.segments:
-        radius = max(.018, segment.radius * (.78 if segment.foliage else .9))
-        radii[node_for_segment[segment.index]].radius = (radius, radius)
-    bpy.ops.object.modifier_apply(modifier=skin.name)
-    # Keep Skin's compact, graph-derived topology.  Whole-object remeshing is
-    # deliberately forbidden here: it spends polygons on every straight run
-    # and erases the authored relationship between skeleton and surface.
-    # Junction improvements must remain local and topology-aware.
+    verts, faces = tree_mesh.branch_mesh(skeleton, sides=BRANCH_SIDES, origin=origin)
+    mesh = bpy.data.meshes.new(name + "_mesh")
+    mesh.from_pydata([list(v) for v in verts], [], [list(f) for f in faces])
+    mesh.update()
     for polygon in mesh.polygons:
         polygon.use_smooth = True
-    obj.select_set(False)
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    obj.data.materials.append(material)
     return obj
 
 

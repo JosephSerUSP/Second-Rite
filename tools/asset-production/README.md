@@ -57,7 +57,7 @@ python tools/asset-production/build_world_prop.py \
   first_stratum_treasure_chest
 ```
 
-Set `BLENDER_BIN` when Blender is not on `PATH`. Builds go to
+Set `BLENDER_EXECUTABLE` to the pinned Blender (`tools/blender/blender-pin.json`). Builds go to
 `out/asset-production/world-props/` by default. The Blender-side builder refuses
 to write beneath `assets/`; promotion remains an explicit reviewed action.
 

@@ -1,4 +1,5 @@
 import math
+import pathlib
 import sys
 import unittest
 
@@ -316,6 +317,23 @@ class MultiStemTests(unittest.TestCase):
                 self.assertLessEqual(math.hypot(centre[0], centre[1]),
                                      spec.crown_radius + 1e-6)
 
+
+class OneBranchMesherTests(unittest.TestCase):
+    def test_no_skin_modifier_remains_in_tools_blender(self):
+        # The tree lab once skinned branches with a Skin modifier while
+        # everything that ships used ``tree_mesh.branch_mesh`` (#1255).
+        needle = "modifiers.new("
+        offenders = []
+        for path in pathlib.Path("tools/blender").rglob("*.py"):
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                if needle in line and ("\"SK" + "IN\"") in line:
+                    offenders.append("%s:%d" % (path, number))
+        self.assertEqual(offenders, [])
+
+    def test_tree_lab_meshes_branches_through_branch_mesh(self):
+        source = pathlib.Path("tools/blender/recipes/tree_lab.py").read_text(encoding="utf-8")
+        self.assertIn("tree_mesh.branch_mesh(", source)
+        self.assertNotIn("skin_vertices", source)
 
 
 if __name__ == "__main__":

@@ -199,11 +199,11 @@ def build_group():
     lean_draw = _node(tree, "FunctionNodeRandomValue", data_type="FLOAT")
     lean_draw.inputs["Min"].default_value = -1.0
     lean_draw.inputs["Max"].default_value = 1.0
-    _node_seed = _node(tree, "ShaderNodeMath", operation="ADD")
-    _link(tree, group_in, "Seed", _node_seed, 0)
-    _node_seed.inputs[1].default_value = 101.0
+    lean_seed = _node(tree, "ShaderNodeMath", operation="ADD")
+    _link(tree, group_in, "Seed", lean_seed, 0)
+    lean_seed.inputs[1].default_value = 101.0
     seed_int = _node(tree, "FunctionNodeFloatToInt", rounding_mode="ROUND")
-    _link(tree, _node_seed, "Value", seed_int, "Float")
+    _link(tree, lean_seed, "Value", seed_int, "Float")
     _link(tree, seed_int, "Integer", lean_draw, "Seed")
     lean_amount = _node(tree, "ShaderNodeMath", operation="MULTIPLY")
     _link(tree, lean_draw, "Value", lean_amount, 0)

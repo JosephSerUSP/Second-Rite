@@ -179,6 +179,14 @@ test('native splash is a compact, centered, independent BrowserWindow', async ()
     assert.equal(f.main.focusCount, 1);
 });
 
+test('closing the splash before it appears quits instead of opening a hidden editor', async () => {
+    const f = makeController();
+    const shown = f.controller.whenShown();
+    f.splash.close();
+    assert.equal(await shown, null);
+    assert.equal(f.app.quitCount, 1);
+});
+
 test('splash retains startup errors, supports retry and copy, and rejects unowned renderers', async () => {
     const f = makeController();
     await f.invoke('thestra-boot-splash-failed', f.main.webContents, 'Three.js vendor files are missing.');

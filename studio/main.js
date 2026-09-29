@@ -353,7 +353,9 @@ windowManager.register('tileset', {
 
 function createWindow() {
     studioBootSplash.open();
-    return studioBootSplash.whenShown().then(() => windowManager.open('main'));
+    return studioBootSplash.whenShown().then(splashWindow =>
+        splashWindow ? windowManager.open('main') : null
+    );
 }
 
 function waitForSurfaceReady(surfaceId, timeoutMs = 15000) {

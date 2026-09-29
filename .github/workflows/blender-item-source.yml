@@ -75,6 +75,15 @@ jobs:
         # Version, URL and digest live in tools/blender/blender-pin.json (#1254).
         uses: ./.github/actions/install-blender
 
+      # A Geometry Nodes tree only evaluates inside Blender, so the ground
+      # cover's slope limit, keep-out, budget and determinism are checked on
+      # the realised mesh by a headless run of the pinned Blender (#1257).
+      - name: Ground cover Geometry Nodes headless check
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover -v
+
       - name: Smoke a real saved Blend through the production compiler
         shell: bash
         run: |

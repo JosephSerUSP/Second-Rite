@@ -122,9 +122,6 @@ python tools/blender/live_bridge/client.py tree-lab round_shade umbrella `
 python tools/blender/live_bridge/client.py tree PRACA_shade_tree round_shade `
   --collection 21_FOREGROUND --location -1.7 20.5 0 --fingerprint <sha256> `
   --set height=6.6 --set crown_radius=2.1
-python tools/blender/live_bridge/client.py grass PRACA_verge `
-  --collection 21_FOREGROUND --location 2.0 18.0 0 --width 4 --depth 2.5 `
-  --density 18 --fingerprint <sha256>
 python tools/blender/live_bridge/client.py link-mesh SourceWall Wall_A Wall_B `
   --fingerprint <sha256>
 python tools/blender/live_bridge/client.py make-unique HeroFacade `
@@ -157,10 +154,11 @@ is retained in bridge history like every other mutation.
 `tools/blender/recipes/tree_lab.py`; it appends a numbered generation and hides
 the prior one so the owner can inspect the result and undo the rebuild.
 
-`grass` scatters one patch as a single `<NAME>_GRASS` card mesh, using the
-tuft atlas built by `tools/materials/make_grass_atlas.py`. The patch is flat:
-a sloped or uneven bed needs a surface function, which the wire protocol
-cannot carry, so author those through a recipe calling the same scatter.
+Ground cover is not a bridge operation. It is a Geometry Nodes modifier
+(`tools/blender/ground_cover.py`) whose inputs -- painted density group, slope
+limit, keep-out collection, budget, seed -- stay editable in the document, so
+nothing is scattered through the socket and the per-request vertex cap does not
+shape it (#1257).
 
 `tree` places one generated specimen into any scene as two objects,
 `<NAME>_BRANCHES` and `<NAME>_CARDS`, meshed by `tools/blender/tree_mesh.py`

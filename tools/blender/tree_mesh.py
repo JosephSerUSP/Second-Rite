@@ -65,8 +65,9 @@ def _ring(centre, direction, reference, radius, sides):
 def card_corners(centre, across, along, width, height):
     """The four corners of one alpha card, in UV order.
 
-    Shared with the grass scatter: a card is a card whether it hangs off a
-    branch or stands on the ground, and only the placement rule differs.
+    Shared with the ground-cover modifier (``ground_cover.py``): a card is a
+    card whether it hangs off a branch or stands on the ground, and only the
+    placement rule differs.
     """
     half_u = _scale(_unit(across), width * .5)
     half_v = _scale(_unit(along), height * .5)

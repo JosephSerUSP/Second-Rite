@@ -13,6 +13,7 @@ const exporter = require('../../tools/export/export-game');
 const projectPlay = require('./project-play');
 const fixtureProjects = require('../../tools/campaign-gen/fixture-project');
 const rtpPreviewResources = require('./rtp-preview-resources');
+const { PRODUCT_NAME } = require('./studio-identity');
 
 // Fixture Project generator bridge state. It is deliberately not allowed to
 // select or redirect the Project Studio has open.
@@ -230,6 +231,8 @@ const server = http.createServer((req, res) => {
         // The editor posts the whole payload back on /save, so the tokens
         // round-trip without any bookkeeping on the client.
         data._fileVersions = allFileVersions();
+        const project = JSON.parse(fs.readFileSync(path.join(DATA_ROOT, 'project.json'), 'utf8'));
+        data._studioBoot = { studioName: PRODUCT_NAME, projectName: project.name };
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));

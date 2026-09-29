@@ -141,12 +141,18 @@ function installStudioIpc(options) {
     });
 
     ipcMain.handle('thestra-studio-surface-ready', (event, surfaceId) => {
-        assertSurface(surfaceId);
+        if (surfaceId !== 'main') assertSurface(surfaceId);
+        else assertCloseableSurface(surfaceId);
         const win = assertSenderOwnsSurface(event, surfaceId);
-        if (typeof win.show === 'function') win.show();
-        if (typeof win.focus === 'function') win.focus();
+        // The main window is gated by the boot splash until both its Project
+        // data and first workspace are ready. Secondary editor windows keep
+        // their existing renderer-ready reveal behavior.
+        if (surfaceId !== 'main') {
+            if (typeof win.show === 'function') win.show();
+            if (typeof win.focus === 'function') win.focus();
+        }
         if (onSurfaceReady) onSurfaceReady(surfaceId, win);
-        return { surfaceId, shown: true };
+        return { surfaceId, shown: surfaceId !== 'main' };
     });
 
     // A renderer announces only WHICH authored resources the existing server

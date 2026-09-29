@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog, screen } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, clipboard, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const semanticRoots = require('../tools/semantic-roots');
@@ -14,6 +14,7 @@ const {
 const { ALLOWED_SURFACES, installStudioIpc } = require('./editor/studio-electron');
 const { createStudioShutdownCoordinator } = require('./editor/studio-shutdown');
 const { createProjectWatcher } = require('./editor/project-watcher');
+const { createStudioBootSplash } = require('./editor/studio-boot-splash');
 
 const APP_ICON_DIR = path.join(__dirname, 'editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
@@ -94,6 +95,16 @@ installProjectIpc({
 const windowStateStore = createJsonWindowStateStore({
     fs,
     userDataDir: app.getPath('userData'),
+});
+const studioBootSplash = createStudioBootSplash({
+    app,
+    BrowserWindow,
+    clipboard,
+    ipcMain,
+    productName: PRODUCT_NAME,
+    icon: APP_ICON_PATH,
+    htmlPath: path.join(__dirname, 'editor/boot-splash.html'),
+    preloadPath: path.join(__dirname, 'boot-splash-preload.js'),
 });
 const windowManager = new StudioWindowManager({
     createWindow: options => new BrowserWindow(options),
@@ -213,6 +224,7 @@ function installSurfaceSmokeDiagnostics(surfaceId, win) {
 }
 
 windowManager.register('main', {
+    autoShow: false,
     defaultState: { width: 1440, height: 900, isMaximized: false },
     buildOptions: state => {
         const options = {
@@ -234,6 +246,7 @@ windowManager.register('main', {
         shutdownCoordinator.requestMainClose(mainWindow, decide);
     },
     configure: mainWindow => {
+        studioBootSplash.attachMain(mainWindow);
         applyWindowsStudioIdentity(mainWindow);
         installSurfaceSmokeDiagnostics('main', mainWindow);
         mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
@@ -339,7 +352,10 @@ windowManager.register('tileset', {
 });
 
 function createWindow() {
-    return windowManager.open('main');
+    studioBootSplash.open();
+    return studioBootSplash.whenShown().then(splashWindow =>
+        splashWindow ? windowManager.open('main') : null
+    );
 }
 
 function waitForSurfaceReady(surfaceId, timeoutMs = 15000) {
@@ -370,7 +386,9 @@ function waitForSurfaceReady(surfaceId, timeoutMs = 15000) {
 
 async function runSurfaceSmoke(markerPath) {
     readySurfaces.clear();
-    createWindow();
+    // Keep this smoke focused on EditorSurface handshakes. Production launch
+    // coverage exercises the separate splash BrowserWindow independently.
+    windowManager.open('main');
     windowManager.open('database');
     windowManager.open('engine');
     windowManager.open('tileset');
@@ -395,6 +413,57 @@ async function runSurfaceSmoke(markerPath) {
     app.exit(0);
 }
 
+async function runBootSplashSmoke(markerPath) {
+    const splashWindow = studioBootSplash.open();
+    await studioBootSplash.whenShown();
+    const splashWasVisible = studioBootSplash.isShown();
+    const initialBounds = splashWasVisible ? splashWindow.getBounds() : null;
+    const splashImageLoaded = splashWasVisible && await splashWindow.webContents.executeJavaScript(`(() => {
+        const art = document.querySelector('.art');
+        return !!art && art.complete && art.naturalWidth > 0;
+    })()`);
+    const mainWindow = windowManager.open('main');
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline && !mainWindow.isVisible()) {
+        if (studioBootSplash.getState().state === 'error') {
+            throw new Error(`Studio startup failed before splash handoff: ${studioBootSplash.getState().error}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 25));
+    }
+
+    const completed = splashWasVisible
+        && splashImageLoaded
+        && mainWindow.isVisible()
+        && splashWindow.isDestroyed()
+        && initialBounds
+        && initialBounds.width === 840
+        && initialBounds.height === 502;
+    if (!completed) {
+        throw new Error(`Studio splash handoff was incomplete: ${JSON.stringify({
+            splashWasVisible,
+            splashImageLoaded,
+            splashDestroyed: splashWindow.isDestroyed(),
+            mainVisible: mainWindow.isVisible(),
+            splashBounds: initialBounds,
+            state: studioBootSplash.getState(),
+        })}`);
+    }
+
+    fs.writeFileSync(markerPath, JSON.stringify({
+        splashBounds: initialBounds,
+        splashWasVisible,
+        splashImageLoaded,
+        mainVisibleAfterSplash: mainWindow.isVisible(),
+        splashClosedAfterReady: splashWindow.isDestroyed(),
+        windows: BrowserWindow.getAllWindows().map(win => ({
+            title: win.getTitle(),
+            visible: typeof win.isVisible === 'function' ? win.isVisible() : null,
+        })),
+    }, null, 2), 'utf8');
+    BrowserWindow.getAllWindows().forEach(win => win.destroy());
+    app.exit(0);
+}
+
 app.whenReady().then(() => {
     if (process.platform === 'win32') {
         app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
@@ -407,6 +476,15 @@ app.whenReady().then(() => {
     if (surfaceSmokeMarker) {
         runSurfaceSmoke(surfaceSmokeMarker).catch(error => {
             console.error('Studio surface smoke failed:', error);
+            app.exit(1);
+        });
+        return;
+    }
+
+    const bootSplashSmokeMarker = process.env.THESTRA_STUDIO_BOOT_SPLASH_SMOKE_MARKER;
+    if (bootSplashSmokeMarker) {
+        runBootSplashSmoke(bootSplashSmokeMarker).catch(error => {
+            console.error('Studio boot splash smoke failed:', error);
             app.exit(1);
         });
         return;

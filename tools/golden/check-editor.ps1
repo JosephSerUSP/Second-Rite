@@ -36,6 +36,14 @@ if ($LASTEXITCODE -ne 0) {
     throw "G6 first-navigation retry regression test failed"
 }
 
+# #1263: a stalled Map-inspection wait must report what the request was doing and
+# how long the harness waited. Observability only -- no timeout changes. Runs the
+# in-page tracker for real in Node against a fake clock.
+& python "tools/golden/test-g6-inspection-observability.py"
+if ($LASTEXITCODE -ne 0) {
+    throw "G6 inspection observability regression test failed"
+}
+
 # #646: editor-screens-actual/ is evidence for this run, not an append-only
 # history. Reset it and stamp the run before the harness can write any frame.
 & python "tools/golden/actual_run.py" g6

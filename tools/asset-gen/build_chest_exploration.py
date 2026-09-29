@@ -1,7 +1,7 @@
-"""Blender 5.1 script to generate 3 high-quality Chest model variants & comparison renders.
+"""Blender script to generate 3 high-quality Chest model variants & comparison renders.
 
 Run via Blender:
-  & "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe" --background --python tools/asset-gen/build_chest_exploration.py
+  & $env:BLENDER_EXECUTABLE --background --python tools/asset-gen/build_chest_exploration.py
 """
 
 import bpy

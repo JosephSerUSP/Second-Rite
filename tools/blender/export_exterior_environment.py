@@ -14,19 +14,22 @@ exactly three ways, and each is a property of the subject rather than a choice:
 
     blender -b -noaudio --python tools/blender/export_exterior_environment.py --         --blend projects/.../st_maria_praca_modelled.blend         --output projects/.../environments/st_maria_town/praca_3d
 
-## Known incomplete: the atlas packs to 9%
+## Atlas coverage
 
-Geometry is exact -- this reproduces the shipped package's 9,304 triangles
-exactly once the off-square duplicate is filtered. The ATLAS is not: it packs
-to roughly 9% non-black coverage against the shipped package's 69%, and against
-41.8% for an interior room through the same pipeline. The consequence is a
-mostly empty atlas and far too few texels on each surface, which reads as a
-dark, muddy street.
+The atlas once packed to roughly 9% non-black coverage. That was the circular
+bake-image dependency of #1023, closed by #1069: ``town_environment_pipeline.py``
+keeps the bake target's image node unlinked from the shader until the bake
+completes.
 
-Lighting is staged below because an unlit bake is wrong regardless, and it does
-move the mean from 0.8 to 2.5. Note that per #1023, the atlas transfer defect is
-driven by a circular image dependency on the bake receiver rather than island
-margin. Do not tune the lights to chase brightness until the bake graph is resolved.
+Measured 29.09.2026 under Blender 5.2.2 on ``st_maria_praca_modelled.blend``
+with the default options: a 2048 x 2048 atlas with 43.3% of its pixels written
+("written" as #1023 defines it: any non-zero channel), mean 48.5 over the
+written pixels, and no ``Circular dependency`` message during the bake. The same
+run joined 37 source meshes into 5,854 runtime triangles after culling 1,713
+sealed faces (``--keep-sealed`` keeps them). The 9,304-triangle figure this
+module once quoted was measured before that cull existed and is not repeated.
+
+Lighting is still staged below, since an unlit bake is wrong regardless.
 
 ## Not yet generic, and not yet mirrored
 

@@ -124,7 +124,7 @@ def exterior(options, output):
 
 def interior(options, output):
     # Use the runtime-exported room geometry for this study. The current
-    # interior source files in this checkout are zstd-wrapped and Blender 4.1
+    # interior source files in this checkout are zstd-wrapped and an older Blender
     # cannot open them; this preserves the actual shipped room silhouette.
     bpy.ops.wm.read_factory_settings(use_empty=True)
     meshes, info = stage_room_model.import_model(options.interior_obj, 4.0)

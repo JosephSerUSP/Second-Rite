@@ -101,7 +101,7 @@ validation.
 Use:
 
 ```text
-python tools/blender/compile_item_blends.py --blender /path/to/blender
+python tools/blender/compile_item_blends.py
 ```
 
 The host wrapper hashes every `.blend` before and after compilation. Blender

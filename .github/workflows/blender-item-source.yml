@@ -13,6 +13,7 @@ on:
       - .gitattributes
       - docs/asset-pipeline/BLENDER_CORE.md
       - .github/workflows/blender-item-source.yml
+      - .github/actions/install-blender/**
   push:
     branches: [main]
     paths:
@@ -26,6 +27,7 @@ on:
       - .gitattributes
       - docs/asset-pipeline/BLENDER_CORE.md
       - .github/workflows/blender-item-source.yml
+      - .github/actions/install-blender/**
   workflow_dispatch:
 
 permissions:
@@ -55,6 +57,7 @@ jobs:
           python -m unittest discover -s tools/blender/tests -p 'test_asset_core_host.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blends_host.py' -v
+          python -m unittest discover -s tools/blender/tests -p 'test_blender_locator.py' -v
 
       # Blender numbered backups are rejected repository-wide by the
       # repo-hygiene job in verify.yml (#671). The check that lived here
@@ -68,16 +71,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
 
-      - name: Download Blender 5.0.1
+      - name: Install pinned Blender
+        # Version, URL and digest live in tools/blender/blender-pin.json (#1254).
+        uses: ./.github/actions/install-blender
+
+      # A Geometry Nodes tree only evaluates inside Blender, so the ground
+      # cover's slope limit, keep-out, budget and determinism are checked on
+      # the realised mesh by a headless run of the pinned Blender (#1257).
+      - name: Ground cover Geometry Nodes headless check
         shell: bash
         run: |
           set -euxo pipefail
-          cd /tmp
-          curl -fL --retry 3 https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz -o blender.tar.xz
-          tar -xf blender.tar.xz
-          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
-          test -n "$BLENDER_BIN"
-          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+          xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover -v
 
       - name: Smoke a real saved Blend through the production compiler
         shell: bash
@@ -87,10 +92,9 @@ jobs:
           output=/tmp/second-rite-item-source-fixture
           rm -f "$fixture" "$fixture"[0-9]*
           rm -rf "$output"
-          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/tests/create_item_source_fixture.py
+          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python tools/blender/tests/create_item_source_fixture.py
           sha256sum "$fixture" > /tmp/item-fixture-before.sha256
           xvfb-run -a python tools/blender/compile_item_blends.py \
-            --blender "$BLENDER_BIN" \
             --source "$fixture" \
             --output-dir "$output"
           sha256sum "$fixture" > /tmp/item-fixture-after.sha256
@@ -104,5 +108,5 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --check
+          xvfb-run -a python tools/blender/compile_item_blends.py --check
           git diff --exit-code -- projects/hichaukitoden-game/assets/authoring/items

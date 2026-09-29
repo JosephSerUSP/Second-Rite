@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -59,20 +58,7 @@ PRESETS = ["wall_pilasters", "wall_niche", "floor_flagstones", "floor_inlay",
 WRAP_RATIO_TOLERANCE = 3.0
 WRAP_STEP_TOLERANCE = 0.03
 
-SEARCH = [
-    os.environ.get("BLENDER"),
-    r"C:\Program Files\Blender Foundation\Blender 5.1\blender.exe",
-    r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe",
-    r"C:\Program Files\Blender Foundation\Blender 4.1\blender.exe",
-    "blender",
-]
-
-
-def blender_executable():
-    for candidate in SEARCH:
-        if candidate and (os.path.isfile(candidate) or candidate == "blender"):
-            return candidate
-    raise SystemExit("no Blender found; set the BLENDER environment variable")
+from blender_locator import blender_executable  # noqa: E402
 
 
 def render(executable, preset, out_dir, size, contrast, blend=True):

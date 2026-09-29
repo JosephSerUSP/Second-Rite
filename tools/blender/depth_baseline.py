@@ -38,7 +38,6 @@ def parse_args():
                         default="report")
     parser.add_argument("--diagnostics-dir")
     parser.add_argument("--confirm-production-write")
-    parser.add_argument("--blender", default=os.environ.get("BLENDER"))
     return parser.parse_args()
 
 
@@ -58,15 +57,12 @@ def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def render(output, blender):
+def render(output):
     command = [sys.executable, str(GENERATOR), "--out", str(output),
                "--size", "512", "--no-blend"]
     for preset in PRESETS:
         command.extend(("--preset", preset))
-    env = os.environ.copy()
-    if blender:
-        env["BLENDER"] = blender
-    run(command, env=env)
+    run(command)
 
 
 def image_data(path):
@@ -178,7 +174,7 @@ def main():
         for index in range(3):
             output = temp / f"run-{index + 1}"
             output.mkdir()
-            render(output, args.blender)
+            render(output)
             runs.append(output)
 
         metadata = [manifest_projection(run_dir / "manifest.json")

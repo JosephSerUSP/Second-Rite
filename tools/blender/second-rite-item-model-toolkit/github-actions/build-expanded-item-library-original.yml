@@ -59,10 +59,10 @@ jobs:
           URL_BUILDER="https://cdn.builder.blender.org/download/daily/blender-5.0.1-stable%2Bv50.a3db93c5b259-linux.x86_64-release.tar.xz"
           curl -fL --retry 3 "$URL_RELEASE" -o blender.tar.xz || curl -fL --retry 3 "$URL_BUILDER" -o blender.tar.xz
           tar -xf blender.tar.xz
-          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
-          test -n "$BLENDER_BIN"
-          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
-          "$BLENDER_BIN" --version
+          BLENDER_EXECUTABLE=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_EXECUTABLE"
+          echo "BLENDER_EXECUTABLE=$BLENDER_EXECUTABLE" >> "$GITHUB_ENV"
+          "$BLENDER_EXECUTABLE" --version
 
       - name: Build, export, render and validate
         shell: bash
@@ -70,7 +70,7 @@ jobs:
           SECOND_RITE_OUT: /tmp/second-rite-output
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python /tmp/second-rite-build/build_expanded_item_library.py
+          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python /tmp/second-rite-build/build_expanded_item_library.py
           test -s /tmp/second-rite-output/second_rite_item_model_library_expanded.blend
           test -s /tmp/second-rite-output/second_rite_item_model_library_expanded_preview.png
           test "$(find /tmp/second-rite-output/exports -name '*.obj' | wc -l)" -eq 53

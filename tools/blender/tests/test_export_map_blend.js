@@ -62,3 +62,25 @@ test('exportMapBlend passes the authoritative bundle to Blender and cleans the t
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
+
+test('blenderExecutable delegates to the one Python locator and returns its path', () => {
+    const calls = [];
+    const exe = exporter.blenderExecutable((command, args) => {
+        calls.push({ command, args });
+        return '/pinned/blender\n';
+    });
+    assert.equal(exe, '/pinned/blender');
+    assert.equal(calls.length, 1);
+    assert.ok(String(calls[0].args[0]).endsWith('blender_locator.py'));
+});
+
+test('blenderExecutable surfaces the locator message, including a version mismatch', () => {
+    assert.throws(
+        () => exporter.blenderExecutable(() => {
+            const error = new Error('exit 1');
+            error.stderr = 'Blender 5.1.2 found at x, but this repository pins Blender 5.2.0';
+            throw error;
+        }),
+        /5\.1\.2.*5\.2\.0/
+    );
+});

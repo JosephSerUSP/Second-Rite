@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from asset_set import DEFAULT_SET, ROOT, get_asset, load_asset_set
+
+sys.path.insert(0, str(ROOT / "tools" / "blender"))
+import blender_locator  # noqa: E402
 
 
 def _parser():
@@ -17,7 +19,6 @@ def _parser():
     parser.add_argument("--set", dest="asset_set", default=str(DEFAULT_SET))
     parser.add_argument("--out-dir", default="out/asset-production/world-props")
     parser.add_argument("--state", action="append", default=[])
-    parser.add_argument("--blender", default=os.environ.get("BLENDER_BIN", "blender"))
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
@@ -36,7 +37,7 @@ def main(argv=None):
     if not out_dir.is_absolute():
         out_dir = ROOT / out_dir
     command = [
-        args.blender, "--background", "--factory-startup",
+        "blender" if args.dry_run else blender_locator.blender_executable(), "--background", "--factory-startup",
         "--python", str(ROOT / "tools" / "blender" / "build_world_props.py"),
         "--", "--set", str(set_path), "--asset", asset["id"],
         "--out-dir", str(out_dir),
@@ -46,10 +47,6 @@ def main(argv=None):
     if args.dry_run:
         print(json.dumps({"assetId": asset["id"], "command": command}, indent=2))
         return 0
-    if shutil.which(args.blender) is None and not Path(args.blender).is_file():
-        raise SystemExit(
-            f"Blender executable not found: {args.blender!r}; set BLENDER_BIN or pass --blender"
-        )
     return subprocess.call(command, cwd=ROOT)
 
 

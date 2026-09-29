@@ -228,8 +228,52 @@ FETCH_OBSERVABILITY_JS = r"""
         completed: 0,
         failed: 0
     };
+    // #1263: POST /api/map-inspection is a different request from
+    // /api/map-renderable, so the counters above say "nothing pending" while the
+    // page is genuinely waiting on it. Track it separately, with timing, so a
+    // stall on an inspection frame can be told apart: still in flight (and for
+    // how long), answered with an error, aborted by the client's own deadline,
+    // or never started.
+    var inspection = window.__g6MapInspectionRequest = {
+        pending: 0,
+        started: 0,
+        completed: 0,
+        failed: 0,
+        url: '',
+        method: '',
+        lastStatus: 0,
+        lastDurationMs: 0,
+        lastError: '',
+        nextId: 0,
+        pendingSince: {}
+    };
     window.fetch = function (input, init) {
         var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        if (url.indexOf('/api/map-inspection') >= 0) {
+            var id = inspection.nextId += 1;
+            var began = performance.now();
+            inspection.pending += 1;
+            inspection.started += 1;
+            inspection.url = url;
+            inspection.method = (init && init.method) || 'GET';
+            inspection.pendingSince[id] = began;
+            var settle = function () {
+                inspection.pending -= 1;
+                delete inspection.pendingSince[id];
+                inspection.lastDurationMs = Math.round(performance.now() - began);
+            };
+            return upstreamFetch.apply(null, arguments).then(function (response) {
+                settle();
+                inspection.completed += 1;
+                inspection.lastStatus = response.status;
+                return response;
+            }, function (error) {
+                settle();
+                inspection.failed += 1;
+                inspection.lastError = String(error && error.message || error);
+                throw error;
+            });
+        }
         if (url.indexOf('/api/map-renderable') < 0) {
             return upstreamFetch.apply(null, arguments);
         }
@@ -258,6 +302,13 @@ STALL_OBSERVATION_JS = r"""
     var top = document.querySelector('#thestra-map-view-toolbar button[data-mode=top]');
     var request = window.__g6RuntimeRenderableRequest || {};
     var authority = window.__g6RuntimeAuthority || {};
+    var inspection = window.__g6MapInspectionRequest || {};
+    var inspectionOldestPendingMs = 0;
+    var pendingSince = inspection.pendingSince || {};
+    Object.keys(pendingSince).forEach(function (id) {
+        inspectionOldestPendingMs = Math.max(
+            inspectionOldestPendingMs, Math.round(performance.now() - pendingSince[id]));
+    });
     var map = (typeof dbPayload !== 'undefined' && dbPayload.maps &&
                typeof currentMapIndex !== 'undefined') ? dbPayload.maps[currentMapIndex] : null;
     return JSON.stringify({
@@ -283,7 +334,30 @@ STALL_OBSERVATION_JS = r"""
         renderableRequestUrl: request.url || '',
         renderableRequestMethod: request.method || '',
         renderableRequestsCompleted: request.completed || 0,
-        renderableRequestsFailed: request.failed || 0
+        renderableRequestsFailed: request.failed || 0,
+        inspectionRequestPending: inspection.pending || 0,
+        inspectionRequestsStarted: inspection.started || 0,
+        inspectionRequestsCompleted: inspection.completed || 0,
+        inspectionRequestsFailed: inspection.failed || 0,
+        inspectionRequestOldestPendingMs: inspectionOldestPendingMs,
+        inspectionRequestLastDurationMs: inspection.lastDurationMs || 0,
+        inspectionRequestLastStatus: inspection.lastStatus || 0,
+        inspectionRequestLastError: inspection.lastError || ''
+    });
+})()
+"""
+
+# What the two inspection frames report when they SUCCEED. Same fields as the
+# stall snapshot, read on their own so the success path stays cheap and a failed
+# read can be ignored without touching the stall path.
+INSPECTION_OBSERVATION_JS = r"""
+(function () {
+    var i = window.__g6MapInspectionRequest;
+    if (!i) { return null; }
+    return JSON.stringify({
+        started: i.started, completed: i.completed, failed: i.failed,
+        pending: i.pending, lastDurationMs: i.lastDurationMs,
+        lastStatus: i.lastStatus, lastError: i.lastError
     });
 })()
 """
@@ -402,6 +476,32 @@ def bind_core_root(core, root=ROOT):
     return core
 
 
+def report_inspection_wait(page, what, waited, bound, log=print):
+    """One line for a SUCCESSFUL wait on a Map inspection frame.
+
+    #1263: the stall reports say what a failing wait saw, but the question the
+    timeout decision needs answered is how close the passing ones come to the
+    bound. Printing this for every leg puts that distribution in ordinary run
+    output. Only the step's own wait reports (a sub-wait such as
+    "<path> reset workspace" would double-count), and this is observability:
+    a failed read must never fail the gate.
+    """
+    if what not in INSPECTION_RUNTIME_STEPS:
+        return
+    try:
+        raw = page.evaluate(INSPECTION_OBSERVATION_JS)
+        seen = json.loads(raw) if raw else {}
+    except (RuntimeError, ValueError):
+        return
+    if not seen:
+        return
+    log("           inspection wait: %.1fs of a %.0fs bound; last request %.1fs, "
+        "status %s (started %s / completed %s / failed %s)"
+        % (waited, bound, seen.get("lastDurationMs", 0) / 1000.0,
+           seen.get("lastStatus", 0), seen.get("started", 0),
+           seen.get("completed", 0), seen.get("failed", 0)))
+
+
 def configure_runtime_authority_readiness(core):
     """Bind G6 to the Map workspace's positive host readiness contract."""
     globals_ = core["run_capture_set"].__globals__
@@ -421,7 +521,8 @@ def configure_runtime_authority_readiness(core):
             expression, what, workspace_ready, ordinary_timeout, producer_timeout,
         )
         observed_expression = effective_readiness_expression(expression, what, workspace_ready)
-        deadline = time.time() + timeout
+        started = time.time()
+        deadline = started + timeout
         last = None
         while time.time() < deadline:
             try:
@@ -430,6 +531,7 @@ def configure_runtime_authority_readiness(core):
                 # adapter object after document initialization.
                 self.evaluate(INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS)
                 if self.evaluate("!!(%s)" % observed_expression):
+                    report_inspection_wait(self, what, time.time() - started, timeout)
                     return
                 last = None
             except RuntimeError as exc:
@@ -445,7 +547,13 @@ def configure_runtime_authority_readiness(core):
         try:
             observed = self.evaluate(STALL_OBSERVATION_JS)
             if observed:
-                last = RuntimeError("observed page state: " + observed)
+                # #1263: say how long the harness actually waited and against
+                # which bound. The wait ends at the bridge's own timeout, so
+                # "stalled" and "the engine answered just after we gave up" are
+                # indistinguishable without both numbers.
+                last = RuntimeError(
+                    "observed page state: %s; waited %.1fs of a %.0fs bound"
+                    % (observed, time.time() - started, timeout))
         except RuntimeError as observation_error:
             if last is None:
                 last = observation_error

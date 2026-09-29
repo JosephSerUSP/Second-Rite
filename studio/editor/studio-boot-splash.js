@@ -14,6 +14,9 @@ function createStudioBootSplash(options) {
     let splashWindow = null;
     let mainWindow = null;
     let ready = false;
+    let splashShown = false;
+    let resolveSplashShown = null;
+    let splashShownPromise = Promise.resolve(null);
     let state = {
         state: 'loading',
         studioName: options.productName || 'Studio',
@@ -116,6 +119,8 @@ function createStudioBootSplash(options) {
     function open() {
         if (isLive(splashWindow)) return splashWindow;
         ready = false;
+        splashShown = false;
+        splashShownPromise = new Promise(resolve => { resolveSplashShown = resolve; });
         splashWindow = new BrowserWindow({
             width: 840,
             height: 502,
@@ -137,11 +142,20 @@ function createStudioBootSplash(options) {
                 preload: options.preloadPath,
             },
         });
+        splashWindow.once('show', () => {
+            if (!isLive(splashWindow) || ready) return;
+            splashShown = true;
+            if (resolveSplashShown) resolveSplashShown(splashWindow);
+            resolveSplashShown = null;
+        });
         splashWindow.once('ready-to-show', () => {
-            if (isLive(splashWindow) && !ready) splashWindow.show();
+            if (!isLive(splashWindow) || ready) return;
+            splashWindow.show();
         });
         splashWindow.on('closed', () => {
             splashWindow = null;
+            if (resolveSplashShown) resolveSplashShown(null);
+            resolveSplashShown = null;
             if (!ready) app.quit();
         });
         splashWindow.loadFile(options.htmlPath);
@@ -168,7 +182,11 @@ function createStudioBootSplash(options) {
     return Object.freeze({
         attachMain,
         getState: () => ({ ...state }),
+        isShown: () => splashShown,
         open,
+        whenShown: () => splashShown
+            ? Promise.resolve(splashWindow)
+            : splashShownPromise,
     });
 }
 

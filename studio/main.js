@@ -353,7 +353,7 @@ windowManager.register('tileset', {
 
 function createWindow() {
     studioBootSplash.open();
-    return windowManager.open('main');
+    return studioBootSplash.whenShown().then(() => windowManager.open('main'));
 }
 
 function waitForSurfaceReady(surfaceId, timeoutMs = 15000) {
@@ -413,21 +413,16 @@ async function runSurfaceSmoke(markerPath) {
 
 async function runBootSplashSmoke(markerPath) {
     const splashWindow = studioBootSplash.open();
+    await studioBootSplash.whenShown();
+    const splashWasVisible = studioBootSplash.isShown();
+    const initialBounds = splashWasVisible ? splashWindow.getBounds() : null;
+    const splashImageLoaded = splashWasVisible && await splashWindow.webContents.executeJavaScript(`(() => {
+        const art = document.querySelector('.art');
+        return !!art && art.complete && art.naturalWidth > 0;
+    })()`);
     const mainWindow = windowManager.open('main');
     const deadline = Date.now() + 30000;
-    let splashWasVisible = false;
-    let initialBounds = null;
-    let splashImageLoaded = false;
     while (Date.now() < deadline && !mainWindow.isVisible()) {
-        if (splashWindow.isVisible()) {
-            splashWasVisible = true;
-            initialBounds = splashWindow.getBounds();
-            const image = await splashWindow.webContents.executeJavaScript(`(() => {
-                const art = document.querySelector('.art');
-                return !!art && art.complete && art.naturalWidth > 0;
-            })()`);
-            splashImageLoaded = splashImageLoaded || image;
-        }
         if (studioBootSplash.getState().state === 'error') {
             throw new Error(`Studio startup failed before splash handoff: ${studioBootSplash.getState().error}`);
         }

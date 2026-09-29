@@ -70,9 +70,16 @@ function makeController() {
         }
         once(name, callback) { this.onceHandlers.set(name, callback); }
         on(name, callback) { this.handlers.set(name, callback); }
-        emit(name) { if (this.onceHandlers.has(name)) this.onceHandlers.get(name)(); }
+        emit(name) {
+            if (this.onceHandlers.has(name)) {
+                const callback = this.onceHandlers.get(name);
+                this.onceHandlers.delete(name);
+                callback();
+            }
+            if (this.handlers.has(name)) this.handlers.get(name)();
+        }
         loadFile(file) { this.loadedFile = file; }
-        show() { this.showCount += 1; }
+        show() { this.showCount += 1; this.emit('show'); }
         focus() { this.focusCount += 1; }
         close() { this.closed = true; this.handlers.get('closed')?.(); }
         isDestroyed() { return this.closed; }
@@ -98,7 +105,7 @@ function makeController() {
     async function invoke(name, sender, ...args) {
         return handlers.get(name)({ sender }, ...args);
     }
-    return { app, clipboard, invoke, main, splash, windows };
+    return { app, clipboard, controller, invoke, main, splash, windows };
 }
 
 test('main splash waits for database and first workspace, then signals the native host', () => {
@@ -147,7 +154,14 @@ test('native splash is a compact, centered, independent BrowserWindow', async ()
     assert.equal(f.splash.loadedFile, 'boot-splash.html');
     assert.match(SPLASH_HTML, /studio-boot-splash\.png/);
 
+    let shown = false;
+    const shownPromise = f.controller.whenShown().then(() => { shown = true; });
+    await Promise.resolve();
+    assert.equal(shown, false, 'the main editor must not start until the splash can paint');
     f.splash.emit('ready-to-show');
+    await shownPromise;
+    assert.equal(shown, true);
+    assert.equal(f.controller.isShown(), true);
     assert.equal(f.splash.showCount, 1);
     assert.equal(f.main.showCount, 0);
 

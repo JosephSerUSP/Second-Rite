@@ -109,6 +109,13 @@ test('root query URLs serve the same Studio document while API queries keep rout
     assert.equal(ping.statusCode, 200);
     assert.match(ping.contentType || '', /^application\/json(?:;|$)/);
     assert.deepEqual(JSON.parse(ping.body), { success: true });
+
+    const data = await request(port, '/data');
+    assert.equal(data.statusCode, 200);
+    const payload = JSON.parse(data.body);
+    assert.equal(payload._studioBoot.studioName, 'Thestra Studio');
+    assert.equal(typeof payload._studioBoot.projectName, 'string');
+    assert.ok(payload._studioBoot.projectName.length > 0);
 });
 
 test('Studio rejects unrelated browser origins before endpoint routing', async t => {

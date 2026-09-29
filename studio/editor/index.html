@@ -1235,8 +1235,99 @@
     <script type="importmap">
     { "imports": { "three": "/vendor/three/three.module.js" } }
     </script>
+    <script>
+        (function () {
+            'use strict';
+            const boot = {
+                isMainSurface: (new URLSearchParams(window.location.search).get('surface') || 'main') === 'main',
+                state: 'loading', databaseReady: false, workspaceReady: false,
+                stage: 'Opening Studio shell…', studioName: 'Thestra Studio',
+                project: 'Selecting Project…',
+                update(stage) {
+                    if (this.state !== 'loading') return;
+                    this.stage = String(stage);
+                    this.publish();
+                },
+                setProject(name) {
+                    if (this.state !== 'loading') return;
+                    this.project = String(name || 'Project name unavailable');
+                    this.publish();
+                },
+                setStudioName(name) {
+                    if (this.state !== 'loading' || !name) return;
+                    this.studioName = String(name);
+                    this.publish();
+                },
+                markDatabaseReady(ok, detail) {
+                    if (this.state !== 'loading') return;
+                    if (!ok) {
+                        this.fail(detail || 'Project data could not be loaded. Check that the Studio server is running, then reload.');
+                        return;
+                    }
+                    this.databaseReady = true;
+                    this.update('Project data loaded; preparing the initial workspace…');
+                    this.maybeReady();
+                },
+                markWorkspaceReady() {
+                    if (this.state !== 'loading') return;
+                    this.workspaceReady = true;
+                    this.update('Initial workspace ready.');
+                    this.maybeReady();
+                },
+                maybeReady() {
+                    const surface = new URLSearchParams(window.location.search).get('surface') || 'main';
+                    if (this.databaseReady && (surface !== 'main' || this.workspaceReady)) this.ready();
+                },
+                ready() {
+                    if (this.state !== 'loading') return;
+                    this.state = 'ready';
+                    document.body.dataset.studioBoot = 'ready';
+                    window.dispatchEvent(new CustomEvent('thestra-studio-boot-ready'));
+                    if (this.isMainSurface && window.thestraStudio) window.thestraStudio.bootReady().catch(console.error);
+                },
+                fail(message) {
+                    if (this.state !== 'loading') return;
+                    this.state = 'error';
+                    this.error = String(message || 'Studio could not finish starting.');
+                    document.body.dataset.studioBoot = 'error';
+                    if (this.isMainSurface && window.thestraStudio) window.thestraStudio.bootFailed(this.error).catch(console.error);
+                },
+                publish() {
+                    if (this.isMainSurface && window.thestraStudio) {
+                        window.thestraStudio.bootProgress({
+                            studioName: this.studioName,
+                            projectName: this.project,
+                            status: this.stage,
+                        }).catch(console.error);
+                    }
+                },
+            };
+            window.ThestraBoot = boot;
+            window.addEventListener('error', event => {
+                const resourceTag = event.target && String(event.target.tagName || '').toUpperCase();
+                if (boot.state === 'loading' && ['SCRIPT', 'LINK'].includes(resourceTag)) {
+                    boot.fail('A startup resource failed to load: ' + (event.target.src || event.target.href || event.target.tagName));
+                } else if (boot.state === 'loading' && event.message) {
+                    boot.fail(event.message + (event.filename ? '\n' + event.filename + ':' + event.lineno : ''));
+                }
+            }, true);
+            window.addEventListener('thestra-database-boot-ready', event => {
+                const state = event.detail || window.thestraDatabaseBootState || {};
+                boot.markDatabaseReady(!!state.ok, state.error);
+            });
+            window.addEventListener('thestra-map-workspace-progress', event => boot.update(event.detail && event.detail.status || 'Preparing initial workspace…'));
+            window.addEventListener('thestra-map-workspace-ready', event => boot.markWorkspaceReady(event.detail && event.detail.status));
+            window.addEventListener('unhandledrejection', event => {
+                if (boot.state === 'loading') {
+                    const reason = event.reason;
+                    boot.fail(reason && reason.stack ? reason.stack : String(reason || 'An unhandled startup request failed.'));
+                }
+            });
+            document.addEventListener('DOMContentLoaded', () => boot.publish(), { once: true });
+        }());
+    </script>
 </head>
-<body>
+<body data-studio-boot="loading">
     <div class="window main-app-window">
         <!-- Menu Bar -->
         <div class="menu-bar">

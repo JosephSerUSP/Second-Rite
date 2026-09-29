@@ -239,7 +239,10 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         electronProcess = app.process();
         app.on('close', () => { appClosed = true; });
 
-        const mainPage = await app.firstWindow();
+        const mainPage = await waitFor('main Studio BrowserWindow page', () => app.windows().find(page =>
+            /^http:\/\/127\.0\.0\.1:\d+\/(?:\?.*)?$/.test(page.url())
+                && surfaceIdFromPage(page) === 'main'
+        ) || null, page => !!page, SURFACE_BOOT_TIMEOUT);
         attachDiagnostics(mainPage, 'main', diagnostics);
         await awaitSurfaceReady(mainPage, 'main');
         mark(t, 'main Studio renderer reached semantic Database readiness');

@@ -97,6 +97,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+        if (window.ThestraBoot) window.ThestraBoot.update('Starting editor services…');
         window.ThestraEditorHost = {
             getPayload: () => dbPayload,
             getMapIndex: () => currentMapIndex,
@@ -269,6 +270,13 @@
             .then(() => loadScript('/js/thestra-workspace-state.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))
             .then(() => loadScript('/js/map-inspector.js'))
-            .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));
+            .catch(error => {
+                console.error('Thestra Editor Scene bootstrap failed:', error);
+                if (window.ThestraBoot && window.ThestraBoot.isMainSurface && window.thestraStudio) {
+                    window.ThestraBoot.fail(`Editor services could not start. Reload Studio after checking its installed assets.\n\n${error.stack || error.message}`);
+                } else {
+                    alert(`Editor services could not start. Reload Studio after checking its installed assets.\n\n${error.message}`);
+                }
+            });
     }, { once: true });
 }());

@@ -169,9 +169,12 @@ def dilate(rgb: np.ndarray, filled: np.ndarray, steps: int):
     return rgb, filled
 
 
+LANE_CENTRE = [atlas_allocation.LANE_CENTRE]        # set from --span in main: half the lane
+
+
 def place_camera(scene, lane_y: float):
     """A lane position in engine space, the mesh being in Blender space (see atlas_allocation)."""
-    return atlas_allocation.lane_camera(scene, lane_y)
+    return atlas_allocation.lane_camera(scene, lane_y, centre=LANE_CENTRE[0])
 
 
 def main():
@@ -184,6 +187,13 @@ def main():
     parser.add_argument("--layout", choices=("loose", "packed", "view"), default="packed",
                         help="the atlas layout: loose is the original ~23%%-full smart_project layout, "
                              "packed is tight, view also spends the atlas where the lane cameras look")
+    parser.add_argument("--probe-volume", type=float, default=0.0, metavar="CELLS_PER_M",
+                        help="bake an EEVEE light probe volume over the room before the beauty pass "
+                             "(the EEVEE answer to the sealed-room world-fill leak); 0 = off")
+    parser.add_argument("--probe-samples", type=int, default=256)
+    parser.add_argument("--exposure", type=float, default=0.0, metavar="EV",
+                        help="gain, in EV, applied to the EEVEE beauty in linear light before it goes "
+                             "into the atlas, and to the EEVEE target frames (matches a plate's exposure)")
     parser.add_argument("--view-bias", type=float, default=0.85)
     parser.add_argument("--view-floor", type=float, default=0.04)
     parser.add_argument("--bake-cameras", type=int, default=9)
@@ -193,7 +203,12 @@ def main():
     parser.add_argument("--lamp-scale", type=float, default=0.3)
     parser.add_argument("--accent-scale", type=float, default=0.4)
     parser.add_argument("--window-emission-scale", type=float, default=1.0)
+    parser.add_argument("--eevee-option", action="append", default=[], metavar="NAME=VALUE",
+                        help="scene.eevee overrides for the beauty and target frames, as in stage_room_model.py")
+    parser.add_argument("--cycles-target", action="store_true",
+                        help="also render Cycles beauty frames as the engine reference, without an atlas")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
+    LANE_CENTRE[0] = args.span / 2.0
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
 
@@ -221,6 +236,13 @@ def main():
     scene.render.engine = "BLENDER_EEVEE"
     uv_layer = target.data.uv_layers.active.name
     size = args.atlas_size
+    if args.eevee_option:
+        print("eevee options: " + json.dumps(stager.apply_eevee_options(scene.eevee, args.eevee_option)), flush=True)
+    probe = None
+    if args.probe_volume > 0:
+        # Baked from the joined mesh alone (the source meshes are hidden above), with the room's lamps.
+        probe = stager.add_probe_volume(scene, args.probe_volume, args.probe_samples)
+        print("probe volume: " + json.dumps(probe), flush=True)
 
     lo, hi = 0.6, args.span - 0.6
     bake_positions = list(np.linspace(lo, hi, args.bake_cameras))
@@ -252,7 +274,7 @@ def main():
         ix = np.clip((uv[..., 0][hit] * size).astype(np.int64), 0, size - 1)
         iy = np.clip((uv[..., 1][hit] * size).astype(np.int64), 0, size - 1)
         flat = iy * size + ix
-        colours = np.clip(beauty[..., :3][hit].astype(np.float64), 0.0, None)
+        colours = np.clip(beauty[..., :3][hit].astype(np.float64), 0.0, None) * (2.0 ** args.exposure)
         for channel in range(3):
             total[channel::3] += np.bincount(flat, weights=colours[:, channel], minlength=size * size)
         weight += np.bincount(flat, minlength=size * size)
@@ -299,9 +321,13 @@ def main():
         place_camera(scene, float(lane_y))
         bpy.context.view_layer.material_override = None
         scene.render.engine = "BLENDER_EEVEE"
+        # The exposure gain is a property of the EEVEE lighting: it is on the EEVEE beauty target, and
+        # already baked into the EEVEE atlas's texels, so the unlit atlas frames must not apply it twice.
+        scene.view_settings.exposure = args.exposure
         scene.render.filepath = str(out / f"target_eevee_{number}.png")
         bpy.ops.render.render(write_still=True)
-        if args.cycles_atlas:
+        scene.view_settings.exposure = 0.0
+        if args.cycles_atlas or args.cycles_target:
             scene.render.engine = "CYCLES"
             scene.cycles.samples = 32
             scene.cycles.use_denoising = True
@@ -336,7 +362,7 @@ def main():
     (out / "result.json").write_text(json.dumps({
         "blend": args.blend.name, "atlasSize": size, "bakeCameras": per_camera,
         "checkCameras": [round(float(y), 3) for y in check_positions],
-        "layout": args.layout, "layoutCoverage": layout, "texelsPerPixel": density_report,
+        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "lampScale": args.lamp_scale, "exposureEV": args.exposure, "texelsPerPixel": density_report,
         "coverage": coverage, "eeveeBakeSeconds": round(bake_seconds, 1),
         "supersample": args.supersample}, indent=1), encoding="utf-8")
     print("EEVEE ATLAS STUDY OK", out)

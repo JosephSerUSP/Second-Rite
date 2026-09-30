@@ -51,7 +51,9 @@ def main() -> int:
     rows = []
     for spec in args.pairs:
         label, _, paths = spec.partition("=")
-        before, _, after = paths.partition(":")
+        # `|` separates the two paths, so a Windows drive letter (D:\...) is not mistaken for the
+        # separator; `:` still works when neither path has one.
+        before, _, after = paths.partition("|") if "|" in paths else paths.partition(":")
         if not (label and before and after):
             raise SystemExit(f"expected LABEL=BEFORE:AFTER, got {spec!r}")
         rows.append((label, *compare(Path(before), Path(after))))

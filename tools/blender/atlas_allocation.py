@@ -42,14 +42,15 @@ FACE_ATTRIBUTE = "sr_face_id"
 LANE_CENTRE = 3.8833
 
 
-def lane_camera(scene, lane_y: float, mirrored: bool = True):
+def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE):
     """The town side-view camera, widened to the 426 px view, standing at lane position `lane_y`.
 
     `lane_y` is a position along the lane in ENGINE space, the space the anchors and the game use
     (0.35 to 7.42 for a shop). For geometry still in Blender space (a source `.blend`, the joined
     `TH_RENDER` mesh) `mirrored` converts it: an earlier version put the camera at Blender y = lane_y,
     which sits half the walkable lane outside the room. Pass `mirrored=False` for geometry already
-    in engine space, such as an exported package's OBJ.
+    in engine space, such as an exported package's OBJ. `centre` is the engine y of the lane's middle:
+    half the span, which is 3.8833 for a shop and 11.5 for the 23 m Passage House corridor.
     """
     import stage_room_model as stager
     import thestra_camera
@@ -57,7 +58,7 @@ def lane_camera(scene, lane_y: float, mirrored: bool = True):
     record = thestra_camera.load_calibration(str(CAMERA_RECORD))
     record = stager.widen_record(record, VIEW_WIDTH)
     camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
-    camera.location.y = LANE_CENTRE - lane_y if mirrored else lane_y
+    camera.location.y = centre - lane_y if mirrored else lane_y
     bpy.context.view_layer.update()
     return camera
 

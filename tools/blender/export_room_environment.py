@@ -50,6 +50,7 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
 import atlas_allocation  # noqa: E402
+import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
 
 # Shared with the pre-rendered packages; both are derived from the calibrated
@@ -104,6 +105,7 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     for obj in meshes:
         copy = obj.copy()
         copy.data = obj.data.copy()
+        atlas_alpha.preserve_uv(copy.data)
         copy.name = f"R_{obj.name}"
         render.objects.link(copy)
         copies.append(copy)
@@ -114,6 +116,8 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     if len(copies) > 1:
         bpy.ops.object.join()
     target = bpy.context.view_layer.objects.active
+    if target and target.data.uv_layers.get(atlas_alpha.ATLAS_UV):
+        target.data.uv_layers.active = target.data.uv_layers[atlas_alpha.ATLAS_UV]
     target.name = name
 
     if decimate < 0.999:

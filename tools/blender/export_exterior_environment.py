@@ -74,6 +74,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import atlas_allocation  # noqa: E402
+import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
@@ -534,6 +535,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
             flatten_ground_sheet(obj)       # in memory, for the Cycles bake: see its docstring
         copy = obj.copy()
         copy.data = realised_mesh(obj)
+        atlas_alpha.preserve_uv(copy.data)
         copy.modifiers.clear()      # already applied above; join must not see them
         if obj.get(ground_cover.OPEN_SURFACE_PROPERTY):
             marks = copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
@@ -580,6 +582,8 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     if len(copies) > 1:
         bpy.ops.object.join()
     target = bpy.context.view_layer.objects.active
+    if target and target.data.uv_layers.get(atlas_alpha.ATLAS_UV):
+        target.data.uv_layers.active = target.data.uv_layers[atlas_alpha.ATLAS_UV]
     if target is None or target.type != "MESH":
         raise RuntimeError("render join produced no active mesh")
     target.name = "st_maria_praca_TH_RENDER"

@@ -106,7 +106,7 @@ def settings_from_args(args, blend_path, positions, place_camera, sources=None) 
         supersample=pick("bake_supersample", "supersample", 3))
 
 
-def bake_atlas(settings: EeveeBake, scene, target, source_collection, image, log=print) -> dict:
+def bake_atlas(settings: EeveeBake, scene, target, source_collection, image, log=print, opacity=None) -> dict:
     """Fill `image` (the exporter's bake target) with the EEVEE projection of the room. Returns a report.
 
     `target` is the joined render mesh with the UVs the atlas is laid out by; `source_collection`
@@ -151,7 +151,7 @@ def bake_atlas(settings: EeveeBake, scene, target, source_collection, image, log
         projected = projection.project_atlas(
             scene, target.data.uv_layers.active.name, settings.positions, settings.place_camera,
             image.size[0], Path(bpy.app.tempdir), supersample=settings.supersample,
-            exposure=settings.exposure, beauty_pass=beauty_pass, uv_pass=uv_pass, log=log)
+            exposure=settings.exposure, beauty_pass=beauty_pass, uv_pass=uv_pass, log=log, opacity=opacity)
         _, coverage = projection.finish_atlas(projected, atlas_allocation.triangle_mask(target.data, image.size[0]),
                                               image.name, None, image=image)
         report["coverage"] = coverage

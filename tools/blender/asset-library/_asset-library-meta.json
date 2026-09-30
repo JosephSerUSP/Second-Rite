@@ -1,0 +1,13 @@
+{
+  "api_versions": {
+    "v1": {
+      "url": "_v1/asset-index.json",
+      "hash": "SHA256:6cf2550da573acdf6e99b9c374c9311205c3f3c6b797cf5ee0d4d784b7c19bee"
+    }
+  },
+  "name": "Second Rite Assets",
+  "contact": {
+    "name": "Second Rite",
+    "url": "https://github.com/JosephSerUSP/Second-Rite"
+  }
+}

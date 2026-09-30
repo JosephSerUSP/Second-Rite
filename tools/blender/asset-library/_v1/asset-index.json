@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "asset_size_bytes": 647307,
+  "asset_count": 1,
+  "file_count": 1,
+  "pages": [
+    {
+      "url": "_v1/assets-00000.json",
+      "hash": "SHA256:7b7c6240c86580395f325dd94f52e7f37f842eef0d1f80a29dd52272b45e574a"
+    }
+  ],
+  "catalogs": [
+    {
+      "path": "Second Rite/Environment",
+      "uuids": [
+        "79f768d6-c0e1-5488-a1e4-9c5bcd072180"
+      ],
+      "simple_name": "Second Rite-Environment"
+    }
+  ]
+}

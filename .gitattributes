@@ -59,3 +59,8 @@ tools/blender/second-rite-item-model-toolkit/BUILD_LIBRARY_WINDOWS.bat  text eol
 tools/blender/second_rite_asset_core.py   text eol=lf
 tools/asset-language/contract.json        text eol=lf
 tools/asset-language/materials.json       text eol=lf
+
+# The asset library listing is hash-chained: meta -> index -> pages -> the .blend, each
+# verified against the SHA-256 of the exact bytes. With core.autocrlf a Windows checkout
+# would rewrite the JSON and break every hash, so the directory is pinned byte-for-byte.
+tools/blender/asset-library/** -text

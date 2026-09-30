@@ -40,7 +40,7 @@ class EeveeBackendTests(unittest.TestCase):
             output = base / backend
             result = blender("-P", str(TOOLS / "export_room_environment.py"), "--",
                              "--blend", str(source), "--output", str(output), "--exit-y", "6.5",
-                             "--atlas-size", "128", "--samples", "8", "--bake-backend", backend,
+                             "--atlas-size", "128", "--samples", "8", *(["--bake-backend", backend] if backend == "cycles" else []),
                              "--bake-supersample", "1")
             if "ROOM 3D EXPORT OK" not in result.stdout:
                 raise AssertionError(f"{backend} export failed:\n{result.stdout[-2500:]}\n{result.stderr[-1000:]}")
@@ -82,7 +82,9 @@ class EeveeBackendTests(unittest.TestCase):
     def test_an_eevee_package_says_how_it_was_made(self):
         bake = self.manifest("eevee")["provenance"]["bake"]
         self.assertEqual(bake["backend"], "eevee")
-        self.assertIn("exposureEV", bake)
+        self.assertEqual(bake["exposureEV"], 0.0)
+        self.assertTrue(bake["emissiveLights"])
+        self.assertTrue(bake["fixtureLights"])
 
     def test_a_cycles_package_keeps_the_manifest_it_always_had(self):
         self.assertNotIn("bake", self.manifest("cycles")["provenance"])

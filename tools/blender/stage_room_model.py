@@ -765,17 +765,8 @@ def main() -> None:
     parser.add_argument("--no-materials", dest="materials", action="store_false",
                         help="skip material-library rebinding and keep raw MTL")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
-                        default="cycles",
-                        help="Cycles by default, and the reason is not "
-                             "fidelity for its own sake. These rooms are "
-                             "sealed boxes, so the world fill should barely "
-                             "reach inside: Cycles puts its share of the "
-                             "Padaria at 3%. EEVEE without raytracing put it "
-                             "at 38%, lighting every surface as though the "
-                             "walls were not there, and that leak is what "
-                             "made these interiors read flat and overbright. "
-                             "At 32 samples with OIDN a 256px plate costs "
-                             "about 21s against EEVEE's 11s")
+                        default="eevee",
+                        help="EEVEE by default with probes and lighting shims; Cycles is an explicit comparison")
     parser.add_argument("--raytracing", action=argparse.BooleanOptionalAction,
                         default=True,
                         help="EEVEE screen-space raytracing, which is where "
@@ -791,14 +782,14 @@ def main() -> None:
                              "ray_tracing_options.NAME) after the defaults "
                              "above; repeatable. For experiments: an unknown "
                              "name is an error, not a silent no-op")
-    parser.add_argument("--probe-volume", type=float, default=0.0, metavar="CELLS_PER_M",
+    parser.add_argument("--probe-volume", type=float, default=None, metavar="CELLS_PER_M",
                         help="EEVEE only: bake a light probe volume over the room at "
                              "this density (cells per metre; 0 = off). Experimental")
     parser.add_argument("--probe-samples", type=int, default=256,
                         help="bake samples for --probe-volume")
-    parser.add_argument("--exposure", type=float, default=0.0, metavar="EV",
-                        help="film exposure in EV, applied to the whole frame after lighting. For "
-                             "matching one engine's plate to another's; 0 leaves the scene as authored")
+    parser.add_argument("--exposure", type=float, default=None, metavar="EV",
+                        help="film exposure in EV after lighting; neutral 0 is the baseline, "
+                             "overrides are deliberate artistic choices")
     parser.add_argument("--ao-distance", type=float, default=1.5,
                         metavar="M",
                         help="how far the fast-GI trace looks for occluders. "
@@ -834,14 +825,14 @@ def main() -> None:
                         help="multiply canonical window daylight emission by K "
                              "at render time; lower than 1 keeps the grille "
                              "readable in the Cycles bake")
-    parser.add_argument("--emissive-lights", action="store_true",
+    parser.add_argument("--emissive-lights", action=argparse.BooleanOptionalAction, default=None,
                         help="EEVEE: put a rectangular area light on every room-facing emissive patch "
                              "(window, embers, glowing reveal), because EEVEE draws emission but does not "
                              "cast it. See emissive_lights.py. The probe volume then stops capturing "
                              "emission so the glow is not counted twice")
     parser.add_argument("--emissive-exclude", action="append", default=[], metavar="MATERIAL",
                         help="with --emissive-lights: a material to leave without a companion light")
-    parser.add_argument("--fixture-lights", action="store_true",
+    parser.add_argument("--fixture-lights", action=argparse.BooleanOptionalAction, default=None,
                         help="EEVEE: a small mesh around a point or spot light (a lantern's flame and cage) "
                              "stops casting shadows, so the lamp can light the wall beside it the way it "
                              "does in Cycles. See light_fixtures.py")
@@ -854,6 +845,18 @@ def main() -> None:
     parser.add_argument("--tolerance", type=float, default=0.5,
                         help="allowed Walker pixel-height error")
     args = parser.parse_args(argv)
+    import environment_sources
+    lighting = (environment_sources.entry_for(args.model) or {}).get("eevee", {}) if args.engine == "eevee" else {}
+    if args.exposure is None:
+        args.exposure = lighting.get("exposureEV", 0.0)
+    if args.probe_volume is None:
+        args.probe_volume = lighting.get("probeCells", 2.0) if args.engine == "eevee" else 0.0
+    if args.emissive_lights is None:
+        args.emissive_lights = lighting.get("emissiveLights", True) if args.engine == "eevee" else False
+    if args.fixture_lights is None:
+        args.fixture_lights = lighting.get("fixtureLights", True) if args.engine == "eevee" else False
+    if not args.eevee_option:
+        args.eevee_option = lighting.get("eeveeOptions", [])
 
     source_is_blend = args.model.suffix.lower() == ".blend"
     if source_is_blend:
@@ -994,9 +997,8 @@ def main() -> None:
                                else "CYCLES")
         scene.render.film_transparent = False
         report["renderQuality"] = configure_render_quality(scene, args)
-        if args.exposure:
-            scene.view_settings.exposure = args.exposure
-            report["exposureEV"] = args.exposure
+        scene.view_settings.exposure = args.exposure
+        report["exposureEV"] = args.exposure
         if args.lamp_scale != 1.0 or args.accent_scale != 1.0:
             report["lampScale"] = scale_lamp_energy(
                 scene, args.lamp_scale, args.accent_scale)

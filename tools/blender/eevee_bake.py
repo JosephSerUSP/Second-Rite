@@ -12,8 +12,8 @@ belongs to. This module is the exporter-facing wrapper, the same for an interior
     (`light_fixtures.py`), and a baked light probe volume with `capture_world` so a sealed room's walls
     occlude the world fill (`stage_room_model.add_probe_volume`). An exterior needs none of them;
   * `exposure` is a gain in EV on the beauty before it goes into the atlas. It is explicit and recorded
-    per environment, not solved here: matching a plate to Cycles is a migration-time comparison
-    (`study_eevee_pilot.py`), not an export step.
+    per environment, not solved here. Neutral exposure is the workflow baseline; lighting is tuned
+    at its source, and Cycles comparisons do not define the intended brightness.
 
 Nothing here changes the source document. Object visibility is put back when the bake is done.
 
@@ -64,8 +64,8 @@ def add_arguments(parser) -> None:
     `eevee` entry), then to the default. A setting on the command line always wins.
     """
     group = parser.add_argument_group("atlas bake backend")
-    group.add_argument("--bake-backend", choices=("cycles", "eevee"), default="cycles",
-                       help="cycles is the selected-to-active bake the shipped packages were made with; eevee "
+    group.add_argument("--bake-backend", choices=("cycles", "eevee"), default="eevee",
+                       help="eevee is the default; cycles retains the selected-to-active comparison bake; eevee "
                             "is a camera-projection bake (eevee_bake.py), seconds where the Praca bake takes "
                             "a quarter of an hour")
     group.add_argument("--exposure", type=float, default=None, metavar="EV",
@@ -100,8 +100,8 @@ def settings_from_args(args, blend_path, positions, place_camera, sources=None) 
         exposure=pick("exposure", "exposureEV", 0.0),
         probe_cells=pick("probe_cells", "probeCells", 0.0),
         probe_samples=pick("probe_samples", "probeSamples", 256),
-        emissive_lights=pick("emissive_lights", "emissiveLights", False),
-        fixture_lights=pick("fixture_lights", "fixtureLights", False),
+        emissive_lights=pick("emissive_lights", "emissiveLights", True),
+        fixture_lights=pick("fixture_lights", "fixtureLights", True),
         eevee_options=list(pick("eevee_option", "eeveeOptions", [])),
         supersample=pick("bake_supersample", "supersample", 3))
 

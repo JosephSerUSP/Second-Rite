@@ -6,11 +6,11 @@
       "status": "adopted",
       "basis": "Source of both shipped Padaria packages, alicias_padaria (plate) and alicias_padaria_3d; docs/reports/st-maria-shops-walkable-2026-08-27.md records it as source authority. Recorded from repo evidence, not yet owner-confirmed.",
       "eevee": {
-        "exposureEV": 0.5243,
+        "exposureEV": 0.0,
         "probeCells": 2,
         "emissiveLights": true,
         "fixtureLights": true,
-        "basis": "study_eevee_pilot.py, 2026-09-30: the exposure that matches the EEVEE plate to the Cycles plate; a starting point for a test subject, not a sign-off"
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
     },
     "img2imgguide.blend": {
@@ -21,11 +21,11 @@
       "status": "adopted",
       "basis": "Source of both shipped smith packages, lauras_smith (plate) and lauras_smith_3d; docs/reports/st-maria-shops-walkable-2026-08-27.md records it as source authority. Recorded from repo evidence, not yet owner-confirmed.",
       "eevee": {
-        "exposureEV": 0.5482,
+        "exposureEV": 0.0,
         "probeCells": 2,
         "emissiveLights": true,
         "fixtureLights": true,
-        "basis": "study_eevee_pilot.py, 2026-09-30: the exposure that matches the EEVEE plate to the Cycles plate; a starting point for a test subject, not a sign-off"
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
     },
     "passage_house_corridor.blend": {
@@ -39,18 +39,18 @@
         ],
         "emissiveLights": true,
         "fixtureLights": true,
-        "basis": "study_eevee_pilot.py, 2026-09-30: the exposure that matches the EEVEE plate to the Cycles plate; a starting point for a test subject, not a sign-off; the corridor needs denser probes and a lower light threshold, or light leaks through its ceiling shell"
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
     },
     "passage_house_room3.blend": {
       "status": "scaffold",
       "basis": "Written by recipes/passage_house_room3.py (regenerated to the Classic 256 preset at 689ccb83); no shipped package is baked from it, and no adoption is recorded.",
       "eevee": {
-        "exposureEV": 0.6117,
+        "exposureEV": 0.0,
         "probeCells": 2,
         "emissiveLights": true,
         "fixtureLights": true,
-        "basis": "study_eevee_pilot.py, 2026-09-30: the exposure that matches the EEVEE plate to the Cycles plate; a starting point for a test subject, not a sign-off"
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
     },
     "st_maria_port_spatial_reference.blend": {
@@ -68,7 +68,10 @@
       "ownerConfirmed": "2026-09-29 (#1269)",
       "eevee": {
         "exposureEV": 0.0,
-        "basis": "study_eevee_exterior.py, 2026-09-30: no probe volume or lighting shims. The EEVEE facades sit about 0.6 EV above the Cycles atlas (ratio 0.64-0.68); left at 0 until the owner says which look is intended"
+        "probeCells": 0,
+        "emissiveLights": false,
+        "fixtureLights": false,
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
     }
   }

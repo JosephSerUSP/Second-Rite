@@ -105,11 +105,19 @@ def main() -> int:
     parser.add_argument("--probe-cells", type=float, default=PROBE_CELLS, help="light probe volume cells per metre")
     parser.add_argument("--eevee-option", action="append", default=[], metavar="NAME=VALUE",
                         help="scene.eevee override for every EEVEE render (plates and atlas)")
+    parser.add_argument("--emissive-lights", action="store_true",
+                        help="companion area lights on emissive patches for the probe plate and the atlas")
+    parser.add_argument("--emissive-exclude", action="append", default=[], metavar="MATERIAL")
+    parser.add_argument("--fixture-lights", action="store_true",
+                        help="a small mesh around a lamp stops shadowing it (the lantern in its cage)")
     args = parser.parse_args()
     out = args.out.resolve()
     room = args.room
     options = [x for o in args.eevee_option for x in ("--eevee-option", o)]
-    probe = ["--engine", "eevee", "--probe-volume", str(args.probe_cells), *options]
+    emissive = (["--emissive-lights"] + [x for m in args.emissive_exclude for x in ("--emissive-exclude", m)]
+                if args.emissive_lights else [])
+    emissive += ["--fixture-lights"] if args.fixture_lights else []
+    probe = ["--engine", "eevee", "--probe-volume", str(args.probe_cells), *options, *emissive]
 
     cycles = plate(room, out / "plate_cycles.png", 0.13, BASE_LAMP_SCALE, "--engine", "cycles")
     cycles_dark = plate(room, out / "plate_cycles_dark.png", 0.0, BASE_LAMP_SCALE, "--engine", "cycles")
@@ -151,7 +159,7 @@ def main() -> int:
         f"cycles plate vs eevee AO plate (today's --engine eevee)={cycles}|{ao}",
         f"cycles plate vs eevee probe plate, exposure matched={cycles}|{matched}"])
     atlas_args = ["--blend", str(ENVIRONMENTS / f"{room}.blend"), "--layout", args.layout,
-                  "--probe-volume", str(args.probe_cells), *options, "--lamp-scale", f"{scale:.5f}", "--exposure", f"{ev:.4f}",
+                  "--probe-volume", str(args.probe_cells), *options, *emissive, "--lamp-scale", f"{scale:.5f}", "--exposure", f"{ev:.4f}",
                   "--span", str(args.span), "--atlas-size", str(args.atlas_size), "--out", str(out / "atlas")]
     atlas_args += ["--cycles-atlas", str(args.cycles_atlas)] if args.cycles_atlas else ["--cycles-target"]
     blender("--python", str(ATLAS_STUDY), "--", *atlas_args)

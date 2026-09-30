@@ -39,15 +39,16 @@ way EEVEE is set up: it is mostly the engine gap, not the probe volume. The shee
 - **Corridor, at the defaults (2 cells per metre):** thin bright bars along the ceiling, light leaking through
   the ceiling shell into the beam recesses, in the plate and in the atlas. Denser probes and a lower light
   threshold (`--probe-cells 4 --eevee-option light_threshold=0.0002`) remove the bars (`corridor_tuning_sheet.png`).
-  **Not fixed by that:** the wall lantern's soft glow, which Cycles produces because an emissive mesh lights
-  the room in a path tracer and EEVEE does not light surfaces from an emissive material (the probe volume
-  captures emission, but at this size it does not show). The doorway's warm spill is also weaker.
+  **Not fixed by that:** the wall lantern's soft glow. *Correction, `eevee-emissive-lights-2026-09-30.md`:* I
+  first put this down to EEVEE not casting emission. It is the lantern's own housing shadowing its light in
+  EEVEE (the flame's emission is under a watt), fixed by releasing the housing's shadow. The doorway's warm
+  spill is also weaker.
 
 ## What it means
 
 - **Safe with per-room tuning, not with one setting.** Two of four rooms are fine as they stand, one needs
-  a blotch looked at (probe density), and the corridor needs denser probes and has a missing effect (lantern
-  glow) that wants a real authored light. None of that was needed in the Padaria, which is the risk of
+  a blotch looked at (probe density), and the corridor needs denser probes and a fix for its lanterns
+  (they shadow their own light in EEVEE; see the correction above). None of that was needed in the Padaria, which is the risk of
   deciding from one room.
 - **The atlas is not the risk.** In every room the EEVEE projected atlas matches its own EEVEE target to
   1.8-3.1 of 255. What varies from room to room is the EEVEE *lighting*, not the bake.

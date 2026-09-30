@@ -41,7 +41,9 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+import emissive_lights  # noqa: E402
 import export_room_environment as exporter  # noqa: E402
+import light_fixtures  # noqa: E402
 import stage_room_model as stager  # noqa: E402
 import atlas_allocation  # noqa: E402
 from atlas_allocation import triangle_mask  # noqa: E402
@@ -205,6 +207,11 @@ def main():
     parser.add_argument("--window-emission-scale", type=float, default=1.0)
     parser.add_argument("--eevee-option", action="append", default=[], metavar="NAME=VALUE",
                         help="scene.eevee overrides for the beauty and target frames, as in stage_room_model.py")
+    parser.add_argument("--emissive-lights", action="store_true",
+                        help="companion area lights on the emissive patches, as in stage_room_model.py")
+    parser.add_argument("--emissive-exclude", action="append", default=[], metavar="MATERIAL")
+    parser.add_argument("--fixture-lights", action="store_true",
+                        help="let lamps shine out of their fixtures, as in stage_room_model.py")
     parser.add_argument("--cycles-target", action="store_true",
                         help="also render Cycles beauty frames as the engine reference, without an atlas")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
@@ -223,14 +230,32 @@ def main():
     stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
     stager.scale_lamp_energy(scene, args.lamp_scale, args.accent_scale)
     stager.scale_window_emission(scene, args.window_emission_scale)
+    companions = None
+    if args.emissive_lights:
+        # From the source meshes, before they are hidden: the joined mesh carries the same emissive
+        # materials but the companions are placed on the faces as authored.
+        companions = emissive_lights.add_companion_lights(scene, exclude=tuple(args.emissive_exclude), ignore=(target,))
+        print("emissive lights: " + json.dumps(companions), flush=True)
     # The joined mesh IS the room: render it, not the source copies it was made from. Only the
     # source MESHES are hidden. `sort_into_contract_collections` puts every object in TH_SOURCE,
     # lamps included, so hiding the collection would leave the room lit by the world fill alone
     # (an earlier draft of this study did exactly that, and looked plausible).
+    fixtures = None
+    if args.fixture_lights:
+        # A lamp inside its own small housing is shadowed by it in EEVEE (see light_fixtures.py), and
+        # the joined mesh has the housing welded into the room, so its shadow cannot be switched off
+        # for that part alone. So the source meshes stay in the scene as the shadow casters, unseen by
+        # the camera, with the housings released, and the joined mesh casts none.
+        fixtures = light_fixtures.release_fixture_lights(scene)
+        print("fixture lights: " + json.dumps(fixtures), flush=True)
+        target.visible_shadow = False
     for obj in source.objects:
         if obj.type == "MESH":
-            obj.hide_render = True
-    lamps = [o for o in source.objects if o.type == "LIGHT"]
+            if args.fixture_lights:
+                obj.visible_camera = False
+            else:
+                obj.hide_render = True
+    lamps =[o for o in source.objects if o.type == "LIGHT"]
     if not lamps:
         raise SystemExit("the source .blend has no lights; the study would measure the world fill only")
     scene.render.engine = "BLENDER_EEVEE"
@@ -241,7 +266,8 @@ def main():
     probe = None
     if args.probe_volume > 0:
         # Baked from the joined mesh alone (the source meshes are hidden above), with the room's lamps.
-        probe = stager.add_probe_volume(scene, args.probe_volume, args.probe_samples)
+        probe = stager.add_probe_volume(scene, args.probe_volume, args.probe_samples,
+                                        capture_emission=not args.emissive_lights)
         print("probe volume: " + json.dumps(probe), flush=True)
 
     lo, hi = 0.6, args.span - 0.6
@@ -332,7 +358,19 @@ def main():
             scene.cycles.samples = 32
             scene.cycles.use_denoising = True
             scene.render.filepath = str(out / f"target_cycles_{number}.png")
+            if args.fixture_lights:
+                # The Cycles reference is the room as it is today: one joined mesh that casts shadows,
+                # its source copies out of the scene. (Left as the EEVEE lighting set-up it is twice as bright.)
+                target.visible_shadow = True
+                for obj in source.objects:
+                    if obj.type == "MESH":
+                        obj.hide_render = True
             bpy.ops.render.render(write_still=True)
+            if args.fixture_lights:
+                target.visible_shadow = False
+                for obj in source.objects:
+                    if obj.type == "MESH":
+                        obj.hide_render = False
             scene.render.engine = "BLENDER_EEVEE"
         for name, image in atlases.items():
             bpy.context.view_layer.material_override = atlas_material(image)
@@ -362,7 +400,7 @@ def main():
     (out / "result.json").write_text(json.dumps({
         "blend": args.blend.name, "atlasSize": size, "bakeCameras": per_camera,
         "checkCameras": [round(float(y), 3) for y in check_positions],
-        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "lampScale": args.lamp_scale, "exposureEV": args.exposure, "texelsPerPixel": density_report,
+        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "emissiveLights": companions, "fixtureLights": fixtures, "lampScale": args.lamp_scale, "exposureEV": args.exposure, "texelsPerPixel": density_report,
         "coverage": coverage, "eeveeBakeSeconds": round(bake_seconds, 1),
         "supersample": args.supersample}, indent=1), encoding="utf-8")
     print("EEVEE ATLAS STUDY OK", out)

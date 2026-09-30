@@ -1,0 +1,15 @@
+{
+  "tufts": 375,
+  "underBuilding": 0,
+  "inLane": 0,
+  "outOfFrame": 0,
+  "aboveMenu": 238,
+  "maxTufts": 375,
+  "bake": true,
+  "inSource": true,
+  "properties": {
+    "sr_cover_layout": "E_mixed",
+    "sr_cover_budget": 375,
+    "sr_cover_seed": 1
+  }
+}

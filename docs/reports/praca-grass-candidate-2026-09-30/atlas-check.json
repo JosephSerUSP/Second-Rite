@@ -1,0 +1,12 @@
+{
+  "grassFaces": 750,
+  "grassTriangles": 1500,
+  "grassIslandTexels": 87903,
+  "grassTransparentTexels": 48557,
+  "grassOpaqueTexels": 10292,
+  "opaqueGrassMeanRGB": [
+    0.11715362996175695,
+    0.13454577873189116,
+    0.08990154744752456
+  ]
+}

@@ -54,7 +54,9 @@ def bake(package: str, out: Path) -> tuple[Path, float]:
     target.mkdir(parents=True, exist_ok=True)
     command = [blender_locator.blender_executable(), "--background", "--factory-startup",
                "-noaudio", "--python", str(ROOT / "tools" / "blender" / "export_room_environment.py"),
-               "--", "--blend", str(SOURCES / blend), "--output", str(target), *extra]
+               "--", "--blend", str(SOURCES / blend), "--output", str(target),
+               # The shipped atlases were laid out the original loose way; reproduce that, not today's default.
+               "--atlas-layout", "loose", *extra]
     started = time.time()
     result = subprocess.run(command, capture_output=True, text=True)
     elapsed = time.time() - started

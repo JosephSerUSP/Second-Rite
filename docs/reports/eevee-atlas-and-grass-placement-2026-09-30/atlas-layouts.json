@@ -1,0 +1,163 @@
+{
+ "padaria_loose": {
+  "layout": "loose",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.1088,
+   "islandTexels": 114063
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 103856,
+   "p10": 0.405,
+   "median": 0.609,
+   "p90": 1.359,
+   "fractionBelowHalf": 0.2778,
+   "fractionBelowOne": 0.7546
+  },
+  "coverage": {
+   "islandTexels": 114063,
+   "seenTexels": 34491,
+   "seenFractionOfIslands": 0.3024,
+   "afterDilationFraction": 0.4525
+  },
+  "eeveeBakeSeconds": 21.2
+ },
+ "padaria_packed": {
+  "layout": "packed",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.7322,
+   "islandTexels": 767793
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 86230,
+   "p10": 1.061,
+   "median": 1.531,
+   "p90": 2.5,
+   "fractionBelowHalf": 0.0085,
+   "fractionBelowOne": 0.0098
+  },
+  "coverage": {
+   "islandTexels": 767793,
+   "seenTexels": 160768,
+   "seenFractionOfIslands": 0.2094,
+   "afterDilationFraction": 0.4058
+  },
+  "eeveeBakeSeconds": 22.3
+ },
+ "padaria_view": {
+  "layout": "view",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.753,
+   "islandTexels": 789526
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 82687,
+   "p10": 2.372,
+   "median": 3.225,
+   "p90": 3.67,
+   "fractionBelowHalf": 0.0082,
+   "fractionBelowOne": 0.0099
+  },
+  "coverage": {
+   "islandTexels": 789526,
+   "seenTexels": 394604,
+   "seenFractionOfIslands": 0.4998,
+   "afterDilationFraction": 0.7318
+  },
+  "eeveeBakeSeconds": 16.9
+ },
+ "padaria_view512": {
+  "layout": "view",
+  "atlasSize": 512,
+  "layoutCoverage": {
+   "islandCoverage": 0.5703,
+   "islandTexels": 149504
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 104369,
+   "p10": 1.031,
+   "median": 1.468,
+   "p90": 1.73,
+   "fractionBelowHalf": 0.008,
+   "fractionBelowOne": 0.045
+  },
+  "coverage": {
+   "islandTexels": 149504,
+   "seenTexels": 94684,
+   "seenFractionOfIslands": 0.6333,
+   "afterDilationFraction": 0.7715
+  },
+  "eeveeBakeSeconds": 27.0
+ },
+ "smith_loose": {
+  "layout": "loose",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.1544,
+   "islandTexels": 161915
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 117503,
+   "p10": 0.5,
+   "median": 0.752,
+   "p90": 1.822,
+   "fractionBelowHalf": 0.0044,
+   "fractionBelowOne": 0.6612
+  },
+  "coverage": {
+   "islandTexels": 161915,
+   "seenTexels": 50773,
+   "seenFractionOfIslands": 0.3136,
+   "afterDilationFraction": 0.4755
+  },
+  "eeveeBakeSeconds": 31.3
+ },
+ "smith_packed": {
+  "layout": "packed",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.8012,
+   "islandTexels": 840117
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 91665,
+   "p10": 1.242,
+   "median": 1.73,
+   "p90": 2.669,
+   "fractionBelowHalf": 0.005,
+   "fractionBelowOne": 0.0051
+  },
+  "coverage": {
+   "islandTexels": 840117,
+   "seenTexels": 191665,
+   "seenFractionOfIslands": 0.2281,
+   "afterDilationFraction": 0.4454
+  },
+  "eeveeBakeSeconds": 34.9
+ },
+ "smith_view": {
+  "layout": "view",
+  "atlasSize": 1024,
+  "layoutCoverage": {
+   "islandCoverage": 0.8323,
+   "islandTexels": 872742
+  },
+  "texelsPerPixel": {
+   "pixelsMeasured": 85065,
+   "p10": 3.0,
+   "median": 3.375,
+   "p90": 3.812,
+   "fractionBelowHalf": 0.0054,
+   "fractionBelowOne": 0.0059
+  },
+  "coverage": {
+   "islandTexels": 872742,
+   "seenTexels": 451827,
+   "seenFractionOfIslands": 0.5177,
+   "afterDilationFraction": 0.7789
+  },
+  "eeveeBakeSeconds": 44.5
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "blend": "alicias_padaria.blend",
+ "atlasSize": 1024,
+ "bakeCameras": [
+  {
+   "laneY": 0.6,
+   "pixels": 350108
+  },
+  {
+   "laneY": 1.421,
+   "pixels": 349822
+  },
+  {
+   "laneY": 2.242,
+   "pixels": 350290
+  },
+  {
+   "laneY": 3.063,
+   "pixels": 319138
+  },
+  {
+   "laneY": 3.883,
+   "pixels": 286436
+  },
+  {
+   "laneY": 4.704,
+   "pixels": 255484
+  },
+  {
+   "laneY": 5.525,
+   "pixels": 231931
+  },
+  {
+   "laneY": 6.346,
+   "pixels": 208376
+  },
+  {
+   "laneY": 7.167,
+   "pixels": 184865
+  }
+ ],
+ "checkCameras": [
+  1.01,
+  4.294,
+  6.756,
+  0.35,
+  7.417
+ ],
+ "coverage": {
+  "islandTexels": 114063,
+  "seenTexels": 34491,
+  "seenFractionOfIslands": 0.3024,
+  "afterDilationFraction": 0.4525
+ },
+ "eeveeBakeSeconds": 10.1,
+ "supersample": 3
+}

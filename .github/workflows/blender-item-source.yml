@@ -101,6 +101,15 @@ jobs:
           set -euxo pipefail
           xvfb-run -a python -m unittest tools.blender.tests.test_atlas_allocation -v
 
+      # The Praca ground-cover adoption edits the adopted source, so it is proven on a copy: nothing
+      # that existed changes, only cover datablocks are added, a second run writes nothing, and the
+      # tufts stay inside the budget and the placement rules (#1270).
+      - name: Praca ground cover adoption
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover_adoption -v
+
       # The exterior bake once copied each object's base mesh, so a Geometry
       # Nodes host baked to nothing and nothing said so. This joins a small town
       # source through the real rebuild and counts what reaches the render mesh.

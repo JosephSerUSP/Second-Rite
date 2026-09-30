@@ -50,125 +50,9 @@ from atlas_allocation import triangle_mask  # noqa: E402
 import thestra_camera  # noqa: E402
 
 CAMERA_RECORD = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
-VIEW_WIDTH = 426          # the wide view; 256 is the classic one inside it
-
-# Every render here that stands for what a player sees uses NO reconstruction filter. The game
-# rasterises at native pixels and samples the atlas nearest, so Film > Filter Size (EEVEE's default
-# is 1.5 px, Cycles' filter width the same) blurs a frame by about a pixel and makes the atlas look
-# far softer than it is: measured on a Padaria frame, Laplacian variance 511 at 1.5 against 2,755 at
-# 0. The lighting samples still accumulate (64), so the frame is converged, just not blurred.
-FILM_FILTER = 0.0
-TAA_SAMPLES = 64
-CYCLES_FILTER_WIDTH = 0.01   # Cycles' minimum; it will not take 0
-
-
-def crisp(scene):
-    scene.eevee.taa_render_samples = TAA_SAMPLES
-    scene.render.filter_size = FILM_FILTER
-    scene.cycles.filter_width = CYCLES_FILTER_WIDTH
-VIEW_HEIGHT = 240
-
-
-def srgb_encode(linear: np.ndarray) -> np.ndarray:
-    c = np.clip(linear, 0.0, 1.0)
-    return np.where(c <= 0.0031308, c * 12.92, 1.055 * np.power(c, 1 / 2.4) - 0.055)
-
-
-def srgb_decode(encoded: np.ndarray) -> np.ndarray:
-    return np.where(encoded <= 0.04045, encoded / 12.92, np.power((encoded + 0.055) / 1.055, 2.4))
-
-
-def set_raw_float_output(scene, path: Path, supersample: int):
-    scene.render.resolution_x = VIEW_WIDTH
-    scene.render.resolution_y = VIEW_HEIGHT
-    scene.render.resolution_percentage = 100 * supersample
-    scene.render.image_settings.file_format = "OPEN_EXR"
-    scene.render.image_settings.color_depth = "32"
-    scene.render.image_settings.color_mode = "RGBA"
-    scene.render.film_transparent = True
-    scene.view_settings.view_transform = "Raw"
-    scene.view_settings.look = "None"
-    scene.view_settings.exposure = 0.0
-    scene.view_settings.gamma = 1.0
-    scene.render.filepath = str(path)
-
-
-def render_exr(scene, path: Path) -> np.ndarray:
-    scene.render.filepath = str(path)
-    bpy.ops.render.render(write_still=True)
-    image = bpy.data.images.load(str(path))
-    try:
-        width, height = image.size
-        buffer = np.empty(width * height * 4, dtype=np.float32)
-        image.pixels.foreach_get(buffer)
-        return buffer.reshape(height, width, 4)          # row 0 is the bottom, as Blender stores it
-    finally:
-        bpy.data.images.remove(image)
-
-
-def uv_material(uv_layer: str):
-    material = bpy.data.materials.new("SR_UV_PASS")
-    material.use_nodes = True
-    tree = material.node_tree
-    tree.nodes.clear()
-    uv = tree.nodes.new("ShaderNodeUVMap")
-    uv.uv_map = uv_layer
-    emission = tree.nodes.new("ShaderNodeEmission")
-    output = tree.nodes.new("ShaderNodeOutputMaterial")
-    tree.links.new(uv.outputs["UV"], emission.inputs["Color"])
-    tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
-    return material
-
-
-def atlas_material(image):
-    material = bpy.data.materials.new("SR_ATLAS_UNLIT")
-    material.use_nodes = True
-    tree = material.node_tree
-    tree.nodes.clear()
-    texture = tree.nodes.new("ShaderNodeTexImage")
-    texture.image = image
-    texture.interpolation = "Closest"            # the runtime samples nearest, with no mipmaps
-    emission = tree.nodes.new("ShaderNodeEmission")
-    output = tree.nodes.new("ShaderNodeOutputMaterial")
-    tree.links.new(texture.outputs["Color"], emission.inputs["Color"])
-    tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
-    return material
-
-
-def texel_density(uv: np.ndarray, size: int) -> np.ndarray:
-    """Texels per screen pixel (linear) at every pixel whose neighbourhood is one smooth surface.
-
-    From the UV frame: how far (u, v) moves, in texels, for one pixel step. The square root of
-    the footprint's area is the linear density; 1.0 means one texel per pixel, below 1 the
-    atlas is coarser than the screen there.
-    """
-    hit = uv[..., 3] > 0.5
-    u = uv[..., 0] * size
-    v = uv[..., 1] * size
-    du_dy, du_dx = np.gradient(u)
-    dv_dy, dv_dx = np.gradient(v)
-    area = np.abs(du_dx * dv_dy - du_dy * dv_dx)
-    inner = hit.copy()
-    for dy in (-1, 0, 1):
-        for dx in (-1, 0, 1):
-            inner &= np.roll(np.roll(hit, dy, axis=0), dx, axis=1)
-    smooth = inner & (np.abs(du_dx) < 8) & (np.abs(du_dy) < 8) & (np.abs(dv_dx) < 8) & (np.abs(dv_dy) < 8)
-    return np.sqrt(area[smooth])
-
-
-def dilate(rgb: np.ndarray, filled: np.ndarray, steps: int):
-    rgb, filled = rgb.copy(), filled.copy()
-    for _ in range(steps):
-        total = np.zeros_like(rgb)
-        count = np.zeros(filled.shape, dtype=np.float32)
-        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            shifted = np.roll(np.roll(filled, dy, axis=0), dx, axis=1)
-            total += np.roll(np.roll(rgb * filled[..., None], dy, axis=0), dx, axis=1)
-            count += shifted
-        grow = (~filled) & (count > 0)
-        rgb[grow] = total[grow] / count[grow][:, None]
-        filled |= grow
-    return rgb, filled
+from eevee_projection import (  # noqa: E402
+    atlas_material, crisp, dilate, finish_atlas, project_atlas, render_exr, set_raw_float_output,
+    texel_density, uv_material)
 
 
 LANE_CENTRE = [atlas_allocation.LANE_CENTRE]        # set from --span in main: half the lane
@@ -278,55 +162,12 @@ def main():
     check_positions = [lo + step * 0.5, (lo + hi) / 2 + step * 0.5, hi - step * 0.5, 0.35, args.span - 0.35]
 
     started = time.time()
-    total = np.zeros(size * size * 3, dtype=np.float64)
-    weight = np.zeros(size * size, dtype=np.float64)
-    uv_mat = uv_material(uv_layer)
-    per_camera = []
-    for number, lane_y in enumerate(bake_positions):
-        place_camera(scene, float(lane_y))
-        # Beauty: the room as EEVEE lights it.
-        bpy.context.view_layer.material_override = None
-        crisp(scene)
-        set_raw_float_output(scene, out / "tmp_beauty.exr", args.supersample)
-        beauty = render_exr(scene, out / "tmp_beauty.exr")
-        # UV: every pixel names its own texel. No antialiasing, no filter, no view transform.
-        bpy.context.view_layer.material_override = uv_mat
-        scene.eevee.taa_render_samples = 1
-        scene.render.filter_size = 0.0
-        set_raw_float_output(scene, out / "tmp_uv.exr", args.supersample)
-        uv = render_exr(scene, out / "tmp_uv.exr")
-        bpy.context.view_layer.material_override = None
-        hit = uv[..., 3] > 0.5
-        ix = np.clip((uv[..., 0][hit] * size).astype(np.int64), 0, size - 1)
-        iy = np.clip((uv[..., 1][hit] * size).astype(np.int64), 0, size - 1)
-        flat = iy * size + ix
-        colours = np.clip(beauty[..., :3][hit].astype(np.float64), 0.0, None) * (2.0 ** args.exposure)
-        for channel in range(3):
-            total[channel::3] += np.bincount(flat, weights=colours[:, channel], minlength=size * size)
-        weight += np.bincount(flat, minlength=size * size)
-        per_camera.append({"laneY": round(float(lane_y), 3), "pixels": int(hit.sum())})
-        print(f"  bake camera {number + 1}/{args.bake_cameras} lane y {lane_y:.2f}: {int(hit.sum())} pixels", flush=True)
-    for name in ("tmp_beauty.exr", "tmp_uv.exr"):
-        (out / name).unlink(missing_ok=True)
-
-    seen = weight > 0
-    linear = np.zeros((size * size, 3))
-    linear[seen] = total.reshape(-1, 3)[seen] / weight[seen][:, None]
-    linear = linear.reshape(size, size, 3)
-    seen = seen.reshape(size, size)
-    islands = triangle_mask(target.data, size)
-    filled, reached = dilate(linear, seen, 4)               # the Cycles bake also dilates by 4
-    coverage = {"islandTexels": int(islands.sum()), "seenTexels": int((seen & islands).sum()),
-                "seenFractionOfIslands": round(float((seen & islands).sum() / max(1, islands.sum())), 4),
-                "afterDilationFraction": round(float((reached & islands).sum() / max(1, islands.sum())), 4)}
-    atlas = np.zeros((size, size, 4), dtype=np.float32)
-    atlas[..., :3] = srgb_encode(filled)
-    atlas[..., 3] = 1.0
-    eevee_atlas = bpy.data.images.new("SR_EEVEE_ATLAS", size, size, alpha=True)
-    eevee_atlas.pixels.foreach_set(atlas.reshape(-1))
-    eevee_atlas.filepath_raw = str(out / "atlas_eevee.png")
-    eevee_atlas.file_format = "PNG"
-    eevee_atlas.save()
+    projected = project_atlas(scene, uv_layer, bake_positions, place_camera, size, out,
+                              supersample=args.supersample, exposure=args.exposure,
+                              log=lambda line: print(line, flush=True))
+    eevee_atlas, coverage = finish_atlas(projected, triangle_mask(target.data, size),
+                                         "SR_EEVEE_ATLAS", out / "atlas_eevee.png")
+    per_camera = projected["cameras"]
     bake_seconds = time.time() - started
     print(f"EEVEE atlas: {json.dumps(coverage)} in {bake_seconds:.1f}s", flush=True)
 
@@ -379,6 +220,7 @@ def main():
         bpy.context.view_layer.material_override = None
     # -- how many texels the atlas spends per screen pixel, at the check cameras ---------------
     scene.render.engine = "BLENDER_EEVEE"
+    uv_mat = uv_material(uv_layer)
     densities = []
     for lane_y in check_positions:
         place_camera(scene, float(lane_y))

@@ -1,0 +1,121 @@
+{
+ "blend": "st_maria_praca_modelled.blend",
+ "atlasSize": 2048,
+ "triangles": 5854,
+ "lightsInDocument": [
+  [
+   "LIGHT_overcast_sky",
+   "SUN",
+   3.0
+  ]
+ ],
+ "lightsAfterStaging": [
+  [
+   "LIGHT_overcast_sky",
+   "SUN",
+   3.0
+  ],
+  [
+   "TH_SUN",
+   "SUN",
+   2.5
+  ]
+ ],
+ "lampsWorld": 0.35,
+ "sun": 2.5,
+ "sourceMeshesSeenByBeauty": 36,
+ "bakeCameras": [
+  {
+   "laneY": 0.6,
+   "pixels": 795218
+  },
+  {
+   "laneY": 2.1,
+   "pixels": 821899
+  },
+  {
+   "laneY": 3.6,
+   "pixels": 848655
+  },
+  {
+   "laneY": 5.1,
+   "pixels": 874866
+  },
+  {
+   "laneY": 6.6,
+   "pixels": 901062
+  },
+  {
+   "laneY": 8.1,
+   "pixels": 911994
+  },
+  {
+   "laneY": 9.6,
+   "pixels": 913378
+  },
+  {
+   "laneY": 11.1,
+   "pixels": 912298
+  },
+  {
+   "laneY": 12.599,
+   "pixels": 907812
+  },
+  {
+   "laneY": 14.099,
+   "pixels": 915317
+  },
+  {
+   "laneY": 15.599,
+   "pixels": 870877
+  },
+  {
+   "laneY": 17.099,
+   "pixels": 846920
+  },
+  {
+   "laneY": 18.599,
+   "pixels": 828276
+  },
+  {
+   "laneY": 20.099,
+   "pixels": 809662
+  },
+  {
+   "laneY": 21.599,
+   "pixels": 791194
+  },
+  {
+   "laneY": 23.099,
+   "pixels": 772726
+  }
+ ],
+ "checkCameras": [
+  1.35,
+  12.599,
+  22.349,
+  0.35,
+  23.349
+ ],
+ "probeVolume": null,
+ "exposureEV": 0.0,
+ "eeveeCoverage": {
+  "islandTexels": 2787588,
+  "seenTexels": 526690,
+  "seenFractionOfIslands": 0.1889,
+  "afterDilationFraction": 0.3457
+ },
+ "texelsPerPixel": {
+  "pixelsMeasured": 383269,
+  "p10": 0.0,
+  "median": 0.0,
+  "p90": 2.236,
+  "fractionBelowOne": 0.7937
+ },
+ "eeveeBakeSeconds": 28.9,
+ "cyclesBakeSeconds": 1003.2,
+ "atlasMeanWrittenTexel": {
+  "eevee": 166.04,
+  "cycles": 101.05
+ }
+}

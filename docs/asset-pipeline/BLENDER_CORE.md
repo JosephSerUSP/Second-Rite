@@ -276,6 +276,12 @@ Both are on `stage_room_model.py`, `study_eevee_atlas.py` and `study_eevee_pilot
 `--engine eevee`. They are tested headless in the Blender workflow (`test_emissive_lights`,
 `test_light_fixtures`).
 
+EEVEE has no bake, so an EEVEE atlas is made by camera projection: `tools/blender/eevee_projection.py` is the
+shared core (a beauty frame and a UV frame per lane camera, splatted into the atlas by UV). The interior
+and exterior comparisons are `study_eevee_atlas.py` and `study_eevee_exterior.py`
+(`docs/reports/eevee-exterior-praca-2026-09-30.md`; it found that the shipped Praça package's ground bakes
+black, #1287).
+
 ## Which Blender runs what
 
 Repository tooling that launches Blender (the item compiler, the map `.blend`

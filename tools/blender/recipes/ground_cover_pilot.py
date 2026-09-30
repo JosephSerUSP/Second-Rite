@@ -105,11 +105,13 @@ def stage_camera_and_light(scene):
     sun.rotation_euler = (0.9, 0.2, 0.5)
 
 
-def render(path, samples=16):
+def render(path):
     scene = bpy.context.scene
-    scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
-    scene.cycles.samples = samples
+    # EEVEE, not Cycles: this is a study render, and EEVEE is what the placement study
+    # and the plate camera previews use. The picture is greener and lighter than the
+    # Cycles one it replaced (mean 12.5/255 apart on this scene), and nothing measures
+    # against either.
+    scene.render.engine = "BLENDER_EEVEE"
     scene.render.resolution_x = 512
     scene.render.resolution_y = 288
     scene.render.resolution_percentage = 100

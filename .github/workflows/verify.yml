@@ -244,6 +244,17 @@ jobs:
           node tools/ci/time-step.js --record --label "environment sources" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "environment sources check failed (exit $__code)" }
 
+      - name: asset library browser - the listing reader trusts only what it can verify
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          python -m unittest tools.blender.tests.test_asset_library
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "asset library browser" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "asset library browser tests failed (exit $__code)" }
+
       - name: G1 - data validation
         shell: pwsh
         run: |

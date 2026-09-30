@@ -171,6 +171,42 @@ adopted and is what the shipped package is baked from; `st_maria_praca.blend` is
 `reauthor_praca_spiral.py`, and the read-only `study_town_perspective.py`) are
 scaffold-only and say so.
 
+## Browsing asset libraries (read-only)
+
+Blender 5.2 remote asset libraries are static JSON over HTTP, and every asset in
+one carries a licence, an author, a catalogue and the SHA-256 of the `.blend` that
+holds it. `tools/blender/asset_library.py` reads that listing with the standard
+library only, so an agent can search it without Blender:
+
+```
+python tools/blender/asset_library.py info
+python tools/blender/asset_library.py search brick --type MATERIAL --license CC0
+python tools/blender/asset_library.py show "Bricks - Regular"
+python tools/blender/asset_library.py provenance "Bricks - Regular"
+```
+
+It defaults to Blender's Online Essentials (all CC0) and takes `--url` for any
+library root. Global options (`--json`, `--url`, `--blender`, `--any-blender`,
+`--offline`, `--refresh`) go before the subcommand.
+
+- **It fetches listing files and nothing else.** A `.blend` or a thumbnail is
+  reported as a URL and a hash and never requested; a test asserts it.
+- **Every listing file is verified** against the hash its parent declares and cached
+  under that hash. A tampered or truncated file is an error, and an unchanged one is
+  not fetched twice. The meta file is the root of trust (TLS is the only check on it).
+- **Results are filtered to the pinned Blender** (`blender-pin.json`, as
+  major.minor), because a library can ship one variant of an asset per Blender
+  range and only one is usable. `--any-blender` lifts that.
+- **`provenance`** prints the record to put in an asset inventory: library, licence,
+  author, the file's URL, size and hash, the listing's index hash, and the Blender it
+  needs.
+
+It does not download or import anything. Vendoring an asset (copying the `.blend`
+into the repository with that provenance record) is a separate, deliberate step,
+because CI and builds must not depend on a remote host, and a downloaded `.blend` can
+carry scripts: open one with `--disable-autoexec`, and append a named datablock
+rather than adopting the file.
+
 ## Which Blender runs what
 
 Repository tooling that launches Blender (the item compiler, the map `.blend`

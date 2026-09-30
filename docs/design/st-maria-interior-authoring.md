@@ -657,7 +657,7 @@ visible.
 
 `export_room_environment.py` lays the room's atlas out one of three ways. `loose` is the
 original `smart_project(island_margin=0.02)`: it covers 10.9% (Padaria) and 15.4% (smith) of
-the atlas, and 75% and 66% of the pixels a player sees are drawn from fewer than one texel
+the atlas, and 80% and 67% of the pixels a player sees are drawn from fewer than one texel
 each. It is kept only to reproduce a shipped package (`study_atlas_drift.py` passes it).
 `packed` (the default) unwraps with no margin and packs with Blender's concave packer and a
 2-texel gutter: 73% and 80% covered, about one percent of visible pixels under one texel.

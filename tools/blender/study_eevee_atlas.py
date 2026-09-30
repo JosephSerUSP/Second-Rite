@@ -170,12 +170,8 @@ def dilate(rgb: np.ndarray, filled: np.ndarray, steps: int):
 
 
 def place_camera(scene, lane_y: float):
-    record = thestra_camera.load_calibration(str(CAMERA_RECORD))
-    record = stager.widen_record(record, VIEW_WIDTH)
-    camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
-    camera.location.y = lane_y
-    bpy.context.view_layer.update()
-    return camera
+    """A lane position in engine space, the mesh being in Blender space (see atlas_allocation)."""
+    return atlas_allocation.lane_camera(scene, lane_y)
 
 
 def main():

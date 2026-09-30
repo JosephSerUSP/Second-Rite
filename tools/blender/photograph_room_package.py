@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import atlas_allocation  # noqa: E402
 import eevee_projection  # noqa: E402
+import render_profiles
 
 
 def main():
@@ -30,6 +31,7 @@ def main():
     parser.add_argument("--package", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--lane-y", type=float, nargs="+", default=[2.0, 3.8833, 5.5])
+    parser.add_argument("--render-profile", choices=tuple(render_profiles.PROFILES), default="review")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -45,9 +47,7 @@ def main():
             obj.data.materials.clear()
             obj.data.materials.append(material)
 
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = 64
-    scene.render.filter_size = 0.0
+    render_profiles.apply(scene, render_profiles.resolve(args.render_profile))
     scene.render.image_settings.file_format = "PNG"
     scene.view_settings.view_transform = "Standard"
     args.out.mkdir(parents=True, exist_ok=True)

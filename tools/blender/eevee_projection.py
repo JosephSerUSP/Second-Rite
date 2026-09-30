@@ -23,19 +23,15 @@ from pathlib import Path
 
 import bpy
 import numpy as np
+import render_profiles
 
 VIEW_WIDTH = 426          # the wide view; 256 is the classic one inside it
 VIEW_HEIGHT = 240
-FILM_FILTER = 0.0
-TAA_SAMPLES = 64
-CYCLES_FILTER_WIDTH = 0.01   # Cycles' minimum; it will not take 0
 DILATION = 4                 # the Cycles bake also dilates by 4
 
 
 def crisp(scene):
-    scene.eevee.taa_render_samples = TAA_SAMPLES
-    scene.render.filter_size = FILM_FILTER
-    scene.cycles.filter_width = CYCLES_FILTER_WIDTH
+    render_profiles.apply(scene, render_profiles.resolve("export"))
 
 
 def srgb_encode(linear: np.ndarray) -> np.ndarray:

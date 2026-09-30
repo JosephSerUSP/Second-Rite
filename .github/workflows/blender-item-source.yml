@@ -121,6 +121,9 @@ jobs:
 
       # The room exporter bakes its atlas with EEVEE when asked (--bake-backend eevee): a tiny room goes
       # through the real exporter with each backend, and the package contract must hold for both.
+      - name: Shared render profile contract
+        run: xvfb-run -a python -m unittest tools.blender.tests.test_render_profiles -v
+
       - name: EEVEE atlas bake backend
         shell: bash
         run: |

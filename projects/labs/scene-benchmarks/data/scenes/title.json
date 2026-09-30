@@ -99,14 +99,14 @@
       {
         "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "sceneState.idx == 1 and 17 or sceneState.idx - 1"
+        "value": "sceneState.idx == 1 and 18 or sceneState.idx - 1"
       }
     ],
     "on_down": [
       {
         "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "sceneState.idx == 17 and 1 or sceneState.idx + 1"
+        "value": "sceneState.idx == 18 and 1 or sceneState.idx + 1"
       }
     ],
     "on_select": [
@@ -424,7 +424,27 @@
             "value": 1
           },
           {
-            "cmd": "QUIT_GAME"
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "b003_rearranging"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.idx == 18",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
           }
         ]
       },

@@ -184,6 +184,10 @@ def main():
     parser.add_argument("--layout", choices=("loose", "packed", "view"), default="packed",
                         help="the atlas layout: loose is the original ~23%%-full smart_project layout, "
                              "packed is tight, view also spends the atlas where the lane cameras look")
+    parser.add_argument("--probe-volume", type=float, default=0.0, metavar="CELLS_PER_M",
+                        help="bake an EEVEE light probe volume over the room before the beauty pass "
+                             "(the EEVEE answer to the sealed-room world-fill leak); 0 = off")
+    parser.add_argument("--probe-samples", type=int, default=256)
     parser.add_argument("--view-bias", type=float, default=0.85)
     parser.add_argument("--view-floor", type=float, default=0.04)
     parser.add_argument("--bake-cameras", type=int, default=9)
@@ -221,6 +225,11 @@ def main():
     scene.render.engine = "BLENDER_EEVEE"
     uv_layer = target.data.uv_layers.active.name
     size = args.atlas_size
+    probe = None
+    if args.probe_volume > 0:
+        # Baked from the joined mesh alone (the source meshes are hidden above), with the room's lamps.
+        probe = stager.add_probe_volume(scene, args.probe_volume, args.probe_samples)
+        print("probe volume: " + json.dumps(probe), flush=True)
 
     lo, hi = 0.6, args.span - 0.6
     bake_positions = list(np.linspace(lo, hi, args.bake_cameras))
@@ -336,7 +345,7 @@ def main():
     (out / "result.json").write_text(json.dumps({
         "blend": args.blend.name, "atlasSize": size, "bakeCameras": per_camera,
         "checkCameras": [round(float(y), 3) for y in check_positions],
-        "layout": args.layout, "layoutCoverage": layout, "texelsPerPixel": density_report,
+        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "lampScale": args.lamp_scale, "texelsPerPixel": density_report,
         "coverage": coverage, "eeveeBakeSeconds": round(bake_seconds, 1),
         "supersample": args.supersample}, indent=1), encoding="utf-8")
     print("EEVEE ATLAS STUDY OK", out)

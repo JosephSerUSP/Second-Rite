@@ -84,6 +84,15 @@ jobs:
           set -euxo pipefail
           xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover -v
 
+      # The exterior bake once copied each object's base mesh, so a Geometry
+      # Nodes host baked to nothing and nothing said so. This joins a small town
+      # source through the real rebuild and counts what reaches the render mesh.
+      - name: Exterior bake carries Geometry Nodes output
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source -v
+
       - name: Smoke a real saved Blend through the production compiler
         shell: bash
         run: |

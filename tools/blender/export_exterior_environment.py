@@ -55,6 +55,7 @@ import math
 import sys
 from pathlib import Path
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -63,10 +64,14 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
+import ground_cover  # noqa: E402  (owns the bake-source marker name)
 
 
 GROUND_NAMES = {"ARCH_square_ground", "ARCH_low_curb"}
 GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
+# Face attribute that survives the join: marks faces of open cards (foliage), which the sealed-face cull must
+# neither delete nor count as a surface.
+OPEN_FACE_ATTRIBUTE = "sr_open_surface"
 
 
 def _areas(mesh, tag_index):
@@ -135,13 +140,19 @@ def cull_enclosed(target, samples, escape_ratio):
     import mathutils
     from mathutils.bvhtree import BVHTree
     mesh = target.data
+    # Parity is only meaningful for closed bodies. An open card (a ground-cover tuft is two crossed quads) has no
+    # inside: left in, it is culled for being "crossed" by its own twin, and it flips the verdict on any solid face
+    # whose ray happens to pass through it. So open faces are neither candidates nor occluders.
+    marks = mesh.attributes.get(OPEN_FACE_ATTRIBUTE)
+    is_open = [d.value for d in marks.data] if marks else [False] * len(mesh.polygons)
+    solid = [p for p in mesh.polygons if not is_open[p.index]]
     bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
-                               [tuple(p.vertices) for p in mesh.polygons],
+                               [tuple(p.vertices) for p in solid],
                                all_triangles=False)
     directions = [mathutils.Vector(d).normalized() for d in PARITY_DIRECTIONS]
     needed = len(directions) // 2 + 1
     doomed = []
-    for poly in mesh.polygons:
+    for poly in solid:
         # Start just OUTSIDE the face along its own normal: an outward-facing
         # skin face is then outside its body, an inward-facing one is inside.
         point = poly.center + poly.normal.normalized() * 1e-3
@@ -155,13 +166,15 @@ def cull_enclosed(target, samples, escape_ratio):
             doomed.append(poly)
     if not doomed:
         return 0
-    for poly in mesh.polygons:
-        poly.select = False
-    for poly in doomed:
-        poly.select = True
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.delete(type="FACE")
-    bpy.ops.object.mode_set(mode="OBJECT")
+    # Delete through bmesh, not by flagging polygons and running mesh.delete: that operator acts on the *edit-mode*
+    # selection, and vertices left selected by an earlier select_all flush every face into it. On a small mesh that
+    # deleted all 574 faces when 135 were doomed; the Praca only escaped by the luck of its selection state.
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[poly.index] for poly in doomed], context="FACES")
+    bm.to_mesh(mesh)
+    bm.free()
     return len(doomed)
 
 
@@ -255,6 +268,61 @@ def in_square(obj, span, margin):
     return -margin <= centre.y <= span + margin
 
 
+def is_bake_source(obj):
+    """Does this object belong in the baked render mesh?
+
+    An explicit marker (`ground_cover.BAKE_PROPERTY`, a custom property) is the
+    contract for anything added after the name filter existed; the historical
+    name rule is kept only so the owner's untouched source still bakes the
+    same. Names are not a contract, so new content must not rely on them.
+    """
+    if obj.get(ground_cover.BAKE_PROPERTY):
+        return True
+    return (obj.name.startswith("STUDY_") or obj.name in GROUND_NAMES
+            or obj.name.startswith("FG_"))
+
+
+def live_modifiers(obj):
+    return [m for m in obj.modifiers if m.show_render]
+
+
+def evaluated(obj):
+    """(evaluated object, its depsgraph), freshly updated.
+
+    The depsgraph must be re-fetched at the point of use: the rebuild links each
+    copy into the scene as it goes, which dirties an earlier depsgraph, and a
+    Geometry Nodes host evaluated against a stale one comes back empty.
+    """
+    bpy.context.view_layer.update()
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    return obj.evaluated_get(depsgraph), depsgraph
+
+
+def realised_mesh(obj):
+    """A standalone mesh holding what `obj` renders, modifiers applied.
+
+    `obj.data.copy()` is the object's *base* mesh: a Geometry Nodes host such as
+    the ground cover has an empty base mesh, so copying it bakes nothing and
+    says nothing (measured: identical triangle counts with and without cover).
+    An object with live modifiers is therefore evaluated; one without is copied
+    exactly as before, so an unmodified source bakes byte-for-byte the same.
+
+    Raises when a modifier-bearing object realises to nothing -- that is a
+    broken node tree or a missing input, and a silent empty bake is the failure
+    this exists to prevent.
+    """
+    if not live_modifiers(obj):
+        return obj.data.copy()
+    evaluated_obj, depsgraph = evaluated(obj)
+    mesh = bpy.data.meshes.new_from_object(evaluated_obj, preserve_all_data_layers=True,
+                                           depsgraph=depsgraph)
+    if mesh is None or not len(mesh.vertices):
+        raise RuntimeError(
+            f"{obj.name} has live modifiers ({', '.join(m.name for m in live_modifiers(obj))}) "
+            "but evaluates to an empty mesh; refusing to bake it silently as nothing")
+    return mesh
+
+
 def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
@@ -284,20 +352,25 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
     ground_tagged = []
     ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
     source_objects = list(source.all_objects)
+    unbaked_modifiers = []
     for obj in source_objects:
         if obj.type != "MESH" or obj.hide_render:
             continue
-        if not (obj.name.startswith("STUDY_") or
-                obj.name in {"ARCH_square_ground", "ARCH_low_curb"} or
-                obj.name.startswith("FG_")):
+        if not is_bake_source(obj):
+            if live_modifiers(obj):
+                unbaked_modifiers.append(obj.name)
             continue
-        if not in_square(obj, span, margin):
+        if not in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
             print(f"[exterior] SKIPPING off-square {obj.name}", flush=True)
             skipped.append(obj.name)
             continue
         print(f"[exterior] copying {obj.name}", flush=True)
         copy = obj.copy()
-        copy.data = obj.data.copy()
+        copy.data = realised_mesh(obj)
+        copy.modifiers.clear()      # already applied above; join must not see them
+        if obj.get(ground_cover.OPEN_SURFACE_PROPERTY):
+            marks = copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
+            marks.data.foreach_set("value", [True] * len(copy.data.polygons))
         copy.name = f"R_{obj.name}"
         copy.hide_viewport = False
         copy.hide_render = False
@@ -314,6 +387,12 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         copies.append(copy)
     if not copies:
         raise RuntimeError("TH_SOURCE contains no renderable meshes")
+    if unbaked_modifiers:
+        # Not an error: the owner's source has such objects (mirrored houses) and
+        # has always baked without them. It is loud so nobody has to discover it.
+        print(f"[exterior] WARNING {len(unbaked_modifiers)} renderable objects carry modifiers "
+              f"but are not bake sources and are left out: {', '.join(sorted(unbaked_modifiers))}",
+              flush=True)
     if skipped:
         print(f"[exterior] skipped {len(skipped)} off-square objects: "
               f"{', '.join(sorted(skipped))}", flush=True)

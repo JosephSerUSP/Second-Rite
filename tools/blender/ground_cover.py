@@ -33,6 +33,11 @@ GROUP_NAME = "SR_GroundCover"
 HOST_NAME = "GROUND_COVER"
 CARDS_COLLECTION = "GROUND_COVER_CARDS"
 KEEP_OUT_COLLECTION = "GROUND_COVER_KEEP_OUT"
+# Custom property that says "bake me": the exterior exporter includes any object carrying it.
+BAKE_PROPERTY = "sr_bake_source"
+# Custom property that says "my faces are open, zero-thickness cards, not the skin of a solid": the exporter's
+# sealed-face cull is a parity test that only means something for closed bodies.
+OPEN_SURFACE_PROPERTY = "sr_bake_open_surface"
 
 #: Tuft atlas built by tools/materials/make_grass_atlas.py: four columns.
 ATLAS_COLUMNS = 4
@@ -320,6 +325,8 @@ def add(terrain, *, keep_out=None, cards=None, density_group="", parent_collecti
     modifier = host.modifiers.new(GROUP_NAME, "NODES")
     modifier.node_group = tree
     host.matrix_world = terrain.matrix_world.copy()
+    host[BAKE_PROPERTY] = True
+    host[OPEN_SURFACE_PROPERTY] = True
     configure(host, **{"Terrain": terrain, "Keep Out": keep_out, "Cards": cards,
                        "Density Group": density_group}, **values)
     return host

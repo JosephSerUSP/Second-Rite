@@ -90,6 +90,35 @@ class OneLocatorTests(unittest.TestCase):
                               for token in RETIRED if token in text]
         self.assertEqual(offenders, [])
 
+    def test_install_directory_search_is_confined_to_the_standalone_toolkit(self):
+        """No repo tool may hunt for a Blender in install directories.
+
+        The retired-token scan above cannot see this: a script that walks
+        ``Program Files\\Blender Foundation`` picks whichever Blender it finds,
+        which is exactly what a version pin exists to stop. The one deliberate
+        exception is the item toolkit, a self-contained bundle meant to be
+        extracted and run outside this repository (it vendors its own core and
+        carries an integrity manifest), so it cannot call the repo's locator or
+        read the repo's pin. It is listed here, by name, so the exemption is
+        visible and cannot widen by accident.
+        """
+        standalone = ("tools/blender/second-rite-item-model-toolkit",)
+        for directory in standalone:
+            self.assertTrue((ROOT / directory).is_dir(),
+                            "%s is exempt but no longer exists; drop it from the list" % directory)
+        offenders = []
+        for base in ("tools", ".github"):
+            for path in (ROOT / base).rglob("*"):
+                relative = path.relative_to(ROOT).as_posix()
+                if (path.suffix not in (".py", ".js", ".yml", ".ps1", ".sh", ".bat")
+                        or path.name == "test_blender_locator.py"
+                        or "node_modules" in path.parts
+                        or any(relative.startswith(d + "/") for d in standalone)):
+                    continue
+                if "Blender Foundation" in path.read_text(encoding="utf-8", errors="replace"):
+                    offenders.append(relative)
+        self.assertEqual(offenders, [])
+
 
 if __name__ == "__main__":
     unittest.main()

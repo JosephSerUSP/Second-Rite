@@ -140,6 +140,51 @@ than accepted as migration noise.
 
 See `assets/authoring/items/README.md` for the author-facing convention.
 
+## Which Blender runs what
+
+Repository tooling that launches Blender (the item compiler, the map `.blend`
+export, the town/room environment pipeline, the camera-parity check, and the
+world-prop and asset-gen builders) finds it in one place:
+`tools/blender/blender_locator.py`. It reads `BLENDER_EXECUTABLE` and requires
+the exact version recorded in `tools/blender/blender-pin.json`; any other
+version fails with a message naming both. CI installs Blender through
+`.github/actions/install-blender` from the same file, so a pin change is one
+edit. There is no `PATH` search and no fallback.
+
+Blender's output is not stable across versions. Under 5.0 the OBJ exporter
+occasionally emitted different UV tables for identical sources
+(`docs/reports/b-item-blend-source-migration-2026-08-15.md`), and the Geometry
+Nodes item `phoenix_pinion` moved by up to about 2 mm between 5.0.1 and 5.2.2. That is why the pin is exact, and why a pin change re-runs
+`compile_item_blends.py --check` and may move an asset-regression baseline.
+
+Two places are deliberately outside that rule.
+
+**The item toolkit** (`tools/blender/second-rite-item-model-toolkit/`) is a
+self-contained bundle meant to be extracted and run away from this repository. It
+vendors its own core and carries an integrity manifest (`SHA256SUMS.txt`,
+`TOOLCHAIN_MANIFEST.json`), so it cannot call the repo's locator or read the
+repo's pin, and its scripts are not edited to follow it. It locates Blender
+itself, accepts "5.0 or newer", and records the Blender it was validated with in
+`validated_blender`. `tools/blender/tests/test_blender_locator.py` names it as the
+only place an install-directory search may exist, and fails if that exemption
+widens or points at a directory that is gone.
+
+**The frozen editor fixture** (`projects/editor-fixture/`) exists so G6 does not
+move with game content. Its item products under `assets/models/items/` were
+compiled by an earlier Blender and are not re-checked: CI's `--check` covers the
+game project only, and a pin change does not require regenerating the fixture.
+Do not run `compile_item_blends.py --check --project-root projects/editor-fixture`
+expecting green.
+
+Why leaving it stale is safe, measured on 2026-09-30 under Blender 5.2.2: the
+fixture's 32 sources compile to products byte-identical to the game project's.
+Against the fixture's committed products, 31 differ only in the header comment
+and object group names, and `phoenix_pinion` also differs in vertex positions (at
+most about 2 mm). G6 previews exactly one model, `bottle_family__basis.obj`,
+which is not compiled from any of those 32 sources, and its model-picker list
+shows file names only. If the fixture is ever refreshed on purpose, compile with
+`--output-dir` into a scratch directory, compare, and run G6 before committing.
+
 ## Surface baseline authority
 
 The legacy depth pipeline sampled evaluated Blender geometry with first-hit ray

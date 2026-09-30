@@ -207,6 +207,38 @@ because CI and builds must not depend on a remote host, and a downloaded `.blend
 carry scripts: open one with `--disable-autoexec`, and append a named datablock
 rather than adopting the file.
 
+## Our own asset library (in the repository, not published)
+
+`tools/blender/asset-library/` is a Blender asset library holding one asset, the
+`SR_GroundCover` Geometry Nodes group, licensed CC0 (the owner's choice, 2026-09-30).
+It has the same layout as a remote library (`_asset-library-meta.json`, `_v1/`, a
+catalogue file), so the browser reads it like one:
+
+```
+python tools/blender/asset_library.py --url file:///D:/path/to/tools/blender/asset-library/ show SR_GroundCover
+```
+
+and Blender can add the directory as a local library in Preferences.
+
+- The node group is defined by `ground_cover.build_group()`. The library `.blend` is a
+  derived product and is never edited by hand. It is not byte-reproducible, so a
+  rebuild changes its hash and the listing: run `python tools/blender/build_asset_library.py`
+  only when the group changes, and commit the result.
+- `build_asset_library.py --check` (in `verify`) fails when the listing no longer
+  describes the file, the licence, author or catalogue is not the declared one, or an
+  asset appears that `ASSETS` does not declare. `test_asset_library_group` (in the Blender
+  workflow) fails when the group in the file is not the one the builder builds now.
+- The library file holds the asset and nothing else, and the build refuses a group that
+  something else uses, because a remote-style library asset must be self-contained.
+
+**It is deliberately not served.** The direction is to consume content published
+online, not to publish ours. Serving a library publicly puts our assets into the online
+asset ecosystem, which needs stricter criteria than an in-repo library: at least an
+owner-approved licence per asset, a provenance record, a demonstrated use in a shipped
+scene, a review of the listing by a person, and a stable version story. Until those are
+written down and met, nothing here is hosted or registered anywhere, and adding an asset
+to `ASSETS` does not publish it.
+
 ## Which Blender runs what
 
 Repository tooling that launches Blender (the item compiler, the map `.blend`

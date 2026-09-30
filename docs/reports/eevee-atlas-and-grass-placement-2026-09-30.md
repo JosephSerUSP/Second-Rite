@@ -28,6 +28,25 @@ still accumulated (64) so the frame is converged, just not blurred. That covers 
 that feeds the atlas, the check frames and the placement study. The numbers in sections 4 and 5 are
 re-measured; several claims from the first version did not survive and are corrected below.
 
+## 1c. A third correction: the lane cameras were in the wrong half of the room
+
+Found while starting the Padaria EEVEE pilot, from a probe volume whose bounds read y -4.65 to 4.63.
+A room in a source `.blend` is authored mirrored (`blender_y = 3.8833 - engine_y`), so its walkable
+lane runs about -3.5 to +3.5 in Blender and 0.35 to 7.42 in the engine. `atlas_allocation.lane_camera`
+took a lane position and used it as the Blender y, which put every camera 3.88 too far along: the
+bake and check cameras of the EEVEE atlas study, and the demand cameras of the `view` allocation,
+covered roughly the half of the lane from the middle to one end and reached past the room's far wall.
+`lane_camera` now takes an engine-space lane position and mirrors it (`mirrored=False` for an
+exported package's OBJ, which is already in engine space), the synthetic test scene is built in
+Blender space, and everything below marked "corrected" was re-run with the real lane.
+
+What moved: the density and layout conclusions did not (loose ~0.61 and 0.75 texels per pixel,
+packed 1.5 and 1.7, and the ranking is the same), but the numbers shifted a little, the
+"held-out cameras including both lane ends" claim is now true where before it was not (the ends
+of the real lane were never sampled), and the engine gap is slightly larger than first reported.
+The shipped shop packages (#1278) used `packed`, which does not use cameras, so they are unaffected.
+The `view` layout in the exporter used the wrong cameras until this fix; nothing shipped uses it.
+
 ## 2. Placement study for #1270 (owner decision)
 
 `study_ground_cover_placement.py` puts the `SR_GroundCover` modifier on a scratch terrain guide
@@ -82,13 +101,13 @@ pixel. `islandCoverage` is the share of the atlas the UV islands occupy.
 
 | room | layout | atlas | islands cover | median texels/pixel | pixels under 1 texel |
 |---|---|---:|---:|---:|---:|
-| Padaria | loose (as shipped) | 1024 | **10.9%** | **0.61** | **75.5%** |
-| Padaria | packed | 1024 | 73.2% | 1.53 | 1.0% |
-| Padaria | view | 1024 | 75.3% | 3.23 | 1.0% |
-| Padaria | view | 512 | 57.0% | 1.47 | 4.5% |
-| smith | loose (as shipped) | 1024 | **15.4%** | **0.75** | **66.1%** |
+| Padaria | loose (as shipped) | 1024 | **10.9%** | **0.61** | **80.1%** |
+| Padaria | packed | 1024 | 73.2% | 1.53 | 0.9% |
+| Padaria | view | 1024 | 75.3% | 3.21 | 0.9% |
+| Padaria | view | 512 | 57.0% | 1.41 | 4.4% |
+| smith | loose (as shipped) | 1024 | **15.4%** | **0.75** | **67.1%** |
 | smith | packed | 1024 | 80.1% | 1.73 | 0.5% |
-| smith | view | 1024 | 83.2% | 3.38 | 0.6% |
+| smith | view | 1024 | 83.2% | 3.31 | 0.6% |
 
 The loose layout is worse than the 23% the shops report quoted, and it puts two thirds to three
 quarters of the visible surface below one texel per pixel, which is the "sharper plate, blurrier
@@ -101,14 +120,15 @@ frame, no antialiasing), scales each island to that demand blended with world-un
 
 Cycles agrees, and the picture is clearer with the filter off. Re-baking the Padaria with the tight
 layouts brings the Cycles atlas closer to its own Cycles beauty target: mean abs difference over
-the lit pixels 11.2 (loose), 9.0 (packed), 8.7 (view), of 255. More to the point, look at it:
+the lit pixels 11.5 (loose) and 9.0 (packed), of 255 (the view-layout Cycles bake, 8.7, was measured
+with the old cameras and not redone). More to the point, look at it:
 `cycles_layouts_sheet.png` draws the Cycles atlas the way the game does. Under the loose layout the
 azulejo dado on the Padaria's counter wall is lost outright (a grey smear); under packed and view
 the tile pattern survives. That is the "azulejo smears in the bake" defect the shops report named,
 and it is a layout defect, not a Blender one.
 
 An honest limit: in pixel-difference terms an EEVEE atlas is about as close to its EEVEE target
-under every layout (2.6, 2.7, 3.1 and 2.6 for loose, packed, view 1024 and view 512 on the
+under every layout (2.8, 2.8, 3.2 and 2.7 for loose, packed, view 1024 and view 512 on the
 Padaria), because a difference of 2-3/255 is dominated by sampling phase at high-frequency detail
 rather than by texel count. The layout shows in the crops (`layouts_sheet.png`), not in that
 number, and my first version's claim that the layout "improved the error against the target"
@@ -136,9 +156,9 @@ compared with the beauty target.
 |---|---:|---:|
 | time, Padaria (1024, loose layout) | 229 s | 8-11 s |
 | time, Padaria (1024, packed / view) | 296 s / 340 s | about 11 s |
-| atlas vs its own beauty target, loose layout, lit-pixel mean of 255 | 11.2 | 2.7 |
-| same, packed / view | 9.0 / 8.7 | 2.7 / 3.1 |
-| same, smith, loose layout | 5.9 | 2.1 |
+| atlas vs its own beauty target, loose layout, lit-pixel mean of 255 | 11.5 | 2.8 |
+| same, packed / view | 9.0 / (not redone) | 2.8 / 3.2 |
+| same, smith, loose / packed | 6.7 / 6.0 | 2.2 / 2.3 |
 
 Reading it:
 
@@ -146,14 +166,14 @@ Reading it:
   baked, including the lane ends. The Cycles bake is further from the Cycles look (6-11) because a
   selected-to-active bake of a fixed view is not the same computation as rendering that view.
 - The EEVEE atlas is not closer to the Cycles look than the plates are: EEVEE beauty against
-  Cycles beauty is already about 10-11 apart (10.6 Padaria, 10.0 smith), and the EEVEE atlas
-  against the Cycles atlas is 10-11.5. The atlas step adds nothing on top of the engine
+  Cycles beauty is already about 11-12 apart (12.0 Padaria, 10.7 smith), and the EEVEE atlas
+  against the Cycles atlas is 11-13.5. The atlas step adds nothing on top of the engine
   difference measured for the plates.
   This is the coherence point: a Cycles-baked room next to an EEVEE plate is off by that engine
   gap; an EEVEE atlas next to an EEVEE plate is not.
-- It only fills what the bake cameras saw, about 20-30% of the island texels before dilution
-  (50% under the view layout, which shrinks unseen islands). The rest stay black. Held-out cameras
-  show no holes, but a camera outside the bake range would; the game's camera is fixed in pitch
+- It only fills what the bake cameras saw, about 20-28% of the island texels before dilution
+  (52-54% under the view layout, which shrinks unseen islands). The rest stay black. Held-out cameras,
+  the two ends of the real lane included, show no holes, but a camera outside the bake range would; the game's camera is fixed in pitch
   and distance and constrained to the lane, and that is the assumption.
 - View-dependent effects (specular, reflection) are baked in for the camera that saw them.
   These rooms are matte and keyless, so it is small here.

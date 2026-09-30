@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "about": "Status of each environment .blend. Written by hand; checked by tools/blender/environment_sources.py --check. Statuses: adopted, scaffold, superseded (with supersededBy), reference.",
+  "sources": {
+    "alicias_padaria.blend": {
+      "status": "adopted",
+      "basis": "Source of both shipped Padaria packages, alicias_padaria (plate) and alicias_padaria_3d; docs/reports/st-maria-shops-walkable-2026-08-27.md records it as source authority. Recorded from repo evidence, not yet owner-confirmed."
+    },
+    "img2imgguide.blend": {
+      "status": "reference",
+      "basis": "Added by the spatial-seam spike (aef2c7ba); no recipe writes it and no package or tool cites it."
+    },
+    "lauras_smith.blend": {
+      "status": "adopted",
+      "basis": "Source of both shipped smith packages, lauras_smith (plate) and lauras_smith_3d; docs/reports/st-maria-shops-walkable-2026-08-27.md records it as source authority. Recorded from repo evidence, not yet owner-confirmed."
+    },
+    "passage_house_corridor.blend": {
+      "status": "scaffold",
+      "basis": "Written by recipes/passage_house_corridor.py; no shipped package is baked from it, and no adoption is recorded."
+    },
+    "passage_house_room3.blend": {
+      "status": "scaffold",
+      "basis": "Written by recipes/passage_house_room3.py (regenerated to the Classic 256 preset at 689ccb83); no shipped package is baked from it, and no adoption is recorded."
+    },
+    "st_maria_port_spatial_reference.blend": {
+      "status": "reference",
+      "basis": "Added by the spatial-seam spike (aef2c7ba); no recipe writes it and no package or tool cites it."
+    },
+    "st_maria_praca.blend": {
+      "status": "scaffold",
+      "basis": "572-triangle scaffold restored deliberately at 06305e79; nothing shipped is baked from it (a52a411c: two sources with different purposes, not two revisions). The six Praca tools that target it are scaffold-only.",
+      "notes": "Docs that call this file authoritative or owner-authored predate the split and are corrected by #1269."
+    },
+    "st_maria_praca_modelled.blend": {
+      "status": "adopted",
+      "basis": "The shipped Praca package (praca/environment.json, environmentId st_maria_praca_modelled) is baked from this file; modelled exterior, 65 meshes, composed through the house grammar (a52a411c, #1021).",
+      "ownerConfirmed": "2026-09-29 (#1269)"
+    }
+  }
+}

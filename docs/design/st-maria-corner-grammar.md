@@ -1,7 +1,8 @@
 # What the St. Maria houses actually do at a corner
 
 Measured from `ARCH_west_house` and `ARCH_west_house.001` in
-`st_maria_praca.blend`. Written before the sweep builder exists, for the same
+`st_maria_praca.blend` (the Praca scaffold; see `environment-sources.json`).
+Written before the sweep builder exists, for the same
 reason `st-maria-seam-defect.md` was: a builder authored against the houses and
 tuned until the diff goes green is a fudge factor with a test suite.
 

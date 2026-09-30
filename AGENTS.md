@@ -411,7 +411,12 @@ tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
                          `projects/*/assets/authoring/environments/` is
                          regenerable scaffold output UNTIL its owner adopts or
                          hand-edits it; after that it is SOURCE AUTHORITY --
-                         edit it directly and never regenerate it.
+                         edit it directly and never regenerate it. Which state
+                         each file is in is recorded in
+                         `environment-sources.json` beside it, and every shipped
+                         `environment.json` names its `provenance.sourceBlend`;
+                         `python tools/blender/environment_sources.py --check`
+                         gates both (#1269).
                          `save_source_blend` refuses to overwrite either way,
                          so the safe default holds: `--force` is the moment you
                          must know which state the document is in.

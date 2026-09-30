@@ -67,6 +67,8 @@ def main() -> None:
                    round(max_x, 4), round(hi, 4), round(max_z, 4)],
         "anchors": {name: {"position": anchor["position"]}
                     for name, anchor in manifest["anchors"].items()},
+        # Which .blend this room was baked from (#1269); the export records it.
+        "provenance": {"sourceBlend": manifest["provenance"]["sourceBlend"]},
     }
     io.open(destination / "environment.json", "w",
             encoding="utf-8", newline="\n").write(

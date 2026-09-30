@@ -13,7 +13,9 @@
     4.0
   ],
   "provenance": {
-    "plateSourceViewTransform": "AgX"
+    "plateSourceViewTransform": "AgX",
+    "sourceBlend": "lauras_smith.blend",
+    "sourceBlendNote": "Its plate is lauras_smith_bg.png, the smith room's plate."
   },
   "anchors": {
     "spawn_player": {

@@ -1,6 +1,7 @@
 """Compare level/pitched town cameras on an exterior and an interior.
 
-This is a read-only camera study. It deliberately renders the same geometry
+This is a read-only camera study (default exterior: st_maria_praca.blend, the
+scaffold; the adopted Praca is st_maria_praca_modelled.blend, #1269). It deliberately renders the same geometry
 through several rigid camera poses and reports the screen drift of world
 verticals. A pitched perspective camera keeps its roll at zero, but verticals
 away from the optical axis can still lean because their depth changes as they

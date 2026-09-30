@@ -658,7 +658,9 @@ visible.
 Once a map's `.blend` exists it is the editable document, and the maintainer
 hand-edits it. The recipe **scaffolds it once and then refuses to overwrite it**;
 `--force` exists but discards hand-authoring. If a map already has a `.blend`,
-change the `.blend`, not the recipe. Staging never saves it.
+change the `.blend`, not the recipe. Staging never saves it. The
+`environment-sources.json` beside the `.blend` records whether it is `adopted`
+or still `scaffold`; a `superseded` one is refused by every writing tool.
 
 ---
 

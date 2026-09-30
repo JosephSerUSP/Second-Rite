@@ -4,6 +4,12 @@ Date: 29 August 2026
 
 Authoritative source: `projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca.blend`
 
+> Correction (#1269, 2026-09-30): that file's recorded status is `scaffold`. The
+> adopted Praca, the source of the shipped package, is
+> `st_maria_praca_modelled.blend`. "Authoritative" below reads as it did on the
+> report's date; the status of every environment `.blend` now lives in
+> `environment-sources.json`.
+
 Bridge session carrying the visual evidence: `950085ea7c86f23d`
 Owner disposition: diagnostic edit rejected as a saved source change; the source `.blend` remained unchanged on disk.
 

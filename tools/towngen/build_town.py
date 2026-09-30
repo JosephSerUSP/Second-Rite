@@ -551,6 +551,11 @@ def build_environment(key, screen):
                    DEPTH_X + 1.0, lane["maxY"], GROUND_Z + 4.0],
         "provenance": {
             "plateSourceViewTransform": screen["plate_view_transform"],
+            # Every generated plate comes from the towngen 2D pipeline; the
+            # Blender-sourced ones (the Padaria, the smith) are authored, not
+            # generated. environment_sources.py checks this record (#1269).
+            "sourceBlend": None,
+            "sourceBlendNote": "The plate is a 2D image; no .blend exists for this screen.",
         },
         "anchors": anchors,
         "preRendered": {

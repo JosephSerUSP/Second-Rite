@@ -11,6 +11,12 @@ session would simply overwrite this edit on its next save.
     blender -b -noaudio --factory-startup -P tools/blender/recipes/replace_st_maria_tree.py
 
 Pass ``-- --dry-run`` to report what would change without writing.
+
+Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
+`scaffold` in environment-sources.json. The adopted Praca, the source of the
+shipped package, is st_maria_praca_modelled.blend; nothing here edits it.
+Whether the modelled file's trees came from this recipe is not established, so
+it is not retargeted.
 """
 from __future__ import annotations
 
@@ -24,6 +30,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools/blender"))
 sys.path.insert(0, str(ROOT / "tools/blender/recipes"))
+import environment_sources  # noqa: E402
 import tree_material  # noqa: E402
 from tree_generator import generate, preset, reduce_lod, validate  # noqa: E402
 from tree_mesh import branch_mesh, foliage_mesh  # noqa: E402
@@ -127,6 +134,7 @@ def main():
         obj["treeLOD"] = "low"
         obj["treeSeed"] = spec.seed
 
+    environment_sources.refuse_superseded(args.document)
     backup = args.document.with_suffix(".blend.bak")
     shutil.copy2(args.document, backup)
     bpy.ops.wm.save_mainfile(filepath=str(args.document.resolve()))

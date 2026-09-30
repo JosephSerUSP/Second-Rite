@@ -1,5 +1,9 @@
 """Re-author st_maria_praca.blend for the spiral layout.
 
+Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
+`scaffold` in environment-sources.json. The adopted Praca, the source of the
+shipped package, is st_maria_praca_modelled.blend; nothing here edits it.
+
     blender --background <praca.blend> --python tools/blender/reauthor_praca_spiral.py -- --write
 
 The blend was authored for the town as it stood BEFORE the spiral rewiring. Its
@@ -8,8 +12,7 @@ an `east_backstreet`, neither of which the Praca has any more. Rendering it as
 it stands produces a picture of the previous town whose painted doors miss the
 wired doorways.
 
-This is deliberately SURGICAL. The file is owner-authored - it was last touched
-by hand - so nothing here rebuilds architecture, re-lights, or re-materials
+This is deliberately SURGICAL. The file was last touched by hand, so nothing here rebuilds architecture, re-lights, or re-materials
 anything. It moves anchors, moves the single modelled door to the one interior
 the Praca still has, and deletes what the rewiring genuinely removed.
 
@@ -24,8 +27,12 @@ Run without `--write` to see what it would do.
 
 import argparse
 import sys
+from pathlib import Path
 
 import bpy
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import environment_sources  # noqa: E402
 
 # Lane y, in world units, from SCREENS["praca"] in tools/towngen/build_town.py.
 # west_churchyard and east_cortico sit ON the lane bounds: they are street
@@ -109,6 +116,7 @@ def main():
         print("  " + r)
 
     if a.write:
+        environment_sources.refuse_superseded(Path(bpy.data.filepath))
         bpy.ops.wm.save_mainfile()
         print("REAUTHOR OK  saved %s" % bpy.data.filepath)
     else:

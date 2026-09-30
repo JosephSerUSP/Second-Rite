@@ -1,7 +1,11 @@
-"""Scaffold the authoritative, hand-editable St. Maria Praca source scene.
+"""Scaffold the St. Maria Praca massing scene (st_maria_praca.blend).
 
 This creates level-design massing, not finished art.  It may create the source
-once, but refuses to overwrite it: after adoption the .blend is the authority.
+once, but refuses to overwrite it.
+
+Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
+`scaffold` in environment-sources.json. The adopted Praca, the source of the
+shipped package, is st_maria_praca_modelled.blend; nothing here edits it.
 
 Blender/world frame (metres): +X camera depth, -Y screen right, +Z up.
 The runtime action lane is X=7.8, Z=-1.5, Y=0..23.699.
@@ -18,6 +22,8 @@ import bpy
 
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tools" / "blender"))
+import environment_sources  # noqa: E402
 DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets"
                  / "authoring" / "environments" / "st_maria_praca.blend")
 MAP = ROOT / "projects" / "hichaukitoden-game" / "data" / "maps" / "17.json"
@@ -231,6 +237,7 @@ def build(output: Path):
     collision.hide_render = True
     anchors.hide_render = True
 
+    environment_sources.refuse_superseded(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(output))
     print("PRACA SOURCE OK " + json.dumps({

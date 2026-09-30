@@ -140,6 +140,37 @@ than accepted as migration noise.
 
 See `assets/authoring/items/README.md` for the author-facing convention.
 
+## Environment source authority
+
+An environment `.blend` under `projects/*/assets/authoring/environments/` has a
+status in `environment-sources.json` beside it, and every shipped
+`environment.json` records `provenance.sourceBlend`. Neither is inferred.
+
+| status | meaning |
+|---|---|
+| `adopted` | the source authority; edit it directly, never regenerate it; packages are baked from it |
+| `scaffold` | regenerable recipe output; nothing shipped is baked from it |
+| `superseded` | replaced by `supersededBy`; tools refuse to write it, and no package may cite it |
+| `reference` | kept for looking at; not a recipe output and not a package source |
+
+Each entry carries a `basis`, the evidence for the status; only
+`st_maria_praca_modelled.blend` is marked `ownerConfirmed`, the rest were recorded
+from repository evidence. A package with no `.blend` (a 2D plate, an unreferenced
+stub) records `sourceBlend: null` with a `sourceBlendNote`.
+
+`python tools/blender/environment_sources.py --check` fails when a package lacks
+the record, names a file that does not exist or is not `adopted`/`scaffold`, or a
+`.blend` has no entry. It runs in `verify`. Every tool that writes an environment
+`.blend` calls `environment_sources.refuse_superseded`; set
+`SR_ALLOW_SUPERSEDED_ENVIRONMENT=1` to override it deliberately.
+
+The Praca has two files on purpose (a52a411c): `st_maria_praca_modelled.blend` is
+adopted and is what the shipped package is baked from; `st_maria_praca.blend` is a
+572-triangle scaffold. The six tools that write it (`recipes/st_maria_praca.py`,
+`refine_st_maria_praca.py`, `replace_st_maria_tree.py`, `mark_st_maria_exits.py`,
+`reauthor_praca_spiral.py`, and the read-only `study_town_perspective.py`) are
+scaffold-only and say so.
+
 ## Which Blender runs what
 
 Repository tooling that launches Blender (the item compiler, the map `.blend`

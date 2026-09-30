@@ -13,7 +13,9 @@
     2.5
   ],
   "provenance": {
-    "plateSourceViewTransform": "Standard"
+    "plateSourceViewTransform": "Standard",
+    "sourceBlend": null,
+    "sourceBlendNote": "The plate is a 2D image; no .blend exists for this screen."
   },
   "anchors": {
     "spawn_player": {

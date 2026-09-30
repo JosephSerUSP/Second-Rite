@@ -61,7 +61,7 @@ def main():
     scene.view_settings.view_transform = "Standard"
     args.out.mkdir(parents=True, exist_ok=True)
     for lane_y in args.lane_y:
-        atlas_allocation.lane_camera(scene, float(lane_y))
+        atlas_allocation.lane_camera(scene, float(lane_y), mirrored=False)   # the OBJ is in engine space
         scene.render.filepath = str((args.out / f"lane_{lane_y:g}.png").resolve())
         bpy.ops.render.render(write_still=True)
     print("PACKAGE PHOTOGRAPHED", args.out)

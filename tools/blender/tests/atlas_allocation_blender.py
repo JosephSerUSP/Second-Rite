@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import atlas_allocation as alloc  # noqa: E402
 
 SIZE = 1024
-CAMERAS = [1.0, 2.5, 4.0, 5.5, 7.0]
+CAMERAS = [0.4, 2.0, 3.8833, 5.8, 7.4]        # lane positions in engine space; the mesh is in Blender space
 
 
 def quad(name, x, y0, y1, z0, z1, facing):
@@ -35,9 +35,10 @@ def build():
     scene = bpy.context.scene
     world = bpy.data.worlds.new("w")
     scene.world = world
-    parts = [("A_wall", quad("A", 0.0, 0.0, 7.0, 0.0, 3.0, -1)),
-             ("B_crate", quad("B", -1.0, 3.0, 4.0, 0.0, 1.0, -1)),
-             ("C_hidden", quad("C", 5.0, 1.0, 6.0, 0.0, 2.5, 1))]
+    # Blender space: the lane runs -3.5 to +3.5 around y = 0.
+    parts = [("A_wall", quad("A", 0.0, -3.5, 3.5, 0.0, 3.0, -1)),
+             ("B_crate", quad("B", -1.0, -0.5, 0.5, 0.0, 1.0, -1)),
+             ("C_hidden", quad("C", 5.0, -2.5, 2.5, 0.0, 2.5, 1))]
     objects = []
     for name, mesh in parts:
         obj = bpy.data.objects.new(name, mesh)

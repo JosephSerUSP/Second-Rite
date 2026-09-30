@@ -361,10 +361,7 @@ def lens_distortion(amount):
 
 def render(path, width, height):
     s = bpy.context.scene
-    engines = [e.identifier for e in
-               bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items]
-    s.render.engine = ("BLENDER_EEVEE_NEXT" if "BLENDER_EEVEE_NEXT" in engines
-                       else "BLENDER_EEVEE")
+    s.render.engine = "BLENDER_EEVEE"
     s.render.resolution_x = width
     s.render.resolution_y = height
     s.render.resolution_percentage = 100

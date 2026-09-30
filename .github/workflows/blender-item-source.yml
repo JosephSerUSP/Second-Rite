@@ -110,6 +110,15 @@ jobs:
           set -euxo pipefail
           xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover_adoption -v
 
+      # EEVEE draws emission but does not cast it, and a lamp inside its own small housing is shadowed
+      # by it; both are fixed at render time, in the pinned Blender, and the second is judged by a
+      # real EEVEE render (docs/reports/eevee-emissive-lights-2026-09-30.md).
+      - name: EEVEE emissive companion lights and fixture shadows
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_emissive_lights tools.blender.tests.test_light_fixtures -v
+
       # The exterior bake once copied each object's base mesh, so a Geometry
       # Nodes host baked to nothing and nothing said so. This joins a small town
       # source through the real rebuild and counts what reaches the render mesh.

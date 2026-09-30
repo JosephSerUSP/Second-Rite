@@ -34,6 +34,8 @@ from mathutils import Matrix, Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import emissive_lights  # noqa: E402
+import light_fixtures  # noqa: E402
 import material_library  # noqa: E402
 import second_rite_asset_core as asset_core  # noqa: E402
 import thestra_camera  # noqa: E402
@@ -435,7 +437,7 @@ def configure_render_quality(scene, args) -> dict:
     return record
 
 
-def add_probe_volume(scene, cells_per_metre: float, samples: int) -> dict:
+def add_probe_volume(scene, cells_per_metre: float, samples: int, capture_emission: bool = True) -> dict:
     """Bake one light probe volume over the room, so EEVEE has a bounce term.
 
     EEVEE's screen-space raytracing cannot see what is off screen or behind a
@@ -458,7 +460,7 @@ def add_probe_volume(scene, cells_per_metre: float, samples: int) -> dict:
     probe.bake_samples = samples
     probe.capture_world = True
     probe.capture_indirect = True
-    probe.capture_emission = True
+    probe.capture_emission = capture_emission
     obj = bpy.data.objects.new("SR_ProbeVolume", probe)
     scene.collection.objects.link(obj)
     obj.location = centre
@@ -832,6 +834,17 @@ def main() -> None:
                         help="multiply canonical window daylight emission by K "
                              "at render time; lower than 1 keeps the grille "
                              "readable in the Cycles bake")
+    parser.add_argument("--emissive-lights", action="store_true",
+                        help="EEVEE: put a rectangular area light on every room-facing emissive patch "
+                             "(window, embers, glowing reveal), because EEVEE draws emission but does not "
+                             "cast it. See emissive_lights.py. The probe volume then stops capturing "
+                             "emission so the glow is not counted twice")
+    parser.add_argument("--emissive-exclude", action="append", default=[], metavar="MATERIAL",
+                        help="with --emissive-lights: a material to leave without a companion light")
+    parser.add_argument("--fixture-lights", action="store_true",
+                        help="EEVEE: a small mesh around a point or spot light (a lantern's flame and cage) "
+                             "stops casting shadows, so the lamp can light the wall beside it the way it "
+                             "does in Cycles. See light_fixtures.py")
     parser.add_argument("--samples", type=int, default=32,
                         help="Cycles sample count. Low on purpose: the "
                              "denoiser below is doing the heavy lifting, and "
@@ -990,9 +1003,19 @@ def main() -> None:
         if args.window_emission_scale != 1.0:
             report["windowEmissionScale"] = scale_window_emission(
                 scene, args.window_emission_scale)
+        if args.fixture_lights:
+            if args.engine != "eevee":
+                raise SystemExit("--fixture-lights is for EEVEE; Cycles already lets a light out of its fixture")
+            report["fixtureLights"] = light_fixtures.release_fixture_lights(scene)
+        if args.emissive_lights:
+            if args.engine != "eevee":
+                raise SystemExit("--emissive-lights is for EEVEE; Cycles lights from emission itself")
+            report["emissiveLights"] = emissive_lights.add_companion_lights(
+                scene, exclude=tuple(args.emissive_exclude))
         if args.probe_volume > 0 and args.engine == "eevee":
             report["probeVolume"] = add_probe_volume(
-                scene, args.probe_volume, args.probe_samples)
+                scene, args.probe_volume, args.probe_samples,
+                capture_emission=not args.emissive_lights)
         # Supersample: render N times the target and area-average back down.
         # EEVEE's own antialiasing resolves a 256px frame poorly on thin
         # geometry -- a grille bar or a chair leg lands on a fraction of a

@@ -406,9 +406,7 @@ def configure_render_quality(scene, args) -> dict:
         record.update(samples=cycles.samples, denoiser=cycles.denoiser)
         return record
 
-    eevee = getattr(scene, "eevee", None)
-    if eevee is None or not hasattr(eevee, "use_raytracing"):
-        return record
+    eevee = scene.eevee
     eevee.use_raytracing = bool(args.raytracing)
     if args.raytracing:
         eevee.use_fast_gi = True
@@ -431,7 +429,82 @@ def configure_render_quality(scene, args) -> dict:
     record.update(raytracing=eevee.use_raytracing,
                   aoMethod=eevee.fast_gi_method if args.raytracing else None,
                   aoDistance=eevee.fast_gi_distance if args.raytracing else None)
+    applied = apply_eevee_options(eevee, args.eevee_option)
+    if applied:
+        record["eeveeOptions"] = applied
     return record
+
+
+def add_probe_volume(scene, cells_per_metre: float, samples: int) -> dict:
+    """Bake one light probe volume over the room, so EEVEE has a bounce term.
+
+    EEVEE's screen-space raytracing cannot see what is off screen or behind a
+    surface, so a lamp's bounce on a wall it faces away from, and the world
+    fill's occlusion by the room's own walls, are both missing. A baked volume
+    supplies both: it is the EEVEE answer to the sealed-box problem the design
+    doc describes, and `capture_world` is what makes the walls occlude the fill.
+    """
+    from mathutils import Vector
+
+    corners = [obj.matrix_world @ Vector(c) for obj in scene.objects
+               if obj.type == "MESH" and not obj.hide_render
+               for c in obj.bound_box]
+    low = Vector(map(min, zip(*corners)))
+    high = Vector(map(max, zip(*corners)))
+    centre, size = (low + high) / 2.0, high - low
+    probe = bpy.data.lightprobes.new("SR_ProbeVolume", "VOLUME")
+    probe.resolution_x, probe.resolution_y, probe.resolution_z = (
+        max(2, int(round(size[i] * cells_per_metre))) for i in range(3))
+    probe.bake_samples = samples
+    probe.capture_world = True
+    probe.capture_indirect = True
+    probe.capture_emission = True
+    obj = bpy.data.objects.new("SR_ProbeVolume", probe)
+    scene.collection.objects.link(obj)
+    obj.location = centre
+    obj.scale = size / 2.0
+    for other in bpy.context.view_layer.objects:
+        other.select_set(False)
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    scene.eevee.gi_diffuse_bounces = max(scene.eevee.gi_diffuse_bounces, 3)
+    result = bpy.ops.object.lightprobe_cache_bake(subset="ACTIVE")
+    if "FINISHED" not in result:
+        raise SystemExit(f"light probe volume bake did not finish: {result}")
+    return {"resolution": [probe.resolution_x, probe.resolution_y, probe.resolution_z],
+            "samples": samples, "bounds": [list(map(float, low)), list(map(float, high))]}
+
+
+def apply_eevee_options(eevee, options) -> dict:
+    """Set `NAME=VALUE` overrides on scene.eevee, for experiments.
+
+    A name under `ray_tracing_options.` reaches the nested settings. The value
+    is coerced to the property's own type, and an unknown name raises rather
+    than being ignored: a typo here would otherwise read as "no effect".
+    """
+    applied = {}
+    for item in options or ():
+        name, sep, raw = item.partition("=")
+        if not sep:
+            raise SystemExit(f"--eevee-option wants NAME=VALUE, got {item!r}")
+        target, _, attribute = name.rpartition(".")
+        owner = eevee
+        for part in filter(None, target.split(".")):
+            owner = getattr(owner, part)
+        prop = owner.bl_rna.properties.get(attribute)
+        if prop is None:
+            raise SystemExit(f"--eevee-option: {name} is not an EEVEE property")
+        if prop.type == "BOOLEAN":
+            value = raw.strip().lower() in ("1", "true", "yes", "on")
+        elif prop.type == "INT":
+            value = int(raw)
+        elif prop.type == "FLOAT":
+            value = float(raw)
+        else:
+            value = raw
+        setattr(owner, attribute, value)
+        applied[name] = value
+    return applied
 
 
 def box_downsample(path, width: int, height: int, factor: int) -> None:
@@ -607,16 +680,6 @@ def widen_record(record, target_width):
     return widened
 
 
-def _eevee_engine() -> str:
-    """EEVEE's enum id moved between Blender releases (BLENDER_EEVEE ->
-    BLENDER_EEVEE_NEXT in 4.2 -> back to BLENDER_EEVEE in 5.x)."""
-    available = bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items.keys()
-    for candidate in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
-        if candidate in available:
-            return candidate
-    return "BLENDER_WORKBENCH"
-
-
 def measure_actor(scene, camera_obj, actor) -> dict:
     feet = actor.location.copy()
     head = feet + Vector((0.0, 0.0, WALKER_WORLD_HEIGHT))
@@ -720,6 +783,17 @@ def main() -> None:
                              "almost entirely by uniform world fill, with no "
                              "occlusion term at all. Nothing sat ON anything, "
                              "because nothing cast a contact shadow")
+    parser.add_argument("--eevee-option", action="append", default=[],
+                        metavar="NAME=VALUE",
+                        help="set any scene.eevee property (or "
+                             "ray_tracing_options.NAME) after the defaults "
+                             "above; repeatable. For experiments: an unknown "
+                             "name is an error, not a silent no-op")
+    parser.add_argument("--probe-volume", type=float, default=0.0, metavar="CELLS_PER_M",
+                        help="EEVEE only: bake a light probe volume over the room at "
+                             "this density (cells per metre; 0 = off). Experimental")
+    parser.add_argument("--probe-samples", type=int, default=256,
+                        help="bake samples for --probe-volume")
     parser.add_argument("--ao-distance", type=float, default=1.5,
                         metavar="M",
                         help="how far the fast-GI trace looks for occluders. "
@@ -899,7 +973,7 @@ def main() -> None:
         # the working directory; always hand it an absolute path.
         scene.render.filepath = str(render_path)
         scene.render.image_settings.file_format = "PNG"
-        scene.render.engine = (_eevee_engine() if args.engine == "eevee"
+        scene.render.engine = ("BLENDER_EEVEE" if args.engine == "eevee"
                                else "BLENDER_WORKBENCH" if args.engine == "workbench"
                                else "CYCLES")
         scene.render.film_transparent = False
@@ -910,6 +984,9 @@ def main() -> None:
         if args.window_emission_scale != 1.0:
             report["windowEmissionScale"] = scale_window_emission(
                 scene, args.window_emission_scale)
+        if args.probe_volume > 0 and args.engine == "eevee":
+            report["probeVolume"] = add_probe_volume(
+                scene, args.probe_volume, args.probe_samples)
         # Supersample: render N times the target and area-average back down.
         # EEVEE's own antialiasing resolves a 256px frame poorly on thin
         # geometry -- a grille bar or a chair leg lands on a fraction of a

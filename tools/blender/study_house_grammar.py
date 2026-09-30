@@ -118,14 +118,6 @@ def sky_world():
     bpy.context.scene.world = world
 
 
-def eevee_engine():
-    items = bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items
-    for name in ("BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"):
-        if name in items:
-            return name
-    raise RuntimeError("no EEVEE engine in this Blender build")
-
-
 def rotated_record(record, degrees):
     """The fixture camera swung around the action plane, distance preserved.
 
@@ -248,7 +240,7 @@ def main():
     override_with_clay(clay_material())
 
     scene = bpy.context.scene
-    scene.render.engine = eevee_engine()
+    scene.render.engine = "BLENDER_EEVEE"
     scene.render.film_transparent = False
     scene.render.image_settings.file_format = "PNG"
     scene.render.filter_size = 0.0  # a clay pass judges edges, so do not soften them

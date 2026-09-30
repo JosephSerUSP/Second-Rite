@@ -1,0 +1,58 @@
+{
+  "alicias_padaria_3d": {
+    "bakeSeconds": 229.1,
+    "atlas": {
+      "meanAbsDiff": 0.85,
+      "p95AbsDiff": 5.0,
+      "fractionOver8": 0.0167,
+      "sharpnessShipped": 441.31,
+      "sharpnessFresh": 424.44,
+      "sharpnessRatio": 0.962
+    },
+    "obj": {
+      "vertices": [
+        1934,
+        1934
+      ],
+      "uvs": [
+        4986,
+        4986
+      ],
+      "faces": [
+        3208,
+        3208
+      ],
+      "byteIdentical": false,
+      "maxVDiff": 0.0,
+      "maxVTDiff": 0.0
+    }
+  },
+  "lauras_smith_3d": {
+    "bakeSeconds": 171.0,
+    "atlas": {
+      "meanAbsDiff": 0.624,
+      "p95AbsDiff": 4.0,
+      "fractionOver8": 0.0056,
+      "sharpnessShipped": 250.82,
+      "sharpnessFresh": 248.05,
+      "sharpnessRatio": 0.989
+    },
+    "obj": {
+      "vertices": [
+        1186,
+        1186
+      ],
+      "uvs": [
+        3450,
+        3450
+      ],
+      "faces": [
+        1816,
+        1816
+      ],
+      "byteIdentical": false,
+      "maxVDiff": 0.0,
+      "maxVTDiff": 0.0
+    }
+  }
+}

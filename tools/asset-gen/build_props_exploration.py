@@ -1,4 +1,4 @@
-"""Blender 5.1 script for exploratory dungeon prop generation.
+"""Blender script (the pinned build, blender-pin.json) for exploratory dungeon prop generation.
 Generates 3 distinct design variants for:
 1. Altar (Colonnaded, Octagonal Reliquary, Monolithic Slab)
 2. Brazier (Wrought Iron Tripod, Columnar Stone Censer, Heavy Square Cage)

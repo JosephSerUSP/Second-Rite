@@ -1,4 +1,4 @@
-"""Blender 5.1 script to build and export the winning 3D prop models:
+"""Blender script (the pinned build, blender-pin.json) to build and export the winning 3D prop models:
 - Altar Variant A -> assets/models/dungeon/dungeon_altar.obj & .mtl
 - Brazier Variant B -> assets/models/dungeon/dungeon_brazier.obj & .mtl
 - Sarcophagus Variant B -> assets/models/dungeon/sarcophagus.obj & .mtl

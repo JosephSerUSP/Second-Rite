@@ -678,7 +678,8 @@ or still `scaffold`; a `superseded` one is refused by every writing tool.
 - Blender resolves a **relative render path against the drive root**, not the
   working directory. Pass absolute paths.
 - EEVEE's engine enum id moved between releases (`BLENDER_EEVEE` →
-  `BLENDER_EEVEE_NEXT` → `BLENDER_EEVEE`).
+  `BLENDER_EEVEE_NEXT` → `BLENDER_EEVEE`). The tooling is pinned to one Blender
+  now (`blender-pin.json`), so it names `BLENDER_EEVEE` and does not probe.
 - Rendering is deterministic here — two runs of the same `.blend` are
   byte-identical. So a pixel difference after a refactor is a **real** change,
   never sampling noise. Use that.

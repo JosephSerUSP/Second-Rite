@@ -36,6 +36,7 @@ both have to stay in the space they were authored in while it runs.
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -48,10 +49,12 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
+import atlas_allocation  # noqa: E402
 
 # Shared with the pre-rendered packages; both are derived from the calibrated
 # side-view camera in fixtures/town_sideview_camera.json.
 LANE_CENTRE = 3.8833
+SPAN_DEFAULT = 7.7667
 NEWLINE = chr(10)
 ACTION_PLANE_X = 0.0
 
@@ -79,7 +82,8 @@ def sort_into_contract_collections():
     return source
 
 
-def build_render_mesh(source, name, decimate):
+def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, view_bias=0.85,
+                      view_floor=0.04, cameras=None):
     """Duplicate the source geometry, join it, and give it an atlas UV layout.
 
     Not yet a hand-authored coarse mesh: this is the whole room joined, which
@@ -122,10 +126,33 @@ def build_render_mesh(source, name, decimate):
     bpy.ops.object.select_all(action="DESELECT")
     target.select_set(True)
     bpy.context.view_layer.objects.active = target
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.02)
-    bpy.ops.object.mode_set(mode="OBJECT")
+    if layout == "loose":
+        # The original layout: an island margin of 0.02 leaves ~77% of the atlas as
+        # gutter (23% carries texels). Kept only so an old package can be reproduced.
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.02)
+        bpy.ops.object.mode_set(mode="OBJECT")
+    elif layout == "packed":
+        atlas_allocation.pack(target, atlas_size)
+    elif layout == "view":
+        # Demand is measured from the joined mesh alone, so the source copies it was made
+        # from are hidden for the measurement and put back for the bake.
+        hidden = [o for o in source.objects if o.type == "MESH" and not o.hide_render]
+        for obj in hidden:
+            obj.hide_render = True
+        try:
+            cameras = cameras or [0.35 + i * (SPAN_DEFAULT - 0.7) / 8 for i in range(9)]
+            report = atlas_allocation.allocate_by_view(target, cameras, atlas_size,
+                                                       view_bias=view_bias, floor=view_floor)
+        finally:
+            for obj in hidden:
+                obj.hide_render = False
+        print("[room3d] atlas allocated by view: " + json.dumps(report), flush=True)
+    else:
+        raise SystemExit(f"unknown atlas layout {layout!r}; use loose, packed or view")
+    print("[room3d] atlas layout " + layout + ": "
+          + json.dumps(atlas_allocation.layout_report(target, atlas_size)), flush=True)
     return target
 
 
@@ -201,6 +228,14 @@ def main() -> None:
     parser.add_argument("--blend", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--atlas-size", type=int, default=1024)
+    parser.add_argument("--atlas-layout", choices=("loose", "packed", "view"), default="packed",
+                        help="loose is the original smart_project layout (~23%% of the atlas carries "
+                             "texels); packed is tight; view also spends the atlas where the lane "
+                             "cameras look (#877). Default packed")
+    parser.add_argument("--view-bias", type=float, default=0.85,
+                        help="--atlas-layout view: 0 = every surface equal, 1 = follow the cameras")
+    parser.add_argument("--view-floor", type=float, default=0.04,
+                        help="--atlas-layout view: least density an island keeps, as a fraction of the mean")
     parser.add_argument("--samples", type=int, default=24)
     parser.add_argument("--decimate", type=float, default=1.0)
     parser.add_argument("--ambient", type=float, default=0.13,
@@ -221,7 +256,9 @@ def main() -> None:
 
     bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
     source = sort_into_contract_collections()
-    build_render_mesh(source, f"{args.blend.stem}_TH_RENDER", args.decimate)
+    build_render_mesh(source, f"{args.blend.stem}_TH_RENDER", args.decimate, layout=args.atlas_layout,
+                      atlas_size=args.atlas_size, view_bias=args.view_bias, view_floor=args.view_floor,
+                      cameras=[0.35 + i * (args.span - 0.7) / 8 for i in range(9)])
 
     spawn = min(max(args.exit_y - 0.9, 0.35), args.span - 0.35)
     anchors = {"spawn_player": round(spawn, 4), "exit_door": args.exit_y}

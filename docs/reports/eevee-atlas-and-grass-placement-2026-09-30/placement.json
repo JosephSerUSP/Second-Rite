@@ -1,0 +1,66 @@
+{
+ "budget": 375,
+ "menuTopRow": 144,
+ "plate": [
+  906,
+  240
+ ],
+ "groundZ": -0.17500004172325134,
+ "trunks": [
+  [
+   2.0,
+   1.0000000099341075
+  ],
+  [
+   -6.0,
+   16.0
+  ]
+ ],
+ "candidates": {
+  "A_bases": {
+   "label": "Building bases",
+   "tufts": 375,
+   "triangles": 1500,
+   "density": 33.416,
+   "aboveMenu": 375,
+   "underMenu": 0,
+   "outOfFrame": 0
+  },
+  "B_trees": {
+   "label": "Tree rings",
+   "tufts": 375,
+   "triangles": 1500,
+   "density": 108.868,
+   "aboveMenu": 0,
+   "underMenu": 375,
+   "outOfFrame": 13
+  },
+  "C_lane_edges": {
+   "label": "Lane edges",
+   "tufts": 375,
+   "triangles": 1500,
+   "density": 19.169,
+   "aboveMenu": 268,
+   "underMenu": 107,
+   "outOfFrame": 1
+  },
+  "D_patches": {
+   "label": "Worn-paving patches",
+   "tufts": 375,
+   "triangles": 1500,
+   "density": 5.471,
+   "aboveMenu": 132,
+   "underMenu": 243,
+   "outOfFrame": 10
+  },
+  "E_mixed": {
+   "label": "Bases + trees + lane edges",
+   "tufts": 375,
+   "triangles": 1500,
+   "density": 17.891,
+   "aboveMenu": 256,
+   "underMenu": 119,
+   "outOfFrame": 1
+  }
+ }
+}

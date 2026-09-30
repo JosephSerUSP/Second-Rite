@@ -93,6 +93,14 @@ jobs:
           set -euxo pipefail
           xvfb-run -a python -m unittest tools.blender.tests.test_asset_library_group -v
 
+      # A room's atlas is packed tight and can be spent where the camera looks (#877); the
+      # allocator measures demand by rendering, so it runs in the pinned Blender.
+      - name: Atlas allocation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_atlas_allocation -v
+
       # The exterior bake once copied each object's base mesh, so a Geometry
       # Nodes host baked to nothing and nothing said so. This joins a small town
       # source through the real rebuild and counts what reaches the render mesh.

@@ -653,6 +653,19 @@ Two preview modes matter:
 with a wider window, so the scale is unchanged and the map's real ends are
 visible.
 
+### The atlas layout: `--atlas-layout`
+
+`export_room_environment.py` lays the room's atlas out one of three ways. `loose` is the
+original `smart_project(island_margin=0.02)`: it covers 10.9% (Padaria) and 15.4% (smith) of
+the atlas, and 75% and 66% of the pixels a player sees are drawn from fewer than one texel
+each. It is kept only to reproduce a shipped package (`study_atlas_drift.py` passes it).
+`packed` (the default) unwraps with no margin and packs with Blender's concave packer and a
+2-texel gutter: 73% and 80% covered, about one percent of visible pixels under one texel.
+`view` also scales each island to what the lane cameras need, measured by rendering the
+mesh from nine lane positions (`tools/blender/atlas_allocation.py`, #877); at 512 px it
+matches `packed` at 1024 with a quarter of the texels. Shipped packages are not rebaked by
+this; a rebake is an owner-signed step.
+
 ### The `.blend` is source authority
 
 Once a map's `.blend` exists it is the editable document, and the maintainer

@@ -105,3 +105,6 @@ tmp/
 # above. Only three subpaths were ignored, so ~26k scratch files showed as
 # untracked. Nothing written here is repository authority.
 out/
+
+# Backups the surgical .blend recipes leave beside the document they edit.
+*.blend.bak

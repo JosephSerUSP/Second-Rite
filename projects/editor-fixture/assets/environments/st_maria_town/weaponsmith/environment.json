@@ -63,5 +63,9 @@
       "height": 48,
       "pixelsPerRuntimeY": 34.6
     }
+  },
+  "provenance": {
+    "sourceBlend": "lauras_smith.blend",
+    "sourceBlendNote": "Its plate is lauras_smith_bg.png, the smith room's plate."
   }
 }

@@ -13,7 +13,8 @@
     4.0
   ],
   "provenance": {
-    "plateSourceViewTransform": "AgX"
+    "plateSourceViewTransform": "AgX",
+    "sourceBlend": "alicias_padaria.blend"
   },
   "anchors": {
     "spawn_player": {

@@ -1,8 +1,11 @@
-"""Apply the first hand-authoring pass to the adopted St. Maria Praca source.
+"""Apply the first hand-authoring pass to the St. Maria Praca scaffold.
 
 This is deliberately an edit script, not a generator: it opens the existing
-authoritative .blend, makes named, reviewable changes, and saves it in place.
-Future spatial authors should edit the same document directly in Blender.
+.blend, makes named, reviewable changes, and saves it in place.
+
+Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
+`scaffold` in environment-sources.json. The adopted Praca, the source of the
+shipped package, is st_maria_praca_modelled.blend; nothing here edits it.
 """
 
 from __future__ import annotations
@@ -16,6 +19,7 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+import environment_sources  # noqa: E402
 import thestra_camera  # noqa: E402
 
 DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets"
@@ -76,6 +80,7 @@ def set_calibrated_camera():
 
 
 def apply(blend):
+    environment_sources.refuse_superseded(blend)
     bpy.ops.wm.open_mainfile(filepath=str(blend))
     architecture, foreground = coll("20_ARCHITECTURE"), coll("21_FOREGROUND")
     ground = bpy.data.objects.get("ARCH_square_ground")

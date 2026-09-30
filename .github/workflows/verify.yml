@@ -229,6 +229,21 @@ jobs:
           node tools/ci/time-step.js --record --label "towngen check" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "towngen check failed (exit $__code)" }
 
+      - name: environment sources - every package names its .blend
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          python tools/blender/environment_sources.py --check
+          $__code = $LASTEXITCODE
+          if ($__code -eq 0) {
+            python -m unittest tools.blender.tests.test_environment_sources
+            $__code = $LASTEXITCODE
+          }
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "environment sources" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "environment sources check failed (exit $__code)" }
+
       - name: G1 - data validation
         shell: pwsh
         run: |

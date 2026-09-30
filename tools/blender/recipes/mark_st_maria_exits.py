@@ -20,6 +20,10 @@ running session would overwrite this on its next save.
 
     blender -b -noaudio --factory-startup -P tools/blender/recipes/mark_st_maria_exits.py
 
+Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
+`scaffold` in environment-sources.json. The adopted Praca, the source of the
+shipped package, is st_maria_praca_modelled.blend; nothing here edits it.
+
 ``plan()`` is separate from the applier so the same geometry can be pushed over
 the live bridge instead, without a second copy of the numbers.
 """
@@ -36,6 +40,8 @@ except ImportError:  # plan() is importable outside Blender, so the live bridge
     bpy = None       # can push the same geometry without a second copy of it.
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tools/blender"))
+import environment_sources  # noqa: E402
 DOCUMENT = ROOT / "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca.blend"
 COLLECTION = "20_ARCHITECTURE"
 LIMESTONE, DARK = "sr_old_limestone", "sr_dark_wood"
@@ -121,6 +127,7 @@ def main():
     for name, centre, dims, material in boxes:
         _box(name, centre, dims, material, collection)
 
+    environment_sources.refuse_superseded(args.document)
     backup = args.document.with_suffix(".blend.bak")
     shutil.copy2(args.document, backup)
     bpy.ops.wm.save_mainfile(filepath=str(args.document.resolve()))

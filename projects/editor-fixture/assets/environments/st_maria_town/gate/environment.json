@@ -70,5 +70,9 @@
       "height": 48,
       "pixelsPerRuntimeY": 34.6
     }
+  },
+  "provenance": {
+    "sourceBlend": null,
+    "sourceBlendNote": "Unreferenced hand-authored stub; no .blend exists for it."
   }
 }

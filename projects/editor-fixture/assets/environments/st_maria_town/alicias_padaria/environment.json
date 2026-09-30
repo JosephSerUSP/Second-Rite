@@ -14,7 +14,8 @@
   ],
   "provenance": {
     "plateSourceViewTransform": "NotRecorded",
-    "note": "The current source blend is AgX; that does not prove the historical PNG bake."
+    "note": "The current source blend is AgX; that does not prove the historical PNG bake.",
+    "sourceBlend": "alicias_padaria.blend"
   },
   "anchors": {
     "spawn_player": {

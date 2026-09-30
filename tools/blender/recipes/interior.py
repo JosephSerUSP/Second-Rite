@@ -39,6 +39,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import environment_sources  # noqa: E402
 import material_library  # noqa: E402
 import second_rite_asset_core as asset_core  # noqa: E402
 from first_stratum.common import box  # noqa: E402
@@ -844,6 +845,7 @@ def recalculate_normals(objects):
 
 def save_source_blend(blend: Path, *, force: bool):
     blend = Path(blend).resolve()
+    environment_sources.refuse_superseded(blend)
     if blend.exists() and not force:
         raise SystemExit(
             f"{blend} already exists and is the SOURCE AUTHORITY for this "

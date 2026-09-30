@@ -1,7 +1,8 @@
 # The St. Maria middle-seam defect
 
-This is the one topology defect in the owner-authored `st_maria_praca.blend`
-that the house grammar is allowed to repair rather than reproduce. It is
+This is the one topology defect in the hand-edited `st_maria_praca.blend` (the
+Praca scaffold, not the adopted `st_maria_praca_modelled.blend`; see
+`environment-sources.json`) that the house grammar is allowed to repair rather than reproduce. It is
 written down here **before** the normalizer exists, because a repair authored
 against the three source houses and tuned until their diff goes green is not a
 repair — it is a fudge factor with a test suite. Everything below was measured

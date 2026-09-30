@@ -150,6 +150,52 @@ class NegativeControlTests(unittest.TestCase):
         self.assertTrue(any("status" in e for e in sources.check_project(self.root)))
 
 
+class EeveeRecordTests(unittest.TestCase):
+    """An entry's `eevee` record is what an EEVEE bake of that environment reads (eevee_bake.py)."""
+
+    def setUp(self):
+        self.directory = tempfile.mkdtemp(prefix="test_env_eevee_")
+        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
+        self.root = _scratch_project(self.directory)
+        self.manifest = sources.authoring_dir(self.root) / sources.MANIFEST_NAME
+
+    def set_record(self, record):
+        _rewrite(self.manifest, lambda d: d["sources"]["new.blend"].update(eevee=record))
+
+    def errors(self):
+        return [e for e in sources.check_project(self.root) if "eevee" in e]
+
+    def test_a_good_record_passes(self):
+        self.set_record({"exposureEV": 0.5, "probeCells": 2, "emissiveLights": True,
+                         "eeveeOptions": ["light_threshold=0.0002"], "basis": "measured"})
+        self.assertEqual(sources.check_project(self.root), [])
+
+    def test_an_unknown_key_fails(self):
+        self.set_record({"exposure": 0.5, "basis": "measured"})
+        self.assertTrue(any("unknown key 'exposure'" in e for e in self.errors()))
+
+    def test_a_wrong_type_fails(self):
+        self.set_record({"exposureEV": "bright", "basis": "measured"})
+        self.assertTrue(any("exposureEV" in e for e in self.errors()))
+        self.set_record({"probeCells": True, "basis": "measured"})           # a bool is not a number here
+        self.assertTrue(any("probeCells" in e for e in self.errors()))
+
+    def test_an_option_must_be_NAME_equals_VALUE(self):
+        self.set_record({"eeveeOptions": ["light_threshold"], "basis": "measured"})
+        self.assertTrue(any("NAME=VALUE" in e for e in self.errors()))
+
+    def test_numbers_need_a_basis(self):
+        self.set_record({"exposureEV": 0.5})
+        self.assertTrue(any("no `basis`" in e for e in self.errors()))
+
+    def test_the_shipped_records_name_their_source(self):
+        shipped = sources.load_sources(sources.authoring_dir(GAME))
+        recorded = {n: e["eevee"] for n, e in shipped.items() if "eevee" in e}
+        self.assertIn("passage_house_corridor.blend", recorded)
+        self.assertEqual(recorded["passage_house_corridor.blend"]["probeCells"], 4)
+        self.assertTrue(all(r["basis"] for r in recorded.values()))
+
+
 class RefusalTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.mkdtemp(prefix="test_env_refusal_")

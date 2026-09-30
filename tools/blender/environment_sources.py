@@ -37,6 +37,11 @@ STATUSES = ("adopted", "scaffold", "superseded", "reference")
 # A package may be baked from these; the others are not a package's source.
 PACKAGE_SOURCE_STATUSES = ("adopted", "scaffold")
 OVERRIDE_ENV = "SR_ALLOW_SUPERSEDED_ENVIRONMENT"
+# An entry may carry an `eevee` record: the settings an EEVEE bake of that environment wants
+# (eevee_bake.settings_from_args reads it). Each key and its type.
+EEVEE_KEYS = {"exposureEV": (int, float), "probeCells": (int, float), "probeSamples": (int,),
+              "emissiveLights": (bool,), "fixtureLights": (bool,), "eeveeOptions": (list,),
+              "supersample": (int,), "basis": (str,)}
 PROJECTS = ("hichaukitoden-game", "editor-fixture")
 
 
@@ -83,6 +88,27 @@ def refuse_superseded(blend: Path) -> None:
         "to override deliberately.")
 
 
+def _check_eevee(where: str, record) -> list[str]:
+    """The `eevee` record of an entry: known keys, right types, options as NAME=VALUE."""
+    if record is None:
+        return []
+    if not isinstance(record, dict):
+        return [f"{where} has an `eevee` record that is not an object"]
+    errors = []
+    for key, value in record.items():
+        kinds = EEVEE_KEYS.get(key)
+        if kinds is None:
+            errors.append(f"{where} `eevee` has an unknown key {key!r}; expected one of {sorted(EEVEE_KEYS)}")
+        elif not isinstance(value, kinds) or (bool not in kinds and isinstance(value, bool)):
+            errors.append(f"{where} `eevee`.{key} is {value!r}; expected {' or '.join(k.__name__ for k in kinds)}")
+    for option in record.get("eeveeOptions", []) if isinstance(record.get("eeveeOptions"), list) else []:
+        if not isinstance(option, str) or "=" not in option:
+            errors.append(f"{where} `eevee`.eeveeOptions has {option!r}; expected NAME=VALUE")
+    if not str(record.get("basis", "")).strip():
+        errors.append(f"{where} `eevee` has no `basis` (where its numbers came from)")
+    return errors
+
+
 def _check_sources(directory: Path, label: str) -> list[str]:
     errors = []
     blends = sorted(p.name for p in directory.glob("*.blend"))
@@ -106,6 +132,7 @@ def _check_sources(directory: Path, label: str) -> list[str]:
             continue
         if not str(entry.get("basis", "")).strip():
             errors.append(f"{where} has no `basis` (the evidence for its status)")
+        errors.extend(_check_eevee(where, entry.get("eevee")))
         if status == "superseded":
             successor = entry.get("supersededBy")
             if not successor or successor == name or successor not in sources:

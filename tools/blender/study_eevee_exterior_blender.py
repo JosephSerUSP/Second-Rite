@@ -53,6 +53,10 @@ def main():
     parser.add_argument("--sun", type=float, default=2.5)
     parser.add_argument("--bake-cameras", type=int, default=16)
     parser.add_argument("--supersample", type=int, default=3)
+    parser.add_argument("--atlas-layout", choices=("view", "legacy"), default="view")
+    parser.add_argument("--keep-full-ground", action="store_true")
+    parser.add_argument("--no-cycles", action="store_true",
+                        help="skip the Cycles bake (17 minutes on the Praca) and its frames")
     parser.add_argument("--exposure", type=float, default=0.0, metavar="EV",
                         help="gain, in EV, on the EEVEE beauty before it goes into the atlas and on the EEVEE target")
     parser.add_argument("--probe-volume", type=float, default=0.0, metavar="CELLS_PER_M")
@@ -65,7 +69,9 @@ def main():
     scene = bpy.context.scene
     source = bpy.data.collections["TH_SOURCE"]
     exterior.rebuild_render_mesh(args.span, args.margin, args.ground_share,
-                                 args.cull_samples, args.cull_escape)
+                                 args.cull_samples, args.cull_escape,
+                                 clip_ground=None if args.keep_full_ground else exterior.GROUND_CLIP_MARGIN,
+                                 layout=args.atlas_layout, atlas_size=args.atlas_size)
     target = next(o for o in bpy.data.collections["TH_RENDER"].all_objects if o and o.type == "MESH")
     triangles = len(target.data.loop_triangles)
 
@@ -181,23 +187,25 @@ def main():
                       "fractionBelowOne": round(float((density < 1.0).mean()), 4)}
     print("texels per screen pixel: " + json.dumps(density_report), flush=True)
 
-    # -- the Cycles atlas, through the exporter's own pipeline, on the same mesh ----------------
-    started = time.time()
-    pipeline.run_pipeline_in_blender(args.blend.resolve(), out / "cycles_package", atlas_size=size,
-                                     bake_samples=24, flat_bake=True)
-    cycles_seconds = time.time() - started
-    cycles_atlas = bpy.data.images.load(str(out / "cycles_package" / "environment.png"))
-    cycles_atlas.colorspace_settings.name = "sRGB"
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.render.image_settings.file_format = "PNG"
-    scene.render.image_settings.color_depth = "8"
-    scene.render.image_settings.color_mode = "RGB"
-    scene.render.film_transparent = False
-    scene.render.resolution_x, scene.render.resolution_y = projection.VIEW_WIDTH, projection.VIEW_HEIGHT
-    scene.render.resolution_percentage = 100
-    scene.view_settings.view_transform = "Standard"
-    projection.crisp(scene)
-    frames("atlas_cycles", cycles_atlas)
+    cycles_seconds, cycles_atlas = None, None
+    if not args.no_cycles:
+        # -- the Cycles atlas, through the exporter's own pipeline, on the same mesh ----------------
+        started = time.time()
+        pipeline.run_pipeline_in_blender(args.blend.resolve(), out / "cycles_package", atlas_size=size,
+                                         bake_samples=24, flat_bake=True)
+        cycles_seconds = time.time() - started
+        cycles_atlas = bpy.data.images.load(str(out / "cycles_package" / "environment.png"))
+        cycles_atlas.colorspace_settings.name = "sRGB"
+        scene.render.engine = "BLENDER_EEVEE"
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.image_settings.color_depth = "8"
+        scene.render.image_settings.color_mode = "RGB"
+        scene.render.film_transparent = False
+        scene.render.resolution_x, scene.render.resolution_y = projection.VIEW_WIDTH, projection.VIEW_HEIGHT
+        scene.render.resolution_percentage = 100
+        scene.view_settings.view_transform = "Standard"
+        projection.crisp(scene)
+        frames("atlas_cycles", cycles_atlas)
 
     def mean_lit(image):
         pixels = np.asarray(image.pixels[:], dtype=np.float32).reshape(-1, 4)[:, :3]
@@ -209,8 +217,11 @@ def main():
               "sourceMeshesSeenByBeauty": len(members), "bakeCameras": projected["cameras"],
               "checkCameras": [round(float(y), 3) for y in checks], "probeVolume": probe,
               "exposureEV": args.exposure, "eeveeCoverage": coverage, "texelsPerPixel": density_report,
-              "eeveeBakeSeconds": round(eevee_seconds, 1), "cyclesBakeSeconds": round(cycles_seconds, 1),
-              "atlasMeanWrittenTexel": {"eevee": mean_lit(eevee_atlas), "cycles": mean_lit(cycles_atlas)}}
+              "eeveeBakeSeconds": round(eevee_seconds, 1),
+              "cyclesBakeSeconds": round(cycles_seconds, 1) if cycles_seconds else None,
+              "atlasMeanWrittenTexel": {"eevee": mean_lit(eevee_atlas),
+                                        "cycles": mean_lit(cycles_atlas) if cycles_atlas else None},
+              "atlasLayout": args.atlas_layout, "groundClipped": not args.keep_full_ground}
     (out / "result.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
     print("EEVEE EXTERIOR STUDY OK", out)
 

@@ -44,13 +44,15 @@ def main() -> int:
     for line in result.stdout.splitlines():
         if line.startswith(("lights", "beauty frame", "EEVEE atlas", "texels per", "probe volume", "eevee options")):
             print(line, flush=True)
+    cycles = "--no-cycles" not in passthrough
     for number in (1, 3):
         pairs = [f"EEVEE beauty vs EEVEE atlas (how well the projection reproduces its own lighting)="
-                 f"{out / f'target_eevee_{number}.png'}|{out / f'atlas_eevee_{number}.png'}",
-                 f"Cycles atlas (shipped approach) vs EEVEE atlas (what the player would see)="
-                 f"{out / f'atlas_cycles_{number}.png'}|{out / f'atlas_eevee_{number}.png'}",
-                 f"EEVEE beauty vs Cycles atlas="
-                 f"{out / f'target_eevee_{number}.png'}|{out / f'atlas_cycles_{number}.png'}"]
+                 f"{out / f'target_eevee_{number}.png'}|{out / f'atlas_eevee_{number}.png'}"]
+        if cycles:
+            pairs += [f"Cycles atlas (shipped approach) vs EEVEE atlas (what the player would see)="
+                      f"{out / f'atlas_cycles_{number}.png'}|{out / f'atlas_eevee_{number}.png'}",
+                      f"EEVEE beauty vs Cycles atlas="
+                      f"{out / f'target_eevee_{number}.png'}|{out / f'atlas_cycles_{number}.png'}"]
         sheet = subprocess.run([sys.executable, str(SHEET), "--out", str(out / f"sheet_{number}.png"), *pairs],
                                capture_output=True, text=True)
         if sheet.returncode != 0:

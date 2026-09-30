@@ -189,8 +189,13 @@ def project_atlas(scene, uv_layer: str, positions, place_camera, size: int, out:
     return {"linear": linear.reshape(size, size, 3), "seen": seen.reshape(size, size), "cameras": cameras}
 
 
-def finish_atlas(projected: dict, islands: np.ndarray, name: str, path: Path) -> tuple[object, dict]:
-    """Dilate, encode to sRGB and save. Returns (the Blender image, what the atlas covers)."""
+def finish_atlas(projected: dict, islands: np.ndarray, name: str, path: Path | None,
+                 image=None) -> tuple[object, dict]:
+    """Dilate and encode to sRGB. Returns (the Blender image, what the atlas covers).
+
+    With `image` the texels go into that image (the exporter's bake target, which it saves itself);
+    otherwise a new image is made and saved to `path`.
+    """
     size = projected["linear"].shape[0]
     seen = projected["seen"]
     filled, reached = dilate(projected["linear"], seen, DILATION)
@@ -200,9 +205,12 @@ def finish_atlas(projected: dict, islands: np.ndarray, name: str, path: Path) ->
     atlas = np.zeros((size, size, 4), dtype=np.float32)
     atlas[..., :3] = srgb_encode(filled)
     atlas[..., 3] = 1.0
-    image = bpy.data.images.new(name, size, size, alpha=True)
-    image.pixels.foreach_set(atlas.reshape(-1))
-    image.filepath_raw = str(path)
-    image.file_format = "PNG"
-    image.save()
+    if image is None:
+        image = bpy.data.images.new(name, size, size, alpha=True)
+        image.pixels.foreach_set(atlas.reshape(-1))
+        image.filepath_raw = str(path)
+        image.file_format = "PNG"
+        image.save()
+    else:
+        image.pixels.foreach_set(atlas.reshape(-1))
     return image, coverage

@@ -119,6 +119,14 @@ jobs:
           set -euxo pipefail
           xvfb-run -a python -m unittest tools.blender.tests.test_emissive_lights tools.blender.tests.test_light_fixtures -v
 
+      # The room exporter bakes its atlas with EEVEE when asked (--bake-backend eevee): a tiny room goes
+      # through the real exporter with each backend, and the package contract must hold for both.
+      - name: EEVEE atlas bake backend
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_eevee_backend -v
+
       # The exterior bake once copied each object's base mesh, so a Geometry
       # Nodes host baked to nothing and nothing said so. This joins a small town
       # source through the real rebuild and counts what reaches the render mesh.

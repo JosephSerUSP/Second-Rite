@@ -62,6 +62,10 @@ def plate(room: str, path: Path, ambient: float, lamp_scale: float, *engine: str
     return path
 
 
+def exposed_plate(room: str, path: Path, ambient: float, ev: float, *engine: str) -> Path:
+    return plate(room, path, ambient, BASE_LAMP_SCALE, "--exposure", f"{ev:.4f}", *engine)
+
+
 def linear(path: Path) -> np.ndarray:
     c = np.asarray(Image.open(path).convert("RGB"), dtype=np.float64) / 255.0
     lin = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
@@ -109,41 +113,47 @@ def main() -> int:
     target = linear(cycles)
     rows = lit_rows(target)
     goal = float(target[rows].mean())
-    scale = BASE_LAMP_SCALE
+    # Exposure is a camera setting, not a lighting one. Scaling the lamps barely moves a room whose
+    # light is mostly world fill and window emission (measured: doubling --lamp-scale changed the mean
+    # by 5%), and it would change the balance the recipe struck. A film exposure in EV multiplies the
+    # whole frame, which is what "the probe volume made the room darker" needs.
+    import math
+    scale, ev = BASE_LAMP_SCALE, 0.0
     history = []
-    for step in range(3):
-        candidate = plate(room, out / f"probe_step{step}.png", 0.13, scale, *probe)
-        measured = float(linear(candidate)[lit_rows(linear(candidate))].mean())
-        history.append({"lampScale": round(scale, 4), "meanLinear": round(measured, 5)})
-        print(f"exposure step {step}: lamp scale {scale:.4f}, mean linear {measured:.5f} (goal {goal:.5f})", flush=True)
-        if abs(measured / goal - 1.0) < 0.02:
+    for step in range(4):
+        candidate = exposed_plate(room, out / f"probe_step{step}.png", 0.13, ev, *probe)
+        cand = linear(candidate)
+        measured = float(cand[lit_rows(cand)].mean())
+        history.append({"exposureEV": round(ev, 4), "meanLinear": round(measured, 5)})
+        print(f"exposure step {step}: {ev:+.3f} EV, mean linear {measured:.5f} (goal {goal:.5f})", flush=True)
+        if abs(measured / goal - 1.0) < 0.03:
             break
-        scale *= goal / measured
+        ev += math.log2(goal / measured)
     matched = out / "plate_eevee_probe.png"
     if not matched.is_file():
-        plate(room, matched, 0.13, scale, *probe)
-    matched_dark = plate(room, out / "plate_eevee_probe_dark.png", 0.0, scale, *probe)
+        exposed_plate(room, matched, 0.13, ev, *probe)
+    matched_dark = exposed_plate(room, out / "plate_eevee_probe_dark.png", 0.0, ev, *probe)
 
     report = {"room": room, "goalMeanLinear": round(goal, 5), "exposureSteps": history,
-              "matchedLampScale": round(scale, 4),
+              "matchedExposureEV": round(ev, 4),
               "fillShare": {"cycles": round(fill_share(cycles, cycles_dark), 4),
                             "eevee_ao": round(fill_share(ao, ao_dark), 4),
                             "eevee_probe_matched": round(fill_share(matched, matched_dark), 4)}}
     print("fill share:", json.dumps(report["fillShare"]), flush=True)
 
     diff_sheet(out / "plates_sheet.png", [
-        f"cycles plate vs eevee AO plate (today's --engine eevee)={cycles}:{ao}",
-        f"cycles plate vs eevee probe plate, exposure matched={cycles}:{matched}"])
+        f"cycles plate vs eevee AO plate (today's --engine eevee)={cycles}|{ao}",
+        f"cycles plate vs eevee probe plate, exposure matched={cycles}|{matched}"])
     if args.cycles_atlas:
         blender("--python", str(ATLAS_STUDY), "--", "--blend", str(ENVIRONMENTS / f"{room}.blend"),
-                "--layout", args.layout, "--probe-volume", str(PROBE_CELLS), "--lamp-scale", f"{scale:.5f}",
+                "--layout", args.layout, "--probe-volume", str(PROBE_CELLS), "--lamp-scale", f"{scale:.5f}", "--exposure", f"{ev:.4f}",
                 "--cycles-atlas", str(args.cycles_atlas), "--out", str(out / "atlas"))
         report["atlasStudy"] = json.loads((out / "atlas" / "result.json").read_text(encoding="utf-8"))
         a = out / "atlas"
         diff_sheet(out / "rooms_sheet.png", [
-            f"3D room, cycles beauty vs cycles atlas (as baked today)={a / 'target_cycles_1.png'}:{a / 'atlas_cycles_1.png'}",
-            f"3D room, eevee+probe beauty vs eevee projected atlas={a / 'target_eevee_1.png'}:{a / 'atlas_eevee_1.png'}",
-            f"3D room, cycles atlas vs eevee projected atlas={a / 'atlas_cycles_1.png'}:{a / 'atlas_eevee_1.png'}"])
+            f"3D room, cycles beauty vs cycles atlas (as baked today)={a / 'target_cycles_1.png'}|{a / 'atlas_cycles_1.png'}",
+            f"3D room, eevee+probe beauty vs eevee projected atlas={a / 'target_eevee_1.png'}|{a / 'atlas_eevee_1.png'}",
+            f"3D room, cycles atlas vs eevee projected atlas={a / 'atlas_cycles_1.png'}|{a / 'atlas_eevee_1.png'}"])
     (out / "pilot.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
     return 0

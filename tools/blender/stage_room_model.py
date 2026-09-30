@@ -794,6 +794,9 @@ def main() -> None:
                              "this density (cells per metre; 0 = off). Experimental")
     parser.add_argument("--probe-samples", type=int, default=256,
                         help="bake samples for --probe-volume")
+    parser.add_argument("--exposure", type=float, default=0.0, metavar="EV",
+                        help="film exposure in EV, applied to the whole frame after lighting. For "
+                             "matching one engine's plate to another's; 0 leaves the scene as authored")
     parser.add_argument("--ao-distance", type=float, default=1.5,
                         metavar="M",
                         help="how far the fast-GI trace looks for occluders. "
@@ -978,6 +981,9 @@ def main() -> None:
                                else "CYCLES")
         scene.render.film_transparent = False
         report["renderQuality"] = configure_render_quality(scene, args)
+        if args.exposure:
+            scene.view_settings.exposure = args.exposure
+            report["exposureEV"] = args.exposure
         if args.lamp_scale != 1.0 or args.accent_scale != 1.0:
             report["lampScale"] = scale_lamp_energy(
                 scene, args.lamp_scale, args.accent_scale)

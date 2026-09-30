@@ -188,6 +188,9 @@ def main():
                         help="bake an EEVEE light probe volume over the room before the beauty pass "
                              "(the EEVEE answer to the sealed-room world-fill leak); 0 = off")
     parser.add_argument("--probe-samples", type=int, default=256)
+    parser.add_argument("--exposure", type=float, default=0.0, metavar="EV",
+                        help="gain, in EV, applied to the EEVEE beauty in linear light before it goes "
+                             "into the atlas, and to the EEVEE target frames (matches a plate's exposure)")
     parser.add_argument("--view-bias", type=float, default=0.85)
     parser.add_argument("--view-floor", type=float, default=0.04)
     parser.add_argument("--bake-cameras", type=int, default=9)
@@ -261,7 +264,7 @@ def main():
         ix = np.clip((uv[..., 0][hit] * size).astype(np.int64), 0, size - 1)
         iy = np.clip((uv[..., 1][hit] * size).astype(np.int64), 0, size - 1)
         flat = iy * size + ix
-        colours = np.clip(beauty[..., :3][hit].astype(np.float64), 0.0, None)
+        colours = np.clip(beauty[..., :3][hit].astype(np.float64), 0.0, None) * (2.0 ** args.exposure)
         for channel in range(3):
             total[channel::3] += np.bincount(flat, weights=colours[:, channel], minlength=size * size)
         weight += np.bincount(flat, minlength=size * size)
@@ -308,8 +311,12 @@ def main():
         place_camera(scene, float(lane_y))
         bpy.context.view_layer.material_override = None
         scene.render.engine = "BLENDER_EEVEE"
+        # The exposure gain is a property of the EEVEE lighting: it is on the EEVEE beauty target, and
+        # already baked into the EEVEE atlas's texels, so the unlit atlas frames must not apply it twice.
+        scene.view_settings.exposure = args.exposure
         scene.render.filepath = str(out / f"target_eevee_{number}.png")
         bpy.ops.render.render(write_still=True)
+        scene.view_settings.exposure = 0.0
         if args.cycles_atlas:
             scene.render.engine = "CYCLES"
             scene.cycles.samples = 32
@@ -345,7 +352,7 @@ def main():
     (out / "result.json").write_text(json.dumps({
         "blend": args.blend.name, "atlasSize": size, "bakeCameras": per_camera,
         "checkCameras": [round(float(y), 3) for y in check_positions],
-        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "lampScale": args.lamp_scale, "texelsPerPixel": density_report,
+        "layout": args.layout, "layoutCoverage": layout, "probeVolume": probe, "lampScale": args.lamp_scale, "exposureEV": args.exposure, "texelsPerPixel": density_report,
         "coverage": coverage, "eeveeBakeSeconds": round(bake_seconds, 1),
         "supersample": args.supersample}, indent=1), encoding="utf-8")
     print("EEVEE ATLAS STUDY OK", out)

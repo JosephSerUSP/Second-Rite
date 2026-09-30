@@ -169,9 +169,12 @@ def dilate(rgb: np.ndarray, filled: np.ndarray, steps: int):
     return rgb, filled
 
 
+LANE_CENTRE = [atlas_allocation.LANE_CENTRE]        # set from --span in main: half the lane
+
+
 def place_camera(scene, lane_y: float):
     """A lane position in engine space, the mesh being in Blender space (see atlas_allocation)."""
-    return atlas_allocation.lane_camera(scene, lane_y)
+    return atlas_allocation.lane_camera(scene, lane_y, centre=LANE_CENTRE[0])
 
 
 def main():
@@ -200,7 +203,12 @@ def main():
     parser.add_argument("--lamp-scale", type=float, default=0.3)
     parser.add_argument("--accent-scale", type=float, default=0.4)
     parser.add_argument("--window-emission-scale", type=float, default=1.0)
+    parser.add_argument("--eevee-option", action="append", default=[], metavar="NAME=VALUE",
+                        help="scene.eevee overrides for the beauty and target frames, as in stage_room_model.py")
+    parser.add_argument("--cycles-target", action="store_true",
+                        help="also render Cycles beauty frames as the engine reference, without an atlas")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
+    LANE_CENTRE[0] = args.span / 2.0
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
 
@@ -228,6 +236,8 @@ def main():
     scene.render.engine = "BLENDER_EEVEE"
     uv_layer = target.data.uv_layers.active.name
     size = args.atlas_size
+    if args.eevee_option:
+        print("eevee options: " + json.dumps(stager.apply_eevee_options(scene.eevee, args.eevee_option)), flush=True)
     probe = None
     if args.probe_volume > 0:
         # Baked from the joined mesh alone (the source meshes are hidden above), with the room's lamps.
@@ -317,7 +327,7 @@ def main():
         scene.render.filepath = str(out / f"target_eevee_{number}.png")
         bpy.ops.render.render(write_still=True)
         scene.view_settings.exposure = 0.0
-        if args.cycles_atlas:
+        if args.cycles_atlas or args.cycles_target:
             scene.render.engine = "CYCLES"
             scene.cycles.samples = 32
             scene.cycles.use_denoising = True

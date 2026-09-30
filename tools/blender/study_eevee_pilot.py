@@ -100,15 +100,21 @@ def main() -> int:
     parser.add_argument("--cycles-atlas", type=Path, default=None,
                         help="a Cycles atlas baked on the same layout (--atlas-layout packed)")
     parser.add_argument("--layout", default="packed")
+    parser.add_argument("--span", type=float, default=7.7667, help="walkable lane length; 23 for the corridor")
+    parser.add_argument("--atlas-size", type=int, default=1024)
+    parser.add_argument("--probe-cells", type=float, default=PROBE_CELLS, help="light probe volume cells per metre")
+    parser.add_argument("--eevee-option", action="append", default=[], metavar="NAME=VALUE",
+                        help="scene.eevee override for every EEVEE render (plates and atlas)")
     args = parser.parse_args()
     out = args.out.resolve()
     room = args.room
-    probe = ["--engine", "eevee", "--probe-volume", str(PROBE_CELLS)]
+    options = [x for o in args.eevee_option for x in ("--eevee-option", o)]
+    probe = ["--engine", "eevee", "--probe-volume", str(args.probe_cells), *options]
 
     cycles = plate(room, out / "plate_cycles.png", 0.13, BASE_LAMP_SCALE, "--engine", "cycles")
     cycles_dark = plate(room, out / "plate_cycles_dark.png", 0.0, BASE_LAMP_SCALE, "--engine", "cycles")
-    ao = plate(room, out / "plate_eevee_ao.png", 0.13, BASE_LAMP_SCALE, "--engine", "eevee")
-    ao_dark = plate(room, out / "plate_eevee_ao_dark.png", 0.0, BASE_LAMP_SCALE, "--engine", "eevee")
+    ao = plate(room, out / "plate_eevee_ao.png", 0.13, BASE_LAMP_SCALE, "--engine", "eevee", *options)
+    ao_dark = plate(room, out / "plate_eevee_ao_dark.png", 0.0, BASE_LAMP_SCALE, "--engine", "eevee", *options)
 
     target = linear(cycles)
     rows = lit_rows(target)
@@ -144,16 +150,19 @@ def main() -> int:
     diff_sheet(out / "plates_sheet.png", [
         f"cycles plate vs eevee AO plate (today's --engine eevee)={cycles}|{ao}",
         f"cycles plate vs eevee probe plate, exposure matched={cycles}|{matched}"])
+    atlas_args = ["--blend", str(ENVIRONMENTS / f"{room}.blend"), "--layout", args.layout,
+                  "--probe-volume", str(args.probe_cells), *options, "--lamp-scale", f"{scale:.5f}", "--exposure", f"{ev:.4f}",
+                  "--span", str(args.span), "--atlas-size", str(args.atlas_size), "--out", str(out / "atlas")]
+    atlas_args += ["--cycles-atlas", str(args.cycles_atlas)] if args.cycles_atlas else ["--cycles-target"]
+    blender("--python", str(ATLAS_STUDY), "--", *atlas_args)
+    report["atlasStudy"] = json.loads((out / "atlas" / "result.json").read_text(encoding="utf-8"))
+    a = out / "atlas"
+    pairs = [f"3D room, eevee+probe beauty vs eevee projected atlas={a / 'target_eevee_1.png'}|{a / 'atlas_eevee_1.png'}",
+             f"3D room, cycles beauty vs eevee+probe beauty (the engine gap)={a / 'target_cycles_1.png'}|{a / 'target_eevee_1.png'}",
+             f"3D room, cycles beauty vs eevee projected atlas={a / 'target_cycles_1.png'}|{a / 'atlas_eevee_1.png'}"]
     if args.cycles_atlas:
-        blender("--python", str(ATLAS_STUDY), "--", "--blend", str(ENVIRONMENTS / f"{room}.blend"),
-                "--layout", args.layout, "--probe-volume", str(PROBE_CELLS), "--lamp-scale", f"{scale:.5f}", "--exposure", f"{ev:.4f}",
-                "--cycles-atlas", str(args.cycles_atlas), "--out", str(out / "atlas"))
-        report["atlasStudy"] = json.loads((out / "atlas" / "result.json").read_text(encoding="utf-8"))
-        a = out / "atlas"
-        diff_sheet(out / "rooms_sheet.png", [
-            f"3D room, cycles beauty vs cycles atlas (as baked today)={a / 'target_cycles_1.png'}|{a / 'atlas_cycles_1.png'}",
-            f"3D room, eevee+probe beauty vs eevee projected atlas={a / 'target_eevee_1.png'}|{a / 'atlas_eevee_1.png'}",
-            f"3D room, cycles atlas vs eevee projected atlas={a / 'atlas_cycles_1.png'}|{a / 'atlas_eevee_1.png'}"])
+        pairs = [f"3D room, cycles beauty vs cycles atlas (as baked today)={a / 'target_cycles_1.png'}|{a / 'atlas_cycles_1.png'}"] + pairs
+    diff_sheet(out / "rooms_sheet.png", pairs)
     (out / "pilot.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps(report, indent=1))
     return 0

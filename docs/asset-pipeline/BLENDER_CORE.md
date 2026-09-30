@@ -285,7 +285,7 @@ black, #1287).
 ### Baking a package's atlas with EEVEE
 
 Both exporters (`export_room_environment.py`, `export_exterior_environment.py`) take `--bake-backend
-cycles|eevee`; `cycles`, the default, is the selected-to-active bake the shipped packages were made with.
+cycles|eevee`; `eevee` is the default. `cycles` is the selected-to-active comparison bake.
 `eevee` runs `eevee_bake.py` in its place: the beauty frames photograph the source meshes (with the joined
 render mesh hidden), the UV frames the joined mesh, and the package contract, files and geometry are the
 same. An EEVEE package records how it was made in `environment.json` at `provenance.bake`; a Cycles package's
@@ -296,8 +296,8 @@ The EEVEE settings (`--exposure`, `--probe-cells`, `--emissive-lights`, `--fixtu
 to their defaults, and a setting on the command line wins. The record is checked by
 `environment_sources.py --check`: known keys, right types, options as `NAME=VALUE`, and a `basis` saying
 where the numbers came from. The current records are pilot-solved starting points for test subjects, not
-sign-offs. The exposure is explicit and recorded, not solved at export: matching a plate to Cycles is a
-migration-time comparison (`study_eevee_pilot.py`).
+sign-offs. Exposure defaults to neutral 0 EV. The earlier Cycles-matching studies are comparisons,
+not a target brightness or an automatic exposure policy.
 
 ```
 blender -b --python tools/blender/export_room_environment.py -- --blend .../alicias_padaria.blend ^
@@ -399,3 +399,9 @@ tools/blender/depth_baseline.py
 ```
 
 They must not overwrite or become hidden inputs to the V2 baseline set.
+
+## Neutral EEVEE workflow
+
+EEVEE is the default for room plates and both environment atlas exporters. Exposure starts at 0 EV; the room test records no longer carry gains fitted to Cycles. Adjust authored lighting, world fill, probe density and lighting shims to resolve lighting problems. Exposure overrides remain available for deliberate artistic choices. Cycles is an explicit comparison via `--engine cycles` or `--bake-backend cycles`; shipping packages are promoted separately after visual review.
+
+Room plates read the same source lighting records as atlas exports. EEVEE enables emissive companion lights and fixture shadow release by default; `--no-emissive-lights` and `--no-fixture-lights` disable them for controls. Room plates default to two probe cells per metre; records retain the corridor density and threshold override. Exterior atlas records may leave probes off.

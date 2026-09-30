@@ -65,6 +65,9 @@ def prepare_render(scene):
         if obj.name.startswith(SCAFFOLD_PREFIXES):
             obj.hide_render = True
     scene.render.engine = "BLENDER_EEVEE"
+    # No reconstruction filter: the tufts are drawn at native pixels, nearest-sampled, in the
+    # game. Film > Filter Size (1.5 px by default) would blur a 9 px tuft into a smear.
+    scene.render.filter_size = 0.0
     scene.render.resolution_x, scene.render.resolution_y = PLATE
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"

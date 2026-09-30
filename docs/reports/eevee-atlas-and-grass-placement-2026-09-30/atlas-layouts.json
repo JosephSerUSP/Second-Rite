@@ -20,7 +20,7 @@
    "seenFractionOfIslands": 0.3024,
    "afterDilationFraction": 0.4525
   },
-  "eeveeBakeSeconds": 10.9
+  "eeveeBakeSeconds": 21.2
  },
  "padaria_packed": {
   "layout": "packed",
@@ -43,7 +43,7 @@
    "seenFractionOfIslands": 0.2094,
    "afterDilationFraction": 0.4058
   },
-  "eeveeBakeSeconds": 10.8
+  "eeveeBakeSeconds": 22.3
  },
  "padaria_view": {
   "layout": "view",
@@ -66,7 +66,7 @@
    "seenFractionOfIslands": 0.4998,
    "afterDilationFraction": 0.7318
   },
-  "eeveeBakeSeconds": 11.0
+  "eeveeBakeSeconds": 16.9
  },
  "padaria_view512": {
   "layout": "view",
@@ -89,7 +89,7 @@
    "seenFractionOfIslands": 0.6333,
    "afterDilationFraction": 0.7715
   },
-  "eeveeBakeSeconds": 9.5
+  "eeveeBakeSeconds": 27.0
  },
  "smith_loose": {
   "layout": "loose",
@@ -112,7 +112,7 @@
    "seenFractionOfIslands": 0.3136,
    "afterDilationFraction": 0.4755
   },
-  "eeveeBakeSeconds": 27.1
+  "eeveeBakeSeconds": 31.3
  },
  "smith_packed": {
   "layout": "packed",
@@ -135,7 +135,7 @@
    "seenFractionOfIslands": 0.2281,
    "afterDilationFraction": 0.4454
   },
-  "eeveeBakeSeconds": 73.4
+  "eeveeBakeSeconds": 34.9
  },
  "smith_view": {
   "layout": "view",
@@ -158,6 +158,6 @@
    "seenFractionOfIslands": 0.5177,
    "afterDilationFraction": 0.7789
   },
-  "eeveeBakeSeconds": 36.8
+  "eeveeBakeSeconds": 44.5
  }
 }

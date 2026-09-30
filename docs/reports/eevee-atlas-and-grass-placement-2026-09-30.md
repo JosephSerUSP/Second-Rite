@@ -13,6 +13,21 @@ laid out with `smart_project(island_margin=0.02)`, which the shops report had al
 built the atlas study on that layout without saying so; the owner caught it. The layout, not the
 Blender version, is where the atlas is wasting resolution (section 4).
 
+## 1b. A second correction: the film filter
+
+Every frame in the first version of this study was rendered with Film > Filter Size at 1.5 px (the
+EEVEE default, which I also set explicitly on the beauty pass that feeds the EEVEE atlas and on
+the check frames; Cycles' filter width was likewise at its default). The game rasterises at native
+pixels and samples the atlas nearest, so that blurred every frame by about a pixel and made the
+atlases look far softer than they are. Measured on one Padaria frame, Laplacian variance is 511 at
+1.5 and 2,755 at 0. The owner spotted it from the images.
+
+Every render here that stands for what a player sees now uses no reconstruction filter (EEVEE
+`filter_size` 0, Cycles `filter_width` 0.01, its minimum) at native size, with the lighting samples
+still accumulated (64) so the frame is converged, just not blurred. That covers the beauty pass
+that feeds the atlas, the check frames and the placement study. The numbers in sections 4 and 5 are
+re-measured; several claims from the first version did not survive and are corrected below.
+
 ## 2. Placement study for #1270 (owner decision)
 
 `study_ground_cover_placement.py` puts the `SR_GroundCover` modifier on a scratch terrain guide
@@ -39,7 +54,8 @@ of the cover the menu hides. A and C put it where it stays visible; B and D put 
 band; E splits the difference. A tuft is 0.34 m, about 9 px at this camera, so at 375 tufts the
 cover is subtle at 1x whichever layout is chosen.
 
-Placement is not decided. Nothing is adopted into the source `.blend`.
+The sheets were re-rendered with no film filter after the correction above; the tuft counts are
+unchanged. Placement is not decided. Nothing is adopted into the source `.blend`.
 
 ## 3. Cycles out of previews
 
@@ -83,11 +99,20 @@ frame, no antialiasing), scales each island to that demand blended with world-un
 (`view_bias`, default 0.85), never below a floor (4% of the mean visible density), and packs. At
 512 it gives the Padaria what `packed` gives at 1024, from a quarter of the texels.
 
-Cycles agrees. Re-baking the Padaria with the tight layouts brings the Cycles atlas closer to its
-own Cycles beauty target: mean abs difference over the lit pixels 8.9 (loose) to 6.6 (packed) and
-6.3 (view), of 255.
+Cycles agrees, and the picture is clearer with the filter off. Re-baking the Padaria with the tight
+layouts brings the Cycles atlas closer to its own Cycles beauty target: mean abs difference over
+the lit pixels 11.2 (loose), 9.0 (packed), 8.7 (view), of 255. More to the point, look at it:
+`cycles_layouts_sheet.png` draws the Cycles atlas the way the game does. Under the loose layout the
+azulejo dado on the Padaria's counter wall is lost outright (a grey smear); under packed and view
+the tile pattern survives. That is the "azulejo smears in the bake" defect the shops report named,
+and it is a layout defect, not a Blender one.
 
-`layouts_sheet.png` shows the four atlases and the same 5x crop from each.
+An honest limit: in pixel-difference terms an EEVEE atlas is about as close to its EEVEE target
+under every layout (2.6, 2.7, 3.1 and 2.6 for loose, packed, view 1024 and view 512 on the
+Padaria), because a difference of 2-3/255 is dominated by sampling phase at high-frequency detail
+rather than by texel count. The layout shows in the crops (`layouts_sheet.png`), not in that
+number, and my first version's claim that the layout "improved the error against the target"
+(2.07 to 1.69) was an artefact of the filter blur.
 
 What changed in the code: `export_room_environment.py` gains `--atlas-layout {loose,packed,view}`
 with **`packed` as the default** (`loose` stays only to reproduce a shipped package, and
@@ -111,17 +136,19 @@ compared with the beauty target.
 |---|---:|---:|
 | time, Padaria (1024, loose layout) | 229 s | 8-11 s |
 | time, Padaria (1024, packed / view) | 296 s / 340 s | about 11 s |
-| atlas vs its own beauty target, loose layout, lit-pixel mean of 255 | 8.9 | 2.1 |
-| same, packed / view | 6.6 / 6.3 | 1.7 / 1.7 |
+| atlas vs its own beauty target, loose layout, lit-pixel mean of 255 | 11.2 | 2.7 |
+| same, packed / view | 9.0 / 8.7 | 2.7 / 3.1 |
+| same, smith, loose layout | 5.9 | 2.1 |
 
 Reading it:
 
-- The EEVEE atlas reproduces the EEVEE look to about 2/255 on lit pixels, from cameras it never
-  baked, including the lane ends. The Cycles bake is further from the Cycles look (6-9) because a
+- The EEVEE atlas reproduces the EEVEE look to about 2-3/255 on lit pixels, from cameras it never
+  baked, including the lane ends. The Cycles bake is further from the Cycles look (6-11) because a
   selected-to-active bake of a fixed view is not the same computation as rendering that view.
 - The EEVEE atlas is not closer to the Cycles look than the plates are: EEVEE beauty against
-  Cycles beauty is already about 9-11 apart, and the EEVEE atlas against the Cycles beauty is the
-  same. The atlas step adds nothing on top of the engine difference measured for the plates.
+  Cycles beauty is already about 10-11 apart (10.6 Padaria, 10.0 smith), and the EEVEE atlas
+  against the Cycles atlas is 10-11.5. The atlas step adds nothing on top of the engine
+  difference measured for the plates.
   This is the coherence point: a Cycles-baked room next to an EEVEE plate is off by that engine
   gap; an EEVEE atlas next to an EEVEE plate is not.
 - It only fills what the bake cameras saw, about 20-30% of the island texels before dilution

@@ -49,6 +49,21 @@ import thestra_camera  # noqa: E402
 
 CAMERA_RECORD = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 VIEW_WIDTH = 426          # the wide view; 256 is the classic one inside it
+
+# Every render here that stands for what a player sees uses NO reconstruction filter. The game
+# rasterises at native pixels and samples the atlas nearest, so Film > Filter Size (EEVEE's default
+# is 1.5 px, Cycles' filter width the same) blurs a frame by about a pixel and makes the atlas look
+# far softer than it is: measured on a Padaria frame, Laplacian variance 511 at 1.5 against 2,755 at
+# 0. The lighting samples still accumulate (64), so the frame is converged, just not blurred.
+FILM_FILTER = 0.0
+TAA_SAMPLES = 64
+CYCLES_FILTER_WIDTH = 0.01   # Cycles' minimum; it will not take 0
+
+
+def crisp(scene):
+    scene.eevee.taa_render_samples = TAA_SAMPLES
+    scene.render.filter_size = FILM_FILTER
+    scene.cycles.filter_width = CYCLES_FILTER_WIDTH
 VIEW_HEIGHT = 240
 
 
@@ -227,8 +242,7 @@ def main():
         place_camera(scene, float(lane_y))
         # Beauty: the room as EEVEE lights it.
         bpy.context.view_layer.material_override = None
-        scene.eevee.taa_render_samples = 64
-        scene.render.filter_size = 1.5
+        crisp(scene)
         set_raw_float_output(scene, out / "tmp_beauty.exr", args.supersample)
         beauty = render_exr(scene, out / "tmp_beauty.exr")
         # UV: every pixel names its own texel. No antialiasing, no filter, no view transform.
@@ -279,8 +293,7 @@ def main():
     scene.render.film_transparent = False
     scene.render.resolution_percentage = 100
     scene.view_settings.view_transform = "Standard"
-    scene.eevee.taa_render_samples = 64
-    scene.render.filter_size = 1.5
+    crisp(scene)
     atlases = {"eevee": eevee_atlas}
     if args.cycles_atlas:
         cycles_atlas = bpy.data.images.load(str(args.cycles_atlas.resolve()))

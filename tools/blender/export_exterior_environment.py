@@ -31,6 +31,17 @@ module once quoted was measured before that cull existed and is not repeated.
 
 Lighting is still staged below, since an unlit bake is wrong regardless.
 
+## The ground (#1287)
+
+`ARCH_square_ground` is a zero-thickness sheet with a duplicate underside, 200 x 200 m. The sealed-face cull
+took it for a closed solid, deleted its top and kept the underside facing down, and the Cycles bake (which casts
+along the target's normal) baked that face black: the package that shipped until this was fixed had a black
+ground. Three things now happen to it: `flatten_ground_sheet` keeps only the face that looks up and marks it an
+open surface; `clip_ground_to_view` cuts it to what the lane cameras can see plus a margin (40,000 m2 became
+4,681); and the atlas is allocated by view (`--atlas-layout view`, the default), not by a fixed 3% ground share,
+because the ground is 59% of the pixels of a frame. `--keep-full-ground` and `--atlas-layout legacy` are the
+old behaviour, kept for comparison.
+
 ## Not yet generic, and not yet mirrored
 
 The render-mesh rebuild hardcodes the ``st_maria_praca`` names, and ``--span`` now bounds which
@@ -62,12 +73,18 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
+import atlas_allocation  # noqa: E402
+import eevee_bake  # noqa: E402
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
 import ground_cover  # noqa: E402  (owns the bake-source marker name)
 
 
 GROUND_NAMES = {"ARCH_square_ground", "ARCH_low_curb"}
+# The authored ground is a zero-thickness sheet with a duplicate underside; see flatten_ground_sheet.
+SHEET_THICKNESS = 1e-4
+# How far past what the lane cameras can see the ground is kept, in metres (None keeps the whole plane).
+GROUND_CLIP_MARGIN = 2.0
 GROUND_TAG_MATERIAL = "TH_GROUND_ALLOC_TAG"
 # Face attribute that survives the join: marks faces of open cards (foliage), which the sealed-face cull must
 # neither delete nor count as a surface.
@@ -323,7 +340,155 @@ def realised_mesh(obj):
     return mesh
 
 
-def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -> None:
+def flatten_ground_sheet(obj):
+    """Make a zero-thickness ground sheet one upward-facing, open surface.
+
+    `ARCH_square_ground` is 8 vertices and 6 faces that all lie in one plane: a top, an underside facing
+    the other way, and four sides of no area. To the parity cull (see `cull_enclosed`) that is a closed
+    solid, so it judged the TOP face sealed and deleted it, leaving the 200 x 200 m underside facing down
+    (#1287). Cycles' selected-to-active bake casts along the target's normal, so a face pointing down
+    casts away from its source, hits nothing and bakes black: the shipped Praca package has a black ground.
+
+    A sheet has no inside. Keep only the faces that face up and have an area, and mark them as open
+    surfaces (the cull neither tests them nor counts them as occluders). Returns what was dropped, or None
+    when `obj` is not a sheet and is left exactly as it was.
+
+    The SOURCE sheet needs it too, not only the copy that is joined into the render mesh. The Cycles bake
+    casts at the source, and with a top and an underside at the same height the ray can land on the
+    underside: measured on a small scene, a correctly facing target over the unflattened source bakes
+    mean 0.0 and over the flattened one mean 0.82. The exporter never saves the document, so the source is
+    flattened in memory; the `.blend` on disk is untouched.
+    """
+    if obj.dimensions.z >= SHEET_THICKNESS:
+        return None
+    rotation = obj.matrix_world.to_3x3()
+    mesh = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bm.faces.ensure_lookup_table()
+    doomed = [f for f in bm.faces if f.calc_area() <= 1e-9 or (rotation @ f.normal).z <= 0.0]
+    total = len(bm.faces)
+    bmesh.ops.delete(bm, geom=doomed, context="FACES")
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.update()
+    marks = mesh.attributes.get(OPEN_FACE_ATTRIBUTE) or mesh.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
+    marks.data.foreach_set("value", [True] * len(mesh.polygons))
+    return {"object": obj.name, "faces": total, "dropped": len(doomed), "kept": total - len(doomed)}
+
+
+def visible_ground_bounds(target, tag_index, span, columns=48, rows=27):
+    """(xmin, xmax, ymin, ymax, hits): where the ground is actually seen from the lane cameras.
+
+    Casts a grid of rays through each lane camera's frame at the joined render mesh, so a ground point
+    that a building hides is not counted. The camera is the game's side-view camera, widened to the
+    426 px view, at both ends of the walkable lane and eight places between.
+    """
+    from mathutils.bvhtree import BVHTree
+    mesh = target.data
+    bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
+                               [tuple(p.vertices) for p in mesh.polygons], all_triangles=False)
+    scene = bpy.context.scene
+    positions = lane_positions(span)
+    points = []
+    for lane_y in positions:
+        camera = atlas_allocation.lane_camera(scene, lane_y, mirrored=False)
+        corners = camera.data.view_frame(scene=scene)
+        xs, ys, z = [c.x for c in corners], [c.y for c in corners], corners[0].z
+        rotation = camera.matrix_world.to_3x3()
+        origin = camera.matrix_world.translation
+        for i in range(columns):
+            for j in range(rows):
+                x = min(xs) + (max(xs) - min(xs)) * (i + 0.5) / columns
+                y = min(ys) + (max(ys) - min(ys)) * (j + 0.5) / rows
+                hit = bvh.ray_cast(origin, (rotation @ Vector((x, y, z))).normalized(), 1000.0)
+                if hit[0] is not None and mesh.polygons[hit[2]].material_index == tag_index:
+                    points.append(hit[0])
+    if not points:
+        return None
+    return (min(p.x for p in points), max(p.x for p in points),
+            min(p.y for p in points), max(p.y for p in points), len(points))
+
+
+def clip_ground_to_view(target, span, margin):
+    """Cut the ground down to what the lane cameras can see, plus `margin` metres.
+
+    The authored ground is 200 x 200 m for a street 23.7 m long that only ever looks at a strip of it.
+    Left whole, it gets a few per cent of the atlas spread over 40,000 m2, about 2 texels per m2 and a
+    hundredth of a texel per screen pixel. Returns a report, or None when there is nothing to clip.
+    """
+    mesh = target.data
+    tag_index = next((i for i, slot in enumerate(mesh.materials)
+                      if slot and slot.name.startswith(GROUND_TAG_MATERIAL)), None)
+    if tag_index is None:
+        return None
+    bounds = visible_ground_bounds(target, tag_index, span)
+    if bounds is None:
+        print("[exterior] no ground is visible from the lane cameras; leaving it whole", flush=True)
+        return None
+    xmin, xmax, ymin, ymax, hits = bounds
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    before = sum(f.calc_area() for f in bm.faces if f.material_index == tag_index)
+    for plane_co, plane_no in ((Vector((xmin - margin, 0, 0)), Vector((-1, 0, 0))),
+                               (Vector((xmax + margin, 0, 0)), Vector((1, 0, 0))),
+                               (Vector((0, ymin - margin, 0)), Vector((0, -1, 0))),
+                               (Vector((0, ymax + margin, 0)), Vector((0, 1, 0)))):
+        faces = [f for f in bm.faces if f.material_index == tag_index]
+        geom = list(faces) + list({e for f in faces for e in f.edges}) + list({v for f in faces for v in f.verts})
+        bmesh.ops.bisect_plane(bm, geom=geom, plane_co=plane_co, plane_no=plane_no, clear_outer=True)
+    bm.faces.ensure_lookup_table()
+    after = sum(f.calc_area() for f in bm.faces if f.material_index == tag_index)
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.update()
+    report = {"hits": hits, "areaBefore": round(before, 1), "areaAfter": round(after, 1),
+              "bounds": [round(v, 2) for v in (xmin - margin, xmax + margin, ymin - margin, ymax + margin)]}
+    print(f"[exterior] ground clipped to what the lane cameras see: {before:.0f} m2 -> {after:.0f} m2 "
+          f"(x {report['bounds'][0]}..{report['bounds'][1]}, y {report['bounds'][2]}..{report['bounds'][3]})", flush=True)
+    return report
+
+
+def lane_positions(span):
+    """Where the game's camera can stand: both ends of the walkable lane and eight places between."""
+    return [0.35] + [0.6 + i * (span - 1.2) / 8 for i in range(9)] + [span - 0.35]
+
+
+def allocate_atlas_by_view(target, span, atlas_size):
+    """Unwrap, and spend the atlas where the lane cameras look (#877). Returns the allocator's report.
+
+    The ground is 59% of the pixels of a Praca frame and used to get a fixed 3% of the atlas, chosen when
+    the ground was a 200 m quad measured at 0.00 texels per screen pixel. Measuring what each camera sees
+    replaces that constant. The measuring pass renders the joined mesh alone, so every other mesh in the
+    document is hidden from it for the moment.
+    """
+    hidden = [o for o in bpy.data.objects if o.type == "MESH" and o != target and not o.hide_render]
+    for obj in hidden:
+        obj.hide_render = True
+    try:
+        # exterior sources are in engine space already: no mirror (see the module docstring)
+        return atlas_allocation.allocate_by_view(target, lane_positions(span), atlas_size, mirrored=False)
+    finally:
+        for obj in hidden:
+            obj.hide_render = False
+
+
+def bake_source_members(source, span, margin):
+    """The source meshes that were joined into the render mesh: what an EEVEE bake photographs.
+
+    The rest of TH_SOURCE (level-design guides, scale actors, preview rigs) must never reach the atlas.
+    """
+    members = []
+    for obj in source.all_objects:
+        if not obj or obj.type != "MESH" or obj.hide_render or not is_bake_source(obj):
+            continue
+        if in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
+            members.append(obj)
+    return members
+
+
+def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
+                        clip_ground=GROUND_CLIP_MARGIN, layout="view", atlas_size=2048) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -365,6 +530,8 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
             skipped.append(obj.name)
             continue
         print(f"[exterior] copying {obj.name}", flush=True)
+        if obj.name in GROUND_NAMES:
+            flatten_ground_sheet(obj)       # in memory, for the Cycles bake: see its docstring
         copy = obj.copy()
         copy.data = realised_mesh(obj)
         copy.modifiers.clear()      # already applied above; join must not see them
@@ -377,6 +544,10 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         render.objects.link(copy)
         copy.hide_set(False)
         if obj.name in GROUND_NAMES:
+            flattened = flatten_ground_sheet(copy)
+            if flattened:
+                print(f"[exterior] {flattened['object']} is a zero-thickness sheet: kept {flattened['kept']} of "
+                      f"{flattened['faces']} faces (the ones facing up)", flush=True)
             # Tag with a dedicated material slot. Object identity is lost in the
             # join, but material_index survives it, so this is how the allocator
             # finds the ground faces afterwards.
@@ -423,12 +594,19 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape) -
         culled = cull_enclosed(target, cull_samples, cull_escape)
         if culled:
             print(f"[exterior] culled {culled} sealed faces nothing can reach", flush=True)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.0)
-    bpy.ops.object.mode_set(mode="OBJECT")
-    if ground_tagged:
-        reallocate_ground(target, ground_share)
+    if ground_tagged and clip_ground is not None:
+        clip_ground_to_view(target, span, clip_ground)
+    if layout == "view":
+        report = allocate_atlas_by_view(target, span, atlas_size)
+        print(f"[exterior] atlas allocated by view: {report['visiblePolygons']} of {report['polygons']} faces "
+              f"are seen, {report['visibleIslands']} of {report['islands']} islands", flush=True)
+    else:
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.0)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        if ground_tagged:
+            reallocate_ground(target, ground_share)
     target.data.calc_loop_triangles()
     if len(target.data.loop_triangles) < 100:
         raise RuntimeError(
@@ -459,6 +637,14 @@ def main() -> None:
                         help="hemisphere rays per face when testing reachability")
     parser.add_argument("--cull-escape", type=float, default=0.0,
                         help="keep a face if more than this fraction of its rays escape")
+    parser.add_argument("--ground-clip-margin", type=float, default=GROUND_CLIP_MARGIN,
+                        help="keep the ground this many metres past what the lane cameras can see; "
+                             "the authored ground is 200 x 200 m for a 24 m street")
+    parser.add_argument("--keep-full-ground", action="store_true",
+                        help="do not clip the ground to the lane cameras' view")
+    parser.add_argument("--atlas-layout", choices=("view", "legacy"), default="view",
+                        help="view spends the atlas where the lane cameras look (#877); legacy is the "
+                             "original smart_project with a fixed --ground-share")
     parser.add_argument("--keep-sealed", action="store_true",
                         help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
@@ -469,13 +655,16 @@ def main() -> None:
                              "backdrop wants; they need ~983k texels for 1.0 "
                              "and a 1024 atlas holds 1,049k in total")
     parser.add_argument("--samples", type=int, default=24)
+    eevee_bake.add_arguments(parser)
     args = parser.parse_args(argv)
 
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
-                        0 if args.keep_sealed else args.cull_samples, args.cull_escape)
+                        0 if args.keep_sealed else args.cull_samples, args.cull_escape,
+                        clip_ground=None if args.keep_full_ground else args.ground_clip_margin,
+                        layout=args.atlas_layout, atlas_size=args.atlas_size)
 
     # Same reason export_room_environment.py stages lighting before baking: a
     # Cycles bake that just opens the file is lit by whatever the .blend last
@@ -487,11 +676,20 @@ def main() -> None:
     stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
     stager.outdoor_sun(args.sun)
 
+    # An EEVEE bake photographs the source meshes that were joined, from 16 places along the lane. A town
+    # source is in engine space already, so the lane cameras are not mirrored.
+    eevee = eevee_bake.settings_from_args(
+        args, args.blend, [0.6 + i * (args.span - 1.2) / 15 for i in range(16)],
+        lambda scene, lane_y: atlas_allocation.lane_camera(scene, lane_y, mirrored=False),
+        sources=bake_source_members(bpy.data.collections["TH_SOURCE"], args.span, args.margin)
+        if args.bake_backend == "eevee" else None)
+
     output = args.output.resolve()
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     flat_bake=True)
+                                     flat_bake=True,
+                                     backend=args.bake_backend, eevee=eevee)
     print("EXTERIOR 3D EXPORT OK")
 
 

@@ -113,8 +113,12 @@ def uv_islands(mesh) -> list[int]:
     return [roots.setdefault(find(p.index), len(roots)) for p in mesh.polygons]
 
 
-def face_pixels(target, cameras: list[float], out: Path) -> np.ndarray:
-    """Pixels each polygon covers, per camera: shape (cameras, polygons). Renders the mesh alone."""
+def face_pixels(target, cameras: list[float], out: Path, mirrored: bool = True,
+                centre: float = LANE_CENTRE) -> np.ndarray:
+    """Pixels each polygon covers, per camera: shape (cameras, polygons). Renders the mesh alone.
+
+    `mirrored` and `centre` are `lane_camera`'s: an exterior source is in engine space already.
+    """
     scene = bpy.context.scene
     mesh = target.data
     if FACE_ATTRIBUTE in mesh.attributes:
@@ -149,7 +153,7 @@ def face_pixels(target, cameras: list[float], out: Path) -> np.ndarray:
     bpy.context.view_layer.material_override = material
     try:
         for number, lane_y in enumerate(cameras):
-            lane_camera(scene, float(lane_y))
+            lane_camera(scene, float(lane_y), mirrored=mirrored, centre=centre)
             path = out / "tmp_face_id.exr"
             scene.render.filepath = str(path)
             bpy.ops.render.render(write_still=True)
@@ -175,7 +179,8 @@ def face_pixels(target, cameras: list[float], out: Path) -> np.ndarray:
 
 
 def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: float = 0.85,
-                     floor: float = 0.04, gutter_texels: float = 2.0, out: Path | None = None) -> dict:
+                     floor: float = 0.04, gutter_texels: float = 2.0, out: Path | None = None,
+                     mirrored: bool = True, centre: float = LANE_CENTRE) -> dict:
     """Unwrap, measure what the cameras need, scale each island to it, pack. Returns a report.
 
     `view_bias` 0 keeps world-uniform density (every surface equal); 1 follows the cameras.
@@ -185,7 +190,7 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     out = Path(out) if out else Path(bpy.app.tempdir)
     pack(target, atlas_size, gutter_texels)
     mesh = target.data
-    counts = face_pixels(target, cameras, out)
+    counts = face_pixels(target, cameras, out, mirrored=mirrored, centre=centre)
     peak = counts.max(axis=0)                                # pixels a face covers in its best view
     island_of = uv_islands(mesh)
     islands = max(island_of) + 1

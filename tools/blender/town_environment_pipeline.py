@@ -43,7 +43,8 @@ def _operator_kwargs(operator, candidate_dict):
 
 
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
-                            bake_samples: int = 16, flat_bake: bool = False):
+                            bake_samples: int = 16, flat_bake: bool = False, backend: str = "cycles",
+                            eevee=None):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -52,6 +53,11 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     margin-4 bake their shipped atlases were made with -- the exterior pipeline
     on PR #998 hardcoded the flat values, which would silently have re-baked
     the Padaria and the smith at one sample.
+
+    ``backend`` chooses how the atlas is made: ``"cycles"`` is the selected-to-active bake the shipped
+    packages were made with; ``"eevee"`` is a camera-projection bake (`eevee_bake.EeveeBake`, passed as
+    ``eevee``), which has the same contract and runs in seconds where the Cycles exterior bake takes
+    a quarter of an hour.
     """
     import bpy
     from mathutils import Vector, Matrix
@@ -161,52 +167,62 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     target_obj.data.materials.clear()
     target_obj.data.materials.append(mat)
 
-    # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
-    scene.render.engine = 'CYCLES'
-    try:
-        scene.cycles.device = 'CPU'
-    except Exception:
-        pass
-    if flat_bake:
-        scene.cycles.samples = 1
-        scene.cycles.max_bounces = 0
-        scene.cycles.diffuse_bounces = 0
-        scene.cycles.glossy_bounces = 0
-        scene.cycles.transparent_max_bounces = 0
+    if backend not in ("cycles", "eevee"):
+        raise RuntimeError(f"unknown bake backend {backend!r}; use cycles or eevee")
+    eevee_report = None
+    if backend == "eevee":
+        if eevee is None:
+            raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
+        import eevee_bake
+        print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}) by EEVEE projection...")
+        eevee_report = eevee_bake.bake_atlas(eevee, scene, target_obj, col_source, bake_image)
     else:
-        scene.cycles.samples = bake_samples
-    scene.cycles.bake_type = 'COMBINED'
-    scene.render.bake.use_selected_to_active = True
-    # Keep the opaque fill above; clearing would restore transparent black and
-    # reintroduce the ambiguity this pass exists to remove.
-    scene.render.bake.use_clear = False
-    scene.render.bake.cage_extrusion = 0.15
-    scene.render.bake.max_ray_distance = 1.0
-    # One texel of dilation for the exterior, and only one.
-    #
-    # Zero was tried and is wrong, for a reason unrelated to filtering. The
-    # runtime samples nearest, so there is no filtering bleed to defend
-    # against -- but the baker RASTERISES a texel only when its centre falls
-    # inside the triangle, while the geometry SAMPLES whatever texel its UV
-    # coordinate lands on. At an island edge those two disagree, so a face can
-    # sample a texel the bake never filled. With margin 0 that showed as seams
-    # tracing every visible edge of the culled facades; margin 1 removed them
-    # completely, for one texel per island boundary.
-    scene.render.bake.margin = 1 if flat_bake else 4
+        # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
+        scene.render.engine = 'CYCLES'
+        try:
+            scene.cycles.device = 'CPU'
+        except Exception:
+            pass
+        if flat_bake:
+            scene.cycles.samples = 1
+            scene.cycles.max_bounces = 0
+            scene.cycles.diffuse_bounces = 0
+            scene.cycles.glossy_bounces = 0
+            scene.cycles.transparent_max_bounces = 0
+        else:
+            scene.cycles.samples = bake_samples
+        scene.cycles.bake_type = 'COMBINED'
+        scene.render.bake.use_selected_to_active = True
+        # Keep the opaque fill above; clearing would restore transparent black and
+        # reintroduce the ambiguity this pass exists to remove.
+        scene.render.bake.use_clear = False
+        scene.render.bake.cage_extrusion = 0.15
+        scene.render.bake.max_ray_distance = 1.0
+        # One texel of dilation for the exterior, and only one.
+        #
+        # Zero was tried and is wrong, for a reason unrelated to filtering. The
+        # runtime samples nearest, so there is no filtering bleed to defend
+        # against -- but the baker RASTERISES a texel only when its centre falls
+        # inside the triangle, while the geometry SAMPLES whatever texel its UV
+        # coordinate lands on. At an island edge those two disagree, so a face can
+        # sample a texel the bake never filled. With margin 0 that showed as seams
+        # tracing every visible edge of the culled facades; margin 1 removed them
+        # completely, for one texel per island boundary.
+        scene.render.bake.margin = 1 if flat_bake else 4
 
-    # Select all source objects as Selected, target_obj as Active.
-    # target_obj must NOT be in the selected set during selected-to-active bake,
-    # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
-    # and circular dependency warnings (#1023).
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.all_objects:
-        if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
-            obj.select_set(True)
-    target_obj.select_set(False)
-    scene.view_layers[0].objects.active = target_obj
+        # Select all source objects as Selected, target_obj as Active.
+        # target_obj must NOT be in the selected set during selected-to-active bake,
+        # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
+        # and circular dependency warnings (#1023).
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in col_source.all_objects:
+            if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
+                obj.select_set(True)
+        target_obj.select_set(False)
+        scene.view_layers[0].objects.active = target_obj
 
-    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-    bpy.ops.object.bake(type='COMBINED')
+        print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+        bpy.ops.object.bake(type='COMBINED')
 
     # Connect baked texture to BSDF Base Color for material export and display
     if bsdf:
@@ -358,6 +374,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "sourceBlend": str(blend_path.name),
         }
     }
+    if eevee_report is not None:
+        # Only an EEVEE bake says so: a Cycles package keeps the manifest it always had.
+        manifest["provenance"]["bake"] = {"backend": "eevee", **eevee_report["settings"]}
 
     manifest_path = output_dir / "environment.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")

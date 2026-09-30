@@ -282,6 +282,36 @@ and exterior comparisons are `study_eevee_atlas.py` and `study_eevee_exterior.py
 (`docs/reports/eevee-exterior-praca-2026-09-30.md`; it found that the shipped Praça package's ground bakes
 black, #1287).
 
+### Baking a package's atlas with EEVEE
+
+Both exporters (`export_room_environment.py`, `export_exterior_environment.py`) take `--bake-backend
+cycles|eevee`; `cycles`, the default, is the selected-to-active bake the shipped packages were made with.
+`eevee` runs `eevee_bake.py` in its place: the beauty frames photograph the source meshes (with the joined
+render mesh hidden), the UV frames the joined mesh, and the package contract, files and geometry are the
+same. An EEVEE package records how it was made in `environment.json` at `provenance.bake`; a Cycles package's
+manifest is unchanged.
+
+The EEVEE settings (`--exposure`, `--probe-cells`, `--emissive-lights`, `--fixture-lights`,
+`--eevee-option NAME=VALUE`) fall back to the environment's `eevee` record in `environment-sources.json`, then
+to their defaults, and a setting on the command line wins. The record is checked by
+`environment_sources.py --check`: known keys, right types, options as `NAME=VALUE`, and a `basis` saying
+where the numbers came from. The current records are pilot-solved starting points for test subjects, not
+sign-offs. The exposure is explicit and recorded, not solved at export: matching a plate to Cycles is a
+migration-time comparison (`study_eevee_pilot.py`).
+
+```
+blender -b --python tools/blender/export_room_environment.py -- --blend .../alicias_padaria.blend ^
+    --output out/padaria_3d --exit-y 6.5 --bake-backend eevee
+```
+
+### The Praça ground (#1287)
+
+`ARCH_square_ground` is a zero-thickness double-sided sheet. The exterior exporter now keeps only its upward
+face (in memory, never saved: the Cycles bake casts at the source, and a coplanar underside makes it bake
+black), clips it to what the lane cameras can see, and allocates the atlas by view (`--atlas-layout view`,
+the default; `legacy` and `--keep-full-ground` are the old behaviour). See the docstring of
+`export_exterior_environment.py`.
+
 ## Which Blender runs what
 
 Repository tooling that launches Blender (the item compiler, the map `.blend`

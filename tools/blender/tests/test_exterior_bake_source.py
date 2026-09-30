@@ -53,6 +53,49 @@ class ExteriorBakeSourceTests(unittest.TestCase):
         # deletes some, so the exact-count test above is not passing by accident.
         self.assertLess(self.probe["closed_as_solid"], self.probe["with_cover"])
 
+    # -- the ground: #1287 ---------------------------------------------------------------------
+    def test_the_ground_sheet_keeps_its_top_and_faces_up(self):
+        ground = self.probe["ground"]["whole"]
+        self.assertEqual(ground["faces"], 1)
+        self.assertEqual(ground["normalsZ"], [1.0])
+        self.assertAlmostEqual(ground["area"], 40000.0, delta=1.0)
+
+    def test_without_the_sheet_handling_the_cull_keeps_the_underside(self):
+        """The negative control: the shipped Praca ground kept one face, pointing down (#1287).
+
+        In this small scene the cull takes both faces; either way no face looks up, which is the defect.
+        """
+        ground = self.probe["ground"]["unflattened"]
+        self.assertNotIn(1.0, ground["normalsZ"])
+        self.assertLessEqual(ground["faces"], 1)
+
+    def test_the_ground_is_cut_down_to_what_the_camera_sees(self):
+        clipped = self.probe["ground"]["clipped"]
+        self.assertEqual(clipped["normalsZ"], [1.0])
+        self.assertGreater(clipped["area"], 100.0)            # the street is seen
+        self.assertLess(clipped["area"], 0.5 * self.probe["ground"]["whole"]["area"])
+        xmin, xmax, ymin, ymax = clipped["bounds"]
+        self.assertLess(xmax - xmin, 200.0)
+        self.assertLess(ymax - ymin, 200.0)
+
+    def test_the_view_layout_gives_the_ground_more_than_the_fixed_three_per_cent(self):
+        legacy, view = self.probe["ground"]["legacyLayout"], self.probe["ground"]["viewLayout"]
+        self.assertLess(legacy["uvShare"], 0.05)
+        self.assertGreater(view["uvShare"], 2.0 * legacy["uvShare"])
+
+    def test_the_cycles_bake_reaches_the_ground(self):
+        """Not only the geometry: the baked atlas holds light where the ground island is."""
+        baked = self.probe["ground"]["bakedWhole"]
+        self.assertEqual(baked["faces"], 1)
+        self.assertGreater(baked["litFraction"], 0.9)
+        self.assertGreater(baked["mean"], 0.05)
+
+    def test_flattening_only_the_copy_still_bakes_black(self):
+        """The negative control: a target that faces up over an unflattened source bakes nothing."""
+        baked = self.probe["ground"]["bakedCopyOnly"]
+        self.assertEqual(baked["faces"], 1)
+        self.assertLess(baked["litFraction"], 0.1)
+
     def test_a_marked_host_that_realises_nothing_refuses_to_bake(self):
         self.assertIn("refusing to bake", self.probe["refused"])
         self.assertIn("GROUND_COVER", self.probe["refused"])

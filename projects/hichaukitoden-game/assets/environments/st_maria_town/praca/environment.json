@@ -6,24 +6,24 @@
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    -100.0,
-    -100.0,
+    -13.841,
+    -27.2099,
     -0.0008,
-    100.0,
-    100.0,
+    46.0804,
+    50.9089,
     10.75
   ],
   "stats": {
-    "triangleCount": 5854,
-    "vertexCount": 5084,
+    "triangleCount": 5842,
+    "vertexCount": 4979,
     "materialGroupCount": 1,
     "textureDimensions": [
       2048,
       2048
     ],
-    "pngSizeBytes": 4388421,
-    "renderMeshSizeBytes": 614595,
-    "packageSizeBytes": 5003822
+    "pngSizeBytes": 6861886,
+    "renderMeshSizeBytes": 625119,
+    "packageSizeBytes": 7487815
   },
   "anchors": {
     "spawn_player": {

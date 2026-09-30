@@ -73,6 +73,18 @@ class EeveeBackendTests(unittest.TestCase):
         self.assertEqual((self.packages["cycles"] / "environment.obj").read_text(),
                          (self.packages["eevee"] / "environment.obj").read_text())
 
+    def test_opacity_uses_source_uv_when_atlas_uv_is_flipped(self):
+        result = blender("-P", str(TOOLS / "tests" / "atlas_alpha_blender.py"))
+        self.assertEqual(result.returncode, 0, result.stdout[-1500:] + result.stderr[-1000:])
+        self.assertIn("ALPHA MASK OK", result.stdout)
+
+    def test_cutout_alpha_survives_both_backends(self):
+        for backend in ("cycles", "eevee"):
+            with self.subTest(backend=backend):
+                fraction = self.atlas(backend)["transparentFraction"]
+                self.assertGreater(fraction, 0.001)
+                self.assertLess(fraction, 0.2)  # opaque room and unobserved atlas remain opaque
+
     def test_the_eevee_atlas_holds_light(self):
         atlas = self.atlas("eevee")
         self.assertEqual(atlas["size"], [128, 128])

@@ -75,7 +75,7 @@ def render_exr(scene, path: Path) -> np.ndarray:
         bpy.data.images.remove(image)
 
 
-def uv_material(uv_layer: str):
+def uv_material(uv_layer: str, opacity=None):
     material = bpy.data.materials.new("SR_UV_PASS")
     material.use_nodes = True
     tree = material.node_tree
@@ -85,7 +85,23 @@ def uv_material(uv_layer: str):
     emission = tree.nodes.new("ShaderNodeEmission")
     output = tree.nodes.new("ShaderNodeOutputMaterial")
     tree.links.new(uv.outputs["UV"], emission.inputs["Color"])
-    tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
+    if opacity is None:
+        tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
+    else:
+        texture = tree.nodes.new("ShaderNodeTexImage")
+        texture.image = opacity
+        texture.interpolation = "Closest"
+        tree.links.new(uv.outputs["UV"], texture.inputs["Vector"])
+        transparent = tree.nodes.new("ShaderNodeBsdfTransparent")
+        mix = tree.nodes.new("ShaderNodeMixShader")
+        cutout = tree.nodes.new("ShaderNodeMath")
+        cutout.operation = "GREATER_THAN"
+        cutout.inputs[1].default_value = 0.01  # runtime discard threshold; UVs must never blend between surfaces
+        tree.links.new(texture.outputs["Color"], cutout.inputs[0])
+        tree.links.new(cutout.outputs[0], mix.inputs[0])
+        tree.links.new(transparent.outputs[0], mix.inputs[1])
+        tree.links.new(emission.outputs[0], mix.inputs[2])
+        tree.links.new(mix.outputs[0], output.inputs["Surface"])
     return material
 
 
@@ -100,7 +116,12 @@ def atlas_material(image):
     emission = tree.nodes.new("ShaderNodeEmission")
     output = tree.nodes.new("ShaderNodeOutputMaterial")
     tree.links.new(texture.outputs["Color"], emission.inputs["Color"])
-    tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
+    transparent = tree.nodes.new("ShaderNodeBsdfTransparent")
+    mix = tree.nodes.new("ShaderNodeMixShader")
+    tree.links.new(texture.outputs["Alpha"], mix.inputs[0])
+    tree.links.new(transparent.outputs[0], mix.inputs[1])
+    tree.links.new(emission.outputs[0], mix.inputs[2])
+    tree.links.new(mix.outputs[0], output.inputs["Surface"])
     return material
 
 
@@ -142,14 +163,14 @@ def dilate(rgb: np.ndarray, filled: np.ndarray, steps: int):
 
 def project_atlas(scene, uv_layer: str, positions, place_camera, size: int, out: Path,
                   supersample: int = 3, exposure: float = 0.0, beauty_pass=None, uv_pass=None,
-                  log=print) -> dict:
+                  log=print, opacity=None) -> dict:
     """Photograph the scene from every lane position and splat it into an atlas.
 
     `place_camera(scene, lane_y)` puts the lane camera where the player would stand.
     `beauty_pass()` / `uv_pass()` (optional) set up what each frame sees, before the frame is rendered.
     Returns {"linear": (size, size, 3) mean linear colour, "seen": (size, size) bool, "cameras": [...]}.
     """
-    uv_mat = uv_material(uv_layer)
+    uv_mat = uv_material(uv_layer, opacity)
     total = np.zeros(size * size * 3, dtype=np.float64)
     weight = np.zeros(size * size, dtype=np.float64)
     cameras = []

@@ -22,6 +22,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import atlas_allocation  # noqa: E402
+import eevee_projection  # noqa: E402
 
 
 def main():
@@ -38,17 +39,7 @@ def main():
     bpy.ops.wm.obj_import(filepath=str(package / "environment.obj"))
     image = bpy.data.images.load(str(package / "environment.png"))
     image.colorspace_settings.name = "sRGB"
-    material = bpy.data.materials.new("PACKAGE_UNLIT")
-    material.use_nodes = True
-    tree = material.node_tree
-    tree.nodes.clear()
-    texture = tree.nodes.new("ShaderNodeTexImage")
-    texture.image = image
-    texture.interpolation = "Closest"
-    emission = tree.nodes.new("ShaderNodeEmission")
-    output = tree.nodes.new("ShaderNodeOutputMaterial")
-    tree.links.new(texture.outputs["Color"], emission.inputs["Color"])
-    tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
+    material = eevee_projection.atlas_material(image)
     for obj in bpy.context.scene.objects:
         if obj.type == "MESH":
             obj.data.materials.clear()

@@ -405,3 +405,9 @@ They must not overwrite or become hidden inputs to the V2 baseline set.
 EEVEE is the default for room plates and both environment atlas exporters. Exposure starts at 0 EV; the room test records no longer carry gains fitted to Cycles. Adjust authored lighting, world fill, probe density and lighting shims to resolve lighting problems. Exposure overrides remain available for deliberate artistic choices. Cycles is an explicit comparison via `--engine cycles` or `--bake-backend cycles`; shipping packages are promoted separately after visual review.
 
 Room plates read the same source lighting records as atlas exports. EEVEE enables emissive companion lights and fixture shadow release by default; `--no-emissive-lights` and `--no-fixture-lights` disable them for controls. Room plates default to two probe cells per metre; records retain the corridor density and threshold override. Exterior atlas records may leave probes off.
+
+## Cutout alpha in environment atlases
+
+`atlas_alpha.py` evaluates authored Principled alpha separately from lighting and camera coverage. Render copies preserve source UVs before atlas unwrapping. A temporary mesh in receiver UV space rasterises the opacity with EEVEE; the EEVEE projection UV pass uses this mask so leaf gaps reveal the geometry behind them. Both backends receive the same opacity, and texels outside geometry stay opaque rather than becoming accidental facade holes. Cycles exterior beauty allows eight transparent bounces so alpha cards do not block direct light at their transparent pixels.
+
+The opacity adapter accepts UV-based Principled alpha. Geometry-dependent alpha and Transparent-BSDF graphs fail explicitly rather than silently yielding an opaque atlas. Package photographs use atlas alpha just as the runtime does. Source documents are never saved by these steps.

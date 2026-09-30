@@ -116,6 +116,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    import atlas_alpha
+    opacity = atlas_alpha.bake_opacity(scene, target_obj, atlas_size)
+
     # Create baked atlas image
     image_name = "environment_atlas"
     if image_name in bpy.data.images:
@@ -175,7 +178,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
         import eevee_bake
         print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}) by EEVEE projection...")
-        eevee_report = eevee_bake.bake_atlas(eevee, scene, target_obj, col_source, bake_image)
+        eevee_report = eevee_bake.bake_atlas(eevee, scene, target_obj, col_source, bake_image, opacity=opacity)
     else:
         # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
         scene.render.engine = 'CYCLES'
@@ -188,7 +191,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             scene.cycles.max_bounces = 0
             scene.cycles.diffuse_bounces = 0
             scene.cycles.glossy_bounces = 0
-            scene.cycles.transparent_max_bounces = 0
+            scene.cycles.transparent_max_bounces = 8
         else:
             scene.cycles.samples = bake_samples
         scene.cycles.bake_type = 'COMBINED'
@@ -223,6 +226,10 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
         print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
         bpy.ops.object.bake(type='COMBINED')
+
+    atlas_alpha.apply(bake_image, opacity)
+    if opacity is not None:
+        bpy.data.images.remove(opacity)
 
     # Connect baked texture to BSDF Base Color for material export and display
     if bsdf:

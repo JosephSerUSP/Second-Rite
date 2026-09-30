@@ -21,9 +21,9 @@
       2048,
       2048
     ],
-    "pngSizeBytes": 6861886,
-    "renderMeshSizeBytes": 625119,
-    "packageSizeBytes": 7487815
+    "pngSizeBytes": 3860265,
+    "renderMeshSizeBytes": 625116,
+    "packageSizeBytes": 4486191
   },
   "anchors": {
     "spawn_player": {
@@ -173,7 +173,35 @@
   },
   "provenance": {
     "generator": "town_environment_pipeline.py",
-    "sourceBlend": "st_maria_praca_modelled.blend"
+    "sourceBlend": "st_maria_praca_modelled.blend",
+    "bake": {
+      "backend": "eevee",
+      "exposureEV": 0.0,
+      "supersample": 3,
+      "probeCells": 0,
+      "probeSamples": 256,
+      "emissiveLights": false,
+      "fixtureLights": false,
+      "eeveeOptions": [],
+      "bakeCameras": [
+        0.6,
+        2.1,
+        3.6,
+        5.1,
+        6.6,
+        8.1,
+        9.6,
+        11.1,
+        12.599,
+        14.099,
+        15.599,
+        17.099,
+        18.599,
+        20.099,
+        21.599,
+        23.099
+      ]
+    }
   },
   "preRendered": {
     "mode": "layered_2d",

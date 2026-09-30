@@ -57,6 +57,23 @@ def main():
     out = Path(sys.argv[sys.argv.index("--") + 1])
     bpy.ops.wm.read_factory_settings(use_empty=True)
     room()
+    # A source-UV cutout, with an opaque green half and a transparent half.
+    import math
+    bpy.ops.mesh.primitive_plane_add(size=1.5, location=(1.0, 0.0, 1.4), rotation=(0, math.pi / 2, 0))
+    card = bpy.context.object
+    card.name = "alpha_card"
+    leaf = material("leaf", (0.1, 0.8, 0.1))
+    texture = leaf.node_tree.nodes.new("ShaderNodeTexImage")
+    image = bpy.data.images.new("cutout", 8, 8, alpha=True)
+    pixels = []
+    for y in range(8):
+        for x in range(8): pixels.extend((0.1, 0.8, 0.1, float(x >= 4)))
+    image.pixels[:] = pixels
+    image.pack()
+    texture.image = image
+    texture.interpolation = "Closest"
+    leaf.node_tree.links.new(texture.outputs["Alpha"], leaf.node_tree.nodes["Principled BSDF"].inputs["Alpha"])
+    card.data.materials.append(leaf)
     light = bpy.data.lights.new("lamp", "POINT")
     light.energy = 400.0
     holder = bpy.data.objects.new("lamp", light)

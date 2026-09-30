@@ -1,0 +1,65 @@
+{
+ "room": "alicias_padaria",
+ "goalMeanLinear": 0.06551,
+ "exposureSteps": [
+  {
+   "exposureEV": 0.0,
+   "meanLinear": 0.04486
+  },
+  {
+   "exposureEV": 0.5465,
+   "meanLinear": 0.0624
+  },
+  {
+   "exposureEV": 0.6167,
+   "meanLinear": 0.06504
+  }
+ ],
+ "matchedExposureEV": 0.6167,
+ "fillShare": {
+  "cycles": 0.1747,
+  "eevee_ao": 0.866,
+  "eevee_probe_matched": 0.2381
+ },
+ "atlasStudy": {
+  "layout": "packed",
+  "atlasSize": 1024,
+  "probeVolume": {
+   "resolution": [
+    18,
+    19,
+    9
+   ],
+   "samples": 256,
+   "bounds": [
+    [
+     -3.6363637447357178,
+     -4.6533331871032715,
+     -0.35000020265579224
+    ],
+    [
+     5.186666488647461,
+     4.633333206176758,
+     4.0
+    ]
+   ]
+  },
+  "lampScale": 0.3,
+  "exposureEV": 0.6167,
+  "texelsPerPixel": {
+   "pixelsMeasured": 105343,
+   "p10": 1.061,
+   "median": 1.531,
+   "p90": 2.372,
+   "fractionBelowHalf": 0.0077,
+   "fractionBelowOne": 0.0088
+  },
+  "coverage": {
+   "islandTexels": 767793,
+   "seenTexels": 155500,
+   "seenFractionOfIslands": 0.2025,
+   "afterDilationFraction": 0.3808
+  },
+  "eeveeBakeSeconds": 9.5
+ }
+}

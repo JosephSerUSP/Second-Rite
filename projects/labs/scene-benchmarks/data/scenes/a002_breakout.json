@@ -246,8 +246,17 @@
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
+                "name": "padXTarget",
+                "value": "sceneState.padX + sceneState.moveInput * 18.0 * sceneState.time.dt"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
                 "name": "padX",
-                "value": "clamp(sceneState.padX + sceneState.moveInput * 18.0 * sceneState.time.dt, 0, sceneState.fieldW - sceneState.padW)"
+                "value": "sceneState.padXTarget < 0 and 0 or (sceneState.padXTarget > sceneState.fieldW - sceneState.padW and sceneState.fieldW - sceneState.padW or sceneState.padXTarget)"
               },
               {
                 "name": "moveInput",
@@ -265,14 +274,33 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.ballX <= 0 or sceneState.ballX >= sceneState.fieldW - 1",
+            "condition": "sceneState.ballX <= 0",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
                   {
                     "name": "ballX",
-                    "value": "clamp(sceneState.ballX, 0, sceneState.fieldW - 1)"
+                    "value": 0
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "-sceneState.ballVX"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ballX >= sceneState.fieldW - 1",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ballX",
+                    "value": "sceneState.fieldW - 1"
                   },
                   {
                     "name": "ballVX",
@@ -368,7 +396,17 @@
     "process_bricks": "\nlocal sceneState = ctx.sceneState\nlocal bx, by = math.floor(sceneState.ballX + 0.5), math.floor(sceneState.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(sceneState.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            sceneState.score = sceneState.score + 10\n            sceneState.ballVY = -sceneState.ballVY\n            break\n        end\n    end\nend\nif count == 0 then sceneState.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, sceneState.fieldH - 1 do\n    for x = 0, sceneState.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif sceneState.gameOver then out = out .. \"GAME OVER\\n\" end\nif sceneState.gameWon then out = out .. \"YOU WIN!\\n\" end\nsceneState.renderedField = out\n"
   },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {
+      "key": "right"
+    },
+    {
+      "key": "right"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
   ]
 }

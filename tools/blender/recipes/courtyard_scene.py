@@ -235,9 +235,9 @@ def build(output):
         upper=[Window(name+' window '+str(i),front,y,4.1,1.05,1.55,shutters=True) for i,y in enumerate([a+(c-a)*.28,a+(c-a)*.69])]
         street_root=shell(b,spec,[{'y':s.y,'width':s.width,'height':s.height,'sill':s.sill} for s in upper],wall,clay,wood)
         for s in upper:window(b,s,mat).parent=street_root
-        b.part(name+' floor stringcourse',(.16,c-a,.17),(front-.045,(a+c)/2,3.6),stone)
-        b.part(name+' chimney',(.64,.58,1.1),(front+2,(a+c)/2,eave+1.0),wall)
-        b.part(name+' chimney crown',(.82,.75,.16),(front+2,(a+c)/2,eave+1.58),stone)
+        b.part(name+' floor stringcourse',(.16,c-a,.17),(front-.045,(a+c)/2,3.6),stone).parent=street_root
+        b.part(name+' chimney',(.64,.58,1.1),(front+2,(a+c)/2,eave+1.0),wall).parent=street_root
+        b.part(name+' chimney crown',(.82,.75,.16),(front+2,(a+c)/2,eave+1.58),stone).parent=street_root
     # Court edge walls connect to buildings and enclose the yard below eye level.
     for y in [-2.1,14.4]:
         spans=[(-6.5,-1.35),(1.35,4.5)] if y<0 else [(-6.5,4.5)]
@@ -341,7 +341,7 @@ def build(output):
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
     render_profiles.apply(scene,render_profiles.resolve('draft'));scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=13;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=14;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

@@ -17,6 +17,10 @@ class RenderProfilesTests(unittest.TestCase):
             self.assertEqual(profile.supersample, 1)
         self.assertEqual(profiles.resolve("cycles-comparison").engine, "CYCLES")
         self.assertEqual(profiles.resolve(supersample=3).supersample, 3)
+        self.assertEqual(profiles.DEFAULT_ATLAS_SIZE, 1024)
+        self.assertEqual(profiles.resolve('draft').samples, 64)
+        self.assertEqual(profiles.resolve('export').samples, 64)
+        self.assertEqual(profiles.resolve('export').atlas_denoise, 'oidn-fast')
 
     def test_invalid_requests_fail_loudly(self):
         for kwargs in ({"samples": 0}, {"supersample": -1}, {"samples": True},

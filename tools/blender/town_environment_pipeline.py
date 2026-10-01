@@ -45,7 +45,8 @@ def _operator_kwargs(operator, candidate_dict):
 
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
                             bake_samples: int = None, flat_bake: bool = False, backend: str = "cycles",
-                            eevee=None, cycles_device="AUTO", render_profile="export", bake_bindings=None):
+                            eevee=None, cycles_device="AUTO", render_profile="export", bake_bindings=None,
+                            atlas_denoise=None, uv_texel_align=None):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -182,6 +183,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     device_record = None
     source_count = None
     correspondence = None
+    denoise_report = None
+    texel_report = None
     if backend == "eevee":
         if eevee is None:
             raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
@@ -193,6 +196,10 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         import render_profiles
         import cycles_source
         profile = render_profiles.resolve(render_profile, engine="cycles", samples=bake_samples)
+        align_uv = profile.atlas_texel_align if uv_texel_align is None else uv_texel_align
+        if align_uv:
+            import atlas_denoise as denoiser
+            texel_report=denoiser.snap_to_texels(target_obj.data,atlas_size)
         quality_record = render_profiles.apply(scene, profile, bake=True)
         bake_samples = profile.samples
         device_record = render_profiles.configure_device(scene, cycles_device)
@@ -249,6 +256,14 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
                             use_clear=False, margin=scene.render.bake.margin,
                             cage_extrusion=scene.render.bake.cage_extrusion,
                             max_ray_distance=scene.render.bake.max_ray_distance)
+
+        denoise_mode = profile.atlas_denoise if atlas_denoise is None else atlas_denoise
+        if denoise_mode == "oidn-fast":
+            import atlas_denoise as denoiser
+            denoise_report = denoiser.denoise(bake_image, target_obj.data)
+            print("[pipeline] Atlas denoise: " + json.dumps(denoise_report))
+        elif denoise_mode != "none":
+            raise ValueError(f"Unknown atlas denoise mode: {denoise_mode!r}")
 
     atlas_alpha.apply(bake_image, opacity)
     if opacity is not None:
@@ -413,6 +428,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     if correspondence is not None:
         manifest["provenance"]["bake"]["correspondence"] = correspondence
+    if backend == "cycles":
+        manifest["provenance"]["bake"]["atlasDenoise"] = denoise_report or {"method":"none"}
+        manifest["provenance"]["bake"]["texelAlignment"] = texel_report or {"method":"none"}
     manifest["provenance"]["exportSeconds"] = time.perf_counter() - started
     manifest_path = output_dir / "environment.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
@@ -420,7 +438,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE, bake_samples: int = None):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
+                               bake_samples: int = None, atlas_denoise=None, uv_texel_align=None):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -435,7 +454,7 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples}, atlas_denoise={atlas_denoise!r}, uv_texel_align={uv_texel_align!r})\n"
     )
     temp_runner.close()
 
@@ -460,9 +479,12 @@ def main():
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
     parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE, help="Atlas texture dimension")
     parser.add_argument("--samples", type=int, default=None, help="Override central Cycles sample count")
+    parser.add_argument("--atlas-denoise", choices=("none","oidn-fast"), default=None)
+    parser.add_argument("--uv-texel-align", action=argparse.BooleanOptionalAction, default=None)
     args = parser.parse_args()
 
-    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)
+    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples,
+                               atlas_denoise=args.atlas_denoise, uv_texel_align=args.uv_texel_align)
 
 
 if __name__ == "__main__":

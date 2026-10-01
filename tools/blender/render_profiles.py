@@ -18,6 +18,8 @@ class Profile:
     samples: int
     supersample: int = 1
     denoise: bool = False
+    atlas_denoise: str = "none"
+    atlas_texel_align: bool = True
     max_bounces: int = 4
     diffuse_bounces: int = 2
     glossy_bounces: int = 2
@@ -28,10 +30,10 @@ class Profile:
 
 
 PROFILES = {
-    "draft": Profile("draft", "CYCLES", 16, denoise=True),
-    "lookdev": Profile("lookdev", "CYCLES", 32, denoise=True),
-    "review": Profile("review", "CYCLES", 128, denoise=True),
-    "export": Profile("export", "CYCLES", 128, denoise=True),
+    "draft": Profile("draft", "CYCLES", 64, denoise=True, atlas_denoise="oidn-fast"),
+    "lookdev": Profile("lookdev", "CYCLES", 64, denoise=True, atlas_denoise="oidn-fast"),
+    "review": Profile("review", "CYCLES", 128, denoise=True, atlas_denoise="oidn-fast"),
+    "export": Profile("export", "CYCLES", 64, denoise=True, atlas_denoise="oidn-fast"),
     "cycles-comparison": Profile("cycles-comparison", "CYCLES", 8, denoise=True),
 }
 ENGINES = {"eevee": "BLENDER_EEVEE", "cycles": "CYCLES", "workbench": "BLENDER_WORKBENCH"}

@@ -62,3 +62,31 @@ keep=embedded.attributes.new('sr_bake_preserve_face','BOOLEAN','FACE')
 keep.data.foreach_set('value',[False]*6+[True]*6)
 assert exporter.cull_enclosed(obj,24,0)==0 and len(embedded.polygons)==12
 print('STRUCTURAL RECEIVER PRESERVED')
+
+# A roof whose own centre is outside the envelope belongs with its admitted wall.
+from recipes.first_stratum.common import box
+import second_rite_asset_core as core
+bpy.ops.wm.read_factory_settings(use_empty=True)
+root=bpy.data.objects.new('Building volume',None);bpy.context.scene.collection.objects.link(root);root['building_volume']='{}'
+wall=box('Near wall',root,(1,2,3),(0,17,1.5),None,core)
+roof=box('Connected roof',root,(3,8,.2),(0,20,3.1),None,core)
+for obj in [wall,roof]:obj['sr_bake_source']=True
+far=bpy.data.objects.new('Parked volume',None);bpy.context.scene.collection.objects.link(far);far['building_volume']='{}'
+spare=box('Parked wall',far,(1,2,3),(0,-30,1.5),None,core);spare['sr_bake_source']=True
+bpy.context.view_layer.update()
+assert not exporter.in_square(roof,12,6), 'Negative control must reproduce per-object rejection'
+admitted=exporter.admitted_names([wall,roof,spare],12,6)
+assert wall.name in admitted and roof.name in admitted, 'Building was admitted as a fragment'
+assert spare.name not in admitted, 'Unrelated off-range volume entered the package'
+
+# A small intersecting box covers the face centre but not the exterior corners.
+from recipes.first_stratum.common import box_geometry
+import bake_correspondence
+outer_v,outer_f=box_geometry((4,4,4));small_v,small_f=box_geometry((.4,.5,.5))
+small_v=[(x-2,y,z) for x,y,z in small_v]
+data=bpy.data.meshes.new('Partly covered exterior');data.from_pydata(outer_v+small_v,[],outer_f+[tuple(i+8 for i in f) for f in small_f]);data.update()
+tag=data.attributes.new(bake_correspondence.OWNER_ATTRIBUTE,'INT','FACE');tag.data.foreach_set('value',[0]*6+[1]*6)
+obj=bpy.data.objects.new('Partly covered exterior',data);bpy.context.scene.collection.objects.link(obj)
+exporter.cull_enclosed(obj,24,0)
+assert any(face.normal.x<-.99 and abs(face.center.x+2)<1e-5 and face.area>15 for face in data.polygons), 'A partially covered exterior face was deleted'
+print('ASSEMBLY AND PARTIAL COVERAGE PROOF OK')

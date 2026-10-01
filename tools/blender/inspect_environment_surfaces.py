@@ -9,7 +9,10 @@ import render_profiles
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source',type=Path,required=True);parser.add_argument('--package',type=Path,required=True)
-    parser.add_argument('--out',type=Path,required=True);args=parser.parse_args(sys.argv[sys.argv.index('--')+1:])
+    parser.add_argument('--out',type=Path,required=True)
+    parser.add_argument('--modes',nargs='+',choices=('source-clay','source-beauty','runtime-clay','runtime-atlas'),
+                        default=['source-clay','source-beauty','runtime-clay','runtime-atlas'])
+    args=parser.parse_args(sys.argv[sys.argv.index('--')+1:])
     args.out.mkdir(parents=True,exist_ok=True);source=args.source.resolve();package=args.package.resolve()
     before=hashlib.sha256(source.read_bytes()).hexdigest();bpy.ops.wm.open_mainfile(filepath=str(source))
     scene=bpy.context.scene
@@ -30,7 +33,7 @@ def main():
     scene.render.film_transparent=False
     views=[('court-oblique',(4,6,2.8),(-32,-10,12),21),('rear-houses',(14,6,5),(-28,-14,16),27),('window',(4.5,3.5,2.1),(-6,-2.6,2.3),4.8),('window-reverse',(4.5,3.5,2.1),(-5,3.2,1.8),4.8),('portal',(4.5,11.5,2),(-8,-4,3),6)]
     rows=[]
-    for mode in ['source-clay','source-beauty','runtime-clay','runtime-atlas']:
+    for mode in args.modes:
         for obj in source_meshes:obj.hide_render=not mode.startswith('source')
         for obj in runtime:obj.hide_render=mode.startswith('source')
         if mode.endswith('clay'):
@@ -51,6 +54,6 @@ def main():
             scene.render.filepath=str((args.out/(mode+'-'+tag+'.png')).resolve());bpy.ops.render.render(write_still=True)
         rows.append({'mode':mode,'views':[v[0] for v in views]})
     assert hashlib.sha256(source.read_bytes()).hexdigest()==before
-    (args.out/'inspection.json').write_text(json.dumps({'sourceSHA256':before,'sourceMeshes':len(source_meshes),'runtimeMeshes':len(runtime),'views':rows,'interpretation':'Workbench clay with backface culling is geometry evidence. Emission atlas views remove additional scene lighting; baked shading remains in the texture. Source file unchanged.'},indent=2)+'\n',encoding='utf-8')
+    (args.out/'inspection.json').write_text(json.dumps({'sourceSHA256':before,'sourceMeshes':len(source_meshes),'runtimeMeshes':len(runtime),'renderProfile':render_profiles.resolve('draft').record(),'views':rows,'interpretation':'Workbench clay with backface culling is geometry evidence. Emission atlas views remove additional scene lighting; baked shading remains in the texture. Source file unchanged.'},indent=2)+'\n',encoding='utf-8')
     print('SURFACE INSPECTION OK')
 if __name__=='__main__':main()

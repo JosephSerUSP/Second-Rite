@@ -1,0 +1,7 @@
+{
+  "beforeSHA256": "b1b989a3093e67dbefb8188a3b7b17c17d8445d4e4625fc96a0488c2947c6ec5",
+  "afterSHA256": "55bcd2637de916eab8f37937a2b473259734b36e26ce61985e402dfe2ef5efb9",
+  "changed": "19 parent relationships and courtyard_revision 14; no vertex/material/light/world-transform changes",
+  "worldTransforms": "all object world matrix components compared with tolerance 1e-6 after parenting; passed",
+  "freshRecipeParity": "three recipe/window-assembly tests passed in 59.769 seconds; snapshot now includes mesh parent ownership"
+}

@@ -21,6 +21,7 @@ def snapshot():
             'materials':[mat.name for mat in obj.data.materials],
             'role':obj.get('sr_bake_role','both'),
             'hidden':obj.hide_render,
+            'parent':obj.parent.name if obj.parent else None,
             'modifiers':[(mod.name,mod.type) for mod in obj.modifiers],
         }
     return rows
@@ -51,7 +52,11 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==13
+assert bpy.context.scene['courtyard_revision']==14
+for obj in bpy.data.objects:
+    if not obj.get('architectural_spec'):continue
+    spec=json.loads(obj['architectural_spec'])
+    assert bpy.data.objects[spec['name']+' glazing target'].parent==obj
 # The posed leaves are separate proxies: their detailed source has no opaque
 # backing that would hide the louvres in oblique/rear views.
 for tag in ['left','right']:

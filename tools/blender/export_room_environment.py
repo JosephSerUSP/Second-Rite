@@ -304,7 +304,8 @@ def main() -> None:
                                      bake_samples=args.samples,
                                      backend=args.bake_backend, eevee=eevee,
                                      cycles_device=args.cycles_device, render_profile=args.render_profile,
-                                     bake_bindings=args.bake_bindings)
+                                     bake_bindings=args.bake_bindings, atlas_denoise=args.atlas_denoise,
+                                     uv_texel_align=args.uv_texel_align)
 
     faces = mirror_obj_file(output / "environment.obj", LANE_CENTRE)
     print(f"[room3d] mirrored {faces} faces into engine space "

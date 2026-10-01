@@ -70,6 +70,10 @@ def add_arguments(parser) -> None:
     group.add_argument("--render-profile", choices=("draft", "lookdev", "review", "export"), default=render_profiles.DEFAULT_EXPORT_PROFILE)
     group.add_argument("--bake-bindings", type=Path, default=None, help="Authored source/receiver ray preflight JSON")
     group.add_argument("--cycles-device", choices=("AUTO", "CPU", "GPU"), default=render_profiles.DEFAULT_DEVICE)
+    group.add_argument("--atlas-denoise", choices=("none", "oidn-fast"), default=None,
+                       help="Cycles UV-chart denoising; defaults to the shared profile. none is a raw control")
+    group.add_argument("--uv-texel-align", action=argparse.BooleanOptionalAction, default=None,
+                       help="Snap valid UV charts to texel centres; preserve charts that would collapse")
     group.add_argument("--exposure", type=float, default=None, metavar="EV",
                        help="eevee: gain in EV on the beauty before it enters the atlas")
     group.add_argument("--probe-cells", type=float, default=None, metavar="CELLS_PER_M",

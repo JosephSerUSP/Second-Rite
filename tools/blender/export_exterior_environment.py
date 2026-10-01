@@ -131,73 +131,83 @@ def _crossings(bvh, point, direction, limit=64):
 
 
 def cull_enclosed(target, samples, escape_ratio):
-    """Delete faces sealed inside the geometry, by an inside/outside test.
+    """Cull faces whose vertices, edge midpoints and centre lie in one solid.
 
-    These are what bakes black, and the reason is not the camera. The house
-    grammar builds closed bodies, so every wall has an inner face, every roof
-    an underside, every box a hidden back. Nothing reaches those surfaces --
-    no light, and no viewer either. A free camera could orbit forever and
-    never see them without clipping through the building.
-
-    The test is PARITY, not ray escape. Firing a hemisphere of rays and asking
-    whether any escapes sounds equivalent and is not: a face visible only
-    through a narrow aperture -- a window reveal, a gap between buildings --
-    has most directions blocked, so finite sampling calls it sealed. That bias
-    is measurable and does not converge. Culling the same mesh with an
-    escaping-ray test gave 2876 faces at 24 samples, 2752 at 64, 2635 at 128,
-    2569 at 256 and 2508 at 512, still falling; the owner saw the consequence
-    as facade faces missing from the export. Counting how many surfaces a ray
-    pierces on its way out answers the actual question -- odd means the point
-    began inside a solid -- and it is unbiased and cheaper. It reports 1713
-    sealed faces, so the escape test was removing about 1163 it should not.
-
-    Five directions are polled and the majority wins, so one grazing ray along
-    a coplanar seam cannot decide a face on its own.
-
-    ``samples`` and ``escape_ratio`` are retained for the CLI but no longer
-    steer the classification; the parity test has no sampling knob to turn.
+    Evaluate closed source bodies separately: global parity across overlapping
+    bodies is XOR rather than union. Centre-only coverage can delete an exposed
+    facade when a small intersecting object covers just its centre. Open sheets
+    and explicitly preserved structural receivers are retained. Partial or
+    ambiguous coverage retains geometry rather than exposing dark inner faces.
+    The legacy samples/escape_ratio arguments do not change this classification.
     """
-    import mathutils
     from mathutils.bvhtree import BVHTree
     mesh = target.data
-    # Parity is only meaningful for closed bodies. An open card (a ground-cover tuft is two crossed quads) has no
-    # inside: left in, it is culled for being "crossed" by its own twin, and it flips the verdict on any solid face
-    # whose ray happens to pass through it. So open faces are neither candidates nor occluders.
     marks = mesh.attributes.get(OPEN_FACE_ATTRIBUTE)
     is_open = [d.value for d in marks.data] if marks else [False] * len(mesh.polygons)
-    solid = [p for p in mesh.polygons if not is_open[p.index]]
     keep = mesh.attributes.get("sr_bake_preserve_face")
-    bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
-                               [tuple(p.vertices) for p in solid],
-                               all_triangles=False)
-    directions = [mathutils.Vector(d).normalized() for d in PARITY_DIRECTIONS]
-    needed = len(directions) // 2 + 1
+    owners = mesh.attributes.get(bake_correspondence.OWNER_ATTRIBUTE)
+    solid = [p for p in mesh.polygons if not is_open[p.index]]
+    groups = {}
+    if owners:
+        for poly in solid:
+            groups.setdefault(owners.data[poly.index].value, []).append(poly)
+    else:
+        # Synthetic/imported meshes without owner tags use connected bodies.
+        vertex_faces = {}
+        for poly in solid:
+            for vertex in poly.vertices:
+                vertex_faces.setdefault(vertex, []).append(poly.index)
+        pending = {p.index for p in solid}
+        while pending:
+            seed = pending.pop(); todo = [seed]; indices = [seed]
+            while todo:
+                current = mesh.polygons[todo.pop()]
+                for vertex in current.vertices:
+                    for index in vertex_faces[vertex]:
+                        if index in pending:
+                            pending.remove(index); todo.append(index); indices.append(index)
+            groups[seed] = [mesh.polygons[i] for i in indices]
+    vertices = [v.co.copy() for v in mesh.vertices]
+    bodies = []
+    for faces in groups.values():
+        # A body may lose degenerate faces during joining. Open bodies cannot
+        # classify enclosed points; never infer a solid from their bounding box.
+        edges = {}
+        for poly in faces:
+            for edge in poly.edge_keys:
+                key = tuple(sorted(edge)); edges[key] = edges.get(key, 0) + 1
+        if not edges or any(count != 2 for count in edges.values()):
+            continue
+        points = [vertices[i] for p in faces for i in p.vertices]
+        low = tuple(min(p[a] for p in points) for a in range(3))
+        high = tuple(max(p[a] for p in points) for a in range(3))
+        if any(high[a]-low[a] < 1e-6 for a in range(3)):
+            continue
+        bodies.append((low, high, BVHTree.FromPolygons(vertices, [tuple(p.vertices) for p in faces], all_triangles=False)))
+    directions = [Vector(d).normalized() for d in PARITY_DIRECTIONS]
+    def inside(point, body):
+        low, high, bvh = body
+        if any(point[a] <= low[a] or point[a] >= high[a] for a in range(3)):
+            return False
+        votes = sum(_crossings(bvh, point, direction) % 2 for direction in directions)
+        return votes >= len(directions)//2 + 1
     doomed = []
     for poly in solid:
         if keep and keep.data[poly.index].value:
             continue
-        # Start just OUTSIDE the face along its own normal: an outward-facing
-        # skin face is then outside its body, an inward-facing one is inside.
-        point = poly.center + poly.normal.normalized() * 1e-3
-        votes = 0
-        for direction in directions:
-            if _crossings(bvh, point, direction) % 2 == 1:
-                votes += 1
-                if votes >= needed:
-                    break
-        if votes >= needed:
-            doomed.append(poly)
-    if not doomed:
-        return 0
-    # Delete through bmesh, not by flagging polygons and running mesh.delete: that operator acts on the *edit-mode*
-    # selection, and vertices left selected by an earlier select_all flush every face into it. On a small mesh that
-    # deleted all 574 faces when 135 were doomed; the Praca only escaped by the luck of its selection state.
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
-    bm.faces.ensure_lookup_table()
-    bmesh.ops.delete(bm, geom=[bm.faces[poly.index] for poly in doomed], context="FACES")
-    bm.to_mesh(mesh)
-    bm.free()
+        offset = poly.normal.normalized()*1e-4
+        corners = [vertices[i] for i in poly.vertices]
+        samples = [p+offset for p in corners]
+        samples.extend((a+b)/2+offset for a,b in zip(corners,corners[1:]+corners[:1]))
+        samples.append(poly.center+offset)
+        # One body must contain the complete sampled face. Global parity over
+        # overlapping or touching bodies is XOR, not a reliable solid union.
+        if any(all(inside(point,body) for point in samples) for body in bodies):
+            doomed.append(poly.index)
+    if doomed:
+        bm = bmesh.new(); bm.from_mesh(mesh); bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[bm.faces[i] for i in doomed], context='FACES')
+        bm.to_mesh(mesh); bm.free(); mesh.update()
     return len(doomed)
 
 
@@ -290,6 +300,46 @@ def in_square(obj, span, margin):
                  Vector()) / 8.0
     return -margin <= centre.y <= span + margin
 
+
+def admitted_names(objects, span, margin):
+    """Admit authored building volumes as units, leaving loose objects bounded.
+
+    A partially visible building still needs its roof/returns. Its existing
+    building_volume root is the semantic boundary; unrelated parked copies remain
+    outside the lane envelope. Bounding corners use actual world transforms.
+    """
+    bpy.context.view_layer.update()
+    graph = bpy.context.evaluated_depsgraph_get()
+    groups = {}
+    loose = []
+    for obj in objects:
+        if obj.type != "MESH" or not is_bake_source(obj):
+            continue
+        parent = obj.parent
+        assembly = None
+        while parent:
+            if "building_volume" in parent:
+                assembly = parent
+            parent = parent.parent
+        if assembly is None:
+            loose.append(obj)
+        else:
+            groups.setdefault(assembly, []).append(obj)
+    admitted = {obj.name for obj in loose
+                if in_square(obj.evaluated_get(graph) if live_modifiers(obj) else obj, span, margin)}
+    for members in groups.values():
+        # Assembly bounds need only runtime bodies/proxies: source micro-detail
+        # must not drag an otherwise off-range building into the package.
+        bodies = [obj for obj in members if bake_role(obj) != "source"]
+        if not bodies:
+            continue
+        corners = [body.matrix_world @ Vector(corner)
+                   for obj in bodies
+                   for body in [obj.evaluated_get(graph) if live_modifiers(obj) else obj]
+                   for corner in body.bound_box]
+        if min(p.y for p in corners) <= span + margin and max(p.y for p in corners) >= -margin:
+            admitted.update(obj.name for obj in members)
+    return admitted
 
 def is_bake_source(obj):
     """Does this object belong in the baked render mesh?
@@ -493,12 +543,13 @@ def bake_source_members(source, span, margin):
     The rest of TH_SOURCE (level-design guides, scale actors, preview rigs) must never reach the atlas.
     """
     members = []
+    admitted = admitted_names(list(source.all_objects), span, margin)
     for obj in source.all_objects:
         if not obj or obj.type != "MESH" or obj.hide_render or not is_bake_source(obj):
             continue
         if bake_role(obj) == "receiver":
             continue
-        if in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
+        if obj.name in admitted:
             members.append(obj)
     return members
 
@@ -534,6 +585,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
     source_objects = list(source.all_objects)
     owner_names = bake_correspondence.registry(source_objects)
+    admitted = admitted_names(source_objects, span, margin)
     unbaked_modifiers = []
     for obj in source_objects:
         if obj.type != "MESH":
@@ -545,7 +597,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
             if live_modifiers(obj):
                 unbaked_modifiers.append(obj.name)
             continue
-        if not in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
+        if obj.name not in admitted:
             print(f"[exterior] SKIPPING off-square {obj.name}", flush=True)
             skipped.append(obj.name)
             continue
@@ -741,7 +793,8 @@ def main() -> None:
                                      flat_bake=False,
                                      backend=args.bake_backend, eevee=eevee,
                                      cycles_device=args.cycles_device, render_profile=args.render_profile,
-                                     bake_bindings=args.bake_bindings)
+                                     bake_bindings=args.bake_bindings, atlas_denoise=args.atlas_denoise,
+                                     uv_texel_align=args.uv_texel_align)
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"

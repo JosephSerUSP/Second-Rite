@@ -64,7 +64,7 @@ def window(builder,spec,materials):
             yy=y-w/2+(col+.5)*w/spec.columns;zz=z+(row+.5)*h/spec.rows
             piece(f'glass {col} {row}',(.01,w/spec.columns-.065,h/spec.rows-.055),(frame_x+.045,yy,zz),glass,bevel=0)
     piece('casement latch',(.055,.055,.15),(frame_x-.08,y+.08,z+h*.49),iron)
-    builder.receiver(spec.name+' glazing target',frame_x-.02,y,z+h/2,w,h,glass)
+    builder.receiver(spec.name+' glazing target',frame_x-.02,y,z+h/2,w,h,glass).parent=root
     if spec.shutters:
         leaf_w=w*.49
         for sign,tag in [(-1,'left'),(1,'right')]:

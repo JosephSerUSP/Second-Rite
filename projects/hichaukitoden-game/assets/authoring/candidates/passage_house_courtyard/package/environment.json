@@ -10,20 +10,20 @@
     -10.4,
     -0.14,
     18.23,
-    22.0,
+    26.4,
     8.81
   ],
   "stats": {
-    "triangleCount": 4215,
-    "vertexCount": 3055,
+    "triangleCount": 5928,
+    "vertexCount": 3541,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1357037,
-    "renderMeshSizeBytes": 387165,
-    "packageSizeBytes": 1744789
+    "pngSizeBytes": 1245125,
+    "renderMeshSizeBytes": 512607,
+    "packageSizeBytes": 1758319
   },
   "anchors": {
     "cortico_entry": {
@@ -87,14 +87,16 @@
     "bake": {
       "backend": "cycles",
       "device": "GPU",
-      "samples": 128,
+      "samples": 64,
       "selectedToActive": true,
       "quality": {
         "name": "export",
         "engine": "CYCLES",
-        "samples": 128,
+        "samples": 64,
         "supersample": 1,
         "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
         "max_bounces": 4,
         "diffuse_bounces": 2,
         "glossy_bounces": 2,
@@ -164,9 +166,25 @@
           }
         ],
         "errors": []
+      },
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 6.023961300001247,
+        "filteredCharts": 127,
+        "preservedSmallCharts": 1122,
+        "filteredTexels": 797450,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to texel centres; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 826,
+        "preservedUnsafeCharts": 484,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 1024
       }
     },
-    "exportSeconds": 107.59373319998849,
+    "exportSeconds": 38.29458670000895,
     "lightingPolicy": "source",
     "cameraCalibration": {
       "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",

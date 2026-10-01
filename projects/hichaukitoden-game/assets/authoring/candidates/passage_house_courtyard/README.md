@@ -112,3 +112,16 @@ the same arguments to trace admission, culling and centroid source hits for the
 legacy layout. See `review/surface-inspection/` and the surface inspection report.
 The current package has confirmed envelope/correspondence defects in #1301;
 portal-only checks do not establish whole-scene visual acceptance.
+
+Revision 14 fixes the scaffold assembly ownership of glazing receivers, stringcourses and chimneys while preserving revision 13 geometry, transforms, materials and lighting.
+Complete building volumes now enter the receiver package together; conservative
+culling retains partially exposed faces. The current atlas stays 1024 square,
+uses Cycles 64 samples and fast chart-isolated OIDN, and snaps valid UV charts to
+texel centres. Charts that would collapse, flip or newly share texels retain their original UVs. Source
+photographs and native frames are under `review/assembly-repair/`; raw controls
+and earlier defective geometry are preserved there. The higher-sample control
+uses the same repaired geometry before texel alignment. Bake correspondence still
+needs broader window coverage; owner visual and PLAYED acceptance remain open.
+
+For raw controls add `--atlas-denoise none`; for unsnapped controls also add
+`--no-uv-texel-align`. Keep `--atlas-size 1024` for drafts; change samples instead.

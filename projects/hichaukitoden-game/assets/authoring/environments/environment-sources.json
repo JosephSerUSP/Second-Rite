@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 13 scaffold: retained portal correction; differentiated limewash/timber, source-baked ceramic trim, softer sun/skylight; extended ground apron with low foreground coping/drainage. Candidate topology and owner visual/traversal acceptance remain staged.",
+      "basis": "Revision 14 scaffold: preserves revision 13 geometry, transforms, materials and lighting; glazing receivers, backstreet stringcourses and chimneys now belong to their architectural assembly/building. Candidate topology and owner visual/traversal acceptance remain staged.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

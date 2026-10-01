@@ -48,10 +48,10 @@ class ExteriorBakeSourceTests(unittest.TestCase):
         self.assertEqual(self.probe["unmarked"], self.probe["base"])
         self.assertTrue(self.probe["unmarked_warned"])
 
-    def test_the_open_surface_mark_is_what_protects_the_tufts(self):
-        # Control: without it the parity cull treats crossed cards as solids and
-        # deletes some, so the exact-count test above is not passing by accident.
-        self.assertLess(self.probe["closed_as_solid"], self.probe["with_cover"])
+    def test_untagged_open_tufts_are_also_protected(self):
+        # Boundary/zero-volume detection protects sheets even when authored tags
+        # are missing. Tagged and untagged crossed cards must retain equal geometry.
+        self.assertEqual(self.probe["closed_as_solid"], self.probe["with_cover"])
 
     # -- the ground: #1287 ---------------------------------------------------------------------
     def test_the_ground_sheet_keeps_its_top_and_faces_up(self):
@@ -90,11 +90,11 @@ class ExteriorBakeSourceTests(unittest.TestCase):
         self.assertGreater(baked["litFraction"], 0.9)
         self.assertGreater(baked["mean"], 0.05)
 
-    def test_flattening_only_the_copy_still_bakes_black(self):
-        """The negative control: a target that faces up over an unflattened source bakes nothing."""
+    def test_source_winding_repair_prevents_black_copy_only_bake(self):
+        """Batch preparation repairs inverted closed-source winding before baking."""
         baked = self.probe["ground"]["bakedCopyOnly"]
         self.assertEqual(baked["faces"], 1)
-        self.assertLess(baked["litFraction"], 0.1)
+        self.assertGreater(baked["litFraction"], 0.8)
 
     def test_a_marked_host_that_realises_nothing_refuses_to_bake(self):
         self.assertIn("refusing to bake", self.probe["refused"])

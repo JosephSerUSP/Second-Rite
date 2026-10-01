@@ -44,7 +44,7 @@ def main():
             z=point.z
             camera=atlas_allocation.lane_camera(scene,y,mirrored=False,record_path=camera_path,width=width)
             actor.location=(0,y,z)
-            render_profiles.apply(scene,render_profiles.resolve(args.quality))
+            render_profiles.apply(scene,render_profiles.resolve(args.quality), device="AUTO")
             scene.render.resolution_percentage=100;scene.render.image_settings.file_format="PNG"
             scene.view_settings.view_transform="AgX"
             bpy.context.view_layer.update()

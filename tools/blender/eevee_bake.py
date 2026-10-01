@@ -28,6 +28,7 @@ from pathlib import Path
 
 import bpy
 
+import render_profiles
 import atlas_allocation
 import eevee_projection as projection
 import emissive_lights
@@ -64,10 +65,10 @@ def add_arguments(parser) -> None:
     `eevee` entry), then to the default. A setting on the command line always wins.
     """
     group = parser.add_argument_group("atlas bake backend")
-    group.add_argument("--bake-backend", choices=("cycles", "eevee"), default="eevee",
-                       help="eevee is the default; cycles retains the selected-to-active comparison bake; eevee "
-                            "is a camera-projection bake (eevee_bake.py), seconds where the Praca bake takes "
-                            "a quarter of an hour")
+    group.add_argument("--bake-backend", choices=("cycles", "eevee"), default=render_profiles.DEFAULT_BAKE_BACKEND,
+                       help="Cycles selected-to-active is the default; EEVEE projection is an explicit comparison")
+    group.add_argument("--render-profile", choices=("draft", "lookdev", "review", "export"), default=render_profiles.DEFAULT_EXPORT_PROFILE)
+    group.add_argument("--cycles-device", choices=("AUTO", "CPU", "GPU"), default=render_profiles.DEFAULT_DEVICE)
     group.add_argument("--exposure", type=float, default=None, metavar="EV",
                        help="eevee: gain in EV on the beauty before it enters the atlas")
     group.add_argument("--probe-cells", type=float, default=None, metavar="CELLS_PER_M",

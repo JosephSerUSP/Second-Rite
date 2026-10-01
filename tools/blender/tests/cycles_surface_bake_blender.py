@@ -25,7 +25,10 @@ with tempfile.TemporaryDirectory() as directory:
     pipeline.run_pipeline_in_blender(Path('test.blend'),Path(directory),atlas_size=32,bake_samples=1,backend='cycles',cycles_device='CPU')
     assert (Path(directory)/'environment.png').is_file()
     manifest=json.loads((Path(directory)/'environment.json').read_text())
-    assert manifest['provenance']['bake']=={'backend':'cycles','device':'CPU','samples':1,'selectedToActive':True}
+    record=manifest['provenance']['bake']
+    assert all(record[key]==value for key,value in {'backend':'cycles','device':'CPU','samples':1,'selectedToActive':True}.items())
+    assert record['batchedSourceObjects']==1
+    assert record['quality']['max_bounces']==4
     atlas=bpy.data.images['environment_atlas'];pixels=list(atlas.pixels);index=(16*32+16)*4
     assert pixels[index]>.8 and pixels[index+1]<.1,'Receiver proxies contaminated the red source bake'
     assert list(image.pixels)==before,'Baking overwrote an upstream source image'

@@ -25,57 +25,6 @@ def main():
         elif obj.name.endswith('gable'):
             bm=bmesh.new();bm.from_mesh(obj.data);bmesh.ops.reverse_faces(bm,faces=list(bm.faces));bm.to_mesh(obj.data);bm.free();obj.data.update();obj['sr_bake_open_surface']=True
     exporter.rebuild_render_mesh(12,6,.03,24,0,clip_ground=None,layout='legacy',atlas_size=args.atlas_size)
-    # One derived beauty mesh avoids per-object bake setup while preserving
-    # UVs, world placement and per-object procedural coordinates.
-    source=bpy.data.collections['TH_SOURCE']
-    members=[o for o in list(source.all_objects) if o.type=='MESH' and o.get('sr_bake_role')!='receiver']
-    graph=bpy.context.evaluated_depsgraph_get()
-    vertices=[];faces=[];uvs=[];generated=[];local=[];materials=[];material_indices=[];smooth=[]
-    material_map={}
-    for obj in members:
-        evaluated=obj.evaluated_get(graph);mesh=evaluated.to_mesh()
-        offset=len(vertices);world=obj.matrix_world
-        lows=[min(v.co[axis] for v in mesh.vertices) for axis in range(3)]
-        highs=[max(v.co[axis] for v in mesh.vertices) for axis in range(3)]
-        for v in mesh.vertices:
-            vertices.append(tuple(world@v.co));local.append(tuple(v.co))
-            generated.append(tuple((v.co[a]-lows[a])/max(highs[a]-lows[a],1e-8) for a in range(3)))
-        uv=mesh.uv_layers.active
-        for face in mesh.polygons:
-            faces.append(tuple(offset+i for i in face.vertices));smooth.append(face.use_smooth)
-            uvs.extend(tuple(uv.data[i].uv) if uv else (0,0) for i in face.loop_indices)
-            material=mesh.materials[face.material_index] if mesh.materials else None
-            if material and material.name not in material_map:
-                material_map[material.name]=len(materials);materials.append(material)
-            material_indices.append(material_map[material.name] if material else 0)
-        evaluated.to_mesh_clear()
-    data=bpy.data.meshes.new('Study batched beauty');data.from_pydata(vertices,[],faces);data.update()
-    layer=data.uv_layers.new(name='Source UV');layer.data.foreach_set('uv',[v for uv in uvs for v in uv])
-    for name,values in [('sr_source_generated',generated),('sr_source_object',local)]:
-        attr=data.attributes.new(name,'FLOAT_VECTOR','POINT');attr.data.foreach_set('vector',[v for row in values for v in row])
-    def adapt(tree):
-        attr=tree.nodes.new('ShaderNodeAttribute');attr.attribute_name='sr_source_generated'
-        objattr=tree.nodes.new('ShaderNodeAttribute');objattr.attribute_name='sr_source_object'
-        for node in list(tree.nodes):
-            if node.type=='TEX_COORD':
-                for link in list(node.outputs['Generated'].links):tree.links.new(attr.outputs['Vector'],link.to_socket)
-                if node.object is None:
-                    for link in list(node.outputs['Object'].links):tree.links.new(objattr.outputs['Vector'],link.to_socket)
-            elif node.type=='GROUP' and node.node_tree:
-                node.node_tree=node.node_tree.copy();adapt(node.node_tree)
-            elif node.type in ['TEX_NOISE','TEX_VORONOI','TEX_WAVE','TEX_GRADIENT','TEX_MAGIC','TEX_CHECKER','TEX_BRICK']:
-                socket=node.inputs.get('Vector')
-                if socket and not socket.is_linked:tree.links.new(attr.outputs['Vector'],socket)
-    for material in materials:
-        copy=material.copy()
-        if copy.use_nodes:adapt(copy.node_tree)
-        data.materials.append(copy)
-    data.polygons.foreach_set('material_index',material_indices);data.polygons.foreach_set('use_smooth',smooth)
-    batch=bpy.data.objects.new('Study beauty batch',data);source.objects.link(batch)
-    for obj in members:
-        source.objects.unlink(obj) if obj.name in source.objects else None
-        bpy.data.objects.remove(obj,do_unlink=True)
-    print('SOURCE BATCH',len(members),'objects to one mesh',len(vertices),'vertices',flush=True)
     prefs=bpy.context.preferences.addons['cycles'].preferences
     prefs.compute_device_type='OPTIX';prefs.get_devices()
     devices=[d for d in prefs.devices if d.type=='OPTIX']

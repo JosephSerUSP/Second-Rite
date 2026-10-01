@@ -395,7 +395,7 @@ def configure_render_quality(scene, args) -> dict:
     problem and not two.
     """
     record = render_profiles.apply(scene, render_profiles.resolve(
-        args.render_profile, engine=args.engine, samples=args.samples, supersample=args.supersample))
+        args.render_profile, engine=args.engine, samples=args.samples, supersample=args.supersample), device="AUTO")
     if scene.render.engine == "CYCLES":
         return record
 

@@ -198,12 +198,14 @@ Keep geometry for building massing, roof edges, passage posts, genuinely open
 thresholds and the walk surface. Compare Classic and Wide frames before retaining
 small decorative geometry. A source object count is not a runtime budget.
 
-The exterior EEVEE projection exporter accepts `sr_bake_role` on source meshes:
+The exterior environment exporter accepts `sr_bake_role` on source meshes:
 `both` (default) contributes to beauty and runtime, `source` contributes only to
 beauty, and `receiver` exports only the simplified surface. Receivers can be hidden
 in source renders. Mark a single-sided card `sr_bake_open_surface = True` so sealed
-face culling cannot remove it. Unsupported roles fail; separate source/receiver
-geometry requires the EEVEE backend. The detailed source remains editable.
+face culling cannot remove it. The exporter also detects boundary and zero-volume
+sheets automatically and repairs closed-body winding on derived copies. Unsupported
+roles fail. Cycles selected-to-active supports separate source/receiver geometry;
+EEVEE projection remains an explicit comparison. The detailed source remains editable.
 
 The map's `groundProfile` owns player elevation. Derive paving and thresholds
 from that profile. With affine texturing, subdivide very large paving faces along

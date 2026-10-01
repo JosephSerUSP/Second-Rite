@@ -31,6 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from blender_locator import blender_executable  # noqa: E402
+import render_profiles
 
 
 def _operator_kwargs(operator, candidate_dict):
@@ -42,9 +43,9 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
-                            bake_samples: int = 16, flat_bake: bool = False, backend: str = "cycles",
-                            eevee=None, cycles_device="CPU"):
+def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
+                            bake_samples: int = None, flat_bake: bool = False, backend: str = "cycles",
+                            eevee=None, cycles_device="AUTO", render_profile="export"):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -59,6 +60,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     ``eevee``). Cycles device selection is explicit; GPU callers configure their
     device in the current Blender process without saving global preferences.
     """
+    import time
+    started = time.perf_counter()
     import bpy
     from mathutils import Vector, Matrix
 
@@ -175,6 +178,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     if backend not in ("cycles", "eevee"):
         raise RuntimeError(f"unknown bake backend {backend!r}; use cycles or eevee")
     eevee_report = None
+    quality_record = None
+    device_record = None
+    source_count = None
     if backend == "eevee":
         if eevee is None:
             raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
@@ -183,16 +189,21 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         eevee_report = eevee_bake.bake_atlas(eevee, scene, target_obj, col_source, bake_image, opacity=opacity)
     else:
         # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
-        scene.render.engine = 'CYCLES'
-        if cycles_device not in {"CPU", "GPU"}:
-            raise ValueError("cycles_device must be CPU or GPU")
-        scene.cycles.device = cycles_device
+        import render_profiles
+        import cycles_source
+        profile = render_profiles.resolve(render_profile, engine="cycles", samples=bake_samples)
+        quality_record = render_profiles.apply(scene, profile, bake=True)
+        bake_samples = profile.samples
+        device_record = render_profiles.configure_device(scene, cycles_device)
+        cycles_device = device_record["device"]
+        _, source_count = cycles_source.batch_source(col_source)
         if flat_bake:
             scene.cycles.samples = 1
             scene.cycles.max_bounces = 0
             scene.cycles.diffuse_bounces = 0
             scene.cycles.glossy_bounces = 0
             scene.cycles.transparent_max_bounces = 8
+            quality_record.update(samples=1, max_bounces=0, diffuse_bounces=0, glossy_bounces=0)
         else:
             scene.cycles.samples = bake_samples
         scene.cycles.bake_type = 'COMBINED'
@@ -388,15 +399,17 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         manifest["provenance"]["bake"] = {"backend": "eevee", **eevee_report["settings"]}
     else:
         manifest["provenance"]["bake"] = {"backend":"cycles", "device":cycles_device,
-            "samples":1 if flat_bake else bake_samples, "selectedToActive":True}
+            "samples":1 if flat_bake else bake_samples, "selectedToActive":True,
+            "quality":quality_record, "hardware":device_record, "batchedSourceObjects":source_count}
 
+    manifest["provenance"]["exportSeconds"] = time.perf_counter() - started
     manifest_path = output_dir / "environment.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print(f"[pipeline] Manifest written to {manifest_path}")
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE, bake_samples: int = None):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -434,8 +447,8 @@ def main():
     parser = argparse.ArgumentParser(description="Bake and export Blender environment to runtime package.")
     parser.add_argument("blend", help="Input .blend source path")
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
-    parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
-    parser.add_argument("--samples", type=int, default=16, help="Cycles bake samples")
+    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE, help="Atlas texture dimension")
+    parser.add_argument("--samples", type=int, default=None, help="Override central Cycles sample count")
     args = parser.parse_args()
 
     export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)

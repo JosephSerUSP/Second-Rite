@@ -9,21 +9,21 @@
     -14.0,
     -10.4,
     -0.14,
-    17.8,
+    18.23,
     21.4,
     8.81
   ],
   "stats": {
-    "triangleCount": 3541,
-    "vertexCount": 2618,
+    "triangleCount": 3675,
+    "vertexCount": 2693,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 151938,
-    "renderMeshSizeBytes": 325991,
-    "packageSizeBytes": 478521
+    "pngSizeBytes": 1271206,
+    "renderMeshSizeBytes": 335343,
+    "packageSizeBytes": 1607136
   },
   "anchors": {
     "cortico_entry": {
@@ -85,33 +85,31 @@
     "generator": "town_environment_pipeline.py",
     "sourceBlend": "passage_house_courtyard.blend",
     "bake": {
-      "backend": "eevee",
-      "exposureEV": 0.0,
-      "supersample": 2,
-      "probeCells": 0,
-      "probeSamples": 256,
-      "emissiveLights": false,
-      "fixtureLights": false,
-      "eeveeOptions": [],
-      "bakeCameras": [
-        0.6,
-        1.32,
-        2.04,
-        2.76,
-        3.48,
-        4.2,
-        4.92,
-        5.64,
-        6.36,
-        7.08,
-        7.8,
-        8.52,
-        9.24,
-        9.96,
-        10.68,
-        11.4
-      ]
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 128,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 128,
+        "supersample": 1,
+        "denoise": false,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 1803
     },
+    "exportSeconds": 40.06980779999867,
     "lightingPolicy": "source",
     "cameraCalibration": {
       "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",

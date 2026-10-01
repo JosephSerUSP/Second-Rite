@@ -31,7 +31,7 @@ DILATION = 4                 # the Cycles bake also dilates by 4
 
 
 def crisp(scene):
-    render_profiles.apply(scene, render_profiles.resolve("export"))
+    render_profiles.apply(scene, render_profiles.resolve("export", engine="eevee"))
 
 
 def srgb_encode(linear: np.ndarray) -> np.ndarray:

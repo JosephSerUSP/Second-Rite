@@ -47,7 +47,7 @@ def main():
             obj.data.materials.clear()
             obj.data.materials.append(material)
 
-    render_profiles.apply(scene, render_profiles.resolve(args.render_profile))
+    render_profiles.apply(scene, render_profiles.resolve(args.render_profile), device="AUTO")
     scene.render.image_settings.file_format = "PNG"
     scene.view_settings.view_transform = "Standard"
     args.out.mkdir(parents=True, exist_ok=True)

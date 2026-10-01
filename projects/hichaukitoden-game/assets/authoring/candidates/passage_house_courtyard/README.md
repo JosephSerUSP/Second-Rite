@@ -9,7 +9,7 @@ provides adjustable shared door/window families used by both the courtyard and t
 existing exterior vocabulary. Fine joinery stays editable in source and bakes onto named runtime receivers.
 Recessed casements retain jambs, sills and shutter silhouettes; shallow panels and
 hardware bake into the atlas. Sage joinery, quiet limewash and a warm timber entry
-define revision 8. The source registry selects EEVEE supersampling 2 at 0 EV. The owner-rejected v1 screenshots and package are preserved under
+define revision 8. The preserved EEVEE revision used supersampling 2 at 0 EV. The current candidate package uses the central Cycles export profile. The owner-rejected v1 screenshots and package are preserved under
 `review/rejected-v1/`; current native Classic/Wide frames are under `review/runtime/`.
 
 From the repository root, stage the committed package without Blender or networking:
@@ -44,13 +44,13 @@ $blender = "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 Export the committed source through the existing environment package boundary:
 
 ```powershell
-& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --bake-backend eevee --source-lighting
+& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --atlas-layout legacy --keep-full-ground --source-lighting
 ```
 
-EEVEE uses 0 EV and the authored light rig. Fine door/window detail stays in the source
-and projects onto receiver cards. Geometry remains for silhouette, passage posts,
+Cycles uses 0 EV and the authored light rig. Fine door/window detail stays in the source
+and bakes onto receiver surfaces using selected-to-active. Geometry remains for silhouette, passage posts,
 roof and paving. Grass is omitted. The exporter's `sr_bake_role` contract is documented
-in the exterior authoring brief; separate source/receiver roles require EEVEE.
+in the exterior authoring brief; separate source/receiver roles are supported by Cycles.
 
 For new captures (these do not replace goldens):
 
@@ -78,3 +78,11 @@ Runtime camera samples feed both source review and atlas projection. After chang
 ```
 
 `inspect_architectural_assembly.py` provides neutral front, oblique, side and rear source studies, plus a roof-cut plan for room volumes. These are editable-source inspections, distinct from the native runtime captures.
+
+
+The current package was exported through the regular Cycles exporter at 128 samples.
+`review/central-cycles/` contains native courtyard comparisons and bakery inspection
+renders; `review/eevee-before-central-cycles/` preserves the preceding EEVEE package
+and captures. Central policy and explicit comparison overrides are documented in
+`tools/blender/ENVIRONMENT-RENDERING.md`. Source and shipping maps remain unchanged.
+The courtyard's entrance shading still needs visual authoring work and owner review.

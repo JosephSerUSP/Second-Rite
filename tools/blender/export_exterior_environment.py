@@ -73,6 +73,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
+import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
@@ -556,8 +557,10 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         copy.data = realised_mesh(obj)
         atlas_alpha.preserve_uv(copy.data)
         copy.modifiers.clear()      # already applied above; join must not see them
-        if obj.get(ground_cover.OPEN_SURFACE_PROPERTY):
-            marks = copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
+        import mesh_export_geometry
+        is_open = mesh_export_geometry.prepare(copy.data)
+        if obj.get(ground_cover.OPEN_SURFACE_PROPERTY) or is_open:
+            marks = copy.data.attributes.get(OPEN_FACE_ATTRIBUTE) or copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
             marks.data.foreach_set("value", [True] * len(copy.data.polygons))
         copy.name = f"R_{obj.name}"
         copy.hide_viewport = False
@@ -682,12 +685,12 @@ def main() -> None:
                         help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
-    parser.add_argument("--atlas-size", type=int, default=2048,
+    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE,
                         help="2048 because the buildings measured 0.66 texels "
                              "per screen pixel at 1024, against the 1-3 a "
                              "backdrop wants; they need ~983k texels for 1.0 "
                              "and a 1024 atlas holds 1,049k in total")
-    parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--samples", type=int, default=None)
     parser.add_argument("--source-lighting", action="store_true",
                         help="preserve authored world and lamps rather than staging the legacy exterior rig")
     eevee_bake.add_arguments(parser)
@@ -697,9 +700,6 @@ def main() -> None:
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
-    if args.bake_backend != "eevee" and any(bake_role(obj) != "both"
-            for obj in bpy.data.collections["TH_SOURCE"].all_objects if obj.type == "MESH"):
-        raise ValueError("Separate source/receiver geometry requires the EEVEE projection backend")
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape,
                         clip_ground=None if args.keep_full_ground else args.ground_clip_margin,
@@ -728,8 +728,9 @@ def main() -> None:
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     flat_bake=True,
-                                     backend=args.bake_backend, eevee=eevee)
+                                     flat_bake=False,
+                                     backend=args.bake_backend, eevee=eevee,
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile)
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"

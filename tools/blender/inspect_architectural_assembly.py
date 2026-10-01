@@ -34,7 +34,7 @@ def main():
     scene.collection.objects.link(camera);scene.camera=camera;data.type='ORTHO';data.ortho_scale=extent
     scene.render.resolution_x=640;scene.render.resolution_y=640
     scene.render.image_settings.file_format='PNG';scene.render.film_transparent=False
-    render_profiles.apply(scene,render_profiles.resolve('review'));scene.view_settings.view_transform='AgX'
+    render_profiles.apply(scene,render_profiles.resolve('review'), device="AUTO");scene.view_settings.view_transform='AgX'
     args.out.mkdir(parents=True,exist_ok=True)
     for tag,angle in [('front',0),('oblique',40),('side',75),('rear',180)]:
         rad=math.radians(angle)

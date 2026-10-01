@@ -40,7 +40,7 @@ class EeveeBackendTests(unittest.TestCase):
             output = base / backend
             result = blender("-P", str(TOOLS / "export_room_environment.py"), "--",
                              "--blend", str(source), "--output", str(output), "--exit-y", "6.5",
-                             "--atlas-size", "128", "--samples", "8", *(["--bake-backend", backend] if backend == "cycles" else []),
+                             "--atlas-size", "128", "--samples", "8", "--bake-backend", backend, "--cycles-device", "CPU",
                              "--bake-supersample", "1")
             if "ROOM 3D EXPORT OK" not in result.stdout:
                 raise AssertionError(f"{backend} export failed:\n{result.stdout[-2500:]}\n{result.stderr[-1000:]}")
@@ -98,8 +98,11 @@ class EeveeBackendTests(unittest.TestCase):
         self.assertTrue(bake["emissiveLights"])
         self.assertTrue(bake["fixtureLights"])
 
-    def test_a_cycles_package_keeps_the_manifest_it_always_had(self):
-        self.assertNotIn("bake", self.manifest("cycles")["provenance"])
+    def test_cycles_package_records_effective_quality(self):
+        record = self.manifest("cycles")["provenance"]["bake"]
+        self.assertEqual(record["backend"], "cycles")
+        self.assertEqual(record["quality"]["samples"], 8)
+        self.assertFalse(record["quality"]["denoise"])
 
 
 if __name__ == "__main__":

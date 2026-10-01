@@ -49,6 +49,7 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
+import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
@@ -232,7 +233,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="export_room_environment")
     parser.add_argument("--blend", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--atlas-size", type=int, default=1024)
+    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE)
     parser.add_argument("--atlas-layout", choices=("loose", "packed", "view"), default="packed",
                         help="loose is the original smart_project layout (~23%% of the atlas carries "
                              "texels); packed is tight; view also spends the atlas where the lane "
@@ -241,7 +242,7 @@ def main() -> None:
                         help="--atlas-layout view: 0 = every surface equal, 1 = follow the cameras")
     parser.add_argument("--view-floor", type=float, default=0.04,
                         help="--atlas-layout view: least density an island keeps, as a fraction of the mean")
-    parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--samples", type=int, default=None)
     eevee_bake.add_arguments(parser)
     parser.add_argument("--decimate", type=float, default=1.0)
     parser.add_argument("--ambient", type=float, default=0.13,
@@ -297,7 +298,8 @@ def main() -> None:
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     backend=args.bake_backend, eevee=eevee)
+                                     backend=args.bake_backend, eevee=eevee,
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile)
 
     faces = mirror_obj_file(output / "environment.obj", LANE_CENTRE)
     print(f"[room3d] mirrored {faces} faces into engine space "

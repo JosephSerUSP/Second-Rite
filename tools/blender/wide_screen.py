@@ -135,7 +135,7 @@ def main():
         if collection:
             collection.hide_render = True
 
-    render_profiles.apply(scene, render_profiles.resolve(args.render_profile))
+    render_profiles.apply(scene, render_profiles.resolve(args.render_profile), device="AUTO")
     scene.render.film_transparent = False
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(args.out.resolve())

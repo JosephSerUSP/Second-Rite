@@ -10,10 +10,10 @@ class RenderProfilesTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout[-2000:] + result.stderr[-1000:])
         self.assertIn("RENDER_PROFILE_SMOKE_OK", result.stdout)
 
-    def test_expensive_settings_require_selection(self):
+    def test_default_quality_is_cycles_and_supersampling_is_explicit(self):
         for name in ("draft", "lookdev", "review", "export"):
             profile = profiles.resolve(name)
-            self.assertEqual(profile.engine, "BLENDER_EEVEE")
+            self.assertEqual(profile.engine, "CYCLES")
             self.assertEqual(profile.supersample, 1)
         self.assertEqual(profiles.resolve("cycles-comparison").engine, "CYCLES")
         self.assertEqual(profiles.resolve(supersample=3).supersample, 3)

@@ -1,93 +1,292 @@
 {
-  "sourceSHA256": "563d9c86bbe5685f77bc41d4aa15dc17fd0be0d83c52f76e6bb4883f844b7714",
-  "sourceBytes": 1026313,
-  "fullGeometry": {
-    "triangleCount": 1958,
-    "vertexCount": 1268,
+  "revision": "owner-directed architectural revision",
+  "sourceSHA256": "17b2dd657a4b82832ab2238a4d4d8eec12e5ea156c2edda7a15de645376b8483",
+  "sourceBytes": 1041966,
+  "package": {
+    "triangleCount": 1450,
+    "vertexCount": 969,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 824175,
-    "renderMeshSizeBytes": 174236,
-    "packageSizeBytes": 999003
+    "pngSizeBytes": 761713,
+    "renderMeshSizeBytes": 129626,
+    "packageSizeBytes": 891931
   },
-  "candidate": {
-    "triangleCount": 1522,
-    "vertexCount": 984,
-    "materialGroupCount": 1,
-    "textureDimensions": [
-      1024,
-      1024
+  "packageSHA256": {
+    "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+    "environment.json": "df2a34efb97191de401de9ed9303ac06e37c9f8acdd753621f5112d7590efa22",
+    "environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
+    "environment.obj": "3a32f5b366aad1e845f260a2f41b27cf50e27c35a46d643b0f480d7af18f4796",
+    "environment.png": "ee480acd8a94e3079ad0f6c1d78f83f7515a882baef29cb132cc37171a4698cb"
+  },
+  "bounds": [
+    -14.0,
+    -5.0,
+    -0.01,
+    9.675,
+    21.5,
+    4.2
+  ],
+  "anchors": {
+    "cortico_entry": [
+      0.0,
+      0.5,
+      0.0
     ],
-    "pngSizeBytes": 812946,
-    "renderMeshSizeBytes": 132082,
-    "packageSizeBytes": 945620
+    "lodging_entry": [
+      0.0,
+      11.5,
+      0.3
+    ],
+    "spawn_player": [
+      0.0,
+      1.0,
+      0.0
+    ]
   },
-  "atlasUVOccupancyRasterized": 0.90762,
-  "fullAtlasUVOccupancyRasterized": 0.89626,
-  "nativeComparisons": [
+  "reviewPositions": [
+    0.5,
+    2,
+    5,
+    8,
+    11.5
+  ],
+  "nativeImages": [
     {
+      "kind": "source",
+      "surface": "native",
+      "image": "256-0.5.png",
+      "meanAbsChannelDifferenceFromRejected": 8.134,
+      "activeSHA256": "6f8ff26d2fdc68c8c94287716fda6c90cb5307359e0adcd9fd64784fce3838c8"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "256-2.png",
+      "meanAbsChannelDifferenceFromRejected": 9.764,
+      "activeSHA256": "64387f02c11c9a78bf2718f9bcdd06d0214fa4e11503bccb8b500b0faca020b2"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "256-5.png",
+      "meanAbsChannelDifferenceFromRejected": 9.969,
+      "activeSHA256": "d7a3ef70d19665075f5a77de66f3cc52f8115f2bf3716f06dc0080f7ba202d38"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "256-8.png",
+      "meanAbsChannelDifferenceFromRejected": 8.657,
+      "activeSHA256": "aac981b711c6fd1319d7b1eb090b48aaca9015e4a09c56b876292794f2740c76"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "256-11.5.png",
+      "meanAbsChannelDifferenceFromRejected": 7.239,
+      "activeSHA256": "a5e6ee945697dad2f2f62d16b6b7014821027c60f37451c329b713b114a6316b"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "426-0.5.png",
+      "meanAbsChannelDifferenceFromRejected": 6.672,
+      "activeSHA256": "bcce7036978e0f90e772a356a9b74b801eaee854bbf2304083fccc1250d5475e"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "426-2.png",
+      "meanAbsChannelDifferenceFromRejected": 7.532,
+      "activeSHA256": "189959c6ba70a4597405550e9ce8226a322333aecacdde6ad3bbe6a071e86f80"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "426-5.png",
+      "meanAbsChannelDifferenceFromRejected": 8.951,
+      "activeSHA256": "44860ac1196c221c9077eb3d49e912ec1427a7359a6fb590ccf9c9c8418c6aa5"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "426-8.png",
+      "meanAbsChannelDifferenceFromRejected": 8.915,
+      "activeSHA256": "697bad0df6ee77cd326aea0115336c52734b1cf80f4f4b0609a02680876f3d78"
+    },
+    {
+      "kind": "source",
+      "surface": "native",
+      "image": "426-11.5.png",
+      "meanAbsChannelDifferenceFromRejected": 7.715,
+      "activeSHA256": "d8a76296fb78a46879d5752265b1dbb81ca7f859eec132fb9a084cda8927503f"
+    },
+    {
+      "kind": "runtime",
       "surface": "classic",
-      "y": 0.5,
-      "meanAbsoluteChannelDifference": 1.328
+      "image": "0.5.png",
+      "meanAbsChannelDifferenceFromRejected": 12.466,
+      "activeSHA256": "60e32146fe3a136b0b3c3ce4c0e62cd032a5e5468021ca03cc8cd80f5f21f784"
     },
     {
+      "kind": "runtime",
       "surface": "classic",
-      "y": 2.0,
-      "meanAbsoluteChannelDifference": 1.857
+      "image": "2.png",
+      "meanAbsChannelDifferenceFromRejected": 14.275,
+      "activeSHA256": "ba49e488ddc5f7c746d32061e4d20af5e13353277758fca887551246dee9ae37"
     },
     {
+      "kind": "runtime",
       "surface": "classic",
-      "y": 5.0,
-      "meanAbsoluteChannelDifference": 2.183
+      "image": "5.png",
+      "meanAbsChannelDifferenceFromRejected": 12.334,
+      "activeSHA256": "6fa79f9eed83990d981d3c83cdb7e347e5086c85441b283c44350f7cb60267d1"
     },
     {
+      "kind": "runtime",
       "surface": "classic",
-      "y": 8.0,
-      "meanAbsoluteChannelDifference": 2.536
+      "image": "8.png",
+      "meanAbsChannelDifferenceFromRejected": 8.423,
+      "activeSHA256": "e9ffadc25dbe09db894947005b32c5c831c272f5bbc83b1c376c06f1f59561e4"
     },
     {
+      "kind": "runtime",
       "surface": "classic",
-      "y": 11.5,
-      "meanAbsoluteChannelDifference": 1.207
+      "image": "11.5.png",
+      "meanAbsChannelDifferenceFromRejected": 11.094,
+      "activeSHA256": "023a6e95bb33b38d6502dd803037fcad72ee6717849006d818d14783302f5308"
     },
     {
+      "kind": "runtime",
       "surface": "wide",
-      "y": 0.5,
-      "meanAbsoluteChannelDifference": 1.542
+      "image": "0.5.png",
+      "meanAbsChannelDifferenceFromRejected": 10.672,
+      "activeSHA256": "75a4a444976cada4f60fe321feb50c9b2bab528c3d244d1107321eddf5ff92ff"
     },
     {
+      "kind": "runtime",
       "surface": "wide",
-      "y": 2.0,
-      "meanAbsoluteChannelDifference": 1.796
+      "image": "2.png",
+      "meanAbsChannelDifferenceFromRejected": 10.938,
+      "activeSHA256": "7ef2de7a3218d02e458b35c857ea394a0bd7ee4b64dd1e0c91333965af2aa13c"
     },
     {
+      "kind": "runtime",
       "surface": "wide",
-      "y": 5.0,
-      "meanAbsoluteChannelDifference": 2.138
+      "image": "5.png",
+      "meanAbsChannelDifferenceFromRejected": 11.401,
+      "activeSHA256": "ceedfbe16767add176b6d67dacc48222a394b9b99050db05bc97692b4579b285"
     },
     {
+      "kind": "runtime",
       "surface": "wide",
-      "y": 8.0,
-      "meanAbsoluteChannelDifference": 1.27
+      "image": "8.png",
+      "meanAbsChannelDifferenceFromRejected": 12.739,
+      "activeSHA256": "d4081d50900a2fc795ec1d5db143dd96c77ec5a81ed6bfec8f361a1d782af821"
     },
     {
+      "kind": "runtime",
       "surface": "wide",
-      "y": 11.5,
-      "meanAbsoluteChannelDifference": 0.715
+      "image": "11.5.png",
+      "meanAbsChannelDifferenceFromRejected": 10.025,
+      "activeSHA256": "8865cd320632caa389ab0616be515c3fb378a38fa0c4c412aad7f28b10eafbaa"
     }
   ],
-  "exportSeconds": {
-    "cold": 27.7,
-    "warm": 27.4
+  "rejectedV1Measurements": {
+    "sourceSHA256": "563d9c86bbe5685f77bc41d4aa15dc17fd0be0d83c52f76e6bb4883f844b7714",
+    "sourceBytes": 1026313,
+    "fullGeometry": {
+      "triangleCount": 1958,
+      "vertexCount": 1268,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 824175,
+      "renderMeshSizeBytes": 174236,
+      "packageSizeBytes": 999003
+    },
+    "candidate": {
+      "triangleCount": 1522,
+      "vertexCount": 984,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 812946,
+      "renderMeshSizeBytes": 132082,
+      "packageSizeBytes": 945620
+    },
+    "atlasUVOccupancyRasterized": 0.90762,
+    "fullAtlasUVOccupancyRasterized": 0.89626,
+    "nativeComparisons": [
+      {
+        "surface": "classic",
+        "y": 0.5,
+        "meanAbsoluteChannelDifference": 1.328
+      },
+      {
+        "surface": "classic",
+        "y": 2.0,
+        "meanAbsoluteChannelDifference": 1.857
+      },
+      {
+        "surface": "classic",
+        "y": 5.0,
+        "meanAbsoluteChannelDifference": 2.183
+      },
+      {
+        "surface": "classic",
+        "y": 8.0,
+        "meanAbsoluteChannelDifference": 2.536
+      },
+      {
+        "surface": "classic",
+        "y": 11.5,
+        "meanAbsoluteChannelDifference": 1.207
+      },
+      {
+        "surface": "wide",
+        "y": 0.5,
+        "meanAbsoluteChannelDifference": 1.542
+      },
+      {
+        "surface": "wide",
+        "y": 2.0,
+        "meanAbsoluteChannelDifference": 1.796
+      },
+      {
+        "surface": "wide",
+        "y": 5.0,
+        "meanAbsoluteChannelDifference": 2.138
+      },
+      {
+        "surface": "wide",
+        "y": 8.0,
+        "meanAbsoluteChannelDifference": 1.27
+      },
+      {
+        "surface": "wide",
+        "y": 11.5,
+        "meanAbsoluteChannelDifference": 0.715
+      }
+    ],
+    "exportSeconds": {
+      "cold": 27.7,
+      "warm": 27.4
+    },
+    "files": {
+      "package\\collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+      "package\\environment.json": "a6d6806eff9e051a489ac8ab38e7073c0e53be0846e117dec662aebbed648b5d",
+      "package\\environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
+      "package\\environment.obj": "1b4c9ecd1e9b229cf6efe4214180d48b8e42e1f1e14411e68acffe485d970873",
+      "package\\environment.png": "a380ca8b167b0af67d725c30e735651521f561bff27c5784fba6eeacfc5e846a"
+    }
   },
-  "files": {
-    "package\\collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-    "package\\environment.json": "a6d6806eff9e051a489ac8ab38e7073c0e53be0846e117dec662aebbed648b5d",
-    "package\\environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
-    "package\\environment.obj": "1b4c9ecd1e9b229cf6efe4214180d48b8e42e1f1e14411e68acffe485d970873",
-    "package\\environment.png": "a380ca8b167b0af67d725c30e735651521f561bff27c5784fba6eeacfc5e846a"
-  }
+  "interpretation": "Pixel deltas document that the rebuilt composition differs from rejected v1; they do not measure visual quality or owner acceptance."
 }

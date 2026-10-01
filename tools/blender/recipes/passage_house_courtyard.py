@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import second_rite_asset_core as core
 import thestra_camera
 import render_profiles
+from opening_families import door as door_family, window as window_family
 from first_stratum.common import box
 from vendor_assets import verify
 
@@ -123,16 +124,6 @@ def build(output):
     profile_surface("COL_profile_walk",profile,-.75,.75,collision,bake=False)
     # Thick walls and unequal volumes frame a court rather than a symmetric diorama.
     structures = [
-        ("rear_west",(.5,10.5,3.8),(4.6,3.75,1.9),plaster),
-        ("rear_east",(.5,3.4,4.2),(4.6,14.2,2.4),plaster),
-        ("rear_lintel",(.5,2.8,.65),(4.6,10.9,3.75),plaster),
-        ("west_return",(5.8,.45,3.8),(2.0,-1.2,1.9),plaster),
-        ("upper_domestic",(2.8,4.3,1.9),(5.5,2.2,4.65),plaster),
-        ("upper_cornice",(3.1,4.6,.18),(5.3,2.2,5.55),pale),
-        ("lodging_door",(.12,1.4,2.25),(4.28,11.0,1.425),wood),
-        ("door_lintel",(.28,1.8,.20),(4.05,11.0,2.66),pale),
-        ("door_jamb_w",(.25,.18,2.5),(4.05,10.22,1.55),pale),
-        ("door_jamb_e",(.25,.18,2.5),(4.05,11.78,1.55),pale),
         ("passage_roof",(6.0,5.7,.18),(1.4,10.7,3.6),terracotta),
         ("passage_front_beam",(.18,5.9,.24),(-1.5,10.7,3.34),wood),
         ("passage_rear_beam",(.18,5.9,.24),(4.0,10.7,3.34),wood),
@@ -148,16 +139,83 @@ def build(output):
     for name,size,location,material in structures:
         part(name,size,location,material,bevel=.025,
              rotation=(0,-.06,0) if name=="passage_roof" else (0,0,0))
-    # Keep the visual door on the map-owned lodging threshold's lateral position.
-    for obj in source.objects:
-        if obj.name.startswith(("lodging_door","door_lintel","door_jamb")):
-            obj.location.y+=.5
-    for y in (.5,3.5,6.8):
-        part(f"window_head_{y}",(.30,1.22,.16),(4.05,y,3.26),pale)
-        part(f"window_sill_{y}",(.42,1.24,.14),(4.0,y,1.76),pale)
-        for dy in (-.56,.56):
-            part(f"window_frame_{y}_{dy}",(.24,.13,1.43),(4.09,y+dy,2.50),pale)
-    part("wall_weathered_plinth",(.18,10.2,.30),(4.26,3.9,.18),pale)
+    # The lodging is one enclosed building shell.  Its rear facade is laid in
+    # continuous masonry bays around real openings, with the full volume,
+    # return walls, rear wall and pitched roof closing every view through them.
+    facade_x, facade_front, facade_back = 4.6, -1.5, 21.5
+    wall_thickness, wall_height = .5, 4.2
+    door_y, door_width, door_height = 11.5, 1.4, 2.45
+    windows = ((.5, 1.22, 1.45, 1.76),
+               (3.5, 1.22, 1.45, 1.76),
+               (6.8, 1.22, 1.45, 1.76))
+    openings = [(door_y, door_width, 0.0, door_height, "door")]
+    openings.extend((y, width, sill, height, "window")
+                    for y, width, height, sill in windows)
+    openings.sort(key=lambda item: item[0])
+
+    def wall_segment(name, y0, y1, z0=0.0, z1=wall_height, material=plaster):
+        if y1-y0 < .01 or z1-z0 < .01:
+            return
+        part(name, (wall_thickness, y1-y0, z1-z0),
+             (facade_x, (y0+y1)/2, (z0+z1)/2), material)
+
+    cursor = facade_front
+    for index, (center, width, sill, height, kind) in enumerate(openings):
+        lo, hi = center-width/2, center+width/2
+        wall_segment(f"lodging_facade_bay_{index}", cursor, lo)
+        if kind == "window":
+            wall_segment(f"lodging_window_{index}_spandrel", lo, hi,
+                         0.0, sill)
+            wall_segment(f"lodging_window_{index}_lintel", lo, hi,
+                         sill+height, wall_height)
+        else:
+            # A substantial stone head spans the door and bears on both piers.
+            wall_segment("lodging_door_head", lo, hi, door_height,
+                         wall_height, pale)
+        cursor = hi
+    wall_segment("lodging_facade_end", cursor, facade_back)
+    # Continuous side returns tie both facade ends into the rear room mass.
+    # The back return stays within the exporter camera envelope; the longer
+    # facade beyond it reads as the lodging's covered gallery wing.
+    for y, side in ((facade_front+.20, "west"), (17.8, "east")):
+        part(f"lodging_{side}_return",(5.0,.55,wall_height),
+             (7.0,y,wall_height/2),plaster)
+    part("lodging_rear_wall",(.55,facade_back-facade_front,wall_height),
+         (9.4,(facade_front+facade_back)/2,wall_height/2),plaster)
+    # A clay gable roof runs along the court, with deep eaves and a real ridge.
+    roof_verts=[(4.25,facade_front-.45,4.05),(4.25,facade_back+.45,4.05),
+        (7.0,facade_front-.45,5.35),(7.0,facade_back+.45,5.35),
+        (9.75,facade_front-.45,4.05),(9.75,facade_back+.45,4.05),
+        (4.25,facade_front-.45,3.88),(4.25,facade_back+.45,3.88),
+        (7.0,facade_front-.45,5.18),(7.0,facade_back+.45,5.18),
+        (9.75,facade_front-.45,3.88),(9.75,facade_back+.45,3.88)]
+    mesh("lodging_pitched_roof",roof_verts,
+         [(0,1,3,2),(2,3,5,4),(4,5,11,10),(10,11,9,8),(8,9,7,6),(6,7,1,0),
+          (0,2,8,6),(2,4,10,8),(1,7,9,3),(3,9,11,5)],source,terracotta)
+    host=type("OpeningHost",(),{})()
+    host.back_x=4.30
+    host.wood=core.make_material("Court lodging door timber",
+        color=(.19,.075,.027),roughness=.82)
+    host.panel=core.make_material("Court door raised panels",
+        color=(.31,.15,.055),roughness=.84)
+    host.stone=pale;host.terracotta=terracotta
+    host.glass=core.make_material("Court smoked glazing",color=(.018,.027,.035),roughness=.32)
+    host.window_glow=host.glass;host.iron=iron
+    host.y=lambda value:float(value)
+    host.part=lambda name,size,location,material:part(name,size,location,material)
+    for index,(y,width,height,sill) in enumerate(windows):
+        window_family(host,f"lodging_window_{index+1}",y,width=width,
+            height=height,sill_z=sill,x=4.30,shutters=True,source=True)
+    door_family(host,"lodging_entry_door",door_y,width=door_width,
+        height=door_height,x=4.30,panels=4,panel_material=host.panel,
+        source=True)
+    # The doorway opens into a short, enclosed vestibule, so the closed leaf is
+    # framed by a building and the open aperture can never expose the sky.
+    part("vestibule_floor",(3.6,1.6,.12),(6.15,door_y,.12),pale)
+    part("vestibule_inner_wall",(.35,2.2,wall_height),(7.8,door_y,2.1),wood)
+    part("vestibule_west_return",(3.4,.18,wall_height),(6.1,door_y-.82,2.1),plaster)
+    part("vestibule_east_return",(3.4,.18,wall_height),(6.1,door_y+.82,2.1),plaster)
+    part("wall_weathered_plinth",(.18,17.4,.30),(4.30,7.2,.18),pale)
     part("passage_eave",(.24,6.05,.12),(-1.68,10.7,3.36),terracotta)
     part("threshold_paving_tongue",(4.4,1.65,.035),(2.0,11.5,.30),paving)
     for y in (8.1,13.1):
@@ -165,17 +223,13 @@ def build(output):
         part(f"column_foot_{y}",(.42,.42,.32),(-1.5,y,.46),pale)
     for y in (7.5,8.9):
         part(f"bench_leg_{y}",(.12,.12,.5),(3.1,y,.56),wood)
-    for y in (0.5,3.5,6.8):
-        part(f"shutter_{y}",(.14,.95,1.35),(4.26,y,2.5),wood)
-        for dy in (-.22,.22):
-            part(f"shutter_panel_{y}_{dy}",(.055,.32,1.05),(4.16,y+dy,2.5),wood)
     # A small tile band at the wash area, not an azulejo-covered facade.
     for j in range(10):
         part(f"wash_tile_{j}",(.035,.19,.19),(3.88,4.3+j*.2,1.28),tile_blue if j%2 else pale)
     # Roof ribs are silhouette-bearing; their repetitions use a shared primitive.
     for j in range(20):
         part(f"pantile_ridge_{j}",(6.05,.10,.07),(1.4,8.05+j*.28,3.73),terracotta)
-    for y in (9.1,11.9):
+    for y in (8.1,13.1):
         part(f"roof_rafter_{y}",(5.5,.14,.18),(1.2,y,3.18),wood)
     part("linen_wash_towel",(.025,.65,.75),(3.78,6.45,1.05),linen)
     # Low-detail pots carry a rounded silhouette and reuse the acquired clay material.
@@ -183,18 +237,9 @@ def build(output):
         bpy.ops.mesh.primitive_uv_sphere_add(segments=12,ring_count=6,radius=radius,location=(2.5,y,.3+radius))
         pot=bpy.context.object;pot.name=f"Court earthenware {y}"
         pot.scale=(1,1,1.25);core.move_to_collection(pot,source);pot.data.materials.append(terracotta);pot["sr_bake_source"]=True
-    # Panelled door rather than a modern flat slab.
-    for z in (.85,1.85):
-        for y in (10.65,11.35):
-            part(f"door_panel_{z}_{y}",(.055,.52,.72),(4.17,y+.5,z),wood)
-    part("door_latch",(.1,.1,.12),(4.1,10.98,1.4),iron)
-    # Window and door joinery remains editable bake source, not runtime triangles.
-    for obj in source.objects:
-        if obj.type=="MESH" and obj.name.startswith(("shutter_","window_","lodging_door","door_")):
-            obj["sr_bake_role"]="source"
     for y in (.5,3.5,6.8):
-        detail_receiver(f"Window receiver {y}",3.78,y,2.5,1.4,1.75,source,plaster)
-    detail_receiver("Lodging door receiver",3.85,11.5,1.58,1.95,2.8,source,plaster)
+        detail_receiver(f"Window receiver {y}",4.34,y,2.50,1.4,1.75,source,plaster)
+    detail_receiver("Lodging door receiver",4.34,11.5,1.95,1.95,2.8,source,plaster)
     for event in map_data["events"]:
         name=next(door["anchor"] for door in map_data["traversal"]["doorways"] if door["eventInstanceId"]==event["instanceId"])
         obj=bpy.data.objects.new(name,None);anchors.objects.link(obj);obj.location=event["worldPosition"]

@@ -9,21 +9,21 @@
     -14.0,
     -5.0,
     -0.01,
-    6.9,
-    17.0,
-    5.64
+    9.675,
+    21.5,
+    4.2
   ],
   "stats": {
-    "triangleCount": 1522,
-    "vertexCount": 984,
+    "triangleCount": 1450,
+    "vertexCount": 969,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 812946,
-    "renderMeshSizeBytes": 132082,
-    "packageSizeBytes": 945620
+    "pngSizeBytes": 761713,
+    "renderMeshSizeBytes": 129626,
+    "packageSizeBytes": 891931
   },
   "anchors": {
     "cortico_entry": {

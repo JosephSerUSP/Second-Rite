@@ -1,0 +1,93 @@
+{
+  "sourceSHA256": "563d9c86bbe5685f77bc41d4aa15dc17fd0be0d83c52f76e6bb4883f844b7714",
+  "sourceBytes": 1026313,
+  "fullGeometry": {
+    "triangleCount": 1958,
+    "vertexCount": 1268,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 824175,
+    "renderMeshSizeBytes": 174236,
+    "packageSizeBytes": 999003
+  },
+  "candidate": {
+    "triangleCount": 1522,
+    "vertexCount": 984,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 812946,
+    "renderMeshSizeBytes": 132082,
+    "packageSizeBytes": 945620
+  },
+  "atlasUVOccupancyRasterized": 0.90762,
+  "fullAtlasUVOccupancyRasterized": 0.89626,
+  "nativeComparisons": [
+    {
+      "surface": "classic",
+      "y": 0.5,
+      "meanAbsoluteChannelDifference": 1.328
+    },
+    {
+      "surface": "classic",
+      "y": 2.0,
+      "meanAbsoluteChannelDifference": 1.857
+    },
+    {
+      "surface": "classic",
+      "y": 5.0,
+      "meanAbsoluteChannelDifference": 2.183
+    },
+    {
+      "surface": "classic",
+      "y": 8.0,
+      "meanAbsoluteChannelDifference": 2.536
+    },
+    {
+      "surface": "classic",
+      "y": 11.5,
+      "meanAbsoluteChannelDifference": 1.207
+    },
+    {
+      "surface": "wide",
+      "y": 0.5,
+      "meanAbsoluteChannelDifference": 1.542
+    },
+    {
+      "surface": "wide",
+      "y": 2.0,
+      "meanAbsoluteChannelDifference": 1.796
+    },
+    {
+      "surface": "wide",
+      "y": 5.0,
+      "meanAbsoluteChannelDifference": 2.138
+    },
+    {
+      "surface": "wide",
+      "y": 8.0,
+      "meanAbsoluteChannelDifference": 1.27
+    },
+    {
+      "surface": "wide",
+      "y": 11.5,
+      "meanAbsoluteChannelDifference": 0.715
+    }
+  ],
+  "exportSeconds": {
+    "cold": 27.7,
+    "warm": 27.4
+  },
+  "files": {
+    "package\\collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+    "package\\environment.json": "a6d6806eff9e051a489ac8ab38e7073c0e53be0846e117dec662aebbed648b5d",
+    "package\\environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
+    "package\\environment.obj": "1b4c9ecd1e9b229cf6efe4214180d48b8e42e1f1e14411e68acffe485d970873",
+    "package\\environment.png": "a380ca8b167b0af67d725c30e735651521f561bff27c5784fba6eeacfc5e846a"
+  }
+}

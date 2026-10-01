@@ -4,6 +4,13 @@ This editable scaffold and package are review candidates. Map 32 is added only t
 copied Project; shipping maps and the town generator remain unchanged. Owner visual
 and traversal acceptance precede promotion.
 
+The current review revision uses one continuous lodging shell, a covered and supported
+entry, and a closed vestibule behind the door. `tools/blender/recipes/opening_families.py`
+provides adjustable shared door/window families used by both the courtyard and the
+existing exterior vocabulary. Fine joinery stays editable in source and bakes onto four
+runtime receivers. The owner-rejected v1 screenshots and package are preserved under
+`review/rejected-v1/`; current native Classic/Wide frames are under `review/runtime/`.
+
 From the repository root, stage the committed package without Blender or networking:
 
 ```powershell

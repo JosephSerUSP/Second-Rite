@@ -1,0 +1,117 @@
+{
+  "contractVersion": 1,
+  "environmentId": "passage_house_courtyard",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -14.0,
+    -5.0,
+    -0.01,
+    6.9,
+    17.0,
+    5.64
+  ],
+  "stats": {
+    "triangleCount": 1522,
+    "vertexCount": 984,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 812946,
+    "renderMeshSizeBytes": 132082,
+    "packageSizeBytes": 945620
+  },
+  "anchors": {
+    "cortico_entry": {
+      "id": "cortico_entry",
+      "position": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "lodging_entry": {
+      "id": "lodging_entry",
+      "position": [
+        0.0,
+        11.5,
+        0.3
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "passage_house_courtyard.blend",
+    "bake": {
+      "backend": "eevee",
+      "exposureEV": 0.0,
+      "supersample": 1,
+      "probeCells": 0,
+      "probeSamples": 256,
+      "emissiveLights": false,
+      "fixtureLights": false,
+      "eeveeOptions": [],
+      "bakeCameras": [
+        0.6,
+        1.32,
+        2.04,
+        2.76,
+        3.48,
+        4.2,
+        4.92,
+        5.64,
+        6.36,
+        7.08,
+        7.8,
+        8.52,
+        9.24,
+        9.96,
+        10.68,
+        11.4
+      ]
+    },
+    "lightingPolicy": "source"
+  }
+}

@@ -12,6 +12,7 @@ function module.run(loader)
     renderer.init(game)
     require("presentation.viewport_3d").init()
     scene_host.init(nil)
+    local view = require("presentation.viewport_3d")
     local result = {}
     for _, y in ipairs({0,0.5,2,5,8,11.5,12}) do
         exploration.loadMap(game,loader.getMapIndex(32))
@@ -23,6 +24,9 @@ function module.run(loader)
         scene_host.update(1,ctx)
         renderer.update(1)
         local width,height = surface.renderSize()
+        local centerX, horizonY = view.authoredCompositionCenter(game.townTraversal.camera)
+        assert(centerX == width / 2, "Classic camera frame must be centred on each render surface")
+        assert(horizonY == 90, "Authored horizon changes with render width")
         local canvas = love.graphics.newCanvas(width,height)
         for _ = 1,2 do
             love.graphics.setCanvas({canvas,depth=true,stencil=true})
@@ -34,7 +38,7 @@ function module.run(loader)
             if _ == 1 then love.timer.sleep(0.20) end
         end
         local png = canvas:newImageData():encode("png")
-        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,cameraOffsetX=game.townTraversal.cameraOffsetX,
+        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,cameraOffsetX=game.townTraversal.cameraOffsetX,logicalWidth=surface.compositionWidth(),cameraCenterX=centerX,
             image=love.data.encode("string","base64",png)}
         canvas:release()
     end

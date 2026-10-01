@@ -30,7 +30,7 @@ def uv_charts(mesh):
 
 
 def snap_to_texels(mesh, size):
-    """Snap complete charts to texel centres; retain charts that would collapse."""
+    """Snap complete charts to pixel corners; retain charts that would collapse."""
     mesh.calc_loop_triangles()
     uv=mesh.uv_layers.active.data
     groups=uv_charts(mesh)
@@ -44,10 +44,10 @@ def snap_to_texels(mesh, size):
         indices=[i for face in mesh.polygons if groups[face.index]==group for i in face.loop_indices]
         points=original[indices]*size
         centre=(points.min(axis=0)+points.max(axis=0))/2
-        quantized=np.where(points>centre,np.floor(points-.5)+.5,np.ceil(points-.5)+.5)
+        quantized=np.where(points>centre,np.floor(points),np.ceil(points))
         if np.any(quantized<points.min(axis=0)-1e-6) or np.any(quantized>points.max(axis=0)+1e-6):
             rejected.add(group)
-        snapped[indices]=np.clip(quantized,.5,size-.5)/size
+        snapped[indices]=np.clip(quantized,0,size)/size
     for tri in mesh.loop_triangles:
         a,b,c=original[list(tri.loops)]*size
         x,y,z=snapped[list(tri.loops)]*size
@@ -73,7 +73,7 @@ def snap_to_texels(mesh, size):
         if groups[face.index] not in rejected:
             for i in face.loop_indices:uv[i].uv=snapped[i]
     mesh.update()
-    return {'method':'UV boundaries inward to texel centres; preserve chart on collapse, flip or new shared texels',
+    return {'method':'UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels',
         'alignedCharts':len(set(groups)-rejected),'preservedUnsafeCharts':len(rejected),
         'existingSharedTexelPairs':len(baseline),'newSharedTexelPairs':len(collisions-baseline),'atlasSize':size}
 

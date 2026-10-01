@@ -10,6 +10,15 @@ local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
 
+-- Authored camera framing lives in Classic composition coordinates. Wider
+-- surfaces translate that frame; they never change its optical pixel scale.
+function viewport_3d.authoredCompositionCenter(camera)
+    local frame = camera and camera.projectionFrame or {}
+    return surface.compositionToRender(
+        frame.canonicalCenterX or surface.compositionWidth() * 0.5,
+        frame.canonicalHorizonY or 70)
+end
+
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
 -- nil when the variant is atlas-only, so every placement site asks one
@@ -1265,6 +1274,7 @@ local function drawTownPrerender(session, inspection)
     local sliceY = preRendered.slicePositions[sceneIndex]
     local projection = preRendered.playerProjection
     local authoredTownCamera = session.townTraversal.camera or {}
+    local townCenterX, townHorizonY = viewport_3d.authoredCompositionCenter(authoredTownCamera)
     local townCamera = worldCamera.resolve(session, {
         profile = "town_sideview",
         authoredCamera = authoredTownCamera,
@@ -1272,10 +1282,8 @@ local function drawTownPrerender(session, inspection)
             targetWidth = renderWidth,
             targetHeight = renderHeight,
             compositionWidth = surface.compositionWidth(),
-            canonicalCenterX = authoredTownCamera.projectionFrame
-                and authoredTownCamera.projectionFrame.canonicalCenterX,
-            canonicalHorizonY = authoredTownCamera.projectionFrame
-                and authoredTownCamera.projectionFrame.canonicalHorizonY,
+            canonicalCenterX = townCenterX,
+            canonicalHorizonY = townHorizonY,
         },
     })
     local townPitch = authoredTownCamera.pitch
@@ -2188,8 +2196,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     if session.townTraversal and session.townTraversal.camera then
         authoredCamera = session.townTraversal.camera
         if authoredCamera.projectionFrame then
-            canonicalCenterX = authoredCamera.projectionFrame.canonicalCenterX or canonicalCenterX
-            canonicalHorizonY = authoredCamera.projectionFrame.canonicalHorizonY or canonicalHorizonY
+            canonicalCenterX, canonicalHorizonY = viewport_3d.authoredCompositionCenter(authoredCamera)
         end
     end
     local camera = worldCamera.resolve(session, {

@@ -1,0 +1,9 @@
+{
+  "firstWholeProcessSeconds": 53.3065966,
+  "repeatWholeProcessSeconds": 52.8613706,
+  "note": "Fresh Blender workers; cache state not certified; measured times are not a cap.",
+  "changedPixels": 21,
+  "maximumChannelDifference": 1,
+  "geometryIdentical": true,
+  "collisionIdentical": true
+}

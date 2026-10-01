@@ -226,8 +226,10 @@ def build(output):
     for y in [8.23,13.53]:
         b.part(f'Veranda post {y}',(.21,.21,2.83),(x0,y,1.795),wood,bevel=.015)
         b.part(f'Veranda foot {y}',(.35,.35,.25),(x0,y,.425),stone,bevel=.025)
-        b.cylinder(f'Veranda knee brace {y}',(x0,y,2.49),(x0+.82,y,3.31),.065,wood,'both',8)
-        b.part(f'Veranda rafter {y}',(6.1,.13,.19),(1.53,y,3.68),wood,bevel=.008)
+        b.cylinder(f'Veranda knee brace {y}',(x0,y,2.49),(x0+.82,y,3.22),.065,wood,'both',8)
+        pitch=math.atan2(.76,x1-x0)
+        rafter=b.part(f'Veranda rafter {y}',(6.1/math.cos(pitch),.13,.19),(1.555,y,3.50),wood,bevel=.008)
+        rafter.rotation_euler.y=-pitch
     # The backstreet has complete two-storey volumes, rather than a detached skyline.
     for name,front,a,c,eave,ridge,color in [('West street',12.3,-10,-1.8,6.3,7.5,(.62,.37,.17)),('Rear street',13.8,-1.8,14.5,7.15,8.4,(.62,.58,.45)),('East street',12.1,14.5,26,6.6,7.8,(.50,.29,.21))]:
         wall=finish_material(name+' limewash',color,weather=True)
@@ -292,14 +294,23 @@ def build(output):
             hit,point,normal,index=floor.ray_cast(Vector((x,y,10)),Vector((0,0,-1)))
             if not hit:raise ValueError('Missing authored floor beneath path')
             b.part(f'Court path stone {row} {col}',(.45,.39,.012),(x,y,point.z+.008),pathmat,'source',.02)
-    # Decorative apron continues toward the camera; these are not walk heights.
-    # Low masonry and a shallow drainage channel give the near rank structure.
-    for i in range(36):
-        yy=-5.5+i*.65
-        hit,point,normal,index=floor.ray_cast(Vector((-6.6,yy,10)),Vector((0,0,-1)))
-        if not hit:raise ValueError('Missing paving beneath foreground coping')
-        detail=b.part(f'Court near coping {i}',(.42,.625,.24),(-6.6,yy,point.z+.12),stone,'source',bevel=.025)
-        box_receiver(detail,b.source)
+    # The camera-side court boundary is a continuous architectural near rank.
+    # Broad masonry fills the lower frame; it stays well outside the walk lane.
+    # Its coping follows the map profile, rather than creating another datum.
+    for start,end in [(-8,2),(2,8),(8,22)]:
+        def height(y):
+            return 0 if y<=2 else .30 if y>=8 else (y-2)*.05
+        xa,xb=-13.8,-12.6
+        verts=[(x,y,height(y)+z) for z in [0,.46] for y in [start,end] for x in [xa,xb]]
+        faces=[(0,2,3,1),(4,5,7,6),(0,1,5,4),(2,6,7,3),(0,4,6,2),(1,3,7,5)]
+        b.mesh(f'Court foreground boundary {start}',verts,faces,plaster)
+        cap=[(x,y,height(y)+z) for z in [.46,.57] for y in [start,end] for x in [xa-.08,xb+.08]]
+        b.mesh(f'Court foreground coping {start}',cap,faces,stone)
+    # Short inward returns make the perimeter read as an enclosed courtyard.
+    for y in [-2.1,14.4]:
+        z=0 if y<2 else .30
+        b.part(f'Court foreground return {y}',(6.7,.42,.46),(-9.25,y,z+.23),plaster)
+        b.part(f'Court foreground return cap {y}',(6.8,.58,.11),(-9.25,y,z+.515),stone,bevel=.02)
     channel=finish_material('Court drain shadow',(.10,.13,.12),roughness=1)
     for i in range(40):
         yy=-5+i*.65
@@ -341,7 +352,7 @@ def build(output):
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
     render_profiles.apply(scene,render_profiles.resolve('draft'));scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=14;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=15;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

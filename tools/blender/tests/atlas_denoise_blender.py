@@ -39,7 +39,7 @@ report=atlas_denoise.snap_to_texels(tiny,64)
 assert report['alignedCharts']==1 and report['preservedUnsafeCharts']==1,report
 assert [tuple(v.uv) for v in layer.data][3:]==before[3:],'Tiny UV chart collapsed'
 for loop in layer.data[:3]:
-    for coordinate in loop.uv:assert abs((coordinate*64-.5)-round(coordinate*64-.5))<1e-5
+    for coordinate in loop.uv:assert abs((coordinate*64)-round(coordinate*64))<1e-5
 print('TEXEL ALIGNMENT OK',report)
 
 # Adjacent islands with a subpixel gutter must not acquire shared texels.

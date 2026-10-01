@@ -52,7 +52,7 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==14
+assert bpy.context.scene['courtyard_revision']==15
 for obj in bpy.data.objects:
     if not obj.get('architectural_spec'):continue
     spec=json.loads(obj['architectural_spec'])
@@ -103,3 +103,15 @@ for width in [256,426]:
 assert len(bottom_hits)==70
 assert any(point.x < -14 for point in bottom_hits), 'Coverage probe missed the previous near-edge defect'
 print('COURTYARD RECIPE PARITY OK',len(actual))
+
+assert not any(o.name.startswith('Court near coping ') for o in bpy.data.objects)
+for obj in bpy.data.objects:
+    if obj.type=='MESH' and obj.name.startswith(('Veranda rafter ', 'Veranda knee brace ')):
+        evaluated=obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        data=evaluated.to_mesh()
+        for vertex in data.vertices:
+            point=evaluated.matrix_world@vertex.co
+            underside=3.24+(point.x+1.55)*.76/6.21
+            assert point.z < underside-.015,(obj.name,point[:],underside)
+        evaluated.to_mesh_clear()
+print('VERANDA SUPPORT CLEARANCE OK')

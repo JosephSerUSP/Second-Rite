@@ -1,0 +1,61 @@
+{
+  "interpretation": "Actual native Classic vs central 256 pixels of Wide, upper world band excludes controls/menu/HUD; owner acceptance remains separate.",
+  "comparisons": [
+    {
+      "position": "0.5",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 2
+    },
+    {
+      "position": "0",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 2
+    },
+    {
+      "position": "11.5",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 2
+    },
+    {
+      "position": "12",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 2
+    },
+    {
+      "position": "2",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 2
+    },
+    {
+      "position": "5",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 1
+    },
+    {
+      "position": "8",
+      "worldBandRows": [
+        20,
+        100
+      ],
+      "changedPixels": 4
+    }
+  ]
+}

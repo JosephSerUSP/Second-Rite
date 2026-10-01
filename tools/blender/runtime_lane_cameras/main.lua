@@ -6,6 +6,8 @@ local function exportViews()
     local json=require('engine.data.json')
     local lane=require('engine.bounded_lane')
     local calibration=require('presentation.world_camera_calibration')
+    local surface=require('presentation.surface')
+    local viewport=require('presentation.viewport_3d')
     local f=assert(io.open(mapPath,'rb'));local text=f:read('*a');f:close()
     local map=json.decode(text)
     local spec=map.traversal
@@ -20,11 +22,13 @@ local function exportViews()
         session.townTraversal.y=y;lane.update(session)
         for _,width in ipairs({256,426}) do
             local frame=spec.camera.projectionFrame
+            surface.setProfile(width==256 and 'classic' or 'wide')
+            local centerX,horizonY=viewport.authoredCompositionCenter(spec.camera)
             result.views[#result.views+1]={y=y,width=width,record=calibration.resolve(session,{
                 profile=spec.camera.profile,authoredCamera=spec.camera,
                 projectionFrame={targetWidth=width,targetHeight=240,
                     baseViewportWidth=frame.baseViewportWidth,baseViewportHeight=frame.baseViewportHeight,
-                    compositionWidth=frame.baseViewportWidth,canonicalCenterX=frame.canonicalCenterX,canonicalHorizonY=frame.canonicalHorizonY}})}
+                    compositionWidth=frame.baseViewportWidth,canonicalCenterX=centerX,canonicalHorizonY=horizonY}})}
         end
     end
     f=assert(io.open(output,'wb'));f:write(json.encode(result));f:close()

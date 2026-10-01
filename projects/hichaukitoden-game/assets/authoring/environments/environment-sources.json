@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 14 scaffold: preserves revision 13 geometry, transforms, materials and lighting; glazing receivers, backstreet stringcourses and chimneys now belong to their architectural assembly/building. Candidate topology and owner visual/traversal acceptance remain staged.",
+      "basis": "Revision 15 scaffold: pitched veranda supports below the roof; camera-side courtyard boundary replaces scattered near blocks. Candidate topology and owner visual/traversal acceptance remain staged.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

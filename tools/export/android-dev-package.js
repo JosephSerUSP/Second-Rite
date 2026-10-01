@@ -13,6 +13,7 @@ const projectIdentity = require('./project-identity');
 const PROJECT_IDENTITY_RELATIVE = path.join('data', 'project.json');
 const MAX_ANDROID_VERSION_CODE = 2100000000;
 const APPLICATION_ID_RE = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/;
+const RECORD_AUDIO_PERMISSION = 'android.permission.RECORD_AUDIO';
 
 function nonEmpty(value, label) {
     if (typeof value !== 'string' || !value.trim()) throw new Error(`${label} must be a non-empty string`);
@@ -88,6 +89,17 @@ function configureGradleProperties(filePath, values) {
     fs.writeFileSync(filePath, `${lines.join('\n').replace(/\n+$/, '')}\n`, 'utf8');
 }
 
+function stripManifestPermission(filePath, permission) {
+    const original = fs.readFileSync(filePath, 'utf8');
+    const escaped = permission.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`^[ \\t]*<uses-permission\\s+android:name=["']${escaped}["']\\s*/>[ \\t]*(?:\\r?\\n|$)`, 'gm');
+    const matches = original.match(pattern) || [];
+    if (matches.length !== 1) {
+        throw new Error(`Expected exactly one ${permission} declaration in pinned love-android manifest; found ${matches.length}`);
+    }
+    fs.writeFileSync(filePath, original.replace(pattern, ''), 'utf8');
+}
+
 function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versionCode,
         sourceSha, loveAndroidRef, manifestPath } = {}) {
     if (!projectDir || !loveAndroidDir || !lovePath) {
@@ -119,6 +131,17 @@ function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versio
         versionName,
     });
 
+    // Upstream 11.5a's noRecord flavor disables microphone support in the
+    // native runtime but leaves RECORD_AUDIO in the common application
+    // manifest. Second Gate has no microphone feature, so do not ask Android
+    // for a capability the game cannot use. Keep this as an explicit pinned-
+    // wrapper patch and fail loudly if the upstream manifest shape changes.
+    const androidManifestPath = path.join(wrapperRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
+    if (!fs.existsSync(androidManifestPath)) {
+        throw new Error(`love-android application manifest is missing: ${androidManifestPath}`);
+    }
+    stripManifestPermission(androidManifestPath, RECORD_AUDIO_PERMISSION);
+
     const embedPath = path.join(wrapperRoot, 'app', 'src', 'embed', 'assets', 'game.love');
     fs.mkdirSync(path.dirname(embedPath), { recursive: true });
     fs.copyFileSync(gameLove, embedPath);
@@ -131,6 +154,7 @@ function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versio
         orientation: android.orientation,
         versionCode: resolvedVersionCode,
         versionName,
+        microphonePermission: false,
         projectIdentity: identity.identity,
         projectVersion: identity.productVersion,
         sourceSha: resolvedSourceSha,
@@ -142,7 +166,7 @@ function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versio
         fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
     }
-    return { manifest, embedPath, propertiesPath };
+    return { manifest, embedPath, propertiesPath, androidManifestPath };
 }
 
 function parseArgs(argv) {
@@ -183,10 +207,12 @@ if (require.main === module) {
 module.exports = {
     APPLICATION_ID_RE,
     MAX_ANDROID_VERSION_CODE,
+    RECORD_AUDIO_PERMISSION,
     configureGradleProperties,
     normalizeSourceSha,
     normalizeVersionCode,
     parseArgs,
     prepareAndroidDevPackage,
     readAndroidMetadata,
+    stripManifestPermission,
 };

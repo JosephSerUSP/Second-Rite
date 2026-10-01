@@ -53,7 +53,7 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==17
+assert bpy.context.scene['courtyard_revision']==18
 scene=bpy.context.scene
 assert scene.render.engine=='CYCLES'
 assert scene.cycles.samples==64 and scene.cycles.preview_samples==64
@@ -129,9 +129,26 @@ print('VERANDA SUPPORT CLEARANCE OK')
 assert bpy.data.objects['Court cistern water'].bound_box
 for obj in bpy.data.objects:
     if obj.type=='MESH' and obj.name.startswith('Court cistern '):
-        assert max((obj.matrix_world@Vector(c)).x for c in obj.bound_box)<-13.5,'Cistern encroaches on player route'
+        assert max((obj.matrix_world@Vector(c)).x for c in obj.bound_box)<-6.0,'Cistern encroaches on player route'
 print('CISTERN CLEAR OF WALK LANE')
 
 assert len(bpy.data.objects['Court cistern foundation'].data.polygons[0].vertices)==8
 assert len(bpy.data.objects['Court cistern water'].data.polygons[0].vertices)==8
+water_z=max(v.co.z for v in bpy.data.objects['Court cistern water'].data.vertices)
+cloth=bpy.data.objects['Court cistern folded linen']
+assert min(v.co.z for v in cloth.data.vertices)>water_z,'Linen intersects the waterline'
+cap=bpy.data.objects['Court cistern coping 0']
+assert max((cap.matrix_world@v.co).z for v in cap.data.vertices)>water_z,'Water exceeds coping'
 print('CISTERN CHAMFERED FOOTPRINT OK')
+
+# Decorative paving must consume the authored floor without adding a second
+# elevation authority or exporting many tiny blocks into the walk route.
+for obj in bpy.data.objects:
+    if not obj.name.startswith(('Court wash apron','Court wash flagstone','Court apron ')):continue
+    assert obj['sr_bake_role']=='source'
+    for vertex in obj.data.vertices:
+        p=obj.matrix_world@vertex.co
+        hit,ground,_,_=floor.ray_cast(Vector((p.x,p.y,10)),Vector((0,0,-1)))
+        assert hit and .007< p.z-ground.z <.013,'Apron detached from authored profile'
+        assert p.x< -2.7,'Decorative wash court enters walk route'
+print('WASH COURT PROFILE CONSUMPTION OK')

@@ -14,16 +14,16 @@
     8.81
   ],
   "stats": {
-    "triangleCount": 6159,
+    "triangleCount": 6137,
     "vertexCount": 3684,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1418875,
-    "renderMeshSizeBytes": 543738,
-    "packageSizeBytes": 1963200
+    "pngSizeBytes": 1438623,
+    "renderMeshSizeBytes": 541984,
+    "packageSizeBytes": 1981194
   },
   "anchors": {
     "cortico_entry": {
@@ -109,7 +109,7 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 2308,
+      "batchedSourceObjects": 2407,
       "correspondence": {
         "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
         "extrusion": 0.15000000596046448,
@@ -176,32 +176,32 @@
       },
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 4.900797600013902,
-        "filteredCharts": 141,
-        "preservedSmallCharts": 1093,
-        "filteredTexels": 528123,
+        "seconds": 4.489000000001397,
+        "filteredCharts": 126,
+        "preservedSmallCharts": 1085,
+        "filteredTexels": 599229,
         "alphaUnchanged": true
       },
       "texelAlignment": {
         "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 511,
-        "preservedUnsafeCharts": 1129,
+        "alignedCharts": 564,
+        "preservedUnsafeCharts": 1068,
         "existingSharedTexelPairs": 0,
         "newSharedTexelPairs": 0,
         "atlasSize": 1024
       }
     },
-    "exportSeconds": 25.912690899975132,
+    "exportSeconds": 29.332892700011143,
     "atlasAllocation": {
       "measurementStage": "After UV packing, before guarded pixel-corner alignment",
       "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
       "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
       "visibleIslandTexelsPerScreenPixelPercentiles": {
-        "p10": 0.8379569149491903,
-        "p50": 0.8394727847149401,
-        "p90": 0.8616326524012359
+        "p10": 2.0030025538598872,
+        "p50": 2.004988655378559,
+        "p90": 2.009093908540199
       },
-      "peakScreenTexelDemand": 128948.0,
+      "peakScreenTexelDemand": 135039.0,
       "atlasSize": 1024,
       "viewBias": 1.0,
       "floor": 0.04,
@@ -219,11 +219,11 @@
         11.4,
         11.65
       ],
-      "islands": 1640,
-      "visibleIslands": 387,
-      "polygons": 3297,
-      "visiblePolygons": 668,
-      "meanVisiblePixelsPerSquareMetre": 42.42
+      "islands": 1632,
+      "visibleIslands": 381,
+      "polygons": 3286,
+      "visiblePolygons": 667,
+      "meanVisiblePixelsPerSquareMetre": 45.33
     },
     "lightingPolicy": "source",
     "cameraCalibration": {

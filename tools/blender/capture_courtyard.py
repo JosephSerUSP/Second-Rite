@@ -10,6 +10,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--game-root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--unobstructed',action='store_true',help='Capture native world without menu/UI for composition review')
     parser.add_argument('--lovec',default=r'C:\Program Files\LOVE\lovec.exe')
     args=parser.parse_args()
     main_path=args.game_root/'main.lua'
@@ -17,7 +18,8 @@ def main():
     marker=b'cli_tools.runTownProofFrames(loader)'
     if marker not in original:raise ValueError('Candidate capture hook boundary changed')
     try:
-        main_path.write_bytes(original.replace(marker,b'require("tests.courtyard_frames").run(loader)'))
+        hook=b'require("tests.courtyard_frames").run(loader,true)' if args.unobstructed else b'require("tests.courtyard_frames").run(loader)'
+        main_path.write_bytes(original.replace(marker,hook))
         for surface in ('classic','wide'):
             result=subprocess.run([args.lovec,str(args.game_root.resolve()),f'surface={surface}','town-proof-frames'],
                 cwd=args.game_root,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=120)

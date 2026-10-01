@@ -294,10 +294,10 @@ def build(output):
             hit,point,normal,index=floor.ray_cast(Vector((x,y,10)),Vector((0,0,-1)))
             if not hit:raise ValueError('Missing authored floor beneath path')
             b.part(f'Court path stone {row} {col}',(.45,.39,.012),(x,y,point.z+.008),pathmat,'source',.02)
-    # The camera-side court boundary is a continuous architectural near rank.
-    # Broad masonry fills the lower frame; it stays well outside the walk lane.
-    # Its coping follows the map profile, rather than creating another datum.
-    for start,end in [(-16,2),(2,8),(8,32)]:
+    # The wash court opens through the near perimeter. Continuous masonry here
+    # concealed the entire apron; returns enclose its ends without sealing off
+    # the central wash area from the adjoining forecourt.
+    for start,end in [(-16,-1),(13.5,32)]:
         def height(y):
             return 0 if y<=2 else .30 if y>=8 else (y-2)*.05
         xa,xb=-13.8,-12.6
@@ -314,13 +314,40 @@ def build(output):
     # A communal wash cistern belongs to the camera-side boundary. Its full
     # hollow volume is authored; only bevels and ceramic decoration bake down.
     # Horizontal water/rim levels sit above foundations sampled from the paving.
-    near_x,far_x=-17.15,-14.0
+    near_x,far_x=-9.7,-6.55
     start_y,end_y=4.0,8.0
     rim_z=.78
     def foundation(x,y):
         hit,point,normal,index=floor.ray_cast(Vector((x,y,10)),Vector((0,0,-1)))
         if not hit:raise ValueError('Missing paving under wash cistern')
         return point.z
+    # A paved wash court occupies the whole near rank, including the area
+    # behind the menu. Inlays consume the floor geometry's profile samples;
+    # their fine joints bake onto that same floor rather than adding walk steps.
+    apron=adapted_material(upstream['Bricks - Cobblestone'],'Court wash apron setts',(.39,.40,.34),**{'Width':.58,'Height':.38,'Grout Width':.012,'Bump':.10,'Roughness':.92})
+    brick=adapted_material(upstream['Bricks - Cobblestone'],'Court apron brick borders',(.34,.18,.105),**{'Width':.32,'Height':.16,'Grout Width':.012,'Bump':.13,'Roughness':.94})
+    def inlay(name,xa,xb,ya,yb,material,lift=.012):
+        samples=sorted({ya,yb,*[p['y'] for p in profile if ya<p['y']<yb]})
+        points=[(x,y,foundation(x,y)+lift) for y in samples for x in [xa,xb]]
+        obj=b.mesh(name,points,[(i*2,i*2+1,i*2+3,i*2+2) for i in range(len(samples)-1)],material,'source')
+        obj['sr_bake_open_surface']=True
+    inlay('Court wash apron',-23.5,-3.8,-15.9,31.9,apron,lift=.008)
+    for x in [-13.8,-4.15]:
+        inlay(f'Court apron longitudinal border {x}',x,x+.35,-15.9,31.9,brick)
+    for y in [-1.5,2.75,9.0,13.25]:
+        inlay(f'Court apron transverse border {y}',-23.5,-3.8,y,y+.35,brick)
+    # Larger worn flagstones surround the cistern, with staggered joints and
+    # broad tonal variation. They are source detail, not loose runtime blocks.
+    for row in range(12):
+        ya=2.95+row*.50
+        for col in range(7):
+            xa=-11.88+col*1.13+(.28 if row%2 else 0)
+            xb=min(xa+1.105,-4.18)
+            if xb<=xa:continue
+            tone=[stone,apron,darkstone][(row*7+col*3)%5%3]
+            inlay(f'Court wash flagstone {row} {col}',xa,xb,ya,ya+.475,tone)
+    for y in [2.48,9.48]:
+        inlay(f'Court wash apron drain {y}',-12.2,-2.72,y,y+.16,darkstone)
     corners=[(near_x,start_y+.48),(near_x+.48,start_y),(far_x-.48,start_y),(far_x,start_y+.48),(far_x,end_y-.48),(far_x-.48,end_y),(near_x+.48,end_y),(near_x,end_y-.48)]
     bottom=[(x,y,foundation(x,y)+.035) for x,y in corners]
     b.mesh('Court cistern foundation',bottom,[tuple(range(len(corners)))],stone)
@@ -332,6 +359,8 @@ def build(output):
         wall=b.part(f'Court cistern wall {label}',(length,.24,rim_z-base),((ax+cx)/2,(ay+cy)/2,(base+rim_z)/2),plaster,'source',.035)
         wall.rotation_euler.z=angle
         box_receiver(wall,b.source)
+        foot=b.part(f'Court cistern masonry base course {label}',(length+.025,.275,.11),((ax+cx)/2,(ay+cy)/2,base+.065),darkstone,'source',.008)
+        foot.rotation_euler.z=angle
         cap=b.part(f'Court cistern coping {label}',(length+.12,.37,.10),((ax+cx)/2,(ay+cy)/2,rim_z+.015),stone,'source',.025)
         cap.rotation_euler.z=angle
         box_receiver(cap,b.source)
@@ -346,7 +375,7 @@ def build(output):
     water.node_tree.links.new(noise.outputs['Fac'],bump.inputs['Height']);water.node_tree.links.new(bump.outputs['Normal'],bsdf.inputs['Normal'])
     centre=Vector(((near_x+far_x)/2,(start_y+end_y)/2,0))
     inside=[Vector((x,y,0))+(centre-Vector((x,y,0))).normalized()*.17 for x,y in corners]
-    b.mesh('Court cistern water',[(p.x,p.y,.66) for p in inside],[tuple(range(8))],water)
+    b.mesh('Court cistern water',[(p.x,p.y,.79) for p in inside],[tuple(range(8))],water)
     # A broad inner ceramic band and carved washboard ridges read at native size.
     for j in range(14):
         yy=start_y+.54+j*(end_y-start_y-1.08)/14
@@ -355,7 +384,7 @@ def build(output):
         xx=near_x+.4+j*.12
         b.part(f'Court cistern washboard ridge {j}',(.045,.85,.025),(xx,start_y+.51,rim_z+.055),stone,'source',.01)
     # A folded wash cloth retains its broad drape silhouette; small folds bake.
-    sections=[(far_x+.16,.86),(far_x-.18,.86),(far_x-.22,.82),(far_x-.22,.69)]
+    sections=[(far_x+.16,.86),(far_x-.18,.86),(far_x-.22,.84),(far_x-.22,.815)]
     cloth_vertices=[(x,y,z) for x,z in sections for y in [6.65,7.45]]
     cloth=b.mesh('Court cistern folded linen',cloth_vertices,[(2*i,2*i+1,2*i+3,2*i+2) for i in range(3)],linen)
     cloth['sr_bake_open_surface']=True
@@ -405,7 +434,7 @@ def build(output):
     scene['render_settings_note']='Classic 256x240 preview, Cycles 64 render/viewport samples, OIDN, neutral exposure; export atlas 1024. Device availability belongs to the launching Blender process.'
     scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=17;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=18;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 17 scaffold: chamfered communal wash cistern and folded linen in the near rank, terrain beneath background volumes, camera-aware bias 1 to preserve facade detail. Owner visual and PLAYED acceptance remain staged.",
+      "basis": "Revision 18 scaffold: open foreground wash court, relocated cistern, full stone apron with brick borders and connected drains, profile-derived baked paving. Owner visual and PLAYED acceptance remain staged.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

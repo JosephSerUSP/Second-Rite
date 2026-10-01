@@ -1,6 +1,6 @@
 -- Candidate-only native compositor captures; shipping main.lua is never changed.
 local module = {}
-function module.run(loader)
+function module.run(loader, unobstructed)
     local json = require("engine.data.json")
     local exploration = require("engine.exploration")
     local lane = require("engine.bounded_lane")
@@ -32,13 +32,17 @@ function module.run(loader)
             love.graphics.setCanvas({canvas,depth=true,stencil=true})
             love.graphics.clear(0,0,0,1,true,true)
             love.graphics.setColor(1,1,1,1)
-            frames.draw(scene_host,renderer,game,loader,height)
+            if unobstructed then
+                view.draw(game,game.townTraversal.camera)
+            else
+                frames.draw(scene_host,renderer,game,loader,height)
+            end
             love.graphics.setCanvas()
             -- Native labels animate on wall time; settle the first draw before capture.
             if _ == 1 then love.timer.sleep(0.20) end
         end
         local png = canvas:newImageData():encode("png")
-        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,cameraOffsetX=game.townTraversal.cameraOffsetX,logicalWidth=surface.compositionWidth(),cameraCenterX=centerX,
+        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,unobstructed=unobstructed or false,cameraOffsetX=game.townTraversal.cameraOffsetX,logicalWidth=surface.compositionWidth(),cameraCenterX=centerX,
             image=love.data.encode("string","base64",png)}
         canvas:release()
     end

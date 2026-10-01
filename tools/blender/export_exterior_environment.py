@@ -637,6 +637,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--blend", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--camera", type=Path, default=atlas_allocation.CAMERA_RECORD,
+                        help="resolved WorldCamera calibration used for atlas projection")
     parser.add_argument("--span", type=float, default=23.699,
                         help="lane length; geometry beyond it is not this street")
     parser.add_argument("--ambient", type=float, default=0.35,
@@ -676,6 +678,7 @@ def main() -> None:
                         help="preserve authored world and lamps rather than staging the legacy exterior rig")
     eevee_bake.add_arguments(parser)
     args = parser.parse_args(argv)
+    atlas_allocation.CAMERA_RECORD = args.camera.resolve()
 
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
@@ -716,6 +719,19 @@ def main() -> None:
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"
+    camera_record = json.loads(args.camera.read_text(encoding="utf-8"))
+    frame = camera_record["projectionFrame"]
+    manifest["provenance"]["cameraCalibration"] = {
+        "contract": "thestra.world-camera-calibration",
+        "source": "candidate Map 32 traversal.camera resolved by runtime/presentation/world_camera_calibration.lua",
+        "pitchDegrees": round(math.degrees(camera_record["orientation"]["pitchRadians"]), 6),
+        "targetWidth": camera_record["targetWidth"],
+        "targetHeight": camera_record["targetHeight"],
+        "viewportCenter": [camera_record["viewportCenterX"], camera_record["viewportCenterY"]],
+        "projectionWindowOffset": [camera_record["projectionWindowOffsetX"], camera_record["projectionWindowOffsetY"]],
+        "projectionFrame": frame,
+        "eye": camera_record["eye"],
+    }
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("EXTERIOR 3D EXPORT OK")
 

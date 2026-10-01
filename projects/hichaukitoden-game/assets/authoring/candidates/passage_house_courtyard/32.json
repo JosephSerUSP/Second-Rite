@@ -54,20 +54,21 @@
         "y": 6,
         "z": 0
       },
-      "distance": 18.666666666666668,
+      "distance": 19.98914649569168,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0,
-      "eyeHeight": 2.2604166666666665,
+      "pitchDegrees": -17.5,
+      "eyeHeight": 1.3212953588491052,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
+      "projectionWindowOffsetY": -161.43297990603955,
       "projectionScale": {
         "x": 1.0,
         "y": 1.0
       },
       "projectionFrame": {
         "canonicalCenterX": 128,
-        "canonicalHorizonY": 66,
+        "canonicalHorizonY": 90,
         "baseViewportWidth": 256,
         "baseViewportHeight": 144
       },

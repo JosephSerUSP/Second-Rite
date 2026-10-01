@@ -250,8 +250,7 @@ def build(output):
     bpy.ops.object.light_add(type="SUN",location=(-4,1,8))
     sun=bpy.context.object;sun.name="Court afternoon sky";sun.data.energy=2.0;sun.data.angle=.15
     sun.rotation_euler=(math.radians(28),math.radians(-22),math.radians(-35))
-    camera=thestra_camera.create_or_update_camera(thestra_camera.load_calibration(str(ROOT/"tools/blender/fixtures/town_sideview_camera.json")),make_active=True)
-    camera.location.y=6
+    camera=thestra_camera.create_or_update_camera(thestra_camera.load_calibration(str(CANDIDATE/"camera.json")),make_active=True)
     actor=thestra_camera.create_actor_preview(ROOT/"projects/hichaukitoden-game/assets/character/walker.png",camera,
         anchor=(0,6,0.2),world_height=1.75)
     core.move_to_collection(actor,preview);preview.hide_render=True

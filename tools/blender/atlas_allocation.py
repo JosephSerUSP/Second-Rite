@@ -42,7 +42,8 @@ FACE_ATTRIBUTE = "sr_face_id"
 LANE_CENTRE = 3.8833
 
 
-def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE):
+def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE,
+                record_path: Path | None = None):
     """The town side-view camera, widened to the 426 px view, standing at lane position `lane_y`.
 
     `lane_y` is a position along the lane in ENGINE space, the space the anchors and the game use
@@ -55,7 +56,7 @@ def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LAN
     import stage_room_model as stager
     import thestra_camera
 
-    record = thestra_camera.load_calibration(str(CAMERA_RECORD))
+    record = thestra_camera.load_calibration(str(record_path or CAMERA_RECORD))
     record = stager.widen_record(record, VIEW_WIDTH)
     camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
     camera.location.y = centre - lane_y if mirrored else lane_y

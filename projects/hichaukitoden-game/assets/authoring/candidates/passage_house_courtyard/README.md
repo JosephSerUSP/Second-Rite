@@ -4,8 +4,7 @@ This editable scaffold and package are review candidates. Map 32 is added only t
 copied Project; shipping maps and the town generator remain unchanged. Owner visual
 and traversal acceptance precede promotion.
 
-The current review revision uses one continuous lodging shell, a covered and supported
-entry, and a closed vestibule behind the door. `tools/blender/recipes/opening_families.py`
+The current review revision keeps the passage facade and covered entry, opens a central roof lightwell, and raises a backstreet skyline behind the lodging. The side court walls tie into the near Cortico dwelling. The saved camera uses the live town pitch of -17.5 degrees; `camera.json` is resolved from Map 32 by the runtime camera-calibration contract, and the shared town-camera solver pins the Walker at 48 px tall with flat-ground feet at y=128. The runtime package records that same calibration. `tools/blender/recipes/opening_families.py`
 provides adjustable shared door/window families used by both the courtyard and the
 existing exterior vocabulary. Fine joinery stays editable in source and bakes onto four
 runtime receivers. The owner-rejected v1 screenshots and package are preserved under
@@ -18,7 +17,9 @@ node tools/blender/stage_courtyard_candidate.js --output out/passage-house-play
 & "C:/Program Files/LOVE/lovec.exe" out/passage-house-play/game
 ```
 
-Use a new output directory each time. The introduction still enters lodging map 25.
+Use a new output directory each time. The source/review renders are a composition claim only; the courtyard remains staged and owner visual/traversal acceptance is still required. Revision 7 was captured natively at five lane positions in Classic and Wide; see `review/measurements.json` for the camera pin, package hashes, and gates.
+
+The introduction still enters lodging map 25.
 Leaving its door now reaches the court's upper landing; walk left through the court
 to Cortiço. The Cortiço entrance retains its existing identity and position. Existing
 saves are test artifacts: use a fresh game to review the candidate route.
@@ -40,7 +41,7 @@ $blender = "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 Export the committed source through the existing environment package boundary:
 
 ```powershell
-& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --span 12 --atlas-size 1024 --bake-backend eevee --source-lighting
+& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --bake-backend eevee --source-lighting
 ```
 
 EEVEE uses 0 EV and the authored light rig. Detailed doors/windows stay in the source

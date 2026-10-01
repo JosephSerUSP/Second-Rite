@@ -16,10 +16,13 @@ import thestra_camera
 def main():
     parser=argparse.ArgumentParser();parser.add_argument("--source",type=Path,required=True)
     parser.add_argument("--map",type=Path,required=True);parser.add_argument("--out",type=Path,required=True)
+    parser.add_argument("--camera",type=Path)
     parser.add_argument("--quality",choices=tuple(render_profiles.PROFILES),default="draft")
     args=parser.parse_args(sys.argv[sys.argv.index("--")+1:])
     bpy.ops.wm.open_mainfile(filepath=str(args.source.resolve()))
     scene=bpy.context.scene;map_data=json.loads(args.map.read_text(encoding="utf-8"))
+    camera_path=(args.camera or args.map.with_name("camera.json")).resolve()
+    atlas_allocation.CAMERA_RECORD=camera_path
     profile=map_data["traversal"]["lane"]["groundProfile"]
     floor=bpy.data.objects["COURT_profile_paving"]
     samples=[point["y"] for point in profile]+[(a["y"]+b["y"])/2 for a,b in zip(profile,profile[1:])]+[.5,11.5]
@@ -39,8 +42,8 @@ def main():
             hit,point,normal,index=floor.ray_cast(Vector((0,y,10)),Vector((0,0,-1)))
             if not hit: raise ValueError(f"No paving at review position {y}")
             z=point.z
-            camera=atlas_allocation.lane_camera(scene,y,mirrored=False)
-            record=thestra_camera.load_calibration(str(atlas_allocation.CAMERA_RECORD))
+            camera=atlas_allocation.lane_camera(scene,y,mirrored=False,record_path=camera_path)
+            record=thestra_camera.load_calibration(str(camera_path))
             record["targetWidth"]=width;record["viewportCenterX"]=width/2
             camera=thestra_camera.create_or_update_camera(record,make_active=True);camera.location.y=y
             actor.location=(0,y,z)
@@ -48,8 +51,11 @@ def main():
             scene.render.resolution_percentage=100;scene.render.image_settings.file_format="PNG"
             scene.view_settings.view_transform="AgX"
             bpy.context.view_layer.update()
-            feet=thestra_camera.project_world_point(scene,camera,Vector((0,y,z)))
-            head=thestra_camera.project_world_point(scene,camera,Vector((0,y,z+1.75)))
+            bpy.context.view_layer.update()
+            feet_world=actor.matrix_world @ Vector((0,0,0))
+            head_world=actor.matrix_world @ Vector((0,1.75,0))
+            feet=thestra_camera.project_world_point(scene,camera,feet_world)
+            head=thestra_camera.project_world_point(scene,camera,head_world)
             scene.render.filepath=str((args.out/f"{width}-{y:g}.png").resolve())
             bpy.ops.render.render(write_still=True)
             frames.append({"width":width,"y":y,"z":z,"feet":feet,"head":head,"height":abs(feet[1]-head[1])})

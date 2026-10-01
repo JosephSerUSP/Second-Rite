@@ -1,25 +1,25 @@
 {
-  "revision": "owner-directed architectural revision",
-  "sourceSHA256": "17b2dd657a4b82832ab2238a4d4d8eec12e5ea156c2edda7a15de645376b8483",
-  "sourceBytes": 1041966,
+  "revision": "owner feedback: live nonzero camera pitch, pinned through shared WorldCamera calibration; staged revision 7 open-sky court and backstreet skyline",
+  "sourceSHA256": "42374ea4684bba944c3b8c659ea2f459c7c164dfb601df24e2da436feea69f50",
+  "sourceBytes": 1087692,
   "package": {
-    "triangleCount": 1450,
-    "vertexCount": 969,
+    "triangleCount": 6552,
+    "vertexCount": 3884,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 761713,
-    "renderMeshSizeBytes": 129626,
-    "packageSizeBytes": 891931
+    "pngSizeBytes": 163875,
+    "renderMeshSizeBytes": 587326,
+    "packageSizeBytes": 753866
   },
   "packageSHA256": {
     "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-    "environment.json": "df2a34efb97191de401de9ed9303ac06e37c9f8acdd753621f5112d7590efa22",
+    "environment.json": "7ad6303574b0b5204c97daf6416bb87cc066f99311079a84db8e66d02d25531c",
     "environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
-    "environment.obj": "3a32f5b366aad1e845f260a2f41b27cf50e27c35a46d643b0f480d7af18f4796",
-    "environment.png": "ee480acd8a94e3079ad0f6c1d78f83f7515a882baef29cb132cc37171a4698cb"
+    "environment.obj": "e9e6663c4e0eec306aae383ccafe936399de44b709c5de5d22e6cb0a9b4a50a7",
+    "environment.png": "3101a2c31fc33367e2c1bfdfd636153d629854a4e8ad9b63aa05ef36c58834de"
   },
   "bounds": [
     -14.0,
@@ -288,5 +288,50 @@
       "package\\environment.png": "a380ca8b167b0af67d725c30e735651521f561bff27c5784fba6eeacfc5e846a"
     }
   },
-  "interpretation": "Pixel deltas document that the rebuilt composition differs from rejected v1; they do not measure visual quality or owner acceptance."
+  "interpretation": "Pixel deltas document that the rebuilt composition differs from rejected v1; they do not measure visual quality or owner acceptance.",
+  "cameraCalibration": {
+    "source": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua",
+    "pitchDegrees": -17.5,
+    "distance": 19.98914649569168,
+    "eyeHeight": 1.3212953588491052,
+    "projectionWindowOffsetY": -161.43297990603955,
+    "canonicalHorizonY": 90,
+    "actorHeightPixelsFlat": 48,
+    "feetYFlat": 128
+  },
+  "currentReviewSHA256": {
+    "source": {
+      "256-0.5.png": "86be4a1722fe6233bbdf9427fc169430b5e221cbde532cba78c555c0aca18163",
+      "256-11.5.png": "6bf1a95335dd9ba6cf1915db48c94e46ed65d7ade1e5ee45616382b13388be4b",
+      "256-2.png": "a106adc58ff83e29386d88396f4361871e69dc654f8639944fefa24e8e0d8254",
+      "256-5.png": "2185796f6c60f3559dad2718270f482f55a014657e2b62b6610d710949b0e9ed",
+      "256-8.png": "8eff887a72a1e9d0362bcc86d354ce5e2d3f0a18b63359751dea9f0b44c9fef6",
+      "426-0.5.png": "7256268257c879bb8cbbe7020a9fff523a3a1b2e07f8d5d492cd6d30ac9ecd1c",
+      "426-11.5.png": "b0cc1ba8eb26ade84f908588007c001a098584360a7f1e1919a05cea917ba7a3",
+      "426-2.png": "312d07c881c71ff09f9231d0702451faf5944a7ec3027ffe578d7732ceaafc6c",
+      "426-5.png": "87b08f40760237be6a52309e6f88e9b6376bfdf31c03c389c54b21ef626b6b27",
+      "426-8.png": "1a8958163caed8e449b1380311ed4f0e20cf8545c38beafd38ac6f15e747fed5"
+    },
+    "runtime/classic": {
+      "0.5.png": "d3a8e6d7851305daa19c3384361ec62d066c7db1be10e094dd464c3bf54a4d97",
+      "11.5.png": "f0eff2ad88f28880afc1fe78a560409f8214c4b5489574ab70dd2df4543090f1",
+      "2.png": "370533d97ae68487f06786a072ab3b6ef01a9ac4588784b204564ce99b931913",
+      "5.png": "a094df73c8b39540a0076a4e72ca5e85a5e880cefad4e4d11260bc8b0a449ad7",
+      "8.png": "c67996145401b9845870b3f3bdd239b4368cfb6d894241154f47e7f8a5f5c513"
+    },
+    "runtime/wide": {
+      "0.5.png": "cba1a481b4429f80e816cea3747dd0dc9045d221e680e7dfa07546cc56ae29ea",
+      "11.5.png": "4f8bd5d4c6d03b803bc3c161c7c80a1f399c8ab1c0f5db3019601dc3ea88dc42",
+      "2.png": "669507cf5418037caa1c6006da21c1efc07ac841cd1ea151127ce8f681d11eae",
+      "5.png": "cc9a8a744856b4c40475dd70ae9f92d573a1529f46890ddf9f4fbe17e93a705b",
+      "8.png": "b5d9ef753260f8961505d46064489099b5aa9039db928c1373f2a1221c717061"
+    }
+  },
+  "verification": {
+    "candidateNodeTests": "2 passed",
+    "environmentSources": "OK",
+    "G1": "VALIDATE OK",
+    "stagedUnit": "ALL UNIT TESTS OK; courtyard_candidate 973 passed",
+    "nativeCapture": "Classic and Wide, five lane positions each; not owner PLAYED acceptance"
+  }
 }

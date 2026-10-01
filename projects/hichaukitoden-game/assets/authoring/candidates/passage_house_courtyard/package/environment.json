@@ -7,23 +7,23 @@
   "collisionMesh": "collision.obj",
   "bounds": [
     -14.0,
-    -5.0,
-    -0.01,
-    9.675,
+    -10.51,
+    -0.045,
+    19.39,
     21.5,
-    4.2
+    13.17
   ],
   "stats": {
-    "triangleCount": 1450,
-    "vertexCount": 969,
+    "triangleCount": 6552,
+    "vertexCount": 3884,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 761713,
-    "renderMeshSizeBytes": 129626,
-    "packageSizeBytes": 891931
+    "pngSizeBytes": 163875,
+    "renderMeshSizeBytes": 587326,
+    "packageSizeBytes": 751793
   },
   "anchors": {
     "cortico_entry": {
@@ -112,6 +112,31 @@
         11.4
       ]
     },
-    "lightingPolicy": "source"
+    "cameraCalibration": {
+      "contract": "thestra.world-camera-calibration",
+      "source": "candidate Map 32 traversal.camera resolved by runtime/presentation/world_camera_calibration.lua",
+      "pitchDegrees": -17.5,
+      "targetWidth": 256,
+      "targetHeight": 240,
+      "viewportCenter": [
+        128,
+        -71.43297990603955
+      ],
+      "projectionWindowOffset": [
+        0,
+        -161.43297990603955
+      ],
+      "projectionFrame": {
+        "canonicalCenterX": 128.0,
+        "canonicalHorizonY": 90,
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144
+      },
+      "eye": {
+        "x": -19.98914649569168,
+        "y": 6,
+        "z": 1.3212953588491052
+      }
+    }
   }
 }

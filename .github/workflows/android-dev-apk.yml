@@ -46,16 +46,18 @@ jobs:
 
   build:
     name: Build installable Second Gate dev APK
-    if: github.event_name == 'workflow_dispatch'
     needs: contract
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
-      - name: Check out trusted source ref
+      - name: Check out package source ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          # Manual builds may select a trusted ref. Android-packaging PRs also
+          # assemble the real APK, but from the exact PR head and with NO stable
+          # signing secret exposed to PR code.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Record exact source commit
@@ -158,7 +160,10 @@ jobs:
         id: signing
         shell: bash
         env:
-          STABLE_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEV_DEBUG_KEYSTORE_BASE64 }}
+          # Stable signing material is available ONLY to explicit trusted manual
+          # builds. PR assembly always uses an ephemeral key, even for same-repo
+          # PRs, so arbitrary PR code cannot read the update certificate.
+          STABLE_KEYSTORE_BASE64: ${{ github.event_name == 'workflow_dispatch' && secrets.ANDROID_DEV_DEBUG_KEYSTORE_BASE64 || '' }}
         run: |
           set -euo pipefail
           keystore="$RUNNER_TEMP/second-gate-dev.keystore"
@@ -166,7 +171,11 @@ jobs:
             printf '%s' "$STABLE_KEYSTORE_BASE64" | base64 --decode > "$keystore"
             mode=stable
           else
-            echo "::warning::ANDROID_DEV_DEBUG_KEYSTORE_BASE64 is not configured. This APK is installable, but its ephemeral certificate will NOT update a build from another CI run. Configure the secret before relying on update-in-place."
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              echo "PR verification intentionally uses an ephemeral certificate; stable update signing is manual-build-only."
+            else
+              echo "::warning::ANDROID_DEV_DEBUG_KEYSTORE_BASE64 is not configured. This APK is installable, but its ephemeral certificate will NOT update a build from another CI run. Configure the secret before relying on update-in-place."
+            fi
             keytool -genkeypair -noprompt \
               -keystore "$keystore" \
               -storepass android \
@@ -236,7 +245,7 @@ jobs:
             echo "- versionCode: \`${THESTRA_ANDROID_VERSION_CODE:-unavailable}\`"
             echo "- signing: \`${THESTRA_ANDROID_SIGNING_MODE:-unavailable}\`"
             if [ "${THESTRA_ANDROID_SIGNING_MODE:-}" = "ephemeral" ]; then
-              echo "- ⚠️ This run used an ephemeral certificate. The APK is installable, but a later run cannot update it in place."
+              echo "- ⚠️ This run used an ephemeral certificate. The APK is installable, but a later differently signed build cannot update it in place."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 

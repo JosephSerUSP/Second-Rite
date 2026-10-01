@@ -232,6 +232,10 @@ jobs:
           printf '%s\n' "$badging" | grep -F "package: name='$expected_package'" >/dev/null
           printf '%s\n' "$badging" | grep -F "versionCode='$expected_code'" >/dev/null
           printf '%s\n' "$badging" | grep -F "versionName='$expected_name'" >/dev/null
+          if printf '%s\n' "$badging" | grep -F "uses-permission: name='android.permission.RECORD_AUDIO'" >/dev/null; then
+            echo "::error::APK still declares android.permission.RECORD_AUDIO despite the no-microphone packaging policy" >&2
+            exit 1
+          fi
 
       - name: Write build summary
         if: always()

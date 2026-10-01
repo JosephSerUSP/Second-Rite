@@ -6,6 +6,8 @@ local virtual_input = require("engine.virtual_input")
 local touch_gamepad = {}
 
 local SETTING = "touchGamepadEnabled"
+local MOBILE_FILL_PROFILE = "mobile_fill"
+local MOBILE_FILL_HEIGHT = 240
 local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
 local decorated = setmetatable({}, { __mode = "k" })
@@ -16,8 +18,38 @@ local function isAndroid()
     return ok and value == "Android"
 end
 
+local function hostDimensions()
+    if love and love.graphics and love.graphics.getDimensions then
+        local w, h = love.graphics.getDimensions()
+        return tonumber(w) or 0, tonumber(h) or 0
+    end
+    return 0, 0
+end
+
 function touch_gamepad.defaultEnabled()
     return isAndroid()
+end
+
+-- A mobile-only comparison profile: preserve the authored 240-line height and
+-- derive the logical world width from the device's current landscape aspect.
+-- The canonical 256x240 composition stays centred and unscaled; only additional
+-- world columns are revealed. registerProfile deliberately replaces an
+-- existing profile of the same id, so reopening Options after a host-size
+-- change refreshes the candidate before it can be selected.
+function touch_gamepad.updateMobileFillProfile(hostW, hostH)
+    hostW = tonumber(hostW) or 0
+    hostH = tonumber(hostH) or 0
+    local renderWidth = 426
+    if hostW > 0 and hostH > 0 then
+        renderWidth = math.max(256,
+            math.floor(MOBILE_FILL_HEIGHT * hostW / hostH + 0.5))
+    end
+    local originX = math.floor((renderWidth - 256) / 2)
+    surface.registerProfile(MOBILE_FILL_PROFILE, {
+        renderWidth = renderWidth, renderHeight = MOBILE_FILL_HEIGHT,
+        compositionOriginX = originX, compositionOriginY = 0,
+    })
+    return surface.getProfile(MOBILE_FILL_PROFILE)
 end
 
 -- Representative mobile surfaces. Layout is derived from surface geometry, so
@@ -34,6 +66,10 @@ if not surface.getProfile("mobile_portrait") then
         compositionOriginX = 0, compositionOriginY = 24,
     })
 end
+do
+    local w, h = hostDimensions()
+    touch_gamepad.updateMobileFillProfile(w, h)
+end
 
 -- main.lua asks user_settings for renderSurfaceProfile before constructing its
 -- canvas. Seed an Android-friendly surface only when the player has no stored
@@ -42,10 +78,7 @@ end
 if isAndroid()
     and user_settings.get(SETTING, nil) ~= false
     and user_settings.get("renderSurfaceProfile", nil) == nil then
-    local w, h = 0, 0
-    if love and love.graphics and love.graphics.getDimensions then
-        w, h = love.graphics.getDimensions()
-    end
+    local w, h = hostDimensions()
     user_settings.set("renderSurfaceProfile", (h > w) and "mobile_portrait" or "mobile_landscape")
 end
 
@@ -216,10 +249,38 @@ local function findScene(ctx, id)
     return nil
 end
 
--- The Options scene is authored campaign UI, while the virtual gamepad is a
--- host/platform feature. Add one host-owned row in memory rather than saving a
--- device preference into data/scenes.json.
-function touch_gamepad.decorateOptions(scenes)
+local function appendMobileFillAspect(loader)
+    if not (loader and isAndroid()) then return end
+    local renderSurfaces = loader.engine and loader.engine.renderSurfaces
+    local options = renderSurfaces and renderSurfaces.options
+    if type(options) ~= "table" then return end
+
+    local found = nil
+    for i, id in ipairs(options) do
+        if id == MOBILE_FILL_PROFILE then found = i; break end
+    end
+
+    local w, h = hostDimensions()
+    if w <= 0 or h <= 0 then return end
+    if w < h then
+        if found then table.remove(options, found) end
+        return
+    end
+
+    touch_gamepad.updateMobileFillProfile(w, h)
+    if not found then options[#options + 1] = MOBILE_FILL_PROFILE end
+end
+
+-- The Options scene is authored campaign UI, while the virtual gamepad and the
+-- device-width surface are host/platform features. Add them in memory rather
+-- than saving mobile-only policy into the Project's portable scene data.
+-- `source` remains backwards-compatible with the old scenes-only test seam;
+-- runtime passes the loader so Android can also extend its authored ASPECT list.
+function touch_gamepad.decorateOptions(source)
+    local loader = type(source) == "table" and source.scenes and source or nil
+    local scenes = loader and loader.scenes or source
+    if loader then appendMobileFillAspect(loader) end
+
     for _, scene in ipairs(scenes or {}) do
         local commands = scene.config and scene.config.optionsCommands
         if type(commands) == "table" and not decorated[scene] then
@@ -249,7 +310,7 @@ function touch_gamepad.decorateOptions(scenes)
                             inner = old:sub(2, -2)
                         end
                         if not tostring(old):find("touch_gamepad", 1, true) then
-                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or (" .. inner .. ")}";
+                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or id == 'aspect' and sceneState.aspect == 'mobile_fill' and 'DEVICE' or (" .. inner .. ")}";
                         end
                     end
                 end
@@ -272,7 +333,7 @@ local function installHost()
     local hostKeyPressed = love and love.keypressed
 
     scene_host.runHook = function(hookName, ctx)
-        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
+        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
         local state = scene_host.getCurrentState()
         local scene = state and findScene(ctx, state.id) or nil
         local meta = scene and decorated[scene] or nil
@@ -319,7 +380,7 @@ local function installHost()
     end
 
     scene_host.update = function(dt, ctx)
-        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
+        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
         if touch_gamepad.isEnabled() then
             local config = require("engine.config")
             local ui = config.ui or {}

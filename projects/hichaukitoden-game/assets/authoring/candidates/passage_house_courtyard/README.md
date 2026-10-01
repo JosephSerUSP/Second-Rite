@@ -103,3 +103,12 @@ coping uses simple box receivers; its bevels stay in the source. Drain slots bak
 onto the paving. `review/art-direction/` preserves previous/current native views.
 The recipe test checks 70 frame-bottom ground rays using actual Classic/Wide camera
 records, including both bounded camera limits.
+
+Independent inspection now uses `inspect_environment_surfaces.py` with --source,
+--package and --out through offline_blender.py. It renders source clay/beauty and
+actual package clay/atlas from five independent cameras, verifies package bounds
+on import and leaves the source unchanged. `study_environment_receivers.py` uses
+the same arguments to trace admission, culling and centroid source hits for the
+legacy layout. See `review/surface-inspection/` and the surface inspection report.
+The current package has confirmed envelope/correspondence defects in #1301;
+portal-only checks do not establish whole-scene visual acceptance.

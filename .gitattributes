@@ -69,3 +69,4 @@ tools/blender/vendor-library/library/blender_assets.cats.txt -text
 projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package/** -text
 # Review controls retain exact exported manifests and measured package hashes.
 projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/review/assembly-repair/** -text
+projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/review/camera-aware/** -text

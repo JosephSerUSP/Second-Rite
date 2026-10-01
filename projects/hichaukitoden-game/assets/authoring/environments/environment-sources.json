@@ -76,10 +76,10 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Fresh owner-requested arrival-court candidate. Candidate Map 32 owns its profile; shipping topology unchanged pending visual review.",
+      "basis": "Fresh scaffold generated in one recipe invocation; courtyard_context composes the architecture. Shared opening family retains silhouettes and bakes shallow joinery. Shipping topology remains unchanged pending owner review.",
       "eevee": {
         "exposureEV": 0.0,
-        "supersample": 1,
+        "supersample": 2,
         "probeCells": 0,
         "emissiveLights": false,
         "fixtureLights": false,

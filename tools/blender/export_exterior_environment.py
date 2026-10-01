@@ -632,6 +632,13 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
           f"{len(target.data.loop_triangles)} runtime triangles")
 
 
+def camera_provenance(path):
+    """Carry the actual serialized resolver output, without a second camera schema."""
+    path=Path(path).resolve()
+    source=path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
+    return {"source":source,"record":json.loads(path.read_text(encoding="utf-8"))}
+
+
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:]
     parser = argparse.ArgumentParser()
@@ -719,20 +726,8 @@ def main() -> None:
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"
-    camera_record = json.loads(args.camera.read_text(encoding="utf-8"))
-    frame = camera_record["projectionFrame"]
-    manifest["provenance"]["cameraCalibration"] = {
-        "contract": "thestra.world-camera-calibration",
-        "source": "candidate Map 32 traversal.camera resolved by runtime/presentation/world_camera_calibration.lua",
-        "pitchDegrees": round(math.degrees(camera_record["orientation"]["pitchRadians"]), 6),
-        "targetWidth": camera_record["targetWidth"],
-        "targetHeight": camera_record["targetHeight"],
-        "viewportCenter": [camera_record["viewportCenterX"], camera_record["viewportCenterY"]],
-        "projectionWindowOffset": [camera_record["projectionWindowOffsetX"], camera_record["projectionWindowOffsetY"]],
-        "projectionFrame": frame,
-        "eye": camera_record["eye"],
-    }
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest["provenance"]["cameraCalibration"] = camera_provenance(args.camera)
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print("EXTERIOR 3D EXPORT OK")
 
 

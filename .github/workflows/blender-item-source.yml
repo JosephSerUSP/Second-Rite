@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source tools.blender.tests.test_bake_receivers -v
+          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source tools.blender.tests.test_bake_receivers tools.blender.tests.test_courtyard_recipe -v
 
       - name: Curated assets are portable without network access
         run: xvfb-run -a python tools/blender/vendor_assets.py check

@@ -6,8 +6,10 @@ and traversal acceptance precede promotion.
 
 The current review revision keeps the passage facade and covered entry, opens a central roof lightwell, and raises a backstreet skyline behind the lodging. The side court walls tie into the near Cortico dwelling. The saved camera uses the live town pitch of -17.5 degrees; `camera.json` is resolved from Map 32 by the runtime camera-calibration contract, and the shared town-camera solver pins the Walker at 48 px tall with flat-ground feet at y=128. The runtime package records that same calibration. `tools/blender/recipes/opening_families.py`
 provides adjustable shared door/window families used by both the courtyard and the
-existing exterior vocabulary. Fine joinery stays editable in source and bakes onto four
-runtime receivers. The owner-rejected v1 screenshots and package are preserved under
+existing exterior vocabulary. Fine joinery stays editable in source and bakes onto named runtime receivers.
+Recessed casements retain jambs, sills and shutter silhouettes; shallow panels and
+hardware bake into the atlas. Sage joinery, quiet limewash and a warm timber entry
+define revision 8. The source registry selects EEVEE supersampling 2 at 0 EV. The owner-rejected v1 screenshots and package are preserved under
 `review/rejected-v1/`; current native Classic/Wide frames are under `review/runtime/`.
 
 From the repository root, stage the committed package without Blender or networking:
@@ -17,7 +19,7 @@ node tools/blender/stage_courtyard_candidate.js --output out/passage-house-play
 & "C:/Program Files/LOVE/lovec.exe" out/passage-house-play/game
 ```
 
-Use a new output directory each time. The source/review renders are a composition claim only; the courtyard remains staged and owner visual/traversal acceptance is still required. Revision 7 was captured natively at five lane positions in Classic and Wide; see `review/measurements.json` for the camera pin, package hashes, and gates.
+Use a new output directory each time. The source/review renders are a composition claim only; the courtyard remains staged and owner visual/traversal acceptance is still required. Revision 8 was captured natively at five lane positions in Classic and Wide; see `review/measurements.json` for the camera pin, package hashes, and gates.
 
 The introduction still enters lodging map 25.
 Leaving its door now reaches the court's upper landing; walk left through the court
@@ -31,7 +33,8 @@ local zero corresponds to the court's upper landing. No Cortiço flattening occu
 
 The editable source is `../../environments/passage_house_courtyard.blend`, registered
 as a scaffold in `environment-sources.json`. Never overwrite an adopted source.
-The recipe refuses existing output paths. For a new scaffold copy:
+The recipe refuses existing output paths. The complete scene, including context and skyline, builds in one run; no follow-up
+refinement scripts are required. For a new scaffold copy:
 
 ```powershell
 $blender = "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe"
@@ -44,8 +47,8 @@ Export the committed source through the existing environment package boundary:
 & $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --bake-backend eevee --source-lighting
 ```
 
-EEVEE uses 0 EV and the authored light rig. Detailed doors/windows stay in the source
-and project onto four receiver cards. Geometry remains for silhouette, passage posts,
+EEVEE uses 0 EV and the authored light rig. Fine door/window detail stays in the source
+and projects onto receiver cards. Geometry remains for silhouette, passage posts,
 roof and paving. Grass is omitted. The exporter's `sr_bake_role` contract is documented
 in the exterior authoring brief; separate source/receiver roles require EEVEE.
 
@@ -57,9 +60,10 @@ python tools/blender/capture_courtyard.py --game-root out/passage-house-play/gam
 ```
 
 `review/` preserves five positions at Classic/Wide sizes in the source and actual
-runtime with Walker/menu, plus a full-geometry runtime comparison. Native runtime
+runtime with Walker/menu, plus before/after comparisons against revision 7. The original full-geometry
+comparison remains under `review/rejected-v1/`. Native runtime
 captures retain the Project's current night sky; the static courtyard lighting is
-baked. This is evidence for review, not owner PLAYED acceptance. See the dated report
+baked. This is evidence for review, not owner PLAYED acceptance. See [the refinement report](../../../../../../docs/reports/passage-house-courtyard-refinement-2026-10-01.md)
 for measured costs, hashes, tests and limitations.
 
 Promotion must update the owning generator or authored-map authority. Do not promote

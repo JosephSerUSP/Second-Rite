@@ -98,8 +98,8 @@ def build(output):
     with bpy.data.libraries.load(str(LIBRARY / "library/selected_materials.blend"), link=False) as (available, loaded):
         loaded.materials = [record["asset"] for record in manifest["assets"]]
     materials = {material.name: material for material in loaded.materials}
-    paving = adapted_material(materials["Bricks - Cobblestone"], "Court warm cobbles", (.30,.28,.23),
-        **{"Width":.24,"Height":.18,"Grout Width":.012,"Bump":.24,"Roughness":.94})
+    paving = adapted_material(materials["Bricks - Cobblestone"], "Court warm cobbles", (.40,.38,.33),
+        **{"Width":.32,"Height":.24,"Grout Width":.007,"Bump":.07,"Roughness":.94})
     terracotta = adapted_material(materials["Clay"], "Court terracotta", (.40,.13,.065), Bump=.25, Roughness=.90)
     linen = adapted_material(materials["Fabric - Linen"], "Court washed linen", (.68,.62,.49),
         **{"Bump":.10,"Translucency":.15,"Subsurface Weight":0.0})
@@ -109,7 +109,7 @@ def build(output):
     iron = core.make_material("Court wrought iron",color=(.025,.028,.028),roughness=.82,metallic=.3)
     water = core.make_material("Court basin water",color=(.06,.13,.14),roughness=.3)
     tile_blue = core.make_material("Court azulejo blue",color=(.04,.13,.25),roughness=.72)
-    weathered(plaster,(.42,.35,.24),(.81,.74,.60),2.4)
+    weathered(plaster,(.61,.57,.48),(.77,.73,.63),.8)
     weathered(wood,(.035,.012,.006),(.14,.068,.023),3.5)
     def part(name,size,location,material,**kwargs):
         obj = box(name,root,size,location,material,core,**kwargs)
@@ -145,10 +145,11 @@ def build(output):
     facade_x, facade_front, facade_back = 4.6, -1.5, 21.5
     wall_thickness, wall_height = .5, 4.2
     door_y, door_width, door_height = 11.5, 1.4, 2.45
+    door_base = profile[-1]["z"]
     windows = ((.5, 1.22, 1.45, 1.76),
                (3.5, 1.22, 1.45, 1.76),
                (6.8, 1.22, 1.45, 1.76))
-    openings = [(door_y, door_width, 0.0, door_height, "door")]
+    openings = [(door_y, door_width, door_base, door_height, "door")]
     openings.extend((y, width, sill, height, "window")
                     for y, width, height, sill in windows)
     openings.sort(key=lambda item: item[0])
@@ -170,7 +171,7 @@ def build(output):
                          sill+height, wall_height)
         else:
             # A substantial stone head spans the door and bears on both piers.
-            wall_segment("lodging_door_head", lo, hi, door_height,
+            wall_segment("lodging_door_head", lo, hi, door_base+door_height,
                          wall_height, pale)
         cursor = hi
     wall_segment("lodging_facade_end", cursor, facade_back)
@@ -195,20 +196,24 @@ def build(output):
     host=type("OpeningHost",(),{})()
     host.back_x=4.30
     host.wood=core.make_material("Court lodging door timber",
-        color=(.19,.075,.027),roughness=.82)
+        color=(.25,.115,.040),roughness=.82)
     host.panel=core.make_material("Court door raised panels",
-        color=(.31,.15,.055),roughness=.84)
+        color=(.47,.285,.12),roughness=.84)
     host.stone=pale;host.terracotta=terracotta
-    host.glass=core.make_material("Court smoked glazing",color=(.018,.027,.035),roughness=.32)
+    host.glass=core.make_material("Court smoked glazing",color=(.095,.145,.17),roughness=.32)
     host.window_glow=host.glass;host.iron=iron
     host.y=lambda value:float(value)
     host.part=lambda name,size,location,material:part(name,size,location,material)
+    casement=core.make_material("Court painted casement",color=(.08,.19,.175),roughness=.83)
+    shutter_finish=core.make_material("Court shutter panel",color=(.13,.25,.215),roughness=.85)
     for index,(y,width,height,sill) in enumerate(windows):
         window_family(host,f"lodging_window_{index+1}",y,width=width,
-            height=height,sill_z=sill,x=4.30,shutters=True,source=True)
+            height=height,sill_z=sill,x=4.35,shutters=True,source=True,
+            recess=.15,retain_shape=True,joinery_material=casement,
+            shutter_material=shutter_finish)
     door_family(host,"lodging_entry_door",door_y,width=door_width,
         height=door_height,x=4.30,panels=4,panel_material=host.panel,
-        source=True)
+        source=True,retain_shape=True,base_z=door_base)
     # The doorway opens into a short, enclosed vestibule, so the closed leaf is
     # framed by a building and the open aperture can never expose the sky.
     part("vestibule_floor",(3.6,1.6,.12),(6.15,door_y,.12),pale)
@@ -238,8 +243,8 @@ def build(output):
         pot=bpy.context.object;pot.name=f"Court earthenware {y}"
         pot.scale=(1,1,1.25);core.move_to_collection(pot,source);pot.data.materials.append(terracotta);pot["sr_bake_source"]=True
     for y in (.5,3.5,6.8):
-        detail_receiver(f"Window receiver {y}",4.34,y,2.50,1.4,1.75,source,plaster)
-    detail_receiver("Lodging door receiver",4.34,11.5,1.95,1.95,2.8,source,plaster)
+        detail_receiver(f"Window receiver {y}",4.50,y,2.485,1.22,1.45,source,plaster)
+    detail_receiver("Lodging door receiver",4.29,11.5,door_base+door_height/2,door_width,door_height,source,plaster)
     for event in map_data["events"]:
         name=next(door["anchor"] for door in map_data["traversal"]["doorways"] if door["eventInstanceId"]==event["instanceId"])
         obj=bpy.data.objects.new(name,None);anchors.objects.link(obj);obj.location=event["worldPosition"]
@@ -260,6 +265,27 @@ def build(output):
     scene.eevee.fast_gi_method="AMBIENT_OCCLUSION_ONLY";scene.eevee.fast_gi_distance=1.5
     scene.render.image_settings.file_format="PNG";scene.render.resolution_percentage=100
     scene["candidate_map"]=json.dumps(map_data);scene["source_profile_authority"]="candidate/32.json"
+    import courtyard_context
+    courtyard_context.compose()
+    # Quiet broad limewash variations instead of high-contrast procedural mottling.
+    for material in bpy.data.materials:
+        if material.use_nodes and 'limewash' in material.name.lower():
+            for node in material.node_tree.nodes:
+                if node.type=='VALTORGB':
+                    low,high=node.color_ramp.elements[0],node.color_ramp.elements[-1]
+                    mean=tuple((low.color[i]+high.color[i])/2 for i in range(3))
+                    low.color=(*[mean[i]-.035 for i in range(3)],1)
+                    high.color=(*[mean[i]+.035 for i in range(3)],1)
+                if node.type=='TEX_NOISE':node.inputs['Scale'].default_value=.65
+    # Warm threshold bounce gives the timber entry a readable focal value under cover.
+    bpy.ops.object.light_add(type='AREA',location=(1.8,11.1,2.9))
+    entry_light=bpy.context.object;entry_light.name='Court warm entry bounce'
+    entry_light.data.energy=35;entry_light.data.color=(1.0,.75,.46)
+    entry_light.data.shape='DISK';entry_light.data.size=1.5
+    from mathutils import Vector
+    entry_light.rotation_euler=(Vector((4.3,11.5,1.5))-entry_light.location).to_track_quat('-Z','Y').to_euler()
+    scene['art_direction']='quiet warm limewash, sage joinery, honey timber entry; fine detail baked, opening silhouettes retained'
+
     bpy.ops.file.pack_all()
     output.parent.mkdir(parents=True,exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(output))

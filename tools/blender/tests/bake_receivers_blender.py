@@ -7,6 +7,12 @@ import export_exterior_environment as exporter
 from vendor_assets_blender import inspect_dependencies
 source=ROOT/'projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend'
 bpy.ops.wm.open_mainfile(filepath=str(source))
+calibration_path=ROOT/'projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json'
+calibration=json.loads(calibration_path.read_text(encoding='utf-8'))
+assert 'projectionFrame' not in calibration
+provenance=exporter.camera_provenance(calibration_path)
+assert provenance['record']==calibration
+assert not Path(provenance['source']).is_absolute()
 inspect_dependencies()
 # A missing texture is an offline failure even if the rest of the source opens.
 unpacked=bpy.data.images.new('missing offline dependency',width=1,height=1)
@@ -17,7 +23,14 @@ else:raise AssertionError('unpacked dependency accepted')
 bpy.data.images.remove(unpacked)
 collection=bpy.data.collections['TH_SOURCE']
 role_counts={key:sum(obj.type=='MESH' and exporter.bake_role(obj)==key for obj in collection.all_objects) for key in ('both','source','receiver')}
-assert role_counts['receiver']==4 and role_counts['source']>10,role_counts
+receivers={obj.name for obj in collection.all_objects if obj.type=='MESH' and exporter.bake_role(obj)=='receiver'}
+assert {'Window receiver 0.5','Window receiver 3.5','Window receiver 6.8','Lodging door receiver'} <= receivers,receivers
+assert role_counts['source']>10,role_counts
+assert all(obj.hide_render for obj in collection.all_objects if obj.type=='MESH' and exporter.bake_role(obj)=='receiver')
+# Silhouette-bearing main shutters and reveal geometry must survive the runtime join.
+assert exporter.bake_role(bpy.data.objects['lodging_window_1_shutter_l'])=='both'
+assert exporter.bake_role(bpy.data.objects['lodging_window_1_jamb_l'])=='both'
+assert exporter.bake_role(bpy.data.objects['lodging_window_1_shutter_l_panel_0'])=='source'
 beauty=exporter.bake_source_members(collection,12,6)
 assert all(exporter.bake_role(obj)!='receiver' for obj in beauty)
 assert any(exporter.bake_role(obj)=='source' for obj in beauty)

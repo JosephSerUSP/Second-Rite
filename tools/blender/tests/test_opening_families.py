@@ -67,6 +67,25 @@ class OpeningFamiliesTests(unittest.TestCase):
         self.assertTrue(all(part.get("sr_bake_role") == "source"
                             for part in parts))
 
+    def test_recess_and_retained_silhouette_do_not_export_panel_relief(self):
+        parts=window(Host(), 'court', 3, x=4.35, recess=.15,
+                     source=True, retain_shape=True,joinery_material='paint',shutter_material='sage')
+        lookup={part.name:part for part in parts}
+        self.assertAlmostEqual(lookup['court_pane'].location[0],4.485)
+        self.assertEqual(lookup['court_jamb_l']['sr_bake_role'],'both')
+        self.assertEqual(lookup['court_shutter_l']['sr_bake_role'],'both')
+        self.assertEqual(lookup['court_shutter_l'].material,'paint')
+        self.assertEqual(lookup['court_shutter_l_panel_0']['sr_bake_role'],'source')
+        self.assertEqual(lookup['court_shutter_l_panel_0'].material,'sage')
+
+    def test_grille_is_spaced_bars_and_invalid_openings_fail(self):
+        parts=window(Host(),'iron',3,grille=True,shutters=False)
+        bars=[part for part in parts if part.name.startswith('iron_grille_')]
+        self.assertEqual(len(bars),4)
+        self.assertTrue(all(part.size[1]<.03 for part in bars))
+        with self.assertRaises(ValueError):window(Host(),'bad',0,recess=-.1)
+        with self.assertRaises(ValueError):door(Host(),'bad',0,width=0)
+
 
 if __name__ == "__main__":
     unittest.main()

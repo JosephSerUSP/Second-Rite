@@ -251,17 +251,24 @@ end
 
 local function appendMobileFillAspect(loader)
     if not (loader and isAndroid()) then return end
-    local w, h = hostDimensions()
-    if w <= 0 or h <= 0 or w < h then return end
-
-    touch_gamepad.updateMobileFillProfile(w, h)
     local renderSurfaces = loader.engine and loader.engine.renderSurfaces
     local options = renderSurfaces and renderSurfaces.options
     if type(options) ~= "table" then return end
-    for _, id in ipairs(options) do
-        if id == MOBILE_FILL_PROFILE then return end
+
+    local found = nil
+    for i, id in ipairs(options) do
+        if id == MOBILE_FILL_PROFILE then found = i; break end
     end
-    options[#options + 1] = MOBILE_FILL_PROFILE
+
+    local w, h = hostDimensions()
+    if w <= 0 or h <= 0 then return end
+    if w < h then
+        if found then table.remove(options, found) end
+        return
+    end
+
+    touch_gamepad.updateMobileFillProfile(w, h)
+    if not found then options[#options + 1] = MOBILE_FILL_PROFILE end
 end
 
 -- The Options scene is authored campaign UI, while the virtual gamepad and the

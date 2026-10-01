@@ -1,5 +1,10 @@
 # Central Cycles environment export — 2026-10-01
 
+Historical measurements and policy at this stage follow. For current quality
+defaults and continuation, use [the consolidation handoff](blender-workflow-consolidation-2026-10-01.md)
+and `tools/blender/ENVIRONMENT-RENDERING.md`; export samples and atlas denoising
+were subsequently changed.
+
 The maintained environment previews and room/exterior exporters now consume the
 shared Cycles quality policy in `tools/blender/render_profiles.py`. Review/export
 use 128 samples, draft uses 16, lookdev 32, exposure is neutral, total bounces four,

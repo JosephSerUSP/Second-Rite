@@ -1,9 +1,11 @@
 # Central environment rendering
 
 `render_profiles.py` owns renderer and quality for maintained environment previews
-and both exporters. Defaults use Cycles at 0 EV: 16 samples for draft, 32 for
-lookdev and 128 for review/export, four total bounces, two diffuse/glossy bounces,
-and a fixed seed. Frame previews use OIDN; atlas bakes leave denoising off. Cameras,
+and both exporters. Defaults use Cycles at 0 EV: 64 samples for draft, lookdev
+and export, and 128 for review; four total bounces, two diffuse/glossy bounces,
+and a fixed seed. Frame previews use OIDN. Cycles baking itself leaves denoising
+off; the atlas then receives fast chart-isolated OIDN to avoid filtering across
+UV islands. Cameras,
 source lighting and map profiles retain their authored authority. Atlas default: 1024.
 
 Both exporters accept `--render-profile`, `--samples`, `--cycles-device`.
@@ -23,6 +25,45 @@ not a hard deadline. Completed exports record effective quality and pipeline tim
 use `tools/ci/time-step.js` to include source opening and export preparation.
 Slow exports require profiling; never ship partial atlases to meet a timer.
 Existing sources and shipping packages are not rewritten by these defaults.
+
+Saved source settings should match effective rendering quality, including viewport
+samples and denoising. The courtyard scaffold saves Cycles64, 0 EV and Classic
+256x240. This does not authorize rewriting adopted sources.
+
+## Atlas allocation and pixel boundaries
+
+The exterior `--atlas-layout view` uses calibrated runtime poses and supports
+`--atlas-view-bias` from 0 (world-area density) to 1 (peak visible camera-area
+density), with a nonzero density floor. Allocation does not delete geometry.
+When omitted, exterior bias and atlas size consume the source's
+`export_atlas_view_bias` and `export_atlas_size` properties. Current courtyard
+values are 1 and 1024. This is area-equivalent allocation, not project-from-view
+UVs or guaranteed anisotropic 1:1 density; #877 tracks the wider view-envelope work.
+
+UV chart boundaries align inward to pixel corners, not pixel centres. Whole
+charts retain their original UVs if alignment would collapse/flip triangles,
+escape chart bounds or introduce shared texels. Bake dilation and isolated
+denoising complement these guards; none proves all receiver correspondence.
+
+## Review and authority
+
+Review source beauty/clay and runtime clay/atlas independently, then inspect
+native Classic and Wide frames at lane ends and intermediate positions, with
+and without the menu. `inspect_environment_surfaces.py` produces independent
+views; `capture_courtyard.py --unobstructed` exposes the full native world frame.
+Wide retains Classic's logical optics. A convincing gameplay frame alone can
+hide missing surfaces or textures projected onto the wrong geometry.
+
+Fine joinery, masonry and paving can bake down; coherent roofs, openings,
+building volumes and important silhouettes must survive as geometry. Compose
+the entire frame behind the menu. Foreground occluders should be separated
+masses with gaps and depth, rather than continuous barriers across the player.
+The current courtyard foreground is an unaccepted experiment, not a template.
+
+The library is repository-local; acquisition is deliberate and builds never
+fetch. See `vendor-library/README.md`. Scaffold/adopted authority remains in
+`environment-sources.json`. For the session's evidence map and continuation
+constraints, see `docs/reports/blender-workflow-consolidation-2026-10-01.md`.
 
 
 ## Receiver correspondence

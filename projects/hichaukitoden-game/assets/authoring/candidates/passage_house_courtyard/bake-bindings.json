@@ -83,6 +83,12 @@
         0
       ],
       "minNormalDot": 0.99
+    },
+    {
+      "receiver": "Court cistern folded linen",
+      "sources": [
+        "Court cistern folded linen"
+      ]
     }
   ]
 }

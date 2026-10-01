@@ -163,7 +163,7 @@ def build(output):
     blue=finish_material('Court cobalt glazed tile',(.035,.11,.24),roughness=.35)
     mat={'sash':sash,'stone':stone,'glass':glass,'shutter':shutter,'iron':iron}
     extended=[{'y':-16,'z':profile[0]['z']},*profile,{'y':32,'z':profile[-1]['z']}]
-    floor=profile_surface('COURT_profile_paving',extended,-24,8,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
+    floor=profile_surface('COURT_profile_paving',extended,-24,19,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
     collision=bpy.data.collections['TH_COLLISION'];profile_surface('COL_profile_walk',profile,-.75,.75,collision,bake=False)
     # Three attached volumes are one lodging: bedrooms, arrival hall, service wing.
     primary=[Window('Court casement '+str(i),4.5,y,upper+.92,width=1.35,height=1.75,shutter_angles=angles) for i,(y,angles) in enumerate([(.5,(95,140)),(3.5,(125,75)),(6.8,(105,130))])]
@@ -311,6 +311,54 @@ def build(output):
         z=0 if y<2 else .30
         b.part(f'Court foreground return {y}',(6.7,.42,.46),(-9.25,y,z+.23),plaster)
         b.part(f'Court foreground return cap {y}',(6.8,.58,.11),(-9.25,y,z+.515),stone,bevel=.02)
+    # A communal wash cistern belongs to the camera-side boundary. Its full
+    # hollow volume is authored; only bevels and ceramic decoration bake down.
+    # Horizontal water/rim levels sit above foundations sampled from the paving.
+    near_x,far_x=-17.15,-14.0
+    start_y,end_y=4.0,8.0
+    rim_z=.78
+    def foundation(x,y):
+        hit,point,normal,index=floor.ray_cast(Vector((x,y,10)),Vector((0,0,-1)))
+        if not hit:raise ValueError('Missing paving under wash cistern')
+        return point.z
+    corners=[(near_x,start_y+.48),(near_x+.48,start_y),(far_x-.48,start_y),(far_x,start_y+.48),(far_x,end_y-.48),(far_x-.48,end_y),(near_x+.48,end_y),(near_x,end_y-.48)]
+    bottom=[(x,y,foundation(x,y)+.035) for x,y in corners]
+    b.mesh('Court cistern foundation',bottom,[tuple(range(len(corners)))],stone)
+    for label,(a,c) in enumerate(zip(corners,corners[1:]+corners[:1])):
+        ax,ay=a;cx,cy=c
+        base=min(foundation(ax,ay),foundation(cx,cy))
+        length=math.hypot(cx-ax,cy-ay)
+        angle=math.atan2(cy-ay,cx-ax)
+        wall=b.part(f'Court cistern wall {label}',(length,.24,rim_z-base),((ax+cx)/2,(ay+cy)/2,(base+rim_z)/2),plaster,'source',.035)
+        wall.rotation_euler.z=angle
+        box_receiver(wall,b.source)
+        cap=b.part(f'Court cistern coping {label}',(length+.12,.37,.10),((ax+cx)/2,(ay+cy)/2,rim_z+.015),stone,'source',.025)
+        cap.rotation_euler.z=angle
+        box_receiver(cap,b.source)
+    water=finish_material('Court cistern still water',(.055,.12,.13),roughness=.18)
+    bsdf=water.node_tree.nodes['Principled BSDF'];bsdf.inputs['Metallic'].default_value=.35
+    bsdf.inputs['Coat Weight'].default_value=.6
+    noise=water.node_tree.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=3
+    noise.inputs['Detail'].default_value=2
+    geometry=water.node_tree.nodes.new('ShaderNodeNewGeometry')
+    bump=water.node_tree.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.18;bump.inputs['Distance'].default_value=.012
+    water.node_tree.links.new(geometry.outputs['Position'],noise.inputs['Vector'])
+    water.node_tree.links.new(noise.outputs['Fac'],bump.inputs['Height']);water.node_tree.links.new(bump.outputs['Normal'],bsdf.inputs['Normal'])
+    centre=Vector(((near_x+far_x)/2,(start_y+end_y)/2,0))
+    inside=[Vector((x,y,0))+(centre-Vector((x,y,0))).normalized()*.17 for x,y in corners]
+    b.mesh('Court cistern water',[(p.x,p.y,.66) for p in inside],[tuple(range(8))],water)
+    # A broad inner ceramic band and carved washboard ridges read at native size.
+    for j in range(14):
+        yy=start_y+.54+j*(end_y-start_y-1.08)/14
+        b.part(f'Court cistern inner ceramic {j}',(.025,.198,.22),(far_x-.135,yy,.64),blue,'source',.004)
+    for j in range(9):
+        xx=near_x+.4+j*.12
+        b.part(f'Court cistern washboard ridge {j}',(.045,.85,.025),(xx,start_y+.51,rim_z+.055),stone,'source',.01)
+    # A folded wash cloth retains its broad drape silhouette; small folds bake.
+    sections=[(far_x+.16,.86),(far_x-.18,.86),(far_x-.22,.82),(far_x-.22,.69)]
+    cloth_vertices=[(x,y,z) for x,z in sections for y in [6.65,7.45]]
+    cloth=b.mesh('Court cistern folded linen',cloth_vertices,[(2*i,2*i+1,2*i+3,2*i+2) for i in range(3)],linen)
+    cloth['sr_bake_open_surface']=True
     channel=finish_material('Court drain shadow',(.10,.13,.12),roughness=1)
     for i in range(40):
         yy=-5+i*.65
@@ -353,11 +401,11 @@ def build(output):
     saved_profile=render_profiles.apply(scene,render_profiles.resolve('export'),device=render_profiles.DEFAULT_DEVICE)
     scene['saved_render_profile']=json.dumps(saved_profile)
     scene['export_atlas_size']=render_profiles.DEFAULT_ATLAS_SIZE
-    scene['export_atlas_view_bias']=.5
+    scene['export_atlas_view_bias']=1.0
     scene['render_settings_note']='Classic 256x240 preview, Cycles 64 render/viewport samples, OIDN, neutral exposure; export atlas 1024. Device availability belongs to the launching Blender process.'
     scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=16;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=17;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

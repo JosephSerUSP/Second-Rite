@@ -12,6 +12,7 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--modes',nargs='+',choices=('source-clay','source-beauty','runtime-clay','runtime-atlas'),
                         default=['source-clay','source-beauty','runtime-clay','runtime-atlas'])
+    parser.add_argument('--views',nargs='+',help='Optional named view subset, such as cistern environment-envelope')
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:])
     args.out.mkdir(parents=True,exist_ok=True);source=args.source.resolve();package=args.package.resolve()
     before=hashlib.sha256(source.read_bytes()).hexdigest();bpy.ops.wm.open_mainfile(filepath=str(source))
@@ -36,6 +37,16 @@ def main():
     envelope_span=max(bounds[i+3]-bounds[i] for i in range(3))
     views.append(('environment-envelope',envelope_center,
                   (-envelope_span*.9,-envelope_span*.55,envelope_span*.6),envelope_span*1.25))
+    cistern=[o for o in source_meshes if o.name.startswith('Court cistern ')]
+    if cistern:
+        points=[o.matrix_world@Vector(corner) for o in cistern for corner in o.bound_box]
+        low=Vector(tuple(min(p[i] for p in points) for i in range(3)))
+        high=Vector(tuple(max(p[i] for p in points) for i in range(3)))
+        views.append(('cistern',(low+high)/2,(-6,-4,5),max(high-low)*1.5))
+    if args.views:
+        missing=set(args.views)-{v[0] for v in views}
+        if missing:parser.error('Unknown or unavailable views: '+', '.join(sorted(missing)))
+        views=[v for v in views if v[0] in args.views]
     rows=[]
     for mode in args.modes:
         for obj in source_meshes:obj.hide_render=not mode.startswith('source')

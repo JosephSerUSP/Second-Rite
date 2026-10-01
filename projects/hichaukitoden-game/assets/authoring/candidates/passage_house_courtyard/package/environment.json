@@ -9,21 +9,21 @@
     -24.0,
     -16.4,
     -0.14,
-    18.23,
+    19.0,
     32.4,
     8.81
   ],
   "stats": {
-    "triangleCount": 5785,
-    "vertexCount": 3430,
+    "triangleCount": 6159,
+    "vertexCount": 3684,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1555693,
-    "renderMeshSizeBytes": 510857,
-    "packageSizeBytes": 2067137
+    "pngSizeBytes": 1418875,
+    "renderMeshSizeBytes": 543738,
+    "packageSizeBytes": 1963200
   },
   "anchors": {
     "cortico_entry": {
@@ -109,7 +109,7 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 2266,
+      "batchedSourceObjects": 2308,
       "correspondence": {
         "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
         "extrusion": 0.15000000596046448,
@@ -163,40 +163,47 @@
             "missing": 0,
             "wrongSource": 0,
             "examples": []
+          },
+          {
+            "receiver": "Court cistern folded linen",
+            "samples": 24,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
           }
         ],
         "errors": []
       },
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 5.556655899999896,
-        "filteredCharts": 186,
-        "preservedSmallCharts": 1238,
-        "filteredTexels": 447832,
+        "seconds": 4.900797600013902,
+        "filteredCharts": 141,
+        "preservedSmallCharts": 1093,
+        "filteredTexels": 528123,
         "alphaUnchanged": true
       },
       "texelAlignment": {
         "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 911,
-        "preservedUnsafeCharts": 629,
+        "alignedCharts": 511,
+        "preservedUnsafeCharts": 1129,
         "existingSharedTexelPairs": 0,
         "newSharedTexelPairs": 0,
         "atlasSize": 1024
       }
     },
-    "exportSeconds": 28.82147480000276,
+    "exportSeconds": 25.912690899975132,
     "atlasAllocation": {
       "measurementStage": "After UV packing, before guarded pixel-corner alignment",
       "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
       "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
       "visibleIslandTexelsPerScreenPixelPercentiles": {
-        "p10": 0.7930892556445607,
-        "p50": 0.9185261375172117,
-        "p90": 1.9870817378225865
+        "p10": 0.8379569149491903,
+        "p50": 0.8394727847149401,
+        "p90": 0.8616326524012359
       },
-      "peakScreenTexelDemand": 133102.0,
+      "peakScreenTexelDemand": 128948.0,
       "atlasSize": 1024,
-      "viewBias": 0.5,
+      "viewBias": 1.0,
       "floor": 0.04,
       "gutterTexels": 2.0,
       "cameras": [
@@ -212,11 +219,11 @@
         11.4,
         11.65
       ],
-      "islands": 1540,
-      "visibleIslands": 366,
-      "polygons": 3115,
-      "visiblePolygons": 651,
-      "meanVisiblePixelsPerSquareMetre": 53.41
+      "islands": 1640,
+      "visibleIslands": 387,
+      "polygons": 3297,
+      "visiblePolygons": 668,
+      "meanVisiblePixelsPerSquareMetre": 42.42
     },
     "lightingPolicy": "source",
     "cameraCalibration": {

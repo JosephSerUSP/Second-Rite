@@ -256,6 +256,11 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     bpy.ops.object.mode_set(mode="EDIT")
     repack(gutter_texels / atlas_size)
     bpy.ops.object.mode_set(mode="OBJECT")
+    # Edit-mode packing can replace the mesh's UV storage. Reacquire its RNA
+    # collection before reading the packed layout rather than retaining a stale
+    # handle across the object/edit-mode boundary.
+    mesh = target.data
+    uv = mesh.uv_layers.active.data
     packed_area = np.zeros(islands)
     for poly in mesh.polygons:
         pts = [np.array(uv[k].uv) for k in poly.loop_indices]

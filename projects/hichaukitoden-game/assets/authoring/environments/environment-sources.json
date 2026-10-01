@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 16 scaffold: extended paving/perimeter/background envelope, persisted export-quality render and viewport settings, camera-aware atlas bias studies. Owner visual and PLAYED acceptance remain staged.",
+      "basis": "Revision 17 scaffold: chamfered communal wash cistern and folded linen in the near rank, terrain beneath background volumes, camera-aware bias 1 to preserve facade detail. Owner visual and PLAYED acceptance remain staged.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

@@ -5,6 +5,7 @@ import copy
 import sys
 from pathlib import Path
 import bpy
+from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'tools/blender/recipes'))
 import passage_house_courtyard as recipe
@@ -52,7 +53,7 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==16
+assert bpy.context.scene['courtyard_revision']==17
 scene=bpy.context.scene
 assert scene.render.engine=='CYCLES'
 assert scene.cycles.samples==64 and scene.cycles.preview_samples==64
@@ -124,3 +125,13 @@ for obj in bpy.data.objects:
             assert point.z < underside-.015,(obj.name,point[:],underside)
         evaluated.to_mesh_clear()
 print('VERANDA SUPPORT CLEARANCE OK')
+
+assert bpy.data.objects['Court cistern water'].bound_box
+for obj in bpy.data.objects:
+    if obj.type=='MESH' and obj.name.startswith('Court cistern '):
+        assert max((obj.matrix_world@Vector(c)).x for c in obj.bound_box)<-13.5,'Cistern encroaches on player route'
+print('CISTERN CLEAR OF WALK LANE')
+
+assert len(bpy.data.objects['Court cistern foundation'].data.polygons[0].vertices)==8
+assert len(bpy.data.objects['Court cistern water'].data.polygons[0].vertices)==8
+print('CISTERN CHAMFERED FOOTPRINT OK')

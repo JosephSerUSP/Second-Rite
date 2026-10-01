@@ -1,0 +1,14 @@
+{
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "samples": 400,
+  "atlasSize": 1024,
+  "backend": "Cycles selected-to-active OptiX GPU",
+  "devices": [
+    "NVIDIA GeForce GTX 1650"
+  ],
+  "prepareSeconds": 23.279646299983142,
+  "bakeAndPackageSeconds": 96.95499630001723,
+  "totalSeconds": 120.23464260000037,
+  "geometry": "Roof winding repaired; open gables outward and protected; production source unchanged",
+  "layout": "Legacy deterministic UV allocation, no camera-projection bake"
+}

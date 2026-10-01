@@ -44,11 +44,11 @@ def _operator_kwargs(operator, candidate_dict):
 
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
                             bake_samples: int = 16, flat_bake: bool = False, backend: str = "cycles",
-                            eevee=None):
+                            eevee=None, cycles_device="CPU"):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
-    and no bake margin, for a street whose atlas already carries its lighting.
+    and one-texel dilation, for a street whose atlas already carries its lighting.
     It defaults off so the interior rooms keep the multi-sample, bounced,
     margin-4 bake their shipped atlases were made with -- the exterior pipeline
     on PR #998 hardcoded the flat values, which would silently have re-baked
@@ -56,8 +56,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     ``backend`` chooses how the atlas is made: ``"cycles"`` is the selected-to-active bake the shipped
     packages were made with; ``"eevee"`` is a camera-projection bake (`eevee_bake.EeveeBake`, passed as
-    ``eevee``), which has the same contract and runs in seconds where the Cycles exterior bake takes
-    a quarter of an hour.
+    ``eevee``). Cycles device selection is explicit; GPU callers configure their
+    device in the current Blender process without saving global preferences.
     """
     import bpy
     from mathutils import Vector, Matrix
@@ -100,7 +100,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # assembly hierarchies. Snapshot membership before changing any member.
     for obj in list(col_source.all_objects):
         if obj:
-            obj.hide_render = False
+            obj.hide_render = backend == "cycles" and obj.get("sr_bake_role") == "receiver"
 
     col_render.hide_render = False
     for obj in list(col_render.all_objects):
@@ -184,10 +184,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     else:
         # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
         scene.render.engine = 'CYCLES'
-        try:
-            scene.cycles.device = 'CPU'
-        except Exception:
-            pass
+        if cycles_device not in {"CPU", "GPU"}:
+            raise ValueError("cycles_device must be CPU or GPU")
+        scene.cycles.device = cycles_device
         if flat_bake:
             scene.cycles.samples = 1
             scene.cycles.max_bounces = 0
@@ -215,19 +214,21 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         # completely, for one texel per island boundary.
         scene.render.bake.margin = 1 if flat_bake else 4
 
-        # Select all source objects as Selected, target_obj as Active.
-        # target_obj must NOT be in the selected set during selected-to-active bake,
-        # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
-        # and circular dependency warnings (#1023).
+        # Selected-to-active requires the receiver to remain selected and active.
+        # Pass the mode explicitly to the operator; its defaults must not turn
+        # this into separate bakes onto every source material's image node.
         bpy.ops.object.select_all(action='DESELECT')
-        for obj in col_source.all_objects:
-            if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
+        for obj in list(col_source.all_objects):
+            if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'} and obj.get("sr_bake_role") != "receiver":
                 obj.select_set(True)
-        target_obj.select_set(False)
+        target_obj.select_set(True)
         scene.view_layers[0].objects.active = target_obj
 
         print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-        bpy.ops.object.bake(type='COMBINED')
+        bpy.ops.object.bake(type='COMBINED', use_selected_to_active=True,
+                            use_clear=False, margin=scene.render.bake.margin,
+                            cage_extrusion=scene.render.bake.cage_extrusion,
+                            max_ray_distance=scene.render.bake.max_ray_distance)
 
     atlas_alpha.apply(bake_image, opacity)
     if opacity is not None:
@@ -384,8 +385,10 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         }
     }
     if eevee_report is not None:
-        # Only an EEVEE bake says so: a Cycles package keeps the manifest it always had.
         manifest["provenance"]["bake"] = {"backend": "eevee", **eevee_report["settings"]}
+    else:
+        manifest["provenance"]["bake"] = {"backend":"cycles", "device":cycles_device,
+            "samples":1 if flat_bake else bake_samples, "selectedToActive":True}
 
     manifest_path = output_dir / "environment.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")

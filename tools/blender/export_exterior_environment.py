@@ -300,6 +300,14 @@ def is_bake_source(obj):
             or obj.name.startswith("FG_"))
 
 
+def bake_role(obj):
+    """Source detail can illuminate a simple receiver without shipping its geometry."""
+    role = obj.get("sr_bake_role", "both")
+    if role not in ("both", "source", "receiver"):
+        raise ValueError(f"{obj.name}: unknown sr_bake_role {role!r}")
+    return role
+
+
 def live_modifiers(obj):
     return [m for m in obj.modifiers if m.show_render]
 
@@ -475,13 +483,15 @@ def allocate_atlas_by_view(target, span, atlas_size):
 
 
 def bake_source_members(source, span, margin):
-    """The source meshes that were joined into the render mesh: what an EEVEE bake photographs.
+    """Beauty source meshes, including detail that is baked onto separate receivers.
 
     The rest of TH_SOURCE (level-design guides, scale actors, preview rigs) must never reach the atlas.
     """
     members = []
     for obj in source.all_objects:
         if not obj or obj.type != "MESH" or obj.hide_render or not is_bake_source(obj):
+            continue
+        if bake_role(obj) == "receiver":
             continue
         if in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
             members.append(obj)
@@ -520,7 +530,10 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     source_objects = list(source.all_objects)
     unbaked_modifiers = []
     for obj in source_objects:
-        if obj.type != "MESH" or obj.hide_render:
+        if obj.type != "MESH":
+            continue
+        role = bake_role(obj)
+        if role == "source" or (obj.hide_render and role != "receiver"):
             continue
         if not is_bake_source(obj):
             if live_modifiers(obj):
@@ -659,12 +672,17 @@ def main() -> None:
                              "backdrop wants; they need ~983k texels for 1.0 "
                              "and a 1024 atlas holds 1,049k in total")
     parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--source-lighting", action="store_true",
+                        help="preserve authored world and lamps rather than staging the legacy exterior rig")
     eevee_bake.add_arguments(parser)
     args = parser.parse_args(argv)
 
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
+    if args.bake_backend != "eevee" and any(bake_role(obj) != "both"
+            for obj in bpy.data.collections["TH_SOURCE"].all_objects if obj.type == "MESH"):
+        raise ValueError("Separate source/receiver geometry requires the EEVEE projection backend")
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape,
                         clip_ground=None if args.keep_full_ground else args.ground_clip_margin,
@@ -677,8 +695,9 @@ def main() -> None:
     # 0.8/0.9/0.7 against the shipped package's 30.0/27.6/23.9 -- a cave. The
     # interior uses an even fill because a room is lit by what it contains; a
     # street gets the fill AND the hard key, which is what outdoor_sun is for.
-    stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
-    stager.outdoor_sun(args.sun)
+    if not args.source_lighting:
+        stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
+        stager.outdoor_sun(args.sun)
 
     # An EEVEE bake photographs the source meshes that were joined, from 16 places along the lane. A town
     # source is in engine space already, so the lane cameras are not mirrored.
@@ -694,6 +713,10 @@ def main() -> None:
                                      bake_samples=args.samples,
                                      flat_bake=True,
                                      backend=args.bake_backend, eevee=eevee)
+    manifest_path = output / "environment.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("EXTERIOR 3D EXPORT OK")
 
 

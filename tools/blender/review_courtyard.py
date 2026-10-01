@@ -42,10 +42,7 @@ def main():
             hit,point,normal,index=floor.ray_cast(Vector((0,y,10)),Vector((0,0,-1)))
             if not hit: raise ValueError(f"No paving at review position {y}")
             z=point.z
-            camera=atlas_allocation.lane_camera(scene,y,mirrored=False,record_path=camera_path)
-            record=thestra_camera.load_calibration(str(camera_path))
-            record["targetWidth"]=width;record["viewportCenterX"]=width/2
-            camera=thestra_camera.create_or_update_camera(record,make_active=True);camera.location.y=y
+            camera=atlas_allocation.lane_camera(scene,y,mirrored=False,record_path=camera_path,width=width)
             actor.location=(0,y,z)
             render_profiles.apply(scene,render_profiles.resolve(args.quality))
             scene.render.resolution_percentage=100;scene.render.image_settings.file_format="PNG"
@@ -59,7 +56,9 @@ def main():
             scene.render.filepath=str((args.out/f"{width}-{y:g}.png").resolve())
             bpy.ops.render.render(write_still=True)
             frames.append({"width":width,"y":y,"z":z,"feet":feet,"head":head,"height":abs(feet[1]-head[1])})
-    (args.out/"frames.json").write_text(json.dumps({"floorSamples":samples,"frames":frames},indent=2),encoding="utf-8")
+    (args.out/"frames.json").write_text(json.dumps({"floorSamples":samples,"frames":frames,
+        "sourceBeautyTriangles":scene.get('source_beauty_triangles'),
+        "sourceMeshRoles":json.loads(scene.get('source_mesh_roles','{}'))},indent=2),encoding="utf-8")
     print("COURTYARD REVIEW OK")
 
 

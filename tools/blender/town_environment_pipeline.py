@@ -90,18 +90,20 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     for col in (col_preview_actors, col_preview_only, col_collision, col_anchors, col_camera):
         if col:
             col.hide_render = True
-            for obj in col.all_objects:
+            for obj in list(col.all_objects):
                 if obj:
                     obj.hide_render = True
 
     # Ensure source and render are visible in render for baking
     col_source.hide_render = False
-    for obj in col_source.all_objects:
+    # Visibility edits invalidate Blender's live collection iterator for nested
+    # assembly hierarchies. Snapshot membership before changing any member.
+    for obj in list(col_source.all_objects):
         if obj:
             obj.hide_render = False
 
     col_render.hide_render = False
-    for obj in col_render.all_objects:
+    for obj in list(col_render.all_objects):
         if obj:
             obj.hide_render = False
 

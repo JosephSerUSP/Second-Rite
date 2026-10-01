@@ -32,5 +32,24 @@ recipe.build(output)
 actual=snapshot()
 assert actual==expected, f'Recipe/source disagree: {set(actual)^set(expected)}; changed {[name for name in actual.keys()&expected.keys() if actual[name]!=expected[name]][:10]}'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==8
+assert bpy.context.scene['courtyard_revision']==11
+# The posed leaves are separate proxies: their detailed source has no opaque
+# backing that would hide the louvres in oblique/rear views.
+for tag in ['left','right']:
+    target=bpy.data.objects['Court casement 1 '+tag+' shutter target']
+    pivot=bpy.data.objects['Court casement 1 '+tag+' shutter hinge']
+    assert target['sr_bake_role']=='receiver' and target.hide_render
+    assert target.parent==pivot and 0<pivot['opening_degrees']<180
+for name in ['Sleeping wing','Arrival hall','Service wing']:
+    owner=bpy.data.objects[name+' volume']
+    spec=json.loads(owner['building_volume'])
+    assert spec['start_portal'] or spec['end_portal']
+    assert any(obj.name.endswith('continuous footing') for obj in owner.children)
+from mathutils import Vector
+graph=bpy.context.evaluated_depsgraph_get()
+for y in [7.5,13.5]:
+    hit,*_=bpy.context.scene.ray_cast(graph,Vector((7.1,y,1.5)),Vector((0,1,0)),distance=1.8)
+    assert not hit,'Authored room connection is blocked at '+str(y)
+hit,*_=bpy.context.scene.ray_cast(graph,Vector((0,.5,1)),Vector((0,-1,0)),distance=3)
+assert not hit,'The Cortico lane exit is blocked by courtyard geometry'
 print('COURTYARD RECIPE PARITY OK',len(actual))

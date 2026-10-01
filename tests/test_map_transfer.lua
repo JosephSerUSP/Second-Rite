@@ -860,6 +860,14 @@ doorTransition.update(0.34)
 check(not doorTransition.isActive(), "the interior reveal completes and unlocks input")
 
 local doorExited = false
+local passageCovered = 0
+check(doorTransition.begin(function() passageCovered = passageCovered + 1 end,
+    {approach = false}), "lane exit begins without a wall approach")
+for _, dt in ipairs({0.29,0.29,0.16,0.34,0.34}) do
+    doorTransition.update(dt)
+    check(doorTransition.approachProgress() == 0, "lane exit never moves the camera into a facade")
+end
+check(passageCovered == 1 and not doorTransition.isActive(), "lane exit transfers once under the fade")
 check(doorTransition.beginExit(function() doorExited = true end),
     "an inverse door threshold transition starts on exit")
 doorTransition.update(0.34)

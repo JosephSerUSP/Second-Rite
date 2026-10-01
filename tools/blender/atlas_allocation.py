@@ -43,7 +43,7 @@ LANE_CENTRE = 3.8833
 
 
 def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE,
-                record_path: Path | None = None):
+                record_path: Path | None = None, width: int = VIEW_WIDTH):
     """The town side-view camera, widened to the 426 px view, standing at lane position `lane_y`.
 
     `lane_y` is a position along the lane in ENGINE space, the space the anchors and the game use
@@ -56,8 +56,23 @@ def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LAN
     import stage_room_model as stager
     import thestra_camera
 
-    record = thestra_camera.load_calibration(str(record_path or CAMERA_RECORD))
-    record = stager.widen_record(record, VIEW_WIDTH)
+    path = Path(record_path or CAMERA_RECORD)
+    views_path = path.with_name(path.stem + '-views.json')
+    if views_path.is_file():
+        data = json.loads(views_path.read_text(encoding='utf-8'))
+        authored_path = path.with_name(data['sourceMap'])
+        if authored_path.is_file() and data['authoredCamera'] != json.loads(authored_path.read_text(encoding='utf-8'))['traversal']['camera']:
+            raise ValueError('Runtime camera views are stale; regenerate with runtime_lane_cameras')
+        matches = [view['record'] for view in data['views']
+                   if abs(view['y'] - lane_y) < 1e-8 and view['width'] == width]
+        if len(matches) < 1:
+            raise ValueError(f'No runtime camera calibration for lane {lane_y}, width {width}')
+        record = matches[0]
+        camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
+        bpy.context.view_layer.update()
+        return camera
+    record = thestra_camera.load_calibration(str(path))
+    record = stager.widen_record(record, width)
     camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
     camera.location.y = centre - lane_y if mirrored else lane_y
     bpy.context.view_layer.update()

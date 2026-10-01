@@ -16,9 +16,11 @@ local DURATIONS = {
     exit_reveal = 0.58,
 }
 
-function door_transition.begin(onCovered)
+function door_transition.begin(onCovered, options)
     if state then return false end
-    state = { phase = "entry_approach", elapsed = 0, onCovered = onCovered }
+    local approach = not (options and options.approach == false)
+    state = { phase = approach and "entry_approach" or "entry_cover", elapsed = 0,
+        onCovered = onCovered, approach = approach }
     return true
 end
 
@@ -62,6 +64,7 @@ end
 
 function door_transition.approachProgress()
     if not state then return 0 end
+    if state.approach == false then return 0 end
     if state.phase == "entry_approach" then
         local p = math.min(1, state.elapsed / DURATIONS.entry_approach)
         return util.easeOut(p)

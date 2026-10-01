@@ -1,0 +1,26 @@
+{
+  "spec": {
+    "name": "Court casement 1",
+    "x": 4.5,
+    "y": 3.5,
+    "sill": 1.22,
+    "width": 1.35,
+    "height": 1.75,
+    "reveal": 0.24,
+    "shutters": true,
+    "columns": 2,
+    "rows": 3,
+    "shutter_angles": [
+      125,
+      75
+    ]
+  },
+  "views": [
+    "front",
+    "oblique",
+    "side",
+    "rear"
+  ],
+  "sourceMeshObjects": 79,
+  "source": "projects\\hichaukitoden-game\\assets\\authoring\\environments\\passage_house_courtyard.blend"
+}

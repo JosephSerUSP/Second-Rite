@@ -76,14 +76,14 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Fresh scaffold generated in one recipe invocation; courtyard_context composes the architecture. Shared opening family retains silhouettes and bakes shallow joinery. Shipping topology remains unchanged pending owner review.",
+      "basis": "Fresh scaffold from courtyard_scene connected room volumes and architectural_assemblies. Rich window, roof and arch sources bake onto retained apertures and proxies. Candidate topology awaits owner review.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,
         "probeCells": 0,
         "emissiveLights": false,
         "fixtureLights": false,
-        "basis": "Outdoor native-review candidate; neutral exposure with authored daylight, no emissive surfaces."
+        "basis": "EEVEE at neutral exposure with authored dusk sun, sky and lamps attached to visible lantern fixtures; automatic lighting shims disabled."
       }
     }
   }

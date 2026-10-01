@@ -59,8 +59,8 @@ python tools/blender/capture_courtyard.py --game-root out/passage-house-play/gam
 & $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/review_courtyard.py -- --source projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --map projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/32.json --out out/court-source-review --quality review
 ```
 
-`review/` preserves five positions at Classic/Wide sizes in the source and actual
-runtime with Walker/menu, plus before/after comparisons against revision 7. The original full-geometry
+`review/` preserves seven positions, including both bounds at Classic/Wide sizes in the source and actual
+runtime with Walker/menu, plus before/after comparisons against rejected revision 8. The original full-geometry
 comparison remains under `review/rejected-v1/`. Native runtime
 captures retain the Project's current night sky; the static courtyard lighting is
 baked. This is evidence for review, not owner PLAYED acceptance. See [the refinement report](../../../../../../docs/reports/passage-house-courtyard-refinement-2026-10-01.md)
@@ -68,3 +68,13 @@ for measured costs, hashes, tests and limitations.
 
 Promotion must update the owning generator or authored-map authority. Do not promote
 by copying staged JSON over generated shipping output.
+
+The Cortico return is an edge exit at lane y=0, with a visible opening through the low court wall. Edge transfers use the shared fade without the wall-door camera approach. Camera projection offsets stop at -72/+72 canonical pixels; the actor continues to the bounds.
+
+Runtime camera samples feed both source review and atlas projection. After changing the authored camera, regenerate these records before exporting:
+
+```powershell
+& "C:/Program Files/LOVE/lovec.exe" tools/blender/runtime_lane_cameras . projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/32.json projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera-views.json
+```
+
+`inspect_architectural_assembly.py` provides neutral front, oblique, side and rear source studies, plus a roof-cut plan for room volumes. These are editable-source inspections, distinct from the native runtime captures.

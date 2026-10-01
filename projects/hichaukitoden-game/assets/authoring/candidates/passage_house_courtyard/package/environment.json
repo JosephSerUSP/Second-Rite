@@ -7,30 +7,30 @@
   "collisionMesh": "collision.obj",
   "bounds": [
     -14.0,
-    -10.51,
-    -0.045,
-    19.39,
-    21.5,
-    13.17
+    -10.4,
+    -0.14,
+    17.8,
+    21.4,
+    8.81
   ],
   "stats": {
-    "triangleCount": 6718,
-    "vertexCount": 4039,
+    "triangleCount": 3541,
+    "vertexCount": 2618,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 181106,
-    "renderMeshSizeBytes": 605009,
-    "packageSizeBytes": 786707
+    "pngSizeBytes": 151938,
+    "renderMeshSizeBytes": 325991,
+    "packageSizeBytes": 478521
   },
   "anchors": {
     "cortico_entry": {
       "id": "cortico_entry",
       "position": [
         0.0,
-        0.5,
+        0.0,
         0.0
       ],
       "rotation": [

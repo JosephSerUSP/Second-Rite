@@ -1,40 +1,47 @@
 {
-  "revision": "8: quieter masonry, recessed sage casements, retained shutter/frame depth, warm panelled entrance; fresh one-run scaffold recipe",
-  "sourceSHA256": "1406e45686efa4adc663889e034ebf388023d82933d737555624ed83319ed893",
-  "sourceBytes": 1417166,
+  "revision": "11: rich architectural sources, partial shutters, connected volumes, clear Cortico edge exit and authored camera end limits",
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "sourceBytes": 1794999,
+  "sourceBeautyTriangles": 191648,
+  "sourceMeshRoles": {
+    "both": 257,
+    "source": 1546,
+    "receiver": 31
+  },
+  "sourceTriangleInterpretation": "Evaluated beauty geometry across the entire editable source, including off-range buildings. Runtime counts are the exported view envelope; the ratio is not a pure same-surface decimation ratio.",
   "package": {
-    "triangleCount": 6718,
-    "vertexCount": 4039,
+    "triangleCount": 3541,
+    "vertexCount": 2618,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 181106,
-    "renderMeshSizeBytes": 605009,
-    "packageSizeBytes": 786707
+    "pngSizeBytes": 151938,
+    "renderMeshSizeBytes": 325991,
+    "packageSizeBytes": 478521
   },
   "packageSHA256": {
     "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-    "environment.json": "9b3813e2d15681f8b4d317484b96668d9e2756086122a0a765b0a2758388e017",
+    "environment.json": "25fda5946bdecfe43252822f7a96d64ad2983691d8e791e3b563408db4b196c0",
     "environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
-    "environment.obj": "4c3b57f45315e6d21006aec67064b7c1756d5e7797ee55bfbb283c322f79f24d",
-    "environment.png": "078e0a1b6106c9da00895844095cc7ff7b8a039824e9a570caf61b62cd6ac514"
+    "environment.obj": "ef0c463c3b8c7293af4016dc0579c0b14a17bfe3708044c7749d14acd6105dbf",
+    "environment.png": "d5dfb59bced3ca036beab9fd6cf695ba9fb3ee15ffaf47680f14c14c86031ed0"
   },
   "bounds": [
     -14.0,
-    -10.51,
-    -0.045,
-    19.39,
-    21.5,
-    13.17
+    -10.4,
+    -0.14,
+    17.8,
+    21.4,
+    8.81
   ],
   "anchors": {
     "cortico_entry": {
       "id": "cortico_entry",
       "position": [
         0.0,
-        0.5,
+        0.0,
         0.0
       ],
       "rotation": [
@@ -85,14 +92,16 @@
       ]
     }
   },
-  "atlasUVOccupancyRasterized": 0.67178,
-  "atlasMeasurement": "Union of OBJ UV face polygons rasterized at 1024x1024; measures allocated UV coverage, not useful visible detail.",
+  "atlasUVOccupancyRasterized": 0.59307,
+  "atlasMeasurement": "Union of OBJ UV polygons at 1024x1024, allocated coverage rather than detail quality.",
   "reviewPositions": [
+    0,
     0.5,
     2,
     5,
     8,
-    11.5
+    11.5,
+    12
   ],
   "cameraCalibration": {
     "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",
@@ -156,28 +165,42 @@
     "frames": [
       {
         "width": 256,
-        "y": 0.5,
-        "z": 9.5367431640625e-07,
+        "y": 0,
+        "z": 0.0,
         "feet": [
-          127.9997787475586,
-          128.00004959106445
+          35.42835998535156,
+          128.00007104873657
         ],
         "head": [
-          127.9997787475586,
-          80.0000524520874
+          35.42835998535156,
+          80.0000810623169
         ],
-        "height": 47.99999713897705
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.14264678955078,
+          128.00007104873657
+        ],
+        "head": [
+          49.14264678955078,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
       },
       {
         "width": 256,
         "y": 2,
         "z": 0.0,
         "feet": [
-          127.9997787475586,
+          90.28550720214844,
           128.00007104873657
         ],
         "head": [
-          127.9997787475586,
+          90.28550720214844,
           80.0000810623169
         ],
         "height": 47.99998998641968
@@ -185,27 +208,27 @@
       {
         "width": 256,
         "y": 5,
-        "z": 0.14999961853027344,
+        "z": 0.15000057220458984,
         "feet": [
-          127.9997787475586,
-          123.60494613647461
+          126.25123596191406,
+          123.60492467880249
         ],
         "head": [
-          127.9997787475586,
-          75.72064876556396
+          126.25123596191406,
+          75.72062015533447
         ],
-        "height": 47.884297370910645
+        "height": 47.88430452346802
       },
       {
         "width": 256,
         "y": 8,
         "z": 0.3000001907348633,
         "feet": [
-          127.9997787475586,
+          131.36529541015625,
           119.23091411590576
         ],
         "head": [
-          127.9997787475586,
+          131.36529541015625,
           71.46177291870117
         ],
         "height": 47.76914119720459
@@ -215,26 +238,54 @@
         "y": 11.5,
         "z": 0.3000001907348633,
         "feet": [
-          127.9997787475586,
+          206.1313934326172,
           119.23089981079102
         ],
         "head": [
-          127.9997787475586,
+          206.1313934326172,
           71.46175861358643
         ],
         "height": 47.76914119720459
       },
       {
-        "width": 426,
-        "y": 0.5,
-        "z": 9.5367431640625e-07,
+        "width": 256,
+        "y": 12,
+        "z": 0.2999992370605469,
         "feet": [
-          212.99977147579193,
-          128.00004959106445
+          219.77972412109375,
+          119.23092842102051
         ],
         "head": [
-          212.99977147579193,
-          80.0000524520874
+          219.77972412109375,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 0,
+        "z": 0.0,
+        "feet": [
+          35.428346022963524,
+          128.00007820129395
+        ],
+        "head": [
+          35.428346022963524,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.142632842063904,
+          128.00007820129395
+        ],
+        "head": [
+          49.142632842063904,
+          80.0000810623169
         ],
         "height": 47.99999713897705
       },
@@ -243,11 +294,11 @@
         "y": 2,
         "z": 0.0,
         "feet": [
-          212.99977147579193,
+          90.28549012541771,
           128.00007820129395
         ],
         "head": [
-          212.99977147579193,
+          90.28549012541771,
           80.0000810623169
         ],
         "height": 47.99999713897705
@@ -255,27 +306,27 @@
       {
         "width": 426,
         "y": 5,
-        "z": 0.14999961853027344,
+        "z": 0.15000057220458984,
         "feet": [
-          212.99978417158127,
-          123.60495328903198
+          126.25122034549713,
+          123.60492467880249
         ],
         "head": [
-          212.99977147579193,
-          75.72064876556396
+          126.25122034549713,
+          75.72063446044922
         ],
-        "height": 47.88430452346802
+        "height": 47.88429021835327
       },
       {
         "width": 426,
         "y": 8,
         "z": 0.3000001907348633,
         "feet": [
-          212.99977147579193,
+          131.3653001189232,
           119.23091411590576
         ],
         "head": [
-          212.9997587800026,
+          131.3653001189232,
           71.46177291870117
         ],
         "height": 47.76914119720459
@@ -285,46 +336,104 @@
         "y": 11.5,
         "z": 0.3000001907348633,
         "feet": [
-          212.99977147579193,
+          206.13138753175735,
           119.23089981079102
         ],
         "head": [
-          212.9997587800026,
+          206.13138753175735,
           71.46175861358643
         ],
         "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 12,
+        "z": 0.2999992370605469,
+        "feet": [
+          219.7797292470932,
+          119.23092842102051
+        ],
+        "head": [
+          219.7797292470932,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
       }
-    ]
+    ],
+    "sourceBeautyTriangles": 191648,
+    "sourceMeshRoles": {
+      "both": 257,
+      "source": 1546,
+      "receiver": 31
+    }
   },
   "currentReviewSHA256": {
     "source": {
-      "256-0.5.png": "4c149451fc0287da85f6494a67cee910af21ba2ba978aaa532acc636a4be58cb",
-      "256-11.5.png": "4674b69826ef35e09a0170c7358b3c4b66a34ba3664bbde99b1092aaafabcbd9",
-      "256-2.png": "2b6e33ac22137f61f53f835995b0e57d5145548959ca97283e5497a46fd24273",
-      "256-5.png": "5625df6b7e6827abb81dbd7d8de9cb114953fe18ec822768f90c553bc8266f0f",
-      "256-8.png": "1b6b527529d13075ff792759f6cdf9c814ad415de3c276a7f6fa20053df76aa7",
-      "426-0.5.png": "5eeffe6a01dd4944f009627dc0c2a0e09a35e1c0d444df8f43a005ef5b2ee0a7",
-      "426-11.5.png": "6da5ca99b0df2c4426567a49ba8ca145380ea16be53fda5aa7b53b9f2cb01655",
-      "426-2.png": "2f97099d5f9f8fe0183c4004e5eddc054b29f1bb7f69e5b0850fd668d571d679",
-      "426-5.png": "18ae55e0ea59a3571c476e9a48f4acdb99e1cdd74e675c26de8abdedf4f0b6e6",
-      "426-8.png": "8d7cd060e11d7de894c3f190e2f6eb976f62e79c6543aaf2d17f70da960ec0a3"
+      "256-0.5.png": "08e3fba1748cd3f3d30d71c187064624d6e34bdc96c5f80d795a8e67f808453c",
+      "256-0.png": "619c09483a29a1aba070444bf30ba4509620978887488f1f3757c50e98ed16b0",
+      "256-11.5.png": "9f479ff586e64ec92f79e953187f568b304f8767e79d95d29e2da33d37970310",
+      "256-12.png": "11af4fa2bf6d22838dd6f9110f163807b99aab551050797de4ecbe71bf27c5eb",
+      "256-2.png": "408660b7dde329153e92e1a7ddb57b8fc7af4bfc8e130a0f36cd727a31ea2af0",
+      "256-5.png": "3b1693847cca23528746ac989763bd77a870829048831eb10be50e2a0419f2c4",
+      "256-8.png": "c3dd1a1643ae90e62c9d84c0ee897b2dc924c32016b69142efa98b02797e1cb0",
+      "426-0.5.png": "68d94aecec74a7505d461f466e3f65301d1dc295c81c9a82ca354f0b1c9090df",
+      "426-0.png": "1760c36fbd16428fcf30a156b170b936c0ecc7dec13f20a6cb8934a07040b890",
+      "426-11.5.png": "02388965a635488d9e70f98bfe697f7fc39e60e9b9d885f45222e9555a5a0041",
+      "426-12.png": "e5911cb9834787b30e70c860bd918d9cf65d405199e87c6ec1618631258ad00c",
+      "426-2.png": "30cfcb5fa6ffe1226006930be2ccc76695c0f03202b6a637c2db313d7d5b2a82",
+      "426-5.png": "fb740617d4fd9e60db62fd26756455e165ff57fb16ea6b9719342558db2802e1",
+      "426-8.png": "431ed4594825cccf7075ba0bb1f4fa9069427f1419c2077eb9cfeaf000cccc07"
     },
     "runtime/classic": {
-      "0.5.png": "57cf817fb0fa6a88880d4b426d740dde4b5023fb621830a93228c8f8c28567b9",
-      "11.5.png": "836f28fcfc7778d51fb39106fadaf986b7e85c9f391e8f56f4d30ba6e8473804",
-      "2.png": "d1d61d388276c20a31670846ef34552b5f7d8ed4fc8f3ea0da24a249011b105d",
-      "5.png": "4a3bf98a5a50fbb77ed192fc8e7570723ff2445b91eec077adb51ca18f83a682",
-      "8.png": "4f7e0962d6fb2231bd4f98a608f4be7c019159d454049b77de7448beb4c3d851"
+      "0.5.png": "b6e83228e37a461dac49b6812fcc797aa29065ce436cf08ace6be5a3331bf52b",
+      "0.png": "fe5055b0f7a47c94410bb2e6127ae9e21cc03cab3dbfdf148cd85aa40864a86c",
+      "11.5.png": "77282f991d45ae9542707279cc4d6c5132be3ed65c04c43e898c3c3f868d9cb4",
+      "12.png": "7b177e59459b85cde8907ab5ca1ebf501f755b96d2e4a2fe79993aa67e010625",
+      "2.png": "3a7d2b9c13479178535b5a753148de93440af1b08e4f6c582bb67e5d0c3bf68c",
+      "5.png": "e7d29febaac0b10b000fb4b5e167e040bdf491944c01d465ea906d8ada65de22",
+      "8.png": "661344ce52e20909ba04f8833bd648089ba8183950706e11e2b5238e3e01acb6"
     },
     "runtime/wide": {
-      "0.5.png": "4e53851693a8375d1cd0d67e1ed0241ef646a4cfff556717a44f6db60c36a2ef",
-      "11.5.png": "efa24be67067d20a930451bc809427541d95b213715aa5797254ce63577bf667",
-      "2.png": "41334d7dc8cc692a2f76ccef2b3f6609ee58eedde382ac801182571ef561ec95",
-      "5.png": "8bfcb752691f01b6a5f519bdbe7cedf9ac0e19f4e630da58d597f1a91f00c78a",
-      "8.png": "4545409314f0eb4278900cb84105384f2146486811c5de24da44a263901e5f8c"
+      "0.5.png": "29ddf8d9c7b679de1d9cae8ae4a4b2e9704c08816efeb336b2b359fdbbab8820",
+      "0.png": "4486af7e1e3f8bb29e7e2b720502585916fce79cfaaa98a4dde789249dbf0edb",
+      "11.5.png": "bca98d6725edfcddf5a48f429e19e6607d917b549f83289d9aab5a5898986f92",
+      "12.png": "a22edf92257eee5aa4ec6c65971f9240233ec29016f20a59d2b188c6a6454d64",
+      "2.png": "aa31862a10079e396366d9620adf9d72b7afb506942ab926b16878a1dcd1942e",
+      "5.png": "2dc67a36cd30a22f2702e37cf46eff3631e47884c8598da21fecfdaea1052e53",
+      "8.png": "85824d77974aaa8ee9de1bf8ecc8e458c81b42e7bd51d40522654e50925b149a"
+    },
+    "modules/window": {
+      "front.png": "ee1e98c39bf7395479268f258ceef5578d70bdd0d5cb2ce866354caa9c7fdfcb",
+      "oblique.png": "dc40c91e389f4a38d270cdc8cb82acacd33ba6baab603e87141a583d1ce6f7e6",
+      "rear.png": "7d846818108d39fba7441f035c97a39be255595c02f1b406a9fc2f045269234f",
+      "side.png": "b56621a8cda50c4ede387ddff90750bb34ef5a0f4e861d6e4ac5169d4350f7f9"
+    },
+    "modules/sleeping-wing": {
+      "front.png": "f259e119f4876c7b525d534da7810ca034583163d3569b2094c62e76e22fe71c",
+      "oblique.png": "f43cf5fbe5fe22a5251592e8d65586c117f2f534a62eec48de8fc35123194752",
+      "rear.png": "bd3e89ff6f73f882d11325ee77ed857e75d19371663bbb15e5bddf8ee9811a6f",
+      "roof-cut-plan.png": "188af577feae9187ac54388c264be78869acb16fef98a0dc2d6be304552f3061",
+      "side.png": "d8da5102cad019379459b48471b3253ac3c68cae27a4bc594b0b30cb0a0afe99"
     }
   },
   "previousRevision": {
+    "sourceSHA256": "1406e45686efa4adc663889e034ebf388023d82933d737555624ed83319ed893",
+    "package": {
+      "triangleCount": 6718,
+      "vertexCount": 4039,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 181106,
+      "renderMeshSizeBytes": 605009,
+      "packageSizeBytes": 786707
+    },
+    "review": "before-assemblies/",
+    "ownerDisposition": "Rejected as weak geometry, textures and lighting"
+  },
+  "olderRevision": {
     "sourceSHA256": "42374ea4684bba944c3b8c659ea2f459c7c164dfb601df24e2da436feea69f50",
     "package": {
       "triangleCount": 6552,
@@ -350,104 +459,11 @@
     },
     "review": "before-sol/"
   },
-  "rejectedV1Measurements": {
-    "sourceSHA256": "563d9c86bbe5685f77bc41d4aa15dc17fd0be0d83c52f76e6bb4883f844b7714",
-    "sourceBytes": 1026313,
-    "fullGeometry": {
-      "triangleCount": 1958,
-      "vertexCount": 1268,
-      "materialGroupCount": 1,
-      "textureDimensions": [
-        1024,
-        1024
-      ],
-      "pngSizeBytes": 824175,
-      "renderMeshSizeBytes": 174236,
-      "packageSizeBytes": 999003
-    },
-    "candidate": {
-      "triangleCount": 1522,
-      "vertexCount": 984,
-      "materialGroupCount": 1,
-      "textureDimensions": [
-        1024,
-        1024
-      ],
-      "pngSizeBytes": 812946,
-      "renderMeshSizeBytes": 132082,
-      "packageSizeBytes": 945620
-    },
-    "atlasUVOccupancyRasterized": 0.90762,
-    "fullAtlasUVOccupancyRasterized": 0.89626,
-    "nativeComparisons": [
-      {
-        "surface": "classic",
-        "y": 0.5,
-        "meanAbsoluteChannelDifference": 1.328
-      },
-      {
-        "surface": "classic",
-        "y": 2.0,
-        "meanAbsoluteChannelDifference": 1.857
-      },
-      {
-        "surface": "classic",
-        "y": 5.0,
-        "meanAbsoluteChannelDifference": 2.183
-      },
-      {
-        "surface": "classic",
-        "y": 8.0,
-        "meanAbsoluteChannelDifference": 2.536
-      },
-      {
-        "surface": "classic",
-        "y": 11.5,
-        "meanAbsoluteChannelDifference": 1.207
-      },
-      {
-        "surface": "wide",
-        "y": 0.5,
-        "meanAbsoluteChannelDifference": 1.542
-      },
-      {
-        "surface": "wide",
-        "y": 2.0,
-        "meanAbsoluteChannelDifference": 1.796
-      },
-      {
-        "surface": "wide",
-        "y": 5.0,
-        "meanAbsoluteChannelDifference": 2.138
-      },
-      {
-        "surface": "wide",
-        "y": 8.0,
-        "meanAbsoluteChannelDifference": 1.27
-      },
-      {
-        "surface": "wide",
-        "y": 11.5,
-        "meanAbsoluteChannelDifference": 0.715
-      }
-    ],
-    "exportSeconds": {
-      "cold": 27.7,
-      "warm": 27.4
-    },
-    "files": {
-      "package\\collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-      "package\\environment.json": "a6d6806eff9e051a489ac8ab38e7073c0e53be0846e117dec662aebbed648b5d",
-      "package\\environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
-      "package\\environment.obj": "1b4c9ecd1e9b229cf6efe4214180d48b8e42e1f1e14411e68acffe485d970873",
-      "package\\environment.png": "a380ca8b167b0af67d725c30e735651521f561bff27c5784fba6eeacfc5e846a"
-    }
-  },
-  "interpretation": "Native images and hashes document the candidate; visual quality and owner PLAYED acceptance remain owner decisions. The previous revision and rejected v1 are preserved separately.",
   "exportSeconds": {
-    "cold": 79.7,
-    "warm": 76.5
+    "first": 106.9,
+    "repeat": null
   },
+  "exportTimingInterpretation": "Separate fresh Blender processes on the same machine, including launch, preparation, bake and packaging; no process-local cache reuse claimed.",
   "renderSettings": {
     "backend": "EEVEE",
     "exposureEV": 0,
@@ -457,15 +473,27 @@
   },
   "verification": {
     "G1": "VALIDATE OK",
-    "stagedUnit": "ALL UNIT TESTS OK; 7 Effekseer world-effect assertions unavailable",
-    "nativeCapture": "Classic and Wide, five lane positions each; not owner PLAYED acceptance",
-    "floorReview": "Profile controls, intermediate samples and both doorway landings passed",
-    "offline": "Fresh recipe and both final exports ran through network-denying offline_blender.py; curated Blender library/dependency check passed",
-    "recipeParity": "Mesh coordinates/connectivity/transforms, material bindings, bake roles and modifier types match fresh scaffold; blend bytes and complete shading are not asserted",
-    "targetedPython": "44 checks passed: opening families, receiver/source contracts, exterior export, fresh recipe parity, vendor host contracts, source-manifest host contracts",
-    "candidateNodeTests": "2 passed: actual editor profile edits/undo/redo and geography extraction",
-    "environmentSources": "OK (game and editor fixture)",
-    "townCheck": "10 generated maps, 35 door edges and arrival anchors passed"
+    "stagedUnit": "ALL UNIT TESTS OK; no failed assertions in final log; 7 Effekseer world-effect assertions unavailable",
+    "targetedPython": "15 passed: fresh source parity, clear Cortico exit, nested production bake, exterior regression and host window validation",
+    "candidateNodeTests": "2 passed: profile/history and geography",
+    "environmentSources": "OK",
+    "townCheck": "10 generated maps and 35 door edges/arrival anchors passed",
+    "libraryHashes": "VENDORED ASSETS OK",
+    "floorReview": "Controls, intermediate samples and both landings passed",
+    "offline": "Source generation and exports used network-denying offline_blender.py; production bake fixture inspected packed dependencies",
+    "nativeCapture": "Classic and Wide with Walker/menu at seven positions including bounds; owner PLAYED remains outstanding",
+    "followups": {
+      "1298": "Stale exterior authoring brief",
+      "1299": "Boundary suite failure not propagated by unit runner"
+    }
   },
-  "exportTimingInterpretation": "First measured final export and subsequent export in separate fresh Blender processes on the same machine. No process-local cache reuse is asserted; the timing wrapper labels separate runs cold."
+  "interpretation": "Module studies are neutral studio source inspection, not runtime rendering. Native images prove the exported composition, not owner acceptance. The previous owner-rejected revision is preserved separately.",
+  "cameraTracking": {
+    "minOffsetX": -72,
+    "maxOffsetX": 72,
+    "source": "32.json#/traversal/camera/tracking",
+    "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
+  },
+  "moduleInspectionSourceSHA256": "3fa21edac0f10f8d9339f8e447f3f2121bbd99758983cbdc75cf356a4412db66",
+  "moduleInspectionNote": "Window and sleeping-wing modules inspected from preceding revision 10 source; these assemblies are unchanged in revision 11. Whole-scene source hash differs because exit and camera data changed."
 }

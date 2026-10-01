@@ -58,6 +58,7 @@ jobs:
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blends_host.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_blender_locator.py' -v
+          python -m unittest tools.blender.tests.test_architectural_assemblies -v
 
       # Blender numbered backups are rejected repository-wide by the
       # repo-hygiene job in verify.yml (#671). The check that lived here

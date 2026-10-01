@@ -23,7 +23,8 @@ load(26, "lodging_door")
 local entryY, entryZ = game.townTraversal.y, game.townTraversal.z
 useDoor("st-maria-cortico-lodging_door")
 check(game.currentMapData.id == 32, "Cortico enters candidate court")
-check(math.abs(game.townTraversal.y - 0.5) < 1e-6 and game.townTraversal.z == 0, "entry lands on lower landing")
+check(math.abs(game.townTraversal.y - 0) < 1e-6 and game.townTraversal.z == 0, "entry lands on lower landing")
+check(lane.isEdgeDoorway(game,lane.nearDoorway(game)), "Cortico return is a lane exit, not an Up wall door")
 for _, direction in ipairs({1,-1}) do
     local previousZ = game.townTraversal.z
     for _ = 1, 240 do
@@ -31,10 +32,15 @@ for _, direction in ipairs({1,-1}) do
         local state = game.townTraversal
         check(math.abs(state.z - lane.groundAt(game, state.y)) < 1e-6, "walk feet follow profile")
         check(direction * (state.z - previousZ) >= -1e-6, "continuous monotone climb/descent")
+        check(math.abs(state.cameraOffsetX) <= 72, "camera respects authored end limits")
         previousZ = state.z
     end
     check(math.abs(game.townTraversal.z - (direction > 0 and 0.3 or 0)) < 1e-6, "slope endpoint")
 end
+load(32,"cortico_entry")
+local lowerOffset=game.townTraversal.cameraOffsetX
+lane.update(game,1/60,1)
+check(game.townTraversal.cameraOffsetX==lowerOffset,"camera stays still as player leaves lower extremity")
 load(32,"lodging_entry")
 check(math.abs(game.townTraversal.z-0.3)<1e-6,"upper doorway arrival")
 useDoor("st-maria-passage-court-lodging_entry")

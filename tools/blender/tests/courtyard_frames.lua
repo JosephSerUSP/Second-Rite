@@ -13,7 +13,7 @@ function module.run(loader)
     require("presentation.viewport_3d").init()
     scene_host.init(nil)
     local result = {}
-    for _, y in ipairs({0.5,2,5,8,11.5}) do
+    for _, y in ipairs({0,0.5,2,5,8,11.5,12}) do
         exploration.loadMap(game,loader.getMapIndex(32))
         game.townTraversal.y = y
         game.townTraversal.z = lane.groundAt(game,y)
@@ -34,7 +34,7 @@ function module.run(loader)
             if _ == 1 then love.timer.sleep(0.20) end
         end
         local png = canvas:newImageData():encode("png")
-        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,
+        result[#result+1] = {y=y,z=game.townTraversal.z,width=width,height=height,cameraOffsetX=game.townTraversal.cameraOffsetX,
             image=love.data.encode("string","base64",png)}
         canvas:release()
     end

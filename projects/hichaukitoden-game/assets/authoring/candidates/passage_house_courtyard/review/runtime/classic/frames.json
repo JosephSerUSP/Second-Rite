@@ -1,32 +1,51 @@
 [
   {
+    "cameraOffsetX": 72,
+    "height": 240,
+    "width": 256,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "cameraOffsetX": 72,
     "height": 240,
     "width": 256,
     "y": 0.5,
     "z": 0
   },
   {
+    "cameraOffsetX": 72,
     "height": 240,
     "width": 256,
     "y": 2,
     "z": 0
   },
   {
+    "cameraOffsetX": 25.613900028715726,
     "height": 240,
     "width": 256,
     "y": 5,
     "z": 0.15
   },
   {
+    "cameraOffsetX": -51.22780005743145,
     "height": 240,
     "width": 256,
     "y": 8,
     "z": 0.3
   },
   {
+    "cameraOffsetX": -72,
     "height": 240,
     "width": 256,
     "y": 11.5,
+    "z": 0.3
+  },
+  {
+    "cameraOffsetX": -72,
+    "height": 240,
+    "width": 256,
+    "y": 12,
     "z": 0.3
   }
 ]

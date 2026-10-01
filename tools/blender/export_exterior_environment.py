@@ -547,6 +547,12 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         if obj.name in GROUND_NAMES:
             flatten_ground_sheet(obj)       # in memory, for the Cycles bake: see its docstring
         copy = obj.copy()
+        # A derived render proxy belongs to the render collection, not the
+        # authored assembly hierarchy. Preserve placement before detaching:
+        # moved assembly roots need world space, and the source hierarchy must
+        # not acquire temporary children belonging to the render export.
+        copy.parent = None
+        copy.matrix_world = obj.matrix_world.copy()
         copy.data = realised_mesh(obj)
         atlas_alpha.preserve_uv(copy.data)
         copy.modifiers.clear()      # already applied above; join must not see them
@@ -625,6 +631,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         if ground_tagged:
             reallocate_ground(target, ground_share)
     target.data.calc_loop_triangles()
+    bpy.context.view_layer.update()
     if len(target.data.loop_triangles) < 100:
         raise RuntimeError(
             f"render join is implausibly small: {len(target.data.loop_triangles)} triangles")

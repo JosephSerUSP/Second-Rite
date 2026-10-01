@@ -50,8 +50,7 @@ function stage(output, packageDir) {
     const mainPath = path.join(staged.stageDir,'main.lua');
     const main = fs.readFileSync(mainPath,'utf8');
     if (!main.includes('"test_bounded_lane",')) throw new Error('Runtime unit registration boundary changed');
-    fs.writeFileSync(mainPath,main.replace('"test_bounded_lane",','"test_bounded_lane",\n            "test_courtyard_candidate",')
-        .replace('cli_tools.runTownProofFrames(loader)','require("tests.courtyard_frames").run(loader)'));
+    fs.writeFileSync(mainPath,main.replace('"test_bounded_lane",','"test_bounded_lane",\n            "test_courtyard_candidate",'));
     console.log(JSON.stringify({...staged,datum},null,2));
     return {...staged,datum,project};
 }

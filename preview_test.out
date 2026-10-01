@@ -1,0 +1,18 @@
+[W][08853.498785] pw.conf      | [          conf.c: 1031 try_load_conf()] can't load config client-rt.conf: No such file or directory
+[E][08853.498922] pw.conf      | [          conf.c: 1060 pw_conf_load_conf_for_context()] can't load config client-rt.conf: No such file or directory
+[ALSOFT] (EE) Failed to create PipeWire event context (errno: 2)
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5204:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5727:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+Could not open device.
+--------------------------------------------------
+SECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)
+--------------------------------------------------
+PREVIEW BEGIN
+{"frameKind":"windows","gameHeight":240,"gameWidth":256,"image":"iVBORw0KGgoAAAANSUhEUgAAAQAAAADwBAMAAAAduaf4AAAAElBMVEUAAAAOEyE/QVL///8DBAcNDRAGyeIPAAADTklEQVR4nO2cYW7jIBCFuzdYChdoov7fCdMDoOUElXr/q+wMg4GkSVZJLLMbvRcrJeOx/ZkBl1Tqe3mBIAgS/XCb6uc3gNfdpnr7BwHetqzAKwAAcB4gxp5CS8MPx/kh4XrwPgDO7bKO2/nTQDUkNMrT4CMAjinqHflI7Ega5GjsFnah7HWWZpTs+dJ1bgWIMcRAckeUmX2QhiD53LtAL617ydJcKAC0GoCUgFOIkeW6kZK8K8BQAqdIQeMlzWIxrAegVxSMrI3f7jsAaYRamo0BTmuWgJ2NAS5jQCrOLlI7rkR0szQbA/JxLYCQk55Lip5zkAKXhkT7gRrRraaFJbgSwHYCAADOAUxfks0GmL4shyAImv4gmv4ong8w/dcxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAGwFipLZNAQg5t20KwPo9cOP/br9/fbVtnX/9vuMsDwg+JE+gGH/NRpgs9MDzafqDaPqjeD7A/7YiAsBzAtCw1HPFn1Mai1cn2aHUHUy7bK8/DdZGi/eECwDVoFJWuiwrXeZM0jCvTo2UK8dzpqBcVsbdzZIsWFFbvCdcATDjSfWgVDfO8qqN6kpKbH3ij/xLXemuamFaMx2b5WmJE8XBCfYygJ1HW5RiDK4YhqojqETMlTSw9clo0CqHyP36nMzC1DLl8GJqmkuc5VO3PL1WgiSbtHwofVh6nzM361jzDlWu2GuhRxVDUfU4TWEJKrl2QnJmbXpTCSi5pQRcS0AdwEuBhm9EbB2ezON0yJQc6ZlUHVD/CmDj3wDsnGUWHI8BrWwQvnEMlKPU0VSCdQgtY0DrqHEF6JanFwDqlz2n5Q7lTb/4qStp/Vz3mEPpYE8azNc05GphOmQGTc6unjZfB2ijtM56Op3aq+nSGMi0TOFs93DklLsBgOOlfGWm05GH8wYAOmDqFHZe56Hzd/jQPgDQHp76KCjzcMsSyDrpQ16HXWns9nv9sf/cbkkm0Rjf9draOBw+D/K+i4etAHRZHhYLYpvX4cSseE3h7wMQBEEQBEEQBEEQBEEQBB3pDyd85siji5YOAAAAAElFTkSuQmCC","sceneId":"a002_breakout","sceneName":"A002 Breakout Benchmark","tileSize":8,"windows":[{"hasLayout":false,"height":3,"id":"header","open":true,"style":"frame","text":"Breakout   Score: 0","width":28,"x":1,"y":1},{"hasLayout":false,"height":16,"id":"playfield","open":true,"style":"frame","text":"","width":28,"x":1,"y":5},{"hasLayout":false,"height":3,"id":"controls","open":true,"style":"frame","text":"LEFT/RIGHT: Move   Enter: Restart   B: Exit","width":28,"x":1,"y":22},{"hasLayout":false,"height":1,"id":"paddle_win","open":true,"style":"panel","text":"=====","width":5,"x":12,"y":19},{"hasLayout":false,"height":1,"id":"ball_win","open":true,"style":"panel","text":"O","width":1,"x":14,"y":19.5}]}
+PREVIEW END

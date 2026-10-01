@@ -284,7 +284,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         "Kd 1.000 1.000 1.000\n"
         "map_Kd environment.png\n"
     )
-    mtl_path.write_text(mtl_content, encoding="utf-8")
+    mtl_path.write_text(mtl_content, encoding="utf-8", newline="\n")
 
     # 6. Export TH_COLLISION if present
     collision_filename = None
@@ -391,7 +391,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "samples":1 if flat_bake else bake_samples, "selectedToActive":True}
 
     manifest_path = output_dir / "environment.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print(f"[pipeline] Manifest written to {manifest_path}")
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 

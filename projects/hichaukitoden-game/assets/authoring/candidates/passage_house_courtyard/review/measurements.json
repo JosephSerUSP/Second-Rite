@@ -495,5 +495,12 @@
     "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
   },
   "moduleInspectionSourceSHA256": "3fa21edac0f10f8d9339f8e447f3f2121bbd99758983cbdc75cf356a4412db66",
-  "moduleInspectionNote": "Window and sleeping-wing modules inspected from preceding revision 10 source; these assemblies are unchanged in revision 11. Whole-scene source hash differs because exit and camera data changed."
+  "moduleInspectionNote": "Window and sleeping-wing modules inspected from preceding revision 10 source; these assemblies are unchanged in revision 11. Whole-scene source hash differs because exit and camera data changed.",
+  "ownerGeometryReview": {
+    "disposition": "Runtime geometry/export needs replacement or repair before promotion",
+    "finding": "Roof envelopes removed by culling; source roof colors can transfer onto background receiver surfaces",
+    "followup": 1301,
+    "cyclesStudy": "cycles-study/",
+    "sourceAndProductionPackageChangedByStudy": false
+  }
 }

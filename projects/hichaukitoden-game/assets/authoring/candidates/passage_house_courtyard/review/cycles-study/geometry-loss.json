@@ -1,0 +1,1306 @@
+{
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "unculled": {
+    "totalTriangles": 5029,
+    "objects": {
+      "COURT_profile_paving": 310,
+      "Sleeping wing wall 0 0": 12,
+      "Sleeping wing wall 0 1": 10,
+      "Sleeping wing wall 0 2": 10,
+      "Sleeping wing wall 1 0": 10,
+      "Sleeping wing wall 1 2": 10,
+      "Sleeping wing wall 2 0": 10,
+      "Sleeping wing wall 2 1": 10,
+      "Sleeping wing wall 2 2": 8,
+      "Sleeping wing wall 3 0": 10,
+      "Sleeping wing wall 3 2": 10,
+      "Sleeping wing wall 4 0": 10,
+      "Sleeping wing wall 4 1": 10,
+      "Sleeping wing wall 4 2": 8,
+      "Sleeping wing wall 5 0": 10,
+      "Sleeping wing wall 5 2": 10,
+      "Sleeping wing wall 6 0": 10,
+      "Sleeping wing wall 6 1": 10,
+      "Sleeping wing wall 6 2": 8,
+      "Sleeping wing west return": 12,
+      "Sleeping wing east return front": 12,
+      "Sleeping wing east return rear": 12,
+      "Sleeping wing east portal head": 12,
+      "Sleeping wing rear": 12,
+      "Sleeping wing room floor": 12,
+      "Sleeping wing continuous footing": 12,
+      "Sleeping wing roof": 20,
+      "Sleeping wing west gable": 1,
+      "Sleeping wing east gable": 1,
+      "Sleeping wing eave timber": 12,
+      "Court casement 0 left reveal": 44,
+      "Court casement 0 right reveal": 44,
+      "Court casement 0 head reveal": 44,
+      "Court casement 0 sill": 44,
+      "Court casement 0 glazing target": 2,
+      "Court casement 0 left shutter target": 12,
+      "Court casement 0 right shutter target": 12,
+      "Court casement 1 left reveal": 44,
+      "Court casement 1 right reveal": 44,
+      "Court casement 1 head reveal": 44,
+      "Court casement 1 sill": 44,
+      "Court casement 1 glazing target": 2,
+      "Court casement 1 left shutter target": 12,
+      "Court casement 1 right shutter target": 12,
+      "Court casement 2 left reveal": 44,
+      "Court casement 2 right reveal": 44,
+      "Court casement 2 head reveal": 44,
+      "Court casement 2 sill": 44,
+      "Court casement 2 glazing target": 2,
+      "Court casement 2 left shutter target": 12,
+      "Court casement 2 right shutter target": 12,
+      "Arrival hall wall 0 0": 12,
+      "Arrival hall wall 0 1": 10,
+      "Arrival hall wall 1 1": 10,
+      "Arrival hall wall 2 0": 12,
+      "Arrival hall wall 2 1": 8,
+      "Arrival hall west return front": 10,
+      "Arrival hall west return rear": 12,
+      "Arrival hall west portal head": 10,
+      "Arrival hall east return front": 12,
+      "Arrival hall east return rear": 12,
+      "Arrival hall east portal head": 12,
+      "Arrival hall rear": 12,
+      "Arrival hall room floor": 12,
+      "Arrival hall continuous footing": 12,
+      "Arrival hall roof": 20,
+      "Arrival hall west gable": 1,
+      "Arrival hall east gable": 1,
+      "Arrival hall eave timber": 12,
+      "Service wing wall 0 0": 12,
+      "Service wing wall 0 1": 10,
+      "Service wing wall 0 2": 10,
+      "Service wing wall 1 0": 10,
+      "Service wing wall 1 2": 10,
+      "Service wing west return front": 10,
+      "Service wing west return rear": 12,
+      "Service wing west portal head": 10,
+      "Service wing rear": 12,
+      "Service wing room floor": 12,
+      "Service wing continuous footing": 12,
+      "Service wing roof": 20,
+      "Service wing west gable": 1,
+      "Service wing eave timber": 12,
+      "Court service casement left reveal": 44,
+      "Court service casement right reveal": 44,
+      "Court service casement head reveal": 44,
+      "Court service casement sill": 44,
+      "Court service casement glazing target": 2,
+      "Court service casement left shutter target": 12,
+      "Court door leaf target": 2,
+      "Court portal threshold": 44,
+      "Court portal pier -1": 44,
+      "Court portal splayed reveal -1": 2,
+      "Court portal pier 1": 44,
+      "Court portal splayed reveal 1": 2,
+      "Court stone arch 0": 12,
+      "Court arch masonry spandrel 0": 12,
+      "Court stone arch 1": 10,
+      "Court arch masonry spandrel 1": 10,
+      "Court stone arch 2": 10,
+      "Court arch masonry spandrel 2": 10,
+      "Court stone arch 3": 10,
+      "Court arch masonry spandrel 3": 10,
+      "Court stone arch 4": 10,
+      "Court arch masonry spandrel 4": 10,
+      "Court stone arch 5": 10,
+      "Court arch masonry spandrel 5": 10,
+      "Court stone arch 6": 10,
+      "Court arch masonry spandrel 6": 10,
+      "Court stone arch 7": 10,
+      "Court arch masonry spandrel 7": 10,
+      "Court stone arch 8": 10,
+      "Court arch masonry spandrel 8": 10,
+      "Court stone arch 9": 10,
+      "Court arch masonry spandrel 9": 10,
+      "Court stone arch 10": 10,
+      "Court arch masonry spandrel 10": 10,
+      "Court stone arch 11": 10,
+      "Court arch masonry spandrel 11": 10,
+      "Court stone arch 12": 10,
+      "Court arch masonry spandrel 12": 10,
+      "Court portal fanlight": 16,
+      "Court covered veranda roof": 12,
+      "Veranda fascia": 44,
+      "Veranda post 8.23": 44,
+      "Veranda foot 8.23": 44,
+      "Veranda knee brace 8.23": 28,
+      "Veranda rafter 8.23": 44,
+      "Veranda post 13.53": 44,
+      "Veranda foot 13.53": 44,
+      "Veranda knee brace 13.53": 28,
+      "Veranda rafter 13.53": 44,
+      "West street wall 3 0": 12,
+      "West street wall 3 2": 12,
+      "West street wall 4 0": 10,
+      "West street wall 4 1": 10,
+      "West street wall 4 2": 8,
+      "West street east return": 12,
+      "West street rear": 12,
+      "West street room floor": 12,
+      "West street roof": 20,
+      "West street east gable": 1,
+      "West street eave timber": 12,
+      "West street window 1 left reveal": 44,
+      "West street window 1 right reveal": 44,
+      "West street window 1 head reveal": 44,
+      "West street window 1 sill": 44,
+      "West street window 1 glazing target": 2,
+      "West street window 1 left shutter target": 12,
+      "West street window 1 right shutter target": 12,
+      "West street floor stringcourse": 12,
+      "West street chimney": 12,
+      "West street chimney crown": 12,
+      "Rear street wall 0 0": 12,
+      "Rear street wall 0 1": 10,
+      "Rear street wall 0 2": 10,
+      "Rear street wall 1 0": 10,
+      "Rear street wall 1 2": 10,
+      "Rear street wall 2 0": 10,
+      "Rear street wall 2 1": 10,
+      "Rear street wall 2 2": 8,
+      "Rear street wall 3 0": 8,
+      "Rear street wall 3 2": 10,
+      "Rear street wall 4 0": 12,
+      "Rear street wall 4 1": 10,
+      "Rear street wall 4 2": 8,
+      "Rear street west return": 12,
+      "Rear street east return": 12,
+      "Rear street rear": 12,
+      "Rear street room floor": 12,
+      "Rear street roof": 20,
+      "Rear street west gable": 1,
+      "Rear street east gable": 1,
+      "Rear street eave timber": 12,
+      "Rear street window 0 left reveal": 44,
+      "Rear street window 0 right reveal": 44,
+      "Rear street window 0 head reveal": 44,
+      "Rear street window 0 sill": 44,
+      "Rear street window 0 glazing target": 2,
+      "Rear street window 0 left shutter target": 12,
+      "Rear street window 0 right shutter target": 12,
+      "Rear street window 1 left reveal": 44,
+      "Rear street window 1 right reveal": 44,
+      "Rear street window 1 head reveal": 44,
+      "Rear street window 1 sill": 44,
+      "Rear street window 1 glazing target": 2,
+      "Rear street window 1 left shutter target": 12,
+      "Rear street window 1 right shutter target": 12,
+      "Rear street floor stringcourse": 12,
+      "Rear street chimney": 12,
+      "Rear street chimney crown": 12,
+      "East street wall 0 0": 12,
+      "East street wall 0 1": 10,
+      "East street wall 0 2": 10,
+      "East street wall 1 0": 10,
+      "East street wall 1 2": 10,
+      "East street west return": 12,
+      "East street west gable": 1,
+      "East street window 0 left reveal": 44,
+      "East street window 0 head reveal": 44,
+      "East street window 0 sill": 44,
+      "East street window 0 glazing target": 2,
+      "East street window 0 left shutter target": 12,
+      "Court enclosing wall -2.1 -6.5": 12,
+      "Court wall coping -2.1 -6.5": 44,
+      "Court enclosing wall -2.1 1.35": 12,
+      "Court wall coping -2.1 1.35": 44,
+      "Court enclosing wall 14.4 -6.5": 12,
+      "Court wall coping 14.4 -6.5": 44,
+      "Cortico passage pier -1.5": 44,
+      "Cortico passage pier cap -1.5": 44,
+      "Cortico passage pier 1.5": 44,
+      "Cortico passage pier cap 1.5": 44,
+      "Cortico passage lintel": 44,
+      "Court fountain ceramic panel": 12,
+      "Fountain basin": 44,
+      "Fountain rim 4.2": 44,
+      "Fountain rim 5.8": 44,
+      "Fountain front rim": 44,
+      "Fountain water": 12,
+      "Fountain iron spout": 44,
+      "Fountain cap": 44,
+      "Court resting bench": 44,
+      "Bench foot 7.37": 12,
+      "Bench foot 8.61": 12,
+      "Court hollow pottery 0": 192,
+      "Court hollow pottery 1": 192,
+      "Lantern glass 9.7": 12,
+      "Lantern cap 9.7 2.48": 12,
+      "Lantern cap 9.7 2.81": 12,
+      "Lantern bar 9.7 -1": 12,
+      "Lantern bar 9.7 1": 12,
+      "Lantern glass 13.3": 12,
+      "Lantern cap 13.3 2.48": 12,
+      "Lantern cap 13.3 2.81": 12,
+      "Lantern bar 13.3 -1": 12,
+      "Lantern bar 13.3 1": 12,
+      "Entry ceiling lantern glass": 12,
+      "Entry ceiling lantern rim": 12
+    }
+  },
+  "culled": {
+    "totalTriangles": 3541,
+    "objects": {
+      "COURT_profile_paving": 310,
+      "Sleeping wing wall 0 0": 6,
+      "Sleeping wing wall 0 1": 6,
+      "Sleeping wing wall 0 2": 8,
+      "Sleeping wing wall 1 0": 6,
+      "Sleeping wing wall 1 2": 8,
+      "Sleeping wing wall 2 0": 6,
+      "Sleeping wing wall 2 1": 6,
+      "Sleeping wing wall 2 2": 8,
+      "Sleeping wing wall 3 0": 6,
+      "Sleeping wing wall 3 2": 4,
+      "Sleeping wing wall 4 0": 6,
+      "Sleeping wing wall 4 1": 6,
+      "Sleeping wing wall 4 2": 4,
+      "Sleeping wing wall 5 0": 8,
+      "Sleeping wing wall 5 2": 8,
+      "Sleeping wing wall 6 0": 8,
+      "Sleeping wing wall 6 1": 4,
+      "Sleeping wing wall 6 2": 6,
+      "Sleeping wing west return": 8,
+      "Sleeping wing east return front": 10,
+      "Sleeping wing east return rear": 8,
+      "Sleeping wing east portal head": 8,
+      "Sleeping wing rear": 8,
+      "Sleeping wing room floor": 6,
+      "Sleeping wing continuous footing": 10,
+      "Sleeping wing roof": 2,
+      "Sleeping wing eave timber": 10,
+      "Court casement 0 left reveal": 24,
+      "Court casement 0 right reveal": 20,
+      "Court casement 0 head reveal": 17,
+      "Court casement 0 sill": 34,
+      "Court casement 0 glazing target": 2,
+      "Court casement 0 left shutter target": 12,
+      "Court casement 0 right shutter target": 12,
+      "Court casement 1 left reveal": 20,
+      "Court casement 1 right reveal": 23,
+      "Court casement 1 head reveal": 20,
+      "Court casement 1 sill": 36,
+      "Court casement 1 glazing target": 2,
+      "Court casement 1 left shutter target": 12,
+      "Court casement 1 right shutter target": 12,
+      "Court casement 2 left reveal": 20,
+      "Court casement 2 right reveal": 22,
+      "Court casement 2 head reveal": 22,
+      "Court casement 2 sill": 33,
+      "Court casement 2 glazing target": 2,
+      "Court casement 2 left shutter target": 12,
+      "Court casement 2 right shutter target": 12,
+      "Arrival hall wall 0 0": 8,
+      "Arrival hall wall 0 1": 6,
+      "Arrival hall wall 1 1": 8,
+      "Arrival hall wall 2 0": 10,
+      "Arrival hall wall 2 1": 6,
+      "Arrival hall west return front": 4,
+      "Arrival hall west return rear": 8,
+      "Arrival hall west portal head": 6,
+      "Arrival hall east return front": 6,
+      "Arrival hall east return rear": 8,
+      "Arrival hall east portal head": 10,
+      "Arrival hall rear": 8,
+      "Arrival hall room floor": 8,
+      "Arrival hall continuous footing": 8,
+      "Arrival hall roof": 2,
+      "Arrival hall east gable": 1,
+      "Arrival hall eave timber": 10,
+      "Service wing wall 0 0": 4,
+      "Service wing wall 0 1": 6,
+      "Service wing wall 0 2": 6,
+      "Service wing wall 1 0": 8,
+      "Service wing wall 1 2": 8,
+      "Service wing west return front": 10,
+      "Service wing west return rear": 8,
+      "Service wing west portal head": 8,
+      "Service wing rear": 10,
+      "Service wing room floor": 4,
+      "Service wing continuous footing": 10,
+      "Service wing roof": 2,
+      "Service wing west gable": 1,
+      "Service wing eave timber": 10,
+      "Court service casement left reveal": 18,
+      "Court service casement right reveal": 20,
+      "Court service casement head reveal": 25,
+      "Court service casement sill": 35,
+      "Court service casement glazing target": 2,
+      "Court service casement left shutter target": 12,
+      "Court door leaf target": 2,
+      "Court portal threshold": 44,
+      "Court portal pier -1": 29,
+      "Court portal splayed reveal -1": 2,
+      "Court portal pier 1": 33,
+      "Court stone arch 0": 8,
+      "Court arch masonry spandrel 0": 6,
+      "Court stone arch 1": 4,
+      "Court arch masonry spandrel 1": 2,
+      "Court stone arch 2": 6,
+      "Court arch masonry spandrel 2": 4,
+      "Court stone arch 3": 6,
+      "Court arch masonry spandrel 3": 6,
+      "Court stone arch 4": 6,
+      "Court arch masonry spandrel 4": 4,
+      "Court stone arch 5": 4,
+      "Court arch masonry spandrel 5": 4,
+      "Court stone arch 6": 6,
+      "Court arch masonry spandrel 6": 4,
+      "Court stone arch 7": 4,
+      "Court arch masonry spandrel 7": 4,
+      "Court stone arch 8": 6,
+      "Court arch masonry spandrel 8": 2,
+      "Court stone arch 9": 6,
+      "Court arch masonry spandrel 9": 6,
+      "Court stone arch 10": 10,
+      "Court arch masonry spandrel 10": 4,
+      "Court stone arch 11": 8,
+      "Court arch masonry spandrel 11": 4,
+      "Court stone arch 12": 6,
+      "Court arch masonry spandrel 12": 6,
+      "Court portal fanlight": 5,
+      "Court covered veranda roof": 4,
+      "Veranda fascia": 42,
+      "Veranda post 8.23": 16,
+      "Veranda foot 8.23": 42,
+      "Veranda knee brace 8.23": 22,
+      "Veranda rafter 8.23": 33,
+      "Veranda post 13.53": 16,
+      "Veranda foot 13.53": 42,
+      "Veranda knee brace 13.53": 22,
+      "Veranda rafter 13.53": 32,
+      "West street wall 3 0": 10,
+      "West street wall 3 2": 10,
+      "West street wall 4 0": 6,
+      "West street wall 4 1": 6,
+      "West street wall 4 2": 6,
+      "West street east return": 6,
+      "West street rear": 10,
+      "West street room floor": 12,
+      "West street roof": 2,
+      "West street eave timber": 10,
+      "West street window 1 left reveal": 20,
+      "West street window 1 right reveal": 24,
+      "West street window 1 head reveal": 26,
+      "West street window 1 sill": 37,
+      "West street window 1 glazing target": 2,
+      "West street window 1 left shutter target": 12,
+      "West street window 1 right shutter target": 12,
+      "West street floor stringcourse": 12,
+      "West street chimney": 6,
+      "West street chimney crown": 10,
+      "Rear street wall 0 0": 8,
+      "Rear street wall 0 1": 6,
+      "Rear street wall 0 2": 8,
+      "Rear street wall 1 0": 6,
+      "Rear street wall 1 2": 8,
+      "Rear street wall 2 0": 8,
+      "Rear street wall 2 1": 8,
+      "Rear street wall 2 2": 8,
+      "Rear street wall 3 0": 6,
+      "Rear street wall 3 2": 8,
+      "Rear street wall 4 0": 6,
+      "Rear street wall 4 1": 6,
+      "Rear street wall 4 2": 6,
+      "Rear street west return": 8,
+      "Rear street east return": 10,
+      "Rear street rear": 8,
+      "Rear street room floor": 10,
+      "Rear street roof": 2,
+      "Rear street east gable": 1,
+      "Rear street eave timber": 8,
+      "Rear street window 0 left reveal": 23,
+      "Rear street window 0 right reveal": 25,
+      "Rear street window 0 head reveal": 17,
+      "Rear street window 0 sill": 31,
+      "Rear street window 0 glazing target": 2,
+      "Rear street window 0 left shutter target": 12,
+      "Rear street window 0 right shutter target": 12,
+      "Rear street window 1 left reveal": 27,
+      "Rear street window 1 right reveal": 18,
+      "Rear street window 1 head reveal": 19,
+      "Rear street window 1 sill": 32,
+      "Rear street window 1 glazing target": 2,
+      "Rear street window 1 left shutter target": 12,
+      "Rear street window 1 right shutter target": 12,
+      "Rear street floor stringcourse": 8,
+      "Rear street chimney": 6,
+      "Rear street chimney crown": 10,
+      "East street wall 0 0": 6,
+      "East street wall 0 1": 6,
+      "East street wall 0 2": 8,
+      "East street wall 1 0": 8,
+      "East street wall 1 2": 8,
+      "East street west return": 6,
+      "East street window 0 left reveal": 22,
+      "East street window 0 head reveal": 23,
+      "East street window 0 sill": 35,
+      "East street window 0 glazing target": 2,
+      "East street window 0 left shutter target": 12,
+      "Court enclosing wall -2.1 -6.5": 8,
+      "Court wall coping -2.1 -6.5": 44,
+      "Court enclosing wall -2.1 1.35": 8,
+      "Court wall coping -2.1 1.35": 40,
+      "Court enclosing wall 14.4 -6.5": 10,
+      "Court wall coping 14.4 -6.5": 34,
+      "Cortico passage pier -1.5": 26,
+      "Cortico passage pier cap -1.5": 34,
+      "Cortico passage pier 1.5": 26,
+      "Cortico passage pier cap 1.5": 34,
+      "Cortico passage lintel": 28,
+      "Court fountain ceramic panel": 6,
+      "Fountain basin": 36,
+      "Fountain rim 4.2": 30,
+      "Fountain rim 5.8": 30,
+      "Fountain front rim": 36,
+      "Fountain water": 12,
+      "Fountain iron spout": 36,
+      "Fountain cap": 42,
+      "Court resting bench": 44,
+      "Bench foot 7.37": 10,
+      "Bench foot 8.61": 10,
+      "Court hollow pottery 0": 192,
+      "Court hollow pottery 1": 186,
+      "Lantern glass 9.7": 4,
+      "Lantern cap 9.7 2.48": 8,
+      "Lantern cap 9.7 2.81": 8,
+      "Lantern bar 9.7 -1": 6,
+      "Lantern bar 9.7 1": 8,
+      "Lantern glass 13.3": 4,
+      "Lantern cap 13.3 2.48": 8,
+      "Lantern cap 13.3 2.81": 10,
+      "Lantern bar 13.3 -1": 6,
+      "Lantern bar 13.3 1": 6,
+      "Entry ceiling lantern glass": 10,
+      "Entry ceiling lantern rim": 10
+    }
+  },
+  "repairedRoofNormals": {
+    "totalTriangles": 3625,
+    "objects": {
+      "COURT_profile_paving": 310,
+      "Sleeping wing wall 0 0": 6,
+      "Sleeping wing wall 0 1": 6,
+      "Sleeping wing wall 0 2": 8,
+      "Sleeping wing wall 1 0": 6,
+      "Sleeping wing wall 1 2": 8,
+      "Sleeping wing wall 2 0": 6,
+      "Sleeping wing wall 2 1": 6,
+      "Sleeping wing wall 2 2": 8,
+      "Sleeping wing wall 3 0": 6,
+      "Sleeping wing wall 3 2": 4,
+      "Sleeping wing wall 4 0": 6,
+      "Sleeping wing wall 4 1": 6,
+      "Sleeping wing wall 4 2": 4,
+      "Sleeping wing wall 5 0": 8,
+      "Sleeping wing wall 5 2": 8,
+      "Sleeping wing wall 6 0": 8,
+      "Sleeping wing wall 6 1": 4,
+      "Sleeping wing wall 6 2": 6,
+      "Sleeping wing west return": 8,
+      "Sleeping wing east return front": 10,
+      "Sleeping wing east return rear": 8,
+      "Sleeping wing east portal head": 8,
+      "Sleeping wing rear": 8,
+      "Sleeping wing room floor": 6,
+      "Sleeping wing continuous footing": 10,
+      "Sleeping wing roof": 18,
+      "Sleeping wing eave timber": 10,
+      "Court casement 0 left reveal": 24,
+      "Court casement 0 right reveal": 20,
+      "Court casement 0 head reveal": 17,
+      "Court casement 0 sill": 34,
+      "Court casement 0 glazing target": 2,
+      "Court casement 0 left shutter target": 12,
+      "Court casement 0 right shutter target": 12,
+      "Court casement 1 left reveal": 20,
+      "Court casement 1 right reveal": 23,
+      "Court casement 1 head reveal": 20,
+      "Court casement 1 sill": 36,
+      "Court casement 1 glazing target": 2,
+      "Court casement 1 left shutter target": 12,
+      "Court casement 1 right shutter target": 12,
+      "Court casement 2 left reveal": 20,
+      "Court casement 2 right reveal": 22,
+      "Court casement 2 head reveal": 22,
+      "Court casement 2 sill": 33,
+      "Court casement 2 glazing target": 2,
+      "Court casement 2 left shutter target": 12,
+      "Court casement 2 right shutter target": 12,
+      "Arrival hall wall 0 0": 8,
+      "Arrival hall wall 0 1": 6,
+      "Arrival hall wall 1 1": 8,
+      "Arrival hall wall 2 0": 10,
+      "Arrival hall wall 2 1": 6,
+      "Arrival hall west return front": 4,
+      "Arrival hall west return rear": 8,
+      "Arrival hall west portal head": 6,
+      "Arrival hall east return front": 6,
+      "Arrival hall east return rear": 8,
+      "Arrival hall east portal head": 10,
+      "Arrival hall rear": 8,
+      "Arrival hall room floor": 8,
+      "Arrival hall continuous footing": 8,
+      "Arrival hall roof": 18,
+      "Arrival hall east gable": 1,
+      "Arrival hall eave timber": 10,
+      "Service wing wall 0 0": 4,
+      "Service wing wall 0 1": 6,
+      "Service wing wall 0 2": 6,
+      "Service wing wall 1 0": 8,
+      "Service wing wall 1 2": 8,
+      "Service wing west return front": 10,
+      "Service wing west return rear": 8,
+      "Service wing west portal head": 8,
+      "Service wing rear": 10,
+      "Service wing room floor": 4,
+      "Service wing continuous footing": 10,
+      "Service wing roof": 18,
+      "Service wing west gable": 1,
+      "Service wing eave timber": 10,
+      "Court service casement left reveal": 18,
+      "Court service casement right reveal": 20,
+      "Court service casement head reveal": 25,
+      "Court service casement sill": 35,
+      "Court service casement glazing target": 2,
+      "Court service casement left shutter target": 12,
+      "Court door leaf target": 2,
+      "Court portal threshold": 44,
+      "Court portal pier -1": 29,
+      "Court portal splayed reveal -1": 2,
+      "Court portal pier 1": 33,
+      "Court stone arch 0": 8,
+      "Court arch masonry spandrel 0": 6,
+      "Court stone arch 1": 4,
+      "Court arch masonry spandrel 1": 2,
+      "Court stone arch 2": 6,
+      "Court arch masonry spandrel 2": 4,
+      "Court stone arch 3": 6,
+      "Court arch masonry spandrel 3": 6,
+      "Court stone arch 4": 6,
+      "Court arch masonry spandrel 4": 4,
+      "Court stone arch 5": 4,
+      "Court arch masonry spandrel 5": 4,
+      "Court stone arch 6": 6,
+      "Court arch masonry spandrel 6": 4,
+      "Court stone arch 7": 4,
+      "Court arch masonry spandrel 7": 4,
+      "Court stone arch 8": 6,
+      "Court arch masonry spandrel 8": 2,
+      "Court stone arch 9": 6,
+      "Court arch masonry spandrel 9": 6,
+      "Court stone arch 10": 10,
+      "Court arch masonry spandrel 10": 4,
+      "Court stone arch 11": 8,
+      "Court arch masonry spandrel 11": 4,
+      "Court stone arch 12": 6,
+      "Court arch masonry spandrel 12": 6,
+      "Court portal fanlight": 5,
+      "Court covered veranda roof": 8,
+      "Veranda fascia": 42,
+      "Veranda post 8.23": 16,
+      "Veranda foot 8.23": 42,
+      "Veranda knee brace 8.23": 22,
+      "Veranda rafter 8.23": 33,
+      "Veranda post 13.53": 16,
+      "Veranda foot 13.53": 42,
+      "Veranda knee brace 13.53": 22,
+      "Veranda rafter 13.53": 32,
+      "West street wall 3 0": 10,
+      "West street wall 3 2": 10,
+      "West street wall 4 0": 6,
+      "West street wall 4 1": 6,
+      "West street wall 4 2": 6,
+      "West street east return": 6,
+      "West street rear": 10,
+      "West street room floor": 12,
+      "West street roof": 18,
+      "West street eave timber": 10,
+      "West street window 1 left reveal": 20,
+      "West street window 1 right reveal": 24,
+      "West street window 1 head reveal": 26,
+      "West street window 1 sill": 37,
+      "West street window 1 glazing target": 2,
+      "West street window 1 left shutter target": 12,
+      "West street window 1 right shutter target": 12,
+      "West street floor stringcourse": 12,
+      "West street chimney": 6,
+      "West street chimney crown": 10,
+      "Rear street wall 0 0": 8,
+      "Rear street wall 0 1": 6,
+      "Rear street wall 0 2": 8,
+      "Rear street wall 1 0": 6,
+      "Rear street wall 1 2": 8,
+      "Rear street wall 2 0": 8,
+      "Rear street wall 2 1": 8,
+      "Rear street wall 2 2": 8,
+      "Rear street wall 3 0": 6,
+      "Rear street wall 3 2": 8,
+      "Rear street wall 4 0": 6,
+      "Rear street wall 4 1": 6,
+      "Rear street wall 4 2": 6,
+      "Rear street west return": 8,
+      "Rear street east return": 10,
+      "Rear street rear": 8,
+      "Rear street room floor": 10,
+      "Rear street roof": 18,
+      "Rear street east gable": 1,
+      "Rear street eave timber": 8,
+      "Rear street window 0 left reveal": 23,
+      "Rear street window 0 right reveal": 25,
+      "Rear street window 0 head reveal": 17,
+      "Rear street window 0 sill": 31,
+      "Rear street window 0 glazing target": 2,
+      "Rear street window 0 left shutter target": 12,
+      "Rear street window 0 right shutter target": 12,
+      "Rear street window 1 left reveal": 27,
+      "Rear street window 1 right reveal": 18,
+      "Rear street window 1 head reveal": 19,
+      "Rear street window 1 sill": 32,
+      "Rear street window 1 glazing target": 2,
+      "Rear street window 1 left shutter target": 12,
+      "Rear street window 1 right shutter target": 12,
+      "Rear street floor stringcourse": 8,
+      "Rear street chimney": 6,
+      "Rear street chimney crown": 10,
+      "East street wall 0 0": 6,
+      "East street wall 0 1": 6,
+      "East street wall 0 2": 8,
+      "East street wall 1 0": 8,
+      "East street wall 1 2": 8,
+      "East street west return": 6,
+      "East street window 0 left reveal": 22,
+      "East street window 0 head reveal": 23,
+      "East street window 0 sill": 35,
+      "East street window 0 glazing target": 2,
+      "East street window 0 left shutter target": 12,
+      "Court enclosing wall -2.1 -6.5": 8,
+      "Court wall coping -2.1 -6.5": 44,
+      "Court enclosing wall -2.1 1.35": 8,
+      "Court wall coping -2.1 1.35": 40,
+      "Court enclosing wall 14.4 -6.5": 10,
+      "Court wall coping 14.4 -6.5": 34,
+      "Cortico passage pier -1.5": 26,
+      "Cortico passage pier cap -1.5": 34,
+      "Cortico passage pier 1.5": 26,
+      "Cortico passage pier cap 1.5": 34,
+      "Cortico passage lintel": 28,
+      "Court fountain ceramic panel": 6,
+      "Fountain basin": 36,
+      "Fountain rim 4.2": 30,
+      "Fountain rim 5.8": 30,
+      "Fountain front rim": 36,
+      "Fountain water": 12,
+      "Fountain iron spout": 36,
+      "Fountain cap": 42,
+      "Court resting bench": 44,
+      "Bench foot 7.37": 10,
+      "Bench foot 8.61": 10,
+      "Court hollow pottery 0": 192,
+      "Court hollow pottery 1": 186,
+      "Lantern glass 9.7": 4,
+      "Lantern cap 9.7 2.48": 8,
+      "Lantern cap 9.7 2.81": 8,
+      "Lantern bar 9.7 -1": 6,
+      "Lantern bar 9.7 1": 8,
+      "Lantern glass 13.3": 4,
+      "Lantern cap 13.3 2.48": 8,
+      "Lantern cap 13.3 2.81": 10,
+      "Lantern bar 13.3 -1": 6,
+      "Lantern bar 13.3 1": 6,
+      "Entry ceiling lantern glass": 10,
+      "Entry ceiling lantern rim": 10
+    }
+  },
+  "roofNormals": {
+    "Sleeping wing roof": {
+      "faceNormals": [
+        [
+          0.39240333437919617,
+          0.0,
+          -0.9197931885719299
+        ],
+        [
+          -0.39240333437919617,
+          0.0,
+          -0.9197932481765747
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.39240318536758423,
+          0.0,
+          0.9197933077812195
+        ],
+        [
+          -0.392403244972229,
+          0.0,
+          0.9197933077812195
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -10.2667240301768
+    },
+    "Sleeping wing west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -1.728334903717041
+    },
+    "Sleeping wing east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -8.590836524963379
+    },
+    "Arrival hall roof": {
+      "faceNormals": [
+        [
+          0.3413214683532715,
+          0.0,
+          -0.939946711063385
+        ],
+        [
+          -0.34132149815559387,
+          0.0,
+          -0.9399466514587402
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.34132149815559387,
+          0.0,
+          0.9399466514587402
+        ],
+        [
+          -0.3413214683532715,
+          0.0,
+          0.939946711063385
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -7.790101369222005
+    },
+    "Arrival hall west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": 11.268073399861654
+    },
+    "Arrival hall east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -19.269078572591145
+    },
+    "Service wing roof": {
+      "faceNormals": [
+        [
+          0.3924032747745514,
+          0.0,
+          -0.9197932481765747
+        ],
+        [
+          -0.3924032151699066,
+          0.0,
+          -0.9197932481765747
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.3924032151699066,
+          0.0,
+          0.9197932481765747
+        ],
+        [
+          -0.3924032747745514,
+          0.0,
+          0.9197932481765747
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -6.891355196634925
+    },
+    "Service wing west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": 14.690831502278646
+    },
+    "Service wing east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -21.349993387858074
+    },
+    "Court covered veranda roof": {
+      "faceNormals": [
+        [
+          0.12147687375545502,
+          0.0,
+          -0.992594301700592
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.121476911008358,
+          0.0,
+          0.992594301700592
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -4.95558176438014
+    },
+    "West street roof": {
+      "faceNormals": [
+        [
+          0.44278019666671753,
+          0.0,
+          -0.8966301083564758
+        ],
+        [
+          -0.44278034567832947,
+          0.0,
+          -0.8966301679611206
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.4427804946899414,
+          0.0,
+          0.896630048751831
+        ],
+        [
+          -0.44278034567832947,
+          0.0,
+          0.896630048751831
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -6.998415698607764
+    },
+    "West street west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -7.799995422363281
+    },
+    "West street east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": 1.4040002822875977
+    },
+    "Rear street roof": {
+      "faceNormals": [
+        [
+          0.45743054151535034,
+          0.0,
+          -0.8892453908920288
+        ],
+        [
+          -0.4574306309223175,
+          0.0,
+          -0.8892452716827393
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.45743077993392944,
+          0.0,
+          0.8892452716827393
+        ],
+        [
+          -0.4574306309223175,
+          0.0,
+          0.8892452716827393
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -13.296997646490752
+    },
+    "Rear street west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -1.464001973470052
+    },
+    "Rear street east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -11.793334325154623
+    },
+    "East street roof": {
+      "faceNormals": [
+        [
+          0.44278037548065186,
+          0.0,
+          -0.8966301679611206
+        ],
+        [
+          -0.44278037548065186,
+          0.0,
+          -0.8966301679611206
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.44278019666671753,
+          0.0,
+          0.8966301679611206
+        ],
+        [
+          -0.44278019666671753,
+          0.0,
+          0.8966301679611206
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -9.564390500386555
+    },
+    "East street west gable": {
+      "faceNormals": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": 11.310007731119791
+    },
+    "East street east gable": {
+      "faceNormals": [
+        [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      ],
+      "signedVolume": -20.27997589111328
+    }
+  },
+  "roofTriangles": {
+    "Sleeping wing roof": {
+      "before": 20,
+      "after": 2,
+      "afterNormalRepair": 18
+    },
+    "Sleeping wing west gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Sleeping wing east gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Arrival hall roof": {
+      "before": 20,
+      "after": 2,
+      "afterNormalRepair": 18
+    },
+    "Arrival hall west gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Arrival hall east gable": {
+      "before": 1,
+      "after": 1,
+      "afterNormalRepair": 1
+    },
+    "Service wing roof": {
+      "before": 20,
+      "after": 2,
+      "afterNormalRepair": 18
+    },
+    "Service wing west gable": {
+      "before": 1,
+      "after": 1,
+      "afterNormalRepair": 1
+    },
+    "Service wing east gable": {
+      "before": 0,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Court covered veranda roof": {
+      "before": 12,
+      "after": 4,
+      "afterNormalRepair": 8
+    },
+    "West street roof": {
+      "before": 20,
+      "after": 2,
+      "afterNormalRepair": 18
+    },
+    "West street west gable": {
+      "before": 0,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "West street east gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Rear street roof": {
+      "before": 20,
+      "after": 2,
+      "afterNormalRepair": 18
+    },
+    "Rear street west gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "Rear street east gable": {
+      "before": 1,
+      "after": 1,
+      "afterNormalRepair": 1
+    },
+    "East street roof": {
+      "before": 0,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "East street west gable": {
+      "before": 1,
+      "after": 0,
+      "afterNormalRepair": 0
+    },
+    "East street east gable": {
+      "before": 0,
+      "after": 0,
+      "afterNormalRepair": 0
+    }
+  },
+  "interpretation": "Controlled culling A/B with identical admitted proxy objects; ground clipping disabled and legacy atlas layout to isolate geometry deletion."
+}

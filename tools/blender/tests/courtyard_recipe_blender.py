@@ -1,5 +1,7 @@
 """Prove the advertised fresh-build command reproduces the registered scaffold."""
 import json
+import math
+import copy
 import sys
 from pathlib import Path
 import bpy
@@ -13,9 +15,9 @@ def snapshot():
     for obj in bpy.data.collections['TH_SOURCE'].all_objects:
         if obj.type!='MESH':continue
         rows[obj.name]={
-            'vertices':[[round(float(c),5) for c in vertex.co] for vertex in obj.data.vertices],
+            'vertices':[[float(c) for c in vertex.co] for vertex in obj.data.vertices],
             'faces':sorted(tuple(face.vertices) for face in obj.data.polygons),
-            'transform':[[round(float(c),5) for c in row] for row in obj.matrix_world],
+            'transform':[[float(c) for c in row] for row in obj.matrix_world],
             'materials':[mat.name for mat in obj.data.materials],
             'role':obj.get('sr_bake_role','both'),
             'hidden':obj.hide_render,
@@ -30,7 +32,24 @@ expected=snapshot()
 source_before=source.read_bytes()
 recipe.build(output)
 actual=snapshot()
-assert actual==expected, f'Recipe/source disagree: {set(actual)^set(expected)}; changed {[name for name in actual.keys()&expected.keys() if actual[name]!=expected[name]][:10]}'
+def equivalent(a,b):
+    if a.keys()!=b.keys():return False
+    for name,row in a.items():
+        other=b[name]
+        for field in row:
+            if field in ['vertices','transform']:
+                if len(row[field])!=len(other[field]):return False
+                for left,right in zip(row[field],other[field]):
+                    if len(left)!=len(right) or any(not math.isclose(x,y,rel_tol=0,abs_tol=1e-5) for x,y in zip(left,right)):return False
+            elif row[field]!=other[field]:return False
+    return True
+assert equivalent(actual,expected), f'Recipe/source disagree: {set(actual)^set(expected)}'
+# Ten micrometres tolerates cross-platform floating-point rotations without
+# rounding-bin discontinuities. Real geometry drift still fails this gate.
+changed=copy.deepcopy(actual)
+name=next(name for name,row in changed.items() if row['vertices'])
+changed[name]['vertices'][0][0]+=.001
+assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
 assert bpy.context.scene['courtyard_revision']==11
 # The posed leaves are separate proxies: their detailed source has no opaque

@@ -1,0 +1,2018 @@
+{
+  "Court door leaf target": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court inner panelled door_leaf",
+      "distance": 0.19500017166137695,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court portal threshold": [
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court portal threshold",
+      "distance": 0.15000000596046448,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Court inner panelled door_threshold",
+      "distance": 0.057999998331069946,
+      "normalAgreement": 0.25841259956359863
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.11999989300966263,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court inner panelled door_leaf",
+      "distance": 0.005000591743737459,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.11999988555908203,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal threshold",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court portal pier -1": [
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.15000000596046448,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal pier -1",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court portal splayed reveal -1": [
+    {
+      "normal": [
+        -0.675724446773529,
+        0.7371543645858765,
+        0.0
+      ],
+      "hit": "Court inner panelled door_jamb_l",
+      "distance": 0.061206113547086716,
+      "normalAgreement": 0.675724446773529
+    },
+    {
+      "normal": [
+        0.675724446773529,
+        -0.7371543645858765,
+        0.0
+      ],
+      "hit": "Court inner panelled door_jamb_l",
+      "distance": 0.1296505331993103,
+      "normalAgreement": 0.7371543645858765
+    }
+  ],
+  "Court portal pier 1": [
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.15000000596046448,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal pier 1",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court portal splayed reveal 1": [
+    {
+      "normal": [
+        0.675724446773529,
+        0.7371543645858765,
+        0.0
+      ],
+      "hit": "Court inner panelled door_jamb_r",
+      "distance": 0.1296505630016327,
+      "normalAgreement": 0.7371543645858765
+    },
+    {
+      "normal": [
+        -0.675724446773529,
+        -0.7371543645858765,
+        0.0
+      ],
+      "hit": "Court inner panelled door_jamb_r",
+      "distance": 0.061206113547086716,
+      "normalAgreement": 0.675724446773529
+    }
+  ],
+  "Court stone arch 0": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9927091002464294,
+        -0.12053482234477997
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000031888484955,
+      "normalAgreement": 1.000000011175871
+    },
+    {
+      "normal": [
+        0.0,
+        -0.23931683599948883,
+        0.9709415435791016
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000000596046448,
+      "normalAgreement": 1.0000000558793545
+    },
+    {
+      "normal": [
+        0.0,
+        0.9927087426185608,
+        0.12053775042295456
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.1499999314546585,
+      "normalAgreement": 1.0000000018626451
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court arch masonry spandrel 0": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 0",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9927091002464294,
+        -0.12053481489419937
+      ],
+      "hit": "Court inner panelled door_jamb_r",
+      "distance": 0.014120053499937057,
+      "normalAgreement": -0.9927091002464294
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.06109428405761719,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 0",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court stone arch 1": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 1",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 1",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9350162148475647,
+        -0.35460519790649414
+      ],
+      "hit": "Court stone arch 1",
+      "distance": 0.14999964833259583,
+      "normalAgreement": 1.000000074505806
+    },
+    {
+      "normal": [
+        0.0,
+        -0.464724600315094,
+        0.8854553699493408
+      ],
+      "hit": "Court stone arch 1",
+      "distance": 0.1499999761581421,
+      "normalAgreement": 1.0000000149011612
+    },
+    {
+      "normal": [
+        0.0,
+        0.9350161552429199,
+        0.3546052575111389
+      ],
+      "hit": "Court stone arch 1",
+      "distance": 0.14999878406524658,
+      "normalAgreement": 1.0000001341104507
+    },
+    {
+      "normal": [
+        0.0,
+        0.23931683599948883,
+        -0.9709415435791016
+      ],
+      "hit": "Court stone arch 0",
+      "distance": 0.15000000596046448,
+      "normalAgreement": -1.0000000558793545
+    }
+  ],
+  "Court arch masonry spandrel 1": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 1",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 1",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9350161552429199,
+        -0.35460519790649414
+      ],
+      "hit": "Court arch masonry spandrel 1",
+      "distance": 0.14999964833259583,
+      "normalAgreement": 1.0000000894069672
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.007575989235192537,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 0",
+      "distance": 0.11977957934141159,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court stone arch 2": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.822982907295227,
+        -0.5680660605430603
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0000000596046448
+    },
+    {
+      "normal": [
+        0.0,
+        -0.6631214618682861,
+        0.7485118508338928
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.1499996930360794,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.822985053062439,
+        0.5680631995201111
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.1499996930360794,
+      "normalAgreement": 1.0000000894069672
+    },
+    {
+      "normal": [
+        0.0,
+        0.464724600315094,
+        -0.8854553699493408
+      ],
+      "hit": "Court stone arch 2",
+      "distance": 0.1500002145767212,
+      "normalAgreement": 1.0000000149011612
+    }
+  ],
+  "Court arch masonry spandrel 2": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.8229829668998718,
+        -0.5680661201477051
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0000001192092896
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 2",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999985694885254,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 0",
+      "distance": 0.030874254181981087,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court stone arch 3": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        -0.6631224155426025,
+        -0.748511016368866
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.8229826092720032,
+        0.5680665969848633
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.15000000596046448,
+      "normalAgreement": 1.0000000596046448
+    },
+    {
+      "normal": [
+        0.0,
+        0.6631220579147339,
+        0.7485112547874451
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.15000051259994507,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        0.6631214618682861,
+        -0.7485118508338928
+      ],
+      "hit": "Court stone arch 3",
+      "distance": 0.1499996930360794,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court arch masonry spandrel 3": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 3",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 3",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.6631224751472473,
+        -0.7485109567642212
+      ],
+      "hit": "Court arch masonry spandrel 3",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 0.9999999701976776
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 4",
+      "distance": 0.14999960362911224,
+      "normalAgreement": -0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 1",
+      "distance": 0.00757598876953125,
+      "normalAgreement": -1.0
+    }
+  ],
+  "Court stone arch 4": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 4",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 4",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.4647226929664612,
+        -0.885456383228302
+      ],
+      "hit": "Court stone arch 4",
+      "distance": 0.15000012516975403,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9350161552429199,
+        0.3546050786972046
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.0017083687707781792,
+      "normalAgreement": -0.35197898745536804
+    },
+    {
+      "normal": [
+        0.0,
+        0.4647231101989746,
+        0.8854561448097229
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.14564737677574158,
+      "normalAgreement": -0.8788987398147583
+    },
+    {
+      "normal": [
+        0.0,
+        0.8229826092720032,
+        -0.5680665969848633
+      ],
+      "hit": "Court stone arch 4",
+      "distance": 0.15000012516975403,
+      "normalAgreement": 1.0000000596046448
+    }
+  ],
+  "Court arch masonry spandrel 4": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 4",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 4",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.4647226631641388,
+        -0.8854563236236572
+      ],
+      "hit": "Court arch masonry spandrel 4",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.012902578338980675,
+      "normalAgreement": 0.23931670188903809
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 3",
+      "distance": 0.14999960362911224,
+      "normalAgreement": -0.9999999403953552
+    }
+  ],
+  "Court stone arch 5": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 5",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 5",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.23931670188903809,
+        -0.9709415435791016
+      ],
+      "hit": "Court stone arch 5",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 0.9999999888241291
+    },
+    {
+      "normal": [
+        0.0,
+        -0.992709219455719,
+        0.12053345888853073
+      ],
+      "hit": "Court stone arch 6",
+      "distance": 0.15000079572200775,
+      "normalAgreement": -1.0000000419095159
+    },
+    {
+      "normal": [
+        0.0,
+        0.23931512236595154,
+        0.970941960811615
+      ],
+      "hit": "Veranda tile barrel 16",
+      "distance": 0.050673648715019226,
+      "normalAgreement": 0.5254188477993011
+    },
+    {
+      "normal": [
+        0.0,
+        0.9350161552429199,
+        -0.3546050786972046
+      ],
+      "hit": "Court stone arch 4",
+      "distance": 0.14999960362911224,
+      "normalAgreement": -1.0
+    }
+  ],
+  "Court arch masonry spandrel 5": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.23931670188903809,
+        -0.9709415435791016
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 0.9999999888241291
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999985694885254,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 4",
+      "distance": 0.14999960362911224,
+      "normalAgreement": -0.9999999403953552
+    }
+  ],
+  "Court stone arch 6": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 6",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court stone arch 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.992709219455719,
+        -0.12053345888853073
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.02625490166246891,
+      "normalAgreement": 0.11964082717895508
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Court stone arch 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.992709219455719,
+        -0.12053345888853073
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.026254791766405106,
+      "normalAgreement": 0.11964082717895508
+    }
+  ],
+  "Court arch masonry spandrel 6": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court arch masonry spandrel 6",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 6",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999985694885254,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 5",
+      "distance": 0.14999961853027344,
+      "normalAgreement": -0.9999999403953552
+    }
+  ],
+  "Court stone arch 7": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 7",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 7",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.23931670188903809,
+        -0.9709415435791016
+      ],
+      "hit": "Court stone arch 7",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 0.9999999888241291
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9350161552429199,
+        -0.3546050786972046
+      ],
+      "hit": "Court stone arch 7",
+      "distance": 0.1499996781349182,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.23931512236595154,
+        0.970941960811615
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.11546379327774048,
+      "normalAgreement": 0.9637514352798462
+    },
+    {
+      "normal": [
+        0.0,
+        0.992709219455719,
+        0.12053345888853073
+      ],
+      "hit": "Court stone arch 7",
+      "distance": 0.15000079572200775,
+      "normalAgreement": 1.0000000419095159
+    }
+  ],
+  "Court arch masonry spandrel 7": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 7",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 7",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.23931670188903809,
+        -0.9709415435791016
+      ],
+      "hit": "Court arch masonry spandrel 7",
+      "distance": 0.14999991655349731,
+      "normalAgreement": 0.9999999888241291
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 8",
+      "distance": 0.14999960362911224,
+      "normalAgreement": -0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 6",
+      "distance": 0.14999961853027344,
+      "normalAgreement": -0.9999999403953552
+    }
+  ],
+  "Court stone arch 8": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 8",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 8",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.4647226929664612,
+        -0.885456383228302
+      ],
+      "hit": "Court stone arch 8",
+      "distance": 0.15000031888484955,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        -0.8229826092720032,
+        -0.5680665969848633
+      ],
+      "hit": "Court stone arch 9",
+      "distance": 0.15000012516975403,
+      "normalAgreement": -1.0000000596046448
+    },
+    {
+      "normal": [
+        0.0,
+        -0.4647231101989746,
+        0.8854561448097229
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.14564737677574158,
+      "normalAgreement": -0.8788987398147583
+    },
+    {
+      "normal": [
+        0.0,
+        0.9350161552429199,
+        0.3546050786972046
+      ],
+      "hit": "Court covered veranda roof",
+      "distance": 0.0017090525943785906,
+      "normalAgreement": -0.35197898745536804
+    }
+  ],
+  "Court arch masonry spandrel 8": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 8",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 8",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.4647226631641388,
+        -0.8854563236236572
+      ],
+      "hit": "Court arch masonry spandrel 8",
+      "distance": 0.15000030398368835,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 8",
+      "distance": 0.14999960362911224,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999985694885254,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 7",
+      "distance": 0.012902578338980675,
+      "normalAgreement": 0.23931670188903809
+    }
+  ],
+  "Court stone arch 9": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 9",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 9",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.6631224155426025,
+        -0.748511016368866
+      ],
+      "hit": "Court stone arch 9",
+      "distance": 0.14999976754188538,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.6631214618682861,
+        -0.7485118508338928
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.1499996930360794,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.6631220579147339,
+        0.7485112547874451
+      ],
+      "hit": "Court stone arch 9",
+      "distance": 0.1499997228384018,
+      "normalAgreement": 1.0000000298023224
+    },
+    {
+      "normal": [
+        0.0,
+        0.8229826092720032,
+        0.5680665969848633
+      ],
+      "hit": "Court stone arch 8",
+      "distance": 0.15000000596046448,
+      "normalAgreement": -1.0000000596046448
+    }
+  ],
+  "Court arch masonry spandrel 9": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.6631224751472473,
+        -0.7485109567642212
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.14999975264072418,
+      "normalAgreement": 0.9999999701976776
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 10",
+      "distance": 0.00757598876953125,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.14999960362911224,
+      "normalAgreement": 0.9999999403953552
+    }
+  ],
+  "Court stone arch 10": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.822982907295227,
+        -0.5680660605430603
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.1499999314546585,
+      "normalAgreement": 1.0000000596046448
+    },
+    {
+      "normal": [
+        0.0,
+        -0.464724600315094,
+        -0.8854553699493408
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.14999999105930328,
+      "normalAgreement": 1.0000000149011612
+    },
+    {
+      "normal": [
+        0.0,
+        -0.822985053062439,
+        0.5680631995201111
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.1499996930360794,
+      "normalAgreement": 1.0000000894069672
+    },
+    {
+      "normal": [
+        0.0,
+        0.6631214618682861,
+        0.7485118508338928
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.15000031888484955,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court arch masonry spandrel 10": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 10",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 10",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.8229829668998718,
+        -0.5680661201477051
+      ],
+      "hit": "Court arch masonry spandrel 10",
+      "distance": 0.1499999314546585,
+      "normalAgreement": 1.0000001192092896
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Arrival hall wall 0 0",
+      "distance": 0.030874252319335938,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.14999961853027344,
+      "normalAgreement": -1.0
+    }
+  ],
+  "Court stone arch 11": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 11",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 11",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        0.0,
+        0.9350162148475647,
+        -0.35460519790649414
+      ],
+      "hit": "Court stone arch 11",
+      "distance": 0.14999961853027344,
+      "normalAgreement": 1.000000074505806
+    },
+    {
+      "normal": [
+        0.0,
+        -0.23931683599948883,
+        -0.9709415435791016
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000000596046448,
+      "normalAgreement": -1.0000000558793545
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9350161552429199,
+        0.3546052575111389
+      ],
+      "hit": "Court stone arch 11",
+      "distance": 0.1499996781349182,
+      "normalAgreement": 1.0000001341104507
+    },
+    {
+      "normal": [
+        0.0,
+        0.464724600315094,
+        0.8854553699493408
+      ],
+      "hit": "Court stone arch 10",
+      "distance": 0.14999976754188538,
+      "normalAgreement": -1.0000000149011612
+    }
+  ],
+  "Court arch masonry spandrel 11": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 11",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 11",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.9350161552429199,
+        -0.35460519790649414
+      ],
+      "hit": "Court arch masonry spandrel 11",
+      "distance": 0.14999964833259583,
+      "normalAgreement": 1.0000000894069672
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Arrival hall wall 0 0",
+      "distance": 0.11977958679199219,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 9",
+      "distance": 0.007575989235192537,
+      "normalAgreement": -1.0
+    }
+  ],
+  "Court stone arch 12": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.9927091002464294,
+        -0.12053482234477997
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000036358833313,
+      "normalAgreement": 1.000000011175871
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        -0.9927087426185608,
+        0.12053775042295456
+      ],
+      "hit": "Court stone arch 12",
+      "distance": 0.15000088512897491,
+      "normalAgreement": 1.0000000018626451
+    },
+    {
+      "normal": [
+        0.0,
+        0.23931683599948883,
+        0.9709415435791016
+      ],
+      "hit": "Court stone arch 11",
+      "distance": 0.15000000596046448,
+      "normalAgreement": -1.0000000558793545
+    }
+  ],
+  "Court arch masonry spandrel 12": [
+    {
+      "normal": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 12",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.9927091002464294,
+        -0.12053481489419937
+      ],
+      "hit": "Court inner panelled door_jamb_l",
+      "distance": 0.014120054431259632,
+      "normalAgreement": -0.9927091002464294
+    },
+    {
+      "normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "hit": "Arrival hall wall 0 0",
+      "distance": 0.14999961853027344,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "hit": "Arrival hall wall 1 1",
+      "distance": 0.14999987185001373,
+      "normalAgreement": -1.0
+    },
+    {
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "hit": "Court arch masonry spandrel 11",
+      "distance": 0.06109428405761719,
+      "normalAgreement": 1.0
+    }
+  ],
+  "Court portal fanlight": [
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 0.9999999403953552
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000008046627045,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000011026859283,
+      "normalAgreement": 1.0
+    },
+    {
+      "normal": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "hit": "Court portal fanlight",
+      "distance": 0.15000009536743164,
+      "normalAgreement": 1.0
+    }
+  ]
+}

@@ -44,6 +44,8 @@ class Builder:
         return obj
     def mesh(self,name,vertices,faces,material,role='both'):
         data=bpy.data.meshes.new(name+'_mesh');data.from_pydata(vertices,[],faces);data.update()
+        import mesh_export_geometry
+        mesh_export_geometry.prepare(data)
         if material:data.materials.append(material)
         obj=bpy.data.objects.new(name,data);self.source.objects.link(obj);obj.parent=self.root
         obj['sr_bake_role']=role;obj['sr_bake_source']=True
@@ -172,14 +174,22 @@ def build(output):
     host=type('DoorHost',(),{})();host.back_x=4.82;host.wood=finish_material('Court honey timber door',(.32,.14,.048),weather=True)
     host.stone=stone;host.terracotta=clay;host.iron=iron;host.y=lambda value:value
     host.part=lambda name,size,position,material:b.part(name,size,position,material,'source',.008)
-    door(host,'Court inner panelled door',11.5,width=1.42,height=2.55,panels=4,panel_material=host.wood,source=True,base_z=upper)
+    door(host,'Court inner panelled door',11.5,width=1.42,height=2.55,panels=4,panel_material=host.wood,source=True,retain_shape=True,base_z=upper,receiver_collection=b.source)
     b.receiver('Court door leaf target',4.70,11.5,upper+2.55/2,1.42,2.55,host.wood)
     b.part('Court portal threshold',(.76,2.02,.06),(4.34,11.5,upper+.03),stone,bevel=.015)
     for sign in [-1,1]:
         b.part(f'Court portal pier {sign}',(.39,.26,2.51),(4.31,11.5+sign*1.17,upper+2.51/2),stone,bevel=.025)
         # Deep splayed reveal closes the space from masonry mouth to inner door.
-        yfront=11.5+sign*1.04;yback=11.5+sign*.71
-        b.mesh(f'Court portal splayed reveal {sign}',[(4.50,yfront,upper),(4.50,yfront,upper+2.51),(4.86,yback,upper+2.51),(4.86,yback,upper)],[(0,1,2,3),(3,2,1,0)],stone)
+        yfront=11.5+sign*1.04;yback=11.5+sign*.89
+        # Finish at the front of the timber jamb, not behind it. A closed
+        # thin masonry return has one aperture-facing surface, not coincident
+        # opposite faces that bake the inside of the entrance onto the outside.
+        front=[Vector(p) for p in [(4.50,yfront,upper),(4.50,yfront,upper+2.51),(4.62,yback,upper+2.51),(4.62,yback,upper)]]
+        if sign>0: front.reverse()
+        normal=(front[1]-front[0]).cross(front[2]-front[0]).normalized()
+        vertices=front+[p-normal*.08 for p in front]
+        b.mesh(f'Court portal splayed reveal {sign}',vertices,[(0,1,2,3),(7,6,5,4),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)],stone)
+
     # Segmental arch of wedge-cut masonry above the open portal.
     radius=1.04;spring=upper+2.51
     for i in range(13):
@@ -192,11 +202,15 @@ def build(output):
         vertices=[(x,y,z) for x in [4.5,4.95] for y,z in [(ya,za),(yc,zc),(yc,3.85),(ya,3.85)]]
         b.mesh(f'Court arch masonry spandrel {i}',vertices,[(0,1,2,3),(7,6,5,4),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)],plaster)
     # Glazed fanlight closes the hall above the door; radial muntins remain source detail.
-    fan=[(4.88,11.5,2.85)]+[(4.88,11.5+radius*math.cos(math.pi*i/16),spring+radius*math.sin(math.pi*i/16)) for i in range(17)]
-    b.mesh('Court portal fanlight',fan,[(0,i,i+1) for i in range(1,17)],glass)
+    fan_base=upper+2.93
+    first_angle=math.asin((fan_base-spring)/radius)
+    fan=[(4.88,11.5,fan_base)]+[(4.88,11.5+radius*math.cos(first_angle+(math.pi-2*first_angle)*i/16),spring+radius*math.sin(first_angle+(math.pi-2*first_angle)*i/16)) for i in range(17)]
+    b.mesh('Court portal fanlight',fan,[(0,i+1,i) for i in range(1,17)],glass)
+    chord=2*math.sqrt(radius*radius-(fan_base-spring)**2)
+    b.part('Court fanlight bottom rail',(.075,chord+.045,.055),(4.84,11.5,fan_base-.012),wood,'source')
     for i in range(1,6):
-        angle=math.pi*i/6
-        b.cylinder(f'Court fanlight radial bead {i}',(4.855,11.5,2.85),(4.855,11.5+radius*math.cos(angle),spring+radius*math.sin(angle)),.024,wood)
+        angle=first_angle+(math.pi-2*first_angle)*i/6
+        b.cylinder(f'Court fanlight radial bead {i}',(4.855,11.5,fan_base),(4.855,11.5+radius*math.cos(angle),spring+radius*math.sin(angle)),.024,wood)
     # Veranda is an attached roof with pitched tiles and a legible timber structure.
     x0,x1,y0,y1=-1.55,4.66,8.08,13.78
     vertices=[(x,y,z) for x,z in [(x0,3.38),(x1,4.14),(x0,3.24),(x1,4.0)] for y in [y0,y1]]
@@ -291,7 +305,7 @@ def build(output):
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
     render_profiles.apply(scene,render_profiles.resolve('draft'));scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=11;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=12;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

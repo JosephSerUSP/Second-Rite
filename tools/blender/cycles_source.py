@@ -4,6 +4,8 @@ Never saves the source document. Preserve UVs, materials, world placement and
 per-object Generated/Object coordinates when consolidating source meshes.
 """
 import bpy
+import json
+import bake_correspondence
 
 def batch_source(source):
     # One derived beauty mesh avoids per-object bake setup while preserving
@@ -11,10 +13,11 @@ def batch_source(source):
     members=[o for o in list(source.all_objects) if o.type=='MESH' and o.get('sr_bake_role')!='receiver']
     graph=bpy.context.evaluated_depsgraph_get()
     vertices=[];faces=[];uvs=[];generated=[];local=[];materials=[];material_indices=[];smooth=[]
+    face_owners=[]
     material_map={}
     default_material=None
     named_uvs={}
-    for obj in members:
+    for owner_index,obj in enumerate(members):
         evaluated=obj.evaluated_get(graph);mesh=evaluated.to_mesh()
         import mesh_export_geometry
         mesh_export_geometry.prepare(mesh)
@@ -36,7 +39,7 @@ def batch_source(source):
             layer=mesh.uv_layers.get(name)
             values.extend(tuple(layer.data[i].uv) if layer else (0,0) for i in range(len(mesh.loops)))
         for face in mesh.polygons:
-            faces.append(tuple(offset+i for i in face.vertices));smooth.append(face.use_smooth)
+            faces.append(tuple(offset+i for i in face.vertices));smooth.append(face.use_smooth);face_owners.append(owner_index)
             uvs.extend(tuple(uv.data[i].uv) if uv else (0,0) for i in face.loop_indices)
             material=mesh.materials[face.material_index] if mesh.materials else None
             if material is None:
@@ -76,7 +79,10 @@ def batch_source(source):
         if copy.use_nodes:adapt(copy.node_tree)
         data.materials.append(copy)
     data.polygons.foreach_set('material_index',material_indices);data.polygons.foreach_set('use_smooth',smooth)
+    owners=data.attributes.new(bake_correspondence.SOURCE_ATTRIBUTE,'INT','FACE')
+    owners.data.foreach_set('value',face_owners)
     batch=bpy.data.objects.new('SR beauty batch',data);source.objects.link(batch)
+    batch[bake_correspondence.SOURCE_RECORD]=json.dumps([obj.name for obj in members])
     for obj in members:
         source.objects.unlink(obj) if obj.name in source.objects else None
         bpy.data.objects.remove(obj,do_unlink=True)

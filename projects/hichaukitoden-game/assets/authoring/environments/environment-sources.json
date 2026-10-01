@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Fresh scaffold from courtyard_scene connected room volumes and architectural_assemblies. Rich window, roof and arch sources bake onto retained apertures and proxies. Candidate topology awaits owner review.",
+      "basis": "Revision 12 scaffold: connected room volumes; outward/clipped fanlight; closed reveals terminating at timber jamb fronts; rich source frame bevels baked onto structural box receivers. Candidate topology and visual/traversal acceptance await owner review.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

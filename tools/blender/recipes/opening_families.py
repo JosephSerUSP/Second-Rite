@@ -9,7 +9,7 @@ family builder.
 
 def door(host, name, lane_y, *, width=1.15, height=2.25, x=None,
          lintel=True, panels=0, frame=0.18, panel_material=None,
-         source=False, retain_shape=False, base_z=0.0):
+         source=False, retain_shape=False, base_z=0.0, receiver_collection=None):
     if min(width,height,frame) <= 0 or panels < 0:
         raise ValueError('Door dimensions must be positive and panel count nonnegative')
     base_x = host.back_x if x is None else float(x)
@@ -19,7 +19,10 @@ def door(host, name, lane_y, *, width=1.15, height=2.25, x=None,
     def part(suffix, size, location, material):
         obj = host.part(f"{name}_{suffix}", size, (location[0],location[1],location[2]+base_z), material)
         if source:
-            obj["sr_bake_role"] = "both" if retain_shape and suffix.startswith(("jamb", "threshold", "lintel")) else "source"
+            structural = retain_shape and suffix.startswith(("jamb", "threshold", "lintel"))
+            obj["sr_bake_role"] = "both" if structural and receiver_collection is None else "source"
+            if structural and receiver_collection is not None:
+                box_receiver(obj, receiver_collection)
         objs.append(obj)
         return obj
 
@@ -123,3 +126,22 @@ def window(host, name, lane_y, *, width=0.95, height=1.25, sill_z=1.15,
             part(f"grille_{j}",(.025,.025,height),
                  (base_x-.16,cy-width/2+j*width/5,sill_z+height/2),host.iron)
     return objs
+
+
+def box_receiver(source, collection):
+    """Keep a structural box while its bevels remain in the detailed source."""
+    import bpy
+    import mesh_export_geometry
+    bpy.context.view_layer.update()
+    # Bounding corners are object-local: copying the original transform also
+    # preserves posed and parented frames without duplicating placement math.
+    mesh = bpy.data.meshes.new(source.name + " receiver mesh")
+    mesh.from_pydata([tuple(point) for point in source.bound_box], [],
+        [(0,1,2,3),(4,7,6,5),(0,4,5,1),(3,2,6,7),(0,3,7,4),(1,5,6,2)])
+    mesh.update(); mesh_export_geometry.prepare(mesh)
+    for material in source.data.materials: mesh.materials.append(material)
+    proxy = source.copy(); proxy.data = mesh; proxy.modifiers.clear()
+    proxy.name = source.name + " target"; proxy["sr_bake_role"] = "receiver"
+    proxy["sr_bake_source"] = True; proxy["sr_bake_preserve"] = True; proxy.hide_render = True
+    collection.objects.link(proxy)
+    return proxy

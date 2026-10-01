@@ -1,0 +1,28 @@
+D:\Antigravity\Hichaukitoden\.claude\worktrees\pilot\out\test-receiver-shadow.py:14: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat=bpy.data.materials.new('red diffuse');mat.use_nodes=True;mat.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value=(.7,.05,.02,1);mat.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value=1;source.data.materials.append(mat)
+SOURCE BATCH 1 objects to one mesh 4 vertices
+D:\Antigravity\Hichaukitoden\.claude\worktrees\pilot\out\test-receiver-shadow.py:14: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat=bpy.data.materials.new('red diffuse');mat.use_nodes=True;mat.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value=(.7,.05,.02,1);mat.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value=1;source.data.materials.append(mat)
+[pipeline] Baking beauty atlas (32x32, 8 samples)...
+Info: Baking map saved to internal image, save it externally or pack it
+[pipeline] Saved beauty texture atlas to C:\Users\josep\AppData\Local\Temp\tmpxnkcd6zl\environment.png
+Info: File exported successfully
+[pipeline] Exported render mesh to C:\Users\josep\AppData\Local\Temp\tmpxnkcd6zl\environment.obj
+[pipeline] Manifest written to C:\Users\josep\AppData\Local\Temp\tmpxnkcd6zl\environment.json
+[pipeline] PACKAGE STATS: 2 tris, 4 verts, atlas: 32x32 (1523 bytes), package: 2069 bytes
+SOURCE BATCH 1 objects to one mesh 4 vertices
+[pipeline] Baking beauty atlas (32x32, 8 samples)...
+Info: Baking map saved to internal image, save it externally or pack it
+[pipeline] Saved beauty texture atlas to C:\Users\josep\AppData\Local\Temp\tmpn5ceoeip\environment.png
+Info: File exported successfully
+[pipeline] Exported render mesh to C:\Users\josep\AppData\Local\Temp\tmpn5ceoeip\environment.obj
+[pipeline] Manifest written to C:\Users\josep\AppData\Local\Temp\tmpn5ceoeip\environment.json
+[pipeline] PACKAGE STATS: 2 tris, 4 verts, atlas: 32x32 (1523 bytes), package: 2069 bytes
+RECEIVER SHADOW RESULT {"True": 0.9938074561650865, "False": 0.9938074561650865}
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\tmpxnkcd6zl\environment.obj
+OBJ export of 'environment.obj' took 1.85 ms
+Writing to C:\Users\josep\AppData\Local\Temp\tmpn5ceoeip\environment.obj
+OBJ export of 'environment.obj' took 2.51 ms
+
+Blender quit

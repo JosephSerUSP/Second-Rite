@@ -51,7 +51,7 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==11
+assert bpy.context.scene['courtyard_revision']==12
 # The posed leaves are separate proxies: their detailed source has no opaque
 # backing that would hide the louvres in oblique/rear views.
 for tag in ['left','right']:
@@ -71,4 +71,14 @@ for y in [7.5,13.5]:
     assert not hit,'Authored room connection is blocked at '+str(y)
 hit,*_=bpy.context.scene.ray_cast(graph,Vector((0,.5,1)),Vector((0,-1,0)),distance=3)
 assert not hit,'The Cortico lane exit is blocked by courtyard geometry'
+fan=bpy.data.objects['Court portal fanlight']
+assert all(face.normal.x<-.99 for face in fan.data.polygons), 'Fanlight faces into the hall'
+assert min(v.co.z for v in fan.data.vertices)>3.2, 'Fanlight overlaps the door header'
+for tag in ['jamb_l','jamb_r','lintel']:
+    name='Court inner panelled door_'+tag
+    detail=bpy.data.objects[name];proxy=bpy.data.objects[name+' target']
+    assert detail['sr_bake_role']=='source' and proxy['sr_bake_role']=='receiver'
+    assert proxy.hide_render and not proxy.modifiers and len(proxy.data.polygons)==6
+    assert proxy.matrix_world==detail.matrix_world, 'Frame target changed its placement'
+    assert all(abs(a-b)<1e-5 for a,b in zip(proxy.dimensions,detail.dimensions)), 'Frame target lost its volume'
 print('COURTYARD RECIPE PARITY OK',len(actual))

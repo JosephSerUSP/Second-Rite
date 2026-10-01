@@ -50,3 +50,15 @@ assert all(abs(v.uv.x-.25)<1e-6 and abs(v.uv.y-.75)<1e-6 for v in batch.data.uv_
 vector=batch.data.materials[0].node_tree.nodes.get(noise.name).inputs['Vector']
 assert vector.links[0].from_node.attribute_name=='sr_source_generated'
 print('SOURCE COORDINATES OK')
+
+# Explicit structural receivers survive the optimization even when embedded
+# in overlapping masonry. They remain closed occluders, not fake open sheets.
+bm=bmesh.new();bmesh.ops.create_cube(bm,size=4);bmesh.ops.create_cube(bm,size=2)
+embedded=bpy.data.meshes.new('nested boxes');bm.to_mesh(embedded);bm.free()
+obj=bpy.data.objects.new('nested structural control',embedded);bpy.context.scene.collection.objects.link(obj)
+control=obj.copy();control.data=embedded.copy();bpy.context.scene.collection.objects.link(control)
+assert exporter.cull_enclosed(control,24,0)==6
+keep=embedded.attributes.new('sr_bake_preserve_face','BOOLEAN','FACE')
+keep.data.foreach_set('value',[False]*6+[True]*6)
+assert exporter.cull_enclosed(obj,24,0)==0 and len(embedded.polygons)==12
+print('STRUCTURAL RECEIVER PRESERVED')

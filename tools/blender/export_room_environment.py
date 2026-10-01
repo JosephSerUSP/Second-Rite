@@ -49,6 +49,7 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
+import bake_correspondence
 import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
@@ -103,9 +104,11 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     render = collection("TH_RENDER")
     bpy.ops.object.select_all(action="DESELECT")
     copies = []
+    owner_names = bake_correspondence.registry(meshes)
     for obj in meshes:
         copy = obj.copy()
         copy.data = obj.data.copy()
+        bake_correspondence.tag(copy.data, obj.name, owner_names)
         atlas_alpha.preserve_uv(copy.data)
         copy.name = f"R_{obj.name}"
         render.objects.link(copy)
@@ -120,6 +123,7 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     if target and target.data.uv_layers.get(atlas_alpha.ATLAS_UV):
         target.data.uv_layers.active = target.data.uv_layers[atlas_alpha.ATLAS_UV]
     target.name = name
+    target[bake_correspondence.OWNER_RECORD] = json.dumps(owner_names)
 
     if decimate < 0.999:
         modifier = target.modifiers.new("TH_DECIMATE", "DECIMATE")
@@ -299,7 +303,8 @@ def main() -> None:
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
                                      backend=args.bake_backend, eevee=eevee,
-                                     cycles_device=args.cycles_device, render_profile=args.render_profile)
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile,
+                                     bake_bindings=args.bake_bindings)
 
     faces = mirror_obj_file(output / "environment.obj", LANE_CENTRE)
     print(f"[room3d] mirrored {faces} faces into engine space "

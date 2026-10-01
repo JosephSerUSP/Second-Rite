@@ -14,16 +14,16 @@
     8.81
   ],
   "stats": {
-    "triangleCount": 3675,
-    "vertexCount": 2693,
+    "triangleCount": 3727,
+    "vertexCount": 2731,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1271206,
-    "renderMeshSizeBytes": 335343,
-    "packageSizeBytes": 1607136
+    "pngSizeBytes": 1286948,
+    "renderMeshSizeBytes": 340227,
+    "packageSizeBytes": 1627762
   },
   "anchors": {
     "cortico_entry": {
@@ -107,9 +107,66 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 1803
+      "batchedSourceObjects": 1804,
+      "correspondence": {
+        "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+        "extrusion": 0.15000000596046448,
+        "maxRayDistance": 1.0,
+        "bindings": [
+          {
+            "receiver": "Court door leaf target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal fanlight",
+            "samples": 64,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal -1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal 1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_l target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_r target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_lintel target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          }
+        ],
+        "errors": []
+      }
     },
-    "exportSeconds": 40.06980779999867,
+    "exportSeconds": 40.139867799996864,
     "lightingPolicy": "source",
     "cameraCalibration": {
       "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",

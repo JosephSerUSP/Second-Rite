@@ -204,7 +204,9 @@ beauty, and `receiver` exports only the simplified surface. Receivers can be hid
 in source renders. Mark a single-sided card `sr_bake_open_surface = True` so sealed
 face culling cannot remove it. The exporter also detects boundary and zero-volume
 sheets automatically and repairs closed-body winding on derived copies. Unsupported
-roles fail. Cycles selected-to-active supports separate source/receiver geometry;
+roles fail. Explicit structural receivers may set `sr_bake_preserve = True`; their
+faces survive sealed-face optimization while remaining closed occluders.
+Cycles selected-to-active supports separate source/receiver geometry;
 EEVEE projection remains an explicit comparison. The detailed source remains editable.
 
 The map's `groundProfile` owns player elevation. Derive paving and thresholds

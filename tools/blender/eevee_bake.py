@@ -68,6 +68,7 @@ def add_arguments(parser) -> None:
     group.add_argument("--bake-backend", choices=("cycles", "eevee"), default=render_profiles.DEFAULT_BAKE_BACKEND,
                        help="Cycles selected-to-active is the default; EEVEE projection is an explicit comparison")
     group.add_argument("--render-profile", choices=("draft", "lookdev", "review", "export"), default=render_profiles.DEFAULT_EXPORT_PROFILE)
+    group.add_argument("--bake-bindings", type=Path, default=None, help="Authored source/receiver ray preflight JSON")
     group.add_argument("--cycles-device", choices=("AUTO", "CPU", "GPU"), default=render_profiles.DEFAULT_DEVICE)
     group.add_argument("--exposure", type=float, default=None, metavar="EV",
                        help="eevee: gain in EV on the beauty before it enters the atlas")

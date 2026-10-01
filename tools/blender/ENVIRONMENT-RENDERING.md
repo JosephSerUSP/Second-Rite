@@ -23,3 +23,22 @@ not a hard deadline. Completed exports record effective quality and pipeline tim
 use `tools/ci/time-step.js` to include source opening and export preparation.
 Slow exports require profiling; never ship partial atlases to meet a timer.
 Existing sources and shipping packages are not rewritten by these defaults.
+
+
+## Receiver correspondence
+
+Both environment exporters accept `--bake-bindings <json>` for a sampled geometric
+preflight before beauty baking. The authored contract lists receiver names, allowed
+source-name patterns and optional front-normal directions/alignment thresholds.
+Receiver identity survives proxy joining and culling; detailed source identity
+survives batching. Four barycentric points per bound front-facing triangle must
+reach an allowed source using the configured no-cage extrusion/distance. Missing,
+culled, reversed or wrongly associated receivers fail before a package is written.
+`bake-correspondence.json` records successful checks and geometric failures.
+
+The check is opt-in and covers the surfaces listed in the contract. It is not an
+exhaustive texel test, shading test or owner visual acceptance. Smooth bound normals
+are rejected because this implementation samples flat receiver normals. Explicit
+structural box receivers carry `sr_bake_preserve`; the culler retains these faces
+while still treating the boxes as closed occluders. The door family can generate
+these boxes while detailed bevels remain only in the source.

@@ -28,5 +28,6 @@
   ],
   "seed": 3201,
   "cameraCalibration": "camera.json",
-  "cameraSource": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua"
+  "cameraSource": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua",
+  "bakeBindings": "bake-bindings.json"
 }

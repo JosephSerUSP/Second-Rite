@@ -73,6 +73,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
+import bake_correspondence
 import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
@@ -165,6 +166,7 @@ def cull_enclosed(target, samples, escape_ratio):
     marks = mesh.attributes.get(OPEN_FACE_ATTRIBUTE)
     is_open = [d.value for d in marks.data] if marks else [False] * len(mesh.polygons)
     solid = [p for p in mesh.polygons if not is_open[p.index]]
+    keep = mesh.attributes.get("sr_bake_preserve_face")
     bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
                                [tuple(p.vertices) for p in solid],
                                all_triangles=False)
@@ -172,6 +174,8 @@ def cull_enclosed(target, samples, escape_ratio):
     needed = len(directions) // 2 + 1
     doomed = []
     for poly in solid:
+        if keep and keep.data[poly.index].value:
+            continue
         # Start just OUTSIDE the face along its own normal: an outward-facing
         # skin face is then outside its body, an inward-facing one is inside.
         point = poly.center + poly.normal.normalized() * 1e-3
@@ -529,6 +533,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     ground_tagged = []
     ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
     source_objects = list(source.all_objects)
+    owner_names = bake_correspondence.registry(source_objects)
     unbaked_modifiers = []
     for obj in source_objects:
         if obj.type != "MESH":
@@ -555,6 +560,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         copy.parent = None
         copy.matrix_world = obj.matrix_world.copy()
         copy.data = realised_mesh(obj)
+        bake_correspondence.tag(copy.data, obj.name, owner_names)
         atlas_alpha.preserve_uv(copy.data)
         copy.modifiers.clear()      # already applied above; join must not see them
         import mesh_export_geometry
@@ -562,6 +568,9 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         if obj.get(ground_cover.OPEN_SURFACE_PROPERTY) or is_open:
             marks = copy.data.attributes.get(OPEN_FACE_ATTRIBUTE) or copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
             marks.data.foreach_set("value", [True] * len(copy.data.polygons))
+        if obj.get("sr_bake_preserve"):
+            preserve = copy.data.attributes.new("sr_bake_preserve_face", "BOOLEAN", "FACE")
+            preserve.data.foreach_set("value", [True]*len(copy.data.polygons))
         copy.name = f"R_{obj.name}"
         copy.hide_viewport = False
         copy.hide_render = False
@@ -609,6 +618,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     if target is None or target.type != "MESH":
         raise RuntimeError("render join produced no active mesh")
     target.name = "st_maria_praca_TH_RENDER"
+    target[bake_correspondence.OWNER_RECORD] = json.dumps(owner_names)
     target.select_set(True)
     bpy.context.view_layer.objects.active = target
     bpy.ops.object.mode_set(mode="EDIT")
@@ -730,7 +740,8 @@ def main() -> None:
                                      bake_samples=args.samples,
                                      flat_bake=False,
                                      backend=args.bake_backend, eevee=eevee,
-                                     cycles_device=args.cycles_device, render_profile=args.render_profile)
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile,
+                                     bake_bindings=args.bake_bindings)
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"

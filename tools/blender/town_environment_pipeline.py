@@ -45,7 +45,7 @@ def _operator_kwargs(operator, candidate_dict):
 
 def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
                             bake_samples: int = None, flat_bake: bool = False, backend: str = "cycles",
-                            eevee=None, cycles_device="AUTO", render_profile="export"):
+                            eevee=None, cycles_device="AUTO", render_profile="export", bake_bindings=None):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
@@ -181,6 +181,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     quality_record = None
     device_record = None
     source_count = None
+    correspondence = None
     if backend == "eevee":
         if eevee is None:
             raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
@@ -196,7 +197,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bake_samples = profile.samples
         device_record = render_profiles.configure_device(scene, cycles_device)
         cycles_device = device_record["device"]
-        _, source_count = cycles_source.batch_source(col_source)
+        source_batch, source_count = cycles_source.batch_source(col_source)
         if flat_bake:
             scene.cycles.samples = 1
             scene.cycles.max_bounces = 0
@@ -211,6 +212,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         # Keep the opaque fill above; clearing would restore transparent black and
         # reintroduce the ambiguity this pass exists to remove.
         scene.render.bake.use_clear = False
+        scene.render.bake.use_cage = False
         scene.render.bake.cage_extrusion = 0.15
         scene.render.bake.max_ray_distance = 1.0
         # One texel of dilation for the exterior, and only one.
@@ -225,6 +227,13 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         # completely, for one texel per island boundary.
         scene.render.bake.margin = 1 if flat_bake else 4
 
+        if bake_bindings is not None:
+            import bake_correspondence
+            correspondence = bake_correspondence.validate(source_batch, target_obj, bake_bindings,
+                extrusion=scene.render.bake.cage_extrusion,
+                ray_distance=scene.render.bake.max_ray_distance,
+                report_path=output_dir / "bake-correspondence.json")
+
         # Selected-to-active requires the receiver to remain selected and active.
         # Pass the mode explicitly to the operator; its defaults must not turn
         # this into separate bakes onto every source material's image node.
@@ -236,7 +245,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         scene.view_layers[0].objects.active = target_obj
 
         print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-        bpy.ops.object.bake(type='COMBINED', use_selected_to_active=True,
+        bpy.ops.object.bake(type='COMBINED', use_selected_to_active=True, use_cage=False,
                             use_clear=False, margin=scene.render.bake.margin,
                             cage_extrusion=scene.render.bake.cage_extrusion,
                             max_ray_distance=scene.render.bake.max_ray_distance)
@@ -402,6 +411,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "samples":1 if flat_bake else bake_samples, "selectedToActive":True,
             "quality":quality_record, "hardware":device_record, "batchedSourceObjects":source_count}
 
+    if correspondence is not None:
+        manifest["provenance"]["bake"]["correspondence"] = correspondence
     manifest["provenance"]["exportSeconds"] = time.perf_counter() - started
     manifest_path = output_dir / "environment.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")

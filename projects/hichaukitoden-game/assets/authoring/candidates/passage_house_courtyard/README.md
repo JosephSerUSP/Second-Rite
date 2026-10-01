@@ -44,7 +44,7 @@ $blender = "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 Export the committed source through the existing environment package boundary:
 
 ```powershell
-& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --atlas-layout legacy --keep-full-ground --source-lighting
+& $blender -b --factory-startup --disable-autoexec --python-exit-code 1 -P tools/blender/offline_blender.py -- tools/blender/export_exterior_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend --output out/court-new-package --camera projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json --span 12 --atlas-size 1024 --atlas-layout legacy --keep-full-ground --source-lighting --bake-bindings projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/bake-bindings.json
 ```
 
 Cycles uses 0 EV and the authored light rig. Fine door/window detail stays in the source
@@ -86,3 +86,11 @@ renders; `review/eevee-before-central-cycles/` preserves the preceding EEVEE pac
 and captures. Central policy and explicit comparison overrides are documented in
 `tools/blender/ENVIRONMENT-RENDERING.md`. Source and shipping maps remain unchanged.
 The courtyard's entrance shading still needs visual authoring work and owner review.
+
+
+Revision 12 corrects the portal's outward fanlight above the door header and gives
+its masonry reveals a closed section ending at the jamb fronts. Simple structural
+frame receivers retain the doorway volume while source bevels bake into the atlas.
+`bake-bindings.json` owns critical portal receiver/source associations; export checks
+sampled front-facing coverage before baking. This is not a full-texel or visual gate.
+The light rig and 0 EV remain unchanged. Source authority remains scaffold.

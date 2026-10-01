@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 15 scaffold: pitched veranda supports below the roof; camera-side courtyard boundary replaces scattered near blocks. Candidate topology and owner visual/traversal acceptance remain staged.",
+      "basis": "Revision 16 scaffold: extended paving/perimeter/background envelope, persisted export-quality render and viewport settings, camera-aware atlas bias studies. Owner visual and PLAYED acceptance remain staged.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

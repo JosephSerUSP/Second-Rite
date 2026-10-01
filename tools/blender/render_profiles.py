@@ -68,6 +68,12 @@ def apply(scene, profile, *, bake=False, device=None):
     scene.cycles.filter_width = 0.01
     if profile.engine == "CYCLES":
         scene.cycles.samples = profile.samples
+        scene.cycles.preview_samples = profile.samples
+        scene.cycles.use_preview_adaptive_sampling = False
+        scene.cycles.use_preview_denoising = profile.denoise
+        if profile.denoise:
+            scene.cycles.preview_denoiser = "OPENIMAGEDENOISE"
+            scene.cycles.preview_denoising_prefilter = "FAST"
         scene.cycles.use_adaptive_sampling = False
         scene.cycles.max_bounces = profile.max_bounces
         scene.cycles.diffuse_bounces = profile.diffuse_bounces

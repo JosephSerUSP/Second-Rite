@@ -90,3 +90,11 @@ obj=bpy.data.objects.new('Partly covered exterior',data);bpy.context.scene.colle
 exporter.cull_enclosed(obj,24,0)
 assert any(face.normal.x<-.99 and abs(face.center.x+2)<1e-5 and face.area>15 for face in data.polygons), 'A partially covered exterior face was deleted'
 print('ASSEMBLY AND PARTIAL COVERAGE PROOF OK')
+
+long=box('Loose boundary crossing view',None,(1,18,.5),(0,-8,.25),None,core)
+long['sr_bake_source']=True
+bpy.context.view_layer.update()
+assert not exporter.in_square(long,12,6)
+assert long.name in exporter.admitted_names([long,spare],12,6)
+assert spare.name not in exporter.admitted_names([long,spare],12,6)
+print('LOOSE BOUNDARY INTERSECTION OK')

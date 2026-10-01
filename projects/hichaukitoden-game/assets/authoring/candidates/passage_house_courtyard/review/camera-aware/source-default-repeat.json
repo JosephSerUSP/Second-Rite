@@ -1,0 +1,12 @@
+{
+  "sourceDefaultsResolved": {
+    "bias": 0.5,
+    "atlasSize": 1024
+  },
+  "repeatWholeProcessSeconds": 59.0008695,
+  "renderMeshBytesEqual": true,
+  "collisionBytesEqual": true,
+  "atlasChangedPixels": 20,
+  "atlasMaximumChannelDifference": 1,
+  "note": "Fresh process default-resolution proof. Timings not a cap or certified cache state."
+}

@@ -32,6 +32,10 @@ def main():
     data.type='ORTHO';scene.render.resolution_x=800;scene.render.resolution_y=600;scene.render.resolution_percentage=100;scene.render.image_settings.file_format='PNG'
     scene.render.film_transparent=False
     views=[('court-oblique',(4,6,2.8),(-32,-10,12),21),('rear-houses',(14,6,5),(-28,-14,16),27),('window',(4.5,3.5,2.1),(-6,-2.6,2.3),4.8),('window-reverse',(4.5,3.5,2.1),(-5,3.2,1.8),4.8),('portal',(4.5,11.5,2),(-8,-4,3),6)]
+    envelope_center=Vector(tuple((bounds[i]+bounds[i+3])/2 for i in range(3)))
+    envelope_span=max(bounds[i+3]-bounds[i] for i in range(3))
+    views.append(('environment-envelope',envelope_center,
+                  (-envelope_span*.9,-envelope_span*.55,envelope_span*.6),envelope_span*1.25))
     rows=[]
     for mode in args.modes:
         for obj in source_meshes:obj.hide_render=not mode.startswith('source')

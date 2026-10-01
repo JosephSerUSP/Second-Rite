@@ -41,6 +41,8 @@ class RenderProfilesTests(unittest.TestCase):
         self.assertEqual(scene.render.resolution_x, 906)
         self.assertEqual(scene.view_settings.view_transform, "AgX")
         self.assertEqual(scene.view_settings.exposure, 0)
+        self.assertEqual(scene.cycles.preview_samples,128)
+        self.assertTrue(scene.cycles.use_preview_denoising)
 
 
 if __name__ == "__main__":

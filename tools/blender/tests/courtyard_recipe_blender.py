@@ -52,7 +52,16 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==15
+assert bpy.context.scene['courtyard_revision']==16
+scene=bpy.context.scene
+assert scene.render.engine=='CYCLES'
+assert scene.cycles.samples==64 and scene.cycles.preview_samples==64
+assert scene.cycles.use_denoising and scene.cycles.use_preview_denoising
+assert scene.view_settings.exposure==0
+assert (scene.render.resolution_x,scene.render.resolution_y)==(256,240)
+assert scene['export_atlas_size']==1024
+print('SAVED RENDER SETTINGS OK')
+
 for obj in bpy.data.objects:
     if not obj.get('architectural_spec'):continue
     spec=json.loads(obj['architectural_spec'])

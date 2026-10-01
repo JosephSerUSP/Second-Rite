@@ -90,7 +90,7 @@ def measure(layout, view_bias=0.85):
 
 def main():
     result = {"loose": measure("loose"), "packed": measure("packed"),
-              "view": measure("view", 0.85), "worldBias": measure("view", 0.0)}
+              "view": measure("view", 0.85), "worldBias": measure("view", 0.0), "halfBias": measure("view", .5), "peakBias": measure("view", 1.0)}
     print("ATLAS_ALLOCATION_PROBE " + json.dumps(result))
 
 

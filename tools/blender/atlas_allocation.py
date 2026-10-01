@@ -155,8 +155,11 @@ def face_pixels(target, cameras: list[float], out: Path, mirrored: bool = True,
     saved = (scene.render.engine, scene.render.resolution_x, scene.render.resolution_y,
              scene.render.resolution_percentage, scene.render.filter_size,
              scene.view_settings.view_transform)
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = 1
+    import render_profiles
+    cycles_saved = (scene.cycles.samples, scene.cycles.use_denoising)
+    render_profiles.apply(scene, render_profiles.resolve("draft", samples=1), device=render_profiles.DEFAULT_DEVICE)
+    scene.cycles.samples = 1
+    scene.cycles.use_denoising = False
     scene.render.filter_size = 0.0
     scene.render.resolution_x, scene.render.resolution_y = VIEW_WIDTH, VIEW_HEIGHT
     scene.render.resolution_percentage = 100
@@ -190,6 +193,7 @@ def face_pixels(target, cameras: list[float], out: Path, mirrored: bool = True,
         (scene.render.engine, scene.render.resolution_x, scene.render.resolution_y,
          scene.render.resolution_percentage, scene.render.filter_size,
          scene.view_settings.view_transform) = saved
+        scene.cycles.samples, scene.cycles.use_denoising = cycles_saved
         (out / "tmp_face_id.exr").unlink(missing_ok=True)
     return counts
 
@@ -203,6 +207,8 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     `floor` is the least density, as a fraction of the mean visible density, an island keeps,
     so surfaces no camera reaches are shrunk but never removed.
     """
+    if not 0 <= view_bias <= 1:
+        raise ValueError("view_bias must be between 0 and 1")
     out = Path(out) if out else Path(bpy.app.tempdir)
     pack(target, atlas_size, gutter_texels)
     mesh = target.data
@@ -250,7 +256,19 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     bpy.ops.object.mode_set(mode="EDIT")
     repack(gutter_texels / atlas_size)
     bpy.ops.object.mode_set(mode="OBJECT")
+    packed_area = np.zeros(islands)
+    for poly in mesh.polygons:
+        pts = [np.array(uv[k].uv) for k in poly.loop_indices]
+        packed_area[island_of[poly.index]] += .5 * abs(sum(
+            pts[n][0]*pts[(n+1)%len(pts)][1]-pts[(n+1)%len(pts)][0]*pts[n][1]
+            for n in range(len(pts))))
+    ratios = np.sqrt(packed_area[visible] * atlas_size**2 / demand[visible])
     return {
+        "measurementStage": "After UV packing, before guarded pixel-corner alignment",
+        "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+        "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+        "visibleIslandTexelsPerScreenPixelPercentiles": dict(zip(('p10','p50','p90'),[float(v) for v in np.percentile(ratios,[10,50,90])])),
+        "peakScreenTexelDemand": float(demand.sum()),
         "atlasSize": atlas_size, "viewBias": view_bias, "floor": floor, "gutterTexels": gutter_texels,
         "cameras": [round(float(c), 3) for c in cameras], "islands": int(islands),
         "visibleIslands": int(visible.sum()), "polygons": len(mesh.polygons),

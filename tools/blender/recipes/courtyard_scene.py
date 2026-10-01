@@ -162,8 +162,8 @@ def build(output):
     glass.node_tree.nodes['Principled BSDF'].inputs['Coat Weight'].default_value=.7
     blue=finish_material('Court cobalt glazed tile',(.035,.11,.24),roughness=.35)
     mat={'sash':sash,'stone':stone,'glass':glass,'shutter':shutter,'iron':iron}
-    extended=[{'y':-8,'z':profile[0]['z']},*profile,{'y':22,'z':profile[-1]['z']}]
-    floor=profile_surface('COURT_profile_paving',extended,-17.8,6,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
+    extended=[{'y':-16,'z':profile[0]['z']},*profile,{'y':32,'z':profile[-1]['z']}]
+    floor=profile_surface('COURT_profile_paving',extended,-24,8,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
     collision=bpy.data.collections['TH_COLLISION'];profile_surface('COL_profile_walk',profile,-.75,.75,collision,bake=False)
     # Three attached volumes are one lodging: bedrooms, arrival hall, service wing.
     primary=[Window('Court casement '+str(i),4.5,y,upper+.92,width=1.35,height=1.75,shutter_angles=angles) for i,(y,angles) in enumerate([(.5,(95,140)),(3.5,(125,75)),(6.8,(105,130))])]
@@ -231,7 +231,7 @@ def build(output):
         rafter=b.part(f'Veranda rafter {y}',(6.1/math.cos(pitch),.13,.19),(1.555,y,3.50),wood,bevel=.008)
         rafter.rotation_euler.y=-pitch
     # The backstreet has complete two-storey volumes, rather than a detached skyline.
-    for name,front,a,c,eave,ridge,color in [('West street',12.3,-10,-1.8,6.3,7.5,(.62,.37,.17)),('Rear street',13.8,-1.8,14.5,7.15,8.4,(.62,.58,.45)),('East street',12.1,14.5,26,6.6,7.8,(.50,.29,.21))]:
+    for name,front,a,c,eave,ridge,color in [('West street',12.3,-16,-1.8,6.3,7.5,(.62,.37,.17)),('Rear street',13.8,-1.8,14.5,7.15,8.4,(.62,.58,.45)),('East street',12.1,14.5,32,6.6,7.8,(.50,.29,.21))]:
         wall=finish_material(name+' limewash',color,weather=True)
         spec=Volume(name,front,front+4,a,c,0,eave,ridge)
         upper=[Window(name+' window '+str(i),front,y,4.1,1.05,1.55,shutters=True) for i,y in enumerate([a+(c-a)*.28,a+(c-a)*.69])]
@@ -297,7 +297,7 @@ def build(output):
     # The camera-side court boundary is a continuous architectural near rank.
     # Broad masonry fills the lower frame; it stays well outside the walk lane.
     # Its coping follows the map profile, rather than creating another datum.
-    for start,end in [(-8,2),(2,8),(8,22)]:
+    for start,end in [(-16,2),(2,8),(8,32)]:
         def height(y):
             return 0 if y<=2 else .30 if y>=8 else (y-2)*.05
         xa,xb=-13.8,-12.6
@@ -350,9 +350,14 @@ def build(output):
     actor=thestra_camera.create_actor_preview(ROOT/'projects/hichaukitoden-game/assets/character/walker.png',camera,anchor=(0,6,.2),world_height=1.75)
     core.move_to_collection(actor,bpy.data.collections['TH_PREVIEW_ACTORS'])
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
-    render_profiles.apply(scene,render_profiles.resolve('draft'));scene.view_settings.view_transform='AgX'
+    saved_profile=render_profiles.apply(scene,render_profiles.resolve('export'),device=render_profiles.DEFAULT_DEVICE)
+    scene['saved_render_profile']=json.dumps(saved_profile)
+    scene['export_atlas_size']=render_profiles.DEFAULT_ATLAS_SIZE
+    scene['export_atlas_view_bias']=.5
+    scene['render_settings_note']='Classic 256x240 preview, Cycles 64 render/viewport samples, OIDN, neutral exposure; export atlas 1024. Device availability belongs to the launching Blender process.'
+    scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=15;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=16;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

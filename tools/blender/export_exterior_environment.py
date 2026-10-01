@@ -325,8 +325,12 @@ def admitted_names(objects, span, margin):
             loose.append(obj)
         else:
             groups.setdefault(assembly, []).append(obj)
-    admitted = {obj.name for obj in loose
-                if in_square(obj.evaluated_get(graph) if live_modifiers(obj) else obj, span, margin)}
+    admitted = set()
+    for obj in loose:
+        body = obj.evaluated_get(graph) if live_modifiers(obj) else obj
+        corners = [body.matrix_world @ Vector(corner) for corner in body.bound_box]
+        if corners and min(p.y for p in corners) <= span + margin and max(p.y for p in corners) >= -margin:
+            admitted.add(obj.name)
     for members in groups.values():
         # Assembly bounds need only runtime bodies/proxies: source micro-detail
         # must not drag an otherwise off-range building into the package.
@@ -518,7 +522,7 @@ def lane_positions(span):
     return [0.35] + [0.6 + i * (span - 1.2) / 8 for i in range(9)] + [span - 0.35]
 
 
-def allocate_atlas_by_view(target, span, atlas_size):
+def allocate_atlas_by_view(target, span, atlas_size, view_bias=.85):
     """Unwrap, and spend the atlas where the lane cameras look (#877). Returns the allocator's report.
 
     The ground is 59% of the pixels of a Praca frame and used to get a fixed 3% of the atlas, chosen when
@@ -531,7 +535,7 @@ def allocate_atlas_by_view(target, span, atlas_size):
         obj.hide_render = True
     try:
         # exterior sources are in engine space already: no mirror (see the module docstring)
-        return atlas_allocation.allocate_by_view(target, lane_positions(span), atlas_size, mirrored=False)
+        return atlas_allocation.allocate_by_view(target, lane_positions(span), atlas_size, view_bias=view_bias, mirrored=False)
     finally:
         for obj in hidden:
             obj.hide_render = False
@@ -555,7 +559,7 @@ def bake_source_members(source, span, margin):
 
 
 def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
-                        clip_ground=GROUND_CLIP_MARGIN, layout="view", atlas_size=2048) -> None:
+                        clip_ground=GROUND_CLIP_MARGIN, layout="view", atlas_size=2048, view_bias=.85) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -685,7 +689,8 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     if ground_tagged and clip_ground is not None:
         clip_ground_to_view(target, span, clip_ground)
     if layout == "view":
-        report = allocate_atlas_by_view(target, span, atlas_size)
+        report = allocate_atlas_by_view(target, span, atlas_size, view_bias)
+        target["atlas_view_allocation"] = json.dumps(report)
         print(f"[exterior] atlas allocated by view: {report['visiblePolygons']} of {report['polygons']} faces "
               f"are seen, {report['visibleIslands']} of {report['islands']} islands", flush=True)
     else:
@@ -743,29 +748,39 @@ def main() -> None:
     parser.add_argument("--atlas-layout", choices=("view", "legacy"), default="view",
                         help="view spends the atlas where the lane cameras look (#877); legacy is the "
                              "original smart_project with a fixed --ground-share")
+    parser.add_argument("--atlas-view-bias", type=float, default=None,
+                        help="0 = uniform world-area density; 1 = peak visible camera footprint. Used with --atlas-layout view.")
     parser.add_argument("--keep-sealed", action="store_true",
                         help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
-    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE,
-                        help="2048 because the buildings measured 0.66 texels "
-                             "per screen pixel at 1024, against the 1-3 a "
-                             "backdrop wants; they need ~983k texels for 1.0 "
-                             "and a 1024 atlas holds 1,049k in total")
+    parser.add_argument("--atlas-size", type=int, default=None,
+                        help="Override saved export_atlas_size; otherwise use the source setting or shared 1024 default")
     parser.add_argument("--samples", type=int, default=None)
     parser.add_argument("--source-lighting", action="store_true",
                         help="preserve authored world and lamps rather than staging the legacy exterior rig")
     eevee_bake.add_arguments(parser)
     args = parser.parse_args(argv)
+    if args.atlas_view_bias is not None and not 0 <= args.atlas_view_bias <= 1:
+        parser.error("--atlas-view-bias must be between 0 and 1")
     atlas_allocation.CAMERA_RECORD = args.camera.resolve()
 
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
+    if args.atlas_size is None:
+        args.atlas_size = bpy.context.scene.get("export_atlas_size", render_profiles.DEFAULT_ATLAS_SIZE)
+    if type(args.atlas_size) is not int or args.atlas_size <= 0:
+        parser.error("Atlas size must be a positive integer")
+    view_bias = args.atlas_view_bias
+    if view_bias is None:
+        view_bias = float(bpy.context.scene.get("export_atlas_view_bias", .85))
+    if not 0 <= view_bias <= 1:
+        parser.error("Saved export_atlas_view_bias must be between 0 and 1")
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape,
                         clip_ground=None if args.keep_full_ground else args.ground_clip_margin,
-                        layout=args.atlas_layout, atlas_size=args.atlas_size)
+                        layout=args.atlas_layout, atlas_size=args.atlas_size, view_bias=view_bias)
 
     # Same reason export_room_environment.py stages lighting before baking: a
     # Cycles bake that just opens the file is lit by whatever the .blend last
@@ -797,6 +812,9 @@ def main() -> None:
                                      uv_texel_align=args.uv_texel_align)
     manifest_path = output / "environment.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    target = bpy.data.objects.get("st_maria_praca_TH_RENDER")
+    if target and "atlas_view_allocation" in target:
+        manifest["provenance"]["atlasAllocation"] = json.loads(target["atlas_view_allocation"])
     manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"
     manifest["provenance"]["cameraCalibration"] = camera_provenance(args.camera)
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")

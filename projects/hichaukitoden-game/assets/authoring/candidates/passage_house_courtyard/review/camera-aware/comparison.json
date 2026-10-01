@@ -1,0 +1,149 @@
+{
+  "selectedBias": 0.5,
+  "interpretation": "Common revision 16 geometry, calibrated camera poses, Cycles 64 atlas. Peak demand is visible area, not projective UV shape; densities are pre pixel-corner alignment. First study ran before the ID pass explicitly selected AUTO device; exact tiny-face counts vary slightly between CPU/GPU.",
+  "studies": {
+    "0": {
+      "allocation": {
+        "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+        "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+        "visibleIslandTexelsPerScreenPixelPercentiles": {
+          "p10": 0.4495058183785976,
+          "p50": 0.940174755792013,
+          "p90": 3.0363466411229263
+        },
+        "peakScreenTexelDemand": 133108.0,
+        "atlasSize": 1024,
+        "viewBias": 0.0,
+        "floor": 0.04,
+        "gutterTexels": 2.0,
+        "cameras": [
+          0.35,
+          0.6,
+          1.95,
+          3.3,
+          4.65,
+          6.0,
+          7.35,
+          8.7,
+          10.05,
+          11.4,
+          11.65
+        ],
+        "islands": 1540,
+        "visibleIslands": 363,
+        "polygons": 3115,
+        "visiblePolygons": 649,
+        "meanVisiblePixelsPerSquareMetre": 53.46
+      },
+      "stats": {
+        "triangleCount": 5785,
+        "vertexCount": 3430,
+        "materialGroupCount": 1,
+        "textureDimensions": [
+          1024,
+          1024
+        ],
+        "pngSizeBytes": 1458702,
+        "renderMeshSizeBytes": 510857,
+        "packageSizeBytes": 1970146
+      },
+      "wholeProcessSeconds": 61.1380496
+    },
+    "0.5": {
+      "allocation": {
+        "measurementStage": "After UV packing, before guarded pixel-corner alignment",
+        "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+        "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+        "visibleIslandTexelsPerScreenPixelPercentiles": {
+          "p10": 0.7930892556445607,
+          "p50": 0.9185261375172117,
+          "p90": 1.9870817378225865
+        },
+        "peakScreenTexelDemand": 133102.0,
+        "atlasSize": 1024,
+        "viewBias": 0.5,
+        "floor": 0.04,
+        "gutterTexels": 2.0,
+        "cameras": [
+          0.35,
+          0.6,
+          1.95,
+          3.3,
+          4.65,
+          6.0,
+          7.35,
+          8.7,
+          10.05,
+          11.4,
+          11.65
+        ],
+        "islands": 1540,
+        "visibleIslands": 366,
+        "polygons": 3115,
+        "visiblePolygons": 651,
+        "meanVisiblePixelsPerSquareMetre": 53.41
+      },
+      "stats": {
+        "triangleCount": 5785,
+        "vertexCount": 3430,
+        "materialGroupCount": 1,
+        "textureDimensions": [
+          1024,
+          1024
+        ],
+        "pngSizeBytes": 1555693,
+        "renderMeshSizeBytes": 510857,
+        "packageSizeBytes": 2067137
+      },
+      "wholeProcessSeconds": 59.4199363
+    },
+    "1": {
+      "allocation": {
+        "measurementStage": "After UV packing, before guarded pixel-corner alignment",
+        "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+        "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+        "visibleIslandTexelsPerScreenPixelPercentiles": {
+          "p10": 0.9100137361600648,
+          "p50": 0.9116189104664696,
+          "p90": 0.9185586535436918
+        },
+        "peakScreenTexelDemand": 133102.0,
+        "atlasSize": 1024,
+        "viewBias": 1.0,
+        "floor": 0.04,
+        "gutterTexels": 2.0,
+        "cameras": [
+          0.35,
+          0.6,
+          1.95,
+          3.3,
+          4.65,
+          6.0,
+          7.35,
+          8.7,
+          10.05,
+          11.4,
+          11.65
+        ],
+        "islands": 1540,
+        "visibleIslands": 366,
+        "polygons": 3115,
+        "visiblePolygons": 651,
+        "meanVisiblePixelsPerSquareMetre": 53.41
+      },
+      "stats": {
+        "triangleCount": 5785,
+        "vertexCount": 3430,
+        "materialGroupCount": 1,
+        "textureDimensions": [
+          1024,
+          1024
+        ],
+        "pngSizeBytes": 1689445,
+        "renderMeshSizeBytes": 510857,
+        "packageSizeBytes": 2200889
+      },
+      "wholeProcessSeconds": 84.748009
+    }
+  }
+}

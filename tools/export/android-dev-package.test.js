@@ -13,7 +13,7 @@ function fixture() {
     const loveAndroidDir = path.join(root, 'love-android');
     const lovePath = path.join(root, 'Second Gate.love');
     fs.mkdirSync(path.join(projectDir, 'data'), { recursive: true });
-    fs.mkdirSync(loveAndroidDir, { recursive: true });
+    fs.mkdirSync(path.join(loveAndroidDir, 'app', 'src', 'main'), { recursive: true });
     fs.writeFileSync(path.join(projectDir, 'data', 'project.json'), JSON.stringify({
         schemaVersion: 1,
         name: 'Second Gate',
@@ -41,6 +41,15 @@ function fixture() {
         'android.useAndroidX=true',
         '',
     ].join('\n'));
+    fs.writeFileSync(path.join(loveAndroidDir, 'app', 'src', 'main', 'AndroidManifest.xml'), [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+        '  <uses-permission android:name="android.permission.INTERNET" />',
+        '  <uses-permission android:name="android.permission.RECORD_AUDIO" />',
+        '  <application android:label="${NAME}" />',
+        '</manifest>',
+        '',
+    ].join('\n'));
     fs.writeFileSync(lovePath, Buffer.from([0x50, 0x4b, 0x03, 0x04, 1, 2, 3]));
     return { root, projectDir, loveAndroidDir, lovePath };
 }
@@ -63,6 +72,7 @@ test('prepares one dev app around the canonical .love export', () => {
     assert.equal(result.manifest.versionCode, 1790870400);
     assert.equal(result.manifest.versionName, '0.0.0-dev+android.1790870400.3acc8c1');
     assert.equal(result.manifest.orientation, 'landscape');
+    assert.equal(result.manifest.microphonePermission, false);
 
     const properties = fs.readFileSync(path.join(f.loveAndroidDir, 'gradle.properties'), 'utf8');
     assert.match(properties, /^app\.name=Second Gate Dev$/m);
@@ -71,9 +81,23 @@ test('prepares one dev app around the canonical .love export', () => {
     assert.match(properties, /^app\.version_name=0\.0\.0-dev\+android\.1790870400\.3acc8c1$/m);
     assert.doesNotMatch(properties, /^app\.name_byte_array=/m);
 
+    const androidManifest = fs.readFileSync(result.androidManifestPath, 'utf8');
+    assert.match(androidManifest, /android\.permission\.INTERNET/);
+    assert.doesNotMatch(androidManifest, /android\.permission\.RECORD_AUDIO/);
+
     const embedded = fs.readFileSync(result.embedPath);
     assert.deepEqual(embedded, fs.readFileSync(f.lovePath));
     assert.deepEqual(JSON.parse(fs.readFileSync(manifestPath, 'utf8')), result.manifest);
+});
+
+test('fails loud if the pinned wrapper no longer has the expected microphone declaration', () => {
+    const f = fixture();
+    const manifestPath = path.join(f.loveAndroidDir, 'app', 'src', 'main', 'AndroidManifest.xml');
+    fs.writeFileSync(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"></manifest>\n');
+    assert.throws(() => androidPackage.stripManifestPermission(
+        manifestPath,
+        androidPackage.RECORD_AUDIO_PERMISSION,
+    ), /Expected exactly one android\.permission\.RECORD_AUDIO declaration/);
 });
 
 test('rejects package ids that would make Android identity ambiguous', () => {

@@ -11,7 +11,44 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            14.5105,
+            0
+          ]
+        },
+        "port_climb": {
+          "position": [
+            7.8,
+            0,
+            0
+          ]
+        },
+        "labyrinth_door": {
+          "position": [
+            7.8,
+            13.526,
+            0
+          ]
+        },
+        "east_praca": {
+          "position": [
+            7.8,
+            29.0208,
+            0
+          ]
+        },
+        "npc_guard": {
+          "position": [
+            7.8,
+            16.1146,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "port_climb",
@@ -40,7 +77,153 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "id": "spawn_player",
+          "position": [
+            7.8,
+            11.85,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "quay_stair": {
+          "id": "quay_stair",
+          "position": [
+            7.8,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "alicia_door": {
+          "id": "alicia_door",
+          "position": [
+            7.8,
+            2.881,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "churchyard_stair": {
+          "id": "churchyard_stair",
+          "position": [
+            7.8,
+            8.751,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "chapel_door": {
+          "id": "chapel_door",
+          "position": [
+            7.8,
+            17.756,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "east_backstreet": {
+          "id": "east_backstreet",
+          "position": [
+            7.8,
+            23.699,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "npc_child": {
+          "id": "npc_child",
+          "position": [
+            7.8,
+            12.717,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        },
+        "npc_registrar": {
+          "id": "npc_registrar",
+          "position": [
+            7.8,
+            16.763,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            1,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "quay_stair",
@@ -79,7 +262,51 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            10.354,
+            0
+          ]
+        },
+        "west_cortico": {
+          "position": [
+            7.8,
+            0,
+            0
+          ]
+        },
+        "padaria_door": {
+          "position": [
+            7.8,
+            13.125,
+            0
+          ]
+        },
+        "east_quay": {
+          "position": [
+            7.8,
+            20.7083,
+            0
+          ]
+        },
+        "npc_auctioneer": {
+          "position": [
+            7.8,
+            1.6771,
+            0
+          ]
+        },
+        "npc_yukio": {
+          "position": [
+            7.8,
+            6.7812,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "west_cortico",
@@ -108,7 +335,51 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            12.724,
+            0
+          ]
+        },
+        "west_market": {
+          "position": [
+            7.8,
+            0,
+            0
+          ]
+        },
+        "praca_stair": {
+          "position": [
+            7.8,
+            13.0156,
+            0
+          ]
+        },
+        "pub_door": {
+          "position": [
+            7.8,
+            21.9479,
+            0
+          ]
+        },
+        "east_port": {
+          "position": [
+            7.8,
+            25.4479,
+            0
+          ]
+        },
+        "npc_fisherman": {
+          "position": [
+            7.8,
+            1.7135,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "west_market",
@@ -142,7 +413,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            3.883,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            7.2254,
+            0
+          ]
+        },
+        "npc_smith": {
+          "position": [
+            7.8,
+            2.7329,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -161,7 +455,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            6.25,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            12.0677,
+            0
+          ]
+        },
+        "npc_owner": {
+          "position": [
+            7.8,
+            0.0729,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -180,7 +497,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            8,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            15.7135,
+            0
+          ]
+        },
+        "npc_agnes": {
+          "position": [
+            7.8,
+            12.651,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -199,7 +539,44 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            7.892,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            -2.5156,
+            0
+          ]
+        },
+        "bedroom_door": {
+          "position": [
+            7.8,
+            14.9844,
+            0
+          ]
+        },
+        "shop_stair": {
+          "position": [
+            7.8,
+            18.2656,
+            0
+          ]
+        },
+        "npc_laura": {
+          "position": [
+            7.8,
+            12.1042,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -228,7 +605,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            3.15,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            1.8958,
+            0
+          ]
+        },
+        "npc_alicia": {
+          "position": [
+            7.8,
+            -0.6562,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -247,7 +647,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            5.2,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            10.0625,
+            0
+          ]
+        },
+        "npc_registrar": {
+          "position": [
+            7.8,
+            4.8125,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -288,7 +711,65 @@
           }
         ]
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            12.031,
+            -0.6044
+          ]
+        },
+        "west_praca": {
+          "position": [
+            7.8,
+            -2.8438,
+            -0.0233
+          ]
+        },
+        "lodging_door": {
+          "position": [
+            7.8,
+            7.8753,
+            -0.3438
+          ]
+        },
+        "padaria_back": {
+          "position": [
+            7.8,
+            11.327,
+            -0.5603
+          ]
+        },
+        "port_stair": {
+          "position": [
+            7.8,
+            17.2348,
+            -1.1369
+          ]
+        },
+        "east_market": {
+          "position": [
+            7.8,
+            21.7138,
+            -1.6245
+          ]
+        },
+        "npc_scholar": {
+          "position": [
+            7.8,
+            1.8958,
+            -0.0688
+          ]
+        },
+        "npc_euler": {
+          "position": [
+            7.8,
+            4.8898,
+            -0.1566
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "west_praca",
@@ -327,7 +808,37 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            1.25,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            7.8,
+            0.35,
+            0
+          ]
+        },
+        "home_stair": {
+          "position": [
+            7.8,
+            7.2254,
+            0
+          ]
+        },
+        "npc_alicia": {
+          "position": [
+            7.8,
+            2.3353,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -351,7 +862,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            0,
+            6.1333,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            0,
+            7.0333,
+            0
+          ]
+        },
+        "npc_alicia": {
+          "position": [
+            0,
+            2.3333,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -370,7 +904,30 @@
         "groundZ": 0,
         "speed": 3.4
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            0,
+            3.3833,
+            0
+          ]
+        },
+        "exit_door": {
+          "position": [
+            0,
+            4.2833,
+            0
+          ]
+        },
+        "npc_smith": {
+          "position": [
+            0,
+            2.7333,
+            0
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "exit_door",
@@ -407,7 +964,51 @@
           }
         ]
       },
-      "spawn": null,
+      "spawnAnchor": "spawn_player",
+      "environmentAnchors": {
+        "spawn_player": {
+          "position": [
+            7.8,
+            14.802,
+            0
+          ]
+        },
+        "west_quay": {
+          "position": [
+            7.8,
+            0,
+            0
+          ]
+        },
+        "forge_door": {
+          "position": [
+            7.8,
+            8.4583,
+            0
+          ]
+        },
+        "smith_3d_door": {
+          "position": [
+            7.8,
+            16.8073,
+            0
+          ]
+        },
+        "cortico_stair": {
+          "position": [
+            7.8,
+            19.0312,
+            0
+          ]
+        },
+        "climb_churchyard": {
+          "position": [
+            7.8,
+            28.6927,
+            0.4618
+          ]
+        }
+      },
       "doorways": [
         {
           "anchor": "west_quay",
@@ -449,7 +1050,8 @@
       "to": "session.floor + 2",
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1601/0/commands/0/commands/3/common:33/commands/2/options/0/commands/3"
     },
     {
@@ -463,7 +1065,8 @@
       "to": "session.floor + 2",
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1601/0/elseCommands/0/commands/1/common:33/commands/2/options/0/commands/3"
     },
     {
@@ -477,7 +1080,8 @@
       "to": "session.floor + 2",
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1601/0/elseCommands/0/elseCommands/0/commands/1/common:33/commands/2/options/0/commands/3"
     },
     {
@@ -491,7 +1095,8 @@
       "to": "session.floor + 2",
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1601/0/elseCommands/0/elseCommands/0/elseCommands/0/commands/0/common:33/commands/2/options/0/commands/3"
     },
     {
@@ -505,6 +1110,11 @@
       "to": 31,
       "arrival": "climb_churchyard",
       "arrivalPosition": [
+        7.8,
+        28.6927,
+        0.4618
+      ],
+      "arrivalEventPosition": [
         7.8,
         28.6927,
         0.4618
@@ -523,7 +1133,8 @@
       "to": 2,
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1603/0/commands/0/common:43/commands/4"
     },
     {
@@ -537,7 +1148,8 @@
       "to": 2,
       "arrival": null,
       "arrivalPosition": null,
-      "arrivalKind": "spawn",
+      "arrivalEventPosition": null,
+      "arrivalKind": "unresolved-or-grid-default",
       "location": "map:16/event:1603/0/elseCommands/1/common:34/commands/3/options/0/commands/0/common:43/commands/4"
     },
     {
@@ -551,6 +1163,11 @@
       "to": 17,
       "arrival": "churchyard_stair",
       "arrivalPosition": [
+        7.8,
+        8.751,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         8.751,
         0
@@ -573,6 +1190,11 @@
         13.0156,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        13.0156,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:17/event:1703/0"
     },
@@ -587,6 +1209,11 @@
       "to": 24,
       "arrival": "exit_door",
       "arrivalPosition": [
+        7.8,
+        1.8958,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         1.8958,
         0
@@ -609,6 +1236,11 @@
         29.0208,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        29.0208,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:17/event:1705/0"
     },
@@ -623,6 +1255,11 @@
       "to": 22,
       "arrival": "exit_door",
       "arrivalPosition": [
+        7.8,
+        15.7135,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         15.7135,
         0
@@ -645,6 +1282,11 @@
         -2.8438,
         -0.0233
       ],
+      "arrivalEventPosition": [
+        7.8,
+        -2.8438,
+        -0.0233
+      ],
       "arrivalKind": "doorway",
       "location": "map:17/event:1707/0"
     },
@@ -659,6 +1301,11 @@
       "to": 26,
       "arrival": "east_market",
       "arrivalPosition": [
+        7.8,
+        21.7138,
+        -1.6245
+      ],
+      "arrivalEventPosition": [
         7.8,
         21.7138,
         -1.6245
@@ -681,6 +1328,11 @@
         0.35,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        0.35,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:18/event:1804/0"
     },
@@ -695,6 +1347,11 @@
       "to": 19,
       "arrival": "west_market",
       "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         0,
         0
@@ -717,6 +1374,11 @@
         20.7083,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        20.7083,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:19/event:1902/0"
     },
@@ -731,6 +1393,11 @@
       "to": 17,
       "arrival": "quay_stair",
       "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         0,
         0
@@ -753,6 +1420,11 @@
         12.0677,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        12.0677,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:19/event:1904/0"
     },
@@ -767,6 +1439,11 @@
       "to": 31,
       "arrival": "west_quay",
       "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         0,
         0
@@ -789,6 +1466,11 @@
         8.4583,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        8.4583,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:20/event:2002/0"
     },
@@ -803,6 +1485,11 @@
       "to": 19,
       "arrival": "pub_door",
       "arrivalPosition": [
+        7.8,
+        21.9479,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         21.9479,
         0
@@ -825,6 +1512,11 @@
         17.756,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        17.756,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:22/event:2202/0"
     },
@@ -839,6 +1531,11 @@
       "to": 26,
       "arrival": "padaria_back",
       "arrivalPosition": [
+        7.8,
+        11.327,
+        -0.5603
+      ],
+      "arrivalEventPosition": [
         7.8,
         11.327,
         -0.5603
@@ -861,6 +1558,11 @@
         1.8958,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        1.8958,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:23/event:2303/0"
     },
@@ -875,6 +1577,11 @@
       "to": 27,
       "arrival": "home_stair",
       "arrivalPosition": [
+        7.8,
+        7.2254,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         7.2254,
         0
@@ -897,6 +1604,11 @@
         14.9844,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        14.9844,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:24/event:2402/0"
     },
@@ -911,6 +1623,11 @@
       "to": 26,
       "arrival": "lodging_door",
       "arrivalPosition": [
+        7.8,
+        7.8753,
+        -0.3438
+      ],
+      "arrivalEventPosition": [
         7.8,
         7.8753,
         -0.3438
@@ -933,6 +1650,11 @@
         23.699,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        23.699,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:26/event:2603/0"
     },
@@ -947,6 +1669,11 @@
       "to": 25,
       "arrival": "exit_door",
       "arrivalPosition": [
+        7.8,
+        10.0625,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         10.0625,
         0
@@ -969,6 +1696,11 @@
         -2.5156,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        -2.5156,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:26/event:2605/0"
     },
@@ -983,6 +1715,11 @@
       "to": 31,
       "arrival": "cortico_stair",
       "arrivalPosition": [
+        7.8,
+        19.0312,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         19.0312,
         0
@@ -1005,6 +1742,11 @@
         0,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        0,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:26/event:2607/0"
     },
@@ -1019,6 +1761,11 @@
       "to": 18,
       "arrival": "padaria_door",
       "arrivalPosition": [
+        7.8,
+        13.125,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         13.125,
         0
@@ -1041,6 +1788,11 @@
         18.2656,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        18.2656,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:27/event:2703/0"
     },
@@ -1055,6 +1807,11 @@
       "to": 18,
       "arrival": "padaria_door",
       "arrivalPosition": [
+        7.8,
+        13.125,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         13.125,
         0
@@ -1077,6 +1834,11 @@
         16.8073,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        16.8073,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:29/event:2902/0"
     },
@@ -1091,6 +1853,11 @@
       "to": 19,
       "arrival": "east_port",
       "arrivalPosition": [
+        7.8,
+        25.4479,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         25.4479,
         0
@@ -1113,6 +1880,11 @@
         7.2254,
         0
       ],
+      "arrivalEventPosition": [
+        7.8,
+        7.2254,
+        0
+      ],
       "arrivalKind": "doorway",
       "location": "map:31/event:3102/0"
     },
@@ -1127,6 +1899,11 @@
       "to": 29,
       "arrival": "exit_door",
       "arrivalPosition": [
+        0,
+        4.2833,
+        0
+      ],
+      "arrivalEventPosition": [
         0,
         4.2833,
         0
@@ -1149,6 +1926,11 @@
         17.2348,
         -1.1369
       ],
+      "arrivalEventPosition": [
+        7.8,
+        17.2348,
+        -1.1369
+      ],
       "arrivalKind": "doorway",
       "location": "map:31/event:3104/0"
     },
@@ -1163,6 +1945,11 @@
       "to": 16,
       "arrival": "port_climb",
       "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalEventPosition": [
         7.8,
         0,
         0

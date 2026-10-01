@@ -35,6 +35,10 @@ test('town geography extraction preserves doorway identity and nested transfer p
  const lodging=graph.edges.find(edge=>edge.from===26&&edge.to===25);
  assert.equal(lodging.event,'st-maria-cortico-lodging_door');
  assert.equal(lodging.arrival,'exit_door');
+ assert.ok(Array.isArray(lodging.arrivalPosition));
+ const room=graph.maps.find(map=>map.id===25);
+ assert.equal(room.spawnAnchor,'spawn_player');
+ assert.ok(room.environmentAnchors.spawn_player.position); 
  assert.ok(graph.edges.some(edge=>edge.location.includes('/common:')));
  assert.ok(graph.maps.find(map=>map.id===26).lane.groundProfile.length>2);
 });

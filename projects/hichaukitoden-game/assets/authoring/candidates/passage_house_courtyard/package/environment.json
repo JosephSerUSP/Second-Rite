@@ -6,24 +6,24 @@
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    -14.0,
+    -17.8,
     -10.4,
     -0.14,
     18.23,
-    21.4,
+    22.0,
     8.81
   ],
   "stats": {
-    "triangleCount": 3727,
-    "vertexCount": 2731,
+    "triangleCount": 4215,
+    "vertexCount": 3055,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1286948,
-    "renderMeshSizeBytes": 340227,
-    "packageSizeBytes": 1627762
+    "pngSizeBytes": 1357037,
+    "renderMeshSizeBytes": 387165,
+    "packageSizeBytes": 1744789
   },
   "anchors": {
     "cortico_entry": {
@@ -107,7 +107,7 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 1804,
+      "batchedSourceObjects": 2192,
       "correspondence": {
         "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
         "extrusion": 0.15000000596046448,
@@ -166,7 +166,7 @@
         "errors": []
       }
     },
-    "exportSeconds": 40.139867799996864,
+    "exportSeconds": 107.59373319998849,
     "lightingPolicy": "source",
     "cameraCalibration": {
       "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",

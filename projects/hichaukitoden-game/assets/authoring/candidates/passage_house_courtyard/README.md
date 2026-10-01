@@ -84,7 +84,7 @@ The current package was exported through the regular Cycles exporter at 128 samp
 `review/central-cycles/` contains native courtyard comparisons and bakery inspection
 renders; `review/eevee-before-central-cycles/` preserves the preceding EEVEE package
 and captures. Central policy and explicit comparison overrides are documented in
-`tools/blender/ENVIRONMENT-RENDERING.md`. Source and shipping maps remain unchanged.
+`tools/blender/ENVIRONMENT-RENDERING.md`. That initial renderer migration retained the source; later scaffold revisions are recorded below. Shipping maps remain unchanged.
 The courtyard's entrance shading still needs visual authoring work and owner review.
 
 
@@ -94,3 +94,12 @@ frame receivers retain the doorway volume while source bevels bake into the atla
 `bake-bindings.json` owns critical portal receiver/source associations; export checks
 sampled front-facing coverage before baking. This is not a full-texel or visual gate.
 The light rig and 0 EV remain unchanged. Source authority remains scaffold.
+
+Revision 13 adds broader mineral variation, directional timber grain and ceramic
+trim baked from rich source decoration, with a softer sun and stronger skylight
+at 0 EV. The decorative paving apron now extends to x=-17.8 and y=-8..22;
+the map-owned traversal profile and collision lane remain unchanged. Low foreground
+coping uses simple box receivers; its bevels stay in the source. Drain slots bake
+onto the paving. `review/art-direction/` preserves previous/current native views.
+The recipe test checks 70 frame-bottom ground rays using actual Classic/Wide camera
+records, including both bounded camera limits.

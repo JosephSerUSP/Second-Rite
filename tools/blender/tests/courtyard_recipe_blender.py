@@ -51,7 +51,7 @@ name=next(name for name,row in changed.items() if row['vertices'])
 changed[name]['vertices'][0][0]+=.001
 assert not equivalent(changed,expected),'Parity gate missed a planted millimetre displacement'
 assert source.read_bytes()==source_before,'Fresh build modified its registered source'
-assert bpy.context.scene['courtyard_revision']==12
+assert bpy.context.scene['courtyard_revision']==13
 # The posed leaves are separate proxies: their detailed source has no opaque
 # backing that would hide the louvres in oblique/rear views.
 for tag in ['left','right']:
@@ -81,4 +81,20 @@ for tag in ['jamb_l','jamb_r','lintel']:
     assert proxy.hide_render and not proxy.modifiers and len(proxy.data.polygons)==6
     assert proxy.matrix_world==detail.matrix_world, 'Frame target changed its placement'
     assert all(abs(a-b)<1e-5 for a,b in zip(proxy.dimensions,detail.dimensions)), 'Frame target lost its volume'
+# Frame-bottom rays exercise real runtime camera records at both review widths.
+import atlas_allocation
+floor=bpy.data.objects['COURT_profile_paving'];bottom_hits=[]
+for width in [256,426]:
+    for lane in [0,.5,2,5,8,11.5,12]:
+        camera=atlas_allocation.lane_camera(bpy.context.scene,lane,mirrored=False,
+            record_path=ROOT/'projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json',width=width)
+        frame=camera.data.view_frame(scene=bpy.context.scene)
+        for fraction in [.01,.25,.5,.75,.99]:
+            bottom=frame[2].lerp(frame[1],fraction);top=frame[3].lerp(frame[0],fraction)
+            direction=(camera.matrix_world.to_3x3()@bottom.lerp(top,1/240)).normalized()
+            hit,point,_,_=floor.ray_cast(camera.location,direction)
+            assert hit, f'Ground cuts off at width {width}, lane {lane}, column {fraction}'
+            bottom_hits.append(point.copy())
+assert len(bottom_hits)==70
+assert any(point.x < -14 for point in bottom_hits), 'Coverage probe missed the previous near-edge defect'
 print('COURTYARD RECIPE PARITY OK',len(actual))

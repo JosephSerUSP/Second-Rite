@@ -13,7 +13,7 @@ import second_rite_asset_core as core
 import thestra_camera,render_profiles
 from first_stratum.common import box
 from architectural_assemblies import Window,window
-from opening_families import door
+from opening_families import door,box_receiver
 from vendor_assets import verify
 
 ROOT=Path(__file__).resolve().parents[3]
@@ -116,18 +116,23 @@ def shell(builder,volume,openings,plaster,clay,timber):
     record.parent=builder.root
     return record
 
-def finish_material(name,color,roughness=.9,weather=False):
+def finish_material(name,color,roughness=.9,weather=False,grain=False):
     material=core.make_material(name,color=color,roughness=roughness)
     if weather:
         tree=material.node_tree;bsdf=tree.nodes['Principled BSDF'];geo=tree.nodes.new('ShaderNodeNewGeometry')
-        noise=tree.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=3.1;noise.inputs['Detail'].default_value=3
-        tree.links.new(geo.outputs['Position'],noise.inputs['Vector'])
+        noise=tree.nodes.new('ShaderNodeTexNoise');noise.inputs['Scale'].default_value=.8 if not grain else 2;noise.inputs['Detail'].default_value=3
+        coordinates=geo.outputs['Position']
+        if grain:
+            stretch=tree.nodes.new('ShaderNodeVectorMath');stretch.operation='MULTIPLY'
+            stretch.inputs[1].default_value=(15,15,.65)
+            tree.links.new(coordinates,stretch.inputs[0]);coordinates=stretch.outputs['Vector']
+        tree.links.new(coordinates,noise.inputs['Vector'])
         ramp=tree.nodes.new('ShaderNodeValToRGB');ramp.color_ramp.elements[0].position=.25;ramp.color_ramp.elements[1].position=.80
-        ramp.color_ramp.elements[0].color=(*[c*.63 for c in color],1);ramp.color_ramp.elements[1].color=(*[min(c*1.17,1) for c in color],1)
+        ramp.color_ramp.elements[0].color=(*[c*.80 for c in color],1);ramp.color_ramp.elements[1].color=(*[min(c*1.08,1) for c in color],1)
         tree.links.new(noise.outputs['Fac'],ramp.inputs['Fac']);tree.links.new(ramp.outputs['Color'],bsdf.inputs['Base Color'])
-        fine=tree.nodes.new('ShaderNodeTexNoise');fine.inputs['Scale'].default_value=75
-        tree.links.new(geo.outputs['Position'],fine.inputs['Vector'])
-        bump=tree.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.24;bump.inputs['Distance'].default_value=.016
+        fine=tree.nodes.new('ShaderNodeTexNoise');fine.inputs['Scale'].default_value=95 if not grain else 9
+        tree.links.new(coordinates,fine.inputs['Vector'])
+        bump=tree.nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.18;bump.inputs['Distance'].default_value=.009
         tree.links.new(fine.outputs['Fac'],bump.inputs['Height']);tree.links.new(bump.outputs['Normal'],bsdf.inputs['Normal'])
     return material
 
@@ -145,20 +150,20 @@ def build(output):
     clay=adapted_material(upstream['Clay'],'Court fired terracotta',(.37,.12,.055),Bump=.22,Roughness=.88)
     paving=adapted_material(upstream['Bricks - Cobblestone'],'Court granite setts',(.27,.30,.26),**{'Width':.42,'Height':.28,'Grout Width':.008,'Bump':.13,'Roughness':.95})
     linen=adapted_material(upstream['Fabric - Linen'],'Court wash linen',(.71,.66,.50),**{'Bump':.15,'Translucency':.08,'Subsurface Weight':0})
-    plaster=finish_material('Court warm limewash',(.72,.67,.49),weather=True)
+    plaster=finish_material('Court warm limewash',(.76,.74,.61),weather=True)
     stone=finish_material('Court limestone',(.55,.56,.48),weather=True)
     darkstone=finish_material('Court damp stone',(.23,.28,.25),weather=True)
-    wood=finish_material('Court dark timber',(.075,.036,.016),weather=True)
+    wood=finish_material('Court dark timber',(.10,.051,.026),weather=True,grain=True)
     sash=finish_material('Court bone painted sash',(.59,.64,.55),roughness=.76)
-    shutter=finish_material('Court sage shutter',(.11,.25,.19),weather=True)
+    shutter=finish_material('Court sage shutter',(.095,.22,.17),weather=True,grain=True)
     iron=finish_material('Court wrought iron',(.025,.030,.024),roughness=.75)
     glass=finish_material('Court blue reflected glass',(.16,.25,.27),roughness=.13)
     glass.node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value=.50
     glass.node_tree.nodes['Principled BSDF'].inputs['Coat Weight'].default_value=.7
     blue=finish_material('Court cobalt glazed tile',(.035,.11,.24),roughness=.35)
     mat={'sash':sash,'stone':stone,'glass':glass,'shutter':shutter,'iron':iron}
-    extended=[{'y':-5,'z':profile[0]['z']},*profile,{'y':18,'z':profile[-1]['z']}]
-    floor=profile_surface('COURT_profile_paving',extended,-14,6,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
+    extended=[{'y':-8,'z':profile[0]['z']},*profile,{'y':22,'z':profile[-1]['z']}]
+    floor=profile_surface('COURT_profile_paving',extended,-17.8,6,b.source,paving,depth_step=.65);floor['sr_bake_open_surface']=True;floor['profile_map']='32.json'
     collision=bpy.data.collections['TH_COLLISION'];profile_surface('COL_profile_walk',profile,-.75,.75,collision,bake=False)
     # Three attached volumes are one lodging: bedrooms, arrival hall, service wing.
     primary=[Window('Court casement '+str(i),4.5,y,upper+.92,width=1.35,height=1.75,shutter_angles=angles) for i,(y,angles) in enumerate([(.5,(95,140)),(3.5,(125,75)),(6.8,(105,130))])]
@@ -171,7 +176,7 @@ def build(output):
     service_root=shell(b,service,[{'y':17.1,'width':1.2,'height':1.6,'sill':1.3}],plaster,clay,wood)
     window(b,Window('Court service casement',4.5,17.1,1.3,1.2,1.6),mat).parent=service_root
     # Inner door leaf sits in a genuinely deep, enclosed entrance volume.
-    host=type('DoorHost',(),{})();host.back_x=4.82;host.wood=finish_material('Court honey timber door',(.32,.14,.048),weather=True)
+    host=type('DoorHost',(),{})();host.back_x=4.82;host.wood=finish_material('Court honey timber door',(.27,.115,.042),weather=True,grain=True)
     host.stone=stone;host.terracotta=clay;host.iron=iron;host.y=lambda value:value
     host.part=lambda name,size,position,material:b.part(name,size,position,material,'source',.008)
     door(host,'Court inner panelled door',11.5,width=1.42,height=2.55,panels=4,panel_material=host.wood,source=True,retain_shape=True,base_z=upper,receiver_collection=b.source)
@@ -244,6 +249,21 @@ def build(output):
         b.part(f'Cortico passage pier {x}',(.32,.44,2.75),(x,-2.1,1.375),plaster,bevel=.025)
         b.part(f'Cortico passage pier cap {x}',(.44,.55,.16),(x,-2.1,2.83),stone,bevel=.02)
     b.part('Cortico passage lintel',(3.40,.45,.23),(0,-2.1,2.81),wood,bevel=.025)
+    # Rich ceramic source decoration bakes onto the existing masonry wall.
+    # The band belongs to the sleeping wing; no extra runtime tile geometry.
+    band_floor=profile[-1]['z']
+    ceramic=finish_material('Court chalk ceramic',(.76,.78,.70),roughness=.48)
+    border=finish_material('Court muted cobalt border',(.045,.13,.23),roughness=.5)
+    for i in range(38):
+        yy=-1.58+i*.26;zz=band_floor+.61
+        b.part(f'Court azulejo field {i}',(.018,.251,.46),(4.484,yy,zz),ceramic,'source',.004)
+        # Four lobes read as a small flower rather than a high-frequency grid.
+        for j in range(4):
+            angle=j*math.pi/2;cy=yy+.058*math.cos(angle);cz=zz+.058*math.sin(angle)
+            points=[(4.472,cy+.052*math.cos(k*math.tau/12),cz+.052*math.sin(k*math.tau/12)) for k in range(12)]
+            b.mesh(f'Court azulejo petal {i} {j}',points,[tuple(range(11,-1,-1))],blue,'source')
+    for zz in [band_floor+.36,band_floor+.86]:
+        b.part(f'Court ceramic border {zz}',(.02,9.9,.038),(4.473,3.35,zz),border,'source')
     # A fountain niche, bench and washing implements give this arrival court a use.
     b.part('Court fountain ceramic panel',(.08,1.8,1.45),(4.38,5.0,1.1),stone)
     for row in range(5):
@@ -272,6 +292,22 @@ def build(output):
             hit,point,normal,index=floor.ray_cast(Vector((x,y,10)),Vector((0,0,-1)))
             if not hit:raise ValueError('Missing authored floor beneath path')
             b.part(f'Court path stone {row} {col}',(.45,.39,.012),(x,y,point.z+.008),pathmat,'source',.02)
+    # Decorative apron continues toward the camera; these are not walk heights.
+    # Low masonry and a shallow drainage channel give the near rank structure.
+    for i in range(36):
+        yy=-5.5+i*.65
+        hit,point,normal,index=floor.ray_cast(Vector((-6.6,yy,10)),Vector((0,0,-1)))
+        if not hit:raise ValueError('Missing paving beneath foreground coping')
+        detail=b.part(f'Court near coping {i}',(.42,.625,.24),(-6.6,yy,point.z+.12),stone,'source',bevel=.025)
+        box_receiver(detail,b.source)
+    channel=finish_material('Court drain shadow',(.10,.13,.12),roughness=1)
+    for i in range(40):
+        yy=-5+i*.65
+        hit,point,normal,index=floor.ray_cast(Vector((-2.6,yy,10)),Vector((0,0,-1)))
+        if not hit:raise ValueError('Missing paving beneath drainage')
+        b.part(f'Court drainage course {i}',(.21,.61,.012),(-2.6,yy,point.z+.009),darkstone,'source',.015)
+        for k in range(3):
+            b.part(f'Court drain slot {i} {k}',(.11,.035,.004),(-2.6,yy+(k-1)*.15,point.z+.018),channel,'source')
     # Persist the map-owned anchors and complete camera calibration.
     anchors=bpy.data.collections['TH_ANCHORS']
     for event in map_data['events']:
@@ -279,10 +315,10 @@ def build(output):
         obj=bpy.data.objects.new(name,None);anchors.objects.link(obj);obj.location=event['worldPosition']
     spawn=bpy.data.objects.new('spawn_player',None);anchors.objects.link(spawn);spawn.location=(0,1,0)
     world=bpy.data.worlds.new('Court dusk sky');world.use_nodes=True;scene.world=world
-    world.node_tree.nodes['Background'].inputs['Color'].default_value=(.14,.23,.39,1);world.node_tree.nodes['Background'].inputs['Strength'].default_value=.22
-    sun_data=bpy.data.lights.new('Court western sun','SUN');sun_data.energy=2.8;sun_data.angle=math.radians(2);sun_data.color=(1,.73,.49)
+    world.node_tree.nodes['Background'].inputs['Color'].default_value=(.14,.23,.39,1);world.node_tree.nodes['Background'].inputs['Strength'].default_value=.32
+    sun_data=bpy.data.lights.new('Court western sun','SUN');sun_data.energy=2.1;sun_data.angle=math.radians(6);sun_data.color=(1,.82,.65)
     sun=bpy.data.objects.new(sun_data.name,sun_data);scene.collection.objects.link(sun);sun.rotation_euler=Vector((1,.8,-1.7)).to_track_quat('-Z','Y').to_euler()
-    sky_data=bpy.data.lights.new('Court blue skylight','AREA');sky_data.energy=200;sky_data.size=18;sky_data.color=(.48,.63,1)
+    sky_data=bpy.data.lights.new('Court blue skylight','AREA');sky_data.energy=380;sky_data.size=18;sky_data.color=(.63,.75,1)
     sky=bpy.data.objects.new(sky_data.name,sky_data);scene.collection.objects.link(sky);sky.location=(-2,6,12);sky.rotation_euler=(Vector((4,6,1))-sky.location).to_track_quat('-Z','Y').to_euler()
     lamp=finish_material('Court lantern glass',(1,.38,.08),roughness=.4)
     lamp.node_tree.nodes['Principled BSDF'].inputs['Emission Color'].default_value=(1,.30,.05,1);lamp.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value=3
@@ -305,7 +341,7 @@ def build(output):
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
     render_profiles.apply(scene,render_profiles.resolve('draft'));scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=12;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
+    scene['courtyard_revision']=13;scene['candidate_map']=json.dumps(map_data);scene['source_profile_authority']='candidate/32.json'
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

@@ -1,27 +1,27 @@
 {
-  "revision": "13 scaffold: mineral/timber material separation, source ceramic trim, softened lighting, continuous decorative apron and coarse foreground receivers",
-  "sourceSHA256": "b1b989a3093e67dbefb8188a3b7b17c17d8445d4e4625fc96a0488c2947c6ec5",
-  "sourceBytes": 1751960,
+  "revision": "12 scaffold: outward clipped fanlight, closed reveals, structural box receivers and sampled source correspondence",
+  "sourceSHA256": "74100329fb6478916e028173fac4805c4f815adc9138dc10fa31a709dafa753e",
+  "sourceBytes": 1791930,
   "sourceTriangleInterpretation": "Evaluated beauty geometry across the entire editable source, including off-range buildings. Runtime counts are the exported view envelope; the ratio is not a pure same-surface decimation ratio.",
   "package": {
-    "triangleCount": 4215,
-    "vertexCount": 3055,
+    "triangleCount": 3727,
+    "vertexCount": 2731,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 1357037,
-    "renderMeshSizeBytes": 387165,
-    "packageSizeBytes": 1744789
+    "pngSizeBytes": 1286948,
+    "renderMeshSizeBytes": 340227,
+    "packageSizeBytes": 1627762
   },
   "packageSHA256": {
     "bake-correspondence.json": "2b663e3f554b407d5b7e84aec7055c321e5329035390d6e96d6263ce422831e9",
     "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-    "environment.json": "b5fce3e379eb3d7431628634e2443a89dabb684ac352a2f0a992404b53fdf165",
+    "environment.json": "dea749a0e9ead5ad37f8758e22c432cce35c20da5a3defdf5173080c245bc88a",
     "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
-    "environment.obj": "9786170ce49d885b79ef38a0bf09b8146397e2cf40a9612b4b1a61e3e0c8e227",
-    "environment.png": "6b38d2a1eb74eff66b82e89087b1ce0b34e7875efca9a3d16191f9829941bf54"
+    "environment.obj": "124d4bd41d2a7a1d88696beab9149205f4a86d07ea7854255a24a910289e32b4",
+    "environment.png": "81142dcba4614ae90630097e32e1674275e621015861f91dd4d9551232534d76"
   },
   "bounds": [
     -14.0,
@@ -364,20 +364,20 @@
     "historicalSourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec"
   },
   "currentReviewSHA256": {
-    "classic\\0.5.png": "e44788544390327ecee27aeb1364a179c0c36f0ebdb17a98bd1a5cab00ad548c",
-    "classic\\0.png": "ef2f3a7333253fe4722655b46c17dce79f2130d307b07d2fc8d54bbf372eb496",
-    "classic\\11.5.png": "07ec02746c54e4bb89c2759b83330efeb6abe56c0c15f2f0276e2ec11eb70fa4",
-    "classic\\12.png": "4c9ba49745782839b3071205b5d1b14b5164278f2f74b9b04b45e0af9343e63d",
-    "classic\\2.png": "a4936290add01c34100ac66d37194f045ccd8e4faaec4f8e61cc07ae948d2aba",
-    "classic\\5.png": "9d3fd6ae0482fe32d71091a9f341dc1211d343a7f2c4349d9e32c998a99e7b04",
-    "classic\\8.png": "ee857bcec4fb063e0b9276a172880015607729ffe0c15b6a6b6845167a7cff69",
-    "wide\\0.5.png": "87479f36a065cf1b09b43ed91b8c7b86a1526ae04a93aae387d7538b09ac730d",
-    "wide\\0.png": "817011e42e20d2747e264c5614147b214a509316dc7366a5774b257bbb2b4402",
-    "wide\\11.5.png": "c4b87cebab80a6fda205e85c823a814aea3fa76c37037da593435e7e74cbec4c",
-    "wide\\12.png": "19e30e26c1862d155ed54ae02c12dc7c80cf9630f3ac9fead69034f7eb75475c",
-    "wide\\2.png": "14bbcaa39e7b0bd7fff5225bef4bbe8e944599d8c7ab6314dd51538e0828cf53",
-    "wide\\5.png": "1c66176ceab40e930596e72ef21567c8eec4dd1e10be7dac6a16f2d87e769f41",
-    "wide\\8.png": "a227123b1dde91a7f9040f6c22ad26800cd77633556e5d97e35956de954963cd"
+    "classic\\0.5.png": "d05d715111d122999682d34052c4602e7d80875154ecb23ee2ab91fb41b88fdc",
+    "classic\\0.png": "584c75bdedc75cefe2ecba617609d66f729e7b064f4f204dda8f53f9f904162b",
+    "classic\\11.5.png": "208e50eae0e92201cf85e8fce0380525a3143cd4c5339af6d39393b6794a13d0",
+    "classic\\12.png": "440913998ab967452a3e8812884a1aa0ba6705905ff77b66f24b1bb7b241ad6d",
+    "classic\\2.png": "b17af39a8d4f51a93b4acd8365a833b9b11f24ea88118b7d9176d54e42eeb089",
+    "classic\\5.png": "8da3025085bbfe2088b76f4aa90d3e0bf0148831feeee6eea463bd2d554cd68f",
+    "classic\\8.png": "ebebf3d29c00c178b46a2faa57a95ab9df4cbbff2811e5e348a0dee9efd90c97",
+    "wide\\0.5.png": "87dc30caa7dc27ec0c938d17af2d9687fa566394e8c4fdd75dd4bdda27126887",
+    "wide\\0.png": "d481e8c71723ac2af358962c757fe4de29f6ea429c223f3fc5c63a5ab9132b07",
+    "wide\\11.5.png": "b7ea4838409f9de4762f282fed2d5fabf31a5b6f74a6926d0064d9a33c8e2d3a",
+    "wide\\12.png": "ee7e8152684ed5e7350a9332c780a3ec9607ab4711f9adca7170f461a3f709cc",
+    "wide\\2.png": "5e5c7b4b656b08e541ad28b13d0cefbbe449e4c4648209e6e9e80f32a04f9bbf",
+    "wide\\5.png": "911522ba34d47578be48338915394ad5edddbe4809f47e6fffd3d6aa4d18c695",
+    "wide\\8.png": "bf625c5a22d244ca831cdcd5a50f5d27e19394539bc83063445d3f300b254da5"
   },
   "previousRevision": {
     "sourceSHA256": "1406e45686efa4adc663889e034ebf388023d82933d737555624ed83319ed893",
@@ -422,7 +422,7 @@
     },
     "review": "before-sol/"
   },
-  "exportSeconds": 144.3378147,
+  "exportSeconds": 64.8,
   "exportTimingInterpretation": "Separate fresh Blender processes on the same machine, including launch, preparation, bake and packaging; no process-local cache reuse claimed.",
   "renderSettings": {
     "backend": "Cycles selected-to-active",
@@ -435,7 +435,7 @@
   "verification": {
     "G1": "VALIDATE OK",
     "stagedUnit": "ALL UNIT TESTS OK; no failed assertions in final log; 7 Effekseer world-effect assertions unavailable",
-    "targetedPython": "4 current recipe/assembly/receiver tests passed in 106.081 seconds; recipe includes 70 frame-bottom coverage samples. Previous revision 12 broader 25-test suite passed.",
+    "targetedPython": "25 focused Blender tests passed, including missing/wrong source negative controls and structural culling preservation",
     "candidateNodeTests": "2 passed: profile/history and geography",
     "environmentSources": "OK",
     "townCheck": "10 generated maps and 35 door edges/arrival anchors passed",
@@ -463,20 +463,20 @@
     "followup": 1301,
     "cyclesStudy": "cycles-study/",
     "sourceAndProductionPackageChangedByStudy": false,
-    "currentStatus": "Portal sampled correspondence remains clean; floor extends to frame bottom and low foreground coping/drainage survive native captures. Dark passage recess and broader visual/PLAYED acceptance remain open."
+    "currentStatus": "Fanlight, reveals and frame correspondence corrected; 112 sampled rays reach intended sources. Dark passage recess and complete all-surface/angle visual acceptance remain open in #1301."
   },
   "currentExport": {
     "stats": {
-      "triangleCount": 4215,
-      "vertexCount": 3055,
+      "triangleCount": 3727,
+      "vertexCount": 2731,
       "materialGroupCount": 1,
       "textureDimensions": [
         1024,
         1024
       ],
-      "pngSizeBytes": 1357037,
-      "renderMeshSizeBytes": 387165,
-      "packageSizeBytes": 1744789
+      "pngSizeBytes": 1286948,
+      "renderMeshSizeBytes": 340227,
+      "packageSizeBytes": 1627762
     },
     "bake": {
       "backend": "cycles",
@@ -501,7 +501,7 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 2192,
+      "batchedSourceObjects": 1804,
       "correspondence": {
         "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
         "extrusion": 0.15000000596046448,
@@ -560,22 +560,22 @@
         "errors": []
       }
     },
-    "pipelineSeconds": 107.59373319998849,
-    "rasterizedUVCoverage": 0.9355878829956055,
+    "rasterizedUVCoverage": 0.9204463958740234,
     "hashes": {
       "bake-correspondence.json": "2b663e3f554b407d5b7e84aec7055c321e5329035390d6e96d6263ce422831e9",
       "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
-      "environment.json": "b5fce3e379eb3d7431628634e2443a89dabb684ac352a2f0a992404b53fdf165",
+      "environment.json": "dea749a0e9ead5ad37f8758e22c432cce35c20da5a3defdf5173080c245bc88a",
       "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
-      "environment.obj": "9786170ce49d885b79ef38a0bf09b8146397e2cf40a9612b4b1a61e3e0c8e227",
-      "environment.png": "6b38d2a1eb74eff66b82e89087b1ce0b34e7875efca9a3d16191f9829941bf54"
+      "environment.obj": "124d4bd41d2a7a1d88696beab9149205f4a86d07ea7854255a24a910289e32b4",
+      "environment.png": "81142dcba4614ae90630097e32e1674275e621015861f91dd4d9551232534d76"
     }
   },
   "timings": {
-    "courtyardFirst": 144.3378147,
-    "courtyardRepeat": 146.9014058,
-    "revision12WholeProcess": 64.8,
-    "note": "Both revision 13 exports use fresh Blender workers, same registered source, 128 samples and 1024 atlas. Geometry/collision byte-identical; atlas bytes differ."
+    "finalCourtyardWholeProcess": 64.8,
+    "earlierCentralCyclesFirst": 66.6,
+    "earlierCentralCyclesRepeat": 64.9,
+    "earlierPadaria": 21.4,
+    "note": "Earlier timings are revision 11; no revision 12 warm repeat measured."
   },
   "previousExportMeasurements": "eevee-before-central-cycles/measurements.json",
   "historicalSourceCounts": {
@@ -643,37 +643,5 @@
       }
     ],
     "errors": []
-  },
-  "foregroundReview": {
-    "frameBottomRays": 70,
-    "widths": [
-      256,
-      426
-    ],
-    "positions": [
-      0,
-      0.5,
-      2,
-      5,
-      8,
-      11.5,
-      12
-    ],
-    "decorativeApron": {
-      "nearX": -17.8,
-      "endY": [
-        -8,
-        22
-      ]
-    },
-    "walkProfileChanged": false,
-    "sourceDraftNote": "Draft captured before coping box-proxy optimization; rendered source shapes and floor are identical, hidden receiver geometry differs. Native frames use the current package."
-  },
-  "repeatAtlasDifferenceMeanRGBA": [
-    2.86102294921875e-06,
-    2.86102294921875e-06,
-    2.86102294921875e-06,
-    0.0
-  ],
-  "repeatAtlasDifferenceNote": "Three pixels differ by one RGB byte step; alpha matches. OBJ and collision byte-identical."
+  }
 }

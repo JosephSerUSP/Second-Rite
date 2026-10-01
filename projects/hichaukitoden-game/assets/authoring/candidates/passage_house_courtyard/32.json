@@ -1,0 +1,146 @@
+{
+  "id": 32,
+  "title": "St. Maria - Passage House Arrival Court",
+  "intro": "A quiet court rises toward the covered entrance. Water runs down the paving, toward the street.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/passage_house_courtyard/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 12,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0,
+          "z": 0
+        },
+        {
+          "y": 2,
+          "z": 0
+        },
+        {
+          "y": 8,
+          "z": 0.3
+        },
+        {
+          "y": 12,
+          "z": 0.3
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 6,
+        "z": 0
+      },
+      "distance": 18.666666666666668,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0,
+      "eyeHeight": 2.2604166666666665,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66,
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 6,
+        "minOffsetX": -164,
+        "maxOffsetX": 164,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "cortico_entry",
+        "eventInstanceId": "st-maria-passage-court-cortico_entry",
+        "radius": 0.45
+      },
+      {
+        "anchor": "lodging_entry",
+        "eventInstanceId": "st-maria-passage-court-lodging_entry",
+        "radius": 0.45
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 3201,
+      "instanceId": "st-maria-passage-court-cortico_entry",
+      "name": "Out to the Cortico",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        0.5,
+        0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "left",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "lodging_door"
+        }
+      ]
+    },
+    {
+      "id": 3202,
+      "instanceId": "st-maria-passage-court-lodging_entry",
+      "name": "Passage House lodging",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        11.5,
+        0.3
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 25,
+          "arrival": "exit_door"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

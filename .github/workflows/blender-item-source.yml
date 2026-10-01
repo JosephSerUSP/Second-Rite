@@ -137,7 +137,10 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source -v
+          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source tools.blender.tests.test_bake_receivers -v
+
+      - name: Curated assets are portable without network access
+        run: xvfb-run -a python tools/blender/vendor_assets.py check
 
       - name: Smoke a real saved Blend through the production compiler
         shell: bash

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "library": "Blender Essentials",
+      "libraryUrl": "https://cdn.extensions.blender.org/asset-libraries/essentials/",
+      "libraryContact": "Blender Foundation",
+      "listingIndexHash": "SHA256:413e13364ea3894a86050dd48c18264bc35d0001f14acf8a5a3c0f58575c445d",
+      "asset": "Bricks - Cobblestone",
+      "idType": "MATERIAL",
+      "license": "CC0 - Public Domain",
+      "author": "Blender Studio",
+      "copyright": "Blender Foundation",
+      "file": {
+        "path": "materials/materials__bricks.blend",
+        "url": "https://cdn.extensions.blender.org/asset-libraries/essentials/materials/materials__bricks.blend",
+        "sizeInBytes": 636936,
+        "hash": "SHA256:32ab5475a3962fd3c92bbc0812fecde299fc71b64616d087b493466b438b6ea8",
+        "blenderVersion": "5.2.40"
+      },
+      "requiresBlender": "5.2",
+      "retrievedAt": "2026-10-01T00:13:04Z",
+      "localPath": "upstream/32ab5475a3962fd3c92bbc0812fecde299fc71b64616d087b493466b438b6ea8.blend"
+    },
+    {
+      "library": "Blender Essentials",
+      "libraryUrl": "https://cdn.extensions.blender.org/asset-libraries/essentials/",
+      "libraryContact": "Blender Foundation",
+      "listingIndexHash": "SHA256:413e13364ea3894a86050dd48c18264bc35d0001f14acf8a5a3c0f58575c445d",
+      "asset": "Clay",
+      "idType": "MATERIAL",
+      "license": "CC0 - Public Domain",
+      "author": "Blender Studio",
+      "copyright": "Blender Foundation",
+      "file": {
+        "path": "materials/materials.blend",
+        "url": "https://cdn.extensions.blender.org/asset-libraries/essentials/materials/materials.blend",
+        "sizeInBytes": 2116266,
+        "hash": "SHA256:6add882e1578232fd4b2d8732948739886f257a49cb30fbbc1a5d37cea65bc6e",
+        "blenderVersion": "5.2.40"
+      },
+      "requiresBlender": "5.2",
+      "retrievedAt": "2026-10-01T00:13:04Z",
+      "localPath": "upstream/6add882e1578232fd4b2d8732948739886f257a49cb30fbbc1a5d37cea65bc6e.blend"
+    },
+    {
+      "library": "Blender Essentials",
+      "libraryUrl": "https://cdn.extensions.blender.org/asset-libraries/essentials/",
+      "libraryContact": "Blender Foundation",
+      "listingIndexHash": "SHA256:413e13364ea3894a86050dd48c18264bc35d0001f14acf8a5a3c0f58575c445d",
+      "asset": "Fabric - Linen",
+      "idType": "MATERIAL",
+      "license": "CC0 - Public Domain",
+      "author": "Blender Studio",
+      "copyright": "Blender Foundation",
+      "file": {
+        "path": "materials/materials__fabric.blend",
+        "url": "https://cdn.extensions.blender.org/asset-libraries/essentials/materials/materials__fabric.blend",
+        "sizeInBytes": 1128501,
+        "hash": "SHA256:b7b48e718a31af553cbc197b5e9d6ba6bfb84694b2dfac2e4842a0900bb76618",
+        "blenderVersion": "5.2.40"
+      },
+      "requiresBlender": "5.2",
+      "retrievedAt": "2026-10-01T00:13:04Z",
+      "localPath": "upstream/b7b48e718a31af553cbc197b5e9d6ba6bfb84694b2dfac2e4842a0900bb76618.blend"
+    }
+  ],
+  "files": [
+    {
+      "localPath": "upstream/32ab5475a3962fd3c92bbc0812fecde299fc71b64616d087b493466b438b6ea8.blend",
+      "sha256": "32ab5475a3962fd3c92bbc0812fecde299fc71b64616d087b493466b438b6ea8"
+    },
+    {
+      "localPath": "upstream/6add882e1578232fd4b2d8732948739886f257a49cb30fbbc1a5d37cea65bc6e.blend",
+      "sha256": "6add882e1578232fd4b2d8732948739886f257a49cb30fbbc1a5d37cea65bc6e"
+    },
+    {
+      "localPath": "upstream/b7b48e718a31af553cbc197b5e9d6ba6bfb84694b2dfac2e4842a0900bb76618.blend",
+      "sha256": "b7b48e718a31af553cbc197b5e9d6ba6bfb84694b2dfac2e4842a0900bb76618"
+    },
+    {
+      "localPath": "library/selected_materials.blend",
+      "sha256": "a8f8e5f0ce0947794c7f294f056ea0b252acb0deb92a3bacee17ad2e6e9e0cff"
+    },
+    {
+      "localPath": "library/blender_assets.cats.txt",
+      "sha256": "f399bbe6ff58f135258f0748b543f25bd93b0e57d2028280120c8acc42d93cb5"
+    }
+  ]
+}

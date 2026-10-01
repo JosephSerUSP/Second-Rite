@@ -1,0 +1,2 @@
+VERSION 1
+8a9baaed-6e5e-5664-b547-3b2e1b5f1d98:Materials/Curated Essentials:Curated Essentials

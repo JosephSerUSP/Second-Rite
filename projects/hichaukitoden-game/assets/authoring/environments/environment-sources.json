@@ -73,6 +73,18 @@
         "fixtureLights": false,
         "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
+    },
+    "passage_house_courtyard.blend": {
+      "status": "scaffold",
+      "basis": "Fresh owner-requested arrival-court candidate. Candidate Map 32 owns its profile; shipping topology unchanged pending visual review.",
+      "eevee": {
+        "exposureEV": 0.0,
+        "supersample": 1,
+        "probeCells": 0,
+        "emissiveLights": false,
+        "fixtureLights": false,
+        "basis": "Outdoor native-review candidate; neutral exposure with authored daylight, no emissive surfaces."
+      }
     }
   }
 }

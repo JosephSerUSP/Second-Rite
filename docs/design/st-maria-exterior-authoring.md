@@ -187,3 +187,26 @@ flips (issue #935).
 3. **Alpha cards through the bake is untested.** The pipeline joins TH_SOURCE
    into one mesh with a smart UV unwrap and bakes to an opaque atlas. Whether
    cutout foliage survives that as anything but opaque rectangles is unknown.
+
+
+## Geometry retained in future environments
+
+Author detailed surfaces in the editable source, then bake windows, door panels,
+shutter slats, shallow ironwork and masonry relief into the atlas whenever their
+silhouette, parallax or gameplay interaction does not require runtime geometry.
+Keep geometry for building massing, roof edges, passage posts, genuinely open
+thresholds and the walk surface. Compare Classic and Wide frames before retaining
+small decorative geometry. A source object count is not a runtime budget.
+
+The exterior EEVEE projection exporter accepts `sr_bake_role` on source meshes:
+`both` (default) contributes to beauty and runtime, `source` contributes only to
+beauty, and `receiver` exports only the simplified surface. Receivers can be hidden
+in source renders. Mark a single-sided card `sr_bake_open_surface = True` so sealed
+face culling cannot remove it. Unsupported roles fail; separate source/receiver
+geometry requires the EEVEE backend. The detailed source remains editable.
+
+The map's `groundProfile` owns player elevation. Derive paving and thresholds
+from that profile. With affine texturing, subdivide very large paving faces along
+the camera depth enough to avoid severe texture distortion; this does not create
+another ground-height authority. Use EEVEE at 0 EV and adjust authored lamps/world
+lighting. `--source-lighting` preserves that rig for the exterior exporter.

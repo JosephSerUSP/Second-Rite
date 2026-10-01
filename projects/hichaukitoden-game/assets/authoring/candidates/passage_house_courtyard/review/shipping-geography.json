@@ -1,0 +1,1174 @@
+{
+  "semantics": "Authored possible transfers, including nested command lists. Conditions are not evaluated. Profiles are local datums; no global height is inferred.",
+  "maps": [
+    {
+      "id": 16,
+      "title": "St. Maria - The Churchyard",
+      "lane": {
+        "minY": 0,
+        "maxY": 29.021,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "port_climb",
+          "eventInstanceId": "st-maria-churchyard-port_climb",
+          "radius": 1.8
+        },
+        {
+          "anchor": "labyrinth_door",
+          "eventInstanceId": "st-maria-churchyard-labyrinth_door",
+          "radius": 2
+        },
+        {
+          "anchor": "east_praca",
+          "eventInstanceId": "st-maria-churchyard-east_praca",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "St. Maria - The Praca",
+      "lane": {
+        "minY": 0,
+        "maxY": 23.699,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "quay_stair",
+          "eventInstanceId": "st-maria-praca-quay_stair",
+          "radius": 2.2
+        },
+        {
+          "anchor": "alicia_door",
+          "eventInstanceId": "st-maria-praca-alicia_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "churchyard_stair",
+          "eventInstanceId": "st-maria-praca-churchyard_stair",
+          "radius": 1.5
+        },
+        {
+          "anchor": "chapel_door",
+          "eventInstanceId": "st-maria-praca-chapel_door",
+          "radius": 1.2
+        },
+        {
+          "anchor": "east_backstreet",
+          "eventInstanceId": "st-maria-praca-east_backstreet",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "St. Maria - Market Row",
+      "lane": {
+        "minY": 0,
+        "maxY": 20.708,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "west_cortico",
+          "eventInstanceId": "st-maria-market-west_cortico",
+          "radius": 0.9
+        },
+        {
+          "anchor": "padaria_door",
+          "eventInstanceId": "st-maria-market-padaria_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "east_quay",
+          "eventInstanceId": "st-maria-market-east_quay",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "St. Maria - The Quay",
+      "lane": {
+        "minY": 0,
+        "maxY": 25.448,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "west_market",
+          "eventInstanceId": "st-maria-quay-west_market",
+          "radius": 0.9
+        },
+        {
+          "anchor": "praca_stair",
+          "eventInstanceId": "st-maria-quay-praca_stair",
+          "radius": 2.2
+        },
+        {
+          "anchor": "pub_door",
+          "eventInstanceId": "st-maria-quay-pub_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "east_port",
+          "eventInstanceId": "st-maria-quay-east_port",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "St. Maria - Laura's forge",
+      "lane": {
+        "minY": 0.35,
+        "maxY": 7.417,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-weaponsmith-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "St. Maria - The Pub",
+      "lane": {
+        "minY": 0,
+        "maxY": 12.5,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-pub-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "St. Maria - Chapel",
+      "lane": {
+        "minY": 0,
+        "maxY": 16,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-chapel-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "St. Maria - The padaria, the hearth",
+      "lane": {
+        "minY": -2.516,
+        "maxY": 18.3,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-house_laura-exit_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "bedroom_door",
+          "eventInstanceId": "st-maria-house_laura-bedroom_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "shop_stair",
+          "eventInstanceId": "st-maria-house_laura-shop_stair",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "St. Maria - The padaria, the room upstairs",
+      "lane": {
+        "minY": -0.7,
+        "maxY": 7,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-house_alicia-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "title": "St. Maria - Passage House",
+      "lane": {
+        "minY": 0,
+        "maxY": 10.4,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-lodging-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "title": "St. Maria - The Cortico",
+      "lane": {
+        "minY": -2.844,
+        "maxY": 26.906,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4,
+        "groundProfile": [
+          {
+            "y": -5.2753,
+            "z": 0
+          },
+          {
+            "y": 3.7775,
+            "z": -0.0868
+          },
+          {
+            "y": 16.6583,
+            "z": -0.8946
+          },
+          {
+            "y": 18.1455,
+            "z": -1.5196
+          },
+          {
+            "y": 22.6113,
+            "z": -1.6509
+          }
+        ]
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "west_praca",
+          "eventInstanceId": "st-maria-cortico-west_praca",
+          "radius": 0.9
+        },
+        {
+          "anchor": "lodging_door",
+          "eventInstanceId": "st-maria-cortico-lodging_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "padaria_back",
+          "eventInstanceId": "st-maria-cortico-padaria_back",
+          "radius": 1.5
+        },
+        {
+          "anchor": "port_stair",
+          "eventInstanceId": "st-maria-cortico-port_stair",
+          "radius": 1.2
+        },
+        {
+          "anchor": "east_market",
+          "eventInstanceId": "st-maria-cortico-east_market",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "title": "St. Maria - Alicia's Padaria",
+      "lane": {
+        "minY": 0.35,
+        "maxY": 7.417,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-alicias_padaria-exit_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "home_stair",
+          "eventInstanceId": "st-maria-alicias_padaria-home_stair",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "title": "St. Maria - Alicia's Padaria (3D)",
+      "lane": {
+        "minY": 0.35,
+        "maxY": 7.4167,
+        "depthX": 0,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-alicias_padaria_3d-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "title": "St. Maria - Laura's Smithy (3D)",
+      "lane": {
+        "minY": 0.35,
+        "maxY": 7.4167,
+        "depthX": 0,
+        "groundZ": 0,
+        "speed": 3.4
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "exit_door",
+          "eventInstanceId": "st-maria-lauras_smith_3d-exit_door",
+          "radius": 0.9
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "title": "St. Maria - The Port",
+      "lane": {
+        "minY": 0,
+        "maxY": 29.604,
+        "depthX": 7.8,
+        "groundZ": 0,
+        "speed": 3.4,
+        "groundProfile": [
+          {
+            "y": -4.6667,
+            "z": 0
+          },
+          {
+            "y": 25.2292,
+            "z": 0
+          },
+          {
+            "y": 29.6042,
+            "z": 0.5833
+          },
+          {
+            "y": 34.1615,
+            "z": 0.5833
+          }
+        ]
+      },
+      "spawn": null,
+      "doorways": [
+        {
+          "anchor": "west_quay",
+          "eventInstanceId": "st-maria-port-west_quay",
+          "radius": 0.9
+        },
+        {
+          "anchor": "forge_door",
+          "eventInstanceId": "st-maria-port-forge_door",
+          "radius": 1.2
+        },
+        {
+          "anchor": "smith_3d_door",
+          "eventInstanceId": "st-maria-port-smith_3d_door",
+          "radius": 0.9
+        },
+        {
+          "anchor": "cortico_stair",
+          "eventInstanceId": "st-maria-port-cortico_stair",
+          "radius": 1.2
+        },
+        {
+          "anchor": "climb_churchyard",
+          "eventInstanceId": "st-maria-port-climb_churchyard",
+          "radius": 3
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-guard",
+      "position": [
+        7.8,
+        16.1146,
+        0
+      ],
+      "to": "session.floor + 2",
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1601/0/commands/0/commands/3/common:33/commands/2/options/0/commands/3"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-guard",
+      "position": [
+        7.8,
+        16.1146,
+        0
+      ],
+      "to": "session.floor + 2",
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1601/0/elseCommands/0/commands/1/common:33/commands/2/options/0/commands/3"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-guard",
+      "position": [
+        7.8,
+        16.1146,
+        0
+      ],
+      "to": "session.floor + 2",
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1601/0/elseCommands/0/elseCommands/0/commands/1/common:33/commands/2/options/0/commands/3"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-guard",
+      "position": [
+        7.8,
+        16.1146,
+        0
+      ],
+      "to": "session.floor + 2",
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1601/0/elseCommands/0/elseCommands/0/elseCommands/0/commands/0/common:33/commands/2/options/0/commands/3"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-port_climb",
+      "position": [
+        7.8,
+        0,
+        0
+      ],
+      "to": 31,
+      "arrival": "climb_churchyard",
+      "arrivalPosition": [
+        7.8,
+        28.6927,
+        0.4618
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:16/event:1602/0"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-labyrinth_door",
+      "position": [
+        7.8,
+        13.526,
+        0
+      ],
+      "to": 2,
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1603/0/commands/0/common:43/commands/4"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-labyrinth_door",
+      "position": [
+        7.8,
+        13.526,
+        0
+      ],
+      "to": 2,
+      "arrival": null,
+      "arrivalPosition": null,
+      "arrivalKind": "spawn",
+      "location": "map:16/event:1603/0/elseCommands/1/common:34/commands/3/options/0/commands/0/common:43/commands/4"
+    },
+    {
+      "from": 16,
+      "event": "st-maria-churchyard-east_praca",
+      "position": [
+        7.8,
+        29.0208,
+        0
+      ],
+      "to": 17,
+      "arrival": "churchyard_stair",
+      "arrivalPosition": [
+        7.8,
+        8.751,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:16/event:1604/0"
+    },
+    {
+      "from": 17,
+      "event": "st-maria-praca-quay_stair",
+      "position": [
+        7.8,
+        0,
+        0
+      ],
+      "to": 19,
+      "arrival": "praca_stair",
+      "arrivalPosition": [
+        7.8,
+        13.0156,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:17/event:1703/0"
+    },
+    {
+      "from": 17,
+      "event": "st-maria-praca-alicia_door",
+      "position": [
+        7.8,
+        2.881,
+        0
+      ],
+      "to": 24,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        1.8958,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:17/event:1704/0"
+    },
+    {
+      "from": 17,
+      "event": "st-maria-praca-churchyard_stair",
+      "position": [
+        7.8,
+        8.751,
+        0
+      ],
+      "to": 16,
+      "arrival": "east_praca",
+      "arrivalPosition": [
+        7.8,
+        29.0208,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:17/event:1705/0"
+    },
+    {
+      "from": 17,
+      "event": "st-maria-praca-chapel_door",
+      "position": [
+        7.8,
+        17.756,
+        0
+      ],
+      "to": 22,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        15.7135,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:17/event:1706/0"
+    },
+    {
+      "from": 17,
+      "event": "st-maria-praca-east_backstreet",
+      "position": [
+        7.8,
+        23.699,
+        0
+      ],
+      "to": 26,
+      "arrival": "west_praca",
+      "arrivalPosition": [
+        7.8,
+        -2.8438,
+        -0.0233
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:17/event:1707/0"
+    },
+    {
+      "from": 18,
+      "event": "st-maria-market-west_cortico",
+      "position": [
+        7.8,
+        0,
+        0
+      ],
+      "to": 26,
+      "arrival": "east_market",
+      "arrivalPosition": [
+        7.8,
+        21.7138,
+        -1.6245
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:18/event:1803/0"
+    },
+    {
+      "from": 18,
+      "event": "st-maria-market-padaria_door",
+      "position": [
+        7.8,
+        13.125,
+        0
+      ],
+      "to": 27,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        0.35,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:18/event:1804/0"
+    },
+    {
+      "from": 18,
+      "event": "st-maria-market-east_quay",
+      "position": [
+        7.8,
+        20.7083,
+        0
+      ],
+      "to": 19,
+      "arrival": "west_market",
+      "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:18/event:1805/0"
+    },
+    {
+      "from": 19,
+      "event": "st-maria-quay-west_market",
+      "position": [
+        7.8,
+        0,
+        0
+      ],
+      "to": 18,
+      "arrival": "east_quay",
+      "arrivalPosition": [
+        7.8,
+        20.7083,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:19/event:1902/0"
+    },
+    {
+      "from": 19,
+      "event": "st-maria-quay-praca_stair",
+      "position": [
+        7.8,
+        13.0156,
+        0
+      ],
+      "to": 17,
+      "arrival": "quay_stair",
+      "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:19/event:1903/0"
+    },
+    {
+      "from": 19,
+      "event": "st-maria-quay-pub_door",
+      "position": [
+        7.8,
+        21.9479,
+        0
+      ],
+      "to": 21,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        12.0677,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:19/event:1904/0"
+    },
+    {
+      "from": 19,
+      "event": "st-maria-quay-east_port",
+      "position": [
+        7.8,
+        25.4479,
+        0
+      ],
+      "to": 31,
+      "arrival": "west_quay",
+      "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:19/event:1905/0"
+    },
+    {
+      "from": 20,
+      "event": "st-maria-weaponsmith-exit_door",
+      "position": [
+        7.8,
+        7.2254,
+        0
+      ],
+      "to": 31,
+      "arrival": "forge_door",
+      "arrivalPosition": [
+        7.8,
+        8.4583,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:20/event:2002/0"
+    },
+    {
+      "from": 21,
+      "event": "st-maria-pub-exit_door",
+      "position": [
+        7.8,
+        12.0677,
+        0
+      ],
+      "to": 19,
+      "arrival": "pub_door",
+      "arrivalPosition": [
+        7.8,
+        21.9479,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:21/event:2102/0"
+    },
+    {
+      "from": 22,
+      "event": "st-maria-chapel-exit_door",
+      "position": [
+        7.8,
+        15.7135,
+        0
+      ],
+      "to": 17,
+      "arrival": "chapel_door",
+      "arrivalPosition": [
+        7.8,
+        17.756,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:22/event:2202/0"
+    },
+    {
+      "from": 23,
+      "event": "st-maria-house_laura-exit_door",
+      "position": [
+        7.8,
+        -2.5156,
+        0
+      ],
+      "to": 26,
+      "arrival": "padaria_back",
+      "arrivalPosition": [
+        7.8,
+        11.327,
+        -0.5603
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:23/event:2302/0"
+    },
+    {
+      "from": 23,
+      "event": "st-maria-house_laura-bedroom_door",
+      "position": [
+        7.8,
+        14.9844,
+        0
+      ],
+      "to": 24,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        1.8958,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:23/event:2303/0"
+    },
+    {
+      "from": 23,
+      "event": "st-maria-house_laura-shop_stair",
+      "position": [
+        7.8,
+        18.2656,
+        0
+      ],
+      "to": 27,
+      "arrival": "home_stair",
+      "arrivalPosition": [
+        7.8,
+        7.2254,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:23/event:2304/0"
+    },
+    {
+      "from": 24,
+      "event": "st-maria-house_alicia-exit_door",
+      "position": [
+        7.8,
+        1.8958,
+        0
+      ],
+      "to": 23,
+      "arrival": "bedroom_door",
+      "arrivalPosition": [
+        7.8,
+        14.9844,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:24/event:2402/0"
+    },
+    {
+      "from": 25,
+      "event": "st-maria-lodging-exit_door",
+      "position": [
+        7.8,
+        10.0625,
+        0
+      ],
+      "to": 26,
+      "arrival": "lodging_door",
+      "arrivalPosition": [
+        7.8,
+        7.8753,
+        -0.3438
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:25/event:2502/0"
+    },
+    {
+      "from": 26,
+      "event": "st-maria-cortico-west_praca",
+      "position": [
+        7.8,
+        -2.8438,
+        -0.0233
+      ],
+      "to": 17,
+      "arrival": "east_backstreet",
+      "arrivalPosition": [
+        7.8,
+        23.699,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:26/event:2603/0"
+    },
+    {
+      "from": 26,
+      "event": "st-maria-cortico-lodging_door",
+      "position": [
+        7.8,
+        7.8753,
+        -0.3438
+      ],
+      "to": 25,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        10.0625,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:26/event:2604/0"
+    },
+    {
+      "from": 26,
+      "event": "st-maria-cortico-padaria_back",
+      "position": [
+        7.8,
+        11.327,
+        -0.5603
+      ],
+      "to": 23,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        -2.5156,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:26/event:2605/0"
+    },
+    {
+      "from": 26,
+      "event": "st-maria-cortico-port_stair",
+      "position": [
+        7.8,
+        17.2348,
+        -1.1369
+      ],
+      "to": 31,
+      "arrival": "cortico_stair",
+      "arrivalPosition": [
+        7.8,
+        19.0312,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:26/event:2606/0"
+    },
+    {
+      "from": 26,
+      "event": "st-maria-cortico-east_market",
+      "position": [
+        7.8,
+        21.7138,
+        -1.6245
+      ],
+      "to": 18,
+      "arrival": "west_cortico",
+      "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:26/event:2607/0"
+    },
+    {
+      "from": 27,
+      "event": "st-maria-alicias_padaria-exit_door",
+      "position": [
+        7.8,
+        0.35,
+        0
+      ],
+      "to": 18,
+      "arrival": "padaria_door",
+      "arrivalPosition": [
+        7.8,
+        13.125,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:27/event:2702/0"
+    },
+    {
+      "from": 27,
+      "event": "st-maria-alicias_padaria-home_stair",
+      "position": [
+        7.8,
+        7.2254,
+        0
+      ],
+      "to": 23,
+      "arrival": "shop_stair",
+      "arrivalPosition": [
+        7.8,
+        18.2656,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:27/event:2703/0"
+    },
+    {
+      "from": 28,
+      "event": "st-maria-alicias_padaria_3d-exit_door",
+      "position": [
+        0,
+        7.0333,
+        0
+      ],
+      "to": 18,
+      "arrival": "padaria_door",
+      "arrivalPosition": [
+        7.8,
+        13.125,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:28/event:2802/0"
+    },
+    {
+      "from": 29,
+      "event": "st-maria-lauras_smith_3d-exit_door",
+      "position": [
+        0,
+        4.2833,
+        0
+      ],
+      "to": 31,
+      "arrival": "smith_3d_door",
+      "arrivalPosition": [
+        7.8,
+        16.8073,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:29/event:2902/0"
+    },
+    {
+      "from": 31,
+      "event": "st-maria-port-west_quay",
+      "position": [
+        7.8,
+        0,
+        0
+      ],
+      "to": 19,
+      "arrival": "east_port",
+      "arrivalPosition": [
+        7.8,
+        25.4479,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:31/event:3101/0"
+    },
+    {
+      "from": 31,
+      "event": "st-maria-port-forge_door",
+      "position": [
+        7.8,
+        8.4583,
+        0
+      ],
+      "to": 20,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        7.8,
+        7.2254,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:31/event:3102/0"
+    },
+    {
+      "from": 31,
+      "event": "st-maria-port-smith_3d_door",
+      "position": [
+        7.8,
+        16.8073,
+        0
+      ],
+      "to": 29,
+      "arrival": "exit_door",
+      "arrivalPosition": [
+        0,
+        4.2833,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:31/event:3103/0"
+    },
+    {
+      "from": 31,
+      "event": "st-maria-port-cortico_stair",
+      "position": [
+        7.8,
+        19.0312,
+        0
+      ],
+      "to": 26,
+      "arrival": "port_stair",
+      "arrivalPosition": [
+        7.8,
+        17.2348,
+        -1.1369
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:31/event:3104/0"
+    },
+    {
+      "from": 31,
+      "event": "st-maria-port-climb_churchyard",
+      "position": [
+        7.8,
+        28.6927,
+        0.4618
+      ],
+      "to": 16,
+      "arrival": "port_climb",
+      "arrivalPosition": [
+        7.8,
+        0,
+        0
+      ],
+      "arrivalKind": "doorway",
+      "location": "map:31/event:3105/0"
+    }
+  ]
+}

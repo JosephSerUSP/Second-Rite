@@ -64,3 +64,6 @@ tools/asset-language/materials.json       text eol=lf
 # verified against the SHA-256 of the exact bytes. With core.autocrlf a Windows checkout
 # would rewrite the JSON and break every hash, so the directory is pinned byte-for-byte.
 tools/blender/asset-library/** -text
+
+tools/blender/vendor-library/library/blender_assets.cats.txt -text
+projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package/** -text

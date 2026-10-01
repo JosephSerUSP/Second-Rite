@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "map": "32.json",
+  "sourceBlend": "passage_house_courtyard.blend",
+  "package": "passage_house_courtyard",
+  "library": "tools/blender/vendor-library/library/selected_materials.blend",
+  "datum": {
+    "entryMap": 26,
+    "entryEventInstanceId": "st-maria-cortico-lodging_door",
+    "entryHeight": "Sample the authored Cortico groundProfile at this event y using generated world-view semantics",
+    "lodgingMap": 25,
+    "lodgingLocalFloor": 0,
+    "courtyardUpperLanding": 0.3
+  },
+  "reviewPositions": [
+    0.5,
+    2,
+    5,
+    8,
+    11.5
+  ],
+  "spawnPosition": [
+    0,
+    1,
+    0
+  ],
+  "seed": 3201
+}

@@ -82,11 +82,13 @@ function touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
 end
 
 -- LÖVE's Android resize/orientation path is intentionally not used here.
--- Package orientation selects one stable host orientation, then startup derives
--- one matching logical surface from the actual handset dimensions.
-if isAndroid() and user_settings.get(SETTING, nil) ~= false then
+-- Package orientation selects one stable host orientation. main.lua calls this
+-- from love.load, after Android has established the real host dimensions but
+-- before the render canvas/profile is chosen.
+function touch_gamepad.prepareAndroidSurface()
+    if not isAndroid() or user_settings.get(SETTING, nil) == false then return nil end
     local w, h = love.graphics.getDimensions()
-    touch_gamepad.configureDeviceSurface(w, h)
+    return touch_gamepad.configureDeviceSurface(w, h)
 end
 
 function touch_gamepad.isEnabled()

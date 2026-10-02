@@ -159,12 +159,17 @@ interpreter.bindPresentation({
     -- frame draws a 426-wide world into a 256-wide target.
     setRenderSurface = function(id)
         local presentation_surface = require("presentation.surface")
+        if id == "mobile_device" then
+            -- DEVICE is derived from live Android host geometry. Refresh before
+            -- activating it so returning from WIDE cannot resurrect a stale
+            -- boot-time profile sampled before immersive fullscreen settled.
+            local hostW, hostH = love.graphics.getDimensions()
+            require("presentation.touch_gamepad").refreshAndroidSurface(hostW, hostH)
+        end
         if not presentation_surface.getProfile(id) then return false end
         presentation_surface.setProfile(id)
         local w, h = presentation_surface.renderSize()
         canvas = presentation_surface.newRasterCanvas(w, h)
-        -- Recompute the integer-nearest host transform for the new surface;
-        -- love.resize owns that maths, so ask it rather than duplicating it.
         love.resize(love.graphics.getWidth(), love.graphics.getHeight())
         require("engine.user_settings").set("renderSurfaceProfile", id)
         return true
@@ -2343,4 +2348,14 @@ end
 
 function love.resize(w, h)
     presentation_output.resize(w, h)
+
+    -- Android may deliver a second, wider content size after immersive mode has
+    -- settled. DEVICE is defined by that live host aspect, so refresh its
+    -- profile on native resize and rebuild the active raster when necessary.
+    local touch = require("presentation.touch_gamepad")
+    local changed = touch.refreshAndroidSurface(w, h)
+    if changed and presentation_surface.getProfileId() == "mobile_device" then
+        local rw, rh = presentation_surface.renderSize()
+        canvas = presentation_surface.newRasterCanvas(rw, rh)
+    end
 end

@@ -49,6 +49,12 @@ do
     local ok, err = output.setMode("crt")
     assert(ok, "CRT shader failed native compilation: " .. tostring(err))
 
+    -- Exercise the actual inverse seam used by touch, not only the formula.
+    output.resize(1000, 600)
+    local rx, ry = output.hostToRender(500, 300)
+    near(rx, 213, 1e-9, "CRT hostToRender centre x")
+    near(ry, 120, 1e-9, "CRT hostToRender centre y")
+
     -- When this API is available, also validate the exact same source as GLES.
     -- Desktop GLES validation is evidence, not a substitute for Android.
     if love.graphics.validateShader then
@@ -66,4 +72,7 @@ end
 
 surface.setProfile(originalProfile)
 output.setMode(originalMode)
+if love.graphics.getDimensions then
+    output.resize(love.graphics.getDimensions())
+end
 print("output presentation tests passed")

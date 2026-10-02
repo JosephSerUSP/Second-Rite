@@ -5,6 +5,11 @@ local function eq(actual, expected, label)
         .. ", got " .. tostring(actual))
 end
 
+local function near(actual, expected, tolerance, label)
+    assert(math.abs(actual - expected) <= tolerance,
+        label .. ": expected ~" .. tostring(expected) .. ", got " .. tostring(actual))
+end
+
 local original = surface.getProfileId()
 
 surface.setProfile("classic")
@@ -219,6 +224,29 @@ do
         assert(not surface.isInsideComposition(x, y),
             "mobile portrait target overlaps canonical frame: " .. tostring(button.button))
     end
+end
+
+-- Device-matched mobile geometry preserves the authored 256x240 composition
+-- while using the handset's aspect ratio for controller-only space.
+do
+    local wideSpec = touch_gamepad.deviceSurfaceSpec(2400, 1080)
+    eq(wideSpec.renderWidth, 533, "20:9 landscape logical width")
+    eq(wideSpec.renderHeight, 240, "20:9 landscape keeps canonical height")
+    eq(wideSpec.compositionOriginX, 138, "20:9 landscape centers composition horizontally")
+    eq(wideSpec.compositionOriginY, 0, "20:9 landscape composition starts at top")
+    assert(wideSpec.fractionalOutputScale, "device surface opts into fractional output scaling")
+    surface.registerProfile("test_mobile_wide", wideSpec)
+    surface.setProfile("test_mobile_wide")
+    local scale, outX, outY = surface.outputTransform(2400, 1080)
+    near(scale, 4.5, 0.0001, "20:9 landscape uses full-height fractional scale")
+    near(outX, 0.75, 0.001, "20:9 landscape leaves only rounding sliver")
+    near(outY, 0, 0.001, "20:9 landscape fills host height")
+
+    local tallSpec = touch_gamepad.deviceSurfaceSpec(1080, 2400)
+    eq(tallSpec.renderWidth, 256, "tall host keeps canonical width")
+    assert(tallSpec.renderHeight > 240, "tall host expands logical surface downward")
+    eq(tallSpec.compositionOriginX, 0, "tall host composition remains left aligned")
+    eq(tallSpec.compositionOriginY, 0, "tall host adds all extra rows below composition")
 end
 
 -- Semantic touch ownership is presentation-only. Player dispatch/repeat is

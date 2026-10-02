@@ -1,13 +1,14 @@
 local surface = require("presentation.surface")
 local user_settings = require("engine.user_settings")
-local input_map = require("engine.input_map")
 local virtual_input = require("engine.virtual_input")
+local player_controller = require("engine.player_controller")
 
 local touch_gamepad = {}
 
 local SETTING = "touchGamepadEnabled"
 local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
+local inputContext = nil
 local decorated = setmetatable({}, { __mode = "k" })
 
 local function isAndroid()
@@ -31,7 +32,7 @@ end
 if not surface.getProfile("mobile_portrait") then
     surface.registerProfile("mobile_portrait", {
         renderWidth = 256, renderHeight = 426,
-        compositionOriginX = 0, compositionOriginY = 24,
+        compositionOriginX = 0, compositionOriginY = 0,
     })
 end
 
@@ -39,14 +40,11 @@ end
 -- canvas. Seed an Android-friendly surface only when the player has no stored
 -- choice and has not explicitly disabled the virtual gamepad. A saved user
 -- override always wins.
-if isAndroid()
-    and user_settings.get(SETTING, nil) ~= false
-    and user_settings.get("renderSurfaceProfile", nil) == nil then
-    local w, h = 0, 0
-    if love and love.graphics and love.graphics.getDimensions then
-        w, h = love.graphics.getDimensions()
-    end
-    user_settings.set("renderSurfaceProfile", (h > w) and "mobile_portrait" or "mobile_landscape")
+if isAndroid() and user_settings.get(SETTING, nil) ~= false then
+    -- #1305: Android is portrait-only for now. LÖVE's resize path does not yet
+    -- provide a trustworthy orientation transition, so stale saved landscape
+    -- preferences must not fight the manifest orientation on later dev builds.
+    user_settings.set("renderSurfaceProfile", "mobile_portrait")
 end
 
 function touch_gamepad.isEnabled()
@@ -56,7 +54,7 @@ end
 function touch_gamepad.setEnabled(value)
     value = value and true or false
     user_settings.set(SETTING, value)
-    if not value then virtual_input.clear() end
+    if not value then touch_gamepad.clearTouches() end
     return value
 end
 
@@ -124,22 +122,22 @@ local function portraitLayout(rw, rh, ox, oy, cw, ch)
     local usableBottom = rh - safeInsets.bottom - 8
     local dcy = usableTop + (usableBottom - usableTop) * 0.43
     local dcx = safeInsets.left + (rw - safeInsets.left - safeInsets.right) * 0.25
-    local cell = clamp(math.floor(math.min(rw / 10, lowerH / 5)), 20, 28)
+    local cell = clamp(math.floor(math.min(rw / 10, lowerH / 5)), 24, 32)
     buttons[#buttons + 1] = rectButton("UP", dcx - cell / 2, dcy - cell * 1.5, cell, cell, "up")
     buttons[#buttons + 1] = rectButton("DOWN", dcx - cell / 2, dcy + cell * 0.5, cell, cell, "down")
     buttons[#buttons + 1] = rectButton("LEFT", dcx - cell * 1.5, dcy - cell / 2, cell, cell, "left")
     buttons[#buttons + 1] = rectButton("RIGHT", dcx + cell * 0.5, dcy - cell / 2, cell, cell, "right")
 
-    local rr = clamp(math.floor(rw / 18), 13, 18)
+    local rr = clamp(math.floor(rw / 13), 18, 22)
     buttons[#buttons + 1] = circleButton("A", rw * 0.78, dcy - 4, rr, "A")
     buttons[#buttons + 1] = circleButton("B", rw * 0.65, dcy + rr * 1.35, rr, "B")
 
-    local uw, uh = 34, 12
+    local uw, uh = 46, 18
     local utilityY = math.min(usableBottom - uh, dcy + cell * 2.0)
     buttons[#buttons + 1] = rectButton("SELECT", rw * 0.40 - uw / 2, utilityY, uw, uh, "SEL")
-    buttons[#buttons + 1] = rectButton("START", rw * 0.58 - uw / 2, utilityY, uw, uh, "START")
-    buttons[#buttons + 1] = rectButton("L", safeInsets.left + 8, usableTop, 30, 12, "L")
-    buttons[#buttons + 1] = rectButton("R", rw - safeInsets.right - 38, usableTop, 30, 12, "R")
+    buttons[#buttons + 1] = rectButton("START", rw * 0.60 - uw / 2, utilityY, uw, uh, "START")
+    buttons[#buttons + 1] = rectButton("L", safeInsets.left + 8, usableTop, 40, 18, "L")
+    buttons[#buttons + 1] = rectButton("R", rw - safeInsets.right - 48, usableTop, 40, 18, "R")
     return buttons
 end
 
@@ -189,22 +187,40 @@ function touch_gamepad.touchpressed(id, x, y)
     local rx, ry = hostToRender(x, y)
     local button = touch_gamepad.hitTest(rx, ry)
     if not button then return false end
-    virtual_input.press(id, button)
+    if not virtual_input.press(id, button) then return false end
+    if inputContext then player_controller.press(button, inputContext) end
     return true
 end
 
 function touch_gamepad.touchmoved(id, x, y)
     if not touch_gamepad.isEnabled() then return false end
     local rx, ry = hostToRender(x, y)
-    return virtual_input.move(id, touch_gamepad.hitTest(rx, ry))
+    local previous = virtual_input.touchButton(id)
+    local button = touch_gamepad.hitTest(rx, ry)
+    local changed = virtual_input.move(id, button)
+    if not changed then return false end
+    if previous and previous ~= button and not virtual_input.isDown(previous) then
+        player_controller.release(previous)
+    end
+    if button and button ~= previous and inputContext then
+        player_controller.press(button, inputContext)
+    end
+    return true
 end
 
 function touch_gamepad.touchreleased(id)
-    return virtual_input.release(id)
+    local button = virtual_input.touchButton(id)
+    local released = virtual_input.release(id)
+    if button and released and not virtual_input.isDown(button) then
+        player_controller.release(button)
+    end
+    return released
 end
 
 function touch_gamepad.clearTouches()
+    local buttons = virtual_input.downButtons()
     virtual_input.clear()
+    for _, button in ipairs(buttons) do player_controller.release(button) end
 end
 
 local function findScene(ctx, id)
@@ -265,12 +281,6 @@ local function installHost()
     local scene_host = require("engine.scene_host")
     local originalRunHook = scene_host.runHook
     local originalUpdate = scene_host.update
-    -- Captured after love.load has installed the real keyboard callback. Modern
-    -- scenes consume semantic hooks directly below. The callback is only a
-    -- compatibility bridge for legacy host-owned input (notably dialogue), and
-    -- receives the player's CURRENT binding rather than a hardcoded W/Z/etc.
-    local hostKeyPressed = love and love.keypressed
-
     scene_host.runHook = function(hookName, ctx)
         if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
         local state = scene_host.getCurrentState()
@@ -299,35 +309,11 @@ local function installHost()
         return handled
     end
 
-    local function dispatchLogicalButton(button, ctx)
-        local hook = input_map.BUTTON_TO_HOOK[button]
-        if hook and scene_host.runHook(hook, ctx) then return true end
-
-        -- Dialogue/event input is still intentionally owned by main.lua rather
-        -- than scene hooks. Re-enter that NORMAL host path only when the
-        -- semantic scene path declines the action. No touch layout knows a
-        -- keyboard literal: the compatibility key is resolved from the current
-        -- rebindable map at dispatch time. Once dialogue becomes hook-driven,
-        -- this bridge naturally stops being used for it.
-        local bindings = input_map.getBindings()
-        local key = bindings and bindings[button]
-        if key and hostKeyPressed then
-            hostKeyPressed(key, nil, false)
-            return true
-        end
-        return false
-    end
-
     scene_host.update = function(dt, ctx)
+        inputContext = ctx
         if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
-        if touch_gamepad.isEnabled() then
-            local config = require("engine.config")
-            local ui = config.ui or {}
-            virtual_input.update(dt, function(button)
-                dispatchLogicalButton(button, ctx)
-            end, ui.autoRepeatInitial or 0.30, ui.autoRepeatInterval or 0.06)
-        else
-            virtual_input.clear()
+        if not touch_gamepad.isEnabled() and virtual_input.activeTouchCount() > 0 then
+            touch_gamepad.clearTouches()
         end
         return originalUpdate(dt, ctx)
     end
@@ -350,18 +336,28 @@ end
 
 local function drawButton(button)
     local down = virtual_input.isDown(button.button)
-    love.graphics.setColor(0.08, 0.08, 0.10, down and 0.62 or 0.38)
+    if down then
+        -- Deliberately invert the control while held. A subtle alpha change was
+        -- effectively invisible on a phone; this must read as tactile feedback.
+        love.graphics.setColor(0.92, 0.92, 0.96, 0.82)
+    else
+        love.graphics.setColor(0.08, 0.08, 0.10, 0.42)
+    end
     if button.shape == "circle" then
         love.graphics.circle("fill", button.x, button.y, button.r)
-        love.graphics.setColor(1, 1, 1, 0.75)
+        love.graphics.setColor(1, 1, 1, down and 1 or 0.75)
         love.graphics.circle("line", button.x, button.y, button.r)
     else
         love.graphics.rectangle("fill", button.x, button.y, button.w, button.h, 2, 2)
-        love.graphics.setColor(1, 1, 1, 0.70)
+        love.graphics.setColor(1, 1, 1, down and 1 or 0.70)
         love.graphics.rectangle("line", button.x, button.y, button.w, button.h, 2, 2)
     end
 
-    love.graphics.setColor(1, 1, 1, 0.86)
+    if down then
+        love.graphics.setColor(0.06, 0.06, 0.08, 1)
+    else
+        love.graphics.setColor(1, 1, 1, 0.90)
+    end
     if button.glyph == "up" or button.glyph == "down"
         or button.glyph == "left" or button.glyph == "right" then
         local cx = button.x + button.w / 2

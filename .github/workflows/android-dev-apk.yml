@@ -111,6 +111,8 @@ jobs:
             exit 1
           fi
           echo "THESTRA_GAME_LOVE=${love_files[0]}" >> "$GITHUB_ENV"
+          love_bytes="$(stat -c '%s' "${love_files[0]}")"
+          echo "Canonical .love: $(du -h "${love_files[0]}" | cut -f1) (${love_bytes} bytes)"
 
           # Android versionCode is a signed 32-bit-ish application integer with
           # a Play ceiling of 2.1b. Epoch seconds are monotonically increasing

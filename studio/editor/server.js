@@ -33,6 +33,10 @@ let genModelCache = null;
 // PORT env override lets a second instance (e.g. preview/CI tooling) run
 // alongside a developer's own server on the default 8080.
 const PORT = parseInt(process.env.PORT, 10) || 8080;
+// Host fixtures can use an isolated theme store without changing the theme API
+// or writing the installation's authored library during interaction tests.
+const THEMES_PATH = path.resolve(process.env.HICHAUKITODEN_MAKER_THEMES_FILE
+    || path.join(__dirname, 'themes.json'));
 const GAME_PORT = 8081;
 // #237/#299: Studio works from two roots -- the installation it ships as and
 // the Project it has open. A Project is one authored/runnable game and data/
@@ -1120,7 +1124,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ success: true }));
     } else if (req.method === 'GET' && req.url === '/api/editor-themes') {
         try {
-            const filePath = path.join(__dirname, 'themes.json');
+            const filePath = THEMES_PATH;
             if (fs.existsSync(filePath)) {
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(fs.readFileSync(filePath, 'utf8'));
@@ -1138,7 +1142,7 @@ const server = http.createServer((req, res) => {
         req.on('end', () => {
             try {
                 const themes = JSON.parse(body);
-                const filePath = path.join(__dirname, 'themes.json');
+                const filePath = THEMES_PATH;
                 fs.writeFileSync(filePath, JSON.stringify(themes, null, 2) + '\n', 'utf8');
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true }));

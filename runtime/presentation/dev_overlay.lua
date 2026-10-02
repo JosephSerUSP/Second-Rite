@@ -41,6 +41,20 @@ function dev_overlay.draw()
         lines[#lines + 1] = string.format("DRAW: %d", drawcalls)
         lines[#lines + 1] = string.format("FRAME: %.2fms", frameMs)
         lines[#lines + 1] = string.format("LUA: %.0fKB", memoryKb)
+
+        local canvas = love.graphics.getCanvas()
+        if canvas and canvas.getPixelDimensions then
+            local lw, lh = canvas:getDimensions()
+            local pw, ph = canvas:getPixelDimensions()
+            lines[#lines + 1] = string.format("RASTER: %dx%d / %dx%dPX", lw, lh, pw, ph)
+            local hostDpi = love.window.getDPIScale and love.window.getDPIScale()
+                or (love.graphics.getDPIScale and love.graphics.getDPIScale()) or 1
+            local gameDpi = canvas.getDPIScale and canvas:getDPIScale() or 1
+            local font = ui.getMainFont and ui.getMainFont() or nil
+            local fontDpi = font and font.getDPIScale and font:getDPIScale() or 1
+            lines[#lines + 1] = string.format(
+                "DPI: HOST %.2f GAME %.2f FONT %.2f", hostDpi, gameDpi, fontDpi)
+        end
     end
 
     local width = 0

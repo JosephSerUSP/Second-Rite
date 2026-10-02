@@ -55,6 +55,7 @@ function surface.registerProfile(id, spec)
         renderHeight = renderHeight,
         compositionOriginX = originX,
         compositionOriginY = originY,
+        fractionalOutputScale = spec.fractionalOutputScale == true,
     }
 end
 
@@ -97,6 +98,7 @@ function surface.getProfile(id)
         renderHeight = p.renderHeight,
         compositionOriginX = p.compositionOriginX,
         compositionOriginY = p.compositionOriginY,
+        fractionalOutputScale = p.fractionalOutputScale,
     }
 end
 
@@ -141,6 +143,22 @@ function surface.renderHeight()
     return profiles[activeProfileId].renderHeight
 end
 
+-- Game-space render targets are authored in logical pixels. They must not
+-- inherit Android/Retina DPI density: final host scaling (and eventually the
+-- CRT presentation pass) owns reconstruction onto the physical display.
+function surface.newRasterCanvas(width, height, settings)
+    local resolved = {}
+    for key, value in pairs(settings or {}) do resolved[key] = value end
+    if resolved.dpiscale ~= nil and resolved.dpiscale ~= 1 then
+        error("game raster canvases require dpiscale = 1", 2)
+    end
+    resolved.dpiscale = 1
+    -- Preserve the caller's current default filtering. Forcing nearest here
+    -- changes fractional-position ghost compositing in the screenshot harness;
+    -- DPI and texture reconstruction are independent choices.
+    return love.graphics.newCanvas(width, height, resolved)
+end
+
 function surface.compositionOrigin()
     local p = profiles[activeProfileId]
     return p.compositionOriginX, p.compositionOriginY
@@ -183,12 +201,23 @@ function surface.hostToComposition(x, y, scale, offsetX, offsetY)
     return surface.renderToComposition(renderX, renderY)
 end
 
--- Integer-nearest logical-surface -> host-window placement. This remains
--- separate from the inner composition origin: changing one must never
--- accidentally reframe the other.
+-- Logical-surface -> host-window placement. Desktop/static profiles keep the
+-- historical integer-nearest scaling contract. Device-matched mobile profiles
+-- may opt into fractional nearest-neighbour scaling so a 4.5x-capable phone is
+-- not arbitrarily forced down to 4x and surrounded by large unused borders.
 function surface.outputTransform(hostWidth, hostHeight)
     local renderWidth, renderHeight = surface.renderSize()
-    local scale = math.floor(math.min(hostWidth / renderWidth, hostHeight / renderHeight))
+    local profile = profiles[activeProfileId]
+    local fitScale = math.min(hostWidth / renderWidth, hostHeight / renderHeight)
+
+    if profile.fractionalOutputScale then
+        local scale = math.max(fitScale, 0.0001)
+        local offsetX = (hostWidth - renderWidth * scale) / 2
+        local offsetY = (hostHeight - renderHeight * scale) / 2
+        return scale, offsetX, offsetY
+    end
+
+    local scale = math.floor(fitScale)
     scale = math.max(1, scale)
     local offsetX = math.floor((hostWidth - renderWidth * scale) / 2)
     local offsetY = math.floor((hostHeight - renderHeight * scale) / 2)

@@ -58,8 +58,9 @@ function dev_overlay.draw()
             "SURFACE: %s %dx%d ORIGIN %d,%d",
             tostring(surface.getProfileId()), rw, rh, originX, originY)
         lines[#lines + 1] = string.format(
-            "OUTPUT: %s %.3fX OFF %.2f,%.2f",
-            string.upper(tostring(output.getMode())), outScale, outX, outY)
+            "OUTPUT: %s %.3fX / %.3fPX OFF %.2f,%.2f",
+            string.upper(tostring(output.getMode())), outScale,
+            output.physicalOutputScale(outScale), outX, outY)
 
         local canvas = love.graphics.getCanvas()
         if canvas and canvas.getPixelDimensions then

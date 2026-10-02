@@ -6,6 +6,7 @@ local loader = require("engine.data.loader")
 local item_presentation = require("presentation.item_presentation")
 local item_model_view = require("presentation.item_model_view")
 local retro_mesh_shader = require("presentation.retro_mesh_shader")
+local surface = require("presentation.surface")
 
 print("[TEST] Starting 3D item model viewer tests...")
 
@@ -206,6 +207,37 @@ if love.graphics and love.graphics.isCreated() then
         end
     end
     check(nonZeroAlpha > 0, "Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (" .. nonZeroAlpha .. " px)")
+end
+
+-------------------------------------------------- 6a. Item raster DPI contract --
+
+if love.graphics and love.graphics.isCreated() then
+    item_model_view.clearCache()
+    local originalNewRasterCanvas = surface.newRasterCanvas
+    local rasterCalls = {}
+    surface.newRasterCanvas = function(w, h, settings)
+        rasterCalls[#rasterCalls + 1] = {
+            w = w, h = h, format = settings and settings.format or "color",
+        }
+        return originalNewRasterCanvas(w, h, settings)
+    end
+
+    local okDraw, drawErr = pcall(item_model_view.draw,
+        0, 0, 73, 61, "assets/models/items/silver_blade.obj",
+        "dpi_contract_window", "dpi_contract_item", 0)
+    surface.newRasterCanvas = originalNewRasterCanvas
+
+    check(okDraw, "Item raster DPI contract draw succeeds: " .. tostring(drawErr))
+    check(#rasterCalls >= 2,
+        "Item turntable allocates colour and depth through surface.newRasterCanvas")
+    check(rasterCalls[1] and rasterCalls[1].w == 73 and rasterCalls[1].h == 61
+            and rasterCalls[1].format == "color",
+        "Item colour target uses the logical item viewport dimensions")
+    check(rasterCalls[2] and rasterCalls[2].w == 73 and rasterCalls[2].h == 61
+            and (rasterCalls[2].format == "depth24stencil8"
+                or rasterCalls[2].format == "depth16"),
+        "Item depth target uses the same DPI-neutral logical dimensions")
+    item_model_view.clearCache()
 end
 
 -------------------------------------------------- 6b. Material overlay passes --

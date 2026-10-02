@@ -12,6 +12,32 @@ local originalMode = output.getMode()
 
 surface.setProfile("wide")
 
+-- Mobile nearest uses the same fractional fit as CRT so changing ASPECT cannot
+-- collapse WIDE to 1x merely because the handset is only ~1.5x in logical
+-- LÖVE units. Desktop keeps the historical integer-nearest contract below.
+do
+    local originalGetOS = love.system.getOS
+    love.system.getOS = function() return "Android" end
+    local scale, x, y = output.transformForMode("nearest", 856, 372)
+    near(scale, 372 / 240, 1e-9, "Android wide nearest fills host height")
+    near(x, (856 - 426 * scale) * 0.5, 1e-9, "Android wide nearest centering")
+    near(y, 0, 1e-9, "Android wide nearest vertical fit")
+    love.system.getOS = originalGetOS
+end
+
+-- Physical CRT calibration must include host DPI. This is the phone condition
+-- that made 1.55 logical scale actually ~2.7 physical pixels per source pixel.
+do
+    local originalWindowDpi = love.window and love.window.getDPIScale
+    local originalGraphicsDpi = love.graphics.getDPIScale
+    if love.window then love.window.getDPIScale = function() return 1.75 end end
+    love.graphics.getDPIScale = function() return 1.75 end
+    near(output.physicalOutputScale(1.55), 2.7125, 1e-9,
+        "CRT physical scale multiplies logical fit by host DPI")
+    if love.window then love.window.getDPIScale = originalWindowDpi end
+    love.graphics.getDPIScale = originalGraphicsDpi
+end
+
 -- Nearest remains the exact #199 integer contract.
 do
     local scale, x, y = output.transformForMode("nearest", 1000, 600)
@@ -65,6 +91,12 @@ end
 -- Native shader construction is part of the spike: if the current LÖVE backend
 -- rejects the source, the unit suite should expose it immediately.
 do
+    local source = output.shaderSource()
+    assert(source:find("physicalOutputScale", 1, true),
+        "CRT beam calibration must consume physical output scale")
+    assert(not source:find("extern number outputScale;", 1, true),
+        "CRT shader must not regress to logical-only scale calibration")
+
     local ok, err = output.setMode("crt")
     assert(ok, "CRT shader failed native compilation: " .. tostring(err))
 
@@ -79,6 +111,60 @@ do
     if love.graphics.validateShader then
         local valid, message = love.graphics.validateShader(true, output.shaderSource())
         assert(valid, "CRT shader failed GLES validation: " .. tostring(message))
+    end
+end
+
+-- Strong CRT experiments stay developer-only: they compile and share CRT
+-- geometry, but must not become ordinary player-facing output modes.
+do
+    local publicModes = output.modeIds()
+    assert(#publicModes == 2 and publicModes[1] == "nearest" and publicModes[2] == "crt",
+        "CRT lab presets leaked into player-facing output mode list")
+
+    local presetIds = output.crtLabPresetIds()
+    local labModes = output.crtLabModeIds()
+    assert(#presetIds == 8, "expected eight CRT lab presets")
+    assert(#labModes == #presetIds, "CRT lab mode/preset count drifted")
+
+    local expectedScale = 1000 / 426
+    for i, presetId in ipairs(presetIds) do
+        local modeId = labModes[i]
+        assert(modeId == "crt-lab:" .. presetId, "CRT lab mode naming drifted")
+        assert(output.isKnownMode(modeId), "CRT lab mode should be developer-runnable: " .. modeId)
+
+        local scale, x, y = output.transformForMode(modeId, 1000, 600)
+        near(scale, expectedScale, 1e-9, modeId .. " fractional scale")
+        near(x, 0, 1e-9, modeId .. " horizontal fit")
+        near(y, (600 - 240 * expectedScale) * 0.5, 1e-9,
+            modeId .. " vertical centering")
+
+        local ok, err = output.setMode(modeId)
+        assert(ok, modeId .. " shader failed native compilation: " .. tostring(err))
+    end
+
+    local maximal = output.crtLabPreset("maximal")
+    assert(maximal and maximal.curvature > 0 and maximal.grilleStrength > 0
+        and maximal.compositeBleed > 0 and maximal.halationStrength > 0,
+        "maximal CRT lab preset must combine the major experiment families")
+    maximal.curvature = 99
+    assert(output.crtLabPreset("maximal").curvature ~= 99,
+        "CRT lab preset accessor must not expose mutable authority")
+    assert(output.crtLabPreset("not-a-preset") == nil,
+        "unknown CRT lab preset should not resolve")
+
+    local labSource = output.crtLabShaderSource()
+    assert(labSource:find("halationStrength", 1, true),
+        "CRT lab shader must expose halation")
+    assert(labSource:find("grilleStrength", 1, true),
+        "CRT lab shader must expose a mask experiment")
+    assert(labSource:find("convergencePixels", 1, true),
+        "CRT lab shader must expose convergence drift")
+    assert(labSource:find("curvature", 1, true),
+        "CRT lab shader must expose curved-glass geometry")
+
+    if love.graphics.validateShader then
+        local valid, message = love.graphics.validateShader(true, labSource)
+        assert(valid, "CRT lab shader failed GLES validation: " .. tostring(message))
     end
 end
 

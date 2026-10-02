@@ -7,7 +7,7 @@ on:
   # rendering relative to its base?", never "is this rendering correct?", so a
   # red run on a PR that intentionally changes rendering is a correct answer to
   # the question asked -- it must not block the merge. Absolute G5/G6 cannot run
-  # here at all: they are owner-signed claims about one machine, one GPU and one
+  # here at all: they are reference-approved claims about one machine, one GPU and one
   # Chrome build (AGENTS.md).
   pull_request:
     branches: [main]
@@ -100,7 +100,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check pillow websocket-client
       - name: Compile Python tooling
         shell: pwsh
-        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tests/test_g6_exit_contract.py tests/test_gate_record.py tests/test_relative_gate_tools.py
+        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tools/golden/expected_delta.py tools/golden/promote-expected-delta.py tests/test_g6_exit_contract.py tests/test_gate_record.py tests/test_relative_gate_tools.py
       - name: Run recorder and relative-tool fixtures
         shell: pwsh
         run: python -m unittest tests/test_g6_exit_contract.py tests/test_gate_record.py tests/test_relative_gate_tools.py -v
@@ -172,7 +172,7 @@ jobs:
           $ErrorActionPreference = 'Continue'
           $report = Join-Path $env:ABROOT 'report.md'
           python tools/golden/compare-relative.py --gate g5 --base-a (Join-Path $env:ABROOT 'base-a') --base-b (Join-Path $env:ABROOT 'base-b') --candidate (Join-Path $env:ABROOT 'candidate') --base-ref $env:BASE_SHA --candidate-ref $env:CANDIDATE_SHA --output $report --github-summary $env:GITHUB_STEP_SUMMARY
-          if ($LASTEXITCODE -ne 0) { throw 'G5 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
+          if ($LASTEXITCODE -ne 0) { throw 'G5 visual evidence is Red or incomplete. Inspect the report; do not recapture references merely to clear the result.' }
 
       - name: Upload G5 evidence
         if: always() && env.ABROOT != ''
@@ -267,7 +267,7 @@ jobs:
           $ErrorActionPreference = 'Continue'
           $report = Join-Path $env:ABROOT 'report.md'
           python tools/golden/compare-relative.py --gate g6 --base-a (Join-Path $env:ABROOT 'base-a') --base-b (Join-Path $env:ABROOT 'base-b') --candidate (Join-Path $env:ABROOT 'candidate') --base-ref $env:BASE_SHA --candidate-ref $env:CANDIDATE_SHA --output $report --github-summary $env:GITHUB_STEP_SUMMARY
-          if ($LASTEXITCODE -ne 0) { throw 'G6 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
+          if ($LASTEXITCODE -ne 0) { throw 'G6 visual evidence is Red or incomplete. Inspect the report; do not recapture references merely to clear the result.' }
 
       - name: Upload G6 evidence
         if: always() && env.ABROOT != ''

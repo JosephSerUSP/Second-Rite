@@ -21,6 +21,30 @@ function captureTownFrames(previewExe, gameRoot) {
     return JSON.parse(match[1]).frames;
 }
 
+// This proof compares compositor pixels produced by two separate LÖVE
+// processes. Presentation-only animation (for example the continuously rolling
+// transfer arrows) must not turn wall-clock phase into an apparent spatial edit.
+// Pin time only around the town-proof dispatch in the disposable exported
+// runtime. Normal play and every non-proof path retain the live presentation
+// clock.
+function pinTownProofPresentationClock(gameRoot) {
+    const mainPath = path.join(gameRoot, 'main.lua');
+    const source = fs.readFileSync(mainPath, 'utf8');
+    const needle = 'cli_tools.runTownProofFrames(loader)';
+    assert.equal(source.split(needle).length - 1, 1,
+        'exported runtime exposes exactly one town-proof dispatch');
+    const fixedCall = [
+        '(function()',
+        '    local __townProofGetTime = love.timer.getTime',
+        '    love.timer.getTime = function() return 0 end',
+        '    local __townProofOk, __townProofErr = pcall(cli_tools.runTownProofFrames, loader)',
+        '    love.timer.getTime = __townProofGetTime',
+        '    if not __townProofOk then error(__townProofErr, 0) end',
+        'end)()',
+    ].join('\n');
+    fs.writeFileSync(mainPath, source.replace(needle, fixedCall));
+}
+
 test('a Port walk-profile edit changes runtime grounding and only its affected compositor sample',
         { timeout: 180000 }, () => {
     const previewExe = process.env.LOVEC || process.env.LOVE_PATH;
@@ -36,6 +60,7 @@ test('a Port walk-profile edit changes runtime grounding and only its affected c
         const staged = stageResult.stdout.match(/PROJECT GATE STAGE OK\s+(\{.*\})/);
         assert.ok(staged, 'the canonical exporter reported its staged Project root');
         const gameRoot = JSON.parse(staged[1]).stageDir;
+        pinTownProofPresentationClock(gameRoot);
 
         const before = captureTownFrames(previewExe, gameRoot);
         const mapPath = path.join(gameRoot, 'data', 'maps.json');

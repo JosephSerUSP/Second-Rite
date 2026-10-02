@@ -260,6 +260,12 @@ do
     eq(wideSpec.compositionOriginX, 138, "20:9 landscape centers composition horizontally")
     eq(wideSpec.compositionOriginY, 0, "20:9 landscape composition starts at top")
     assert(wideSpec.fractionalOutputScale, "device surface opts into fractional output scaling")
+    assert(not touch_gamepad.profileSupportsControls("classic", 2400, 1080),
+        "Classic cannot be offered while landscape touch controls are active")
+    assert(not touch_gamepad.profileSupportsControls("four_three", 2400, 1080),
+        "4:3 cannot be offered while landscape touch controls are active")
+    assert(touch_gamepad.profileSupportsControls("wide", 2400, 1080),
+        "Wide has enough side gutter for the complete controller")
     surface.registerProfile("test_mobile_wide", wideSpec)
     surface.setProfile("test_mobile_wide")
     local scale, outX, outY = surface.outputTransform(2400, 1080)

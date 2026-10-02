@@ -12,6 +12,8 @@ test('validates transient map requests without mutating input', () => {
     assert.equal(value.renderableEncoding, 'instances');
     assert.throws(() => bridge.validateRequest({ map: { id: 7 }, renderableEncoding: 'packed' }),
         /unsupported renderable encoding/);
+    assert.throws(() => bridge.validateRequest({ map: { id: 7 }, renderableEncoding: 'expanded' }),
+        /unsupported renderable encoding/);
 });
 
 test('rejects missing map identity', () => {

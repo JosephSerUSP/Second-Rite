@@ -44,6 +44,23 @@ local ok, err = xpcall(function()
     assert(not touch.refreshAndroidSurface(856, 372),
         "identical resize must not churn the DEVICE profile")
 
+    -- A touch-only player who hides the controller must have a host-level way
+    -- back. The rescue recognizer is active only while hidden and requires two
+    -- nearby taps inside a short interval.
+    settings.pinForCapture({touchGamepadEnabled = false, renderSurfaceProfile = "mobile_device"})
+    assert(touch.rescueTap("rescue-a", 100, 100, 10.00),
+        "first hidden-controller tap is reserved for rescue")
+    assert(not touch.isEnabled(), "one rescue tap does not re-enable controls")
+    assert(touch.touchreleased("rescue-a"), "rescue release is consumed")
+    assert(touch.rescueTap("rescue-b", 220, 100, 10.10),
+        "far second tap starts a new rescue pair")
+    assert(not touch.isEnabled(), "spatially unrelated taps do not restore controls")
+    assert(touch.touchreleased("rescue-b"), "far rescue candidate release is consumed")
+    assert(touch.rescueTap("rescue-c", 224, 103, 10.25),
+        "nearby second tap is consumed")
+    assert(touch.isEnabled(), "quick nearby double tap restores virtual gamepad")
+    assert(touch.touchreleased("rescue-c"), "restoring tap release stays consumed")
+
     -- Check the complete hit-target rectangles, not only their centres. The
     -- first candidate gave 4:3 tablets no controls at all.
     for _, host in ipairs({{2400,1080}, {1024,768}, {1280,960}, {1100,1000},

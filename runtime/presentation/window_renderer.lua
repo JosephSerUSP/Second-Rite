@@ -34,6 +34,7 @@
 
 local ui = require("presentation.ui")
 local util = require("presentation.util")
+local surface = require("presentation.surface")
 local formula = require("engine.formula")
 local small_battlers = require("presentation.small_battlers")
 local sprite_sheet = require("presentation.sprite_sheet")
@@ -1244,7 +1245,7 @@ local function drawSwapIndicator(state, sceneData, ctx)
     local creatureId = battler and (battler.actorData and battler.actorData.id or battler.name) or "empty"
     local key = srcWinId .. ":" .. tostring(srcIdx) .. ":" .. tostring(creatureId)
     if key ~= swapGhostKey or not swapGhostCanvas then
-        swapGhostCanvas = love.graphics.newCanvas(colW, rowH)
+        swapGhostCanvas = surface.newRasterCanvas(colW, rowH)
         swapGhostKey = key
         love.graphics.push("all")
         love.graphics.setCanvas(swapGhostCanvas)

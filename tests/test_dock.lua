@@ -19,6 +19,8 @@ local sessionModule = require("engine.session")
 local config = require("engine.config")
 local dock = require("presentation.dock")
 local windowRenderer = require("presentation.window_renderer")
+local surface = require("presentation.surface")
+local ui = require("presentation.ui")
 
 print("[TEST] Starting dock tests...")
 
@@ -189,6 +191,24 @@ check(dock.variant() == "party_status", "moving between party_status scenes keep
 check(dock.__store()._dataWins["party"] == firstWin,
     "the dock's window table SURVIVES the scene change (no animation replay)")
 check(not dock.__fading(), "a same-variant transition starts no cross-fade")
+
+-- #1307: content remains canonical, but the persistent shell itself must span
+-- the complete render surface on wider profiles.
+local originalSurface = surface.getProfileId()
+surface.setProfile("wide")
+local capturedPanels = {}
+local originalDrawPanel = ui.drawPanel
+ui.drawPanel = function(x, y, w, h, ...)
+    capturedPanels[#capturedPanels + 1] = { x = x, y = y, w = w, h = h }
+end
+local wideDrawOk, wideDrawErr = pcall(drawScene, "save_menu")
+ui.drawPanel = originalDrawPanel
+check(wideDrawOk, "wide dock shell draw succeeds: " .. tostring(wideDrawErr))
+check(capturedPanels[1]
+        and capturedPanels[1].x == -surface.compositionOriginX()
+        and capturedPanels[1].w == surface.renderWidth(),
+    "static dock shell spans the whole render surface while content stays canonical")
+surface.setProfile(originalSurface)
 
 -- A different variant clears content, morphs its N shells, then populates the
 -- destination. It does not inherit the outgoing variant's table.

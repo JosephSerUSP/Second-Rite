@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "map": "32.json",
+  "map": "../../../../data/maps/32.json",
   "sourceBlend": "passage_house_courtyard.blend",
   "package": "passage_house_courtyard",
   "library": "tools/blender/vendor-library/library/selected_materials.blend",
@@ -29,5 +29,6 @@
   "seed": 3201,
   "cameraCalibration": "camera.json",
   "cameraSource": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua",
-  "bakeBindings": "bake-bindings.json"
+  "bakeBindings": "bake-bindings.json",
+  "authority": "Shipping authored map; candidate directory retains review controls"
 }

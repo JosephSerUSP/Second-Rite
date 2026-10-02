@@ -1,4 +1,4 @@
--- Runs only in a candidate stage, through the actual runtime unit harness.
+-- Shipping Passage House transfers/profile through the actual runtime unit harness.
 local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -22,7 +22,7 @@ end
 load(26, "lodging_door")
 local entryY, entryZ = game.townTraversal.y, game.townTraversal.z
 useDoor("st-maria-cortico-lodging_door")
-check(game.currentMapData.id == 32, "Cortico enters candidate court")
+check(game.currentMapData.id == 32, "Cortico enters the arrival court")
 check(math.abs(game.townTraversal.y - 0) < 1e-6 and game.townTraversal.z == 0, "entry lands on lower landing")
 check(lane.isEdgeDoorway(game,lane.nearDoorway(game)), "Cortico return is a lane exit, not an Up wall door")
 for _, direction in ipairs({1,-1}) do
@@ -53,4 +53,4 @@ check(game.currentMapData.id==26 and math.abs(game.townTraversal.y-entryY)<1e-6
     and math.abs(game.townTraversal.z-entryZ)<1e-6,"return preserves Cortico doorway position and elevation")
 load(25,nil)
 check(game.currentMapData.id==25,"introduction can still arrive directly in lodging")
-require("tests.fail_fast")("courtyard_candidate",failed,passed)
+require("tests.fail_fast")("passage_house_courtyard",failed,passed)

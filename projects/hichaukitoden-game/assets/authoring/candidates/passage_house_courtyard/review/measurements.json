@@ -63,8 +63,8 @@
     "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
   },
   "revision": "Revision 18: open foreground wash court, relocated cistern, full profile-derived stone apron, brick borders and drainage",
-  "sourceSHA256": "91077aeb5b9b51fd6ab8dd95a973326cedaf412ba5b7d468d21d7a184a95a0a3",
-  "sourceBytes": 1996751,
+  "sourceSHA256": "2e535bbf2007a3393131bfbe64f33c2e54d4cb695f86ab76b50082bc679e8d95",
+  "sourceBytes": 1991303,
   "package": {
     "triangleCount": 6137,
     "vertexCount": 3684,
@@ -277,6 +277,134 @@
     ],
     "errors": []
   },
-  "ownerGeometryReview": "Visual and PLAYED acceptance pending; Issue 1301 retains correspondence/seam work.",
-  "foregroundReview": "Matched revision 17/18 native frames with and without menu at both widths; paving source details consume the floor profile and do not add runtime blocks."
+  "ownerGeometryReview": "Owner visually approved revision 18 and authorized shipping. Foreground refinement remains issue 1308; PLAYED acceptance not claimed.",
+  "foregroundReview": "Matched revision 17/18 native frames with and without menu at both widths; paving source details consume the floor profile and do not add runtime blocks.",
+  "promotion": {
+    "ownerVisualApproval": true,
+    "ownerShippingAuthorization": true,
+    "ownerPlayedAcceptance": "Not claimed",
+    "approvedStudySourceSHA256": "91077aeb5b9b51fd6ab8dd95a973326cedaf412ba5b7d468d21d7a184a95a0a3",
+    "sourceChange": "Only map-authority metadata changed; geometry matches recipe. All 14 shipping native frames match approved study below row 4; nine full frames differ by one top-row pixel.",
+    "nativeFramesCompared": 14,
+    "nativeFrameDifferences": [
+      {
+        "frame": "classic\\0.5.png",
+        "differentPixels": 0,
+        "positions": []
+      },
+      {
+        "frame": "classic\\0.png",
+        "differentPixels": 0,
+        "positions": []
+      },
+      {
+        "frame": "classic\\11.5.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            225,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "classic\\12.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            225,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "classic\\2.png",
+        "differentPixels": 0,
+        "positions": []
+      },
+      {
+        "frame": "classic\\5.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            225,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "classic\\8.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            225,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "wide\\0.5.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            310,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "wide\\0.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            310,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "wide\\11.5.png",
+        "differentPixels": 0,
+        "positions": []
+      },
+      {
+        "frame": "wide\\12.png",
+        "differentPixels": 0,
+        "positions": []
+      },
+      {
+        "frame": "wide\\2.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            310,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "wide\\5.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            310,
+            4
+          ]
+        ]
+      },
+      {
+        "frame": "wide\\8.png",
+        "differentPixels": 1,
+        "positions": [
+          [
+            310,
+            4
+          ]
+        ]
+      }
+    ],
+    "shippingPackage": "assets/environments/st_maria_town/passage_house_courtyard",
+    "shippingMap": "data/maps/32.json",
+    "packageFilesByteIdentical": true
+  }
 }

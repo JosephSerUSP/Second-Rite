@@ -76,7 +76,7 @@
     },
     "passage_house_courtyard.blend": {
       "status": "scaffold",
-      "basis": "Revision 18 scaffold: open foreground wash court, relocated cistern, full stone apron with brick borders and connected drains, profile-derived baked paving. Owner visual and PLAYED acceptance remain staged.",
+      "basis": "Revision 18 visually approved by owner and promoted on 2026-10-01. Scaffold recipe retained; source profile authority is data/maps/32.json. Shipping source geometry and atlas match the approved study; further foreground refinement remains issue 1308.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,

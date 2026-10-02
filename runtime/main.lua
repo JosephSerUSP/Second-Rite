@@ -690,6 +690,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")

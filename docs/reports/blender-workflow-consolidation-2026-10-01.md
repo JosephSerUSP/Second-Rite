@@ -1,5 +1,10 @@
 # Blender workflow consolidation and session handoff
 
+Later owner approval supersedes this snapshot's unaccepted-room status. See
+[the shipping promotion report](passage-house-shipping-promotion-2026-10-01.md).
+The map now lives in shipping data; the helper below stages that canonical Project,
+and foreground feedback remains follow-up #1308.
+
 Snapshot: branch `codex/passage-house-courtyard-candidate`, scene revision 18 at
 `6c1c4695`. PR #1296 is a draft stacked on open renderer PR #1294. Earlier ground,
 neutral-exposure and alpha fixes merged as #1289/#1291/#1292. This handoff does

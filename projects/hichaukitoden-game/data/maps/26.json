@@ -279,8 +279,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 25,
-          "arrival": "exit_door"
+          "mapId": 32,
+          "arrival": "cortico_entry"
         }
       ],
       "direction": "away"

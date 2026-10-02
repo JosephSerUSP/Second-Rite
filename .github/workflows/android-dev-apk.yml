@@ -12,7 +12,7 @@ on:
       - ".github/workflows/android-dev-apk.yml"
       - "tools/export/android-dev-package.js"
       - "tools/export/android-dev-package.test.js"
-      - "projects/hichaukitoden-game/data/project.json"
+      - "projects/hichaukitoden-game/data/project.json"\n      - "runtime/presentation/touch_gamepad.lua"\n      - "runtime/engine/virtual_input.lua"\n      - "runtime/engine/player_controller.lua"\n      - "runtime/engine/scene_host.lua"\n      - "tests/test_presentation_surface.lua"
 
 permissions:
   contents: read

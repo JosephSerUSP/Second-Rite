@@ -114,6 +114,60 @@ do
     end
 end
 
+-- Strong CRT experiments stay developer-only: they compile and share CRT
+-- geometry, but must not become ordinary player-facing output modes.
+do
+    local publicModes = output.modeIds()
+    assert(#publicModes == 2 and publicModes[1] == "nearest" and publicModes[2] == "crt",
+        "CRT lab presets leaked into player-facing output mode list")
+
+    local presetIds = output.crtLabPresetIds()
+    local labModes = output.crtLabModeIds()
+    assert(#presetIds == 8, "expected eight CRT lab presets")
+    assert(#labModes == #presetIds, "CRT lab mode/preset count drifted")
+
+    local expectedScale = 1000 / 426
+    for i, presetId in ipairs(presetIds) do
+        local modeId = labModes[i]
+        assert(modeId == "crt-lab:" .. presetId, "CRT lab mode naming drifted")
+        assert(output.isKnownMode(modeId), "CRT lab mode should be developer-runnable: " .. modeId)
+
+        local scale, x, y = output.transformForMode(modeId, 1000, 600)
+        near(scale, expectedScale, 1e-9, modeId .. " fractional scale")
+        near(x, 0, 1e-9, modeId .. " horizontal fit")
+        near(y, (600 - 240 * expectedScale) * 0.5, 1e-9,
+            modeId .. " vertical centering")
+
+        local ok, err = output.setMode(modeId)
+        assert(ok, modeId .. " shader failed native compilation: " .. tostring(err))
+    end
+
+    local maximal = output.crtLabPreset("maximal")
+    assert(maximal and maximal.curvature > 0 and maximal.grilleStrength > 0
+        and maximal.compositeBleed > 0 and maximal.halationStrength > 0,
+        "maximal CRT lab preset must combine the major experiment families")
+    maximal.curvature = 99
+    assert(output.crtLabPreset("maximal").curvature ~= 99,
+        "CRT lab preset accessor must not expose mutable authority")
+    assert(output.crtLabPreset("not-a-preset") == nil,
+        "unknown CRT lab preset should not resolve")
+
+    local labSource = output.crtLabShaderSource()
+    assert(labSource:find("halationStrength", 1, true),
+        "CRT lab shader must expose halation")
+    assert(labSource:find("grilleStrength", 1, true),
+        "CRT lab shader must expose a mask experiment")
+    assert(labSource:find("convergencePixels", 1, true),
+        "CRT lab shader must expose convergence drift")
+    assert(labSource:find("curvature", 1, true),
+        "CRT lab shader must expose curved-glass geometry")
+
+    if love.graphics.validateShader then
+        local valid, message = love.graphics.validateShader(true, labSource)
+        assert(valid, "CRT lab shader failed GLES validation: " .. tostring(message))
+    end
+end
+
 -- Unknown modes fail safely to the shipping nearest path.
 do
     local ok = output.setMode("definitely-not-a-mode")

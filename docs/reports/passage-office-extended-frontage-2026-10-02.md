@@ -1,0 +1,13 @@
+# Registry: terminate the service frontage at the right wall
+
+The owner found the ceiling-fitted service bay visually unbalanced and proposed extending its furniture/divider to the other wall, with a new cabinet against the right wall. Revision 11 edits revision 10 into a new preserved source to test that composition.
+
+The counter extends from its existing waiting-side end to the actual right-wall inside plane at source Y=-4.650 m. Its length is now 5.850 m, with eight painted front panels and a timber slab/plinth. The existing writing station, ledgers and registrar remain in place rather than moving to the enlarged counter's centre. The front divider extends to the same wall, retaining the measured beam pockets and ceiling fit. Its side return remains attached to the rear wall; the new frontage is intentionally asymmetrical, not a claim that the counter reaches both side walls.
+
+A panelled records cabinet stands behind the counter against the right wall. It faces inward; its projecting cornice is seated against the wall rather than intersecting the masonry. The shell signature verifies that the existing ceiling and beams retain their geometry, transforms and material assignments. Source checks verify the counter endpoint and cabinet outer back projection meet the measured wall plane. The foreground plant, waiting bench, wall art, window construction and event anchors are retained.
+
+`out/registry-workflow/r11/extended-frontage.html` compares revision 10 and 11 native Classic, Wide and nominal device frames, with counter/divider/cabinet closeups and additional cabinet views from inside the room. The centre Classic and device previews were visually inspected. The full workflow also captures four surfaces at five lane positions, with/without UI and source-camera comparisons. This is a candidate review, not owner acceptance or physical-phone evidence.
+
+G1 passed for the revision 11 stage. Two counter/joinery regression tests, two capture-preservation tests and the source-authority check passed. Export and inspections preserve the packed source hash. Full runtime units were not repeated for this art-only iteration and no golden references were changed.
+
+The retained source is `projects/hichaukitoden-game/assets/authoring/candidates/passage_office/passage_office_r11.blend`. `extend_registry_frontage.py` performs the bounded edit on an existing source, measures the destination wall and refuses overwrite. The shared counter helper now supports separate body and panel finishes. Earlier revisions, shipping environment bindings and authored game content are preserved.

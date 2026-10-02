@@ -1,0 +1,136 @@
+{
+  "sourceSHA256": "ca04918d40ca0c15a4c432dd80f9f6cdcb91260d1b552420e3ce97e8931eb24a",
+  "1024": {
+    "stats": {
+      "triangleCount": 760,
+      "vertexCount": 496,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 1712191,
+      "renderMeshSizeBytes": 70500,
+      "packageSizeBytes": 1783490
+    },
+    "exportSeconds": 24.903
+  },
+  "512": {
+    "stats": {
+      "triangleCount": 760,
+      "vertexCount": 496,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        512,
+        512
+      ],
+      "pngSizeBytes": 450250,
+      "renderMeshSizeBytes": 70500,
+      "packageSizeBytes": 521549
+    },
+    "exportSeconds": 17.253
+  },
+  "frames": [
+    {
+      "frame": "review\\world\\classic\\0.35.png",
+      "meanAbsoluteChannelDifference": 2.4077,
+      "changedPixelsPercent": 31.958
+    },
+    {
+      "frame": "review\\world\\classic\\1.0833.png",
+      "meanAbsoluteChannelDifference": 2.4264,
+      "changedPixelsPercent": 32.16
+    },
+    {
+      "frame": "review\\world\\classic\\3.8833.png",
+      "meanAbsoluteChannelDifference": 2.3838,
+      "changedPixelsPercent": 31.859
+    },
+    {
+      "frame": "review\\world\\classic\\5.5333.png",
+      "meanAbsoluteChannelDifference": 2.4358,
+      "changedPixelsPercent": 32.448
+    },
+    {
+      "frame": "review\\world\\classic\\7.4167.png",
+      "meanAbsoluteChannelDifference": 2.3433,
+      "changedPixelsPercent": 31.812
+    },
+    {
+      "frame": "review\\world\\device\\0.35.png",
+      "meanAbsoluteChannelDifference": 1.3063,
+      "changedPixelsPercent": 18.012
+    },
+    {
+      "frame": "review\\world\\device\\1.0833.png",
+      "meanAbsoluteChannelDifference": 1.3149,
+      "changedPixelsPercent": 18.104
+    },
+    {
+      "frame": "review\\world\\device\\3.8833.png",
+      "meanAbsoluteChannelDifference": 1.2954,
+      "changedPixelsPercent": 17.967
+    },
+    {
+      "frame": "review\\world\\device\\5.5333.png",
+      "meanAbsoluteChannelDifference": 1.3192,
+      "changedPixelsPercent": 18.236
+    },
+    {
+      "frame": "review\\world\\device\\7.4167.png",
+      "meanAbsoluteChannelDifference": 1.2769,
+      "changedPixelsPercent": 17.945
+    },
+    {
+      "frame": "review\\world\\four_three\\0.35.png",
+      "meanAbsoluteChannelDifference": 2.2856,
+      "changedPixelsPercent": 31.51
+    },
+    {
+      "frame": "review\\world\\four_three\\1.0833.png",
+      "meanAbsoluteChannelDifference": 2.3007,
+      "changedPixelsPercent": 31.672
+    },
+    {
+      "frame": "review\\world\\four_three\\3.8833.png",
+      "meanAbsoluteChannelDifference": 2.2666,
+      "changedPixelsPercent": 31.431
+    },
+    {
+      "frame": "review\\world\\four_three\\5.5333.png",
+      "meanAbsoluteChannelDifference": 2.3082,
+      "changedPixelsPercent": 31.902
+    },
+    {
+      "frame": "review\\world\\four_three\\7.4167.png",
+      "meanAbsoluteChannelDifference": 2.2341,
+      "changedPixelsPercent": 31.392
+    },
+    {
+      "frame": "review\\world\\wide\\0.35.png",
+      "meanAbsoluteChannelDifference": 1.7171,
+      "changedPixelsPercent": 23.677
+    },
+    {
+      "frame": "review\\world\\wide\\1.0833.png",
+      "meanAbsoluteChannelDifference": 1.7283,
+      "changedPixelsPercent": 23.798
+    },
+    {
+      "frame": "review\\world\\wide\\3.8833.png",
+      "meanAbsoluteChannelDifference": 1.7028,
+      "changedPixelsPercent": 23.617
+    },
+    {
+      "frame": "review\\world\\wide\\5.5333.png",
+      "meanAbsoluteChannelDifference": 1.7338,
+      "changedPixelsPercent": 23.97
+    },
+    {
+      "frame": "review\\world\\wide\\7.4167.png",
+      "meanAbsoluteChannelDifference": 1.6784,
+      "changedPixelsPercent": 23.589
+    }
+  ],
+  "limits": "Decoded frame differences are descriptive, not acceptance thresholds; includes actor raster and renderer behavior."
+}

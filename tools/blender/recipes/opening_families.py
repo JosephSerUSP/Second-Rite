@@ -128,6 +128,68 @@ def window(host, name, lane_y, *, width=0.95, height=1.25, sill_z=1.15,
     return objs
 
 
+def two_sided_window(host, name, center, outward, *, width=1.8, height=1.5,
+                     reveal=.5, shutter_angle=155, casement_angle=22):
+    """One assembly for inside/outside inspection: external shutters, inner casements.
+
+    `outward` is the horizontal wall normal. Shutters swing outward; glazed
+    casements swing inward behind the fixed grille. Positions share one basis.
+    """
+    import math
+    from mathutils import Vector
+    normal=Vector(outward)
+    if min(width,height,reveal)<=0 or normal.length<1e-6:
+        raise ValueError('Window dimensions and outward direction must be nonzero')
+    if not 0<=shutter_angle<=180 or not 0<=casement_angle<90:
+        raise ValueError('Window swings must stay within their authored half-spaces')
+    normal.normalize();up=Vector((0,0,1));tangent=up.cross(normal)
+    center=Vector(center);yaw=math.atan2(normal.y,normal.x)
+    if abs(normal.z)>1e-6:raise ValueError('Window normal must be horizontal')
+    created=[]
+    def emit(tag,size,offset,mat,angle=0):
+        pos=center+normal*offset[0]+tangent*offset[1]+up*offset[2]
+        obj=host.part(name+'_'+tag,size,tuple(pos),mat)
+        obj.rotation_euler.z=yaw+angle;created.append(obj)
+        return obj
+    for side in (-1,1):
+        emit('reveal', (reveal,.12,height+.16),(reveal/2,side*(width/2+.06),0),host.whitewash)
+    for sign in (-1,1):
+        emit('head_sill',(reveal+.18,width+.24,.10),(reveal/2,0,sign*(height/2+.05)),host.stone)
+    emit('inner_mullion',(.06,.05,height),(-.04,0,0),host.wood)
+    for sign in (-1,1):
+        emit('inner_rail',(.06,width,.06),(-.04,0,sign*height/2),host.wood)
+    for j in range(1,6):
+        emit('outer_grille',(.025,.025,height),(reveal-.055,-width/2+j*width/6,0),host.iron)
+    emit('grille_tie',(.025,width,.025),(reveal-.055,0,-height*.1),host.iron)
+    leaf_width=width/2-.025
+    for side in (-1,1):
+        # Each leaf rotates around the same jamb hinge; the centre follows its swing.
+        for kind,angle,plane,mat in [('shutter',shutter_angle,reveal+.025,host.wood),
+                                     ('casement',-casement_angle,-.06,host.glass)]:
+            theta=side*math.radians(angle)
+            offset=(plane+side*math.sin(theta)*leaf_width/2,
+                    side*width/2-side*math.cos(theta)*leaf_width/2,0)
+            if kind=='shutter':
+                emit(kind,(.065,leaf_width,height),offset,mat,theta)
+                for z in (-height*.24,height*.24):
+                    emit('shutter_panel',(.024,leaf_width-.11,height*.38),
+                         (offset[0]+.04*math.cos(theta),offset[1]+.04*math.sin(theta),z),host.panel,theta)
+            else:
+                # Clear pane and four actual timber rails; no solid opaque inner leaf.
+                emit(kind+'_glass',(.012,leaf_width-.08,height-.10),offset,mat,theta)
+                for z in (-height/2,height/2):
+                    emit(kind+'_rail',(.06,leaf_width,.05),(offset[0],offset[1],z),host.wood,theta)
+                for edge in (-1,1):
+                    emit(kind+'_stile',(.06,.05,height),
+                         (offset[0]-edge*math.sin(theta)*leaf_width/2,
+                          offset[1]+edge*math.cos(theta)*leaf_width/2,0),host.wood,theta)
+            for z in (-height*.31,height*.31):
+                emit(kind+'_hinge',(.045,.035,.10),(plane,side*width/2,z),host.iron)
+    for obj in created:
+        obj['sr_window_family']=name;obj['sr_shutters_open']='outward';obj['sr_casements_open']='inward'
+    return created
+
+
 def box_receiver(source, collection):
     """Keep a structural box while its bevels remain in the detailed source."""
     import bpy

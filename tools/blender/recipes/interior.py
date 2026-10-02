@@ -43,6 +43,7 @@ import environment_sources  # noqa: E402
 import material_library  # noqa: E402
 import second_rite_asset_core as asset_core  # noqa: E402
 from first_stratum.common import box  # noqa: E402
+from shell_geometry import ceiling_members  # noqa: E402
 
 CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 ENVIRONMENT_DIR = (ROOT / "projects" / "hichaukitoden-game" / "assets"
@@ -184,6 +185,9 @@ class Interior:
         self.bread = material("bread_crust")
         self.straw = material("wax")
         self.crock = material("bone")
+        self.paper = material("paper")
+        self.leather = material("book_leather")
+        self.ink = material("writing_ink")
         self.daylight = emissive("sr_window_daylight", (0.92, 0.95, 1.0))
         # Dim on purpose. make_material emits at strength 1.2, so a near-white
         # colour clips to a flat lightbox; this keeps a lit doorway reading as
@@ -405,8 +409,9 @@ class Interior:
     def ceiling(self, *, beams=0, beam_span=1.5, mat=None):
         mat = mat or self.wood
         centre = (self.front_x + self.back_x) / 2.0
-        self.part("ceiling", (self.depth, self.half_width * 2, self.ceiling_thick),
-                  (centre, 0.0, self.ceiling_z + self.ceiling_thick / 2.0), mat)
+        for name, size, location in ceiling_members(self.front_x, self.back_x,
+                self.half_width, self.wall_thick, self.ceiling_z, self.ceiling_thick):
+            self.part(name, size, location, mat)
         half = beams // 2
         for index in range(-half, half + 1):
             self.part(f"ceiling_beam_{index + half}",

@@ -508,6 +508,42 @@
         ]
       },
       "notes": "Capa-e-canal pantile: the roof surface itself. Distinct from terracotta, which is the generic fired clay of floor tile and oven body and carries no channel rhythm."
+    },
+    {
+      "id": "paper",
+      "displayName": "Writing Paper",
+      "family": "organic",
+      "baseColorSrgb": [222, 205, 164],
+      "metallicHint": 0,
+      "roughnessHint": 0.94,
+      "opacityMode": "opaque",
+      "generationTags": ["warm rag paper", "bound page edges"],
+      "legacyMtl": {"kd": [0.87, 0.804, 0.643]},
+      "notes": "Paper for records and books; distinct from woven cloth."
+    },
+    {
+      "id": "book_leather",
+      "displayName": "Book Leather",
+      "family": "organic",
+      "baseColorSrgb": [87, 46, 29],
+      "metallicHint": 0,
+      "roughnessHint": 0.78,
+      "opacityMode": "opaque",
+      "generationTags": ["worn brown book binding"],
+      "legacyMtl": {"kd": [0.341, 0.18, 0.114]},
+      "notes": "Leather bindings, covers and spines; no timber grain."
+    },
+    {
+      "id": "writing_ink",
+      "displayName": "Writing Ink",
+      "family": "carbon",
+      "baseColorSrgb": [34, 28, 24],
+      "metallicHint": 0,
+      "roughnessHint": 0.75,
+      "opacityMode": "opaque",
+      "generationTags": ["dark brown black ink"],
+      "legacyMtl": {"kd": [0.133, 0.11, 0.094]},
+      "notes": "Written entries and stamp pads."
     }
   ]
 }

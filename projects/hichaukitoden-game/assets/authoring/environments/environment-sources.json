@@ -85,6 +85,11 @@
         "fixtureLights": false,
         "basis": "EEVEE at neutral exposure with authored dusk sun, sky and lamps attached to visible lantern fixtures; automatic lighting shims disabled."
       }
+    },
+    "passage_office.blend": {
+      "status": "adopted",
+      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; byte-identical copy of preserved candidate. Edit directly; never regenerate.",
+      "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7"
     }
   }
 }

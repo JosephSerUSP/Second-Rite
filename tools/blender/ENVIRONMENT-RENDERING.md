@@ -83,3 +83,47 @@ are rejected because this implementation samples flat receiver normals. Explicit
 structural box receivers carry `sr_bake_preserve`; the culler retains these faces
 while still treating the boxes as closed occluders. The door family can generate
 these boxes while detailed bevels remain only in the source.
+
+## Registry workflow experiment
+
+`registry_workflow.py` exercises a new interior through the canonical Project
+export stage. It replaces map 28 only inside that disposable stage, reuses the
+authored Registrar commands and Celina sprite, exports the supplied source, and
+captures Classic, 4:3, Wide and a nominal device aspect at five lane positions.
+UI and unobstructed world frames are separate. Desktop controls are disabled
+and device controls enabled through the in-memory capture-settings seam;
+the operator's saved settings are not written.
+
+`capture_environment.py` is the reusable native capture entry point. It emits
+runtime camera calibration records with the frames. `review_room_source.py`
+consumes those records, reflecting the camera into the interior authoring frame
+using the room export's existing coordinate mapping. It preserves the source.
+This avoids comparing an old fixed room-preview camera with a different runtime
+camera. The review runner forces Blender's `--python-exit-code 1`, records each
+step's wall time and exit code, and refuses to overwrite a previous run directory.
+
+With `BLENDER_EXECUTABLE` set to the pinned build:
+
+```powershell
+python tools/blender/registry_workflow.py --source projects/hichaukitoden-game/assets/authoring/candidates/passage_office/passage_office_r3.blend --output out/registry-next-review --exit-y 1.0833 --npc-y 5.5333
+```
+
+The runner writes `review.html`, `evidence.json`, logs, native frames and source
+beauty/clay views. `--atlas-size 512` is an explicit lookdev comparison; maintained
+export defaults remain 1024. `--device WIDTH HEIGHT` feeds the runtime's actual
+device-surface resolver. Its default 2100x900 is nominal 21:9, not a measurement
+of a particular phone's usable viewport or insets. Physical device testing is
+separate. The Registry source is retained as rejected composition/workflow evidence.
+
+`inspect_environment_parts.py` isolates named source meshes in front, oblique and
+top views, in material and clay modes. Its neutral studio lights are diagnostic,
+not a proposed environment rig. Native camera records optionally provide projected
+bounds; these include occluded geometry and are not visible-pixel coverage.
+The source is not saved. Source review, inspection and room export now fail before
+rendering when a used image or linked library cannot be resolved.
+
+Moving a `.blend` as raw bytes can break its `//` image paths. To retain a portable
+candidate, use `pack_environment_source.py --source <working-source> --output
+<new-source.blend>`: it validates the original dependencies, embeds images, refuses
+linked libraries and existing destinations, saves a new document and records its
+dependency provenance. The original and upstream textures remain unchanged.

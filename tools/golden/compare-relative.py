@@ -136,12 +136,12 @@ def capture_evidence(root):
 def state_label(result):
     state = result.get("state")
     if state == "orange":
-        return "ORANGE — expected delta pending canonical reference reconciliation"
+        return "ORANGE - expected delta pending canonical reference reconciliation"
     if state == "green":
-        return "GREEN — candidate and base agree on repeat-stable evidence"
+        return "GREEN - candidate and base agree on repeat-stable evidence"
     if state == "red":
-        return "RED — visual delta is unreviewed, rejected, or exceeds recorded approval"
-    return "INCONCLUSIVE / INFRASTRUCTURE — evidence is incomplete or unstable"
+        return "RED - visual delta is unreviewed, rejected, or exceeds recorded approval"
+    return "INCONCLUSIVE / INFRASTRUCTURE - evidence is incomplete or unstable"
 
 
 def report_markdown(result):
@@ -178,7 +178,7 @@ def report_markdown(result):
         approval = result["expectedDelta"]
         summary = approval.get("summary", {})
         lines += [
-            "## 🟠 Expected visual delta",
+            "## Expected visual delta",
             "",
             "**EXPECTED VISUAL DELTA (ORANGE)**",
             "",
@@ -228,7 +228,7 @@ def report_markdown(result):
 
     if result.get("status") == "candidate-diff":
         lines += [
-            "## Manual Red → Orange promotion", "",
+            "## Manual Red -> Orange promotion", "",
             "If review determines that **all** evidence above is expected, persist that decision from this report JSON:", "",
             "`python tools/golden/promote-expected-delta.py --report <report.json> --id <short-id> --reviewer <name> --rationale <why> --reference <PR/issue>`",
             "",

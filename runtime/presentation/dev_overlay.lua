@@ -42,6 +42,25 @@ function dev_overlay.draw()
         lines[#lines + 1] = string.format("FRAME: %.2fms", frameMs)
         lines[#lines + 1] = string.format("LUA: %.0fKB", memoryKb)
 
+        local surface = require("presentation.surface")
+        local output = require("presentation.output")
+        local hostW, hostH = love.graphics.getDimensions()
+        local hostPW, hostPH = hostW, hostH
+        if love.graphics.getPixelDimensions then
+            hostPW, hostPH = love.graphics.getPixelDimensions()
+        end
+        local rw, rh = surface.renderSize()
+        local originX, originY = surface.compositionOrigin()
+        local outScale, outX, outY = output.transform(hostW, hostH)
+        lines[#lines + 1] = string.format(
+            "HOST: %dx%d / %dx%dPX", hostW, hostH, hostPW, hostPH)
+        lines[#lines + 1] = string.format(
+            "SURFACE: %s %dx%d ORIGIN %d,%d",
+            tostring(surface.getProfileId()), rw, rh, originX, originY)
+        lines[#lines + 1] = string.format(
+            "OUTPUT: %s %.3fX OFF %.2f,%.2f",
+            string.upper(tostring(output.getMode())), outScale, outX, outY)
+
         local canvas = love.graphics.getCanvas()
         if canvas and canvas.getPixelDimensions then
             local lw, lh = canvas:getDimensions()

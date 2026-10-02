@@ -78,7 +78,7 @@ while paired-data coherence is a G1 failure.
 
 - G2/G3/G5/G6 red = a **regression** (behavioral for G2/G3, visual for G5/G6).
   Investigate. Never regenerate a golden log or recapture screenshots to
-  silence a diff; regeneration is an owner-signed action.
+  silence a diff; regeneration requires explicit maintainer/reference approval.
 - **G5 is the only gate that can see the world view.** G1 validates data, G2
   diffs battle logs, G3 diffs UI *events* — a renderer or presentation change
   can break none of them and still be badly wrong. Frames that differ are
@@ -135,8 +135,14 @@ while paired-data coherence is a G1 failure.
     for G6 because live editor nondeterminism has existed (#253/#259).
   Relative mode answers **"did this candidate alter rendering relative to the
   base ref?"**, not **"is this rendering correct?"** It runs without the native
-  Effekseer shim. A green relative run never licenses recapturing G5/G6 goldens,
-  and a red relative run is investigated as a candidate-vs-base regression.
+  Effekseer shim. A green relative run never licenses recapturing G5/G6 goldens.
+  A complete-capture visual delta is **Red** until reviewed. A reviewer may
+  persist that exact evidence with `tools/golden/promote-expected-delta.py`;
+  a matching rerun is **Orange / expected delta**, meaning understood and
+  accepted for this evidence fingerprint but still pending canonical reference
+  reconciliation. Any additional/changed evidence is Red again. Capture failure
+  or repeat-control instability is separate infrastructure/inconclusive state
+  and cannot be promoted to Orange. See `tools/golden/relative-README.md`.
 - G4 red = the **doc is stale**, not the engine. Run
   `tools/golden/capture-state.ps1` and commit the result.
 - `[formula] error in 'os.time()'` during G1 is the sandbox negative test, not a

@@ -14,6 +14,7 @@ local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
 local inputContext = nil
 local decorated = setmetatable({}, { __mode = "k" })
+local authoredSurfaceOptions = setmetatable({}, { __mode = "k" })
 
 local function isAndroid()
     if not (love and love.system and love.system.getOS) then return false end
@@ -23,6 +24,32 @@ end
 
 function touch_gamepad.defaultEnabled()
     return isAndroid()
+end
+
+-- A touch-controlled surface must reserve the COMPLETE controller outside the
+-- canonical 256x240 composition. Merely being a valid render surface is not
+-- enough: Classic has no gutter and 4:3 has only 32 px per side, so selecting
+-- either while touch is enabled would strand a phone user without buttons.
+local function profileSupportsControls(id, hostWidth, hostHeight)
+    local profile = surface.getProfile(id)
+    if not profile then return false end
+    local cw, ch = surface.compositionSize()
+    local rw, rh = profile.renderWidth, profile.renderHeight
+    local ox, oy = profile.compositionOriginX, profile.compositionOriginY
+    local landscape = rw >= rh
+    if hostWidth and hostHeight and landscape ~= (hostWidth >= hostHeight) then
+        return false
+    end
+    if landscape then
+        local leftW = ox
+        local rightW = rw - (ox + cw)
+        return leftW >= 40 and rightW >= 40
+    end
+    return rh - (oy + ch) >= MIN_CONTROL_ROWS
+end
+
+function touch_gamepad.profileSupportsControls(id, hostWidth, hostHeight)
+    return profileSupportsControls(id, hostWidth, hostHeight)
 end
 
 -- Representative fixed profiles remain useful for desktop previews/tests, but
@@ -96,9 +123,13 @@ function touch_gamepad.prepareAndroidSurface()
     local w, h = love.graphics.getDimensions()
     local profile = touch_gamepad.configureDeviceSurface(w, h)
     -- Registration is independent of visibility: a saved DEVICE choice must
-    -- still resolve after the user hides the controller. Seed only a missing
-    -- preference so a deliberate ASPECT choice survives the next launch.
-    if touch_gamepad.isEnabled() and user_settings.get("renderSurfaceProfile", nil) == nil then
+    -- still resolve after the user hides the controller. When touch IS enabled,
+    -- however, preserving an unsafe explicit choice is a lockout bug: Classic
+    -- and 4:3 cannot fit the complete controller. Repair old/saved choices to
+    -- DEVICE before main.lua creates the game canvas.
+    local current = user_settings.get("renderSurfaceProfile", nil)
+    if touch_gamepad.isEnabled()
+        and (current == nil or not profileSupportsControls(current, w, h)) then
         user_settings.set("renderSurfaceProfile", profile)
     end
     return profile
@@ -295,17 +326,27 @@ local function appendDeviceAspect(loader)
     local options = renderSurfaces and renderSurfaces.options
     if type(options) ~= "table" or not surface.getProfile(DEVICE_PROFILE) then return end
 
-    local found = nil
-    for i, id in ipairs(options) do
-        if id == DEVICE_PROFILE then found = i; break end
+    -- Keep an immutable copy of the Project-authored order. decorateOptions is
+    -- called repeatedly, so filtering the already-filtered table would slowly
+    -- erase choices and make toggling the controller non-reversible.
+    local authored = authoredSurfaceOptions[loader]
+    if not authored then
+        authored = {}
+        for _, id in ipairs(options) do
+            if id ~= DEVICE_PROFILE then authored[#authored + 1] = id end
+        end
+        authoredSurfaceOptions[loader] = authored
     end
 
     local w, h = love.graphics.getDimensions()
-    if w < h then
-        if found then table.remove(options, found) end
-        return
+    for i = #options, 1, -1 do options[i] = nil end
+    for _, id in ipairs(authored) do
+        if not touch_gamepad.isEnabled() or profileSupportsControls(id, w, h) then
+            options[#options + 1] = id
+        end
     end
-    if not found then options[#options + 1] = DEVICE_PROFILE end
+    -- DEVICE is the host-matched safe choice in either orientation.
+    options[#options + 1] = DEVICE_PROFILE
 end
 
 -- #1307 integration: Options remains authored campaign UI, while the virtual

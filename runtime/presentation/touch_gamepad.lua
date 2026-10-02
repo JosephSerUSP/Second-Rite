@@ -108,16 +108,37 @@ function touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight)
     }
 end
 
-function touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
-    surface.registerProfile(DEVICE_PROFILE,
-        touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight))
-    return DEVICE_PROFILE
+local function sameDeviceSpec(profile, spec)
+    return profile
+        and profile.renderWidth == spec.renderWidth
+        and profile.renderHeight == spec.renderHeight
+        and profile.compositionOriginX == spec.compositionOriginX
+        and profile.compositionOriginY == spec.compositionOriginY
+        and profile.fractionalOutputScale == spec.fractionalOutputScale
 end
 
--- LÖVE's Android resize/orientation path is intentionally not used here.
--- Package orientation selects one stable host orientation. main.lua calls this
--- from love.load, after Android has established the real host dimensions but
--- before the render canvas/profile is chosen.
+function touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
+    local spec = touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight)
+    local previous = surface.getProfile(DEVICE_PROFILE)
+    local changed = not sameDeviceSpec(previous, spec)
+    if changed then
+        surface.registerProfile(DEVICE_PROFILE, spec)
+    end
+    return DEVICE_PROFILE, changed, spec
+end
+
+-- Android can report an initial content size during love.load and then expand
+-- once immersive/fullscreen system chrome settles. Keep DEVICE tied to the
+-- ACTUAL host geometry rather than freezing whichever dimensions happened to
+-- exist during boot.
+function touch_gamepad.refreshAndroidSurface(hostWidth, hostHeight)
+    if not isAndroid() then return false end
+    local _, changed = touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
+    return changed
+end
+
+-- Register DEVICE during boot so a saved profile resolves immediately. Later
+-- native resize events keep the profile synchronized with the settled host.
 function touch_gamepad.prepareAndroidSurface()
     if not isAndroid() then return nil end
     local w, h = love.graphics.getDimensions()

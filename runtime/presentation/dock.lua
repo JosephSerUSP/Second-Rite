@@ -9,6 +9,7 @@
 
 local ui = require("presentation.ui")
 local util = require("presentation.util")
+local surface = require("presentation.surface")
 
 local dock = {}
 
@@ -32,6 +33,17 @@ end
 
 local function copyRect(rect)
     return { x = rect.x or 0, y = rect.y or 18, w = rect.w or 16, h = rect.h or 12 }
+end
+
+-- #1307: dock CONTENT stays authored in canonical 256px composition space,
+-- while the persistent shell is allowed to anchor the whole render surface.
+-- dock.draw runs after beginComposition(), so render-space x=0 is negative
+-- compositionOriginX here.
+local function renderWideFootprint(reg)
+    local rect = copyRect(reg.footprint or { x = 0, y = 18, w = 32, h = 12 })
+    rect.x = -surface.compositionOriginX() / ui.tileSize
+    rect.w = surface.renderWidth() / ui.tileSize
+    return rect
 end
 
 local function variantFor(reg, name)
@@ -228,17 +240,19 @@ function dock.draw(state, sceneData, ctx)
     end
 
     -- `staticShell` (engine.json dock registry): one windowskin spanning the
-    -- whole footprint, drawn once and never animated, with every variant's
-    -- content composited on top of it. Two things motivate it, both from the
-    -- windowskin going semitransparent: per-variant shells that morph made the
-    -- dock's outline move against a world now visible through it, and any two
-    -- panels sharing a rect (dialogue_message and dialogue_choices do exactly
-    -- that) stacked two translucent skins and read twice as dark.
-    -- Variant content windows carry `chrome: "none"` so nothing draws a second
-    -- skin inside this one.
+    -- whole RENDER width, drawn once and never animated, with every variant's
+    -- canonical content composited on top of it. The extra width is shell only:
+    -- authored party/dialogue/battle content does not reflow into it.
+    --
+    -- Two things motivate the single shell, both from the windowskin going
+    -- semitransparent: per-variant shells that morph made the dock's outline
+    -- move against a world now visible through it, and any two panels sharing a
+    -- rect (dialogue_message and dialogue_choices do exactly that) stacked two
+    -- translucent skins and read twice as dark. Variant content windows carry
+    -- `chrome: "none"` so nothing draws a second skin inside this one.
     local staticShell = reg.staticShell and (currentVariant or transition)
     if staticShell then
-        drawShells({ copyRect(reg.footprint or { x = 0, y = 18, w = 32, h = 12 }) })
+        drawShells({ renderWideFootprint(reg) })
     end
 
     -- Windows the outgoing and incoming variants share keep drawing right

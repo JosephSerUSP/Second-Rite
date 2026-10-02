@@ -18,12 +18,12 @@ local sprite_sheet = require("presentation.sprite_sheet")
 local frame_renderer = require("presentation.frame_renderer")
 local door_transition = require("presentation.door_transition")
 local presentation_surface = require("presentation.surface")
+local presentation_output = require("presentation.output")
 
 -- Canonical authored composition dimensions. The logical render surface
 -- may be larger; presentation.surface owns that independent profile.
 local gameWidth, gameHeight = presentation_surface.compositionSize()
 local canvas
-local scale, scaleX, scaleY = 1, 1, 1
 
 -- Global Session and State Router
 
@@ -511,6 +511,8 @@ function love.load(arg)
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
                 cli.requestedSurfaceProfile = val:sub(#"surface=" + 1)
+            elseif val:match("^output=") then
+                cli.requestedOutputMode = val:sub(#"output=" + 1)
             end
             i = i + 1
         end
@@ -677,6 +679,7 @@ function love.load(arg)
             "test_presentation_surface",
             "test_android_touch_boot",
             "test_render_surface_option",
+            "test_output_presentation",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_scene_state_boundary",
@@ -1009,6 +1012,17 @@ function love.load(arg)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
     canvas = presentation_surface.newRasterCanvas(renderWidth, renderHeight)
+
+    -- #1310 output reconstruction is orthogonal to render-surface/aspect
+    -- selection. Explicit CLI beats a stored experimental preference; captures
+    -- pin stored settings away unless they deliberately opt in via output=<id>.
+    local outputMode = cli.requestedOutputMode
+        or require("engine.user_settings").get("outputPresentationMode", nil)
+        or "nearest"
+    local outputOk, outputErr = presentation_output.setMode(outputMode)
+    if not outputOk then
+        print("[output] " .. tostring(outputErr) .. "; using nearest")
+    end
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader
@@ -1332,7 +1346,7 @@ function love.draw()
     
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1, 1) -- reset color before drawing canvas to prevent dark tinting leak
-    love.graphics.draw(canvas, scaleX, scaleY, 0, scale, scale)
+    presentation_output.draw(canvas)
     if cli.isTownProofShot and not cli.townProofCaptured then
         cli.townProofCaptured = true
         cli.townProofQuitTimer = 1.0
@@ -2310,5 +2324,5 @@ function love.keyreleased(key)
 end
 
 function love.resize(w, h)
-    scale, scaleX, scaleY = presentation_surface.outputTransform(w, h)
+    presentation_output.resize(w, h)
 end

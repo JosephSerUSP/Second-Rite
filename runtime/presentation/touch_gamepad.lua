@@ -1,4 +1,5 @@
 local surface = require("presentation.surface")
+local output = require("presentation.output")
 local user_settings = require("engine.user_settings")
 local virtual_input = require("engine.virtual_input")
 local player_controller = require("engine.player_controller")
@@ -233,9 +234,9 @@ function touch_gamepad.hitTest(renderX, renderY)
 end
 
 local function hostToRender(x, y)
-    local hostW, hostH = love.graphics.getDimensions()
-    local scale, offsetX, offsetY = surface.outputTransform(hostW, hostH)
-    return surface.hostToRender(x, y, scale, offsetX, offsetY)
+    -- Inverse input mapping must consume the exact transform used by the
+    -- final output stage. CRT may be fractional while nearest stays integer.
+    return output.hostToRender(x, y)
 end
 
 function touch_gamepad.touchpressed(id, x, y)

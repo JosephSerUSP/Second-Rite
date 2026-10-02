@@ -1,0 +1,72 @@
+[
+  {
+    "frame": "classic\\0.5.png",
+    "meanAbsoluteByteDifference": 1.2250434027777777,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "classic\\0.png",
+    "meanAbsoluteByteDifference": 1.2561577690972223,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "classic\\11.5.png",
+    "meanAbsoluteByteDifference": 1.6511664496527778,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "classic\\12.png",
+    "meanAbsoluteByteDifference": 1.7926161024305556,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "classic\\2.png",
+    "meanAbsoluteByteDifference": 1.221142578125,
+    "maximumByteDifference": 66
+  },
+  {
+    "frame": "classic\\5.png",
+    "meanAbsoluteByteDifference": 1.3844997829861112,
+    "maximumByteDifference": 74
+  },
+  {
+    "frame": "classic\\8.png",
+    "meanAbsoluteByteDifference": 1.7273003472222221,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "wide\\0.5.png",
+    "meanAbsoluteByteDifference": 1.563174882629108,
+    "maximumByteDifference": 94
+  },
+  {
+    "frame": "wide\\0.png",
+    "meanAbsoluteByteDifference": 1.5831670579029733,
+    "maximumByteDifference": 255
+  },
+  {
+    "frame": "wide\\11.5.png",
+    "meanAbsoluteByteDifference": 1.3550469483568075,
+    "maximumByteDifference": 107
+  },
+  {
+    "frame": "wide\\12.png",
+    "meanAbsoluteByteDifference": 1.4639638758476787,
+    "maximumByteDifference": 107
+  },
+  {
+    "frame": "wide\\2.png",
+    "meanAbsoluteByteDifference": 1.5594809598330726,
+    "maximumByteDifference": 94
+  },
+  {
+    "frame": "wide\\5.png",
+    "meanAbsoluteByteDifference": 1.5883215962441315,
+    "maximumByteDifference": 94
+  },
+  {
+    "frame": "wide\\8.png",
+    "meanAbsoluteByteDifference": 1.5084670057381324,
+    "maximumByteDifference": 107
+  }
+]

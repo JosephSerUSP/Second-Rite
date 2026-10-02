@@ -249,7 +249,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Continue"
           $__sw = [System.Diagnostics.Stopwatch]::StartNew()
-          python -m unittest tools.blender.tests.test_asset_library
+          python -m unittest tools.blender.tests.test_asset_library tools.blender.tests.test_vendor_assets
           $__code = $LASTEXITCODE
           if ($__code -eq 0) {
             python tools/blender/build_asset_library.py --check
@@ -262,6 +262,18 @@ jobs:
           $__sw.Stop()
           node tools/ci/time-step.js --record --label "asset library browser" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "asset library browser tests failed (exit $__code)" }
+
+      - name: Courtyard candidate profile commands and staged traversal
+        shell: pwsh
+        run: |
+          node --test tools/blender/tests/test_courtyard_candidate.js
+          if ($LASTEXITCODE -ne 0) { throw "Candidate profile tests failed" }
+          node tools/blender/stage_courtyard_candidate.js --output out/ci-courtyard --package projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package
+          if ($LASTEXITCODE -ne 0) { throw "Candidate staging failed" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-validate.ps1 -GameRoot out/ci-courtyard/game
+          if ($LASTEXITCODE -ne 0) { throw "Candidate G1 failed" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot out/ci-courtyard/game
+          if ($LASTEXITCODE -ne 0) { throw "Candidate units failed" }
 
       - name: G1 - data validation
         shell: pwsh

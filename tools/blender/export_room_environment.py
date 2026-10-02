@@ -49,6 +49,8 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 import town_environment_pipeline as pipeline  # noqa: E402
 import stage_room_model as stager  # noqa: E402
+import bake_correspondence
+import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
@@ -102,9 +104,11 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     render = collection("TH_RENDER")
     bpy.ops.object.select_all(action="DESELECT")
     copies = []
+    owner_names = bake_correspondence.registry(meshes)
     for obj in meshes:
         copy = obj.copy()
         copy.data = obj.data.copy()
+        bake_correspondence.tag(copy.data, obj.name, owner_names)
         atlas_alpha.preserve_uv(copy.data)
         copy.name = f"R_{obj.name}"
         render.objects.link(copy)
@@ -119,6 +123,7 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
     if target and target.data.uv_layers.get(atlas_alpha.ATLAS_UV):
         target.data.uv_layers.active = target.data.uv_layers[atlas_alpha.ATLAS_UV]
     target.name = name
+    target[bake_correspondence.OWNER_RECORD] = json.dumps(owner_names)
 
     if decimate < 0.999:
         modifier = target.modifiers.new("TH_DECIMATE", "DECIMATE")
@@ -232,7 +237,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="export_room_environment")
     parser.add_argument("--blend", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--atlas-size", type=int, default=1024)
+    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE)
     parser.add_argument("--atlas-layout", choices=("loose", "packed", "view"), default="packed",
                         help="loose is the original smart_project layout (~23%% of the atlas carries "
                              "texels); packed is tight; view also spends the atlas where the lane "
@@ -241,7 +246,7 @@ def main() -> None:
                         help="--atlas-layout view: 0 = every surface equal, 1 = follow the cameras")
     parser.add_argument("--view-floor", type=float, default=0.04,
                         help="--atlas-layout view: least density an island keeps, as a fraction of the mean")
-    parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--samples", type=int, default=None)
     eevee_bake.add_arguments(parser)
     parser.add_argument("--decimate", type=float, default=1.0)
     parser.add_argument("--ambient", type=float, default=0.13,
@@ -297,7 +302,10 @@ def main() -> None:
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     backend=args.bake_backend, eevee=eevee)
+                                     backend=args.bake_backend, eevee=eevee,
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile,
+                                     bake_bindings=args.bake_bindings, atlas_denoise=args.atlas_denoise,
+                                     uv_texel_align=args.uv_texel_align)
 
     faces = mirror_obj_file(output / "environment.obj", LANE_CENTRE)
     print(f"[room3d] mirrored {faces} faces into engine space "

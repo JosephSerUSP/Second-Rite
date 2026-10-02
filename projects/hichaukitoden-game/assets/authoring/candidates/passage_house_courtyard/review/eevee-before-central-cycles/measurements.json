@@ -1,0 +1,506 @@
+{
+  "revision": "11: rich architectural sources, partial shutters, connected volumes, clear Cortico edge exit and authored camera end limits",
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "sourceBytes": 1794999,
+  "sourceBeautyTriangles": 191648,
+  "sourceMeshRoles": {
+    "both": 257,
+    "source": 1546,
+    "receiver": 31
+  },
+  "sourceTriangleInterpretation": "Evaluated beauty geometry across the entire editable source, including off-range buildings. Runtime counts are the exported view envelope; the ratio is not a pure same-surface decimation ratio.",
+  "package": {
+    "triangleCount": 3541,
+    "vertexCount": 2618,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 151938,
+    "renderMeshSizeBytes": 325991,
+    "packageSizeBytes": 478521
+  },
+  "packageSHA256": {
+    "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+    "environment.json": "25fda5946bdecfe43252822f7a96d64ad2983691d8e791e3b563408db4b196c0",
+    "environment.mtl": "800505ca38b07b34df1ed39a77058ce014ea611bd8e09d9545a26df8071829c3",
+    "environment.obj": "ef0c463c3b8c7293af4016dc0579c0b14a17bfe3708044c7749d14acd6105dbf",
+    "environment.png": "d5dfb59bced3ca036beab9fd6cf695ba9fb3ee15ffaf47680f14c14c86031ed0"
+  },
+  "bounds": [
+    -14.0,
+    -10.4,
+    -0.14,
+    17.8,
+    21.4,
+    8.81
+  ],
+  "anchors": {
+    "cortico_entry": {
+      "id": "cortico_entry",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "lodging_entry": {
+      "id": "lodging_entry",
+      "position": [
+        0.0,
+        11.5,
+        0.3
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "atlasUVOccupancyRasterized": 0.59307,
+  "atlasMeasurement": "Union of OBJ UV polygons at 1024x1024, allocated coverage rather than detail quality.",
+  "reviewPositions": [
+    0,
+    0.5,
+    2,
+    5,
+    8,
+    11.5,
+    12
+  ],
+  "cameraCalibration": {
+    "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",
+    "record": {
+      "baseViewportHeight": 144,
+      "baseViewportWidth": 256,
+      "contract": "thestra.world-camera-calibration",
+      "coordinateSystem": {
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "handedness": "right-handed",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "worldHorizontal": "XY",
+        "worldUp": "+Z"
+      },
+      "eye": {
+        "x": -19.98914649569168,
+        "y": 6,
+        "z": 1.3212953588491052
+      },
+      "farPlane": 128,
+      "fovHalfX": 0.24999999999999997,
+      "fovHalfY": 0.14062499999999997,
+      "nearPlane": 0.05,
+      "orientation": {
+        "forwardX": 1,
+        "forwardY": 0,
+        "pitchRadians": -0.30543261909900765,
+        "rightX": 0,
+        "rightY": 1
+      },
+      "projection": "perspective",
+      "projectionScale": {
+        "x": 1,
+        "y": 1
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -161.43297990603955,
+      "targetHeight": 240,
+      "targetWidth": 256,
+      "version": 1,
+      "viewportCenterX": 128,
+      "viewportCenterY": -71.43297990603955
+    }
+  },
+  "sourceReview": {
+    "floorSamples": [
+      0,
+      2,
+      8,
+      12,
+      1.0,
+      5.0,
+      10.0,
+      0.5,
+      11.5
+    ],
+    "frames": [
+      {
+        "width": 256,
+        "y": 0,
+        "z": 0.0,
+        "feet": [
+          35.42835998535156,
+          128.00007104873657
+        ],
+        "head": [
+          35.42835998535156,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.14264678955078,
+          128.00007104873657
+        ],
+        "head": [
+          49.14264678955078,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 2,
+        "z": 0.0,
+        "feet": [
+          90.28550720214844,
+          128.00007104873657
+        ],
+        "head": [
+          90.28550720214844,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 5,
+        "z": 0.15000057220458984,
+        "feet": [
+          126.25123596191406,
+          123.60492467880249
+        ],
+        "head": [
+          126.25123596191406,
+          75.72062015533447
+        ],
+        "height": 47.88430452346802
+      },
+      {
+        "width": 256,
+        "y": 8,
+        "z": 0.3000001907348633,
+        "feet": [
+          131.36529541015625,
+          119.23091411590576
+        ],
+        "head": [
+          131.36529541015625,
+          71.46177291870117
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 256,
+        "y": 11.5,
+        "z": 0.3000001907348633,
+        "feet": [
+          206.1313934326172,
+          119.23089981079102
+        ],
+        "head": [
+          206.1313934326172,
+          71.46175861358643
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 256,
+        "y": 12,
+        "z": 0.2999992370605469,
+        "feet": [
+          219.77972412109375,
+          119.23092842102051
+        ],
+        "head": [
+          219.77972412109375,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 0,
+        "z": 0.0,
+        "feet": [
+          35.428346022963524,
+          128.00007820129395
+        ],
+        "head": [
+          35.428346022963524,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.142632842063904,
+          128.00007820129395
+        ],
+        "head": [
+          49.142632842063904,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 2,
+        "z": 0.0,
+        "feet": [
+          90.28549012541771,
+          128.00007820129395
+        ],
+        "head": [
+          90.28549012541771,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 5,
+        "z": 0.15000057220458984,
+        "feet": [
+          126.25122034549713,
+          123.60492467880249
+        ],
+        "head": [
+          126.25122034549713,
+          75.72063446044922
+        ],
+        "height": 47.88429021835327
+      },
+      {
+        "width": 426,
+        "y": 8,
+        "z": 0.3000001907348633,
+        "feet": [
+          131.3653001189232,
+          119.23091411590576
+        ],
+        "head": [
+          131.3653001189232,
+          71.46177291870117
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 11.5,
+        "z": 0.3000001907348633,
+        "feet": [
+          206.13138753175735,
+          119.23089981079102
+        ],
+        "head": [
+          206.13138753175735,
+          71.46175861358643
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 12,
+        "z": 0.2999992370605469,
+        "feet": [
+          219.7797292470932,
+          119.23092842102051
+        ],
+        "head": [
+          219.7797292470932,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
+      }
+    ],
+    "sourceBeautyTriangles": 191648,
+    "sourceMeshRoles": {
+      "both": 257,
+      "source": 1546,
+      "receiver": 31
+    }
+  },
+  "currentReviewSHA256": {
+    "source": {
+      "256-0.5.png": "08e3fba1748cd3f3d30d71c187064624d6e34bdc96c5f80d795a8e67f808453c",
+      "256-0.png": "619c09483a29a1aba070444bf30ba4509620978887488f1f3757c50e98ed16b0",
+      "256-11.5.png": "9f479ff586e64ec92f79e953187f568b304f8767e79d95d29e2da33d37970310",
+      "256-12.png": "11af4fa2bf6d22838dd6f9110f163807b99aab551050797de4ecbe71bf27c5eb",
+      "256-2.png": "408660b7dde329153e92e1a7ddb57b8fc7af4bfc8e130a0f36cd727a31ea2af0",
+      "256-5.png": "3b1693847cca23528746ac989763bd77a870829048831eb10be50e2a0419f2c4",
+      "256-8.png": "c3dd1a1643ae90e62c9d84c0ee897b2dc924c32016b69142efa98b02797e1cb0",
+      "426-0.5.png": "68d94aecec74a7505d461f466e3f65301d1dc295c81c9a82ca354f0b1c9090df",
+      "426-0.png": "1760c36fbd16428fcf30a156b170b936c0ecc7dec13f20a6cb8934a07040b890",
+      "426-11.5.png": "02388965a635488d9e70f98bfe697f7fc39e60e9b9d885f45222e9555a5a0041",
+      "426-12.png": "e5911cb9834787b30e70c860bd918d9cf65d405199e87c6ec1618631258ad00c",
+      "426-2.png": "30cfcb5fa6ffe1226006930be2ccc76695c0f03202b6a637c2db313d7d5b2a82",
+      "426-5.png": "fb740617d4fd9e60db62fd26756455e165ff57fb16ea6b9719342558db2802e1",
+      "426-8.png": "431ed4594825cccf7075ba0bb1f4fa9069427f1419c2077eb9cfeaf000cccc07"
+    },
+    "runtime/classic": {
+      "0.5.png": "b6e83228e37a461dac49b6812fcc797aa29065ce436cf08ace6be5a3331bf52b",
+      "0.png": "fe5055b0f7a47c94410bb2e6127ae9e21cc03cab3dbfdf148cd85aa40864a86c",
+      "11.5.png": "77282f991d45ae9542707279cc4d6c5132be3ed65c04c43e898c3c3f868d9cb4",
+      "12.png": "7b177e59459b85cde8907ab5ca1ebf501f755b96d2e4a2fe79993aa67e010625",
+      "2.png": "3a7d2b9c13479178535b5a753148de93440af1b08e4f6c582bb67e5d0c3bf68c",
+      "5.png": "e7d29febaac0b10b000fb4b5e167e040bdf491944c01d465ea906d8ada65de22",
+      "8.png": "661344ce52e20909ba04f8833bd648089ba8183950706e11e2b5238e3e01acb6"
+    },
+    "runtime/wide": {
+      "0.5.png": "29ddf8d9c7b679de1d9cae8ae4a4b2e9704c08816efeb336b2b359fdbbab8820",
+      "0.png": "4486af7e1e3f8bb29e7e2b720502585916fce79cfaaa98a4dde789249dbf0edb",
+      "11.5.png": "bca98d6725edfcddf5a48f429e19e6607d917b549f83289d9aab5a5898986f92",
+      "12.png": "a22edf92257eee5aa4ec6c65971f9240233ec29016f20a59d2b188c6a6454d64",
+      "2.png": "aa31862a10079e396366d9620adf9d72b7afb506942ab926b16878a1dcd1942e",
+      "5.png": "2dc67a36cd30a22f2702e37cf46eff3631e47884c8598da21fecfdaea1052e53",
+      "8.png": "85824d77974aaa8ee9de1bf8ecc8e458c81b42e7bd51d40522654e50925b149a"
+    },
+    "modules/window": {
+      "front.png": "ee1e98c39bf7395479268f258ceef5578d70bdd0d5cb2ce866354caa9c7fdfcb",
+      "oblique.png": "dc40c91e389f4a38d270cdc8cb82acacd33ba6baab603e87141a583d1ce6f7e6",
+      "rear.png": "7d846818108d39fba7441f035c97a39be255595c02f1b406a9fc2f045269234f",
+      "side.png": "b56621a8cda50c4ede387ddff90750bb34ef5a0f4e861d6e4ac5169d4350f7f9"
+    },
+    "modules/sleeping-wing": {
+      "front.png": "f259e119f4876c7b525d534da7810ca034583163d3569b2094c62e76e22fe71c",
+      "oblique.png": "f43cf5fbe5fe22a5251592e8d65586c117f2f534a62eec48de8fc35123194752",
+      "rear.png": "bd3e89ff6f73f882d11325ee77ed857e75d19371663bbb15e5bddf8ee9811a6f",
+      "roof-cut-plan.png": "188af577feae9187ac54388c264be78869acb16fef98a0dc2d6be304552f3061",
+      "side.png": "d8da5102cad019379459b48471b3253ac3c68cae27a4bc594b0b30cb0a0afe99"
+    }
+  },
+  "previousRevision": {
+    "sourceSHA256": "1406e45686efa4adc663889e034ebf388023d82933d737555624ed83319ed893",
+    "package": {
+      "triangleCount": 6718,
+      "vertexCount": 4039,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 181106,
+      "renderMeshSizeBytes": 605009,
+      "packageSizeBytes": 786707
+    },
+    "review": "before-assemblies/",
+    "ownerDisposition": "Rejected as weak geometry, textures and lighting"
+  },
+  "olderRevision": {
+    "sourceSHA256": "42374ea4684bba944c3b8c659ea2f459c7c164dfb601df24e2da436feea69f50",
+    "package": {
+      "triangleCount": 6552,
+      "vertexCount": 3884,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 163875,
+      "renderMeshSizeBytes": 587326,
+      "packageSizeBytes": 753866
+    },
+    "cameraCalibration": {
+      "source": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua",
+      "pitchDegrees": -17.5,
+      "distance": 19.98914649569168,
+      "eyeHeight": 1.3212953588491052,
+      "projectionWindowOffsetY": -161.43297990603955,
+      "canonicalHorizonY": 90,
+      "actorHeightPixelsFlat": 48,
+      "feetYFlat": 128
+    },
+    "review": "before-sol/"
+  },
+  "exportSeconds": {
+    "first": 106.9,
+    "repeat": null
+  },
+  "exportTimingInterpretation": "Separate fresh Blender processes on the same machine, including launch, preparation, bake and packaging; no process-local cache reuse claimed.",
+  "renderSettings": {
+    "backend": "EEVEE",
+    "exposureEV": 0,
+    "supersample": 2,
+    "sourceReviewSamples": 64,
+    "atlasSize": 1024
+  },
+  "verification": {
+    "G1": "VALIDATE OK",
+    "stagedUnit": "ALL UNIT TESTS OK; no failed assertions in final log; 7 Effekseer world-effect assertions unavailable",
+    "targetedPython": "15 passed: fresh source parity, clear Cortico exit, nested production bake, exterior regression and host window validation",
+    "candidateNodeTests": "2 passed: profile/history and geography",
+    "environmentSources": "OK",
+    "townCheck": "10 generated maps and 35 door edges/arrival anchors passed",
+    "libraryHashes": "VENDORED ASSETS OK",
+    "floorReview": "Controls, intermediate samples and both landings passed",
+    "offline": "Source generation and exports used network-denying offline_blender.py; production bake fixture inspected packed dependencies",
+    "nativeCapture": "Classic and Wide with Walker/menu at seven positions including bounds; owner PLAYED remains outstanding",
+    "followups": {
+      "1298": "Stale exterior authoring brief",
+      "1299": "Boundary suite failure not propagated by unit runner"
+    }
+  },
+  "interpretation": "Module studies are neutral studio source inspection, not runtime rendering. Native images prove the exported composition, not owner acceptance. The previous owner-rejected revision is preserved separately.",
+  "cameraTracking": {
+    "minOffsetX": -72,
+    "maxOffsetX": 72,
+    "source": "32.json#/traversal/camera/tracking",
+    "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
+  },
+  "moduleInspectionSourceSHA256": "3fa21edac0f10f8d9339f8e447f3f2121bbd99758983cbdc75cf356a4412db66",
+  "moduleInspectionNote": "Window and sleeping-wing modules inspected from preceding revision 10 source; these assemblies are unchanged in revision 11. Whole-scene source hash differs because exit and camera data changed.",
+  "ownerGeometryReview": {
+    "disposition": "Runtime geometry/export needs replacement or repair before promotion",
+    "finding": "Roof envelopes removed by culling; source roof colors can transfer onto background receiver surfaces",
+    "followup": 1301,
+    "cyclesStudy": "cycles-study/",
+    "sourceAndProductionPackageChangedByStudy": false
+  }
+}

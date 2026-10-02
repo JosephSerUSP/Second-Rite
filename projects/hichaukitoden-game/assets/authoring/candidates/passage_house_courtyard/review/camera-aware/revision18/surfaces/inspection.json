@@ -1,0 +1,49 @@
+{
+  "sourceSHA256": "91077aeb5b9b51fd6ab8dd95a973326cedaf412ba5b7d468d21d7a184a95a0a3",
+  "sourceMeshes": 2407,
+  "runtimeMeshes": 1,
+  "renderProfile": {
+    "name": "draft",
+    "engine": "CYCLES",
+    "samples": 64,
+    "supersample": 1,
+    "denoise": true,
+    "atlas_denoise": "oidn-fast",
+    "atlas_texel_align": true,
+    "max_bounces": 4,
+    "diffuse_bounces": 2,
+    "glossy_bounces": 2,
+    "seed": 3201
+  },
+  "views": [
+    {
+      "mode": "source-clay",
+      "views": [
+        "environment-envelope",
+        "cistern"
+      ]
+    },
+    {
+      "mode": "source-beauty",
+      "views": [
+        "environment-envelope",
+        "cistern"
+      ]
+    },
+    {
+      "mode": "runtime-clay",
+      "views": [
+        "environment-envelope",
+        "cistern"
+      ]
+    },
+    {
+      "mode": "runtime-atlas",
+      "views": [
+        "environment-envelope",
+        "cistern"
+      ]
+    }
+  ],
+  "interpretation": "Workbench clay with backface culling is geometry evidence. Emission atlas views remove additional scene lighting; baked shading remains in the texture. Source file unchanged."
+}

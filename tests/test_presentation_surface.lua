@@ -305,5 +305,19 @@ do
         "horizon is anchored in canonical composition space")
 end
 
+-- Map-authored camera centres are Classic coordinates, including intentional
+-- off-centre framing. Surface expansion must translate rather than reuse them.
+do
+    local viewport = require("presentation.viewport_3d")
+    local camera = {projectionFrame={canonicalCenterX=136,canonicalHorizonY=90}}
+    for _, fixture in ipairs({{"classic",136,90},{"wide",221,90},{"mobile_portrait",136,114}}) do
+        surface.setProfile(fixture[1])
+        local x,y = viewport.authoredCompositionCenter(camera)
+        eq(x,fixture[2],fixture[1] .. " authored camera centre translated")
+        eq(y,fixture[3],fixture[1] .. " authored camera horizon translated")
+        eq(surface.compositionWidth(),256,fixture[1] .. " camera logical width stays Classic")
+    end
+end
+
 surface.setProfile(original)
 print("presentation surface tests passed")

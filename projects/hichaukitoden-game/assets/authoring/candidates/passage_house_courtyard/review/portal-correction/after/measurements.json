@@ -1,0 +1,647 @@
+{
+  "revision": "12 scaffold: outward clipped fanlight, closed reveals, structural box receivers and sampled source correspondence",
+  "sourceSHA256": "74100329fb6478916e028173fac4805c4f815adc9138dc10fa31a709dafa753e",
+  "sourceBytes": 1791930,
+  "sourceTriangleInterpretation": "Evaluated beauty geometry across the entire editable source, including off-range buildings. Runtime counts are the exported view envelope; the ratio is not a pure same-surface decimation ratio.",
+  "package": {
+    "triangleCount": 3727,
+    "vertexCount": 2731,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1286948,
+    "renderMeshSizeBytes": 340227,
+    "packageSizeBytes": 1627762
+  },
+  "packageSHA256": {
+    "bake-correspondence.json": "2b663e3f554b407d5b7e84aec7055c321e5329035390d6e96d6263ce422831e9",
+    "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+    "environment.json": "dea749a0e9ead5ad37f8758e22c432cce35c20da5a3defdf5173080c245bc88a",
+    "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+    "environment.obj": "124d4bd41d2a7a1d88696beab9149205f4a86d07ea7854255a24a910289e32b4",
+    "environment.png": "81142dcba4614ae90630097e32e1674275e621015861f91dd4d9551232534d76"
+  },
+  "bounds": [
+    -14.0,
+    -10.4,
+    -0.14,
+    18.23,
+    21.4,
+    8.81
+  ],
+  "anchors": {
+    "cortico_entry": {
+      "id": "cortico_entry",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "lodging_entry": {
+      "id": "lodging_entry",
+      "position": [
+        0.0,
+        11.5,
+        0.3
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "atlasUVOccupancyRasterized": 0.9194202423095703,
+  "atlasMeasurement": "Union of OBJ UV polygons at 1024x1024, allocated coverage rather than detail quality.",
+  "reviewPositions": [
+    0,
+    0.5,
+    2,
+    5,
+    8,
+    11.5,
+    12
+  ],
+  "cameraCalibration": {
+    "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",
+    "record": {
+      "baseViewportHeight": 144,
+      "baseViewportWidth": 256,
+      "contract": "thestra.world-camera-calibration",
+      "coordinateSystem": {
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "handedness": "right-handed",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "worldHorizontal": "XY",
+        "worldUp": "+Z"
+      },
+      "eye": {
+        "x": -19.98914649569168,
+        "y": 6,
+        "z": 1.3212953588491052
+      },
+      "farPlane": 128,
+      "fovHalfX": 0.24999999999999997,
+      "fovHalfY": 0.14062499999999997,
+      "nearPlane": 0.05,
+      "orientation": {
+        "forwardX": 1,
+        "forwardY": 0,
+        "pitchRadians": -0.30543261909900765,
+        "rightX": 0,
+        "rightY": 1
+      },
+      "projection": "perspective",
+      "projectionScale": {
+        "x": 1,
+        "y": 1
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -161.43297990603955,
+      "targetHeight": 240,
+      "targetWidth": 256,
+      "version": 1,
+      "viewportCenterX": 128,
+      "viewportCenterY": -71.43297990603955
+    }
+  },
+  "sourceReview": {
+    "floorSamples": [
+      0,
+      2,
+      8,
+      12,
+      1.0,
+      5.0,
+      10.0,
+      0.5,
+      11.5
+    ],
+    "frames": [
+      {
+        "width": 256,
+        "y": 0,
+        "z": 0.0,
+        "feet": [
+          35.42835998535156,
+          128.00007104873657
+        ],
+        "head": [
+          35.42835998535156,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.14264678955078,
+          128.00007104873657
+        ],
+        "head": [
+          49.14264678955078,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 2,
+        "z": 0.0,
+        "feet": [
+          90.28550720214844,
+          128.00007104873657
+        ],
+        "head": [
+          90.28550720214844,
+          80.0000810623169
+        ],
+        "height": 47.99998998641968
+      },
+      {
+        "width": 256,
+        "y": 5,
+        "z": 0.15000057220458984,
+        "feet": [
+          126.25123596191406,
+          123.60492467880249
+        ],
+        "head": [
+          126.25123596191406,
+          75.72062015533447
+        ],
+        "height": 47.88430452346802
+      },
+      {
+        "width": 256,
+        "y": 8,
+        "z": 0.3000001907348633,
+        "feet": [
+          131.36529541015625,
+          119.23091411590576
+        ],
+        "head": [
+          131.36529541015625,
+          71.46177291870117
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 256,
+        "y": 11.5,
+        "z": 0.3000001907348633,
+        "feet": [
+          206.1313934326172,
+          119.23089981079102
+        ],
+        "head": [
+          206.1313934326172,
+          71.46175861358643
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 256,
+        "y": 12,
+        "z": 0.2999992370605469,
+        "feet": [
+          219.77972412109375,
+          119.23092842102051
+        ],
+        "head": [
+          219.77972412109375,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 0,
+        "z": 0.0,
+        "feet": [
+          35.428346022963524,
+          128.00007820129395
+        ],
+        "head": [
+          35.428346022963524,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 0.5,
+        "z": 0.0,
+        "feet": [
+          49.142632842063904,
+          128.00007820129395
+        ],
+        "head": [
+          49.142632842063904,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 2,
+        "z": 0.0,
+        "feet": [
+          90.28549012541771,
+          128.00007820129395
+        ],
+        "head": [
+          90.28549012541771,
+          80.0000810623169
+        ],
+        "height": 47.99999713897705
+      },
+      {
+        "width": 426,
+        "y": 5,
+        "z": 0.15000057220458984,
+        "feet": [
+          126.25122034549713,
+          123.60492467880249
+        ],
+        "head": [
+          126.25122034549713,
+          75.72063446044922
+        ],
+        "height": 47.88429021835327
+      },
+      {
+        "width": 426,
+        "y": 8,
+        "z": 0.3000001907348633,
+        "feet": [
+          131.3653001189232,
+          119.23091411590576
+        ],
+        "head": [
+          131.3653001189232,
+          71.46177291870117
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 11.5,
+        "z": 0.3000001907348633,
+        "feet": [
+          206.13138753175735,
+          119.23089981079102
+        ],
+        "head": [
+          206.13138753175735,
+          71.46175861358643
+        ],
+        "height": 47.76914119720459
+      },
+      {
+        "width": 426,
+        "y": 12,
+        "z": 0.2999992370605469,
+        "feet": [
+          219.7797292470932,
+          119.23092842102051
+        ],
+        "head": [
+          219.7797292470932,
+          71.46178722381592
+        ],
+        "height": 47.76914119720459
+      }
+    ],
+    "sourceBeautyTriangles": 191648,
+    "sourceMeshRoles": {
+      "both": 257,
+      "source": 1546,
+      "receiver": 31
+    },
+    "historicalSourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec"
+  },
+  "currentReviewSHA256": {
+    "classic\\0.5.png": "d05d715111d122999682d34052c4602e7d80875154ecb23ee2ab91fb41b88fdc",
+    "classic\\0.png": "584c75bdedc75cefe2ecba617609d66f729e7b064f4f204dda8f53f9f904162b",
+    "classic\\11.5.png": "208e50eae0e92201cf85e8fce0380525a3143cd4c5339af6d39393b6794a13d0",
+    "classic\\12.png": "440913998ab967452a3e8812884a1aa0ba6705905ff77b66f24b1bb7b241ad6d",
+    "classic\\2.png": "b17af39a8d4f51a93b4acd8365a833b9b11f24ea88118b7d9176d54e42eeb089",
+    "classic\\5.png": "8da3025085bbfe2088b76f4aa90d3e0bf0148831feeee6eea463bd2d554cd68f",
+    "classic\\8.png": "ebebf3d29c00c178b46a2faa57a95ab9df4cbbff2811e5e348a0dee9efd90c97",
+    "wide\\0.5.png": "87dc30caa7dc27ec0c938d17af2d9687fa566394e8c4fdd75dd4bdda27126887",
+    "wide\\0.png": "d481e8c71723ac2af358962c757fe4de29f6ea429c223f3fc5c63a5ab9132b07",
+    "wide\\11.5.png": "b7ea4838409f9de4762f282fed2d5fabf31a5b6f74a6926d0064d9a33c8e2d3a",
+    "wide\\12.png": "ee7e8152684ed5e7350a9332c780a3ec9607ab4711f9adca7170f461a3f709cc",
+    "wide\\2.png": "5e5c7b4b656b08e541ad28b13d0cefbbe449e4c4648209e6e9e80f32a04f9bbf",
+    "wide\\5.png": "911522ba34d47578be48338915394ad5edddbe4809f47e6fffd3d6aa4d18c695",
+    "wide\\8.png": "bf625c5a22d244ca831cdcd5a50f5d27e19394539bc83063445d3f300b254da5"
+  },
+  "previousRevision": {
+    "sourceSHA256": "1406e45686efa4adc663889e034ebf388023d82933d737555624ed83319ed893",
+    "package": {
+      "triangleCount": 6718,
+      "vertexCount": 4039,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 181106,
+      "renderMeshSizeBytes": 605009,
+      "packageSizeBytes": 786707
+    },
+    "review": "before-assemblies/",
+    "ownerDisposition": "Rejected as weak geometry, textures and lighting"
+  },
+  "olderRevision": {
+    "sourceSHA256": "42374ea4684bba944c3b8c659ea2f459c7c164dfb601df24e2da436feea69f50",
+    "package": {
+      "triangleCount": 6552,
+      "vertexCount": 3884,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 163875,
+      "renderMeshSizeBytes": 587326,
+      "packageSizeBytes": 753866
+    },
+    "cameraCalibration": {
+      "source": "32.json#/traversal/camera resolved by runtime/presentation/world_camera_calibration.lua",
+      "pitchDegrees": -17.5,
+      "distance": 19.98914649569168,
+      "eyeHeight": 1.3212953588491052,
+      "projectionWindowOffsetY": -161.43297990603955,
+      "canonicalHorizonY": 90,
+      "actorHeightPixelsFlat": 48,
+      "feetYFlat": 128
+    },
+    "review": "before-sol/"
+  },
+  "exportSeconds": 64.8,
+  "exportTimingInterpretation": "Separate fresh Blender processes on the same machine, including launch, preparation, bake and packaging; no process-local cache reuse claimed.",
+  "renderSettings": {
+    "backend": "Cycles selected-to-active",
+    "exposureEV": 0,
+    "samples": 128,
+    "atlasSize": 1024,
+    "device": "OptiX GPU",
+    "historicalSourceReview": "Unchanged EEVEE 64-sample source captures; current source hash unchanged"
+  },
+  "verification": {
+    "G1": "VALIDATE OK",
+    "stagedUnit": "ALL UNIT TESTS OK; no failed assertions in final log; 7 Effekseer world-effect assertions unavailable",
+    "targetedPython": "25 focused Blender tests passed, including missing/wrong source negative controls and structural culling preservation",
+    "candidateNodeTests": "2 passed: profile/history and geography",
+    "environmentSources": "OK",
+    "townCheck": "10 generated maps and 35 door edges/arrival anchors passed",
+    "libraryHashes": "VENDORED ASSETS OK",
+    "floorReview": "Controls, intermediate samples and both landings passed",
+    "offline": "Current scaffold build/export/source inspection used network-denying Blender wrapper; this denies Python sockets, not machine networking.",
+    "nativeCapture": "Classic and Wide with Walker/menu at seven positions including bounds; owner PLAYED remains outstanding",
+    "followups": {
+      "1298": "Stale exterior authoring brief",
+      "1299": "Boundary suite failure not propagated by unit runner"
+    }
+  },
+  "interpretation": "Module studies are neutral studio source inspection, not runtime rendering. Native images prove the exported composition, not owner acceptance. The previous owner-rejected revision is preserved separately.",
+  "cameraTracking": {
+    "minOffsetX": -72,
+    "maxOffsetX": 72,
+    "source": "32.json#/traversal/camera/tracking",
+    "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
+  },
+  "moduleInspectionSourceSHA256": "3fa21edac0f10f8d9339f8e447f3f2121bbd99758983cbdc75cf356a4412db66",
+  "moduleInspectionNote": "Historical revision 10 module studies; current revision 12 source is separately hashed. These images are not a current whole-source capture.",
+  "ownerGeometryReview": {
+    "disposition": "Runtime geometry/export needs replacement or repair before promotion",
+    "finding": "Roof envelopes removed by culling; source roof colors can transfer onto background receiver surfaces",
+    "followup": 1301,
+    "cyclesStudy": "cycles-study/",
+    "sourceAndProductionPackageChangedByStudy": false,
+    "currentStatus": "Fanlight, reveals and frame correspondence corrected; 112 sampled rays reach intended sources. Dark passage recess and complete all-surface/angle visual acceptance remain open in #1301."
+  },
+  "currentExport": {
+    "stats": {
+      "triangleCount": 3727,
+      "vertexCount": 2731,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 1286948,
+      "renderMeshSizeBytes": 340227,
+      "packageSizeBytes": 1627762
+    },
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 128,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 128,
+        "supersample": 1,
+        "denoise": false,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 1804,
+      "correspondence": {
+        "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+        "extrusion": 0.15000000596046448,
+        "maxRayDistance": 1.0,
+        "bindings": [
+          {
+            "receiver": "Court door leaf target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal fanlight",
+            "samples": 64,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal -1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal 1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_l target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_r target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_lintel target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          }
+        ],
+        "errors": []
+      }
+    },
+    "rasterizedUVCoverage": 0.9204463958740234,
+    "hashes": {
+      "bake-correspondence.json": "2b663e3f554b407d5b7e84aec7055c321e5329035390d6e96d6263ce422831e9",
+      "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+      "environment.json": "dea749a0e9ead5ad37f8758e22c432cce35c20da5a3defdf5173080c245bc88a",
+      "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+      "environment.obj": "124d4bd41d2a7a1d88696beab9149205f4a86d07ea7854255a24a910289e32b4",
+      "environment.png": "81142dcba4614ae90630097e32e1674275e621015861f91dd4d9551232534d76"
+    }
+  },
+  "timings": {
+    "finalCourtyardWholeProcess": 64.8,
+    "earlierCentralCyclesFirst": 66.6,
+    "earlierCentralCyclesRepeat": 64.9,
+    "earlierPadaria": 21.4,
+    "note": "Earlier timings are revision 11; no revision 12 warm repeat measured."
+  },
+  "previousExportMeasurements": "eevee-before-central-cycles/measurements.json",
+  "historicalSourceCounts": {
+    "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+    "sourceBeautyTriangles": 191648,
+    "sourceMeshRoles": {
+      "both": 257,
+      "source": 1546,
+      "receiver": 31
+    }
+  },
+  "receiverCorrespondence": {
+    "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+    "extrusion": 0.15000000596046448,
+    "maxRayDistance": 1.0,
+    "bindings": [
+      {
+        "receiver": "Court door leaf target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal fanlight",
+        "samples": 64,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal splayed reveal -1",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal splayed reveal 1",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_jamb_l target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_jamb_r target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_lintel target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      }
+    ],
+    "errors": []
+  }
+}

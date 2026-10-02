@@ -1,5 +1,10 @@
 # Neutral EEVEE workflow (2026-09-30)
 
+This is the historical EEVEE migration stage. Maintained environment defaults
+subsequently returned to Cycles surface baking while retaining neutral exposure.
+See [the consolidation handoff](blender-workflow-consolidation-2026-10-01.md)
+for current policy and evidence.
+
 The owner chose neutral 0 EV and lighting corrections instead of exposure gains fitted to Cycles. Room plates and both atlas exporters now default to EEVEE; Cycles remains explicit for comparisons. The test-scene records retain probe density and lighting shims, with all exposure gains reset to zero. Room plates consume these same records. Zero exposure is applied even when a source document carries a different exposure.
 
 ![Padaria: explicit Cycles left, default EEVEE right, both 0 EV](eevee-neutral-proof-2026-09-30/padaria.png)

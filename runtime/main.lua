@@ -690,6 +690,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
@@ -1739,9 +1740,17 @@ end
 local function enterDoorEvent(ev)
     local commands = commandsForMapEvent(ev)
     if not commands then return false end
+    local lane = require("engine.bounded_lane")
+    local edgeExit = false
+    for _, doorway in ipairs((activeSession.townTraversal or {}).doorways or {}) do
+        if lane.eventFor(activeSession, doorway) == ev and lane.isEdgeDoorway(activeSession, doorway) then
+            edgeExit = true
+            break
+        end
+    end
     return door_transition.begin(function()
         runEventCommands(ev, commands)
-    end)
+    end, {approach = not edgeExit})
 end
 
 -- Which way the player is holding, from the authored bindings and the touch

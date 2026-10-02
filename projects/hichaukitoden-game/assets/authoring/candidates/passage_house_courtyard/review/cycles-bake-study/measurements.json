@@ -1,0 +1,62 @@
+{
+  "kind": "Actual Cycles combined selected-to-active atlas baking; no EEVEE camera-projection bake",
+  "budgets": "Sample counts calibrated toward total wall time, not a render time_limit knob",
+  "rows": [
+    {
+      "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+      "samples": 1,
+      "atlasSize": 1024,
+      "backend": "Cycles selected-to-active OptiX GPU",
+      "devices": [
+        "NVIDIA GeForce GTX 1650"
+      ],
+      "prepareSeconds": 22.785311699990416,
+      "bakeAndPackageSeconds": 5.791266699990956,
+      "totalSeconds": 28.576578399981372,
+      "geometry": "Roof winding repaired; open gables outward and protected; production source unchanged",
+      "layout": "Legacy deterministic UV allocation, no camera-projection bake",
+      "targetBudgetSeconds": 30,
+      "atlasMeanAbsRGB8bitVs400Samples": 2.353586196899414,
+      "comparisonNote": "Difference against the longest sample count, not ground-truth accuracy; includes unlit/unseen atlas texels."
+    },
+    {
+      "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+      "samples": 128,
+      "atlasSize": 1024,
+      "backend": "Cycles selected-to-active OptiX GPU",
+      "devices": [
+        "NVIDIA GeForce GTX 1650"
+      ],
+      "prepareSeconds": 25.48136129998602,
+      "bakeAndPackageSeconds": 34.67675010001403,
+      "totalSeconds": 60.15811140000005,
+      "geometry": "Roof winding repaired; open gables outward and protected; production source unchanged",
+      "layout": "Legacy deterministic UV allocation, no camera-projection bake",
+      "targetBudgetSeconds": 60,
+      "atlasMeanAbsRGB8bitVs400Samples": 0.2971404393513997,
+      "comparisonNote": "Difference against the longest sample count, not ground-truth accuracy; includes unlit/unseen atlas texels."
+    },
+    {
+      "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+      "samples": 400,
+      "atlasSize": 1024,
+      "backend": "Cycles selected-to-active OptiX GPU",
+      "devices": [
+        "NVIDIA GeForce GTX 1650"
+      ],
+      "prepareSeconds": 23.279646299983142,
+      "bakeAndPackageSeconds": 96.95499630001723,
+      "totalSeconds": 120.23464260000037,
+      "geometry": "Roof winding repaired; open gables outward and protected; production source unchanged",
+      "layout": "Legacy deterministic UV allocation, no camera-projection bake",
+      "targetBudgetSeconds": 120,
+      "atlasMeanAbsRGB8bitVs400Samples": 0.0,
+      "comparisonNote": "Difference against the longest sample count, not ground-truth accuracy; includes unlit/unseen atlas texels."
+    }
+  ],
+  "unbatchedCalibration": "One-sample runs exceeded 120 seconds and were stopped; profiling was inside the bake operator. No valid package was produced by those censored runs.",
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "registeredSourceAndProductionPackageChanged": false,
+  "knownDefects": "Portal fanlight retains 5/16 triangles and right splayed reveal 0/2 under culling; black entrance patches persist at high sample counts. These studies are not promotion-ready.",
+  "verification": "13 focused Cycles receiver, exterior bake and EEVEE receiver regressions passed; source sentinel image remained unchanged."
+}

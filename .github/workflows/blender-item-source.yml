@@ -58,6 +58,7 @@ jobs:
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blends_host.py' -v
           python -m unittest discover -s tools/blender/tests -p 'test_blender_locator.py' -v
+          python -m unittest tools.blender.tests.test_architectural_assemblies -v
 
       # Blender numbered backups are rejected repository-wide by the
       # repo-hygiene job in verify.yml (#671). The check that lived here
@@ -121,6 +122,9 @@ jobs:
 
       # The room exporter bakes its atlas with EEVEE when asked (--bake-backend eevee): a tiny room goes
       # through the real exporter with each backend, and the package contract must hold for both.
+      - name: Shared render profile contract
+        run: xvfb-run -a python -m unittest tools.blender.tests.test_render_profiles -v
+
       - name: EEVEE atlas bake backend
         shell: bash
         run: |
@@ -134,7 +138,10 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source -v
+          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source tools.blender.tests.test_bake_receivers tools.blender.tests.test_courtyard_recipe tools.blender.tests.test_cycles_surface_bake -v
+
+      - name: Curated assets are portable without network access
+        run: xvfb-run -a python tools/blender/vendor_assets.py check
 
       - name: Smoke a real saved Blend through the production compiler
         shell: bash

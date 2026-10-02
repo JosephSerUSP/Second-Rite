@@ -62,6 +62,15 @@ class AtlasAllocationTests(unittest.TestCase):
         for part in ("B", "C"):
             self.assertAlmostEqual(parts[part]["density"] / parts["A"]["density"], 1.0, delta=0.15)
 
+    def test_bias_is_a_continuous_priority_scale(self):
+        def hidden_ratio(name):
+            parts=self.probe[name]['parts']
+            return parts['C']['density']/parts['A']['density']
+        self.assertGreater(hidden_ratio('worldBias'),hidden_ratio('halfBias'))
+        self.assertGreater(hidden_ratio('halfBias'),hidden_ratio('peakBias'))
+        self.assertGreater(hidden_ratio('peakBias'),0)
+        self.assertIn('visibleIslandTexelsPerScreenPixelPercentiles',self.probe['peakBias']['report'])
+
 
 if __name__ == "__main__":
     unittest.main()

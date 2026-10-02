@@ -161,7 +161,7 @@
     {
       "id": 2502,
       "instanceId": "st-maria-lodging-exit_door",
-      "name": "Out to the Cortico",
+      "name": "Out to the arrival court",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -174,8 +174,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 26,
-          "arrival": "lodging_door"
+          "mapId": 32,
+          "arrival": "lodging_entry"
         }
       ],
       "direction": "away"

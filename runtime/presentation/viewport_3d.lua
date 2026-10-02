@@ -681,7 +681,7 @@ local function getCompositeTileCanvas(atlas, originX, originY, leftEdgeSpec, rig
         return compositeCache[key], compositeGlowCache[key]
     end
 
-    local canvas = love.graphics.newCanvas(ATLAS_TILE, ATLAS_TILE)
+    local canvas = surface.newRasterCanvas(ATLAS_TILE, ATLAS_TILE)
     canvas:setFilter("nearest", "nearest")
     -- Bake in ordinary 2D space. The finished canvas is an opaque wall tile
     -- (the base wall is drawn first), so the raycaster can light and fog it
@@ -738,7 +738,7 @@ local function getCompositeTileCanvas(atlas, originX, originY, leftEdgeSpec, rig
     -- exactly right -- it means "not emissive", not "missing data".
     local glowCanvas
     if atlas.glowImg then
-        glowCanvas = love.graphics.newCanvas(ATLAS_TILE, ATLAS_TILE)
+        glowCanvas = surface.newRasterCanvas(ATLAS_TILE, ATLAS_TILE)
         glowCanvas:setFilter("nearest", "nearest")
         love.graphics.setCanvas(glowCanvas)
         love.graphics.clear(0, 0, 0, 1)

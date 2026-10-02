@@ -175,6 +175,24 @@ interpreter.bindPresentation({
     listRenderSurfaces = function()
         return require("presentation.surface").profileIds()
     end,
+    setOutputPresentation = function(id)
+        local ok, err = presentation_output.setMode(id)
+        if not ok then
+            print("[output] " .. tostring(err))
+            return false
+        end
+        require("engine.user_settings").set("outputPresentationMode", id)
+        -- Output mode owns the final host transform. Recompute it immediately
+        -- so CRT/nearest changes do not wait for an unrelated resize event.
+        love.resize(love.graphics.getWidth(), love.graphics.getHeight())
+        return true
+    end,
+    getOutputPresentation = function()
+        return presentation_output.getMode()
+    end,
+    listOutputPresentations = function()
+        return presentation_output.modeIds()
+    end,
     setFont = function(name)
         local ui = require("presentation.ui")
         local fontSize = (config.ui and config.ui.fontSize) or 16

@@ -162,7 +162,7 @@ interpreter.bindPresentation({
         if not presentation_surface.getProfile(id) then return false end
         presentation_surface.setProfile(id)
         local w, h = presentation_surface.renderSize()
-        canvas = love.graphics.newCanvas(w, h)
+        canvas = presentation_surface.newRasterCanvas(w, h)
         -- Recompute the integer-nearest host transform for the new surface;
         -- love.resize owns that maths, so ask it rather than duplicating it.
         love.resize(love.graphics.getWidth(), love.graphics.getHeight())
@@ -1007,7 +1007,7 @@ function love.load(arg)
     presentation_surface.setProfile(surfaceProfile)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    canvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    canvas = presentation_surface.newRasterCanvas(renderWidth, renderHeight)
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader

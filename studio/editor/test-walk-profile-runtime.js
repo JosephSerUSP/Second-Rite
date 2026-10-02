@@ -24,32 +24,25 @@ function captureTownFrames(previewExe, gameRoot) {
 // This proof compares compositor pixels produced by two separate LÖVE
 // processes. Presentation-only animation (for example the continuously rolling
 // transfer arrows) must not turn wall-clock phase into an apparent spatial edit.
-// Pin time only inside the disposable staged town-proof harness: the runtime
-// under test is otherwise unchanged, while ordinary play keeps its live clock.
+// Pin time only around the town-proof dispatch in the disposable exported
+// runtime. Normal play and every non-proof path retain the live presentation
+// clock.
 function pinTownProofPresentationClock(gameRoot) {
-    const cliPath = path.join(gameRoot, 'engine', 'cli_tools.lua');
-    const source = fs.readFileSync(cliPath, 'utf8');
-    const begin = 'function cli.runTownProofFrames(loader)\n';
-    const nextFunction = '\n-- An automated playthrough.';
-    const start = source.indexOf(begin);
-    const finish = source.indexOf(nextFunction, start);
-    assert.ok(start >= 0 && finish > start,
-        'staged runtime exposes the town-proof harness boundary');
-
-    let proof = source.slice(start, finish);
-    assert.equal(proof.split(begin).length - 1, 1,
-        'town-proof harness has one function entry');
-    proof = proof.replace(begin, begin
-        + '    local __townProofGetTime = love.timer.getTime\n'
-        + '    love.timer.getTime = function() return 0 end\n');
-    const tail = '    print("TOWN PROOF END")\nend\n';
-    assert.equal(proof.split(tail).length - 1, 1,
-        'town-proof harness has one completion boundary');
-    proof = proof.replace(tail,
-        '    print("TOWN PROOF END")\n'
-        + '    love.timer.getTime = __townProofGetTime\n'
-        + 'end\n');
-    fs.writeFileSync(cliPath, source.slice(0, start) + proof + source.slice(finish));
+    const mainPath = path.join(gameRoot, 'main.lua');
+    const source = fs.readFileSync(mainPath, 'utf8');
+    const needle = 'cli_tools.runTownProofFrames(loader)';
+    assert.equal(source.split(needle).length - 1, 1,
+        'exported runtime exposes exactly one town-proof dispatch');
+    const fixedCall = [
+        '(function()',
+        '    local __townProofGetTime = love.timer.getTime',
+        '    love.timer.getTime = function() return 0 end',
+        '    local __townProofOk, __townProofErr = pcall(cli_tools.runTownProofFrames, loader)',
+        '    love.timer.getTime = __townProofGetTime',
+        '    if not __townProofOk then error(__townProofErr, 0) end',
+        'end)()',
+    ].join('\n');
+    fs.writeFileSync(mainPath, source.replace(needle, fixedCall));
 }
 
 test('a Port walk-profile edit changes runtime grounding and only its affected compositor sample',

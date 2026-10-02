@@ -100,6 +100,29 @@ function stripManifestPermission(filePath, permission) {
     fs.writeFileSync(filePath, original.replace(pattern, ''), 'utf8');
 }
 
+function configureUncompressedLoveAsset(filePath) {
+    const original = fs.readFileSync(filePath, 'utf8');
+    if (/noCompress[^\n]*['"]love['"]/.test(original)) return false;
+
+    const anchor = 'android {\n';
+    const first = original.indexOf(anchor);
+    if (first < 0 || original.indexOf(anchor, first + anchor.length) >= 0) {
+        throw new Error('Pinned love-android app/build.gradle must contain exactly one android block');
+    }
+
+    // game.love is already a ZIP archive. Asking AGP/aapt to deflate it again
+    // wastes work and can exhaust CompressAssetsWorkAction heap as the Project
+    // grows. Keep the portable game payload byte-identical inside the APK.
+    const insertion = [
+        'android {',
+        '    androidResources {',
+        "        noCompress += ['love']",
+        '    }',
+    ].join('\n') + '\n';
+    fs.writeFileSync(filePath, original.replace(anchor, insertion), 'utf8');
+    return true;
+}
+
 function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versionCode,
         sourceSha, loveAndroidRef, manifestPath } = {}) {
     if (!projectDir || !loveAndroidDir || !lovePath) {
@@ -142,6 +165,12 @@ function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versio
     }
     stripManifestPermission(androidManifestPath, RECORD_AUDIO_PERMISSION);
 
+    const appBuildGradlePath = path.join(wrapperRoot, 'app', 'build.gradle');
+    if (!fs.existsSync(appBuildGradlePath)) {
+        throw new Error(`love-android app/build.gradle is missing: ${appBuildGradlePath}`);
+    }
+    configureUncompressedLoveAsset(appBuildGradlePath);
+
     const embedPath = path.join(wrapperRoot, 'app', 'src', 'embed', 'assets', 'game.love');
     fs.mkdirSync(path.dirname(embedPath), { recursive: true });
     fs.copyFileSync(gameLove, embedPath);
@@ -166,7 +195,7 @@ function prepareAndroidDevPackage({ projectDir, loveAndroidDir, lovePath, versio
         fs.mkdirSync(path.dirname(output), { recursive: true });
         fs.writeFileSync(output, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
     }
-    return { manifest, embedPath, propertiesPath, androidManifestPath };
+    return { manifest, embedPath, propertiesPath, androidManifestPath, appBuildGradlePath };
 }
 
 function parseArgs(argv) {
@@ -209,6 +238,7 @@ module.exports = {
     MAX_ANDROID_VERSION_CODE,
     RECORD_AUDIO_PERMISSION,
     configureGradleProperties,
+    configureUncompressedLoveAsset,
     normalizeSourceSha,
     normalizeVersionCode,
     parseArgs,

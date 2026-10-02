@@ -228,7 +228,9 @@ local fired = {}
 local function dispatch(button) fired[#fired + 1] = button end
 virtual_input.press("dir", "UP")
 virtual_input.press("face", "A")
-assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")\neq(virtual_input.touchButton("face"), "A", "touch owner exposes canonical button")\nassert(#virtual_input.downButtons() == 2, "down button query reports active canonical holds")
+assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")
+eq(virtual_input.touchButton("face"), "A", "touch owner exposes canonical button")
+assert(#virtual_input.downButtons() == 2, "down button query reports active canonical holds")
 virtual_input.update(0, dispatch, 0.30, 0.06)
 eq(fired[1], "UP", "touch-down directional press")
 eq(fired[2], "A", "touch-down action press")
@@ -297,8 +299,8 @@ do
     local portrait = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
         select(2, surface.compositionOrigin()))
     eq(portrait.scale, classic.scale, "portrait must not rescale the sky either")
-    eq(portrait.horizonY, classic.horizonY + 24, "portrait horizon shifts with the composition")
-    eq(portrait.extraTop, 24 / classic.scale, "portrait extends upward by the revealed band")
+    eq(portrait.horizonY, classic.horizonY, "portrait horizon stays at canonical y")
+    eq(portrait.extraTop, 0, "portrait reserves its extra height below the composition")
     -- The load-bearing invariant: whatever the surface, the horizon sits at the
     -- same place in CANONICAL space. Only its render-space y moves.
     eq(portrait.horizonY - select(2, surface.compositionOrigin()), classic.backdropH,

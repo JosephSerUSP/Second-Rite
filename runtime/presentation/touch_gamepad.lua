@@ -6,6 +6,7 @@ local player_controller = require("engine.player_controller")
 local touch_gamepad = {}
 
 local SETTING = "touchGamepadEnabled"
+local DEVICE_PROFILE = "mobile_device"
 local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
 local inputContext = nil
@@ -21,8 +22,12 @@ function touch_gamepad.defaultEnabled()
     return isAndroid()
 end
 
--- Representative mobile surfaces. Layout is derived from surface geometry, so
--- future device-sized profiles do not require new input semantics.
+-- Representative fixed profiles remain useful for desktop previews/tests, but
+-- Android itself uses a device-matched logical surface. The canonical 256x240
+-- composition never changes:
+--   * host wider than classic -> add columns symmetrically at the sides;
+--   * host tighter than classic -> add rows only BELOW the composition.
+-- Controls inhabit only that added space.
 if not surface.getProfile("mobile_landscape") then
     surface.registerProfile("mobile_landscape", {
         renderWidth = 426, renderHeight = 240,
@@ -36,15 +41,52 @@ if not surface.getProfile("mobile_portrait") then
     })
 end
 
--- main.lua asks user_settings for renderSurfaceProfile before constructing its
--- canvas. Android is deliberately portrait-only for this first deployment lane,
--- so while the touch controller is enabled the platform profile overrides any
--- stale landscape preference from an earlier dev build.
+function touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight)
+    hostWidth = tonumber(hostWidth) or 0
+    hostHeight = tonumber(hostHeight) or 0
+    if hostWidth <= 0 or hostHeight <= 0 then
+        error("mobile device surface requires positive host dimensions", 2)
+    end
+
+    local cw, ch = surface.compositionSize()
+    local hostAspect = hostWidth / hostHeight
+    local classicAspect = cw / ch
+    local rw, rh, ox, oy
+
+    if hostAspect >= classicAspect then
+        rh = ch
+        rw = math.max(cw, math.floor(ch * hostAspect + 0.5))
+        ox = math.floor((rw - cw) / 2)
+        oy = 0
+    else
+        rw = cw
+        rh = math.max(ch, math.floor(cw / hostAspect + 0.5))
+        ox = 0
+        oy = 0
+    end
+
+    return {
+        renderWidth = rw,
+        renderHeight = rh,
+        compositionOriginX = ox,
+        compositionOriginY = oy,
+        fractionalOutputScale = true,
+    }
+end
+
+function touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
+    surface.registerProfile(DEVICE_PROFILE,
+        touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight))
+    user_settings.set("renderSurfaceProfile", DEVICE_PROFILE)
+    return DEVICE_PROFILE
+end
+
+-- LÖVE's Android resize/orientation path is intentionally not used here.
+-- Package orientation selects one stable host orientation, then startup derives
+-- one matching logical surface from the actual handset dimensions.
 if isAndroid() and user_settings.get(SETTING, nil) ~= false then
-    -- #1305: Android is portrait-only for now. LÖVE's resize path does not yet
-    -- provide a trustworthy orientation transition, so stale saved landscape
-    -- preferences must not fight the manifest orientation on later dev builds.
-    user_settings.set("renderSurfaceProfile", "mobile_portrait")
+    local w, h = love.graphics.getDimensions()
+    touch_gamepad.configureDeviceSurface(w, h)
 end
 
 function touch_gamepad.isEnabled()

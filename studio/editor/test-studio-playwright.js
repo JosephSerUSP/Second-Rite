@@ -179,6 +179,10 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
     const projectRoot = path.join(tempRoot, 'project');
     const termsPath = path.join(projectRoot, 'data', 'terms.json');
     const mapPath = path.join(projectRoot, 'data', 'maps', '1.json');
+    const authoredThemesPath = path.join(__dirname, 'themes.json');
+    const authoredThemesBytes = fs.readFileSync(authoredThemesPath);
+    const fixtureThemesPath = path.join(tempRoot, 'themes.json');
+    fs.writeFileSync(fixtureThemesPath, authoredThemesBytes);
     const diagnostics = [];
     let app = null;
     let electronProcess = null;
@@ -233,6 +237,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
                 EDITOR_PORT: String(editorPort),
                 RUNTIME_BRIDGE_PORT: String(bridgePort),
                 ELECTRON_DISABLE_GPU: '1',
+                HICHAUKITODEN_MAKER_THEMES_FILE: fixtureThemesPath,
             },
             timeout: 30000,
         });
@@ -802,6 +807,8 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         await applicationClosed;
         assert.equal(appClosed, true, 'coordinated shutdown must terminate the Electron application');
         mark(t, 'main close coordinated secondary shutdown and Electron exited');
+        assert.deepEqual(fs.readFileSync(authoredThemesPath), authoredThemesBytes,
+            'theme interaction must preserve the authored installation library byte-for-byte');
     } catch (error) {
         if (diagnostics.length) {
             error.message += '\nRenderer diagnostics:\n' + diagnostics.join('\n');

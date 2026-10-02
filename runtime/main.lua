@@ -162,7 +162,7 @@ interpreter.bindPresentation({
         if not presentation_surface.getProfile(id) then return false end
         presentation_surface.setProfile(id)
         local w, h = presentation_surface.renderSize()
-        canvas = love.graphics.newCanvas(w, h)
+        canvas = presentation_surface.newRasterCanvas(w, h)
         -- Recompute the integer-nearest host transform for the new surface;
         -- love.resize owns that maths, so ask it rather than duplicating it.
         love.resize(love.graphics.getWidth(), love.graphics.getHeight())
@@ -675,6 +675,7 @@ function love.load(arg)
             "test_reserve_list",
             "test_authored_storage",
             "test_presentation_surface",
+            "test_android_touch_boot",
             "test_render_surface_option",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
@@ -986,6 +987,12 @@ function love.load(arg)
         return
     end
     
+    -- Android's device-matched mobile profile must be registered only after
+    -- the native host window exists, but before the active surface is chosen.
+    -- It samples once: orientation/resizing remains package-owned rather than
+    -- rebuilding the LÖVE canvas live.
+    require("presentation.touch_gamepad").prepareAndroidSurface()
+
     -- Surface selection is a presentation concern. CLI fixtures above stay
     -- on their existing canonical canvases; normal play may choose a wider
     -- logical surface without changing authored UI coordinates. A command-
@@ -1001,7 +1008,7 @@ function love.load(arg)
     presentation_surface.setProfile(surfaceProfile)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    canvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    canvas = presentation_surface.newRasterCanvas(renderWidth, renderHeight)
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader

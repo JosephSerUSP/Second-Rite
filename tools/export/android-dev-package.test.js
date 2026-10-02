@@ -1,0 +1,147 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const test = require('node:test');
+const crypto = require('node:crypto');
+const androidPackage = require('./android-dev-package');
+
+function fixture() {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-android-package-'));
+    const projectDir = path.join(root, 'project');
+    const loveAndroidDir = path.join(root, 'love-android');
+    const lovePath = path.join(root, 'Second Gate.love');
+    fs.mkdirSync(path.join(projectDir, 'data'), { recursive: true });
+    fs.mkdirSync(path.join(loveAndroidDir, 'app', 'src', 'main'), { recursive: true });
+    fs.writeFileSync(path.join(loveAndroidDir, 'app', 'build.gradle'), [
+        'android {',
+        '    namespace "org.love2d.android.executable"',
+        '}',
+        '',
+    ].join('\n'));
+    fs.writeFileSync(path.join(projectDir, 'data', 'project.json'), JSON.stringify({
+        schemaVersion: 1,
+        name: 'Second Gate',
+        identity: 'SecondGate',
+        productName: 'Second Gate',
+        executableName: 'Second Gate',
+        buildSlug: 'second-gate',
+        windowTitle: 'Second Gate',
+        productVersion: '0.0.0-dev',
+        android: {
+            applicationId: 'io.github.josephserusp.hichaukitoden',
+            displayName: 'Second Gate',
+            orientation: 'landscape',
+        },
+    }, null, 2));
+    fs.writeFileSync(path.join(loveAndroidDir, 'gradle.properties'), [
+        '#app.name=LÖVE for Android',
+        'app.name_byte_array=76,195,150,86,69',
+        '',
+        'app.application_id=org.love2d.android',
+        'app.orientation=landscape',
+        'app.version_code=32',
+        'app.version_name=11.5a',
+        '',
+        'android.useAndroidX=true',
+        '',
+    ].join('\n'));
+    fs.writeFileSync(path.join(loveAndroidDir, 'app', 'src', 'main', 'AndroidManifest.xml'), [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+        '  <uses-permission android:name="android.permission.INTERNET" />',
+        '  <uses-permission android:name="android.permission.RECORD_AUDIO" />',
+        '  <application android:label="${NAME}" />',
+        '</manifest>',
+        '',
+    ].join('\n'));
+    fs.writeFileSync(lovePath, Buffer.from([0x50, 0x4b, 0x03, 0x04, 1, 2, 3]));
+    return { root, projectDir, loveAndroidDir, lovePath };
+}
+
+test('prepares one dev app around the canonical .love export', () => {
+    const f = fixture();
+    const manifestPath = path.join(f.root, 'android-build.json');
+    const result = androidPackage.prepareAndroidDevPackage({
+        projectDir: f.projectDir,
+        loveAndroidDir: f.loveAndroidDir,
+        lovePath: f.lovePath,
+        versionCode: '1790870400',
+        sourceSha: '3acc8c1eae5dce07815554373ceba22a946d17a8',
+        loveAndroidRef: '55feb38fa144f4734c26742389f279fb07d955c0',
+        manifestPath,
+    });
+
+    assert.equal(result.manifest.applicationId, 'io.github.josephserusp.hichaukitoden.dev');
+    assert.equal(result.manifest.displayName, 'Second Gate Dev');
+    assert.equal(result.manifest.versionCode, 1790870400);
+    assert.equal(result.manifest.versionName, '0.0.0-dev+android.1790870400.3acc8c1');
+    assert.equal(result.manifest.orientation, 'landscape');
+    assert.equal(result.manifest.microphonePermission, false);
+
+    const properties = fs.readFileSync(path.join(f.loveAndroidDir, 'gradle.properties'), 'utf8');
+    assert.match(properties, /^app\.name=Second Gate Dev$/m);
+    assert.match(properties, /^app\.application_id=io\.github\.josephserusp\.hichaukitoden\.dev$/m);
+    assert.match(properties, /^app\.version_code=1790870400$/m);
+    assert.match(properties, /^app\.version_name=0\.0\.0-dev\+android\.1790870400\.3acc8c1$/m);
+    assert.doesNotMatch(properties, /^app\.name_byte_array=/m);
+
+    const androidManifest = fs.readFileSync(result.androidManifestPath, 'utf8');
+    assert.match(androidManifest, /android\.permission\.INTERNET/);
+    assert.doesNotMatch(androidManifest, /android\.permission\.RECORD_AUDIO/);
+
+    const appBuildGradle = fs.readFileSync(result.appBuildGradlePath, 'utf8');
+    assert.match(appBuildGradle, /androidResources\s*\{[\s\S]*noCompress \+= \['love'\]/);
+    assert.equal((appBuildGradle.match(/noCompress/g) || []).length, 1);
+
+    const embedded = fs.readFileSync(result.embedPath);
+    assert.deepEqual(embedded, fs.readFileSync(f.lovePath));
+    assert.equal(result.manifest.loveSha256, crypto.createHash('sha256').update(embedded).digest('hex'));
+    assert.deepEqual(JSON.parse(fs.readFileSync(manifestPath, 'utf8')), result.manifest);
+});
+
+test('fails loud if the pinned wrapper no longer has the expected microphone declaration', () => {
+    const f = fixture();
+    const manifestPath = path.join(f.loveAndroidDir, 'app', 'src', 'main', 'AndroidManifest.xml');
+    fs.writeFileSync(manifestPath, '<manifest xmlns:android="http://schemas.android.com/apk/res/android"></manifest>\n');
+    assert.throws(() => androidPackage.stripManifestPermission(
+        manifestPath,
+        androidPackage.RECORD_AUDIO_PERMISSION,
+    ), /Expected exactly one android\.permission\.RECORD_AUDIO declaration/);
+});
+
+test('rejects package ids that would make Android identity ambiguous', () => {
+    const f = fixture();
+    const file = path.join(f.projectDir, 'data', 'project.json');
+    const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+    raw.android.applicationId = 'Second Gate';
+    fs.writeFileSync(file, JSON.stringify(raw));
+    assert.throws(() => androidPackage.readAndroidMetadata(f.projectDir), /lowercase dotted Android package id/);
+});
+
+test('rejects invalid or exhausted Android version codes', () => {
+    assert.throws(() => androidPackage.normalizeVersionCode('0'), /between 1/);
+    assert.throws(() => androidPackage.normalizeVersionCode('2100000001'), /between 1/);
+    assert.throws(() => androidPackage.normalizeVersionCode('12.5'), /positive integer/);
+    assert.equal(androidPackage.normalizeVersionCode('42'), 42);
+});
+
+test('rejects unsupported Android orientation before patching the wrapper', () => {
+    const f = fixture();
+    const file = path.join(f.projectDir, 'data', 'project.json');
+    const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+    raw.android.orientation = 'upside_down';
+    fs.writeFileSync(file, JSON.stringify(raw));
+    assert.throws(() => androidPackage.readAndroidMetadata(f.projectDir), /landscape or portrait/);
+});
+
+test('marks an already-zipped .love asset noCompress exactly once', () => {
+    const f = fixture();
+    const buildGradle = path.join(f.loveAndroidDir, 'app', 'build.gradle');
+    assert.equal(androidPackage.configureUncompressedLoveAsset(buildGradle), true);
+    assert.equal(androidPackage.configureUncompressedLoveAsset(buildGradle), false);
+    const source = fs.readFileSync(buildGradle, 'utf8');
+    assert.equal((source.match(/noCompress/g) || []).length, 1);
+});

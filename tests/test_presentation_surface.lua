@@ -1,11 +1,41 @@
 local surface = require("presentation.surface")
+local ui = require("presentation.ui")
 
 local function eq(actual, expected, label)
     assert(actual == expected, label .. ": expected " .. tostring(expected)
         .. ", got " .. tostring(actual))
 end
 
+local function near(actual, expected, tolerance, label)
+    assert(math.abs(actual - expected) <= tolerance,
+        label .. ": expected ~" .. tostring(expected) .. ", got " .. tostring(actual))
+end
+
 local original = surface.getProfileId()
+
+-- A logical game pixel is one backing texel regardless of host/Android DPI.
+do
+    local minFilter, magFilter, anisotropy = love.graphics.getDefaultFilter()
+    love.graphics.setDefaultFilter("linear", "linear")
+    local raster = surface.newRasterCanvas(13, 7)
+    local rasterMin, rasterMag = raster:getFilter()
+    eq(rasterMin, "linear", "DPI helper preserves inherited minification")
+    eq(rasterMag, "linear", "DPI helper preserves inherited magnification")
+    love.graphics.setDefaultFilter(minFilter, magFilter, anisotropy)
+    local lw, lh = raster:getDimensions()
+    local pw, ph = raster:getPixelDimensions()
+    eq(lw, 13, "game raster logical width")
+    eq(lh, 7, "game raster logical height")
+    eq(pw, 13, "game raster backing width")
+    eq(ph, 7, "game raster backing height")
+    eq(raster:getDPIScale(), 1, "game raster DPI")
+    raster:release()
+
+    local font = ui.loadFont("Lucida", 8)
+    assert(font, "DPI-neutral fallback font loads")
+    eq(font:getDPIScale(), 1, "game font DPI")
+    font:release()
+end
 
 surface.setProfile("classic")
 do
@@ -209,7 +239,7 @@ do
     eq(rw, 256, "mobile portrait width")
     eq(rh, 426, "mobile portrait height")
     eq(ox, 0, "mobile portrait origin x")
-    eq(oy, 24, "mobile portrait is biased upward")
+    eq(oy, 0, "mobile portrait composition starts at the top")
     local layout = touch_gamepad.layout()
     eq(layout.orientation, "portrait", "mobile portrait orientation")
     assert(#layout.buttons >= 8, "mobile portrait exposes full logical controller")
@@ -221,24 +251,42 @@ do
     end
 end
 
--- Semantic lifecycle: multi-touch direction + action, deterministic held repeat,
--- direction changes while held, release, and focus-loss style clearing.
+-- Device-matched mobile geometry preserves the authored 256x240 composition
+-- while using the handset's aspect ratio for controller-only space.
+do
+    local wideSpec = touch_gamepad.deviceSurfaceSpec(2400, 1080)
+    eq(wideSpec.renderWidth, 533, "20:9 landscape logical width")
+    eq(wideSpec.renderHeight, 240, "20:9 landscape keeps canonical height")
+    eq(wideSpec.compositionOriginX, 138, "20:9 landscape centers composition horizontally")
+    eq(wideSpec.compositionOriginY, 0, "20:9 landscape composition starts at top")
+    assert(wideSpec.fractionalOutputScale, "device surface opts into fractional output scaling")
+    surface.registerProfile("test_mobile_wide", wideSpec)
+    surface.setProfile("test_mobile_wide")
+    local scale, outX, outY = surface.outputTransform(2400, 1080)
+    near(scale, 4.5, 0.0001, "20:9 landscape uses full-height fractional scale")
+    near(outX, 0.75, 0.001, "20:9 landscape leaves only rounding sliver")
+    near(outY, 0, 0.001, "20:9 landscape fills host height")
+
+    local tallSpec = touch_gamepad.deviceSurfaceSpec(1080, 2400)
+    eq(tallSpec.renderWidth, 256, "tall host keeps canonical width")
+    assert(tallSpec.renderHeight > 240, "tall host expands logical surface downward")
+    eq(tallSpec.compositionOriginX, 0, "tall host composition remains left aligned")
+    eq(tallSpec.compositionOriginY, 0, "tall host adds all extra rows below composition")
+end
+
+-- Semantic touch ownership is presentation-only. Player dispatch/repeat is
+-- covered by player_membrane_spec; this fixture protects multi-touch state,
+-- direction changes, release, and focus-loss style clearing.
 virtual_input.clear()
-local fired = {}
-local function dispatch(button) fired[#fired + 1] = button end
 virtual_input.press("dir", "UP")
 virtual_input.press("face", "A")
 assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")
-virtual_input.update(0, dispatch, 0.30, 0.06)
-eq(fired[1], "UP", "touch-down directional press")
-eq(fired[2], "A", "touch-down action press")
-virtual_input.update(0.31, dispatch, 0.30, 0.06)
-eq(fired[3], "UP", "held directional repeat")
+eq(virtual_input.touchButton("face"), "A", "touch owner exposes canonical button")
+assert(#virtual_input.downButtons() == 2, "down button query reports active canonical holds")
 virtual_input.move("dir", "RIGHT")
 assert(not virtual_input.isDown("UP") and virtual_input.isDown("RIGHT"),
     "direction changes while touch remains active")
-virtual_input.update(0, dispatch, 0.30, 0.06)
-eq(fired[#fired], "RIGHT", "moved touch emits new logical direction")
+eq(virtual_input.touchButton("dir"), "RIGHT", "moved touch owns new canonical direction")
 virtual_input.release("face")
 virtual_input.release("dir")
 assert(not virtual_input.isDown("A") and not virtual_input.isDown("RIGHT"),
@@ -264,10 +312,54 @@ eq(decorated.config.optionsCommands[2].id, "touch_gamepad", "touch option semant
 assert(decorated.windows[1].content[1].formatRight:find("touch_gamepad", 1, true),
     "touch option displays ON/OFF state")
 
+-- #1307 integration: Android exposes the already device-matched startup surface
+-- as DEVICE in the authored ASPECT cycle without writing mobile-only data back
+-- into the Project.
+do
+    local originalGetOS = love.system.getOS
+    local originalGetDimensions = love.graphics.getDimensions
+    local okDevice, deviceErr
+    local deviceDecorated, deviceScene, options, deviceCount
+    okDevice, deviceErr = pcall(function()
+        love.system.getOS = function() return "Android" end
+        love.graphics.getDimensions = function() return 2400, 1080 end
+        surface.registerProfile("mobile_device",
+            touch_gamepad.deviceSurfaceSpec(2400, 1080))
+
+        deviceScene = {
+            id = "options",
+            config = { optionsCommands = { { id = "aspect", name = "ASPECT" } } },
+            windows = { {
+                content = { { listId = "config:optionsCommands", formatRight = "{sceneState.aspect}" } },
+            } },
+        }
+        local fakeLoader = {
+            engine = { renderSurfaces = { options = { "classic", "four_three", "wide" } } },
+            scenes = { deviceScene },
+        }
+        deviceDecorated = touch_gamepad.decorateOptions(fakeLoader)
+        touch_gamepad.decorateOptions(fakeLoader)
+        options = fakeLoader.engine.renderSurfaces.options
+        deviceCount = 0
+        for _, id in ipairs(options) do
+            if id == "mobile_device" then deviceCount = deviceCount + 1 end
+        end
+    end)
+    love.system.getOS = originalGetOS
+    love.graphics.getDimensions = originalGetDimensions
+
+    assert(okDevice, "DEVICE aspect decoration succeeds: " .. tostring(deviceErr))
+    eq(options[#options], "mobile_device", "Android ASPECT cycle appends device-matched surface")
+    eq(deviceCount, 1, "DEVICE aspect is appended exactly once")
+    assert(deviceDecorated == deviceScene, "loader-backed decorator still returns options scene")
+    assert(deviceScene.windows[1].content[1].formatRight:find("DEVICE", 1, true),
+        "DEVICE aspect receives a player-facing label")
+end
+
 -- Sky anchoring across surface heights. The panorama art is authored against
 -- the 240-line composition and has no vertical headroom, so a taller surface
 -- must not rescale the sky or repeat it on Y: the horizon stays put in
--- canonical space and the revealed band above is extended from the top row.
+-- canonical space; any extra mobile height lives below the composition.
 do
     local viewport_3d = require("presentation.viewport_3d")
     local PANORAMA_H = 60
@@ -297,8 +389,8 @@ do
     local portrait = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
         select(2, surface.compositionOrigin()))
     eq(portrait.scale, classic.scale, "portrait must not rescale the sky either")
-    eq(portrait.horizonY, classic.horizonY + 24, "portrait horizon shifts with the composition")
-    eq(portrait.extraTop, 24 / classic.scale, "portrait extends upward by the revealed band")
+    eq(portrait.horizonY, classic.horizonY, "portrait horizon stays at canonical y")
+    eq(portrait.extraTop, 0, "portrait reserves its extra height below the composition")
     -- The load-bearing invariant: whatever the surface, the horizon sits at the
     -- same place in CANONICAL space. Only its render-space y moves.
     eq(portrait.horizonY - select(2, surface.compositionOrigin()), classic.backdropH,
@@ -310,7 +402,7 @@ end
 do
     local viewport = require("presentation.viewport_3d")
     local camera = {projectionFrame={canonicalCenterX=136,canonicalHorizonY=90}}
-    for _, fixture in ipairs({{"classic",136,90},{"wide",221,90},{"mobile_portrait",136,114}}) do
+    for _, fixture in ipairs({{"classic",136,90},{"wide",221,90},{"mobile_portrait",136,90}}) do
         surface.setProfile(fixture[1])
         local x,y = viewport.authoredCompositionCenter(camera)
         eq(x,fixture[2],fixture[1] .. " authored camera centre translated")

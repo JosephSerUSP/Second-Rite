@@ -21,12 +21,6 @@ local CRT_SHADER = [[
     extern vec2 sourceSize;
     extern number outputScale;
 
-    vec4 sourcePixel(Image tex, vec2 pixel) {
-        vec2 hi = max(sourceSize - vec2(1.0), vec2(0.0));
-        vec2 p = clamp(pixel, vec2(0.0), hi);
-        return Texel(tex, (p + vec2(0.5)) / sourceSize);
-    }
-
     vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
         // Pixel centres are integer coordinates in this space.
         vec2 sourcePos = tc * sourceSize - vec2(0.5);
@@ -38,8 +32,11 @@ local CRT_SHADER = [[
         // without turning the low-resolution frame into ordinary bilinear blur.
         number row = floor(sourcePos.y + 0.5);
         number blendX = smoothstep(0.18, 0.82, fracPart.x);
-        vec4 leftPx = sourcePixel(tex, vec2(base.x, row));
-        vec4 rightPx = sourcePixel(tex, vec2(base.x + 1.0, row));
+        vec2 hi = max(sourceSize - vec2(1.0), vec2(0.0));
+        vec2 leftPixel = clamp(vec2(base.x, row), vec2(0.0), hi);
+        vec2 rightPixel = clamp(vec2(base.x + 1.0, row), vec2(0.0), hi);
+        vec4 leftPx = Texel(tex, (leftPixel + vec2(0.5)) / sourceSize);
+        vec4 rightPx = Texel(tex, (rightPixel + vec2(0.5)) / sourceSize);
         vec4 px = mix(leftPx, rightPx, blendX);
 
         // A source scanline is brightest around its centre and gently darker
@@ -142,10 +139,7 @@ function output.transformForMode(mode, w, h)
 end
 
 function output.transform(w, h)
-    w, h = w or dimensions()
-    if h == nil then
-        w, h = dimensions()
-    end
+    if w == nil or h == nil then w, h = dimensions() end
     return output.transformForMode(activeMode, w, h)
 end
 

@@ -10,6 +10,6 @@
   "android": {
     "applicationId": "io.github.josephserusp.secondgate",
     "displayName": "Second Gate",
-    "orientation": "landscape"
+    "orientation": "portrait"
   }
 }

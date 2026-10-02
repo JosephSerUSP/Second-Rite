@@ -221,26 +221,19 @@ do
     end
 end
 
--- Semantic lifecycle: multi-touch direction + action, deterministic held repeat,
--- direction changes while held, release, and focus-loss style clearing.
+-- Semantic touch ownership is presentation-only. Player dispatch/repeat is
+-- covered by player_membrane_spec; this fixture protects multi-touch state,
+-- direction changes, release, and focus-loss style clearing.
 virtual_input.clear()
-local fired = {}
-local function dispatch(button) fired[#fired + 1] = button end
 virtual_input.press("dir", "UP")
 virtual_input.press("face", "A")
 assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")
 eq(virtual_input.touchButton("face"), "A", "touch owner exposes canonical button")
 assert(#virtual_input.downButtons() == 2, "down button query reports active canonical holds")
-virtual_input.update(0, dispatch, 0.30, 0.06)
-eq(fired[1], "UP", "touch-down directional press")
-eq(fired[2], "A", "touch-down action press")
-virtual_input.update(0.31, dispatch, 0.30, 0.06)
-eq(fired[3], "UP", "held directional repeat")
 virtual_input.move("dir", "RIGHT")
 assert(not virtual_input.isDown("UP") and virtual_input.isDown("RIGHT"),
     "direction changes while touch remains active")
-virtual_input.update(0, dispatch, 0.30, 0.06)
-eq(fired[#fired], "RIGHT", "moved touch emits new logical direction")
+eq(virtual_input.touchButton("dir"), "RIGHT", "moved touch owns new canonical direction")
 virtual_input.release("face")
 virtual_input.release("dir")
 assert(not virtual_input.isDown("A") and not virtual_input.isDown("RIGHT"),

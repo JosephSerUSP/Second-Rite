@@ -1750,7 +1750,7 @@
       {
         "cmd": "SHOW_STRING_PICTURE",
         "id": 99,
-        "text": "ESC: Skip",
+        "text": "B / ESC: Skip",
         "x": 246,
         "y": 225,
         "anchor": "right",

@@ -407,6 +407,12 @@ local _, compositionOriginDeclarations = worldShader:gsub(
     "uniform mediump vec2 compositionOrigin;", "")
 check(compositionOriginDeclarations == 2,
     "World shader pins compositionOrigin to matching mediump precision in vertex and pixel stages")
+local worldShaderCompiles, compiledWorldShader = pcall(love.graphics.newShader, worldShader)
+check(worldShaderCompiles,
+    "World shader with explicit GLES precision still compiles on the desktop LÖVE backend")
+if worldShaderCompiles and compiledWorldShader and compiledWorldShader.release then
+    compiledWorldShader:release()
+end
 
 check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);", 1, true) ~= nil
         and worldShader:find("float ndcY;", 1, true) ~= nil

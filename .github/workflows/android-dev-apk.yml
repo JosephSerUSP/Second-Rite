@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-dev-apk-${{ github.ref }}
+  group: android-dev-apk-v2-${{ github.ref }}
   cancel-in-progress: true
 
 env:

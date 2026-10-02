@@ -15,11 +15,15 @@ on:
       - "projects/hichaukitoden-game/data/project.json"
       - "runtime/presentation/touch_gamepad.lua"
       - "runtime/presentation/surface.lua"
+      - "runtime/presentation/dock.lua"
+      - "runtime/presentation/retro_mesh_shader.lua"
       - "runtime/main.lua"
       - "runtime/engine/virtual_input.lua"
       - "runtime/engine/player_controller.lua"
       - "runtime/engine/scene_host.lua"
       - "tests/test_presentation_surface.lua"
+      - "tests/test_dock.lua"
+      - "tests/test_item_model_view.lua"
 
 permissions:
   contents: read

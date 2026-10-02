@@ -61,6 +61,21 @@ function virtual_input.release(id)
     return true
 end
 
+-- Device adapters may need to release the canonical controller button that a
+-- touch owned before mutating the touch table. This exposes only logical input,
+-- never presentation coordinates.
+function virtual_input.touchButton(id)
+    local touch = touches[id]
+    return touch and touch.button or nil
+end
+
+function virtual_input.downButtons()
+    local result = {}
+    for button in pairs(downCounts) do result[#result + 1] = button end
+    table.sort(result)
+    return result
+end
+
 function virtual_input.clear()
     touches = {}
     downCounts = {}

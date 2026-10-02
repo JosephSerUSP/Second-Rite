@@ -9,14 +9,20 @@ local ok, err = xpcall(function()
     love.system.getOS = function() return "Android" end
     love.graphics.getDimensions = function() return 1024, 768 end
 
-    -- Registration must survive hidden controls, and boot must preserve an
-    -- explicit ASPECT preference rather than resetting it to DEVICE.
+    -- Registration survives hidden controls. Unsafe saved ASPECT choices are
+    -- repaired only while touch is enabled: a phone must never boot into a
+    -- surface whose controller layout is empty.
     settings.pinForCapture({touchGamepadEnabled = false, renderSurfaceProfile = "mobile_device"})
     assert(touch.prepareAndroidSurface() == "mobile_device")
     surface.setProfile(settings.get("renderSurfaceProfile"))
-    settings.pinForCapture({renderSurfaceProfile = "classic"})
+    settings.pinForCapture({touchGamepadEnabled = false, renderSurfaceProfile = "classic"})
     touch.prepareAndroidSurface()
-    assert(settings.get("renderSurfaceProfile") == "classic", "boot overwrote ASPECT preference")
+    assert(settings.get("renderSurfaceProfile") == "classic",
+        "hidden controller should preserve an explicit ASPECT preference")
+    settings.pinForCapture({touchGamepadEnabled = true, renderSurfaceProfile = "classic"})
+    touch.prepareAndroidSurface()
+    assert(settings.get("renderSurfaceProfile") == "mobile_device",
+        "touch-enabled boot must repair an unsafe saved ASPECT")
     settings.pinForCapture()
     touch.prepareAndroidSurface()
     assert(settings.get("renderSurfaceProfile") == "mobile_device", "fresh Android boot needs controls")

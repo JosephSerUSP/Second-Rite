@@ -293,37 +293,42 @@ assert(decorated.windows[1].content[1].formatRight:find("touch_gamepad", 1, true
 do
     local originalGetOS = love.system.getOS
     local originalGetDimensions = love.graphics.getDimensions
-    love.system.getOS = function() return "Android" end
-    love.graphics.getDimensions = function() return 2400, 1080 end
-    touch_gamepad.configureDeviceSurface(2400, 1080)
+    local okDevice, deviceErr
+    local deviceDecorated, deviceScene, options, deviceCount
+    okDevice, deviceErr = pcall(function()
+        love.system.getOS = function() return "Android" end
+        love.graphics.getDimensions = function() return 2400, 1080 end
+        surface.registerProfile("mobile_device",
+            touch_gamepad.deviceSurfaceSpec(2400, 1080))
 
-    local deviceScene = {
-        id = "options",
-        config = { optionsCommands = { { id = "aspect", name = "ASPECT" } } },
-        windows = { {
-            content = { { listId = "config:optionsCommands", formatRight = "{sceneState.aspect}" } },
-        } },
-    }
-    local fakeLoader = {
-        engine = { renderSurfaces = { options = { "classic", "four_three", "wide" } } },
-        scenes = { deviceScene },
-    }
-    local deviceDecorated = touch_gamepad.decorateOptions(fakeLoader)
-    touch_gamepad.decorateOptions(fakeLoader)
+        deviceScene = {
+            id = "options",
+            config = { optionsCommands = { { id = "aspect", name = "ASPECT" } } },
+            windows = { {
+                content = { { listId = "config:optionsCommands", formatRight = "{sceneState.aspect}" } },
+            } },
+        }
+        local fakeLoader = {
+            engine = { renderSurfaces = { options = { "classic", "four_three", "wide" } } },
+            scenes = { deviceScene },
+        }
+        deviceDecorated = touch_gamepad.decorateOptions(fakeLoader)
+        touch_gamepad.decorateOptions(fakeLoader)
+        options = fakeLoader.engine.renderSurfaces.options
+        deviceCount = 0
+        for _, id in ipairs(options) do
+            if id == "mobile_device" then deviceCount = deviceCount + 1 end
+        end
+    end)
+    love.system.getOS = originalGetOS
+    love.graphics.getDimensions = originalGetDimensions
 
-    local options = fakeLoader.engine.renderSurfaces.options
+    assert(okDevice, "DEVICE aspect decoration succeeds: " .. tostring(deviceErr))
     eq(options[#options], "mobile_device", "Android ASPECT cycle appends device-matched surface")
-    local deviceCount = 0
-    for _, id in ipairs(options) do
-        if id == "mobile_device" then deviceCount = deviceCount + 1 end
-    end
     eq(deviceCount, 1, "DEVICE aspect is appended exactly once")
     assert(deviceDecorated == deviceScene, "loader-backed decorator still returns options scene")
     assert(deviceScene.windows[1].content[1].formatRight:find("DEVICE", 1, true),
         "DEVICE aspect receives a player-facing label")
-
-    love.system.getOS = originalGetOS
-    love.graphics.getDimensions = originalGetDimensions
 end
 
 -- Sky anchoring across surface heights. The panorama art is authored against

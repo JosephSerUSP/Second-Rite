@@ -39,8 +39,8 @@ end
 do
     local scale, x, y = output.transformForMode("crt", 320, 180)
     assert(scale < 1, "CRT small-host path should fit rather than crop")
-    near(x, 0, 1e-9, "small host horizontal fit")
-    assert(y >= 0, "small host vertical offset should remain on-screen")
+    near(x, (320 - 426 * scale) * 0.5, 1e-9, "small host horizontal centering")
+    near(y, 0, 1e-9, "small host vertical fit")
 end
 
 -- Native shader construction is part of the spike: if the current LÖVE backend

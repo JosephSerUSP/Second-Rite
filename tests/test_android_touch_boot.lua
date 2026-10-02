@@ -27,6 +27,23 @@ local ok, err = xpcall(function()
     touch.prepareAndroidSurface()
     assert(settings.get("renderSurfaceProfile") == "mobile_device", "fresh Android boot needs controls")
 
+    -- Android can settle into a wider immersive content area after love.load.
+    -- DEVICE must follow the later host instead of freezing the boot sample.
+    love.graphics.getDimensions = function() return 704, 372 end
+    touch.prepareAndroidSurface()
+    local bootProfile = surface.getProfile("mobile_device")
+    assert(bootProfile.renderWidth == 454 and bootProfile.renderHeight == 240,
+        "boot sample pins the expected narrow intermediate DEVICE")
+    local changed = touch.refreshAndroidSurface(856, 372)
+    local settledProfile = surface.getProfile("mobile_device")
+    assert(changed, "settled Android host must refresh DEVICE")
+    assert(settledProfile.renderWidth == 552 and settledProfile.renderHeight == 240,
+        "settled DEVICE must match the final handset aspect")
+    assert(settledProfile.compositionOriginX == 148,
+        "settled DEVICE recentres the canonical composition")
+    assert(not touch.refreshAndroidSurface(856, 372),
+        "identical resize must not churn the DEVICE profile")
+
     -- Check the complete hit-target rectangles, not only their centres. The
     -- first candidate gave 4:3 tablets no controls at all.
     for _, host in ipairs({{2400,1080}, {1024,768}, {1280,960}, {1100,1000},

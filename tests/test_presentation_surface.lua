@@ -1,4 +1,5 @@
 local surface = require("presentation.surface")
+local ui = require("presentation.ui")
 
 local function eq(actual, expected, label)
     assert(actual == expected, label .. ": expected " .. tostring(expected)
@@ -11,6 +12,24 @@ local function near(actual, expected, tolerance, label)
 end
 
 local original = surface.getProfileId()
+
+-- A logical game pixel is one backing texel regardless of host/Android DPI.
+do
+    local raster = surface.newRasterCanvas(13, 7)
+    local lw, lh = raster:getDimensions()
+    local pw, ph = raster:getPixelDimensions()
+    eq(lw, 13, "game raster logical width")
+    eq(lh, 7, "game raster logical height")
+    eq(pw, 13, "game raster backing width")
+    eq(ph, 7, "game raster backing height")
+    eq(raster:getDPIScale(), 1, "game raster DPI")
+    raster:release()
+
+    local font = ui.loadFont("Lucida", 8)
+    assert(font, "DPI-neutral fallback font loads")
+    eq(font:getDPIScale(), 1, "game font DPI")
+    font:release()
+end
 
 surface.setProfile("classic")
 do

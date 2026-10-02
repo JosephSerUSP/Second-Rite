@@ -105,7 +105,7 @@ class EeveeBackendTests(unittest.TestCase):
         self.assertEqual(record["backend"], "cycles")
         self.assertEqual(record["quality"]["samples"], 8)
         self.assertFalse(record["quality"]["denoise"])
-        self.assertFalse(record["quality"]["atlas_texel_align"])
+        self.assertEqual(record["texelAlignment"]["method"], "none")
 
 
 if __name__ == "__main__":

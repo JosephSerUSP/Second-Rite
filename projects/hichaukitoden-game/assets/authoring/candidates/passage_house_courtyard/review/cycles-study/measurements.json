@@ -1,0 +1,56 @@
+{
+  "sourceSHA256": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+  "blender": "5.2.2 LTS",
+  "backend": "OPTIX",
+  "devices": [
+    "NVIDIA GeForce GTX 1650"
+  ],
+  "resolution": [
+    426,
+    240
+  ],
+  "laneY": 5,
+  "exposureEV": 0,
+  "viewTransform": "AgX",
+  "denoiser": "OPENIMAGEDENOISE",
+  "adaptiveSampling": false,
+  "sampleCeiling": 1000000,
+  "budgetInterpretation": "Cycles integration time per image; actual wall time also includes synchronization and denoising. First Cycles frame is cold; later frames reuse persistent data.",
+  "eeveeReferenceSeconds": 28.58192090000375,
+  "frames": [
+    {
+      "budgetSeconds": 30,
+      "wallSeconds": 38.44595090000075,
+      "image": "cycles-30s.png"
+    },
+    {
+      "budgetSeconds": 60,
+      "wallSeconds": 69.80164459999651,
+      "image": "cycles-60s.png"
+    },
+    {
+      "budgetSeconds": 120,
+      "wallSeconds": 120.76972450001631,
+      "image": "cycles-120s.png"
+    }
+  ],
+  "nativeImageDifferences": {
+    "30": {
+      "meanAbsRGB8bitVs120": 0.195523604590506,
+      "p95MaxChannelDiff": 1.0,
+      "pixelsMaxDiffGreaterThan4Percent": 0.12226134585289515
+    },
+    "60": {
+      "meanAbsRGB8bitVs120": 0.09869587897756912,
+      "p95MaxChannelDiff": 1.0,
+      "pixelsMaxDiffGreaterThan4Percent": 0.0029342723004694834
+    }
+  },
+  "differenceInterpretation": "Differences to the longest budget, not error against ground truth. One view, same seed, denoised output.",
+  "frameSHA256": {
+    "cycles-120s.png": "0d1d09d110a5d34667c639eec5781f1fa70e71138e0a6f4bf7f404284d970118",
+    "cycles-30s.png": "13f0e17a2fca095d3c32dd565c02b279efba7a4918b52aae1fd2f95ef9291aac",
+    "cycles-60s.png": "2405be074b7f6f6d71be1d7c26a0dcca3724e1b0a257b16ec4c5b7b5a9380abb",
+    "eevee-reference.png": "d0781b4a77fe4c279bfba167652fa5123f335296de74ee184682c719fac40726"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "contractVersion": 1,
+  "environmentId": "alicias_padaria",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -3.6364,
+    -4.6533,
+    -0.35,
+    5.1867,
+    4.6333,
+    4.0
+  ],
+  "stats": {
+    "triangleCount": 3208,
+    "vertexCount": 1934,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1843900,
+    "renderMeshSizeBytes": 298505,
+    "packageSizeBytes": 2143204
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        6.1333,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "id": "exit_door",
+      "position": [
+        0.0,
+        7.0333,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "alicias_padaria.blend",
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 128,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 128,
+        "supersample": 1,
+        "denoise": false,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 47
+    },
+    "exportSeconds": 14.121265099995071
+  }
+}

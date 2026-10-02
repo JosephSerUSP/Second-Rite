@@ -545,79 +545,27 @@ class Exterior:
 
     def doorway(self, name, lane_y, *, width=1.15, height=2.25, x=None,
                 lintel=True, lamp=False):
-        """A panelled door in a facade, centred on a runtime lane position.
-
-        The door is the anchor: a runtime doorway names a lane Y, and this puts
-        the picture of a door at exactly that Y, so what the player sees and
-        what the provider tests are the same place.
-        """
-        base_x = self.back_x if x is None else float(x)
-        cy = self.y(lane_y)
-        # Construct the surround from separate members.  A solid slab behind
-        # the leaf reads as a pasted-on rectangle; jambs and a recessed leaf
-        # give the same layered depth as the owner's authored openings.
-        leaf = self.part("%s_leaf" % name, (0.12, width, height),
-                         (base_x - 0.015, cy, height / 2.0), self.wood)
-        jamb = 0.18
-        projection = 0.16
-        for side, tag in ((-1, "l"), (1, "r")):
-            self.part("%s_jamb_%s" % (name, tag),
-                      (projection, jamb, height + 0.18),
-                      (base_x - projection / 2.0 - 0.04,
-                       cy + side * (width / 2.0 + jamb / 2.0),
-                       (height + 0.18) / 2.0), self.stone)
-        self.part("%s_threshold" % name, (0.52, width + 0.42, 0.16),
-                  (base_x - 0.22, cy, 0.08), self.stone)
-        if lintel:
-            self.part("%s_lintel" % name, (projection + 0.1, width + 0.5, 0.24),
-                      (base_x - projection / 2.0 - 0.08, cy,
-                       height + 0.12), self.stone)
-            self.part("%s_drip" % name, (projection + 0.18, width + 0.68, 0.1),
-                      (base_x - projection / 2.0 - 0.13, cy,
-                       height + 0.29), self.terracotta)
+        """Build the shared adjustable door family at a runtime lane anchor."""
+        from opening_families import door
+        members = door(self, name, lane_y, width=width, height=height, x=x,
+                       lintel=lintel)
         if lamp:
+            base_x = self.back_x if x is None else float(x)
+            cy = self.y(lane_y)
             spot = (base_x - 0.3, cy + width / 2.0 + 0.3, height + 0.5)
             self.part("%s_lamp" % name, (0.22, 0.22, 0.3), spot,
                       self.lamplight)
             self.lamp_light("%s_lamp_source" % name, spot)
-        return leaf
+        return members[0]
 
     def window(self, name, lane_y, *, width=0.95, height=1.25, sill_z=1.15,
                x=None, shutters=True, grille=False, lit=False):
-        base_x = self.back_x if x is None else float(x)
-        cy = self.y(lane_y)
-        pane = self.part("%s_pane" % name, (0.08, width, height),
-                         (base_x - 0.015, cy, sill_z + height / 2.0),
-                         self.window_glow if lit else self.glass)
-        surround = 0.14
-        for side, tag in ((-1, "l"), (1, "r")):
-            self.part("%s_jamb_%s" % (name, tag),
-                      (0.16, surround, height + 0.22),
-                      (base_x - 0.1,
-                       cy + side * (width / 2.0 + surround / 2.0),
-                       sill_z + height / 2.0), self.stone)
-        self.part("%s_head" % name, (0.18, width + 0.42, 0.16),
-                  (base_x - 0.11, cy, sill_z + height + 0.11), self.stone)
-        self.part("%s_sill" % name, (0.38, width + 0.46, 0.14),
-                  (base_x - 0.16, cy, sill_z - 0.07), self.stone)
-        # A small wood frame and mullion keep the pane from reading as a black
-        # void at native resolution.
-        self.part("%s_frame_top" % name, (0.1, width, 0.08),
-                  (base_x - 0.08, cy, sill_z + height - 0.04), self.wood)
-        self.part("%s_frame_bottom" % name, (0.1, width, 0.08),
-                  (base_x - 0.08, cy, sill_z + 0.04), self.wood)
-        self.part("%s_mullion" % name, (0.1, 0.07, height),
-                  (base_x - 0.08, cy, sill_z + height / 2.0), self.wood)
-        if shutters:
-            for side, tag in ((-1, "l"), (1, "r")):
-                self.part("%s_shutter_%s" % (name, tag),
-                          (0.08, width * 0.52, height),
-                          (base_x - 0.16, cy + side * (width * 0.76),
-                           sill_z + height / 2.0), self.wood)
-        if grille:
-            self.part("%s_grille" % name, (0.06, width + 0.1, height + 0.1),
-                      (base_x - 0.2, cy, sill_z + height / 2.0), self.iron)
-        return pane
+        """Build the shared adjustable window family at a runtime lane anchor."""
+        from opening_families import window
+        members = window(self, name, lane_y, width=width, height=height,
+                         sill_z=sill_z, x=x, shutters=shutters,
+                         grille=grille, lit=lit)
+        return members[0]
 
     # -- the near side ----------------------------------------------------
     def foreground(self, name, lane_y, *, size, x=None, material_value=None,

@@ -334,7 +334,7 @@ end
 -- Sky anchoring across surface heights. The panorama art is authored against
 -- the 240-line composition and has no vertical headroom, so a taller surface
 -- must not rescale the sky or repeat it on Y: the horizon stays put in
--- canonical space and the revealed band above is extended from the top row.
+-- canonical space; any extra mobile height lives below the composition.
 do
     local viewport_3d = require("presentation.viewport_3d")
     local PANORAMA_H = 60
@@ -370,6 +370,20 @@ do
     -- same place in CANONICAL space. Only its render-space y moves.
     eq(portrait.horizonY - select(2, surface.compositionOrigin()), classic.backdropH,
         "horizon is anchored in canonical composition space")
+end
+
+-- Map-authored camera centres are Classic coordinates, including intentional
+-- off-centre framing. Surface expansion must translate rather than reuse them.
+do
+    local viewport = require("presentation.viewport_3d")
+    local camera = {projectionFrame={canonicalCenterX=136,canonicalHorizonY=90}}
+    for _, fixture in ipairs({{"classic",136,90},{"wide",221,90},{"mobile_portrait",136,90}}) do
+        surface.setProfile(fixture[1])
+        local x,y = viewport.authoredCompositionCenter(camera)
+        eq(x,fixture[2],fixture[1] .. " authored camera centre translated")
+        eq(y,fixture[3],fixture[1] .. " authored camera horizon translated")
+        eq(surface.compositionWidth(),256,fixture[1] .. " camera logical width stays Classic")
+    end
 end
 
 surface.setProfile(original)

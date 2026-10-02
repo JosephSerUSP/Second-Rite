@@ -56,6 +56,20 @@ function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     return normalX * x + tangentX * y, normalY * x + tangentY * y
 end
 
+-- Transition arrows point along local +Z after OBJ normalization. Their idle
+-- motion is a roll around that shaft, so the authored direction never wobbles
+-- and the marker remains spatially truthful while still reading as active.
+local TRANSITION_ARROW_SPIN_PERIOD = 2.0
+local function transitionArrowSpinAngle()
+    return (love.timer.getTime() % TRANSITION_ARROW_SPIN_PERIOD)
+        * (math.pi * 2 / TRANSITION_ARROW_SPIN_PERIOD)
+end
+
+local function spinTransitionArrowLocal(x, y, z, angle)
+    local cosA, sinA = math.cos(angle), math.sin(angle)
+    return x * cosA - y * sinA, x * sinA + y * cosA, z
+end
+
 -- Tileset atlas configuration. See docs/design/runtime/rendering/raycaster-tileset-lighting.md.
 -- Grid cells are 64x64px, 4 columns wide. Default row layout (no sidecar
 -- needed): row 0 = sky/ceiling, row 1 = wall, row 2 = door, row 3 = floor.
@@ -1452,6 +1466,7 @@ local function drawTownPrerender(session, inspection)
                 -- authored camera ever sees it.
                 local modelScale = tonumber(rawEv.modelScale) or 1
                 local isTransitionArrow = presentation.model:match("transition_arrow") ~= nil
+                local arrowSpin = isTransitionArrow and transitionArrowSpinAngle() or 0
                 local lanes = require("engine.bounded_lane")
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 for _, modelGroup in ipairs(model.groups or {}) do
@@ -1467,6 +1482,7 @@ local function drawTownPrerender(session, inspection)
                                 local lz = vertex[3]
                                 local worldX, worldY, worldZ
                                 if isTransitionArrow then
+                                    lx, ly, lz = spinTransitionArrowLocal(lx, ly, lz, arrowSpin)
                                     local point = worldView.transitionArrowWorldPoint(imageX, imageY,
                                         groundZ, modelScale, rawEv.direction, lx, ly, lz)
                                     worldX, worldY, worldZ = point.x, point.y, point.z
@@ -2796,6 +2812,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             model = objModel.load(spec.model)
         end
         local placed = {}
+        local transitionArrowSpin = spec.transitionArrowAxis and transitionArrowSpinAngle() or 0
         for _, modelGroup in ipairs(model.groups) do
             local transformSpan = buildProfiler.span("materialize.transformLightingBounds", "cpu")
             local vertices = {}
@@ -2806,10 +2823,14 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 local nx, ny, nz = vertex[6], vertex[7], vertex[8]
                 if spec.transitionArrowAxis then
                     -- obj_model normalizes the source OBJ from Y-up to
-                    -- runtime Z-up, so local +Z is the shaft. Rotate that
-                    -- shaft into the one authored ground axis here.
+                    -- runtime Z-up, so local +Z is the shaft. Roll the marker
+                    -- around that shaft first, then rotate the shaft into the
+                    -- one authored ground axis. The direction itself never
+                    -- changes; only the arrow's local cross-section spins.
                     local direction = spec.transitionArrowAxis
                     local rightX, rightY = direction.y, -direction.x
+                    lx, ly, lz = spinTransitionArrowLocal(lx, ly, lz, transitionArrowSpin)
+                    nx, ny, nz = spinTransitionArrowLocal(nx, ny, nz, transitionArrowSpin)
                     local arrowPoint = worldView.transitionArrowWorldPoint(originX, originY,
                         spec.transitionArrowGroundZ or originZ, spec.modelScale or 1,
                         spec.transitionArrowDirection, lx, ly, lz)
@@ -2852,7 +2873,8 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             transformSpan()
             buildProfiler.add("materialize.placedVertices", #vertices)
             local gpuSpan = buildProfiler.span("materialize.placedGpuMeshCreate", "graphics")
-            local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "static")
+            local meshUsage = spec.transitionArrowAxis and "stream" or "static"
+            local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", meshUsage)
             if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
             gpuSpan()
             placed[#placed + 1] = {
@@ -2863,11 +2885,72 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 bounds = #vertices > 0 and {
                     minX = minX, maxX = maxX, minY = minY, maxY = maxY,
                 } or nil,
+                transitionArrow = spec.transitionArrowAxis and {
+                    sourceVertices = modelGroup.vertices,
+                    color = modelGroup.color,
+                    originX = originX,
+                    originY = originY,
+                    groundZ = spec.transitionArrowGroundZ or originZ,
+                    scale = spec.modelScale or 1,
+                    direction = spec.transitionArrowDirection,
+                    axis = spec.transitionArrowAxis,
+                    angle = transitionArrowSpin,
+                } or nil,
             }
         end
         structure.modelSurfaces[cacheKey] = placed
         return placed
     end
+
+    local function refreshTransitionArrow(placed)
+        local arrow = placed.transitionArrow
+        if not arrow then return end
+
+        local angle = transitionArrowSpinAngle()
+        if math.abs(angle - (arrow.angle or 0)) < 0.0001 then return end
+
+        local direction = arrow.axis
+        local rightX, rightY = direction.y, -direction.x
+        local vertices = {}
+        local minX, maxX = math.huge, -math.huge
+        local minY, maxY = math.huge, -math.huge
+        for _, vertex in ipairs(arrow.sourceVertices or {}) do
+            local lx, ly, lz = spinTransitionArrowLocal(
+                vertex[1], vertex[2], vertex[3], angle)
+            local nx, ny, nz = spinTransitionArrowLocal(
+                vertex[6], vertex[7], vertex[8], angle)
+            local point = worldView.transitionArrowWorldPoint(
+                arrow.originX, arrow.originY, arrow.groundZ, arrow.scale,
+                arrow.direction, lx, ly, lz)
+            nx, ny, nz = nx * rightX + nz * direction.x,
+                nx * rightY + nz * direction.y, ny
+
+            minX, maxX = math.min(minX, point.x), math.max(maxX, point.x)
+            minY, maxY = math.min(minY, point.y), math.max(maxY, point.y)
+            local light = colorAt(point.x, point.y, point.z, false)
+            local directional = math.max(0.35,
+                0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+            local color = arrow.color
+            vertices[#vertices + 1] = {
+                point.x, point.y, vertex[4], vertex[5],
+                color[1], color[2], color[3], color[4],
+                light[1] * directional, light[2] * directional, light[3] * directional,
+                1, point.z,
+            }
+        end
+
+        placed.vertices = vertices
+        placed.bounds = #vertices > 0 and {
+            minX = minX, maxX = maxX, minY = minY, maxY = maxY,
+        } or nil
+        placed.mesh:setVertices(vertices)
+        -- The near-clip cache is camera-pose keyed. Animated geometry changes
+        -- under a stationary camera, so a previous clipped mesh is no longer
+        -- valid even when the camera itself has not moved.
+        placed.clipPose = nil
+        arrow.angle = angle
+    end
+
     local function queuePlacedModels(placedGroups)
         -- Keep projection depth positive on the CPU, but leave the final cut
         -- to the GPU's 0.05 near plane. Cutting triangle soup exactly at the
@@ -2876,6 +2959,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         local cpuClipPlane = 0.005
         local queueStarted = love.timer.getTime()
         for _, placed in ipairs(placedGroups) do
+            refreshTransitionArrow(placed)
             if not (profileVariant == "no-height" and placed.isHeightSurface) then
             profile.placedModelsVisited = profile.placedModelsVisited + 1
             if placed.isHeightSurface then

@@ -10,11 +10,15 @@ local SETTING = "touchGamepadEnabled"
 local DEVICE_PROFILE = "mobile_device"
 local MIN_CONTROL_GUTTER = 64
 local MIN_CONTROL_ROWS = 90
+local RESCUE_DOUBLE_TAP_SECONDS = 0.35
+local RESCUE_DOUBLE_TAP_RADIUS = 48
 local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
 local inputContext = nil
 local decorated = setmetatable({}, { __mode = "k" })
 local authoredSurfaceOptions = setmetatable({}, { __mode = "k" })
+local rescueTap = { time = nil, x = nil, y = nil }
+local rescueTouches = {}
 
 local function isAndroid()
     if not (love and love.system and love.system.getOS) then return false end
@@ -164,7 +168,48 @@ function touch_gamepad.setEnabled(value)
     value = value and true or false
     user_settings.set(SETTING, value)
     if not value then touch_gamepad.clearTouches() end
+    if value then
+        rescueTap.time, rescueTap.x, rescueTap.y = nil, nil, nil
+    end
     return value
+end
+
+local function rescueNow()
+    if love and love.timer and love.timer.getTime then return love.timer.getTime() end
+    return os.clock()
+end
+
+-- Hidden touch controls must never be a one-way door on a touch-only device.
+-- While the virtual gamepad is OFF, Android reserves touch input for one simple
+-- escape hatch: two nearby taps in quick succession anywhere on the host.
+-- Normal gameplay never sees this recognizer because it is inactive while the
+-- controller is visible.
+function touch_gamepad.rescueTap(id, x, y, now)
+    if not isAndroid() or touch_gamepad.isEnabled() then return false end
+    now = tonumber(now) or rescueNow()
+    x, y = tonumber(x) or 0, tonumber(y) or 0
+    rescueTouches[id] = true
+
+    local previousTime = rescueTap.time
+    local previousX, previousY = rescueTap.x, rescueTap.y
+    local closeInTime = previousTime
+        and now >= previousTime and (now - previousTime) <= RESCUE_DOUBLE_TAP_SECONDS
+    local closeInSpace = false
+    if closeInTime and previousX and previousY then
+        local dx, dy = x - previousX, y - previousY
+        closeInSpace = (dx * dx + dy * dy) <= RESCUE_DOUBLE_TAP_RADIUS * RESCUE_DOUBLE_TAP_RADIUS
+    end
+
+    if closeInTime and closeInSpace then
+        touch_gamepad.setEnabled(true)
+        local ok, scene_host = pcall(require, "engine.scene_host")
+        local state = ok and scene_host.getCurrentState and scene_host.getCurrentState() or nil
+        if state and state.v then state.v.touchGamepad = true end
+        return true
+    end
+
+    rescueTap.time, rescueTap.x, rescueTap.y = now, x, y
+    return true
 end
 
 -- Insets are logical render-surface pixels. Native platform glue can populate
@@ -292,7 +337,9 @@ local function hostToRender(x, y)
 end
 
 function touch_gamepad.touchpressed(id, x, y)
-    if not touch_gamepad.isEnabled() then return false end
+    if not touch_gamepad.isEnabled() then
+        return touch_gamepad.rescueTap(id, x, y)
+    end
     local rx, ry = hostToRender(x, y)
     local button = touch_gamepad.hitTest(rx, ry)
     if not button then return false end
@@ -302,7 +349,8 @@ function touch_gamepad.touchpressed(id, x, y)
 end
 
 function touch_gamepad.touchmoved(id, x, y)
-    if not touch_gamepad.isEnabled() then return false end
+    if rescueTouches[id] then return true end
+    if not touch_gamepad.isEnabled() then return isAndroid() end
     local rx, ry = hostToRender(x, y)
     local previous = virtual_input.touchButton(id)
     local button = touch_gamepad.hitTest(rx, ry)
@@ -318,6 +366,10 @@ function touch_gamepad.touchmoved(id, x, y)
 end
 
 function touch_gamepad.touchreleased(id)
+    if rescueTouches[id] then
+        rescueTouches[id] = nil
+        return true
+    end
     local button = virtual_input.touchButton(id)
     local released = virtual_input.release(id)
     if button and released and not virtual_input.isDown(button) then
@@ -391,7 +443,7 @@ function touch_gamepad.decorateOptions(source)
                 commands[#commands + 1] = {
                     id = "touch_gamepad",
                     name = "VIRTUAL GAMEPAD",
-                    help = "Show or hide the touch controller. Defaults on for Android.",
+                    help = "Show or hide the touch controller. On Android, double-tap anywhere to restore it when hidden.",
                 }
             end
             decorated[scene] = {

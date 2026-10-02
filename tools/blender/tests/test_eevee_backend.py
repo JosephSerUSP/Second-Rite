@@ -38,10 +38,12 @@ class EeveeBackendTests(unittest.TestCase):
             raise AssertionError(f"could not build the room:\n{made.stdout[-1500:]}\n{made.stderr[-800:]}")
         for backend in ("cycles", "eevee"):
             output = base / backend
+            # Compare backends under one UV policy: Cycles' export quality profile
+            # aligns atlas texels by default, whereas EEVEE uses its own settings.
             result = blender("-P", str(TOOLS / "export_room_environment.py"), "--",
                              "--blend", str(source), "--output", str(output), "--exit-y", "6.5",
                              "--atlas-size", "128", "--samples", "8", "--bake-backend", backend, "--cycles-device", "CPU",
-                             "--bake-supersample", "1")
+                             "--bake-supersample", "1", "--no-uv-texel-align")
             if "ROOM 3D EXPORT OK" not in result.stdout:
                 raise AssertionError(f"{backend} export failed:\n{result.stdout[-2500:]}\n{result.stderr[-1000:]}")
             cls.packages[backend] = output
@@ -103,6 +105,7 @@ class EeveeBackendTests(unittest.TestCase):
         self.assertEqual(record["backend"], "cycles")
         self.assertEqual(record["quality"]["samples"], 8)
         self.assertFalse(record["quality"]["denoise"])
+        self.assertEqual(record["texelAlignment"]["method"], "none")
 
 
 if __name__ == "__main__":

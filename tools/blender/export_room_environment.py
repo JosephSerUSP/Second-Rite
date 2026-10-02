@@ -54,6 +54,7 @@ import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
+import source_dependencies
 
 # Shared with the pre-rendered packages; both are derived from the calibrated
 # side-view camera in fixtures/town_sideview_camera.json.
@@ -263,9 +264,12 @@ def main() -> None:
                         help="lane Y of the exit door, in ENGINE space")
     parser.add_argument("--npc", default=None,
                         help="NAME=LANE_Y for the shopkeeper anchor")
+    parser.add_argument("--npc-x", type=float, default=0,
+                        help="ENGINE depth of the NPC anchor")
     args = parser.parse_args(argv)
 
     bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
+    source_dependencies.assert_available()
     source = sort_into_contract_collections()
     build_render_mesh(source, f"{args.blend.stem}_TH_RENDER", args.decimate, layout=args.atlas_layout,
                       atlas_size=args.atlas_size, view_bias=args.view_bias, view_floor=args.view_floor,
@@ -277,6 +281,8 @@ def main() -> None:
         key, value = args.npc.split("=")
         anchors[key] = float(value)
     build_anchors(anchors)
+    if args.npc:
+        bpy.data.objects[key].location.x = args.npc_x
     build_collision(args.span, args.ceiling)
 
     # The .blend saves a black world: the stager supplies the fill at RENDER

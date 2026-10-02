@@ -1792,6 +1792,15 @@ an additive bell-and-roots plate and exact string-picture title fade away.
 Later descents retain the slow world reveal but do not replay the discovery
 card.
 
+The Passage Office is map 33, a bounded-lane interior reached through the
+Passage Office transition in the Praca (map 17). Registrar Celina's existing
+registration and Crossing Writ command tree lives inside the office; its exit
+returns to the retained `npc_registrar` Praca anchor. That anchor keeps its
+historical identifier while serving the office entrance. The room consumes
+`st_maria_town/passage_office/environment.json`, derived from the adopted
+`passage_office.blend`. The owner approved its composition and explicitly
+waived a composition playtest before integration.
+
 The authored environmental encounters continue that relationship through the
 deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions
 and counterfeits Saban's stable; the Blood Chapel stages an unfinished Vigil

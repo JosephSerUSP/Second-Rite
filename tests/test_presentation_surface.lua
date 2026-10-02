@@ -209,7 +209,7 @@ do
     eq(rw, 256, "mobile portrait width")
     eq(rh, 426, "mobile portrait height")
     eq(ox, 0, "mobile portrait origin x")
-    eq(oy, 24, "mobile portrait is biased upward")
+    eq(oy, 0, "mobile portrait composition starts at the top")
     local layout = touch_gamepad.layout()
     eq(layout.orientation, "portrait", "mobile portrait orientation")
     assert(#layout.buttons >= 8, "mobile portrait exposes full logical controller")
@@ -228,7 +228,7 @@ local fired = {}
 local function dispatch(button) fired[#fired + 1] = button end
 virtual_input.press("dir", "UP")
 virtual_input.press("face", "A")
-assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")
+assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")\neq(virtual_input.touchButton("face"), "A", "touch owner exposes canonical button")\nassert(#virtual_input.downButtons() == 2, "down button query reports active canonical holds")
 virtual_input.update(0, dispatch, 0.30, 0.06)
 eq(fired[1], "UP", "touch-down directional press")
 eq(fired[2], "A", "touch-down action press")

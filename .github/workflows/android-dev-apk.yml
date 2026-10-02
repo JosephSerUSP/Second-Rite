@@ -14,6 +14,8 @@ on:
       - "tools/export/android-dev-package.test.js"
       - "projects/hichaukitoden-game/data/project.json"
       - "runtime/presentation/touch_gamepad.lua"
+      - "runtime/presentation/surface.lua"
+      - "runtime/main.lua"
       - "runtime/engine/virtual_input.lua"
       - "runtime/engine/player_controller.lua"
       - "runtime/engine/scene_host.lua"

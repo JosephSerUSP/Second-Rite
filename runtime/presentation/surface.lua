@@ -143,6 +143,21 @@ function surface.renderHeight()
     return profiles[activeProfileId].renderHeight
 end
 
+-- Game-space render targets are authored in logical pixels. They must not
+-- inherit Android/Retina DPI density: final host scaling (and eventually the
+-- CRT presentation pass) owns reconstruction onto the physical display.
+function surface.newRasterCanvas(width, height, settings)
+    local resolved = {}
+    for key, value in pairs(settings or {}) do resolved[key] = value end
+    if resolved.dpiscale ~= nil and resolved.dpiscale ~= 1 then
+        error("game raster canvases require dpiscale = 1", 2)
+    end
+    resolved.dpiscale = 1
+    local canvas = love.graphics.newCanvas(width, height, resolved)
+    canvas:setFilter("nearest", "nearest")
+    return canvas
+end
+
 function surface.compositionOrigin()
     local p = profiles[activeProfileId]
     return p.compositionOriginX, p.compositionOriginY

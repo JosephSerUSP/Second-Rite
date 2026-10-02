@@ -854,6 +854,25 @@ function viewport_3d.billboardCorners(x, y, z, width, height,
     }
 end
 
+-- Resolve one sprite-sheet frame's UV rectangle. Player side-view art is
+-- authored facing left; positive lane facing therefore mirrors horizontally.
+-- Event billboards pass nil and retain their authored orientation.
+function viewport_3d.billboardFrameUV(imageWidth, imageHeight,
+        frameWidth, frameHeight, frameIndex, facing)
+    frameWidth = frameWidth or imageWidth
+    frameHeight = frameHeight or imageHeight
+    frameIndex = frameIndex or 0
+    local columns = math.max(1, math.floor(imageWidth / frameWidth))
+    local col = frameIndex % columns
+    local row = math.floor(frameIndex / columns)
+    local u0 = col * frameWidth / imageWidth
+    local u1 = (col + 1) * frameWidth / imageWidth
+    local v0 = 1 - (row * frameHeight / imageHeight)
+    local v1 = 1 - ((row + 1) * frameHeight / imageHeight)
+    if facing ~= nil and facing > 0 then u0, u1 = u1, u0 end
+    return u0, v0, u1, v1
+end
+
 function viewport_3d.resolveEventPresentation(ev, session)
     if not ev then return { visual = nil } end
     ev = exploration.resolvePage(ev, session)
@@ -3118,26 +3137,23 @@ end
         return rawEv.x + 1.5, rawEv.y + 1.5, 0
     end
 
-    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex)
+    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex, facing)
         local centerX, centerY = x, y
         z = z or 0
         height = height or 1
         frameWidth = frameWidth or image:getWidth()
         frameHeight = frameHeight or image:getHeight()
         frameIndex = frameIndex or 0
-        local columns = math.max(1, math.floor(image:getWidth() / frameWidth))
-        local col = frameIndex % columns
-        local row = math.floor(frameIndex / columns)
         local width = height * frameWidth / frameHeight
         local groupForSprite = group(image)
         -- World quads are authored bottom-to-top. LÖVE image UVs are
         -- top-to-bottom, so the bottom vertex takes the upper edge of the
-        -- selected frame and the top vertex takes its lower edge. This is the
-        -- established billboard convention used before the frame-aware path.
-        local u0, v0 = col * frameWidth / image:getWidth(),
-            1 - (row * frameHeight / image:getHeight())
-        local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
-            1 - ((row + 1) * frameHeight / image:getHeight())
+        -- selected frame and the top vertex takes its lower edge. Facing is a
+        -- UV concern here: mirroring the world quad would also reverse its
+        -- camera-space geometry.
+        local u0, v0, u1, v1 = viewport_3d.billboardFrameUV(
+            image:getWidth(), image:getHeight(),
+            frameWidth, frameHeight, frameIndex, facing)
         local function spriteColor(wx, wy, z)
             if session.townTraversal then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
@@ -3200,7 +3216,7 @@ end
         if playerImage then
             local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
             addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
-                state.walkFrameIndex or 0)
+                state.walkFrameIndex or 0, state.facing or 1)
         end
     end
 

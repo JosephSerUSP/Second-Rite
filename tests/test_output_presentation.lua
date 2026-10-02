@@ -12,6 +12,32 @@ local originalMode = output.getMode()
 
 surface.setProfile("wide")
 
+-- Mobile nearest uses the same fractional fit as CRT so changing ASPECT cannot
+-- collapse WIDE to 1x merely because the handset is only ~1.5x in logical
+-- LÖVE units. Desktop keeps the historical integer-nearest contract below.
+do
+    local originalGetOS = love.system.getOS
+    love.system.getOS = function() return "Android" end
+    local scale, x, y = output.transformForMode("nearest", 856, 372)
+    near(scale, 372 / 240, 1e-9, "Android wide nearest fills host height")
+    near(x, (856 - 426 * scale) * 0.5, 1e-9, "Android wide nearest centering")
+    near(y, 0, 1e-9, "Android wide nearest vertical fit")
+    love.system.getOS = originalGetOS
+end
+
+-- Physical CRT calibration must include host DPI. This is the phone condition
+-- that made 1.55 logical scale actually ~2.7 physical pixels per source pixel.
+do
+    local originalWindowDpi = love.window and love.window.getDPIScale
+    local originalGraphicsDpi = love.graphics.getDPIScale
+    if love.window then love.window.getDPIScale = function() return 1.75 end end
+    love.graphics.getDPIScale = function() return 1.75 end
+    near(output.physicalOutputScale(1.55), 2.7125, 1e-9,
+        "CRT physical scale multiplies logical fit by host DPI")
+    if love.window then love.window.getDPIScale = originalWindowDpi end
+    love.graphics.getDPIScale = originalGraphicsDpi
+end
+
 -- Nearest remains the exact #199 integer contract.
 do
     local scale, x, y = output.transformForMode("nearest", 1000, 600)
@@ -65,6 +91,12 @@ end
 -- Native shader construction is part of the spike: if the current LÖVE backend
 -- rejects the source, the unit suite should expose it immediately.
 do
+    local source = output.shaderSource()
+    assert(source:find("physicalOutputScale", 1, true),
+        "CRT beam calibration must consume physical output scale")
+    assert(not source:find("extern number outputScale;", 1, true),
+        "CRT shader must not regress to logical-only scale calibration")
+
     local ok, err = output.setMode("crt")
     assert(ok, "CRT shader failed native compilation: " .. tostring(err))
 

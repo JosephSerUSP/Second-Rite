@@ -19,7 +19,7 @@ local crtShaderError = nil
 -- envelope, no curvature, no phosphor mask, no temporal state.
 local CRT_SHADER = [[
     extern vec2 sourceSize;
-    extern number outputScale;
+    extern number physicalOutputScale;
 
     vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
         // Pixel centres are integer coordinates in this space.
@@ -39,16 +39,19 @@ local CRT_SHADER = [[
         vec4 rightPx = Texel(tex, (rightPixel + vec2(0.5)) / sourceSize);
         vec4 px = mix(leftPx, rightPx, blendX);
 
-        // A source scanline is brightest around its centre and gently darker
-        // near the row boundary. Fade the effect away at low host scales where
-        // there are too few physical pixels to represent a beam cleanly.
+        // A source scanline is brightest around its centre and visibly darker
+        // near the row boundary. Calibrate against PHYSICAL source-pixel scale:
+        // on high-DPI Android, 1.55 logical host units can still be ~2.7 display
+        // pixels. Using logical scale here made the CRT path collapse into little
+        // more than pleasant horizontal smoothing on real phones.
         number phase = abs(fract(tc.y * sourceSize.y) - 0.5) * 2.0;
-        number scaleWeight = clamp((outputScale - 1.5) / 2.0, 0.0, 1.0);
-        number scanStrength = 0.16 * scaleWeight;
-        number beam = 1.0 - scanStrength * smoothstep(0.25, 1.0, phase);
+        number scaleWeight = clamp((physicalOutputScale - 1.25) / 2.0, 0.0, 1.0);
+        number scanStrength = 0.22 * scaleWeight;
+        number beam = 1.0 - scanStrength * smoothstep(0.18, 1.0, phase);
 
-        // Modest compensation keeps the filter from reading as a dark overlay.
-        number compensation = 1.0 + scanStrength * 0.35;
+        // Compensation keeps the stronger beam envelope from simply reading as
+        // a dark overlay while retaining an obvious CRT scan structure.
+        number compensation = 1.0 + scanStrength * 0.45;
         px.rgb *= beam * compensation;
         return px * color;
     }
@@ -118,24 +121,53 @@ function output.resize(w, h)
     hostHeight = tonumber(h) or hostHeight
 end
 
--- Geometry is mode-specific but has ONE authority. Nearest delegates to the
--- established integer contract verbatim. CRT is allowed to use the largest
--- aspect-preserving fractional scale that fits the host, including <1x for an
--- unusually small host.
+local function fractionalFit(w, h)
+    local renderWidth, renderHeight = surface.renderSize()
+    local scale = math.min(w / renderWidth, h / renderHeight)
+    if scale <= 0 then scale = 1 end
+    return scale,
+        (w - renderWidth * scale) * 0.5,
+        (h - renderHeight * scale) * 0.5
+end
+
+local function isAndroid()
+    if not (love and love.system and love.system.getOS) then return false end
+    local ok, osName = pcall(love.system.getOS)
+    return ok and osName == "Android"
+end
+
+function output.hostDpiScale()
+    local scale = nil
+    if love and love.window and love.window.getDPIScale then
+        local ok, value = pcall(love.window.getDPIScale)
+        if ok then scale = tonumber(value) end
+    end
+    if (not scale or scale <= 0) and love and love.graphics and love.graphics.getDPIScale then
+        local ok, value = pcall(love.graphics.getDPIScale)
+        if ok then scale = tonumber(value) end
+    end
+    return (scale and scale > 0) and scale or 1
+end
+
+function output.physicalOutputScale(logicalScale)
+    return (tonumber(logicalScale) or 1) * output.hostDpiScale()
+end
+
+-- Geometry is mode-specific but has ONE authority. Desktop/static nearest keeps
+-- the historical integer contract. Android always fractionally fits the chosen
+-- logical surface: DEVICE already did this, but WIDE falling back to 1x on a
+-- 1.55x-capable phone made the whole game suddenly tiny when CRT was disabled.
+-- CRT uses the same largest aspect-preserving fractional fit everywhere.
 function output.transformForMode(mode, w, h)
     if mode == "nearest" then
+        if isAndroid() then return fractionalFit(w, h) end
         return surface.outputTransform(w, h)
     end
     if mode ~= "crt" then
         error("unknown output presentation mode '" .. tostring(mode) .. "'", 2)
     end
 
-    local renderWidth, renderHeight = surface.renderSize()
-    local scale = math.min(w / renderWidth, h / renderHeight)
-    if scale <= 0 then scale = 1 end
-    local offsetX = (w - renderWidth * scale) * 0.5
-    local offsetY = (h - renderHeight * scale) * 0.5
-    return scale, offsetX, offsetY
+    return fractionalFit(w, h)
 end
 
 function output.transform(w, h)
@@ -172,7 +204,7 @@ function output.draw(canvas)
             print("[output] CRT disabled: " .. tostring(err))
         else
             shader:send("sourceSize", { canvas:getWidth(), canvas:getHeight() })
-            shader:send("outputScale", scale)
+            shader:send("physicalOutputScale", output.physicalOutputScale(scale))
             love.graphics.setShader(shader)
         end
     else

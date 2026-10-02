@@ -20,6 +20,7 @@ local growth = require("engine.growth")
 local progression = require("engine.progression")
 local traits = require("engine.traits")
 local config = require("engine.config")
+local state_value = require("engine.state_value")
 
 local progress = {}
 
@@ -146,7 +147,13 @@ end
 -- level-up window be authored data instead of a drawer.
 function progress.publish(v, entries, index)
     local e = entries and entries[index]
-    v.levelUpRows = e and e.rows or {}
+    -- Scene state is a value TREE, never an object graph. `entries` itself is
+    -- retained in v.levelUps, so assigning e.rows here aliases the same table
+    -- into two Scene-state paths (levelUps[i].rows and levelUpRows). The Scene
+    -- host correctly rejects that at the next hook boundary. Publish a value
+    -- copy instead: this is a projection of the selected entry, not shared
+    -- mutable storage.
+    v.levelUpRows = e and state_value.copy(e.rows or {}, "level-up rows") or {}
     v.levelUpName = e and e.name or ""
     v.levelUpPortrait = e and e.portraitKey or ""
     v.levelUpFromLevel = e and e.fromLevel or 0

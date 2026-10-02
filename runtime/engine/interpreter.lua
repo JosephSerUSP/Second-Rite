@@ -2890,6 +2890,27 @@ local function buildScriptApi(ctx)
         api.setRenderSurface(nextId)
         return api.getRenderSurface()
     end
+    -- Final output reconstruction (#1310) is independent from the logical
+    -- render surface. Keep it on the same presentation seam so Project Options
+    -- can expose the experiment without requiring presentation modules.
+    function api.setOutputPresentation(id)
+        return present("setOutputPresentation", id) and true or false
+    end
+    function api.getOutputPresentation()
+        return present("getOutputPresentation") or "nearest"
+    end
+    function api.cycleOutputPresentation()
+        local ids = present("listOutputPresentations") or { "nearest", "crt" }
+        if not ids or #ids == 0 then return api.getOutputPresentation() end
+        local current = api.getOutputPresentation()
+        local at = 1
+        for i, id in ipairs(ids) do
+            if id == current then at = i break end
+        end
+        local nextId = ids[(at % #ids) + 1]
+        api.setOutputPresentation(nextId)
+        return api.getOutputPresentation()
+    end
     -- Active font selection: player typography preference, through the
     -- presentation seam and stored per-player in user_settings.
     function api.setFont(id)

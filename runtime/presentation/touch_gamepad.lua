@@ -276,10 +276,34 @@ local function findScene(ctx, id)
     return nil
 end
 
--- The Options scene is authored campaign UI, while the virtual gamepad is a
--- host/platform feature. Add one host-owned row in memory rather than saving a
--- device preference into data/scenes.json.
-function touch_gamepad.decorateOptions(scenes)
+local function appendDeviceAspect(loader)
+    if not (loader and isAndroid()) then return end
+    local renderSurfaces = loader.engine and loader.engine.renderSurfaces
+    local options = renderSurfaces and renderSurfaces.options
+    if type(options) ~= "table" or not surface.getProfile(DEVICE_PROFILE) then return end
+
+    local found = nil
+    for i, id in ipairs(options) do
+        if id == DEVICE_PROFILE then found = i; break end
+    end
+
+    local w, h = love.graphics.getDimensions()
+    if w < h then
+        if found then table.remove(options, found) end
+        return
+    end
+    if not found then options[#options + 1] = DEVICE_PROFILE end
+end
+
+-- #1307 integration: Options remains authored campaign UI, while the virtual
+-- gamepad and handset-sized DEVICE surface are host/platform features. Extend
+-- the in-memory loader only; portable Project data remains device-independent.
+-- source keeps the old scenes-only unit seam working.
+function touch_gamepad.decorateOptions(source)
+    local loader = type(source) == "table" and source.scenes and source or nil
+    local scenes = loader and loader.scenes or source
+    if loader then appendDeviceAspect(loader) end
+
     for _, scene in ipairs(scenes or {}) do
         local commands = scene.config and scene.config.optionsCommands
         if type(commands) == "table" and not decorated[scene] then
@@ -309,7 +333,7 @@ function touch_gamepad.decorateOptions(scenes)
                             inner = old:sub(2, -2)
                         end
                         if not tostring(old):find("touch_gamepad", 1, true) then
-                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or (" .. inner .. ")}";
+                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or id == 'aspect' and sceneState.aspect == 'mobile_device' and 'DEVICE' or (" .. inner .. ")}";
                         end
                     end
                 end
@@ -326,7 +350,7 @@ local function installHost()
     local originalRunHook = scene_host.runHook
     local originalUpdate = scene_host.update
     scene_host.runHook = function(hookName, ctx)
-        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
+        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
         local state = scene_host.getCurrentState()
         local scene = state and findScene(ctx, state.id) or nil
         local meta = scene and decorated[scene] or nil
@@ -355,7 +379,7 @@ local function installHost()
 
     scene_host.update = function(dt, ctx)
         inputContext = ctx
-        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader.scenes) end
+        if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
         if not touch_gamepad.isEnabled() and virtual_input.activeTouchCount() > 0 then
             touch_gamepad.clearTouches()
         end

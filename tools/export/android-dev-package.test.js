@@ -14,6 +14,12 @@ function fixture() {
     const lovePath = path.join(root, 'Second Gate.love');
     fs.mkdirSync(path.join(projectDir, 'data'), { recursive: true });
     fs.mkdirSync(path.join(loveAndroidDir, 'app', 'src', 'main'), { recursive: true });
+    fs.writeFileSync(path.join(loveAndroidDir, 'app', 'build.gradle'), [
+        'android {',
+        '    namespace "org.love2d.android.executable"',
+        '}',
+        '',
+    ].join('\n'));
     fs.writeFileSync(path.join(projectDir, 'data', 'project.json'), JSON.stringify({
         schemaVersion: 1,
         name: 'Second Gate',
@@ -85,6 +91,10 @@ test('prepares one dev app around the canonical .love export', () => {
     assert.match(androidManifest, /android\.permission\.INTERNET/);
     assert.doesNotMatch(androidManifest, /android\.permission\.RECORD_AUDIO/);
 
+    const appBuildGradle = fs.readFileSync(result.appBuildGradlePath, 'utf8');
+    assert.match(appBuildGradle, /androidResources\s*\{[\s\S]*noCompress \+= \['love'\]/);
+    assert.equal((appBuildGradle.match(/noCompress/g) || []).length, 1);
+
     const embedded = fs.readFileSync(result.embedPath);
     assert.deepEqual(embedded, fs.readFileSync(f.lovePath));
     assert.deepEqual(JSON.parse(fs.readFileSync(manifestPath, 'utf8')), result.manifest);
@@ -114,4 +124,13 @@ test('rejects invalid or exhausted Android version codes', () => {
     assert.throws(() => androidPackage.normalizeVersionCode('2100000001'), /between 1/);
     assert.throws(() => androidPackage.normalizeVersionCode('12.5'), /positive integer/);
     assert.equal(androidPackage.normalizeVersionCode('42'), 42);
+});
+
+test('marks an already-zipped .love asset noCompress exactly once', () => {
+    const f = fixture();
+    const buildGradle = path.join(f.loveAndroidDir, 'app', 'build.gradle');
+    assert.equal(androidPackage.configureUncompressedLoveAsset(buildGradle), true);
+    assert.equal(androidPackage.configureUncompressedLoveAsset(buildGradle), false);
+    const source = fs.readFileSync(buildGradle, 'utf8');
+    assert.equal((source.match(/noCompress/g) || []).length, 1);
 });

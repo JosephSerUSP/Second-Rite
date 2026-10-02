@@ -985,6 +985,12 @@ function love.load(arg)
         return
     end
     
+    -- Android's device-matched mobile profile must be registered only after
+    -- the native host window exists, but before the active surface is chosen.
+    -- It samples once: orientation/resizing remains package-owned rather than
+    -- rebuilding the LÖVE canvas live.
+    require("presentation.touch_gamepad").prepareAndroidSurface()
+
     -- Surface selection is a presentation concern. CLI fixtures above stay
     -- on their existing canonical canvases; normal play may choose a wider
     -- logical surface without changing authored UI coordinates. A command-

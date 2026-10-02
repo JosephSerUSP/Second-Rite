@@ -39,7 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
-from build_town import SCREENS, AUTHORED_NOT_GENERATED  # noqa: E402
+from build_town import SCREENS, AUTHORED_NOT_GENERATED, AUTHORED_TOWN_MAPS  # noqa: E402
 
 PROJECT_REL = os.path.join("projects", "hichaukitoden-game")
 ENV_REL = os.path.join("assets", "environments", "st_maria_town")
@@ -130,7 +130,7 @@ def check_door_and_arrival_resolution():
     """Assert door target/arrival anchor resolution and town reachability."""
     errors = []
     maps_dir = os.path.join(ROOT, PROJECT_REL, "data", "maps")
-    town_map_ids = {s["id"] for s in SCREENS.values()} | {29}
+    town_map_ids = {s["id"] for s in SCREENS.values()} | set(AUTHORED_TOWN_MAPS) | {29}
     town_maps = {}
     for mid in town_map_ids:
         map_file = os.path.join(maps_dir, "%d.json" % mid)
@@ -226,6 +226,9 @@ def main():
     for key in sorted(AUTHORED_NOT_GENERATED):
         print("towngen: map %d (%s) is authored, not generated - not checked"
               % (SCREENS[key]["id"], key))
+    for map_id, key in sorted(AUTHORED_TOWN_MAPS.items()):
+        print("towngen: map %d (%s) is authored 3D; connections checked, geometry preserved"
+              % (map_id, key))
 
     pkg_errors = check_environment_packages()
     if pkg_errors:

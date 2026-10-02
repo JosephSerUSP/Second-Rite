@@ -449,8 +449,8 @@ for _key, (_min_y, _max_y, _width) in SCREEN_CONTRACTS.items():
 # now fails CI instead of surviving until the next rebuild deletes it.
 # Authored 3D annex: only its registration is owned here. Its profile and events
 # live in data/maps/32.json; rebuilding the flat-plate town must preserve them.
-SCREENS["passage_house_courtyard"] = {"id": 32, "title": "St. Maria - Passage House Arrival Court"}
-AUTHORED_NOT_GENERATED = {"weaponsmith", "praca", "alicias_padaria", "passage_house_courtyard"}
+AUTHORED_TOWN_MAPS = {32: "passage_house_courtyard"}
+AUTHORED_NOT_GENERATED = {"weaponsmith", "praca", "alicias_padaria"}
 AUTHORED_REFERENCE_MAPS = {17, 20, 27, 28, 29, 32}
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
@@ -739,6 +739,12 @@ def main():
     files = index.get("files", [])
     for screen in SCREENS.values():
         name = "%d.json" % screen["id"]
+        if name not in files:
+            files.append(name)
+    for map_id in AUTHORED_TOWN_MAPS:
+        name = "%d.json" % map_id
+        if not os.path.isfile(os.path.join(MAPS, name)):
+            raise ValueError("Registered authored town map is missing: " + name)
         if name not in files:
             files.append(name)
     index["files"] = sorted(files, key=lambda n: int(n.split(".")[0]))

@@ -37,9 +37,9 @@ if not surface.getProfile("mobile_portrait") then
 end
 
 -- main.lua asks user_settings for renderSurfaceProfile before constructing its
--- canvas. Seed an Android-friendly surface only when the player has no stored
--- choice and has not explicitly disabled the virtual gamepad. A saved user
--- override always wins.
+-- canvas. Android is deliberately portrait-only for this first deployment lane,
+-- so while the touch controller is enabled the platform profile overrides any
+-- stale landscape preference from an earlier dev build.
 if isAndroid() and user_settings.get(SETTING, nil) ~= false then
     -- #1305: Android is portrait-only for now. LÖVE's resize path does not yet
     -- provide a trustworthy orientation transition, so stale saved landscape

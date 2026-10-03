@@ -1,0 +1,65 @@
+{
+  "gauntletId": "expedition-horizon-01",
+  "ownerPlaytestStatus": "PENDING",
+  "runs": [
+    {
+      "candidateId": "control-3000",
+      "playedAt": null,
+      "newGameUsed": null,
+      "partyAndEquipmentNotes": "",
+      "firstReturnUrge": {
+        "floorOrLocation": "",
+        "mpRemaining": null,
+        "cause": ""
+      },
+      "decision": "",
+      "desireToPushOneMoreRoom": null,
+      "desireToReturn": null,
+      "perceivedUnfairness": null,
+      "memorableSurprise": "",
+      "otherNotes": ""
+    },
+    {
+      "candidateId": "intermediate-1800",
+      "playedAt": null,
+      "newGameUsed": null,
+      "partyAndEquipmentNotes": "",
+      "firstReturnUrge": {
+        "floorOrLocation": "",
+        "mpRemaining": null,
+        "cause": ""
+      },
+      "decision": "",
+      "desireToPushOneMoreRoom": null,
+      "desireToReturn": null,
+      "perceivedUnfairness": null,
+      "memorableSurprise": "",
+      "otherNotes": ""
+    },
+    {
+      "candidateId": "low-900",
+      "playedAt": null,
+      "newGameUsed": null,
+      "partyAndEquipmentNotes": "",
+      "firstReturnUrge": {
+        "floorOrLocation": "",
+        "mpRemaining": null,
+        "cause": ""
+      },
+      "decision": "",
+      "desireToPushOneMoreRoom": null,
+      "desireToReturn": null,
+      "perceivedUnfairness": null,
+      "memorableSurprise": "",
+      "otherNotes": ""
+    }
+  ],
+  "comparison": {
+    "rankingBestToWorst": [],
+    "preferredCandidate": null,
+    "whatWouldYouStealFromAnotherCandidate": "",
+    "didAnyVariantMakeYouRetreatEarlier": "",
+    "ownerNotes": ""
+  },
+  "ratingScale": "Use integers 1-5 for desire/perceived dimensions; leave null if not observed."
+}

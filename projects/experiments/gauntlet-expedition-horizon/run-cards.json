@@ -1,0 +1,95 @@
+{
+  "gauntletId": "expedition-horizon-01",
+  "question": "How does opening Summoner MP change the felt First-Stratum horizon and the decision to return?",
+  "evidenceBoundary": "Tests the current authored traversal-cost implementation; it does not settle the pending #372 battle-activation or Veil design.",
+  "authoredAtUtc": "2026-09-23T22:39:50.746Z",
+  "authoredBy": "Codex, bounded #696 follow-up",
+  "sourceProject": "projects/hichaukitoden-game",
+  "sourceCommit": "7534c05638329785a869008be7ef20c35a4745ce",
+  "sourceDataSha256": "d5a1a282ac69dd36231f6cf8554782daa491a9e5b53a06978393d78079a661ad",
+  "sourceAssetsSha256": "b0189e0c6775dcfd0b4a676ae222e1a2d0cd661c37e23752c606120a352f8603",
+  "onlyGameplayVariable": "data/system.json:summoner.startMp",
+  "candidateDataDigestPolicy": "SHA-256 over sorted Project-owned data paths and bytes after applying exactly one candidate overlay, including the candidate-specific isolated data/project.json identity.",
+  "candidates": [
+    {
+      "id": "control-3000",
+      "role": "current authored control",
+      "startMp": 3000,
+      "gameplayVariable": "data/system.json:summoner.startMp",
+      "saveIdentity": "SecondRiteHorizon3000",
+      "overlayPath": "overlays/control-3000/candidate.json",
+      "selectedDataSha256": "ffed173a31879759fbbd0b50e817400c7ded4d7901f9f8f85170bc3c79b8640a",
+      "materialization": "Disposable copy of the hash-pinned canonical Project with this immutable overlay applied",
+      "launchCommand": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play control-3000",
+      "validation": {
+        "status": "PASS",
+        "selectedDataSha256": "ffed173a31879759fbbd0b50e817400c7ded4d7901f9f8f85170bc3c79b8640a",
+        "command": "node tools/ci/stage-project-gates.js --project <materialized candidate> --output <stage>; lovec <stage> validate",
+        "checkedAtUtc": "2026-09-24T08:32:04.022Z"
+      },
+      "testPlayLaunch": {
+        "status": "PASS",
+        "command": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play control-3000",
+        "selectedDataSha256": "ffed173a31879759fbbd0b50e817400c7ded4d7901f9f8f85170bc3c79b8640a",
+        "observedWindowTitle": "Second Rite Horizon 3000",
+        "evidence": "The normal Test Play path opened a responsive love.exe window with the candidate-specific title for approximately 10 seconds. No First-Stratum gameplay input was performed.",
+        "ownerGameplayAndRating": "PENDING",
+        "checkedAtUtc": "2026-09-23T22:41:18.904Z"
+      }
+    },
+    {
+      "id": "intermediate-1800",
+      "role": "intermediate opening pool",
+      "startMp": 1800,
+      "gameplayVariable": "data/system.json:summoner.startMp",
+      "saveIdentity": "SecondRiteHorizon1800",
+      "overlayPath": "overlays/intermediate-1800/candidate.json",
+      "selectedDataSha256": "6aa9fe9feb20c59ae9ee1bb9fcce63134af6329b08ecbe265d9fd387b077862a",
+      "materialization": "Disposable copy of the hash-pinned canonical Project with this immutable overlay applied",
+      "launchCommand": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play intermediate-1800",
+      "validation": {
+        "status": "PASS",
+        "selectedDataSha256": "6aa9fe9feb20c59ae9ee1bb9fcce63134af6329b08ecbe265d9fd387b077862a",
+        "command": "node tools/ci/stage-project-gates.js --project <materialized candidate> --output <stage>; lovec <stage> validate",
+        "checkedAtUtc": "2026-09-24T08:32:16.416Z"
+      },
+      "testPlayLaunch": {
+        "status": "PASS",
+        "command": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play intermediate-1800",
+        "selectedDataSha256": "6aa9fe9feb20c59ae9ee1bb9fcce63134af6329b08ecbe265d9fd387b077862a",
+        "observedWindowTitle": "Second Rite Horizon 1800",
+        "evidence": "The normal Test Play path opened a responsive love.exe window with the candidate-specific title for approximately 10 seconds. No First-Stratum gameplay input was performed.",
+        "ownerGameplayAndRating": "PENDING",
+        "checkedAtUtc": "2026-09-23T22:41:18.905Z"
+      }
+    },
+    {
+      "id": "low-900",
+      "role": "low opening pool",
+      "startMp": 900,
+      "gameplayVariable": "data/system.json:summoner.startMp",
+      "saveIdentity": "SecondRiteHorizon900",
+      "overlayPath": "overlays/low-900/candidate.json",
+      "selectedDataSha256": "2d0fb4179f9e69468945bfac36b0321955de771b4155ab4b67713fff8f141b2d",
+      "materialization": "Disposable copy of the hash-pinned canonical Project with this immutable overlay applied",
+      "launchCommand": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play low-900",
+      "validation": {
+        "status": "PASS",
+        "selectedDataSha256": "2d0fb4179f9e69468945bfac36b0321955de771b4155ab4b67713fff8f141b2d",
+        "command": "node tools/ci/stage-project-gates.js --project <materialized candidate> --output <stage>; lovec <stage> validate",
+        "checkedAtUtc": "2026-09-24T08:32:29.306Z"
+      },
+      "testPlayLaunch": {
+        "status": "PASS",
+        "command": "node projects/experiments/gauntlet-expedition-horizon/gauntlet.js play low-900",
+        "selectedDataSha256": "2d0fb4179f9e69468945bfac36b0321955de771b4155ab4b67713fff8f141b2d",
+        "observedWindowTitle": "Second Rite Horizon 900",
+        "evidence": "The normal Test Play path opened a responsive love.exe window with the candidate-specific title for approximately 10 seconds. No First-Stratum gameplay input was performed.",
+        "ownerGameplayAndRating": "PENDING",
+        "checkedAtUtc": "2026-09-23T22:41:18.905Z"
+      }
+    }
+  ],
+  "sourceExecutionSha256": "fa40d529a18ba083497179943d580cfdb8d785766396da2f4ef97a49763df14b",
+  "executionSourcePolicy": "SHA-256 of runtime, rtp, tools/export, tools/semantic-roots.js, tools/ci/stage-project-gates.js, studio/editor/project-cli.js, studio/editor/project-play.js, studio/editor/project-lifecycle.js; checked before materialization and execution"
+}

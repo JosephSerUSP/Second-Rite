@@ -238,7 +238,7 @@
     }
   },
   "summoner": {
-    "startMp": 3000,
+    "startMp": 900,
     "maxMpCap": 9999,
     "summonCostBase": 10,
     "summonCostPerLevel": 5,

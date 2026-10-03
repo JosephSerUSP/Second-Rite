@@ -34,7 +34,7 @@ movement.
 ## Complete route
 
 1. Meet the already-contracted **Saban** in Room 3 and leave through its door.
-2. Find **Registrar Celina** at the Passage Office.
+2. Walk into the **Passage Office** doorway in the Praca and find **Registrar Celina** inside.
 3. Enter the seal in the Registry and receive **Crossing Writ** (item 198).
 4. Visit the available shops and prepare Saban for the first descent.
 5. Walk north to the gate.

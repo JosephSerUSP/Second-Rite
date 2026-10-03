@@ -257,25 +257,42 @@ jobs:
           "$build_tools/apksigner" verify --verbose --print-certs "$final" | tee out/android-signature.txt
 
           python - "$final" <<'PY'
-          import hashlib, json, sys, zipfile
+          import hashlib, io, json, sys, zipfile
+
           with open('out/android-build.json', encoding='utf-8') as source:
               manifest = json.load(source)
+
           with zipfile.ZipFile(sys.argv[1]) as apk:
               game_love = apk.read('assets/game.love')
-              digest = hashlib.sha256(game_love).hexdigest()
-              with zipfile.ZipFile(__import__('io').BytesIO(game_love)) as love_archive:
-                  terms = json.loads(love_archive.read('data/terms.json'))
-                  options = json.loads(love_archive.read('data/scenes/options.json'))
-                  developer = json.loads(love_archive.read('data/scenes/developer_menu.json'))
+          digest = hashlib.sha256(game_love).hexdigest()
           if digest != manifest['loveSha256']:
               raise SystemExit('Embedded game.love differs from the profiled export')
+
+          with zipfile.ZipFile(io.BytesIO(game_love)) as love_archive:
+              runtime_main = love_archive.read('main.lua').decode('utf-8')
+              terms = json.loads(love_archive.read('data/terms.json'))
+              scenes = json.loads(love_archive.read('data/scenes.json'))
+
+          def scene(scene_id):
+              matches = [entry for entry in scenes if entry.get('id') == scene_id]
+              if len(matches) != 1:
+                  raise SystemExit(f'Embedded game.love expected one scene {scene_id!r}, found {len(matches)}')
+              return matches[0]
+
+          options = scene('options')
+          developer = scene('developer_menu')
+
+          if 'session.developerMode = true -- Android Dev profile' not in runtime_main:
+              raise SystemExit('Embedded game.love does not boot with Android developer mode enabled')
           if terms['title']['options'][-1] != 'Developer Room':
               raise SystemExit('Embedded game.love is missing Developer Room access')
+          if not any(row.get('id') == 'developer_menu' for row in options['config']['optionsCommands']):
+              raise SystemExit('Embedded game.love is missing touch-accessible DEVELOPER MENU')
           if not any(row.get('id') == 'crt_lab' for row in options['config']['optionsCommands']):
               raise SystemExit('Embedded game.love is missing touch-accessible CRT LAB')
           if not any(row.get('id') == 'crt_lab' for row in developer['config']['developerCommands']):
               raise SystemExit('Embedded game.love is missing Developer-menu CRT LAB')
-          print('APK EMBEDDED PROFILE + LOVE SHA256 OK:', digest)
+          print('APK EMBEDDED DEVELOPER PROFILE + LOVE SHA256 OK:', digest)
           PY
 
           badging="$($build_tools/aapt dump badging "$final")"
@@ -301,7 +318,7 @@ jobs:
             echo "## Second Gate Android dev APK"
             echo
             echo "- Source: \`${THESTRA_SOURCE_SHA:-unavailable}\`"
-            echo "- developer profile: \`enabled\` (Developer Room + live CRT Lab)"
+            echo "- developer profile: \`enabled\` (Developer Room + touch Developer Menu + live CRT Lab)"
             echo "- love-android: \`$LOVE_ANDROID_LABEL\` / \`$LOVE_ANDROID_REF\`"
             echo "- versionCode: \`${THESTRA_ANDROID_VERSION_CODE:-unavailable}\`"
             echo "- signing: \`${THESTRA_ANDROID_SIGNING_MODE:-unavailable}\`"

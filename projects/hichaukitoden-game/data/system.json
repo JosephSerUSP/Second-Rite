@@ -133,6 +133,8 @@
     "criticalMultiplier": 1.5,
     "baseSpeed": 10,
     "speedPerLevel": 0.5,
+    "battleActivationBase": 50,
+    "battleActivationPerMpd": 15,
     "mpExhaustionDamage": 1,
     "battleItem": 1,
     "defendSkillId": "defend",

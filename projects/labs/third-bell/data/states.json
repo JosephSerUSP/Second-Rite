@@ -1,0 +1,255 @@
+{
+  "dead": {
+    "id": "dead",
+    "categories": [
+      "negative"
+    ],
+    "name": "Dead",
+    "icon": 11,
+    "restriction": 4,
+    "priority": 100,
+    "traits": [],
+    "display": {
+      "hideIcon": true
+    }
+  },
+  "sleep": {
+    "id": "sleep",
+    "categories": [
+      "negative",
+      "common",
+      "mental"
+    ],
+    "name": "Sleep",
+    "icon": 21,
+    "restriction": 4,
+    "duration": 3,
+    "removeAtDamage": true,
+    "traits": [],
+    "display": {
+      "sprite": {
+        "static": true
+      }
+    }
+  },
+  "regen": {
+    "id": "regen",
+    "categories": [
+      "positive",
+      "magical"
+    ],
+    "name": "Regeneration",
+    "icon": 22,
+    "duration": 5,
+    "traits": [
+      {
+        "code": "HRG",
+        "value": 0.1
+      }
+    ]
+  },
+  "berserk": {
+    "id": "berserk",
+    "categories": [
+      "negative",
+      "common",
+      "mental"
+    ],
+    "name": "Berserk",
+    "icon": 116,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 3
+      },
+      {
+        "code": "FORCE_ACTION",
+        "dataId": "attack"
+      }
+    ]
+  },
+  "weakened": {
+    "id": "weakened",
+    "categories": [
+      "negative",
+      "common",
+      "physical"
+    ],
+    "name": "Weakened",
+    "icon": 24,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "PARAM_RATE",
+        "dataId": "atk",
+        "value": 0.5
+      },
+      {
+        "code": "PARAM_RATE",
+        "dataId": "def",
+        "value": 0.5
+      },
+      {
+        "code": "PARAM_RATE",
+        "dataId": "asp",
+        "value": 0.5
+      }
+    ]
+  },
+  "poison": {
+    "id": "poison",
+    "categories": [
+      "negative",
+      "common",
+      "physical"
+    ],
+    "name": "Poison",
+    "icon": 25,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "HRG",
+        "value": -0.1
+      }
+    ],
+    "display": {
+      "animation": "state.poison"
+    }
+  },
+  "defending": {
+    "id": "defending",
+    "categories": [
+      "positive",
+      "physical"
+    ],
+    "name": "Defending",
+    "icon": 26,
+    "duration": 1,
+    "traits": [
+      {
+        "code": "DAMAGE_RATE",
+        "value": 0.5
+      },
+      {
+        "code": "COVER_ALIGNED_BACK"
+      }
+    ]
+  },
+  "warded": {
+    "id": "warded",
+    "categories": [
+      "positive",
+      "magical"
+    ],
+    "name": "Warded",
+    "icon": 27,
+    "duration": 9999,
+    "priority": 50,
+    "traits": [],
+    "display": {}
+  },
+  "provoke": {
+    "id": "provoke",
+    "categories": [
+      "positive",
+      "physical"
+    ],
+    "name": "Provoke",
+    "icon": 28,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "TARGET_RATE",
+        "value": 3
+      }
+    ]
+  },
+  "magicGuard": {
+    "id": "magicGuard",
+    "categories": [
+      "positive",
+      "magical"
+    ],
+    "name": "Magic Guard",
+    "icon": 29,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "PARAM_RATE",
+        "dataId": "mdf",
+        "value": 0.35
+      }
+    ]
+  },
+  "blind": {
+    "id": "blind",
+    "categories": [
+      "negative",
+      "common",
+      "physical"
+    ],
+    "name": "Blind",
+    "icon": 114,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "HIT",
+        "value": -0.4
+      }
+    ]
+  },
+  "silence": {
+    "id": "silence",
+    "categories": [
+      "negative",
+      "common",
+      "magical"
+    ],
+    "name": "Silence",
+    "icon": 31,
+    "duration": 3,
+    "traits": []
+  },
+  "petrify": {
+    "id": "petrify",
+    "categories": [
+      "negative",
+      "common",
+      "physical"
+    ],
+    "name": "Petrify",
+    "icon": 32,
+    "restriction": 4,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "PARAM_RATE",
+        "dataId": "def",
+        "value": 1.2
+      }
+    ]
+  },
+  "charm": {
+    "id": "charm",
+    "categories": [
+      "negative",
+      "common",
+      "mental"
+    ],
+    "name": "Charm",
+    "icon": 8,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "FORCE_ACTION",
+        "dataId": "attack"
+      },
+      {
+        "code": "INVERT_TARGETING",
+        "value": 1
+      }
+    ]
+  }
+}

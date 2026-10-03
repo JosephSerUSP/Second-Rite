@@ -1,0 +1,94 @@
+{
+  "id": "titania",
+  "name": "Titania",
+  "names": [
+    "Ariel",
+    "Puck",
+    "Sparky",
+    "Tinker",
+    "Faye",
+    "Mote",
+    "Clover",
+    "Twinkle"
+  ],
+  "flavor": "A High Pixie raised all the way to level twenty without a catalyst. The fairy court answers her with powerful support magic.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "Titania[fps=15]",
+  "elements": [
+    "Green",
+    "White",
+    "White"
+  ],
+  "skills": [
+    "windBlade",
+    "soothingMote",
+    "fairyCourt"
+  ],
+  "passives": [
+    "fairyQueen"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 36,
+    "atk": 12,
+    "def": 22,
+    "mat": 34,
+    "mdf": 31,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 76,
+      "atk": 17,
+      "def": 24,
+      "mat": 42,
+      "mdf": 38
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 88,
+      "atk": 20,
+      "def": 29,
+      "mat": 49,
+      "mdf": 45
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 90,
+      "atk": 21,
+      "def": 30,
+      "mat": 50,
+      "mdf": 46
+    }
+  ],
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Titania",
+  "bigBattler": "Titania",
+  "defaultGrowthSeed": 1366260010
+}

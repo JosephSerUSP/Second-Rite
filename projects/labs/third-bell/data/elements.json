@@ -1,0 +1,48 @@
+{
+  "White": {
+    "name": "White",
+    "icon": 4,
+    "strongAgainst": [
+      "Black"
+    ],
+    "weakAgainst": []
+  },
+  "Black": {
+    "name": "Black",
+    "icon": 5,
+    "strongAgainst": [
+      "White"
+    ],
+    "weakAgainst": []
+  },
+  "Green": {
+    "name": "Green",
+    "icon": 2,
+    "strongAgainst": [
+      "Blue"
+    ],
+    "weakAgainst": [
+      "Red"
+    ]
+  },
+  "Red": {
+    "name": "Red",
+    "icon": 1,
+    "strongAgainst": [
+      "Green"
+    ],
+    "weakAgainst": [
+      "Blue"
+    ]
+  },
+  "Blue": {
+    "name": "Blue",
+    "icon": 3,
+    "strongAgainst": [
+      "Red"
+    ],
+    "weakAgainst": [
+      "Green"
+    ]
+  }
+}

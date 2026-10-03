@@ -1,0 +1,386 @@
+[
+  {
+    "id": "default",
+    "name": "Three-round party fight, then a victory resolution",
+    "seed": 12345,
+    "encounters": [
+      {
+        "party": [
+          "high_pixie",
+          "skeleton",
+          "angel"
+        ],
+        "enemies": [
+          {
+            "actor": "pixie"
+          },
+          {
+            "actor": "pixie"
+          },
+          {
+            "actor": "pixie"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            },
+            {
+              "slot": 2,
+              "type": "attack",
+              "target": "e1"
+            },
+            {
+              "slot": 3,
+              "type": "attack",
+              "target": "e1"
+            }
+          ],
+          [
+            {
+              "slot": 1,
+              "type": "skill",
+              "id": "soothingMote",
+              "target": "p1"
+            },
+            {
+              "slot": 2,
+              "type": "defend",
+              "target": "p2"
+            },
+            {
+              "slot": 3,
+              "type": "attack",
+              "target": "e2"
+            }
+          ],
+          [
+            {
+              "type": "skill",
+              "id": "flee",
+              "slot": 1
+            },
+            {
+              "slot": 2,
+              "type": "attack",
+              "target": "e2"
+            },
+            {
+              "slot": 3,
+              "type": "attack",
+              "target": "e2"
+            }
+          ]
+        ]
+      },
+      {
+        "party": [
+          "high_pixie"
+        ],
+        "enemies": [
+          {
+            "actor": "pixie",
+            "hp": 1
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "affinity",
+    "name": "Element affinity probes -- both damage layers at three alignment depths",
+    "seed": 4242,
+    "_note": [
+      "One encounter per matchup, one round each, so the probed action always",
+      "resolves against a full-HP target and cannot be lost to a kill earlier",
+      "in the round. `attack` has no element, which isolates the USER layer;",
+      "shadowClaw and boneRush are Black, which adds the SKILL layer on top.",
+      "Attackers: Shadow Stalker Black/Black/Black, Imp Red, Golem non-elemental.",
+      "Targets: Archangel White/White, Ooze Green, Wisp Blue."
+    ],
+    "encounters": [
+      {
+        "_note": "user layer, deepest case: Black x3 vs White x2 = 6 matchups",
+        "party": [
+          "shadow_stalker"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "user layer control: Red has no relationship to White",
+        "party": [
+          "imp"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "user layer control: a non-elemental attacker never gets a bonus",
+        "party": [
+          "golem"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "both layers: Black x3 wielding a Black skill into White x2",
+        "party": [
+          "shadow_stalker"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "skill",
+              "id": "shadowClaw",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "skill layer alone: a Black skill in Red hands (the tome case)",
+        "party": [
+          "imp"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "skill",
+              "id": "shadowClaw",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "skill layer alone: a Black skill in non-elemental hands",
+        "party": [
+          "golem"
+        ],
+        "enemies": [
+          {
+            "actor": "archangel"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "skill",
+              "id": "boneRush",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "user layer, single strong match: Red beats Green",
+        "party": [
+          "imp"
+        ],
+        "enemies": [
+          {
+            "actor": "ooze"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "user layer, weak side: Red is weak into Blue",
+        "party": [
+          "imp"
+        ],
+        "enemies": [
+          {
+            "actor": "wisp"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "depth without a matchup: Black x3 has no relationship to Green",
+        "party": [
+          "shadow_stalker"
+        ],
+        "enemies": [
+          {
+            "actor": "ooze"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "growth",
+    "name": "Levelled creatures -- seeded growth is visible to G2",
+    "seed": 20260726,
+    "level": 14,
+    "_note": [
+      "Every other fixture builds its battlers at level 1 (cli_tools passes",
+      "`fixture.level or 1`), so the entire growth model -- the largest single",
+      "determinant of every stat in the game -- was invisible to G2. Rewriting",
+      "growth from a smooth species curve to seeded per-instance packets moved",
+      "zero golden lines, which proved coverage rather than correctness.",
+      "This fixture fights at level 14: mid-band for the 11-20 budgets, so both",
+      "the first band's full total and a partial second band are exercised.",
+      "Both sides are levelled, so a change to accumulation shows up in damage",
+      "dealt AND taken."
+    ],
+    "encounters": [
+      {
+        "_note": "Physical and magical attackers against a levelled wall: reads ATK/DEF and MAT/MDF accumulation at once.",
+        "level": 14,
+        "party": [
+          "high_pixie",
+          "skeleton"
+        ],
+        "enemies": [
+          {
+            "actor": "golem"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "skill",
+              "id": "holySmite",
+              "target": "e1"
+            },
+            {
+              "slot": 2,
+              "type": "attack",
+              "target": "e1"
+            }
+          ],
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            },
+            {
+              "slot": 2,
+              "type": "skill",
+              "id": "boneRush",
+              "target": "e1"
+            }
+          ]
+        ]
+      },
+      {
+        "_note": "A levelled enemy hitting back, so growth on the receiving side is covered too.",
+        "level": 14,
+        "party": [
+          "pixie"
+        ],
+        "enemies": [
+          {
+            "actor": "skeleton"
+          }
+        ],
+        "rounds": [
+          [
+            {
+              "slot": 1,
+              "type": "defend"
+            }
+          ],
+          [
+            {
+              "slot": 1,
+              "type": "attack",
+              "target": "e1"
+            }
+          ]
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,93 @@
+{
+  "id": "bahamut",
+  "name": "Bahamut",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A heavenly dragon released by a sacred catalyst. Its presence turns defense and white creation into acts of majesty.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "White",
+    "White",
+    "White"
+  ],
+  "skills": [
+    "holySmite",
+    "sacredRain"
+  ],
+  "passives": [
+    "sacredScale"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 115,
+    "atk": 29,
+    "def": 32,
+    "mat": 37,
+    "mdf": 39,
+    "mpd": 8,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 109,
+      "atk": 25,
+      "def": 30,
+      "mat": 36,
+      "mdf": 39
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 127,
+      "atk": 30,
+      "def": 36,
+      "mat": 43,
+      "mdf": 45
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 129,
+      "atk": 31,
+      "def": 37,
+      "mat": 44,
+      "mdf": 47
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    179,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Bahamut",
+  "bigBattler": "Bahamut",
+  "defaultGrowthSeed": 1964635965
+}

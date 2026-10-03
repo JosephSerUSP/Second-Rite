@@ -1,0 +1,145 @@
+{
+  "id": "wisp",
+  "name": "Wisp",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 1,
+  "role": "Caster",
+  "smallBattler": "wisp",
+  "passives": [
+    "etherealBody",
+    "moveHeal"
+  ],
+  "elements": [
+    "Blue"
+  ],
+  "skills": [
+    "soothingMote"
+  ],
+  "expGrowth": 4,
+  "gold": 14,
+  "drops": [
+    {
+      "itemId": 41,
+      "chance": 0.3
+    },
+    {
+      "itemId": 24,
+      "chance": 0.1
+    }
+  ],
+  "evolutions": [],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A weak Wisp flickers faintly on the dungeon floor, needing a Potion..."
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Give HP Tonic",
+          "condition": "hasItem:1",
+          "commands": [
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 1,
+              "count": -1
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The Wisp absorbs the potion and glows brightly with gratitude!"
+            },
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "wisp",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Leave",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Wisp groans softly as you step back."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [
+    {
+      "itemId": 41,
+      "chance": 0.7,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Glow",
+    "Mote",
+    "Flicker",
+    "Ember",
+    "Shine",
+    "Beacon",
+    "Will-o",
+    "Lumen"
+  ],
+  "flavor": "A drifting light that quietly mends its companions while traveling. It is fragile, expensive to manifest, and invaluable on long expeditions.",
+  "baseParams": {
+    "maxHp": 40,
+    "atk": 5,
+    "def": 7,
+    "mat": 17,
+    "mdf": 15,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 20,
+      "atk": 10,
+      "def": 12,
+      "mat": 35,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 29,
+      "atk": 15,
+      "def": 19,
+      "mat": 52,
+      "mdf": 39
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 32,
+      "atk": 17,
+      "def": 20,
+      "mat": 58,
+      "mdf": 44
+    }
+  ],
+  "portrait": "wisp",
+  "bigBattler": "wisp",
+  "defaultGrowthSeed": 654878655
+}

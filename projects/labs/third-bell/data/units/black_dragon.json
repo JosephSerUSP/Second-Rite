@@ -1,0 +1,99 @@
+{
+  "id": "black_dragon",
+  "name": "Black Dragon",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A black dragon carrying the stillness of deep caverns. Its magic erodes defenses before the final strike.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Black",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "badDream"
+  ],
+  "passives": [
+    "blackHunger"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "nidhogg",
+      "cost": {
+        "item": 54
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 94,
+    "atk": 27,
+    "def": 24,
+    "mat": 29,
+    "mdf": 25,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 93,
+      "atk": 27,
+      "def": 21,
+      "mat": 31,
+      "mdf": 24
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 108,
+      "atk": 32,
+      "def": 24,
+      "mat": 37,
+      "mdf": 28
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 110,
+      "atk": 34,
+      "def": 26,
+      "mat": 38,
+      "mdf": 28
+    }
+  ],
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "BlackDragon",
+  "bigBattler": "BlackDragon",
+  "defaultGrowthSeed": 324104432
+}

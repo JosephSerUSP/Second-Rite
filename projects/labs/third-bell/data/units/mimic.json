@@ -1,0 +1,98 @@
+{
+  "id": "mimic",
+  "name": "Mimic",
+  "names": [
+    "Chester",
+    "Caixa",
+    "Trinco",
+    "Penny",
+    "Jack",
+    "Boca",
+    "Dobra",
+    "Tesouro"
+  ],
+  "flavor": "A living chest with a talent for making items work harder. It is sturdy, opportunistic, and available for promotion immediately.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "mimic",
+  "elements": [
+    "Black",
+    "White"
+  ],
+  "skills": [
+    "itemToss"
+  ],
+  "passives": [
+    "scavenger"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "pandora",
+      "cost": {
+        "item": 47
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 80,
+    "atk": 18,
+    "def": 28,
+    "mat": 12,
+    "mdf": 22,
+    "mpd": 2,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 90,
+      "atk": 20,
+      "def": 29,
+      "mat": 15,
+      "mdf": 23
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 105,
+      "atk": 23,
+      "def": 33,
+      "mat": 18,
+      "mdf": 27
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 105,
+      "atk": 24,
+      "def": 35,
+      "mat": 20,
+      "mdf": 28
+    }
+  ],
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Mimic",
+  "bigBattler": "Mimic",
+  "defaultGrowthSeed": 1725285583
+}

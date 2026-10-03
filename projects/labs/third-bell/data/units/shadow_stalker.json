@@ -1,0 +1,95 @@
+{
+  "id": "shadow_stalker",
+  "name": "Shadow Stalker",
+  "names": [
+    "Umbra",
+    "Sombra",
+    "Nox",
+    "Shade",
+    "Kage",
+    "Velvet",
+    "Murk",
+    "Silêncio"
+  ],
+  "flavor": "A patient hunter that steps between shadows. Its speed and critical strikes reward precise aggression.",
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "level": 12,
+  "role": "Assassin",
+  "elements": [
+    "Black",
+    "Black",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "assassinate"
+  ],
+  "traits": [
+    {
+      "code": "EVA",
+      "value": 0.15
+    },
+    {
+      "code": "CRI",
+      "value": 0.1
+    }
+  ],
+  "smallBattler": "Ghoul",
+  "gold": 14,
+  "expGrowth": 10,
+  "drops": [],
+  "evolutions": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 80,
+    "atk": 38,
+    "def": 13,
+    "mat": 11,
+    "mdf": 13,
+    "mpd": 2,
+    "mxa": 6,
+    "mxp": 4
+  },
+  "passives": [
+    "battleStartDamage"
+  ],
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 67,
+      "atk": 79,
+      "def": 23,
+      "mat": 23,
+      "mdf": 23
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 97,
+      "atk": 116,
+      "def": 34,
+      "mat": 33,
+      "mdf": 34
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 108,
+      "atk": 129,
+      "def": 39,
+      "mat": 37,
+      "mdf": 39
+    }
+  ],
+  "portrait": "ShadowStalker",
+  "bigBattler": "ShadowStalker",
+  "defaultGrowthSeed": 2056059806
+}

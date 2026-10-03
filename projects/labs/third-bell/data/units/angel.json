@@ -1,0 +1,150 @@
+{
+  "id": "angel",
+  "name": "Angel",
+  "favoriteFoods": [
+    171,
+    179,
+    187
+  ],
+  "level": 1,
+  "role": "Support",
+  "smallBattler": "Angel",
+  "passives": [
+    "holyAura"
+  ],
+  "elements": [
+    "White"
+  ],
+  "skills": [
+    "holySmite",
+    "divineFavor"
+  ],
+  "flavor": "A celestial being tasked with guiding the lost. Its patience is legendary.",
+  "expGrowth": 5,
+  "gold": 20,
+  "evolutions": [
+    {
+      "level": 6,
+      "evolvesTo": "archangel",
+      "bonus": {
+        "maxHp": 10,
+        "mat": 4,
+        "mdf": 3
+      }
+    }
+  ],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A radiant Angel hovers gracefully. 'A modest offering of 30 Gold shall fund my holy crusade.'"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Pay 30 Gold",
+          "condition": "gold:30",
+          "commands": [
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": -30
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Angel accepts the offering. 'May divine light guide our path.'"
+            },
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "angel",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Decline",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Angel scoffs. 'No coin, no deal!'"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 8,
+      "chance": 0.15
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [
+    {
+      "itemId": 8,
+      "chance": 0.5,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Gabriel",
+    "Michael",
+    "Uriel",
+    "Seraph",
+    "Halo",
+    "Mercy",
+    "Divine",
+    "Aura"
+  ],
+  "baseParams": {
+    "maxHp": 44,
+    "atk": 7,
+    "def": 11,
+    "mat": 13,
+    "mdf": 15,
+    "mpd": 2,
+    "mxa": 5,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 20,
+      "atk": 14,
+      "def": 19,
+      "mat": 27,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 29,
+      "atk": 21,
+      "def": 29,
+      "mat": 39,
+      "mdf": 39
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 32,
+      "atk": 24,
+      "def": 33,
+      "mat": 44,
+      "mdf": 44
+    }
+  ],
+  "portrait": "angel",
+  "bigBattler": "angel",
+  "defaultGrowthSeed": 2027808456
+}

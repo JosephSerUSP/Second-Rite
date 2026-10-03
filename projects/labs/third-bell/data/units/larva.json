@@ -1,0 +1,94 @@
+{
+  "id": "larva",
+  "name": "Larva",
+  "favoriteFoods": [
+    171,
+    182,
+    190
+  ],
+  "level": 1,
+  "role": "Parasite",
+  "smallBattler": "Ooze",
+  "passives": [
+    "parasite"
+  ],
+  "elements": [
+    "Red"
+  ],
+  "skills": [],
+  "flavor": "It's eating your rations. And your tank.",
+  "expGrowth": 2,
+  "gold": 5,
+  "evolutions": [
+    {
+      "level": 6,
+      "evolvesTo": "crimson_lord",
+      "bonus": {
+        "maxHp": 12,
+        "atk": 5,
+        "def": 2
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "drops": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "names": [
+    "Wiggly",
+    "Grub",
+    "Squirm",
+    "Munch",
+    "Silky",
+    "Chrysalis",
+    "Inchworm",
+    "Crawler"
+  ],
+  "baseParams": {
+    "maxHp": 44,
+    "atk": 11,
+    "def": 7,
+    "mat": 7,
+    "mdf": 6,
+    "mpd": 3,
+    "mxa": 3,
+    "mxp": 1
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 20,
+      "atk": 23,
+      "def": 12,
+      "mat": 14,
+      "mdf": 10
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 29,
+      "atk": 33,
+      "def": 19,
+      "mat": 21,
+      "mdf": 16
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 32,
+      "atk": 37,
+      "def": 20,
+      "mat": 24,
+      "mdf": 18
+    }
+  ],
+  "portrait": "larva",
+  "bigBattler": "larva",
+  "defaultGrowthSeed": 28251350
+}

@@ -1,0 +1,97 @@
+{
+  "id": "gargoyle",
+  "name": "Gargoyle",
+  "names": [
+    "Hugo",
+    "Pedra",
+    "Vigia",
+    "Goya",
+    "Sino",
+    "Chuva",
+    "Paris",
+    "Gárgula"
+  ],
+  "flavor": "A watchful stone fiend more magical than a Golem. It provokes attacks and raises the party's magical defenses.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "Demon",
+  "elements": [
+    "Black",
+    "White"
+  ],
+  "skills": [
+    "provoke",
+    "aegisCry"
+  ],
+  "passives": [
+    "watchfulStone"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "grotesque"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 58,
+    "atk": 13,
+    "def": 20,
+    "mat": 17,
+    "mdf": 20,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 81,
+      "atk": 20,
+      "def": 28,
+      "mat": 24,
+      "mdf": 30
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 95,
+      "atk": 23,
+      "def": 33,
+      "mat": 29,
+      "mdf": 35
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 96,
+      "atk": 24,
+      "def": 34,
+      "mat": 30,
+      "mdf": 35
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    176,
+    182
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Gargoyle",
+  "bigBattler": "Gargoyle",
+  "defaultGrowthSeed": 1485935201
+}

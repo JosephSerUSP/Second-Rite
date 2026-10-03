@@ -1,0 +1,92 @@
+{
+  "id": "firemane",
+  "name": "Firemane",
+  "names": [
+    "Celeste",
+    "Estrela",
+    "Amalthea",
+    "Shiro",
+    "Iris",
+    "Neve",
+    "Lança",
+    "Rocinante"
+  ],
+  "flavor": "A fiery mount reached through an accessible catalyst. It preserves simple healing while adding aggressive red magic.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "unicorn",
+  "elements": [
+    "Red",
+    "Red"
+  ],
+  "skills": [
+    "soothingMote",
+    "flare"
+  ],
+  "passives": [
+    "burningHeart"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 72,
+    "atk": 28,
+    "def": 19,
+    "mat": 29,
+    "mdf": 20,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 83,
+      "atk": 29,
+      "def": 21,
+      "mat": 33,
+      "mdf": 22
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 97,
+      "atk": 33,
+      "def": 24,
+      "mat": 38,
+      "mdf": 26
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 98,
+      "atk": 35,
+      "def": 26,
+      "mat": 40,
+      "mdf": 27
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Firemane",
+  "bigBattler": "Firemane",
+  "defaultGrowthSeed": 472030973
+}

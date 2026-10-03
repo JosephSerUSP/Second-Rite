@@ -1,0 +1,115 @@
+{
+  "id": "demon",
+  "name": "Demon",
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "level": 2,
+  "role": "Attacker",
+  "smallBattler": "Demon",
+  "passives": [
+    "chaosPact"
+  ],
+  "elements": [
+    "Red",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "infernalPact"
+  ],
+  "flavor": "A pact-bound fiend that revels in chaos and destruction.",
+  "expGrowth": 5,
+  "gold": 25,
+  "drops": [
+    {
+      "itemId": 5,
+      "chance": 0.1
+    }
+  ],
+  "evolutions": [
+    {
+      "level": 6,
+      "evolvesTo": "incubus",
+      "bonus": {
+        "maxHp": 10,
+        "atk": 4,
+        "mat": 3
+      }
+    }
+  ],
+  "initialParty": true,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [
+    {
+      "itemId": 5,
+      "chance": 0.6,
+      "count": 1
+    },
+    {
+      "itemId": 5,
+      "chance": 0.4,
+      "count": 2,
+      "minLevel": 8
+    }
+  ],
+  "names": [
+    "Asmodeus",
+    "Malphas",
+    "Crowley",
+    "Fizz",
+    "Ash",
+    "Diablo",
+    "Brimstone",
+    "Cinder"
+  ],
+  "baseParams": {
+    "maxHp": 44,
+    "atk": 18,
+    "def": 12,
+    "mat": 8,
+    "mdf": 9,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 20,
+      "atk": 37,
+      "def": 21,
+      "mat": 16,
+      "mdf": 16
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 29,
+      "atk": 55,
+      "def": 32,
+      "mat": 25,
+      "mdf": 24
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 32,
+      "atk": 61,
+      "def": 35,
+      "mat": 27,
+      "mdf": 26
+    }
+  ],
+  "portrait": "demon",
+  "bigBattler": "demon",
+  "defaultGrowthSeed": 894229037
+}

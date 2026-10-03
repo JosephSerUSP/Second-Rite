@@ -90,6 +90,14 @@ function configureGradleProperties(filePath, values) {
     setGradleProperty(lines, 'app.orientation', values.orientation);
     setGradleProperty(lines, 'app.version_code', String(values.versionCode));
     setGradleProperty(lines, 'app.version_name', values.versionName);
+
+    // The embedded game is already a large ZIP-backed .love archive. Even with
+    // noCompress below, AGP's asset packaging phase needs substantially more
+    // than its default heap once the Project is a few hundred MiB. Keep this
+    // explicit and bounded on the Android-dev wrapper rather than depending on
+    // runner-specific GRADLE_OPTS; --no-daemon will still launch its one-shot
+    // worker with this budget.
+    setGradleProperty(lines, 'org.gradle.jvmargs', '-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8');
     fs.writeFileSync(filePath, `${lines.join('\n').replace(/\n+$/, '')}\n`, 'utf8');
 }
 

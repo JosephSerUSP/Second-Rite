@@ -6,17 +6,7 @@
     },
     {
       "cmd": "COMMENT",
-      "text": "Traversal cost: exactly the combined MPD of the living manifested party, with no Summoner base cost. A lone MPD-1 creature can walk almost indefinitely; a heavy party pays for every step. Nothing is charged on a safe map. This replaced a flat dungeon.moveMpDrain in exploration.lua, which charged the same 1 MP whether the Summoner was carrying a Pixie or a Bahamut -- the entire expedition economy the design rests on was invisible."
-    },
-    {
-      "cmd": "IF",
-      "condition": "not session.mapSafe",
-      "then": [
-        {
-          "cmd": "CHANGE_MP",
-          "amount": "-(party.mpd)"
-        }
-      ]
+      "text": "Ordinary traversal is free. Merely keeping manifested companions available must not tax every step or reward reserve micromanagement. Expedition MP pressure is charged when the party is actively channelled into battle; future Veil/avoidance traversal may add an exceptional player-chosen spend."
     },
     {
       "cmd": "FOR_EACH",

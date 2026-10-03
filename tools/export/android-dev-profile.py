@@ -4,6 +4,10 @@
 The ordinary Project remains player-facing. The Android *dev* package owns this
 profile at export time so a future release APK cannot accidentally inherit
 Developer Room / CRT Lab access merely because it also runs on Android.
+
+Exported players contain the compiled semantic scene bank at data/scenes.json,
+not the source-authoring data/scenes/*.json fragments. This adapter therefore
+operates on that compiled ownership boundary and validates the finished archive.
 """
 from __future__ import annotations
 
@@ -24,31 +28,28 @@ CURATED_CRT = [
     ("crt-lab:convergence", "CONVERGENCE"),
 ]
 
-REQUIRED_JSON = {
-    "data/terms.json",
-    "data/scenes/title.json",
-    "data/scenes/options.json",
-    "data/scenes/developer_menu.json",
-}
+SCENES_PATH = "data/scenes.json"
+TERMS_PATH = "data/terms.json"
 RUNTIME_MAIN = "main.lua"
+REQUIRED_FILES = {SCENES_PATH, TERMS_PATH, RUNTIME_MAIN}
 DEV_MODE_SOURCE = "    session.developerMode = cli.isDeveloperMode\n"
 DEV_MODE_STAMP = "    session.developerMode = true -- Android Dev profile\n"
 
 
-def _lua_table(items: list[tuple[str, str]], column: int) -> str:
-    values = [item[column] for item in items]
-    if column == 0:
-        return "{ " + ", ".join(json.dumps(value) for value in values) + " }"
+def _lua_modes() -> str:
+    return "{ " + ", ".join(json.dumps(mode) for mode, _ in CURATED_CRT) + " }"
+
+
+def _lua_labels() -> str:
     return "{ " + ", ".join(
         "[" + json.dumps(mode) + "]=" + json.dumps(label)
-        for mode, label in items
+        for mode, label in CURATED_CRT
     ) + " }"
 
 
 def crt_init_script() -> str:
-    labels = _lua_table(CURATED_CRT, 1)
     return (
-        f"local labels = {labels}\n"
+        f"local labels = {_lua_labels()}\n"
         "ctx.sceneState.crtLabMode = api.getOutputPresentation()\n"
         "ctx.sceneState.crtLabLabel = labels[ctx.sceneState.crtLabMode] or "
         "string.upper(tostring(ctx.sceneState.crtLabMode or ''))"
@@ -56,11 +57,9 @@ def crt_init_script() -> str:
 
 
 def crt_cycle_script() -> str:
-    modes = _lua_table(CURATED_CRT, 0)
-    labels = _lua_table(CURATED_CRT, 1)
     return (
-        f"local modes = {modes}\n"
-        f"local labels = {labels}\n"
+        f"local modes = {_lua_modes()}\n"
+        f"local labels = {_lua_labels()}\n"
         "local current = api.getOutputPresentation()\n"
         "local nextMode = modes[1]\n"
         "for i, id in ipairs(modes) do\n"
@@ -78,31 +77,39 @@ def patch_runtime_main(source: str) -> str:
         return source
     count = source.count(DEV_MODE_SOURCE)
     if count != 1:
-        raise ValueError(
-            f"expected one runtime developer-mode assignment, found {count}"
-        )
+        raise ValueError(f"expected one runtime developer-mode assignment, found {count}")
     return source.replace(DEV_MODE_SOURCE, DEV_MODE_STAMP, 1)
 
 
+def scene_by_id(scenes: list[dict], scene_id: str) -> dict:
+    matches = [scene for scene in scenes if scene.get("id") == scene_id]
+    if len(matches) != 1:
+        raise ValueError(f"compiled scene bank expected one {scene_id!r}, found {len(matches)}")
+    return matches[0]
+
+
 def _window(scene: dict, window_id: str) -> dict:
-    for window in scene.get("windows", []):
-        if window.get("id") == window_id:
-            return window
-    raise ValueError(f"scene {scene.get('id')} is missing window {window_id}")
+    matches = [window for window in scene.get("windows", []) if window.get("id") == window_id]
+    if len(matches) != 1:
+        raise ValueError(f"scene {scene.get('id')} expected one window {window_id}, found {len(matches)}")
+    return matches[0]
 
 
 def _list_block(scene: dict, window_id: str, list_id: str) -> dict:
-    for block in _window(scene, window_id).get("content", []):
-        if block.get("listId") == list_id:
-            return block
-    raise ValueError(f"scene {scene.get('id')} is missing list block {list_id}")
+    matches = [
+        block for block in _window(scene, window_id).get("content", [])
+        if block.get("listId") == list_id
+    ]
+    if len(matches) != 1:
+        raise ValueError(f"scene {scene.get('id')} expected one list block {list_id}, found {len(matches)}")
+    return matches[0]
 
 
 def _hook(scene: dict, name: str) -> list[dict]:
-    hooks = scene.setdefault("hooks", {})
-    if name not in hooks or not isinstance(hooks[name], list):
+    value = scene.get("hooks", {}).get(name)
+    if not isinstance(value, list):
         raise ValueError(f"scene {scene.get('id')} is missing hook {name}")
-    return hooks[name]
+    return value
 
 
 def _select_handler(hook: list[dict], index: int) -> dict | None:
@@ -117,7 +124,9 @@ def _nav_select_handler(hook: list[dict], index: int) -> dict | None:
     needle = f"sceneState.idx == {index}"
     for command in hook:
         condition = str(command.get("condition", ""))
-        if command.get("cmd") == "IF" and "sceneState.mode == 'nav'" in condition and needle in condition:
+        if (command.get("cmd") == "IF"
+                and "sceneState.mode == 'nav'" in condition
+                and needle in condition):
             return command
     return None
 
@@ -125,9 +134,9 @@ def _nav_select_handler(hook: list[dict], index: int) -> dict | None:
 def _insert_before_id(rows: list[dict], before_id: str, row: dict) -> None:
     if any(existing.get("id") == row.get("id") for existing in rows):
         return
-    for i, existing in enumerate(rows):
+    for index, existing in enumerate(rows):
         if existing.get("id") == before_id:
-            rows.insert(i, row)
+            rows.insert(index, row)
             return
     raise ValueError(f"could not insert {row.get('id')} before missing {before_id}")
 
@@ -151,7 +160,6 @@ def patch_title(scene: dict, terms: dict) -> None:
             break
     if not found:
         raise ValueError("title scene has no navigational on_down bound")
-
     if _select_handler(_hook(scene, "on_select"), 5) is None:
         raise ValueError("title scene has no authored Developer Room handler at index 5")
 
@@ -171,43 +179,11 @@ def _ensure_crt_format(block: dict, *, output_row: bool) -> None:
         elif new not in fmt:
             raise ValueError("unexpected Options OUTPUT formatRight expression")
     if "id == 'crt_lab'" not in fmt:
-        tail = "or ''}"
-        if not fmt.endswith(tail):
+        suffix = "or ''}"
+        if not fmt.endswith(suffix):
             raise ValueError("formatRight no longer ends in the expected fallback")
-        fmt = fmt[: -len(tail)] + "or id == 'crt_lab' and (sceneState.crtLabLabel or '') or ''}"
+        fmt = fmt[:-len(suffix)] + "or id == 'crt_lab' and (sceneState.crtLabLabel or '') or ''}"
     block["formatRight"] = fmt
-
-
-def _append_init_to_script(scene: dict, marker: str) -> None:
-    for command in _hook(scene, "on_enter"):
-        if command.get("cmd") == "SCRIPT" and "api.getOutputPresentation()" in str(command.get("code", "")):
-            code = str(command.get("code", ""))
-            if marker not in code:
-                command["code"] = code + "\n" + crt_init_script()
-            return
-    raise ValueError(f"scene {scene.get('id')} has no output-presentation init SCRIPT")
-
-
-def _crt_select_handler(index: int) -> dict:
-    return {
-        "cmd": "IF",
-        "condition": f"locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == {index}",
-        "then": [
-            {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
-            {"cmd": "SCRIPT", "code": crt_cycle_script()},
-        ],
-    }
-
-
-def _developer_select_handler(index: int) -> dict:
-    return {
-        "cmd": "IF",
-        "condition": f"locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == {index}",
-        "then": [
-            {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
-            {"cmd": "SCENE_EVENT", "kind": "push", "scene": "developer_menu"},
-        ],
-    }
 
 
 def patch_options(scene: dict) -> None:
@@ -227,22 +203,26 @@ def patch_options(scene: dict) -> None:
 
     block = _list_block(scene, "options_list", "config:optionsCommands")
     _ensure_crt_format(block, output_row=True)
-    _append_init_to_script(scene, "crtLabLabel")
 
-    nav_down = False
+    init_found = False
+    for command in _hook(scene, "on_enter"):
+        if command.get("cmd") == "SCRIPT" and "api.getOutputPresentation()" in str(command.get("code", "")):
+            init_found = True
+            if "crtLabLabel" not in str(command.get("code", "")):
+                command["code"] = str(command.get("code", "")) + "\n" + crt_init_script()
+            break
+    if not init_found:
+        raise ValueError("Options scene has no output-presentation init SCRIPT")
+
     for command in _hook(scene, "on_down"):
         condition = str(command.get("condition", ""))
         if "sceneState.mode == 'nav'" in condition and "sceneState.idx <" in condition:
             command["condition"] = "sceneState.mode == 'nav' and sceneState.idx < 9"
-            nav_down = True
             break
-    if not nav_down:
+    else:
         raise ValueError("Options scene has no nav on_down bound")
 
     select = _hook(scene, "on_select")
-    # Source Options has EXIT at nav index 7. The dev profile owns indices
-    # 7=Developer Menu, 8=CRT Lab, 9=Exit. Recognize the already-stamped shape
-    # before looking for the original index so repeated local packaging is safe.
     exit_handler = _nav_select_handler(select, 9)
     if exit_handler is None:
         exit_handler = _nav_select_handler(select, 7)
@@ -252,25 +232,37 @@ def patch_options(scene: dict) -> None:
             "sceneState.idx == 7", "sceneState.idx == 9", 1
         )
 
-    if not any(
-        command.get("cmd") == "IF"
-        and "sceneState.idx == 7" in str(command.get("condition", ""))
+    has_dev = any(
+        "sceneState.idx == 7" in str(command.get("condition", ""))
         and any(step.get("cmd") == "SCENE_EVENT" and step.get("scene") == "developer_menu"
                 for step in command.get("then", []))
         for command in select
-    ):
-        exit_pos = select.index(exit_handler)
-        select.insert(exit_pos, _developer_select_handler(7))
+    )
+    if not has_dev:
+        select.insert(select.index(exit_handler), {
+            "cmd": "IF",
+            "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 7",
+            "then": [
+                {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
+                {"cmd": "SCENE_EVENT", "kind": "push", "scene": "developer_menu"},
+            ],
+        })
 
-    if not any(
-        command.get("cmd") == "IF"
-        and "sceneState.idx == 8" in str(command.get("condition", ""))
+    has_crt = any(
+        "sceneState.idx == 8" in str(command.get("condition", ""))
         and any(step.get("cmd") == "SCRIPT" and "crtLabMode" in str(step.get("code", ""))
                 for step in command.get("then", []))
         for command in select
-    ):
-        exit_pos = select.index(exit_handler)
-        select.insert(exit_pos, _crt_select_handler(8))
+    )
+    if not has_crt:
+        select.insert(select.index(exit_handler), {
+            "cmd": "IF",
+            "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 8",
+            "then": [
+                {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
+                {"cmd": "SCRIPT", "code": crt_cycle_script()},
+            ],
+        })
 
 
 def patch_developer_menu(scene: dict) -> None:
@@ -283,18 +275,13 @@ def patch_developer_menu(scene: dict) -> None:
     if len(rows) != 15:
         raise ValueError(f"unexpected Android-dev Developer row count: {len(rows)}")
 
-    block = _list_block(scene, "developer_list", "config:developerCommands")
-    _ensure_crt_format(block, output_row=False)
-
-    # The Developer menu's existing init SCRIPT does not mention output mode.
-    # Append a dedicated SCRIPT instead of coupling unrelated presentation state.
+    _ensure_crt_format(_list_block(scene, "developer_list", "config:developerCommands"), output_row=False)
     on_enter = _hook(scene, "on_enter")
     if not any(command.get("cmd") == "SCRIPT" and "crtLabLabel" in str(command.get("code", "")) for command in on_enter):
         on_enter.append({"cmd": "SCRIPT", "code": crt_init_script()})
 
     for command in _hook(scene, "on_down"):
-        condition = str(command.get("condition", ""))
-        if "sceneState.idx <" in condition:
+        if "sceneState.idx <" in str(command.get("condition", "")):
             command["condition"] = "sceneState.idx < 15"
             break
     else:
@@ -310,15 +297,14 @@ def patch_developer_menu(scene: dict) -> None:
             "sceneState.idx == 14", "sceneState.idx == 15", 1
         )
 
-    if not any(
-        command.get("cmd") == "IF"
-        and "sceneState.idx == 14" in str(command.get("condition", ""))
+    has_crt = any(
+        "sceneState.idx == 14" in str(command.get("condition", ""))
         and any(step.get("cmd") == "SCRIPT" and "crtLabMode" in str(step.get("code", ""))
                 for step in command.get("then", []))
         for command in select
-    ):
-        title_pos = select.index(title_handler)
-        select.insert(title_pos, {
+    )
+    if not has_crt:
+        select.insert(select.index(title_handler), {
             "cmd": "IF",
             "condition": "locals._guard == 0 and sceneState.idx == 14",
             "then": [
@@ -328,10 +314,12 @@ def patch_developer_menu(scene: dict) -> None:
         })
 
 
-def patch_documents(docs: dict[str, dict]) -> None:
-    patch_title(docs["data/scenes/title.json"], docs["data/terms.json"])
-    patch_options(docs["data/scenes/options.json"])
-    patch_developer_menu(docs["data/scenes/developer_menu.json"])
+def patch_compiled_data(scenes: list[dict], terms: dict) -> None:
+    if not isinstance(scenes, list):
+        raise ValueError("data/scenes.json must be the compiled ordered scene collection")
+    patch_title(scene_by_id(scenes, "title"), terms)
+    patch_options(scene_by_id(scenes, "options"))
+    patch_developer_menu(scene_by_id(scenes, "developer_menu"))
 
 
 def patch_archive(love_path: Path) -> None:
@@ -341,25 +329,21 @@ def patch_archive(love_path: Path) -> None:
     with zipfile.ZipFile(love_path, "r") as source:
         infos = source.infolist()
         names = [info.filename for info in infos]
-        duplicates = sorted({name for name in names if names.count(name) > 1})
-        if duplicates:
-            raise ValueError(f".love archive contains duplicate entries: {duplicates}")
-        missing = sorted(REQUIRED_JSON.difference(names))
-        if RUNTIME_MAIN not in names:
-            missing.append(RUNTIME_MAIN)
+        if len(names) != len(set(names)):
+            raise ValueError(".love archive contains duplicate entries")
+        missing = sorted(REQUIRED_FILES.difference(names))
         if missing:
             raise ValueError(f".love archive is missing developer-profile inputs: {missing}")
-        docs = {
-            name: json.loads(source.read(name).decode("utf-8"))
-            for name in REQUIRED_JSON
-        }
+
+        scenes = json.loads(source.read(SCENES_PATH).decode("utf-8"))
+        terms = json.loads(source.read(TERMS_PATH).decode("utf-8"))
         runtime_main = patch_runtime_main(source.read(RUNTIME_MAIN).decode("utf-8"))
-        patch_documents(docs)
+        patch_compiled_data(scenes, terms)
         replacements = {
-            name: (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
-            for name, doc in docs.items()
+            SCENES_PATH: (json.dumps(scenes, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+            TERMS_PATH: (json.dumps(terms, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+            RUNTIME_MAIN: runtime_main.encode("utf-8"),
         }
-        replacements[RUNTIME_MAIN] = runtime_main.encode("utf-8")
 
         fd, temp_name = tempfile.mkstemp(prefix=love_path.name + ".", suffix=".tmp", dir=love_path.parent)
         os.close(fd)
@@ -367,20 +351,19 @@ def patch_archive(love_path: Path) -> None:
         try:
             with zipfile.ZipFile(temp_path, "w") as target:
                 for info in infos:
-                    payload = replacements.get(info.filename, source.read(info.filename))
-                    target.writestr(info, payload)
+                    target.writestr(info, replacements.get(info.filename, source.read(info.filename)))
             os.replace(temp_path, love_path)
         finally:
             if temp_path.exists():
                 temp_path.unlink()
 
-    # Re-open the real output and prove the developer profile survived serialization.
     with zipfile.ZipFile(love_path, "r") as result:
         runtime_main = result.read(RUNTIME_MAIN).decode("utf-8")
-        title = json.loads(result.read("data/scenes/title.json"))
-        terms = json.loads(result.read("data/terms.json"))
-        options = json.loads(result.read("data/scenes/options.json"))
-        developer = json.loads(result.read("data/scenes/developer_menu.json"))
+        scenes = json.loads(result.read(SCENES_PATH))
+        terms = json.loads(result.read(TERMS_PATH))
+    options = scene_by_id(scenes, "options")
+    developer = scene_by_id(scenes, "developer_menu")
+    title = scene_by_id(scenes, "title")
     if DEV_MODE_STAMP not in runtime_main:
         raise AssertionError("Android dev runtime does not boot in developer mode")
     if terms["title"]["options"][-1] != "Developer Room":
@@ -433,24 +416,16 @@ def self_test() -> None:
     }
     terms = {"title": {"options": ["New Game", "Continue", "Options", "Exit"]}}
     runtime_main = "function boot()\n" + DEV_MODE_SOURCE + "end\n"
-    docs = {
-        "data/scenes/title.json": title,
-        "data/scenes/options.json": options,
-        "data/scenes/developer_menu.json": developer,
-        "data/terms.json": terms,
-    }
 
     with tempfile.TemporaryDirectory() as td:
         love_path = Path(td) / "test.love"
         with zipfile.ZipFile(love_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for name, doc in docs.items():
-                archive.writestr(name, json.dumps(doc))
+            archive.writestr(SCENES_PATH, json.dumps([title, options, developer]))
+            archive.writestr(TERMS_PATH, json.dumps(terms))
             archive.writestr(RUNTIME_MAIN, runtime_main)
         patch_archive(love_path)
-        # Idempotence is important for local/manual packaging retries.
-        patch_archive(love_path)
+        patch_archive(love_path)  # prove local/manual packaging retries are idempotent
 
-    assert len(terms["title"]["options"]) == 4, "self-test source fixture was mutated in-place unexpectedly"
     print("ANDROID DEV PROFILE SELF-TEST OK")
 
 

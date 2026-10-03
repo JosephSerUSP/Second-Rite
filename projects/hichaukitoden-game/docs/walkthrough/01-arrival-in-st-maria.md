@@ -21,35 +21,38 @@ movement.
 
 ![Full town screenshot required: current image lacks UI](images/st-maria-gameplay.png)
 
-> **Player commentary:** St. Maria is tiny, but walking it in first person
-> prevents it from feeling like a shop menu. I walked into what looked like a
-> wall texture and discovered it was a door. The awkward static room render
-> feels exactly like an old game spending its CG budget in strange places.
-
-> **Player commentary:** The old opening dropped me into town before I had any
-> sense of travel. The carriage and road shots make St. Maria feel remote; the
-> threshold image makes the dungeon premise concrete before the gate guard has
-> to explain it again.
+> **Player commentary:** St. Maria made more sense once the first errand made me
+> physically learn it. I left my room through the Passage House court, came out
+> into the Cortiço, and reached the Praça to register. After Celina told me the
+> gate was uphill and the shops downhill, those stopped being abstract menu
+> destinations and became directions I could reuse.
 
 ## Complete route
 
 1. Meet the already-contracted **Saban** in Room 3 and leave through its door.
-2. Find **Registrar Celina** at the Passage Office.
-3. Enter the seal in the Registry and receive **Crossing Writ** (item 198).
-4. Visit the available shops and prepare Saban for the first descent.
-5. Walk north to the gate.
-6. Present the Crossing Writ and choose **Enter Dungeon**.
+2. Cross the **Passage House Arrival Court** and exit to **the Cortiço**.
+3. Follow the upper route to **the Praça** and enter the **Passage Office**.
+4. Register with **Registrar Celina** and receive **Crossing Writ** (item 198).
+5. Decide whether to prepare before descending:
+   - **Alicia's Padaria** is downhill on Market Row for provisions;
+   - **Laura's forge** is farther down at the Port for equipment;
+   - the **Churchyard / Labyrinth gate** is uphill from the Praça.
+6. Reach the Churchyard, present the Crossing Writ, and choose **Enter Dungeon**.
+
+The point of this route is not to make registration longer. It gives the player
+one compulsory traversal that teaches the town's altitude logic before the
+preparation loop becomes optional.
 
 ## Town services
 
 | Location | Service | Opening significance |
 |---|---|---|
-| Passage Office | Registry | Required; grants Crossing Writ |
-| Passage House, Room 3 | Rest / inspection | Establishes persistent room and Saban |
-| Alicia's bakery | Supplies | Recovery and expedition food |
-| Laura's forge | Equipment | Opening weapons and armor |
-| Rusty Tankard | Information | Rumors and optional introductions |
-| Chapel | Conversation | Sister Agnes; no required blessing |
+| Passage Office, Praça | Registry | Required; grants Crossing Writ and orients the player |
+| Passage House, Room 3 | Rest / inspection | Establishes persistent home and Saban |
+| Alicia's Padaria, Market Row | Supplies | Recovery and expedition food |
+| Laura's forge, Port | Equipment | Opening weapons and armor |
+| Rusty Tankard, Quay | Information | Rumors and optional introductions |
+| Chapel, Praça | Conversation | Sister Agnes; no required blessing |
 
 The production guide must list every shop row, price, statistic and stock
 condition here. A recommendation never substitutes for the complete inventory.
@@ -61,7 +64,9 @@ The sign reads:
 > **This'll be your home for the upcoming months.**
 
 Proposed inspection flags include the missing picture, chipped feed bowl and
-low coat hook. None blocks progression.
+low coat hook. None blocks progression. Room 3 deliberately contains no civic
+service: it is where the game can accumulate personal expedition history rather
+than a second place to perform registration.
 
 > **Player commentary:** On my first run I assumed the feed bowl was disposable
 > flavor text. The Floor 3 room made me regret not paying attention. This is
@@ -78,9 +83,12 @@ Saban is in the party before control begins.
 | Saban is actor 61, level 3 | Occupies one active slot | Enables survival/loss reactions |
 | His contract is already named | Name persists through save/load | Distinguishes him from later Moa |
 | The old owner was erased | No immediate answer | Gives the Passage House a quiet suspicion |
+| Saban has MPD 1 | Dangerous battle activation starts at 65 MP in the current playtest baseline | Establishes the expedition-cost language before heavier companions |
 
-> **Player commentary:** The gate guard told me to reserve enough MP to walk
-> home. I filed this as generic tutorial advice and ignored it.
+Celina's opening explanation is intentionally specific: ordinary walking does
+not consume the seal; fully channeling manifested creatures into a dangerous
+fight does. This keeps the town/dungeon walk itself from punishing attachment
+while making party weight matter at the moment danger commits the player.
 
 ## Progression and state
 
@@ -93,6 +101,8 @@ Saban is in the party before control begins.
 
 - **Fantasy:** the player is an outsider buying into a dangerous local economy,
   not a chosen hero.
+- **Place:** the first civic errand teaches Room 3 → Cortiço → Praça, then gives
+  actionable uphill/downhill directions for Gate, Padaria and Port.
 - **Attachment:** the rented room and a named starter can acquire history.
 - **Decision:** opening money can favor equipment, supplies, or Saban's safety.
 - **Content debt:** full shop tables; room inspection flags; Saban provenance;

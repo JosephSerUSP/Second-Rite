@@ -103,7 +103,7 @@
                   "label": "Ask about St. Maria.",
                   "commands": [
                     {
-                      "text": "\"The village sells meals, beds, steel and funerals. Summoners bring demand for all four.\"",
+                      "text": "\"You are standing in the Praça. Uphill is the Churchyard and the Labyrinth gate. Downhill, Market Row has Alicia's padaria; keep descending to the Port for Laura's forge. Your room is back through the Cortiço.\"",
                       "speaker": "Registrar Celina",
                       "expression": 2,
                       "cmd": "TEXT"
@@ -114,7 +114,7 @@
                   "label": "Ask about the Labyrinth.",
                   "commands": [
                     {
-                      "text": "\"Return before your MP makes the decision for you. Pride is not accepted as payment at the infirmary.\"",
+                      "text": "\"Walking does not spend your seal. Calling every manifestation fully into a fight does. Return before your MP makes the decision for you.\"",
                       "speaker": "Registrar Celina",
                       "expression": 5,
                       "cmd": "TEXT"
@@ -148,7 +148,7 @@
               "cmd": "CHANGE_ITEM"
             },
             {
-              "text": "Obtained Crossing Writ. \"The guard will let you descend now. Coming back remains your responsibility.\"",
+              "text": "Obtained Crossing Writ. \"The gate is uphill in the Churchyard. Alicia sells provisions downhill on Market Row; Laura's forge is at the Port. Coming back remains your responsibility.\"",
               "speaker": "Registrar Celina",
               "expression": 5,
               "cmd": "TEXT"

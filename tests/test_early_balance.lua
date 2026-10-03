@@ -19,6 +19,11 @@ loader.init()
 local fixed = loader.system.newGame.party.fixedMembers[1]
 check(fixed.id == "moa" and fixed.level == 3,
     "Saban starts at level 3, matching the top of Floor 1's enemy range")
+check(loader.system.summoner.startMp == 900,
+    "opening playtest baseline starts the Summoner at 900 MP")
+check(loader.system.combat.battleActivationBase == 50
+        and loader.system.combat.battleActivationPerMpd == 15,
+    "battle activation tuning is authored as 50 + 15 * party MPD")
 
 local floor1 = loader.maps[2]
 local floor1Troop = troop.rollForMap(floor1, loader)
@@ -114,19 +119,30 @@ for _, entry in ipairs(floor1.encounters) do
 end
 check(sawBlueEnemy, "Floor 1 contains Blue elemental enemies for Saban's Green elemental advantage")
 
--- Verify map navigation MP drain formula evaluation
+-- Walking should never make the player resent keeping a companion manifested.
+-- Expedition pressure is charged on dangerous battle activation instead.
 local flow = require("engine.flow")
 sess.party = { saban }
 sess.mp = 50
 sess.maxMp = 50
 sess.mapSafe = false
 flow.run("exploration.step", { session = sess, party = sess.party })
--- Verify Cerberus actor adjustments & sidequest registration
+check(sess.mp == 50,
+    "ordinary dangerous-map traversal does not spend Summoner MP")
+
+local sabanMpd = loader.getUnit("moa").baseParams.mpd
+local sabanActivation = loader.system.combat.battleActivationBase
+    + sabanMpd * loader.system.combat.battleActivationPerMpd
+check(sabanMpd == 1 and sabanActivation == 65,
+    "Saban-only battle activation costs 65 MP in the opening playtest baseline")
+
+-- Verify Cerberus actor adjustments & sidequest registration. MPD remains a
+-- meaningful battle-activation weight even though it no longer taxes walking.
 local cerberus = loader.getUnit("cerberus")
 check(cerberus and cerberus.elements and cerberus.elements[1] == "Black" and cerberus.elements[2] == "White",
     "Cerberus is aligned to Black and White elements")
 check(cerberus and cerberus.baseParams and cerberus.baseParams.mpd == 6,
-    "Cerberus carries a heavy traversal MPD of 6")
+    "Cerberus carries a heavy manifestation MPD of 6")
 
 local lostHoundQuest = loader.getQuest and loader.getQuest("lost_hound")
 check(lostHoundQuest and lostHoundQuest.name == "The Stray Hound",

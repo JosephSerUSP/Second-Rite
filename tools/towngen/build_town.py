@@ -388,10 +388,10 @@ SCREENS = {
     "lodging": dict(
         pixels_per_y=PIXELS_PER_Y,
         plate_view_transform="Standard",
-        id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
+        id=25, title="St. Maria - Passage House, Room 3", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_celina", 260.0)],
+        npcs=[],
         doors=[("exit_door", "Out to the arrival court", 32, "lodging_entry", 404.0, None, "away")],
     ),
     "alicias_padaria": dict(

@@ -151,7 +151,7 @@
           ],
           "elseCommands": [
             {
-              "text": "Resting on a velvet cushion is a shimmering Teardrop Crystal!",
+              "text": "A shimmering Teardrop Crystal rests beside a dry seed that seems to pulse when your seal passes over it.",
               "cmd": "TEXT"
             },
             {
@@ -160,22 +160,12 @@
               "cmd": "CHANGE_ITEM"
             },
             {
-              "item": "11",
+              "item": "195",
               "count": 1,
               "cmd": "CHANGE_ITEM"
             },
             {
-              "item": "171",
-              "count": 1,
-              "cmd": "CHANGE_ITEM"
-            },
-            {
-              "item": "176",
-              "count": 1,
-              "cmd": "CHANGE_ITEM"
-            },
-            {
-              "text": "Acquired Glittering Teardrop, Mystic Egg, Pão de Queijo, and Onigiri!",
+              "text": "Acquired Glittering Teardrop and Ether Seed. Ether Seed permanently raises the Summoner's Max MP when used.",
               "cmd": "TEXT"
             }
           ],
@@ -451,7 +441,7 @@
             },
             {
               "cmd": "TEXT",
-              "text": "Pixie's manifestation drain is 3. Saban alone costs 1 per step. Together, every tile will cost 4 — roughly a quarter of your current range."
+              "text": "Saban's manifestation drain is 1; Pixie's is 3. Walking with them costs nothing. Channeling Saban alone into battle costs 65 MP; channeling both costs 110."
             },
             {
               "cmd": "CHOICE",
@@ -471,7 +461,7 @@
                     },
                     {
                       "cmd": "TEXT",
-                      "text": "The Pixie accepts. PARTY now records two individual creatures; neither can be replaced by summoning from the field."
+                      "text": "Pixie accepts. She can mend the party after battle and Sense weak walls that Saban cannot reveal alone."
                     },
                     {
                       "cmd": "ERASE_EVENT"

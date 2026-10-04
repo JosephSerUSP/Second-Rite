@@ -1,5 +1,5 @@
 {
-  "sourceSHA256": "89960da11ca75658a68cc4dc20524fed6c3527a920c5ceb3152c7d0bd8ae5f5d",
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
   "retainedBuildings": [
     "forge",
     "pub",
@@ -96,7 +96,7 @@
     },
     {
       "id": "praca-stair-foot",
-      "samples": 59,
+      "samples": 60,
       "collisions": [],
       "intrusions": []
     },
@@ -120,37 +120,37 @@
     },
     {
       "id": "forge-door",
-      "samples": 14,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
     {
       "id": "pub-door",
-      "samples": 13,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
     {
       "id": "bakery-door",
-      "samples": 6,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
     {
       "id": "passage-house-door",
-      "samples": 16,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
     {
       "id": "chapel-door",
-      "samples": 9,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
     {
       "id": "registry-door",
-      "samples": 9,
+      "samples": 21,
       "collisions": [],
       "intrusions": []
     },
@@ -173,7 +173,7 @@
       "intrusions": []
     }
   ],
-  "samples": 1993,
+  "samples": 2053,
   "collisions": 0,
   "terrainIntrusions": 0,
   "scope": "Source lane and approach point checks; not swept body or owner play"

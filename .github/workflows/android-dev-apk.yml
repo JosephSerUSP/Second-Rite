@@ -144,14 +144,15 @@ jobs:
           xvfb-run -a "$LOVEC" out/st-maria-playtest/game validate
           export LOVEC_PATH="$LOVEC"
           xvfb-run -a python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/run_playthrough.py
+          xvfb-run -a python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/run_transfer_checks.py --output out/st-maria-playtest/transfer-proof
           # This candidate installs beside the regular dev APK. Its save
           # identity is isolated too, so old town saves cannot bypass the route.
           node - <<'NODE'
           const fs = require('fs');
           const path = 'projects/hichaukitoden-game/data/project.json';
           const project = JSON.parse(fs.readFileSync(path, 'utf8'));
-          project.android.applicationId += '.stmaria.routes';
-          project.android.displayName += ' St. Maria Routes';
+          project.android.applicationId += '.stmaria.entrances';
+          project.android.displayName += ' St. Maria Entrances';
           fs.writeFileSync(path, JSON.stringify(project, null, 2) + '\n');
           NODE
 

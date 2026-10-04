@@ -108,8 +108,19 @@ function M.run(loader)
             assert(lane.interact(session,'UP')~=lane.eventFor(session,doorway),'UP opened a DOWN exit')
         end
         local event=assert(lane.interact(session,button))
+        local transfer
+        for _,command in ipairs(event.commands) do
+            if command.cmd=='LOAD_MAP' then transfer=command end
+        end
         run(event.commands)
         assert(session.currentMapData.id==expected, 'Wrong arrival')
+        if session.townTraversal then
+            assert(transfer and transfer.arrival, 'Town transfer has no named arrival')
+            local state=session.townTraversal
+            local destination=assert(state.environment.anchors[transfer.arrival], 'Missing destination doorway')
+            assert(math.abs(state.y-destination.position[2])<.00001,
+                'Transfer landed away from its destination doorway: '..anchor)
+        end
         visited[#visited+1]=expected
     end
     exploration.loadMap(session,loader.getMapIndex(loader.system.spawn.mapId))
@@ -134,6 +145,13 @@ function M.run(loader)
     run(loader.maps[loader.getMapIndex(33)].events[1].commands)
     _, writ=hasWrit(); assert(writ,'Registry did not grant writ')
     door('exit_door',1005)
+    door('door-chapel',22)
+    local agnes
+    for _,event in ipairs(session.currentMapData.events) do if event.name=='Agnes' then agnes=event end end
+    walk(assert(agnes).worldPosition[2])
+    run(agnes.commands)
+    assert(session.flags.agnes_met,'The chapel cannot introduce Agnes')
+    door('exit_door',1005)
     door('to-court',1001)
     door('to-market',1002)
     door('door-bakery',28)
@@ -145,6 +163,15 @@ function M.run(loader)
     assert(session.flags.shipment_investigated,'The single Alicia cannot advance the shipment quest')
     door('exit_door',1002)
     door('to-quay',1003)
+    door('door-pub',21)
+    local pubOwner
+    for _,event in ipairs(session.currentMapData.events) do
+        if event.instanceId=='st-maria-pub-owner' then pubOwner=event end
+    end
+    assert(pubOwner,'The pub owner is missing')
+    walk(pubOwner.worldPosition[2])
+    run(pubOwner.commands,'Leave')
+    door('exit_door',1003)
     door('to-forge',1004)
     door('door-forge',29)
     door('exit_door',1004)

@@ -61,6 +61,36 @@ local function clearProjection(v)
     v.levelUpCounter = ""
 end
 
+local function publishReports(v, changes)
+    v.actorChanges = state_value.copy(changes, "Actor Change reports")
+    v.actorChangeIndex = 1
+    v.actorChangeCount = #v.actorChanges
+    progress.publish(v, v.actorChanges, 1)
+    v.actorChangePresentedIndex = 1
+end
+
+-- A source Scene may choose a dedicated modal instead of carrying Actor Change
+-- windows itself. The transaction still belongs to that source hook; this only
+-- hands the already-resolved, detached report to a generic presentation Scene.
+-- Lazy requiring scene_host avoids a module-load cycle (scene_host requires us)
+-- while keeping the dependency inside the engine layer.
+local function handoffToScene(sceneData, sourceV, session, changes)
+    local cfg = sceneData and sceneData.config
+    if not cfg or cfg.actorChangePresentation ~= "scene" then return false end
+
+    local seed = {}
+    publishReports(seed, changes)
+    clearProjection(sourceV)
+
+    local host = require("engine.scene_host")
+    host.push("actor_change", {
+        session = session,
+        loader = session.loader,
+        party = session.party or {},
+    }, seed)
+    return true
+end
+
 -- Called before one authored Scene hook. Nil means this hook is not a durable
 -- change transaction; finish() still runs afterwards so paging/closing an
 -- already-published report remains declarative Scene State.
@@ -76,11 +106,8 @@ function actor_change.finish(sceneData, v, session, before)
 
     local changes = before and progress.changes(session, before) or {}
     if #changes > 0 then
-        v.actorChanges = state_value.copy(changes, "Actor Change reports")
-        v.actorChangeIndex = 1
-        v.actorChangeCount = #v.actorChanges
-        progress.publish(v, v.actorChanges, 1)
-        v.actorChangePresentedIndex = 1
+        if handoffToScene(sceneData, v, session, changes) then return false end
+        publishReports(v, changes)
         return true
     end
 

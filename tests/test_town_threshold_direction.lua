@@ -1,5 +1,6 @@
 local lane = require('engine.bounded_lane')
 local transition = require('presentation.door_transition')
+local town_prompt = require('presentation.town_prompt')
 local failed, passed = 0, 0
 local function check(value, message)
     if value then passed=passed+1 else failed=failed+1; print('CHECK FAILED: '..message) end
@@ -21,6 +22,19 @@ check(lane.interact(game,'UP').instanceId=='enter','UP selects only the inward e
 check(lane.interact(game,'DOWN').instanceId=='leave','DOWN selects only the foreground exit at the same point')
 check(lane.interact(game,'LEFT')==nil,'a sideways press cannot open a depth door')
 check(lane.doorwayButton(game,street)=='RIGHT','marker and input share the authored axis')
+check(town_prompt.compactLabel({name='Out to the Cortico'})=='Cortico',
+    'town prompt removes navigation prose carried by the direction icon')
+check(town_prompt.compactLabel({name='Down to the Port'})=='Port',
+    'town prompt removes vertical navigation prose')
+check(town_prompt.compactLabel({name="Laura's Smithy (3D)"})=="Laura's Smithy",
+    'town prompt hides authoring/debug suffixes')
+check(town_prompt.compactLabel({name='Out to the Quay',label='Harbour'})=='Harbour',
+    'authored compact labels override presentation compaction')
+local icon = town_prompt.directionIcon('RIGHT')
+check(type(icon)=='table' and icon.direction=='RIGHT',
+    'resolved gameplay direction projects to an icon source without changing semantics')
+local badDirection = pcall(town_prompt.directionIcon,'DIAGONAL')
+check(not badDirection,'unknown prompt directions fail loudly')
 game.townTraversal.y=0
 check(lane.edgeDoorway(game,-1)==nil,'pushing a bound cannot hijack its depth doorway')
 check(not lane.isEdgeDoorway(game,foreground),'a foreground door on a bound remains a DOWN interaction')

@@ -26,9 +26,13 @@ local drawers = {
         require("presentation.event_animation_controller").installRenderer(renderer)
 
         -- Scene-owned world presentation supplies the durable default camera;
-        -- gameplay Map topology remains untouched.
+        -- gameplay Map topology remains untouched. Bounded-lane towns keep the
+        -- renderer's one event-label animation/layout path, but its text draw is
+        -- projected to the compact direction-glyph form for this world frame.
         require("presentation.vertex_shading_resolver").withComposite(ctx.session, function()
-            renderer.drawMap(worldPresentation)
+            require("presentation.town_prompt").withCompactDoorUi(ctx.session, function()
+                renderer.drawMap(worldPresentation)
+            end)
         end)
     end,
 }

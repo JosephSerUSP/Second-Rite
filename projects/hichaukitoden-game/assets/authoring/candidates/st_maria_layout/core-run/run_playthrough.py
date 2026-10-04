@@ -7,6 +7,9 @@ root = Path(__file__).resolve().parents[7]
 stage = root / 'out/st-maria-playtest/game'
 (stage / 'tests').mkdir(exist_ok=True)
 (stage / 'tests/check_playthrough.lua').write_bytes((candidate / 'check_playthrough.lua').read_bytes())
+# Production exports omit unit suites. Keep this conversation fixture only in
+# the disposable proof stage, just like the route harness itself.
+(stage / 'tests/test_weaponsmith_dialogue.lua').write_bytes((root / 'tests/test_weaponsmith_dialogue.lua').read_bytes())
 main = stage / 'main.lua'
 original = main.read_bytes()
 marker = b'cli_tools.runTownProofFrames(loader)'

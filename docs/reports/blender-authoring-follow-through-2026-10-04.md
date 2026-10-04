@@ -219,6 +219,13 @@ current-main staged units passed. G4 also identified the stale scene rows from
 the merged Actor Change work; the canonical state capture regenerated those
 rows and G4 passed. No gameplay mechanic changed in this reconciliation.
 Native frames and the walk/transfer probe were refreshed against current main.
+G2 passed all three battle fixtures. G3 remains red for current main's starting
+MP change (900 versus the 3000 reference) and missing Actor Change scene log;
+these are also documented in
+[Issue #1365](https://github.com/JosephSerUSP/Second-Rite/issues/1365).
+The golden logs were preserved. Their reconciliation needs the owner approval
+required by AGENTS.md; this branch is not represented as merge-green. The
+latest hosted rerun remains a separate check of the final head.
 
 Catalogue integrity/search and tool-index checks took **434 / 405 / 305 ms**
 respectively on their recorded cold local runs. The focused catalogue rebuild

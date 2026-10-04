@@ -27,7 +27,11 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-ENV_ROOT = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+ENV_ROOT = (PROJECT / "assets"
             / "environments" / "st_maria_town")
 LANE_CENTRE = 3.8833
 

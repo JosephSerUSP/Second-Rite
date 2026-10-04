@@ -15,6 +15,8 @@ local sessionModule = require("engine.session")
 local interpreter = require("engine.interpreter")
 local traits = require("engine.traits")
 local growth = require("engine.growth")
+local progress = require("engine.progress")
+local scene_host = require("engine.scene_host")
 
 print("[TEST] Starting promotion tests...")
 
@@ -40,6 +42,17 @@ local function rigPixie(level)
     local b = sessionModule.Battler.new(loader.getUnit(PIXIE), level, 24680)
     b.hp = b:getMaxHp(sess)
     sess.party[1] = b
+    sess.mp = 9999
+    return sess, b
+end
+
+local function rigReservePixie(level)
+    local sess = sessionModule.GameSession.new(loader)
+    sess.party = {}
+    sess.reserve = {}
+    local b = sessionModule.Battler.new(loader.getUnit(PIXIE), level, 24680)
+    b.hp = b:getMaxHp(sess)
+    sess.reserve[1] = b
     sess.mp = 9999
     return sess, b
 end
@@ -228,6 +241,59 @@ do
     runScript(sess, "api.promote(false, 1)")
     check(sess.party[1].actorData.id == HIGH_PIXIE,
         "and a level-1 creature can take it")
+end
+
+----------------------------------------------------------- Actor Change host --
+
+do
+    -- The durable projection spans both expedition rosters. A reserve promotion
+    -- replaces the object in-place just like a party promotion, so a party-only
+    -- snapshot would silently lose the report.
+    local sess = rigReservePixie(6)
+    local before = progress.snapshot(sess)
+    runScript(sess, "api.promote(true, 1)")
+    local changes = progress.changes(sess, before)
+    check(#changes == 1, "reserve promotion produces one durable Actor Change")
+    check(changes[1] and changes[1].kind == "form" and changes[1].title == "FORM CHANGE!",
+        "reserve promotion is classified as a form change")
+    check(changes[1] and changes[1].fromName ~= changes[1].toName,
+        "the report retains both sides of the promotion")
+end
+
+do
+    -- Drive the real ritual Scene. Ritual does not contain bespoke Actor Change
+    -- code: the generic Scene transaction boundary observes its successful
+    -- confirm hook, then hands the resolved report to the dedicated modal.
+    local sess = rigReservePixie(6)
+    local ctx = { session = sess, loader = loader, party = sess.party }
+    scene_host.init(nil, ctx)
+    scene_host.push("ritual", ctx, {
+        ritualMode = "promote",
+        targetIsReserve = true,
+        targetIndex = 1,
+    })
+
+    check(scene_host.getCurrent() == "ritual", "ritual promotion scene opens")
+    scene_host.runHook("on_select", ctx) -- choose Promote -> confirmation
+    check(scene_host.getCurrent() == "ritual"
+            and scene_host.getCurrentState().v.state == 2,
+        "first select enters ritual confirmation without manufacturing a report")
+
+    scene_host.runHook("on_select", ctx) -- confirm -> api.promote -> Actor Change
+    check(sess.reserve[1] and sess.reserve[1].actorData.id == HIGH_PIXIE,
+        "ritual confirmation performs the reserve promotion")
+    check(scene_host.getCurrent() == "actor_change"
+            and scene_host.getPrevious() == "ritual",
+        "successful ritual promotion opens the generic Actor Change modal")
+
+    local report = scene_host.getCurrentState().v
+    check(report.actorChangeTitle == "FORM CHANGE!" and report.actorChangeCount == 1,
+        "the modal receives the resolved promotion report")
+
+    scene_host.runHook("on_select", ctx)
+    check(scene_host.getCurrent() == "ritual"
+            and scene_host.getCurrentState().v.state == 3,
+        "dismissing Actor Change returns to the already-resolved ritual result")
 end
 
 print(("=== Promotion Tests Completed: %d passed, %d failed ==="):format(passed, failed))

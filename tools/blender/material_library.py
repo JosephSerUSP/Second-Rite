@@ -71,7 +71,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_PROJECT = ROOT / "projects" / "hichaukitoden-game"
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+DEFAULT_PROJECT = PROJECT
 MATERIAL_KIND = "second_gate_material"
 MATERIAL_VERSION = 1
 STATUSES = ("placeholder", "authored", "promoted")
@@ -110,7 +113,7 @@ AO_GAIN = float(os.environ.get("SR_AO_GAIN", AO_GAIN))
 
 
 def library_root(project: Path | None = None) -> Path:
-    return (Path(project) if project else DEFAULT_PROJECT) / "assets" / "materials"
+    return project_root(project) / "assets" / "materials"
 
 
 def sha256(path: Path) -> str:

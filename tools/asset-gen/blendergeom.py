@@ -31,8 +31,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 SCRIPT = Path(__file__).resolve().parent / "blender" / "render_depth.py"
-DEFAULT_OUT = ROOT / "assets" / "geometry" / "1_blender_depth_maps"
+DEFAULT_OUT = PROJECT / 'assets' / "geometry" / "1_blender_depth_maps"
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import second_rite_asset_core as asset_core  # noqa: E402
 

@@ -17,7 +17,11 @@ from opening_families import door,box_receiver
 from vendor_assets import verify
 
 ROOT=Path(__file__).resolve().parents[3]
-CANDIDATE=ROOT/'projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard'
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+CANDIDATE=PROJECT / 'assets/authoring/candidates/passage_house_courtyard'
 
 @dataclass(frozen=True)
 class Volume:
@@ -140,7 +144,7 @@ def build(output):
     from architectural_surfaces import adapted_material,profile_surface
     if output.exists():raise FileExistsError('Refusing to overwrite editable source: '+str(output))
     library=ROOT/'tools/blender/vendor-library';manifest=verify(library)
-    map_data=json.loads((ROOT/'projects/hichaukitoden-game/data/maps/32.json').read_text(encoding='utf-8'));profile=map_data['traversal']['lane']['groundProfile']
+    map_data=json.loads((PROJECT / 'data/maps/32.json').read_text(encoding='utf-8'));profile=map_data['traversal']['lane']['groundProfile']
     upper=profile[-1]['z']
     bpy.ops.wm.read_factory_settings(use_empty=True);scene=bpy.context.scene;b=Builder()
     for name in ['TH_RENDER','TH_ANCHORS','TH_COLLISION','TH_PREVIEW_ACTORS']:core.ensure_collection(name)
@@ -424,7 +428,7 @@ def build(output):
     entry=bpy.data.objects.new(entry_data.name,entry_data);scene.collection.objects.link(entry);entry.location=(3.0,11.5,3.53)
     entry.rotation_euler=(Vector((4.8,11.5,1.6))-entry.location).to_track_quat('-Z','Y').to_euler()
     camera=thestra_camera.create_or_update_camera(thestra_camera.load_calibration(str(CANDIDATE/'camera.json')),make_active=True)
-    actor=thestra_camera.create_actor_preview(ROOT/'projects/hichaukitoden-game/assets/character/walker.png',camera,anchor=(0,6,.2),world_height=1.75)
+    actor=thestra_camera.create_actor_preview(PROJECT / 'assets/character/walker.png',camera,anchor=(0,6,.2),world_height=1.75)
     core.move_to_collection(actor,bpy.data.collections['TH_PREVIEW_ACTORS'])
     for name in ['TH_RENDER','TH_COLLISION','TH_ANCHORS','TH_PREVIEW_ACTORS']:bpy.data.collections[name].hide_render=True
     saved_profile=render_profiles.apply(scene,render_profiles.resolve('export'),device=render_profiles.DEFAULT_DEVICE)

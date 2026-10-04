@@ -1,0 +1,98 @@
+{
+  "localHead": "5d195b4b9234ae7c5a28405e98c0dc9c4947396c",
+  "alternateHead": "205f99fb26822e289342b69d8c68875aceb6c869",
+  "functions": {
+    "total": 49,
+    "public": 47,
+    "requiredKeywordParameters": {
+      "woven_runner": [
+        "cloth_mat",
+        "border_mat",
+        "motif_mat"
+      ],
+      "service_screen": [
+        "front",
+        "rear",
+        "left",
+        "right"
+      ],
+      "framed_picture": [
+        "artwork"
+      ],
+      "potted_plant": [
+        "foliage_mat"
+      ],
+      "shelf": [
+        "y",
+        "z"
+      ],
+      "lantern": [
+        "y"
+      ],
+      "stair": [
+        "y",
+        "x_start"
+      ],
+      "tool_rail": [
+        "y",
+        "z"
+      ]
+    }
+  },
+  "items": {
+    "itemReferences": 207,
+    "uniqueReferencedPaths": 205,
+    "objFiles": 208,
+    "sourceBlends": 32,
+    "referencedPathsMatchedBySourceStem": 32,
+    "referencedPathsWithoutMatchingSourceStem": 173,
+    "unreferencedObjPaths": [
+      "assets/models/items/bottle_family__molten.obj",
+      "assets/models/items/bottle_family__round.obj",
+      "assets/models/items/placeholder_question.obj"
+    ]
+  },
+  "candidates": [
+    {
+      "folder": "passage_house_courtyard",
+      "direct": 0,
+      "recursive": 0,
+      "manifest": false
+    },
+    {
+      "folder": "passage_office",
+      "direct": 12,
+      "recursive": 12,
+      "manifest": true
+    },
+    {
+      "folder": "st_maria_layout",
+      "direct": 1,
+      "recursive": 23,
+      "manifest": false
+    }
+  ],
+  "alternateCandidateCheckAgainstLocal": [
+    "hichaukitoden-game: candidates/passage_office: passage_office_r4.blend has no entry in environment-sources.json",
+    "hichaukitoden-game: candidates/passage_office holds 12 .blend files; keep at most 2 (revisions are commits, not file names)",
+    "hichaukitoden-game: candidates/st_maria_layout: environment-sources.json is missing (there are 1 .blend files)"
+  ],
+  "nestedUnregisteredCandidateProbe": [],
+  "commands": [
+    {
+      "label": "current-item-corpus",
+      "exit": 1,
+      "tail": "t call last):\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\check_item_models.py\", line 236, in <module>\n    sys.exit(main())\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\check_item_models.py\", line 159, in main\n    models = load_item_models()\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\item_model_corpus.py\", line 209, in load_item_models\n    items = json.loads(items_json.read_text(encoding=\"utf-8\"))\n  File \"C:\\Users\\josep\\AppData\\Local\\Programs\\Python\\Python310\\lib\\pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"C:\\Users\\josep\\AppData\\Local\\Programs\\Python\\Python310\\lib\\pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: 'D:\\\\Antigravity\\\\Hichaukitoden\\\\data\\\\items.json'\n"
+    },
+    {
+      "label": "current-asset-set-tests",
+      "exit": 1,
+      "tail": "y\\\\Hichaukitoden\\\\assets\\\\authoring\\\\first_stratum\\\\asset-set.json'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\tests\\test_asset_set.py\", line 27, in test_surface_command_resolves_existing_generator\n    data = asset_set.load_asset_set(root=ROOT, check_files=True)\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\asset_set.py\", line 141, in load_asset_set\n    data = _json(path)\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\asset_set.py\", line 29, in _json\n    raise AssetSetError(f\"missing JSON file: {path}\") from exc\nasset_set.AssetSetError: missing JSON file: D:\\Antigravity\\Hichaukitoden\\assets\\authoring\\first_stratum\\asset-set.json\n\n----------------------------------------------------------------------\nRan 4 tests in 0.004s\n\nFAILED (errors=3)\n"
+    },
+    {
+      "label": "current-model-census-tests",
+      "exit": 1,
+      "tail": "===========================================================\nERROR: test_model_census (unittest.loader._FailedTest)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_model_census\nTraceback (most recent call last):\n  File \"C:\\Users\\josep\\AppData\\Local\\Programs\\Python\\Python310\\lib\\unittest\\loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"C:\\Users\\josep\\AppData\\Local\\Programs\\Python\\Python310\\lib\\unittest\\loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"D:\\Antigravity\\Hichaukitoden\\tools\\asset-production\\tests\\test_model_census.py\", line 16, in <module>\n    import mesh_recipe  # noqa: E402\nModuleNotFoundError: No module named 'mesh_recipe'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+    }
+  ]
+}

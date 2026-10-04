@@ -6,7 +6,9 @@ from pathlib import Path
 
 TOOLS=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(TOOLS))
-from blender_locator import blender_executable
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import blender_test_support
+from blender_test_support import blender_executable
 
 
 class SourceDependencyTests(unittest.TestCase):

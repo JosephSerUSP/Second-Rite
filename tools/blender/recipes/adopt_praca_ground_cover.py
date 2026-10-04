@@ -41,13 +41,16 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import environment_sources  # noqa: E402
 import ground_cover  # noqa: E402
 import ground_cover_placement as placement  # noqa: E402
 import tree_material  # noqa: E402
 
-DOCUMENT = ROOT / "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca_modelled.blend"
+DOCUMENT = PROJECT / 'assets/authoring/environments/st_maria_praca_modelled.blend'
 SET_COLLECTION = "GROUND_COVER_SET"
 GUIDE_NAME = "GROUND_COVER_GUIDE"
 LANE_COPY = "GROUND_COVER_LANE"

@@ -3,5 +3,5 @@
   "purpose": "Small framed harbour painting over the Registry waiting bench",
   "output": "harbour_painting.png",
   "prompt": "Create a single small period oil painting to hang inside a colonial Portuguese tropical port registry office in a fantasy RPG. The output is ONLY the painted rectangular canvas, flat straight-on edge to edge, no frame, no room, no lettering. Horizontal 4:3 composition. Modest quiet harbour: a low whitewashed waterfront, terracotta roofs, one small dark fishing boat in the near water, pale sail at middle distance, warm hazy sky. Restrained teal water, ochre shore, warm cream and muted rusty red, broad painterly masses and visible aged oil-brush texture. Handmade slightly uneven old canvas, calm civic atmosphere, no recognizable real-world landmarks, no flags, no religious symbols, no modern objects, no ornate fantasy effects. Design for legibility as a tiny framed painting in a low-resolution game; simple silhouette and clear value grouping.",
-  "sourceAuthority": "Candidate art only; generated image is saved locally and embedded into passage_office_r7.blend"
+  "sourceAuthority": "Candidate art only; generated image is saved locally and embedded into passage_office_r7.blend (pruned 2026-10-04, #1349; in git history)"
 }

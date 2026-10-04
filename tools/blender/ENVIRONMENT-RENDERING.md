@@ -105,7 +105,7 @@ step's wall time and exit code, and refuses to overwrite a previous run director
 With `BLENDER_EXECUTABLE` set to the pinned build:
 
 ```powershell
-python tools/blender/registry_workflow.py --source projects/hichaukitoden-game/assets/authoring/candidates/passage_office/passage_office_r3.blend --output out/registry-next-review --exit-y 1.0833 --npc-y 5.5333
+python tools/blender/registry_workflow.py --source projects/hichaukitoden-game/assets/authoring/environments/passage_office.blend --output out/registry-next-review --exit-y 1.0833 --npc-y 4.5833 --npc-x 1.15
 ```
 
 The runner writes `review.html`, `evidence.json`, logs, native frames and source
@@ -113,7 +113,8 @@ beauty/clay views. `--atlas-size 512` is an explicit lookdev comparison; maintai
 export defaults remain 1024. `--device WIDTH HEIGHT` feeds the runtime's actual
 device-surface resolver. Its default 2100x900 is nominal 21:9, not a measurement
 of a particular phone's usable viewport or insets. Physical device testing is
-separate. The Registry source is retained as rejected composition/workflow evidence.
+separate. The Registry (Passage Office) was adopted from revision 13; its earlier
+revisions are in git history, not in the candidate folder (#1349).
 
 `inspect_environment_parts.py` isolates named source meshes in front, oblique and
 top views, in material and clay modes. Its neutral studio lights are diagnostic,

@@ -28,12 +28,15 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import stage_room_model  # noqa: E402
 import thestra_camera  # noqa: E402
 
-DEFAULT_EXTERIOR = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "environments" / "st_maria_praca.blend"
-DEFAULT_INTERIOR = ROOT / "projects" / "hichaukitoden-game" / "assets" / "environments" / "st_maria_town" / "alicias_padaria_3d" / "environment.obj"
+DEFAULT_EXTERIOR = PROJECT / "assets" / "authoring" / "environments" / "st_maria_praca.blend"
+DEFAULT_INTERIOR = PROJECT / "assets" / "environments" / "st_maria_town" / "alicias_padaria_3d" / "environment.obj"
 DEFAULT_CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 
 

@@ -8,12 +8,16 @@ derived on paper.
 The interior counterpart is [`st-maria-interior-authoring.md`](st-maria-interior-authoring.md).
 The vocabulary is `tools/blender/recipes/exterior.py`.
 
-> **There is no worked example, on purpose.** One screen (Market Row) was built
-> to derive these numbers and was not good enough to stand as a template, so it
-> was not landed. PRs #941 and #942 converged on one identical room because the
-> interior brief hands over a worked `build()` that *is* a bakery; repeating
-> that mistake outdoors would be worse, because a street has more free
-> variables to lose. Compose from the vocabulary.
+> **The worked example is structure, not a place.** PRs #941 and #942
+> converged on one identical room because the interior brief hands over a
+> worked `build()` that *is* a bakery. The exterior example,
+> `tools/blender/recipes/examples/exterior_reference.py`, avoids that by
+> carrying nothing a street could be recognised by: generic stone and wood, no
+> trade, no cast. It shows the ground run-off, the three near ranks, heights
+> taken from the camera, and the checks (`boards()` empty, menu band covered at
+> every lane position). Copy its structure; compose the place from its own
+> brief. It is never a source (`example_*` is refused by
+> `environment_sources.py --check`).
 
 ## The camera is the interior camera
 

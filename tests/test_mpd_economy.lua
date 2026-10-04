@@ -1,9 +1,11 @@
--- The Summoner MP economy: traversal cost, Battle Strain, and the MPD floor.
+-- The Summoner MP economy: free traversal, battle activation, Battle Strain,
+-- and the MPD floor.
 --
--- The design's whole expedition tension lives here -- a step costs exactly what
--- the living party costs to keep manifested, ordinary combat rounds cost
--- nothing, and only a prolonged battle bills you. Both halves used to be flat
--- numbers that ignored the party entirely.
+-- Ordinary traversal is intentionally free. MPD becomes expedition pressure
+-- when the Summoner channels the manifested party into combat: battle entry
+-- costs a fixed base plus the living party's combined MPD, while only a
+-- prolonged fight adds Strain. These tests pin that current contract rather
+-- than the retired per-step drain model.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
 local loader = require("engine.data.loader")
@@ -57,15 +59,14 @@ do
     check(formula.groupView(sess.party, sess).mpd == 7,
         "party.mpd is the combined MPD of the party")
 
-    -- A dead creature stops costing anything. That is the grim arithmetic the
-    -- design is built on, so it is asserted rather than assumed.
+    -- A dead creature stops contributing to manifestation pressure.
     sess.party[3].hp = 0
     sess.party[3]:addState("dead")
     check(formula.groupView(sess.party, sess).mpd == 3,
         "a dead creature contributes no MPD")
 end
 
-------------------------------------------------------------- traversal cost --
+-------------------------------------------------------------- free traversal --
 
 local function step(sess)
     local before = sess.mp
@@ -75,37 +76,69 @@ end
 
 do
     local sess = rig({ 1 })
-    check(step(sess) == 1, "a lone MPD-1 creature costs 1 MP per step")
+    check(step(sess) == 0, "ordinary dangerous-map traversal spends no Summoner MP")
 end
 
 do
     local sess = rig({ 4, 6, 9 })
-    check(step(sess) == 19, "a heavy party costs the sum of its MPD per step")
+    check(step(sess) == 0, "a heavy manifested party still walks for free")
 end
 
 do
-    -- The design's headline: the Summoner has no traversal cost of their own,
-    -- so an empty party walks free rather than paying a base rate.
     local sess = rig({})
-    check(step(sess) == 0, "the Summoner alone pays nothing to walk")
+    check(step(sess) == 0, "the Summoner alone walks for free")
 end
 
 do
     local sess = rig({ 4, 6 })
     sess.currentMapData = { safe = true }
-    check(step(sess) == 0, "a safe map costs nothing")
+    check(step(sess) == 0, "safe-map traversal also spends no Summoner MP")
 end
 
 do
-    -- Range, in the terms the design's table uses: 3000 MP against a party of
-    -- MPD 5 is 600 steps.
     local sess = rig({ 1, 4 })
-    local steps = 0
-    while sess.mp > 0 and steps < 5000 do
-        step(sess)
-        steps = steps + 1
-    end
-    check(steps == 600, "3000 MP buys 600 steps at party MPD 5 (" .. steps .. ")")
+    for _ = 1, 600 do step(sess) end
+    check(sess.mp == 3000,
+        "600 ordinary steps leave the expedition MP pool untouched")
+end
+
+---------------------------------------------------------- battle activation --
+
+local function battleStart(sess)
+    local before = sess.mp
+    local events = flow.run("battle.battle_start", {
+        session = sess,
+        loader = loader,
+        troopId = "recruit_skeleton",
+    })
+    return before - sess.mp, events
+end
+
+do
+    local sess = rig({ 1 })
+    check(battleStart(sess) == 65,
+        "MPD-1 party pays the authored 50 + 15 * MPD battle activation cost")
+end
+
+do
+    local sess = rig({ 4, 6, 9 })
+    check(battleStart(sess) == 335,
+        "battle activation scales with the living party's combined MPD")
+end
+
+do
+    local sess = rig({ 4, 6 })
+    sess.currentMapData = { safe = true }
+    check(battleStart(sess) == 0,
+        "safe-map battles skip expedition activation cost")
+end
+
+do
+    local sess = rig({ 1 })
+    sess.mp = 40
+    local spent = battleStart(sess)
+    check(spent == 40 and sess.mp == 0,
+        "insufficient MP spends the remainder and still enters battle at zero")
 end
 
 ------------------------------------------------------------------- Strain --
@@ -123,8 +156,8 @@ end
 do
     local sess = rig({ 2, 3 })  -- combined MPD 5
 
-    -- Ordinary rounds are free. Taking a tactical turn is not priced, which is
-    -- the explicit reversal: every round used to bill the whole party's MPD.
+    -- Ordinary rounds are free. Taking a tactical turn is not priced; Strain
+    -- is exceptional pressure against letting an expedition battle run long.
     for round = 1, 5 do
         check(roundEnd(sess, round) == 0, "round " .. round .. " costs nothing")
     end
@@ -139,8 +172,7 @@ end
 
 do
     -- Strain scales with the party, so a cheap party can afford a long fight
-    -- and a heavy one cannot. That is the tradeoff the whole roster is priced
-    -- against.
+    -- and a heavy one cannot. That is the tradeoff the roster is priced around.
     local cheap = rig({ 1 })
     local heavy = rig({ 9, 9 })
     check(roundEnd(cheap, 6) == 4 and roundEnd(heavy, 6) == 72,
@@ -176,7 +208,9 @@ do
     b.actorData.traits = { { code = "PARAM_PLUS", dataId = "mpd", value = -99 } }
     check(traits.getParam(b, "mpd", sess) == 1, "MPD never falls below 1")
     check(formula.groupView(sess.party, sess).mpd == 1,
-        "the floored value is what the party query and the step cost see")
+        "the floored value is what the party query reports")
+    check(battleStart(sess) == 65,
+        "battle activation consumes the same floored MPD value")
 end
 
 print(("=== MPD Economy Tests Completed: %d passed, %d failed ==="):format(passed, failed))

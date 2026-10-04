@@ -14,7 +14,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 
 class ExteriorBakeSourceTests(unittest.TestCase):
@@ -22,7 +24,7 @@ class ExteriorBakeSourceTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        blender = blender_locator.blender_executable()
+        blender = blender_test_support.blender_executable()
         script = ROOT / "tools" / "blender" / "tests" / "exterior_bake_source_blender.py"
         result = subprocess.run(
             [blender, "-b", "-noaudio", "--factory-startup", "-P", str(script)],
@@ -87,14 +89,24 @@ class ExteriorBakeSourceTests(unittest.TestCase):
         """Not only the geometry: the baked atlas holds light where the ground island is."""
         baked = self.probe["ground"]["bakedWhole"]
         self.assertEqual(baked["faces"], 1)
+        expected = {"faces": 1, "nonzeroAreaFaces": 1, "normalsZ": [1.0]}
+        self.assertEqual(baked["source"], expected)
+        self.assertEqual(baked["batchedSource"], expected)
         self.assertGreater(baked["litFraction"], 0.9)
         self.assertGreater(baked["mean"], 0.05)
 
-    def test_source_winding_repair_prevents_black_copy_only_bake(self):
-        """Batch preparation repairs inverted closed-source winding before baking."""
+    def test_flattening_only_the_copy_leaves_an_ambiguous_source_sheet(self):
+        """Copy-only preparation retains both source faces, before and after batching.
+
+        Coincident top/underside ray hits bake lit on pinned Windows and black
+        on pinned Linux (#1354). Neither shade is the portable contract: the
+        production path must remove that ambiguity from the source itself.
+        """
         baked = self.probe["ground"]["bakedCopyOnly"]
         self.assertEqual(baked["faces"], 1)
-        self.assertGreater(baked["litFraction"], 0.8)
+        expected = {"faces": 6, "nonzeroAreaFaces": 2, "normalsZ": [-1.0, 1.0]}
+        self.assertEqual(baked["source"], expected)
+        self.assertEqual(baked["batchedSource"], expected)
 
     def test_a_marked_host_that_realises_nothing_refuses_to_bake(self):
         self.assertIn("refusing to bake", self.probe["refused"])

@@ -15,7 +15,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 DOCUMENT = ROOT / "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca_modelled.blend"
 RECIPE = ROOT / "tools/blender/recipes/adopt_praca_ground_cover.py"
@@ -26,7 +28,7 @@ ALLOWED = ("GROUND_COVER", "SR_GroundCover", "CARD_", "sr_grass_kenney_atlas", "
 
 
 def blender(*arguments):
-    result = subprocess.run([blender_locator.blender_executable(), "--background", "--factory-startup",
+    result = subprocess.run([blender_test_support.blender_executable(), "--background", "--factory-startup",
                              "-noaudio", "--python-exit-code", "1", *arguments],
                             capture_output=True, text=True, timeout=600)
     if result.returncode != 0:

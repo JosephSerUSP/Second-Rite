@@ -24,6 +24,9 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 TOOL = ROOT / "tools" / "asset-gen"
 OUT = TOOL / "out" / "first-stratum-overnight"
 SPEC_PATH = TOOL / "first_stratum_materials.json"
@@ -55,7 +58,7 @@ def safe(value):
 
 
 def geometry_records():
-    path = ROOT / "assets" / "geometry" / "1_blender_depth_maps" / "manifest.json"
+    path = PROJECT / 'assets' / "geometry" / "1_blender_depth_maps" / "manifest.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     records = {}
     for item in data.get("maps", []):

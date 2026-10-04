@@ -32,6 +32,9 @@ import bpy
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import emissive_lights  # noqa: E402
@@ -42,7 +45,7 @@ import thestra_camera  # noqa: E402
 import render_profiles
 
 DEFAULT_CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
-DEFAULT_WALKER = ROOT / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
+DEFAULT_WALKER = PROJECT / "assets" / "character" / "walker.png"
 WALKER_WORLD_HEIGHT = 1.75
 WALKER_NATIVE_PIXELS = 48.0
 MODEL_COLLECTION = "TH_SOURCE"

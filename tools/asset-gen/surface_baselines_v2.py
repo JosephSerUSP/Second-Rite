@@ -20,7 +20,11 @@ from typing import Callable, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUT = ROOT / "assets" / "geometry" / "2_procedural_surface_baselines"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+DEFAULT_OUT = PROJECT / 'assets' / "geometry" / "2_procedural_surface_baselines"
 DEFAULT_SIZE = 128
 DEFAULT_RANGE_CELLS = 0.25
 FIELD_MIN = -32767

@@ -18,8 +18,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 BLENDER_TOOLS = ROOT / "tools" / "blender"
 sys.path.insert(0, str(BLENDER_TOOLS))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import build_synthetic_environment  # noqa: E402
+import blender_test_support
 
 PROBE = Path(__file__).resolve().parent / "house_grammar_emit_blender.py"
 
@@ -27,7 +29,7 @@ PROBE = Path(__file__).resolve().parent / "house_grammar_emit_blender.py"
 class HouseEmitterTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        blender = build_synthetic_environment.blender_executable()
+        blender = blender_test_support.blender_executable()
         proc = subprocess.run(
             [str(blender), "--background", "--factory-startup",
              "--python", str(PROBE)],

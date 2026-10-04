@@ -14,13 +14,6 @@ local NAVIGATION_PREFIXES = {
     "^Into%s+",
 }
 
-local VALID_DIRECTIONS = {
-    UP = true,
-    DOWN = true,
-    LEFT = true,
-    RIGHT = true,
-}
-
 local DIRECTION_ROTATION = {
     UP = 0,
     RIGHT = math.pi / 2,
@@ -51,14 +44,6 @@ function town_prompt.compactLabel(event)
     -- Prefix removal can expose an authored lowercase article/noun.
     name = name:gsub("^%l", string.upper, 1)
     return name
-end
-
-function town_prompt.directionIcon(button)
-    if button == nil then return nil end
-    if not VALID_DIRECTIONS[button] then
-        error("unknown town prompt direction '" .. tostring(button) .. "'", 2)
-    end
-    return { direction = button }
 end
 
 local function parseRenderedDoorLabel(text)

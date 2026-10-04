@@ -221,3 +221,10 @@ instead of creating more room-specific corrective scripts.
 Machine evidence, source hashes, bake settings, movement results and every
 surface's pixel deltas are retained in
 [evidence.json](blender-authoring-follow-through-2026-10-04/evidence.json).
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: Blender authoring follow-through
+  base: 72458508920982a199e91d22e686f60367cee6db

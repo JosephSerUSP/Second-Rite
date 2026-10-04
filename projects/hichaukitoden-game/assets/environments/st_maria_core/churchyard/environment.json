@@ -76,7 +76,7 @@
   },
   "provenance": {
     "sourceBlend": "st_maria_core.blend",
-    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+    "sourceSHA256": "5182e990e8c1c81cfb3264b2eb5ed096389fd2fb4a4f3fe58f98c16468d69f44",
     "sourceScreen": "churchyard",
     "plateRecord": {
       "contract": "thestra.world-camera-calibration",
@@ -131,6 +131,7 @@
         "solvedEyeHeight": 2.260416666666667,
         "pixelsPerWorldUnit": 27.428571428571427
       }
-    }
+    },
+    "sourceRevision": "praca-approaches-20261004"
   }
 }

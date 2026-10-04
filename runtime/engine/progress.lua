@@ -80,7 +80,7 @@ end
 -- creature in place.
 function progress.snapshot(session)
     local snap = snapshotSlots(session.party, session, config.MAX_PARTY_SIZE)
-    snap.reserve = snapshotSlots(session.reserve, session, config.MAX_PARTY_SIZE)
+    snap.reserve = snapshotSlots(session.reserve, session, config.MAX_RESERVE_SIZE)
     return snap
 end
 
@@ -218,7 +218,7 @@ function progress.changes(session, before)
     local entries = {}
     appendSlotChanges(entries, session, session.party, before, config.MAX_PARTY_SIZE)
     appendSlotChanges(entries, session, session.reserve,
-        before and before.reserve, config.MAX_PARTY_SIZE)
+        before and before.reserve, config.MAX_RESERVE_SIZE)
     return entries
 end
 

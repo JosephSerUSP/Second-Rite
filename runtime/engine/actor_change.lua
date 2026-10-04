@@ -1,17 +1,17 @@
 -- Durable Actor Change transaction projection.
 --
--- Gameplay mutation stays in the subsystem that owns it. A Scene that wants to
--- present persistent creature development opts specific hooks into observation
--- with `config.actorChangeReports = { "on_select", ... }`. The Scene host takes
--- an authoritative snapshot before that hook and asks progress.lua what changed
--- only after the complete authored transaction has resolved.
+-- Gameplay mutation stays in the subsystem that owns it. Authored Scenes are
+-- already transaction boundaries: the Scene host can snapshot durable creature
+-- state before a hook, let the complete authored command list resolve, then ask
+-- progress.lua what persistently changed. A Scene may narrow observation with
+-- `config.actorChangeReports`; otherwise its hooks participate automatically.
 --
--- This is deliberately NOT a global mutation watcher. Current HP, states and
--- equipment are outside progress.snapshot(), and authored Scenes must opt in to
--- a transaction boundary. The one migration exception is the host fallback:
--- map/common-event execution still lives behind scene_host's legacy input
--- fallback, so that opaque transaction is bracketed as a whole until it becomes
--- authored Scene behavior too.
+-- This is deliberately NOT an interpreter/effect watcher. Current HP, states
+-- and equipment are outside progress.snapshot(), so ordinary healing, status,
+-- equipment and presentation work disappear from the diff. The one migration
+-- exception is the host fallback: map/common-event execution still lives behind
+-- scene_host's legacy input fallback, so that opaque transaction is bracketed
+-- as a whole until it becomes authored Scene behavior too.
 local progress = require("engine.progress")
 local state_value = require("engine.state_value")
 
@@ -23,7 +23,12 @@ local function configured(sceneData)
 end
 
 local function observesHook(sceneData, hookName)
+    if not sceneData then return false end
     local spec = configured(sceneData)
+    -- No declaration means the ordinary Scene transaction contract: any
+    -- durable creature development resolved by the hook deserves a report.
+    if spec == nil then return true end
+    if spec == false then return false end
     if spec == true then return true end
     if type(spec) ~= "table" then return false end
     for _, hook in ipairs(spec) do
@@ -79,25 +84,27 @@ local function queueReports(changes)
     return true
 end
 
--- Called before one authored Scene hook. Nil means this hook is not a durable
--- change transaction; finish() still runs afterwards so paging/closing an
--- already-published inline report remains declarative Scene State.
+-- Called before one authored Scene hook. An explicit hook list can suppress
+-- snapshots for presentation-only hooks; an undeclared Scene gets the generic
+-- transaction behavior automatically.
 function actor_change.begin(sceneData, hookName, session)
     if not session or not observesHook(sceneData, hookName) then return nil end
     return progress.snapshot(session)
 end
 
--- Called after the hook has completely resolved. `actorChangePresentation =
--- "scene"` moves the detached result into the host queue instead of retaining
--- it on the source Scene. scene_host drains that queue only after the source
--- transaction and any authored transition events have settled.
+-- Called after the hook has completely resolved. Scenes that explicitly opt in
+-- with actorChangeReports keep the report inline by default (Items uses this to
+-- preserve its existing popup surface). An otherwise-unconfigured Scene hands
+-- durable changes to the generic Actor Change modal. Setting
+-- `actorChangePresentation = "scene"` makes that handoff explicit as well.
 function actor_change.finish(sceneData, v, session, before)
-    if not configured(sceneData) or not v or not session then return false end
+    if not sceneData or not v or not session then return false end
 
     local changes = before and progress.changes(session, before) or {}
     if #changes > 0 then
-        local cfg = sceneData and sceneData.config
-        if cfg and cfg.actorChangePresentation == "scene" then
+        local cfg = sceneData.config or {}
+        local automatic = configured(sceneData) == nil
+        if automatic or cfg.actorChangePresentation == "scene" then
             queueReports(changes)
             clearProjection(v)
             return false
@@ -106,11 +113,11 @@ function actor_change.finish(sceneData, v, session, before)
         return true
     end
 
+    -- Paging/clearing only applies to a Scene that already owns an inline
+    -- projection. Automatically observed source Scenes never retain one.
     local entries = v.actorChanges
     if type(entries) ~= "table" or #entries == 0 then return false end
 
-    -- The authored Scene closes the overlay by setting count to zero. Clear the
-    -- retained reports here so stale durable changes cannot reappear later.
     if (tonumber(v.actorChangeCount) or 0) <= 0 then
         clearProjection(v)
         return false

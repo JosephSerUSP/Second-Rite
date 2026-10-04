@@ -1,0 +1,760 @@
+{
+  "sourceEdit": {
+    "source": "projects/hichaukitoden-game/assets/authoring/environments/alicias_padaria.blend",
+    "sourceBeforeSHA256": "8453c716b259d494b3ddf1391cd1dd9a47aa641a4f1c38c194bd5aaaa7a960ed",
+    "candidateSHA256": "83cc1af7458d617586624ad7a556c045cdcd0ea3a1a87f9dbb9b9ee5b3d35216",
+    "oldBounds": [
+      [
+        -1.167,
+        -3.416296,
+        0.0
+      ],
+      [
+        -0.57,
+        -2.8,
+        1.238976
+      ]
+    ],
+    "newBounds": [
+      [
+        -0.597,
+        -0.808148,
+        0.0
+      ],
+      [
+        -0.0,
+        -0.191852,
+        1.238976
+      ]
+    ],
+    "counterBounds": [
+      [
+        0.16,
+        -2.3,
+        0.0
+      ],
+      [
+        0.84,
+        1.3,
+        0.96
+      ]
+    ],
+    "delta": [
+      0.57,
+      2.608148,
+      -0.0
+    ],
+    "relationship": {
+      "beside": "counter",
+      "axis": "x",
+      "side": -1,
+      "gap": 0.16
+    },
+    "unchangedObjects": 53,
+    "waterMeshAndMaterialsUnchanged": true,
+    "protectedVolume": {
+      "exit_sightline": [
+        [
+          -1.6,
+          -3.9,
+          0.05
+        ],
+        [
+          0.1,
+          -2.4,
+          1.8
+        ]
+      ]
+    }
+  },
+  "walk": {
+    "approachSteps": 55,
+    "approachY": 3.016633333333335,
+    "arrivalMapId": 18,
+    "arrivalY": 13.125,
+    "exitEvent": "st-maria-alicias_padaria_3d-exit_door",
+    "exitSteps": 70,
+    "exitY": 6.9833,
+    "input": "bounded_lane.update at 60 Hz",
+    "mapId": 28,
+    "spawnY": 6.1333,
+    "transfer": "authored commands through interpreter.runImmediate"
+  },
+  "bakes": {
+    "control-package": {
+      "stats": {
+        "triangleCount": 3208,
+        "vertexCount": 1934,
+        "materialGroupCount": 1,
+        "textureDimensions": [
+          1024,
+          1024
+        ],
+        "pngSizeBytes": 1970801,
+        "renderMeshSizeBytes": 298505,
+        "packageSizeBytes": 2270105
+      },
+      "bake": {
+        "backend": "cycles",
+        "device": "CPU",
+        "samples": 24,
+        "selectedToActive": true,
+        "quality": {
+          "name": "export",
+          "engine": "CYCLES",
+          "samples": 24,
+          "supersample": 1,
+          "denoise": false,
+          "atlas_denoise": "oidn-fast",
+          "atlas_texel_align": true,
+          "max_bounces": 4,
+          "diffuse_bounces": 2,
+          "glossy_bounces": 2,
+          "seed": 3201
+        },
+        "hardware": {
+          "device": "CPU",
+          "computeBackend": "CPU",
+          "devices": []
+        },
+        "batchedSourceObjects": 47,
+        "atlasDenoise": {
+          "method": "none"
+        },
+        "texelAlignment": {
+          "method": "none"
+        }
+      },
+      "seconds": 20.263949800049886
+    },
+    "candidate-package-v2": {
+      "stats": {
+        "triangleCount": 3208,
+        "vertexCount": 1934,
+        "materialGroupCount": 1,
+        "textureDimensions": [
+          1024,
+          1024
+        ],
+        "pngSizeBytes": 1964006,
+        "renderMeshSizeBytes": 298352,
+        "packageSizeBytes": 2263157
+      },
+      "bake": {
+        "backend": "cycles",
+        "device": "CPU",
+        "samples": 24,
+        "selectedToActive": true,
+        "quality": {
+          "name": "export",
+          "engine": "CYCLES",
+          "samples": 24,
+          "supersample": 1,
+          "denoise": false,
+          "atlas_denoise": "oidn-fast",
+          "atlas_texel_align": true,
+          "max_bounces": 4,
+          "diffuse_bounces": 2,
+          "glossy_bounces": 2,
+          "seed": 3201
+        },
+        "hardware": {
+          "device": "CPU",
+          "computeBackend": "CPU",
+          "devices": []
+        },
+        "batchedSourceObjects": 47,
+        "atlasDenoise": {
+          "method": "none"
+        },
+        "texelAlignment": {
+          "method": "none"
+        }
+      },
+      "seconds": 24.723607899970375
+    }
+  },
+  "frameDifferences": [
+    {
+      "surface": "classic",
+      "y": 1,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21031,
+      "meanAbsoluteChannelDifference": 2.198562282986111,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 1,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 23617,
+      "meanAbsoluteChannelDifference": 3.5271647135416666,
+      "differenceBounds": [
+        0,
+        4,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21119,
+      "meanAbsoluteChannelDifference": 2.2000325520833335,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 3,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 23710,
+      "meanAbsoluteChannelDifference": 3.537082248263889,
+      "differenceBounds": [
+        0,
+        4,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 6,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21026,
+      "meanAbsoluteChannelDifference": 2.2067003038194444,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 6,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 23634,
+      "meanAbsoluteChannelDifference": 3.5479166666666666,
+      "differenceBounds": [
+        0,
+        4,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 20979,
+      "meanAbsoluteChannelDifference": 2.183968098958333,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 6.1333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 23561,
+      "meanAbsoluteChannelDifference": 3.514236111111111,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 7.0333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21133,
+      "meanAbsoluteChannelDifference": 2.1951009114583333,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 7.0333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 23724,
+      "meanAbsoluteChannelDifference": 3.6192491319444446,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 1,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21981,
+      "meanAbsoluteChannelDifference": 1.8138715277777777,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 1,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25261,
+      "meanAbsoluteChannelDifference": 2.9189105902777777,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22075,
+      "meanAbsoluteChannelDifference": 1.820915798611111,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 3,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25353,
+      "meanAbsoluteChannelDifference": 2.9291927083333333,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21976,
+      "meanAbsoluteChannelDifference": 1.8244878472222221,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25278,
+      "meanAbsoluteChannelDifference": 2.938394097222222,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21929,
+      "meanAbsoluteChannelDifference": 1.8010329861111112,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6.1333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25213,
+      "meanAbsoluteChannelDifference": 2.9204947916666666,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 7.0333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22058,
+      "meanAbsoluteChannelDifference": 1.803828125,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 7.0333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25367,
+      "meanAbsoluteChannelDifference": 2.9980338541666667,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 1,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21974,
+      "meanAbsoluteChannelDifference": 1.358946270213876,
+      "differenceBounds": [
+        68,
+        4,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 1,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25259,
+      "meanAbsoluteChannelDifference": 2.193371804903495,
+      "differenceBounds": [
+        68,
+        4,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22071,
+      "meanAbsoluteChannelDifference": 1.365411450182577,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 3,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25347,
+      "meanAbsoluteChannelDifference": 2.197434141888367,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 6,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21976,
+      "meanAbsoluteChannelDifference": 1.3668133802816902,
+      "differenceBounds": [
+        68,
+        4,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 6,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25271,
+      "meanAbsoluteChannelDifference": 2.203687402190923,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21920,
+      "meanAbsoluteChannelDifference": 1.3464756129368805,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 6.1333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25200,
+      "meanAbsoluteChannelDifference": 2.1938086854460095,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 7.0333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22041,
+      "meanAbsoluteChannelDifference": 1.3480438184663537,
+      "differenceBounds": [
+        68,
+        4,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 7.0333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25363,
+      "meanAbsoluteChannelDifference": 2.2532407407407407,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 1,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21978,
+      "meanAbsoluteChannelDifference": 1.0321602182539682,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 1,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25257,
+      "meanAbsoluteChannelDifference": 1.6609300595238095,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22072,
+      "meanAbsoluteChannelDifference": 1.0362748015873016,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 3,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25329,
+      "meanAbsoluteChannelDifference": 1.6627876984126984,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 6,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21977,
+      "meanAbsoluteChannelDifference": 1.0392485119047619,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 6,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25247,
+      "meanAbsoluteChannelDifference": 1.6673387896825398,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21925,
+      "meanAbsoluteChannelDifference": 1.0274751984126984,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 6.1333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25158,
+      "meanAbsoluteChannelDifference": 1.6532762896825397,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 7.0333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22065,
+      "meanAbsoluteChannelDifference": 1.0315823412698413,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 7.0333,
+      "base": "control",
+      "candidate": "candidate-v2",
+      "changedPixels": 25304,
+      "meanAbsoluteChannelDifference": 1.6965873015873016,
+      "differenceBounds": [
+        135,
+        4,
+        425,
+        146
+      ]
+    }
+  ],
+  "surfaces": [
+    "classic",
+    "four_three",
+    "wide",
+    "device"
+  ],
+  "positions": [
+    1,
+    3,
+    6,
+    6.1333,
+    7.0333
+  ],
+  "limits": [
+    "Device aspect simulated on desktop; no physical phone test",
+    "Automated movement and interpreter transfer; no owner PLAYED claim",
+    "Current retained plate has unresolved source lineage; preserved separately under issue #1362",
+    "Whole atlas is rebaked; unchanged-source control demonstrates existing exporter drift",
+    "Catalogue illustrations do not establish native visual correctness",
+    "No lower-effort agent trial was run"
+  ]
+}

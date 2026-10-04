@@ -82,6 +82,47 @@ Reproduction logs, parent/candidate compiler proof, capture restoration proof,
 scratch exports, surface-provenance proof and timing records are retained in
 the worktree's `out/`. The PR checks provide the separate hosted verdict.
 
+## Bakery exit readability: a concrete authoring failure
+
+The owner identified an apparent obstacle between the player and the bakery
+exit in the fresh native captures. Read-only inspection of the adopted
+`alicias_padaria.blend` confirms that the conspicuous foreground object is
+`water`: Alicia's drinking-water crock on a wooden stand. Its intended purpose
+is sound. The shared furnishing describes free drinking water within customer
+reach, rather than behind the counter. The placement undermines the route's
+readability.
+
+![Native Classic bakery frame with the player approaching the exit and the water stand beside it](blender-authoring-cross-audit-2026-10-04/bakery-exit-classic.png)
+
+In the saved source, the stand's bounds are X [-1.167, -0.570],
+Y [-3.4163, -2.8000], Z [0, 1.239] in Blender coordinates. It sits in front of
+the movement lane at depthX = 0, beside the exit's lateral position. The nearby
+flour sacks are a separate object behind the lane, with their nearest X bound
+at 0.1429. The map has no blocked movement ranges; the bounded-lane controller
+does not infer obstacles from rendered furniture. This finding establishes
+visual obstruction, not a reproduced collision or failed exit interaction.
+
+Move the stand toward the customer side of the counter, or choose another
+accessible placement that leaves the doorway and approach visibly clear.
+Review that choice in native Classic and Wide frames at the approach, spawn
+and exit positions. Keep the water's narrative role and useful foreground
+depth; geometrical separation from a one-dimensional lane alone cannot prove
+that a route reads as walkable.
+
+This is a useful negative example for the proposed authoring interface.
+"Customer-reachable water stand" should carry an observable relationship to
+the customer area and a protected exit approach. A lower-effort author should
+not need to discover the difference between world-space clearance and projected
+readability after shipping. Shared geometry checks can establish clearance;
+native captures and review must establish the remaining visual claim.
+
+[Issue #1357](https://github.com/JosephSerUSP/Second-Rite/issues/1357) records
+the scoped source edit and acceptance, related to #1346/#1347. The adopted
+source was opened without saving; no bakery source, derived package or map
+was changed. [The evidence record](blender-authoring-cross-audit-2026-10-04/bakery-exit-evidence.json)
+preserves its hash, object bounds and the captured map contract. Interactive
+exit traversal was not run for this finding.
+
 ## Conclusion
 
 The alternate audit strengthens the earlier assessment. Its most valuable additions are the broken item-production lane, explicit gaps in test discovery, item scaffold/finish proposals, and a set of resumable Issues. The earlier assessment contributes direct inspection of saved Blender sources, precise runtime package selection, native frames, bake/source-role concerns, and an empirical test for whether lower-effort authoring actually improves.

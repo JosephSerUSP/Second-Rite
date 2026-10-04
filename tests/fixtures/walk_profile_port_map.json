@@ -1,0 +1,225 @@
+{
+  "id": 31,
+  "title": "St. Maria - The Port",
+  "intro": "Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/port/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.0,
+      "maxY": 29.604,
+      "depthX": 7.8,
+      "groundZ": 0.0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": -4.6667,
+          "z": 0.0
+        },
+        {
+          "y": 25.2292,
+          "z": 0.0
+        },
+        {
+          "y": 29.6042,
+          "z": 0.5833
+        },
+        {
+          "y": 34.1615,
+          "z": 0.5833
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 14.802,
+        "z": 0.0
+      },
+      "distance": 18.666666666666668,
+      "yawDegrees": 0.0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": 2.2604166666666665,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 14.802,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "west_quay",
+        "eventInstanceId": "st-maria-port-west_quay",
+        "radius": 0.9
+      },
+      {
+        "anchor": "forge_door",
+        "eventInstanceId": "st-maria-port-forge_door",
+        "radius": 1.2
+      },
+      {
+        "anchor": "smith_3d_door",
+        "eventInstanceId": "st-maria-port-smith_3d_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "cortico_stair",
+        "eventInstanceId": "st-maria-port-cortico_stair",
+        "radius": 1.2
+      },
+      {
+        "anchor": "climb_churchyard",
+        "eventInstanceId": "st-maria-port-climb_churchyard",
+        "radius": 3.0
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 3101,
+      "instanceId": "st-maria-port-west_quay",
+      "name": "The Quay",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        0.0,
+        0.0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 19,
+          "arrival": "east_port"
+        }
+      ],
+      "direction": "left"
+    },
+    {
+      "id": 3102,
+      "instanceId": "st-maria-port-forge_door",
+      "name": "The forge",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        8.4583,
+        0.0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 20,
+          "arrival": "exit_door"
+        }
+      ],
+      "direction": "away"
+    },
+    {
+      "id": 3103,
+      "instanceId": "st-maria-port-smith_3d_door",
+      "name": "Laura's Smithy (3D)",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        16.8073,
+        0.0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 29,
+          "arrival": "exit_door"
+        }
+      ],
+      "direction": "away"
+    },
+    {
+      "id": 3104,
+      "instanceId": "st-maria-port-cortico_stair",
+      "name": "Up to the Cortico",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        19.0312,
+        0.0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "port_stair"
+        }
+      ],
+      "direction": "away"
+    },
+    {
+      "id": 3105,
+      "instanceId": "st-maria-port-climb_churchyard",
+      "name": "The long climb",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        28.6927,
+        0.4618
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 16,
+          "arrival": "port_climb"
+        }
+      ],
+      "direction": "away"
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

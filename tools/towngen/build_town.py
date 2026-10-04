@@ -722,69 +722,10 @@ def build_map(key, screen, map1):
 
 
 def main():
-    map1 = load_map1_commands()
-    build_stub()
-    for key, screen in SCREENS.items():
-        if key in AUTHORED_NOT_GENERATED:
-            print("skipped %-12s map %d (authored, not generated)"
-                  % (key, screen["id"]))
-            continue
-        build_environment(key, screen)
-        build_map(key, screen, map1)
-        print("built %-13s map %d" % (key, screen["id"]))
-
-    index_path = os.path.join(MAPS, "index.json")
-    with io.open(index_path, encoding="utf-8") as handle:
-        index = json.load(handle)
-    files = index.get("files", [])
-    for screen in SCREENS.values():
-        name = "%d.json" % screen["id"]
-        if name not in files:
-            files.append(name)
-    for map_id in AUTHORED_TOWN_MAPS:
-        name = "%d.json" % map_id
-        if not os.path.isfile(os.path.join(MAPS, name)):
-            raise ValueError("Registered authored town map is missing: " + name)
-        if name not in files:
-            files.append(name)
-    index["files"] = sorted(files, key=lambda n: int(n.split(".")[0]))
-    write_json(index_path, index)
-
-    # The opening cinematic loaded the 3D grid town directly. Repoint it at the
-    # lodging room its own text describes, by id rather than by position, so a
-    # rebuild stays correct if the command list moves.
-    commons_path = os.path.join(DATA, "commonEvents.json")
-    with io.open(commons_path, encoding="utf-8") as handle:
-        commons = json.load(handle)
-    repointed = 0
-    for common in commons.values():
-        if common.get("name") != "Opening - Arrival at St. Maria":
-            continue
-        for command in common.get("commands", []):
-            if command.get("cmd") == "LOAD_MAP" and command.get("mapId") == 1:
-                command["mapId"] = SCREENS["lodging"]["id"]
-                repointed += 1
-    if repointed:
-        write_json(commons_path, commons)
-    print("opening cinematic transfers repointed: %d" % repointed)
-
-    # Classic is the intended gameplay experience. A wider profile reveals
-    # more of the same plate rather than stretching it, so the Project states
-    # its intent instead of leaving the default implicit.
-    engine_path = os.path.join(DATA, "engine.json")
-    with io.open(engine_path, encoding="utf-8") as handle:
-        engine = json.load(handle)
-    engine.setdefault("ui", {})["renderSurfaceProfile"] = "classic"
-    write_json(engine_path, engine)
-    print("render surface profile authored: classic")
-
-    system_path = os.path.join(DATA, "system.json")
-    with io.open(system_path, encoding="utf-8") as handle:
-        system = json.load(handle)
-    system["spawn"] = {"mapId": SCREENS["praca"]["id"], "x": 0, "y": 0, "dir": "E"}
-    write_json(system_path, system)
-    print("new game now starts on map %d" % SCREENS["praca"]["id"])
-    print("TOWN BUILD OK")
+    # The owner adopted the physically grounded B18 town as Project content.
+    # Legacy construction helpers remain available to their focused tests.
+    # Rebuilding the old table would overwrite adopted maps and is forbidden.
+    print("St. Maria is authored Project content; legacy town generation is retired.")
 
 
 if __name__ == "__main__":

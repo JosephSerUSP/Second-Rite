@@ -1,0 +1,552 @@
+{
+  "id": 1002,
+  "title": "St. Maria / Bakery side street",
+  "intro": "A street of St. Maria.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_core/market/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 14.0,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0.0,
+          "z": 0.449993
+        },
+        {
+          "y": 0.2,
+          "z": 0.437143
+        },
+        {
+          "y": 0.4,
+          "z": 0.424286
+        },
+        {
+          "y": 0.6,
+          "z": 0.411429
+        },
+        {
+          "y": 0.8,
+          "z": 0.398571
+        },
+        {
+          "y": 1.0,
+          "z": 0.385714
+        },
+        {
+          "y": 1.2,
+          "z": 0.372857
+        },
+        {
+          "y": 1.4,
+          "z": 0.36
+        },
+        {
+          "y": 1.6,
+          "z": 0.347143
+        },
+        {
+          "y": 1.8,
+          "z": 0.334286
+        },
+        {
+          "y": 2.0,
+          "z": 0.321428
+        },
+        {
+          "y": 2.2,
+          "z": 0.308572
+        },
+        {
+          "y": 2.4,
+          "z": 0.295715
+        },
+        {
+          "y": 2.6,
+          "z": 0.282857
+        },
+        {
+          "y": 2.8,
+          "z": 0.27
+        },
+        {
+          "y": 3.0,
+          "z": 0.257143
+        },
+        {
+          "y": 3.2,
+          "z": 0.244286
+        },
+        {
+          "y": 3.4,
+          "z": 0.231428
+        },
+        {
+          "y": 3.6,
+          "z": 0.218571
+        },
+        {
+          "y": 3.8,
+          "z": 0.205714
+        },
+        {
+          "y": 4.0,
+          "z": 0.192857
+        },
+        {
+          "y": 4.2,
+          "z": 0.179999
+        },
+        {
+          "y": 4.4,
+          "z": 0.167143
+        },
+        {
+          "y": 4.6,
+          "z": 0.154287
+        },
+        {
+          "y": 4.8,
+          "z": 0.141429
+        },
+        {
+          "y": 5.0,
+          "z": 0.128572
+        },
+        {
+          "y": 5.2,
+          "z": 0.115714
+        },
+        {
+          "y": 5.4,
+          "z": 0.102857
+        },
+        {
+          "y": 5.6,
+          "z": 0.09
+        },
+        {
+          "y": 5.8,
+          "z": 0.077143
+        },
+        {
+          "y": 6.0,
+          "z": 0.064286
+        },
+        {
+          "y": 6.2,
+          "z": 0.051428
+        },
+        {
+          "y": 6.4,
+          "z": 0.038571
+        },
+        {
+          "y": 6.6,
+          "z": 0.025715
+        },
+        {
+          "y": 6.8,
+          "z": 0.012857
+        },
+        {
+          "y": 7.0,
+          "z": 0.0
+        },
+        {
+          "y": 7.2,
+          "z": -0.012857
+        },
+        {
+          "y": 7.4,
+          "z": -0.025714
+        },
+        {
+          "y": 7.6,
+          "z": -0.038571
+        },
+        {
+          "y": 7.8,
+          "z": -0.051429
+        },
+        {
+          "y": 8.0,
+          "z": -0.064286
+        },
+        {
+          "y": 8.2,
+          "z": -0.077143
+        },
+        {
+          "y": 8.4,
+          "z": -0.09
+        },
+        {
+          "y": 8.6,
+          "z": -0.102857
+        },
+        {
+          "y": 8.8,
+          "z": -0.115714
+        },
+        {
+          "y": 9.0,
+          "z": -0.128571
+        },
+        {
+          "y": 9.2,
+          "z": -0.141429
+        },
+        {
+          "y": 9.4,
+          "z": -0.154286
+        },
+        {
+          "y": 9.6,
+          "z": -0.167143
+        },
+        {
+          "y": 9.8,
+          "z": -0.18
+        },
+        {
+          "y": 10.0,
+          "z": -0.192857
+        },
+        {
+          "y": 10.2,
+          "z": -0.205715
+        },
+        {
+          "y": 10.4,
+          "z": -0.218572
+        },
+        {
+          "y": 10.6,
+          "z": -0.231428
+        },
+        {
+          "y": 10.8,
+          "z": -0.244286
+        },
+        {
+          "y": 11.0,
+          "z": -0.257143
+        },
+        {
+          "y": 11.2,
+          "z": -0.27
+        },
+        {
+          "y": 11.4,
+          "z": -0.282857
+        },
+        {
+          "y": 11.6,
+          "z": -0.295714
+        },
+        {
+          "y": 11.8,
+          "z": -0.308572
+        },
+        {
+          "y": 12.0,
+          "z": -0.321429
+        },
+        {
+          "y": 12.2,
+          "z": -0.334286
+        },
+        {
+          "y": 12.4,
+          "z": -0.347143
+        },
+        {
+          "y": 12.6,
+          "z": -0.36
+        },
+        {
+          "y": 12.8,
+          "z": -0.372857
+        },
+        {
+          "y": 13.0,
+          "z": -0.385714
+        },
+        {
+          "y": 13.2,
+          "z": -0.398572
+        },
+        {
+          "y": 13.4,
+          "z": -0.411429
+        },
+        {
+          "y": 13.6,
+          "z": -0.424285
+        },
+        {
+          "y": 13.8,
+          "z": -0.437143
+        },
+        {
+          "y": 14.0,
+          "z": -0.449994
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 7.0,
+        "z": 2.2604
+      },
+      "distance": 18.6667,
+      "yawDegrees": 0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333332999993,
+      "fovDegrees": 28.072486935852954,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionFrame": {
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 7.0,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "to-court",
+        "eventInstanceId": "core-run-market-to-court",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-quay",
+        "eventInstanceId": "core-run-market-to-quay",
+        "radius": 0.65
+      },
+      {
+        "anchor": "door-bakery",
+        "eventInstanceId": "core-run-market-door-bakery",
+        "radius": 0.65
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 100201,
+      "instanceId": "core-run-market-to-court",
+      "name": "Corti\u00e7o / Passage House",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        0,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "left",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1001,
+          "arrival": "to-market"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100202,
+      "instanceId": "core-run-market-to-quay",
+      "name": "Pub quay",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        14.0,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1003,
+          "arrival": "to-market"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100203,
+      "instanceId": "core-run-market-door-bakery",
+      "name": "Bakery",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        6.999998086693267,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 28,
+          "arrival": "exit_door"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100204,
+      "instanceId": "core-run-st-maria-market-auctioneer",
+      "name": "Auctioneer",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        1.1338,
+        0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "name": "auctioneer_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "Rare finds! Highest bidder takes all! \u2026Well. Fixed price for now. But the *spirit* is the same. Spend like you\u2019re trying to forget something.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Browse",
+              "commands": [
+                {
+                  "shopId": 4,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "auctioneer_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask what\u2019s \u2018unidentified\u2019 mean",
+              "commands": [
+                {
+                  "text": "It means you pay first and ask questions later. Just like love. Just like the dungeon. Now\u2014 are you brave, or are you smart?",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Browse",
+                      "commands": [
+                        {
+                          "shopId": 4,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ],
+      "sprite": "assets/character/npc_goustav.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 100205,
+      "instanceId": "core-run-st-maria-market-yukio",
+      "name": "Yukio",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        4.5845,
+        0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "commonEventId": 36,
+          "cmd": "CALL_COMMON_EVENT"
+        }
+      ],
+      "sprite": "assets/character/town/npc_yukio.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

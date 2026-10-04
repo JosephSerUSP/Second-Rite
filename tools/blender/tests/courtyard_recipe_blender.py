@@ -32,7 +32,9 @@ source=ROOT/'projects/hichaukitoden-game/assets/authoring/environments/passage_h
 bpy.ops.wm.open_mainfile(filepath=str(source))
 expected=snapshot()
 source_before=source.read_bytes()
-recipe.build(output)
+fixture=ROOT/'tests/fixtures/walk_profile_courtyard_map.json'
+recipe.build(output,map_data=json.loads(fixture.read_text(encoding='utf-8')),
+    profile_authority='tests/fixtures/walk_profile_courtyard_map.json')
 actual=snapshot()
 def equivalent(a,b):
     if a.keys()!=b.keys():return False

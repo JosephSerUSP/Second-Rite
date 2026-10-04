@@ -594,7 +594,7 @@
     {
       "id": 2102,
       "instanceId": "st-maria-pub-exit_door",
-      "name": "Out to the Quay",
+      "name": "Out to Pub quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -607,11 +607,11 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 19,
-          "arrival": "pub_door"
+          "mapId": 1003,
+          "arrival": "door-pub"
         }
       ],
-      "direction": "away"
+      "direction": "toward"
     }
   ],
   "treasures": [],

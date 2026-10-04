@@ -102,7 +102,7 @@
     {
       "id": 2902,
       "instanceId": "st-maria-lauras_smith_3d-exit_door",
-      "name": "Out to the Port",
+      "name": "Out to Forge quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -115,11 +115,11 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 31,
-          "arrival": "smith_3d_door"
+          "mapId": 1004,
+          "arrival": "door-forge"
         }
       ],
-      "direction": "away"
+      "direction": "toward"
     }
   ],
   "treasures": [],

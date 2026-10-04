@@ -1683,14 +1683,15 @@
                   },
                   {
                     "cmd": "LOAD_MAP",
-                    "mapId": "1"
+                    "mapId": 1007,
+                    "arrival": "labyrinth-gate"
                   },
                   {
                     "condition": "flag:vigil_ready",
                     "commands": [
                       {
                         "cmd": "SET_MAP_PRESENTATION",
-                        "mapId": "1",
+                        "mapId": 1007,
                         "tileset": "town_003",
                         "fogPreset": "purple_dusk",
                         "ambientR": "0.24",
@@ -1735,7 +1736,8 @@
         "cmd": "SET_FLAG"
       },
       {
-        "cmd": "PORTAL_TO_TOWN"
+        "cmd": "PORTAL_TO_TOWN",
+        "mapId": 1007
       }
     ]
   },
@@ -2342,6 +2344,10 @@
       {
         "cmd": "TEXT",
         "text": "Saban noses the bowl, then leans his familiar weight against you. He carried you to St. Maria; now your mount and only summon will carry you below it."
+      },
+      {
+        "cmd": "TEXT",
+        "text": "When you are ready, leave the Passage House. The Registry is in the Praca, along the right-hand street outside."
       }
     ]
   },
@@ -2748,6 +2754,14 @@
           }
         ],
         "cmd": "CHOICE"
+      }
+    ]
+  },
+  "46": {
+    "name": "Passage House rest",
+    "commands": [
+      {
+        "cmd": "RECOVER_PARTY"
       }
     ]
   }

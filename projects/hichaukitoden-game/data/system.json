@@ -249,7 +249,7 @@
     "defaultSacrificeRewards": []
   },
   "spawn": {
-    "mapId": 17,
+    "mapId": 25,
     "x": 0,
     "y": 0,
     "dir": "E"

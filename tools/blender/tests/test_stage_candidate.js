@@ -2,7 +2,15 @@
 // stage_candidate.js builds the staged map without touching the Project.
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const {candidateMap, parse} = require('../stage_candidate');
+
+// Expectations come from map 22 itself, so editing the map elsewhere (its
+// destination, its direction) does not break these tests.
+const source = JSON.parse(fs.readFileSync(path.resolve(__dirname,
+    '../../../projects/hichaukitoden-game/data/maps/22.json'), 'utf8'));
+const sourceExit = source.events.find(e => e.instanceId === 'st-maria-chapel-exit_door');
 
 const manifest = {anchors: {
     exit_door: {position: [0, 6.8833, 0]},
@@ -15,8 +23,7 @@ test('exit and NPC move to package anchors; presentation comes from the template
     const {map, dropped} = candidateMap({...base, npcs: [['st-maria-chapel-agnes', 'npc_agnes']]});
     const exit = map.events.find(e => e.instanceId === 'st-maria-chapel-exit_door');
     assert.deepEqual(exit.worldPosition, [0, 6.8833, 0]);
-    assert.deepEqual(exit.commands[0], {cmd: 'LOAD_MAP', mapId: 17, arrival: 'chapel_door'},
-                     'the map keeps its own exit destination');
+    assert.deepEqual(exit.commands, sourceExit.commands, 'the map keeps its own exit destination');
     assert.deepEqual(map.traversal.doorways.map(d => d.eventInstanceId), ['st-maria-chapel-exit_door']);
     assert.equal(map.traversal.environmentPackage, base.packagePath);
     assert.equal(map.ceilingStyle, 'solid', 'a 2D plate map\'s sky ceiling must not leak into an interior');
@@ -24,7 +31,7 @@ test('exit and NPC move to package anchors; presentation comes from the template
     assert.deepEqual(map.events.find(e => e.instanceId === 'st-maria-chapel-agnes').worldPosition,
                      [0, 4.4833, 0]);
     assert.deepEqual(dropped, []);
-    assert.equal(map.title, 'St. Maria - Chapel', 'the place keeps its own text');
+    assert.equal(map.title, source.title, 'the place keeps its own text');
 });
 
 test('unlisted events are dropped and reported', () => {
@@ -62,7 +69,7 @@ test('--camera merges into the template camera key by key', () => {
 
 test('an end-wall exit can say it leads off the side of the screen', () => {
     const exit = m => m.events.find(e => e.instanceId === 'st-maria-chapel-exit_door');
-    assert.equal(exit(candidateMap({...base, npcs: []}).map).direction, 'away', 'kept by default');
+    assert.equal(exit(candidateMap({...base, npcs: []}).map).direction, sourceExit.direction, 'kept by default');
     assert.equal(exit(candidateMap({...base, npcs: [], exitDirection: 'right'}).map).direction, 'right');
     assert.throws(() => candidateMap({...base, npcs: [], exitDirection: 'up'}), /exit-direction/);
 });

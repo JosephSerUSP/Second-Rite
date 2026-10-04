@@ -586,3 +586,13 @@ tools listed in F1.
   adopted `environments/passage_office.blend`. `environment_sources.py --check`
   now covers candidate folders: same record, no `adopted` candidate, at most two
   `.blend` files. The policy is in `BLENDER_CORE.md`.
+- #1350: `tools/blender/recipes/examples/exterior_reference.py` is a worked
+  exterior that is deliberately not a place. It uses generic materials and has
+  no trade or cast. It builds the ground run-off, the three near ranks and
+  camera-derived heights, then checks itself (`boards()` empty, menu band ≥ 0.6
+  covered at every lane position) and fails loud. `environment_sources.py
+  --check` refuses `example_*` as a source or package. A headless Blender test
+  with negative controls (injected board, save into a Project) runs in
+  `blender-item-source.yml`. It takes its camera from the vocabulary and holds
+  no camera number of its own, so it follows #1298 when that lands. Verified
+  under the pinned Blender 5.2.2 on Linux.

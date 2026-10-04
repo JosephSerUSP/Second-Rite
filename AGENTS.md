@@ -411,8 +411,12 @@ tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
                          ceiling off: the ground runs off the bottom of the
                          frame, the near stack is three ranks, and the same
                          camera distance applies (the 21.1175 in the exterior
-                         maps belongs to the 2D plate, not to a camera). It
-                         ships with no worked example on purpose.
+                         maps belongs to the 2D plate, not to a camera). Its
+                         worked example, `recipes/examples/exterior_reference.py`,
+                         is deliberately NOT a place: copy its structure
+                         (ranks, ground, camera-derived heights, self-checks),
+                         never its look. `example_*` files are refused as
+                         sources by `environment_sources.py --check`.
                          A `.blend` under
                          `projects/*/assets/authoring/environments/` is
                          regenerable scaffold output UNTIL its owner adopts or

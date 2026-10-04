@@ -122,6 +122,15 @@ jobs:
 
       # The room exporter bakes its atlas with EEVEE when asked (--bake-backend eevee): a tiny room goes
       # through the real exporter with each backend, and the package contract must hold for both.
+      # The worked exterior builds, passes its own checks (no board, menu band
+      # covered at every lane position), and those checks catch a broken
+      # composition (#1350).
+      - name: Worked exterior example
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_example -v
+
       - name: Shared render profile contract
         run: xvfb-run -a python -m unittest tools.blender.tests.test_render_profiles -v
 

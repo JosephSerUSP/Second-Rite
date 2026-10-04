@@ -171,6 +171,20 @@ class NegativeControlTests(unittest.TestCase):
         self.assertTrue(any("room_r2.blend has no entry" in e
                             for e in sources.check_project(self.root)))
 
+    def test_a_worked_example_in_the_authoring_folder_fails(self):
+        (self.authoring / "example_street.blend").write_bytes(b"BLENDER")
+        _rewrite(self.authoring / sources.MANIFEST_NAME,
+                 lambda d: d["sources"].update({"example_street.blend":
+                                                {"status": "adopted", "basis": "test"}}))
+        errors = sources.check_project(self.root)
+        self.assertTrue(any("is a worked example" in e for e in errors))
+        self.assertTrue(any("records a worked example" in e for e in errors))
+
+    def test_a_package_baked_from_a_worked_example_fails(self):
+        _rewrite(self.package, lambda d: d["provenance"].update(
+            sourceBlend="example_exterior_reference.blend"))
+        self.assertTrue(any("worked example" in e for e in sources.check_project(self.root)))
+
     def test_an_unknown_status_fails(self):
         _rewrite(self.authoring / sources.MANIFEST_NAME,
                  lambda d: d["sources"]["new.blend"].update(status="final"))

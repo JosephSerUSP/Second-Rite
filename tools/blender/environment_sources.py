@@ -51,6 +51,9 @@ PROJECTS = ("hichaukitoden-game", "editor-fixture")
 # commits, not file names (#1349). Two leaves room for the newest and one
 # under comparison.
 MAX_CANDIDATE_BLENDS = 2
+# Worked examples (`tools/blender/recipes/examples/`) carry this prefix. They
+# teach structure and must never become a source or a package (#1350).
+EXAMPLE_PREFIX = "example_"
 
 
 def authoring_dir(project_root: Path) -> Path:
@@ -134,8 +137,14 @@ def _check_sources(directory: Path, label: str) -> list[str]:
     for name in blends:
         if name not in sources:
             errors.append(f"{label}: {name} has no entry in {MANIFEST_NAME}")
+    for name in blends:
+        if name.startswith(EXAMPLE_PREFIX):
+            errors.append(f"{label}: {name} is a worked example; examples are "
+                          "built into out/ and never kept as a source")
     for name, entry in sorted(sources.items()):
         where = f"{label}: {MANIFEST_NAME} entry {name}"
+        if name.startswith(EXAMPLE_PREFIX):
+            errors.append(f"{where} records a worked example as a source")
         if name not in blends:
             errors.append(f"{where} names a file that does not exist")
         status = entry.get("status")
@@ -167,6 +176,9 @@ def _check_packages(project_root: Path, label: str) -> list[str]:
             errors.append(f"{label}: {rel} records no provenance.sourceBlend")
             continue
         source = provenance["sourceBlend"]
+        if isinstance(source, str) and source.startswith(EXAMPLE_PREFIX):
+            errors.append(f"{label}: {rel} is baked from the worked example {source!r}")
+            continue
         if source is None:
             if not str(provenance.get("sourceBlendNote", "")).strip():
                 errors.append(f"{label}: {rel} has sourceBlend null and no "

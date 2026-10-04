@@ -46,13 +46,14 @@ The `.blend` a recipe writes is SOURCE AUTHORITY: `interior.save_source_blend`
 refuses to overwrite one that exists, because ordinary work must never discard
 hand-authoring.
 
-**There is deliberately no worked example.** This module ships as a vocabulary
-with no recipe calling it, because the one screen built to derive it was not
-good enough to stand as a template, and a brief's worked example is what the
-next author copies -- PRs #941 and #942 converged on one identical room for
-exactly that reason. Read `docs/design/st-maria-exterior-authoring.md` for the
-measured constants and the rules; then compose from the vocabulary rather than
-adapting somebody else's street.
+**The worked example is not a place.** A brief's worked example is what the
+next author copies (PRs #941 and #942 converged on one identical room for
+exactly that reason), so `recipes/examples/exterior_reference.py` carries only
+structure: the ground run-off, the three near ranks, camera-derived heights and
+the self-checks, with generic materials and nothing a street could be
+recognised by. Copy its structure; take every facade, prop and material choice
+from the place's own brief, `docs/design/st-maria-exterior-authoring.md` for
+the rules. `example_*` files are never a source (#1350).
 """
 
 from __future__ import annotations

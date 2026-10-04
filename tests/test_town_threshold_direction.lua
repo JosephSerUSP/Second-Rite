@@ -23,24 +23,36 @@ check(lane.interact(game,'DOWN').instanceId=='leave','DOWN selects only the fore
 check(lane.interact(game,'LEFT')==nil,'a sideways press cannot open a depth door')
 check(lane.doorwayButton(game,street)=='RIGHT','marker and input share the authored axis')
 check(town_prompt.compactLabel({name='Out to the Cortico'})=='Cortico',
-    'town prompt removes navigation prose carried by the direction icon')
+    'town prompt removes navigation prose carried by the direction glyph')
 check(town_prompt.compactLabel({name='Down to the Port'})=='Port',
     'town prompt removes vertical navigation prose')
 check(town_prompt.compactLabel({name="Laura's Smithy (3D)"})=="Laura's Smithy",
     'town prompt hides authoring/debug suffixes')
 check(town_prompt.compactLabel({name='Out to the Quay',label='Harbour'})=='Harbour',
     'authored compact labels override presentation compaction')
-local icon = town_prompt.directionIcon('RIGHT')
-check(type(icon)=='table' and icon.direction=='RIGHT',
-    'resolved gameplay direction projects to an icon source without changing semantics')
-local badDirection = pcall(town_prompt.directionIcon,'DIAGONAL')
-check(not badDirection,'unknown prompt directions fail loudly')
+local renderedName, renderedDirection = town_prompt.parseRenderedDoorLabel('Out to the Cortico  - LEFT')
+check(renderedName=='Out to the Cortico' and renderedDirection=='LEFT',
+    'renderer doorway sentence resolves into destination and direction projection')
+check(town_prompt.parseRenderedDoorLabel('Talk to Agnes')==nil,
+    'ordinary NPC prompts are not mistaken for directed door prompts')
 game.townTraversal.y=0
 check(lane.edgeDoorway(game,-1)==nil,'pushing a bound cannot hijack its depth doorway')
 check(not lane.isEdgeDoorway(game,foreground),'a foreground door on a bound remains a DOWN interaction')
 game.townTraversal.y=8
 check(lane.promptDoorway(game)==street,'the next street is previewed before reaching the boundary')
 check(lane.interact(game,'RIGHT')==nil,'a preview does not widen the activation radius')
+
+-- The scoped adapter must change both measurement and drawing semantics only
+-- for the bounded-lane frame, then put the shared UI API back exactly as found.
+local ui=require('presentation.ui')
+local originalMeasure=ui.measureText
+local rawWidth=originalMeasure('next street  - RIGHT')
+local compactWidth
+town_prompt.withCompactDoorUi(game,function()
+    compactWidth=ui.measureText('next street  - RIGHT')
+end)
+check(compactWidth and compactWidth<rawWidth,'direction glyph projection shrinks the actual prompt footprint')
+check(ui.measureText==originalMeasure,'town prompt projection restores the shared UI measurement seam')
 
 local transfers=0
 check(transition.begin(function() transfers=transfers+1; transition.setArrivalDirection('toward') end,

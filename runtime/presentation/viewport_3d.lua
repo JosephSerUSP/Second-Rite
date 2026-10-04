@@ -8,7 +8,17 @@ local geometryVisibility = require("engine.geometry.visibility_profile")
 local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
+local transitionMarkers = require("presentation.transition_markers")
 local buildProfiler = require("engine.map_build_profiler")
+
+-- Authored camera framing lives in Classic composition coordinates. Wider
+-- surfaces translate that frame; they never change its optical pixel scale.
+function viewport_3d.authoredCompositionCenter(camera)
+    local frame = camera and camera.projectionFrame or {}
+    return surface.compositionToRender(
+        frame.canonicalCenterX or surface.compositionWidth() * 0.5,
+        frame.canonicalHorizonY or 70)
+end
 
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
@@ -54,6 +64,20 @@ end
 function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     local tangentX, tangentY = -normalY, normalX
     return normalX * x + tangentX * y, normalY * x + tangentY * y
+end
+
+-- Transition arrows point along local +Z after OBJ normalization. Their idle
+-- motion is a roll around that shaft, so the authored direction never wobbles
+-- and the marker remains spatially truthful while still reading as active.
+local TRANSITION_ARROW_SPIN_PERIOD = 2.0
+local function transitionArrowSpinAngle()
+    return (love.timer.getTime() % TRANSITION_ARROW_SPIN_PERIOD)
+        * (math.pi * 2 / TRANSITION_ARROW_SPIN_PERIOD)
+end
+
+local function spinTransitionArrowLocal(x, y, z, angle)
+    local cosA, sinA = math.cos(angle), math.sin(angle)
+    return x * cosA - y * sinA, x * sinA + y * cosA, z
 end
 
 -- Tileset atlas configuration. See docs/design/runtime/rendering/raycaster-tileset-lighting.md.
@@ -672,7 +696,7 @@ local function getCompositeTileCanvas(atlas, originX, originY, leftEdgeSpec, rig
         return compositeCache[key], compositeGlowCache[key]
     end
 
-    local canvas = love.graphics.newCanvas(ATLAS_TILE, ATLAS_TILE)
+    local canvas = surface.newRasterCanvas(ATLAS_TILE, ATLAS_TILE)
     canvas:setFilter("nearest", "nearest")
     -- Bake in ordinary 2D space. The finished canvas is an opaque wall tile
     -- (the base wall is drawn first), so the raycaster can light and fog it
@@ -729,7 +753,7 @@ local function getCompositeTileCanvas(atlas, originX, originY, leftEdgeSpec, rig
     -- exactly right -- it means "not emissive", not "missing data".
     local glowCanvas
     if atlas.glowImg then
-        glowCanvas = love.graphics.newCanvas(ATLAS_TILE, ATLAS_TILE)
+        glowCanvas = surface.newRasterCanvas(ATLAS_TILE, ATLAS_TILE)
         glowCanvas:setFilter("nearest", "nearest")
         love.graphics.setCanvas(glowCanvas)
         love.graphics.clear(0, 0, 0, 1)
@@ -843,6 +867,25 @@ function viewport_3d.billboardCorners(x, y, z, width, height,
         y = left.y + dirY * upHorizontal,
         z = z + upZ,
     }
+end
+
+-- Resolve one sprite-sheet frame's UV rectangle. Player side-view art is
+-- authored facing left; positive lane facing therefore mirrors horizontally.
+-- Event billboards pass nil and retain their authored orientation.
+function viewport_3d.billboardFrameUV(imageWidth, imageHeight,
+        frameWidth, frameHeight, frameIndex, facing)
+    frameWidth = frameWidth or imageWidth
+    frameHeight = frameHeight or imageHeight
+    frameIndex = frameIndex or 0
+    local columns = math.max(1, math.floor(imageWidth / frameWidth))
+    local col = frameIndex % columns
+    local row = math.floor(frameIndex / columns)
+    local u0 = col * frameWidth / imageWidth
+    local u1 = (col + 1) * frameWidth / imageWidth
+    local v0 = 1 - (row * frameHeight / imageHeight)
+    local v1 = 1 - ((row + 1) * frameHeight / imageHeight)
+    if facing ~= nil and facing > 0 then u0, u1 = u1, u0 end
+    return u0, v0, u1, v1
 end
 
 function viewport_3d.resolveEventPresentation(ev, session)
@@ -1000,9 +1043,18 @@ end
 local PLAYER_IDLE_SPRITE = "assets/character/player.png"
 local PLAYER_WALK_SPRITE = "assets/character/walker.png"
 
-local function playerSpritePath(state)
-    if state and (state.walking or state.moving) then return PLAYER_WALK_SPRITE end
+local function playerSpritePath(state, pose)
+    if pose or (state and (state.walking or state.moving)) then return PLAYER_WALK_SPRITE end
     return PLAYER_IDLE_SPRITE
+end
+
+local function townPlayerPose(session)
+    local state = session.townTraversal
+    local x, y, z = require("engine.bounded_lane").actorRoot(session)
+    local pose = require("presentation.door_transition").actorPose()
+    return {x = x + (pose and pose.x or 0), y = y + (pose and pose.y or 0), z = z,
+        frame = pose and pose.frame or state.walkFrameIndex or 0,
+        facing = state.facing or 1, moving = pose}
 end
 
 local function drawTownPrerenderSprite(image, x, footY, width, height,
@@ -1265,6 +1317,7 @@ local function drawTownPrerender(session, inspection)
     local sliceY = preRendered.slicePositions[sceneIndex]
     local projection = preRendered.playerProjection
     local authoredTownCamera = session.townTraversal.camera or {}
+    local townCenterX, townHorizonY = viewport_3d.authoredCompositionCenter(authoredTownCamera)
     local townCamera = worldCamera.resolve(session, {
         profile = "town_sideview",
         authoredCamera = authoredTownCamera,
@@ -1272,10 +1325,8 @@ local function drawTownPrerender(session, inspection)
             targetWidth = renderWidth,
             targetHeight = renderHeight,
             compositionWidth = surface.compositionWidth(),
-            canonicalCenterX = authoredTownCamera.projectionFrame
-                and authoredTownCamera.projectionFrame.canonicalCenterX,
-            canonicalHorizonY = authoredTownCamera.projectionFrame
-                and authoredTownCamera.projectionFrame.canonicalHorizonY,
+            canonicalCenterX = townCenterX,
+            canonicalHorizonY = townHorizonY,
         },
     })
     local townPitch = authoredTownCamera.pitch
@@ -1331,7 +1382,8 @@ local function drawTownPrerender(session, inspection)
             projectedY + groundScreenOffsetY, denominator
     end
     local function screenXForTownY(y)
-        local x, _, denominator = projectTownPoint(depthX, y, state.groundZ or 0)
+        local groundZ = require("engine.bounded_lane").groundAt(session, y) or state.groundZ or 0
+        local x, _, denominator = projectTownPoint(depthX, y, groundZ)
         return panX + centerX + (x - plateGroundX), denominator
     end
     -- Runtime-proof telemetry: this is resolved composition state, captured
@@ -1346,16 +1398,16 @@ local function drawTownPrerender(session, inspection)
         cameraTargetY = townCamera.targetY,
     }
 
-    -- Where the floor is at a given point along the lane. The camera looks
-    -- straight at the facades with no vanishing point, so one scale converts
-    -- both axes and a world height difference is a plain pixel offset from
-    -- the authored foot line.
+    -- Ground follows the same pitched perspective as the plate's source camera.
+    -- A linear height-to-pixel offset drifts away from a visible slope.
     local lanes = require("engine.bounded_lane")
     local function screenFootY(y)
         local groundZ = lanes.groundAt(session, y)
         if not groundZ then return screenY end
-        return screenY - (groundZ - state.groundZ) * pixelsPerRuntimeY
+        local _, footY = toScreen(depthX, y, groundZ)
+        return footY
     end
+    state.lastPrerenderComposition.laneScreenY = screenFootY(actorY)
 
     local function eventSpriteSize(event)
         local height = tonumber(event.worldHeight) or 1.75
@@ -1413,12 +1465,16 @@ local function drawTownPrerender(session, inspection)
         end
     end
 
-    local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+    local playerPose = townPlayerPose(session)
+    local playerImage = getEventSprite({ sprite = playerSpritePath(state, playerPose.moving) }, session)
     if playerImage then
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
-            screenFootY(actorY),
-            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
-            state.facing or 1)
+        local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
+        local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
+        local scale = baseDepth / poseDepth
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY) + poseX - baseX,
+            screenFootY(actorY) + poseY - baseY,
+            actorWidth * scale, actorHeight * scale, 24, 48, playerPose.frame,
+            playerPose.facing)
     end
 
     -- The matching foreground cutout follows the same pan and is composited
@@ -1442,7 +1498,8 @@ local function drawTownPrerender(session, inspection)
     for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         if not rawEv.wallEvent then
             local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-            if presentation.visual == "model" and presentation.model then
+            if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                 local imageX, imageY = townEventWorldPosition(rawEv)
                 imageX = imageX or depthX
                 local model = townArrowModel(presentation.model)
@@ -1452,11 +1509,12 @@ local function drawTownPrerender(session, inspection)
                 -- authored camera ever sees it.
                 local modelScale = tonumber(rawEv.modelScale) or 1
                 local isTransitionArrow = presentation.model:match("transition_arrow") ~= nil
+                local arrowSpin = isTransitionArrow and transitionArrowSpinAngle() or 0
                 local lanes = require("engine.bounded_lane")
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 for _, modelGroup in ipairs(model.groups or {}) do
                     local color = modelGroup.color or { 1, 0.65, 0.08, 1 }
-                    local lineSegments = {}
+                    local triangles = {}
                     for index = 1, #(modelGroup.vertices or {}), 3 do
                         local a, b, c = modelGroup.vertices[index],
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
@@ -1467,6 +1525,7 @@ local function drawTownPrerender(session, inspection)
                                 local lz = vertex[3]
                                 local worldX, worldY, worldZ
                                 if isTransitionArrow then
+                                    lx, ly, lz = spinTransitionArrowLocal(lx, ly, lz, arrowSpin)
                                     local point = worldView.transitionArrowWorldPoint(imageX, imageY,
                                         groundZ, modelScale, rawEv.direction, lx, ly, lz)
                                     worldX, worldY, worldZ = point.x, point.y, point.z
@@ -1477,34 +1536,25 @@ local function drawTownPrerender(session, inspection)
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end
-                            local ax, ay = arrowPoint(a)
-                            local bx, by = arrowPoint(b)
-                            local cx, cy = arrowPoint(c)
-                            if isTransitionArrow then
-                                local function addSegment(x1, y1, x2, y2)
-                                    local keyA = string.format("%.3f,%.3f", x1, y1)
-                                    local keyB = string.format("%.3f,%.3f", x2, y2)
-                                    local key = keyA < keyB and keyA .. ":" .. keyB
-                                        or keyB .. ":" .. keyA
-                                    lineSegments[key] = { x1, y1, x2, y2 }
-                                end
-                                addSegment(ax, ay, bx, by)
-                                addSegment(bx, by, cx, cy)
-                                addSegment(cx, cy, ax, ay)
-                            else
-                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
-                            end
+                            local ax, ay, ad = arrowPoint(a)
+                            local bx, by, bd = arrowPoint(b)
+                            local cx, cy, cd = arrowPoint(c)
+                            local shade = isTransitionArrow and (0.55 + 0.45 * math.abs(a[8] or 0)) or 1
+                            triangles[#triangles + 1] = {
+                                depth = (ad + bd + cd) / 3,
+                                points = { ax, ay, bx, by, cx, cy },
+                                shade = shade,
+                            }
                         end
                     end
-                    if isTransitionArrow then
-                        love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                        love.graphics.setLineStyle("rough")
-                        love.graphics.setLineWidth(1)
-                        for _, segment in pairs(lineSegments) do
-                            love.graphics.line(segment)
-                        end
-                        love.graphics.setLineWidth(1)
+                    -- Filled model faces, ordered from the far side to the camera.
+                    -- Face shading keeps the shaft and head readable on a plate.
+                    table.sort(triangles, function(a, b) return a.depth > b.depth end)
+                    for _, triangle in ipairs(triangles) do
+                        local shade = triangle.shade
+                        love.graphics.setColor(color[1] * shade, color[2] * shade,
+                            color[3] * shade, color[4] or 1)
+                        love.graphics.polygon("fill", triangle.points)
                     end
                 end
             end
@@ -2188,8 +2238,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     if session.townTraversal and session.townTraversal.camera then
         authoredCamera = session.townTraversal.camera
         if authoredCamera.projectionFrame then
-            canonicalCenterX = authoredCamera.projectionFrame.canonicalCenterX or canonicalCenterX
-            canonicalHorizonY = authoredCamera.projectionFrame.canonicalHorizonY or canonicalHorizonY
+            canonicalCenterX, canonicalHorizonY = viewport_3d.authoredCompositionCenter(authoredCamera)
         end
     end
     local camera = worldCamera.resolve(session, {
@@ -2796,6 +2845,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             model = objModel.load(spec.model)
         end
         local placed = {}
+        local transitionArrowSpin = spec.transitionArrowAxis and transitionArrowSpinAngle() or 0
         for _, modelGroup in ipairs(model.groups) do
             local transformSpan = buildProfiler.span("materialize.transformLightingBounds", "cpu")
             local vertices = {}
@@ -2806,10 +2856,14 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 local nx, ny, nz = vertex[6], vertex[7], vertex[8]
                 if spec.transitionArrowAxis then
                     -- obj_model normalizes the source OBJ from Y-up to
-                    -- runtime Z-up, so local +Z is the shaft. Rotate that
-                    -- shaft into the one authored ground axis here.
+                    -- runtime Z-up, so local +Z is the shaft. Roll the marker
+                    -- around that shaft first, then rotate the shaft into the
+                    -- one authored ground axis. The direction itself never
+                    -- changes; only the arrow's local cross-section spins.
                     local direction = spec.transitionArrowAxis
                     local rightX, rightY = direction.y, -direction.x
+                    lx, ly, lz = spinTransitionArrowLocal(lx, ly, lz, transitionArrowSpin)
+                    nx, ny, nz = spinTransitionArrowLocal(nx, ny, nz, transitionArrowSpin)
                     local arrowPoint = worldView.transitionArrowWorldPoint(originX, originY,
                         spec.transitionArrowGroundZ or originZ, spec.modelScale or 1,
                         spec.transitionArrowDirection, lx, ly, lz)
@@ -2852,7 +2906,8 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             transformSpan()
             buildProfiler.add("materialize.placedVertices", #vertices)
             local gpuSpan = buildProfiler.span("materialize.placedGpuMeshCreate", "graphics")
-            local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "static")
+            local meshUsage = spec.transitionArrowAxis and "stream" or "static"
+            local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", meshUsage)
             if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
             gpuSpan()
             placed[#placed + 1] = {
@@ -2863,11 +2918,72 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 bounds = #vertices > 0 and {
                     minX = minX, maxX = maxX, minY = minY, maxY = maxY,
                 } or nil,
+                transitionArrow = spec.transitionArrowAxis and {
+                    sourceVertices = modelGroup.vertices,
+                    color = modelGroup.color,
+                    originX = originX,
+                    originY = originY,
+                    groundZ = spec.transitionArrowGroundZ or originZ,
+                    scale = spec.modelScale or 1,
+                    direction = spec.transitionArrowDirection,
+                    axis = spec.transitionArrowAxis,
+                    angle = transitionArrowSpin,
+                } or nil,
             }
         end
         structure.modelSurfaces[cacheKey] = placed
         return placed
     end
+
+    local function refreshTransitionArrow(placed)
+        local arrow = placed.transitionArrow
+        if not arrow then return end
+
+        local angle = transitionArrowSpinAngle()
+        if math.abs(angle - (arrow.angle or 0)) < 0.0001 then return end
+
+        local direction = arrow.axis
+        local rightX, rightY = direction.y, -direction.x
+        local vertices = {}
+        local minX, maxX = math.huge, -math.huge
+        local minY, maxY = math.huge, -math.huge
+        for _, vertex in ipairs(arrow.sourceVertices or {}) do
+            local lx, ly, lz = spinTransitionArrowLocal(
+                vertex[1], vertex[2], vertex[3], angle)
+            local nx, ny, nz = spinTransitionArrowLocal(
+                vertex[6], vertex[7], vertex[8], angle)
+            local point = worldView.transitionArrowWorldPoint(
+                arrow.originX, arrow.originY, arrow.groundZ, arrow.scale,
+                arrow.direction, lx, ly, lz)
+            nx, ny, nz = nx * rightX + nz * direction.x,
+                nx * rightY + nz * direction.y, ny
+
+            minX, maxX = math.min(minX, point.x), math.max(maxX, point.x)
+            minY, maxY = math.min(minY, point.y), math.max(maxY, point.y)
+            local light = colorAt(point.x, point.y, point.z, false)
+            local directional = math.max(0.35,
+                0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+            local color = arrow.color
+            vertices[#vertices + 1] = {
+                point.x, point.y, vertex[4], vertex[5],
+                color[1], color[2], color[3], color[4],
+                light[1] * directional, light[2] * directional, light[3] * directional,
+                1, point.z,
+            }
+        end
+
+        placed.vertices = vertices
+        placed.bounds = #vertices > 0 and {
+            minX = minX, maxX = maxX, minY = minY, maxY = maxY,
+        } or nil
+        placed.mesh:setVertices(vertices)
+        -- The near-clip cache is camera-pose keyed. Animated geometry changes
+        -- under a stationary camera, so a previous clipped mesh is no longer
+        -- valid even when the camera itself has not moved.
+        placed.clipPose = nil
+        arrow.angle = angle
+    end
+
     local function queuePlacedModels(placedGroups)
         -- Keep projection depth positive on the CPU, but leave the final cut
         -- to the GPU's 0.05 near plane. Cutting triangle soup exactly at the
@@ -2876,6 +2992,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         local cpuClipPlane = 0.005
         local queueStarted = love.timer.getTime()
         for _, placed in ipairs(placedGroups) do
+            refreshTransitionArrow(placed)
             if not (profileVariant == "no-height" and placed.isHeightSurface) then
             profile.placedModelsVisited = profile.placedModelsVisited + 1
             if placed.isHeightSurface then
@@ -3111,26 +3228,23 @@ end
         return rawEv.x + 1.5, rawEv.y + 1.5, 0
     end
 
-    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex)
+    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex, facing)
         local centerX, centerY = x, y
         z = z or 0
         height = height or 1
         frameWidth = frameWidth or image:getWidth()
         frameHeight = frameHeight or image:getHeight()
         frameIndex = frameIndex or 0
-        local columns = math.max(1, math.floor(image:getWidth() / frameWidth))
-        local col = frameIndex % columns
-        local row = math.floor(frameIndex / columns)
         local width = height * frameWidth / frameHeight
         local groupForSprite = group(image)
         -- World quads are authored bottom-to-top. LÖVE image UVs are
         -- top-to-bottom, so the bottom vertex takes the upper edge of the
-        -- selected frame and the top vertex takes its lower edge. This is the
-        -- established billboard convention used before the frame-aware path.
-        local u0, v0 = col * frameWidth / image:getWidth(),
-            1 - (row * frameHeight / image:getHeight())
-        local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
-            1 - ((row + 1) * frameHeight / image:getHeight())
+        -- selected frame and the top vertex takes its lower edge. Facing is a
+        -- UV concern here: mirroring the world quad would also reverse its
+        -- camera-space geometry.
+        local u0, v0, u1, v1 = viewport_3d.billboardFrameUV(
+            image:getWidth(), image:getHeight(),
+            frameWidth, frameHeight, frameIndex, facing)
         local function spriteColor(wx, wy, z)
             if session.townTraversal then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
@@ -3148,7 +3262,8 @@ end
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-                if presentation.visual == "model" and presentation.model then
+                if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
                     if presentation.model:match("transition_arrow") then
                         modelSpec.transitionArrowDirection = rawEv.direction
@@ -3189,11 +3304,11 @@ end
 
     if session.townTraversal then
         local state = session.townTraversal
-        local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+        local pose = townPlayerPose(session)
+        local playerImage = getEventSprite({ sprite = playerSpritePath(state, pose.moving) }, session)
         if playerImage then
-            local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
-            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
-                state.walkFrameIndex or 0)
+            addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
+                pose.frame, pose.facing)
         end
     end
 

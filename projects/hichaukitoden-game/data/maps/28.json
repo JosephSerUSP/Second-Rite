@@ -94,6 +94,24 @@
       "worldHeight": 1.75,
       "commands": [
         {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "flag:shipment_investigated",
+              "commands": [],
+              "elseCommands": [
+                {
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 45
+                }
+              ]
+            }
+          ],
+          "elseCommands": []
+        },
+        {
           "name": "padaria_hub",
           "cmd": "LABEL"
         },

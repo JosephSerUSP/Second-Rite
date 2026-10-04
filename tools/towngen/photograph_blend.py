@@ -26,6 +26,10 @@ import argparse
 import math
 import os
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "blender"))
+import render_profiles
 
 import bpy
 
@@ -238,6 +242,7 @@ def render_stitched(scene, cam, path, transform, width, height, tile):
 
 
 def render(scene, path, transform, width, height):
+    render_profiles.apply(scene, render_profiles.resolve("review"))
     scene.render.resolution_x = width
     scene.render.resolution_y = height
     scene.render.resolution_percentage = 100

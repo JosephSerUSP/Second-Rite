@@ -428,6 +428,11 @@ do
     }
     progress.publish(v, entries, 2)
     check(v.levelUpName == "B" and v.levelUpToLevel == 5, "publishing selects by index")
+    check(v.levelUpRows ~= entries[2].rows,
+        "published level-up rows are copied rather than aliased into Scene state")
+    local stateTree = { levelUps = entries, levelUpRows = v.levelUpRows }
+    check(pcall(require("engine.state_value").validate, stateTree, "level-up scene probe"),
+        "published level-up projection remains a valid authored Scene-state tree")
     check(v.levelUpCounter == "2/2", "and shows a position while there is more than one")
     progress.publish(v, { entries[1] }, 1)
     check(v.levelUpCounter == "", "a lone level-up needs no position indicator")

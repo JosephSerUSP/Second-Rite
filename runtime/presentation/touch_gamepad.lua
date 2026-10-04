@@ -1,16 +1,24 @@
 local surface = require("presentation.surface")
+local output = require("presentation.output")
 local user_settings = require("engine.user_settings")
-local input_map = require("engine.input_map")
 local virtual_input = require("engine.virtual_input")
+local player_controller = require("engine.player_controller")
 
 local touch_gamepad = {}
 
 local SETTING = "touchGamepadEnabled"
-local MOBILE_FILL_PROFILE = "mobile_fill"
-local MOBILE_FILL_HEIGHT = 240
+local DEVICE_PROFILE = "mobile_device"
+local MIN_CONTROL_GUTTER = 64
+local MIN_CONTROL_ROWS = 90
+local RESCUE_DOUBLE_TAP_SECONDS = 0.35
+local RESCUE_DOUBLE_TAP_RADIUS = 48
 local safeInsets = { left = 0, top = 0, right = 0, bottom = 0 }
 local hostInstalled = false
+local inputContext = nil
 local decorated = setmetatable({}, { __mode = "k" })
+local authoredSurfaceOptions = setmetatable({}, { __mode = "k" })
+local rescueTap = { time = nil, x = nil, y = nil }
+local rescueTouches = {}
 
 local function isAndroid()
     if not (love and love.system and love.system.getOS) then return false end
@@ -18,42 +26,42 @@ local function isAndroid()
     return ok and value == "Android"
 end
 
-local function hostDimensions()
-    if love and love.graphics and love.graphics.getDimensions then
-        local w, h = love.graphics.getDimensions()
-        return tonumber(w) or 0, tonumber(h) or 0
-    end
-    return 0, 0
-end
-
 function touch_gamepad.defaultEnabled()
     return isAndroid()
 end
 
--- A mobile-only comparison profile: preserve the authored 240-line height and
--- derive the logical world width from the device's current landscape aspect.
--- The canonical 256x240 composition stays centred and unscaled; only additional
--- world columns are revealed. registerProfile deliberately replaces an
--- existing profile of the same id, so reopening Options after a host-size
--- change refreshes the candidate before it can be selected.
-function touch_gamepad.updateMobileFillProfile(hostW, hostH)
-    hostW = tonumber(hostW) or 0
-    hostH = tonumber(hostH) or 0
-    local renderWidth = 426
-    if hostW > 0 and hostH > 0 then
-        renderWidth = math.max(256,
-            math.floor(MOBILE_FILL_HEIGHT * hostW / hostH + 0.5))
+-- A touch-controlled surface must reserve the COMPLETE controller outside the
+-- canonical 256x240 composition. Merely being a valid render surface is not
+-- enough: Classic has no gutter and 4:3 has only 32 px per side, so selecting
+-- either while touch is enabled would strand a phone user without buttons.
+local function profileSupportsControls(id, hostWidth, hostHeight)
+    local profile = surface.getProfile(id)
+    if not profile then return false end
+    local cw, ch = surface.compositionSize()
+    local rw, rh = profile.renderWidth, profile.renderHeight
+    local ox, oy = profile.compositionOriginX, profile.compositionOriginY
+    local landscape = rw >= rh
+    if hostWidth and hostHeight and landscape ~= (hostWidth >= hostHeight) then
+        return false
     end
-    local originX = math.floor((renderWidth - 256) / 2)
-    surface.registerProfile(MOBILE_FILL_PROFILE, {
-        renderWidth = renderWidth, renderHeight = MOBILE_FILL_HEIGHT,
-        compositionOriginX = originX, compositionOriginY = 0,
-    })
-    return surface.getProfile(MOBILE_FILL_PROFILE)
+    if landscape then
+        local leftW = ox
+        local rightW = rw - (ox + cw)
+        return leftW >= 40 and rightW >= 40
+    end
+    return rh - (oy + ch) >= MIN_CONTROL_ROWS
 end
 
--- Representative mobile surfaces. Layout is derived from surface geometry, so
--- future device-sized profiles do not require new input semantics.
+function touch_gamepad.profileSupportsControls(id, hostWidth, hostHeight)
+    return profileSupportsControls(id, hostWidth, hostHeight)
+end
+
+-- Representative fixed profiles remain useful for desktop previews/tests, but
+-- Android itself uses a device-matched logical surface. The canonical 256x240
+-- composition never changes:
+--   * host wider than classic -> add columns symmetrically at the sides;
+--   * host tighter than classic -> add rows only BELOW the composition.
+-- Controls inhabit only that added space.
 if not surface.getProfile("mobile_landscape") then
     surface.registerProfile("mobile_landscape", {
         renderWidth = 426, renderHeight = 240,
@@ -63,23 +71,93 @@ end
 if not surface.getProfile("mobile_portrait") then
     surface.registerProfile("mobile_portrait", {
         renderWidth = 256, renderHeight = 426,
-        compositionOriginX = 0, compositionOriginY = 24,
+        compositionOriginX = 0, compositionOriginY = 0,
     })
 end
-do
-    local w, h = hostDimensions()
-    touch_gamepad.updateMobileFillProfile(w, h)
+
+function touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight)
+    hostWidth = tonumber(hostWidth) or 0
+    hostHeight = tonumber(hostHeight) or 0
+    if hostWidth <= 0 or hostHeight <= 0 then
+        error("mobile device surface requires positive host dimensions", 2)
+    end
+
+    local cw, ch = surface.compositionSize()
+    local hostAspect = hostWidth / hostHeight
+    local classicAspect = cw / ch
+    local rw, rh, ox, oy
+
+    if hostAspect >= classicAspect then
+        -- A tablet can have less spare width than a phone. Reserve the whole
+        -- three-cell D-pad before fitting the host; otherwise the controller
+        -- disappears or its targets extend into the authored composition.
+        rw = math.max(cw + 2 * MIN_CONTROL_GUTTER,
+            math.floor(ch * hostAspect + 0.5))
+        rh = math.max(ch, math.floor(rw / hostAspect + 0.5))
+        ox = math.floor((rw - cw) / 2)
+        oy = 0
+    else
+        rw = cw
+        rh = math.max(ch + MIN_CONTROL_ROWS, math.floor(cw / hostAspect + 0.5))
+        ox = 0
+        oy = 0
+    end
+
+    return {
+        renderWidth = rw,
+        renderHeight = rh,
+        compositionOriginX = ox,
+        compositionOriginY = oy,
+        fractionalOutputScale = true,
+    }
 end
 
--- main.lua asks user_settings for renderSurfaceProfile before constructing its
--- canvas. Seed an Android-friendly surface only when the player has no stored
--- choice and has not explicitly disabled the virtual gamepad. A saved user
--- override always wins.
-if isAndroid()
-    and user_settings.get(SETTING, nil) ~= false
-    and user_settings.get("renderSurfaceProfile", nil) == nil then
-    local w, h = hostDimensions()
-    user_settings.set("renderSurfaceProfile", (h > w) and "mobile_portrait" or "mobile_landscape")
+local function sameDeviceSpec(profile, spec)
+    return profile
+        and profile.renderWidth == spec.renderWidth
+        and profile.renderHeight == spec.renderHeight
+        and profile.compositionOriginX == spec.compositionOriginX
+        and profile.compositionOriginY == spec.compositionOriginY
+        and profile.fractionalOutputScale == spec.fractionalOutputScale
+end
+
+function touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
+    local spec = touch_gamepad.deviceSurfaceSpec(hostWidth, hostHeight)
+    local previous = surface.getProfile(DEVICE_PROFILE)
+    local changed = not sameDeviceSpec(previous, spec)
+    if changed then
+        surface.registerProfile(DEVICE_PROFILE, spec)
+    end
+    return DEVICE_PROFILE, changed, spec
+end
+
+-- Android can report an initial content size during love.load and then expand
+-- once immersive/fullscreen system chrome settles. Keep DEVICE tied to the
+-- ACTUAL host geometry rather than freezing whichever dimensions happened to
+-- exist during boot.
+function touch_gamepad.refreshAndroidSurface(hostWidth, hostHeight)
+    if not isAndroid() then return false end
+    local _, changed = touch_gamepad.configureDeviceSurface(hostWidth, hostHeight)
+    return changed
+end
+
+-- Register DEVICE during boot so a saved profile resolves immediately. Later
+-- native resize events keep the profile synchronized with the settled host.
+function touch_gamepad.prepareAndroidSurface()
+    if not isAndroid() then return nil end
+    local w, h = love.graphics.getDimensions()
+    local profile = touch_gamepad.configureDeviceSurface(w, h)
+    -- Registration is independent of visibility: a saved DEVICE choice must
+    -- still resolve after the user hides the controller. When touch IS enabled,
+    -- however, preserving an unsafe explicit choice is a lockout bug: Classic
+    -- and 4:3 cannot fit the complete controller. Repair old/saved choices to
+    -- DEVICE before main.lua creates the game canvas.
+    local current = user_settings.get("renderSurfaceProfile", nil)
+    if touch_gamepad.isEnabled()
+        and (current == nil or not profileSupportsControls(current, w, h)) then
+        user_settings.set("renderSurfaceProfile", profile)
+    end
+    return profile
 end
 
 function touch_gamepad.isEnabled()
@@ -89,8 +167,49 @@ end
 function touch_gamepad.setEnabled(value)
     value = value and true or false
     user_settings.set(SETTING, value)
-    if not value then virtual_input.clear() end
+    if not value then touch_gamepad.clearTouches() end
+    if value then
+        rescueTap.time, rescueTap.x, rescueTap.y = nil, nil, nil
+    end
     return value
+end
+
+local function rescueNow()
+    if love and love.timer and love.timer.getTime then return love.timer.getTime() end
+    return os.clock()
+end
+
+-- Hidden touch controls must never be a one-way door on a touch-only device.
+-- While the virtual gamepad is OFF, Android reserves touch input for one simple
+-- escape hatch: two nearby taps in quick succession anywhere on the host.
+-- Normal gameplay never sees this recognizer because it is inactive while the
+-- controller is visible.
+function touch_gamepad.rescueTap(id, x, y, now)
+    if not isAndroid() or touch_gamepad.isEnabled() then return false end
+    now = tonumber(now) or rescueNow()
+    x, y = tonumber(x) or 0, tonumber(y) or 0
+    rescueTouches[id] = true
+
+    local previousTime = rescueTap.time
+    local previousX, previousY = rescueTap.x, rescueTap.y
+    local closeInTime = previousTime
+        and now >= previousTime and (now - previousTime) <= RESCUE_DOUBLE_TAP_SECONDS
+    local closeInSpace = false
+    if closeInTime and previousX and previousY then
+        local dx, dy = x - previousX, y - previousY
+        closeInSpace = (dx * dx + dy * dy) <= RESCUE_DOUBLE_TAP_RADIUS * RESCUE_DOUBLE_TAP_RADIUS
+    end
+
+    if closeInTime and closeInSpace then
+        touch_gamepad.setEnabled(true)
+        local ok, scene_host = pcall(require, "engine.scene_host")
+        local state = ok and scene_host.getCurrentState and scene_host.getCurrentState() or nil
+        if state and state.v then state.v.touchGamepad = true end
+        return true
+    end
+
+    rescueTap.time, rescueTap.x, rescueTap.y = now, x, y
+    return true
 end
 
 -- Insets are logical render-surface pixels. Native platform glue can populate
@@ -157,22 +276,22 @@ local function portraitLayout(rw, rh, ox, oy, cw, ch)
     local usableBottom = rh - safeInsets.bottom - 8
     local dcy = usableTop + (usableBottom - usableTop) * 0.43
     local dcx = safeInsets.left + (rw - safeInsets.left - safeInsets.right) * 0.25
-    local cell = clamp(math.floor(math.min(rw / 10, lowerH / 5)), 20, 28)
+    local cell = clamp(math.floor(math.min(rw / 10, lowerH / 5)), 24, 32)
     buttons[#buttons + 1] = rectButton("UP", dcx - cell / 2, dcy - cell * 1.5, cell, cell, "up")
     buttons[#buttons + 1] = rectButton("DOWN", dcx - cell / 2, dcy + cell * 0.5, cell, cell, "down")
     buttons[#buttons + 1] = rectButton("LEFT", dcx - cell * 1.5, dcy - cell / 2, cell, cell, "left")
     buttons[#buttons + 1] = rectButton("RIGHT", dcx + cell * 0.5, dcy - cell / 2, cell, cell, "right")
 
-    local rr = clamp(math.floor(rw / 18), 13, 18)
+    local rr = clamp(math.floor(rw / 13), 18, 22)
     buttons[#buttons + 1] = circleButton("A", rw * 0.78, dcy - 4, rr, "A")
     buttons[#buttons + 1] = circleButton("B", rw * 0.65, dcy + rr * 1.35, rr, "B")
 
-    local uw, uh = 34, 12
+    local uw, uh = 46, 18
     local utilityY = math.min(usableBottom - uh, dcy + cell * 2.0)
     buttons[#buttons + 1] = rectButton("SELECT", rw * 0.40 - uw / 2, utilityY, uw, uh, "SEL")
-    buttons[#buttons + 1] = rectButton("START", rw * 0.58 - uw / 2, utilityY, uw, uh, "START")
-    buttons[#buttons + 1] = rectButton("L", safeInsets.left + 8, usableTop, 30, 12, "L")
-    buttons[#buttons + 1] = rectButton("R", rw - safeInsets.right - 38, usableTop, 30, 12, "R")
+    buttons[#buttons + 1] = rectButton("START", rw * 0.60 - uw / 2, utilityY, uw, uh, "START")
+    buttons[#buttons + 1] = rectButton("L", safeInsets.left + 8, usableTop, 40, 18, "L")
+    buttons[#buttons + 1] = rectButton("R", rw - safeInsets.right - 48, usableTop, 40, 18, "R")
     return buttons
 end
 
@@ -212,32 +331,57 @@ function touch_gamepad.hitTest(renderX, renderY)
 end
 
 local function hostToRender(x, y)
-    local hostW, hostH = love.graphics.getDimensions()
-    local scale, offsetX, offsetY = surface.outputTransform(hostW, hostH)
-    return surface.hostToRender(x, y, scale, offsetX, offsetY)
+    -- Inverse input mapping must consume the exact transform used by the
+    -- final output stage. CRT may be fractional while nearest stays integer.
+    return output.hostToRender(x, y)
 end
 
 function touch_gamepad.touchpressed(id, x, y)
-    if not touch_gamepad.isEnabled() then return false end
+    if not touch_gamepad.isEnabled() then
+        return touch_gamepad.rescueTap(id, x, y)
+    end
     local rx, ry = hostToRender(x, y)
     local button = touch_gamepad.hitTest(rx, ry)
     if not button then return false end
-    virtual_input.press(id, button)
+    if not virtual_input.press(id, button) then return false end
+    if inputContext then player_controller.press(button, inputContext) end
     return true
 end
 
 function touch_gamepad.touchmoved(id, x, y)
-    if not touch_gamepad.isEnabled() then return false end
+    if rescueTouches[id] then return true end
+    if not touch_gamepad.isEnabled() then return isAndroid() end
     local rx, ry = hostToRender(x, y)
-    return virtual_input.move(id, touch_gamepad.hitTest(rx, ry))
+    local previous = virtual_input.touchButton(id)
+    local button = touch_gamepad.hitTest(rx, ry)
+    local changed = virtual_input.move(id, button)
+    if not changed then return false end
+    if previous and previous ~= button and not virtual_input.isDown(previous) then
+        player_controller.release(previous)
+    end
+    if button and button ~= previous and inputContext then
+        player_controller.press(button, inputContext)
+    end
+    return true
 end
 
 function touch_gamepad.touchreleased(id)
-    return virtual_input.release(id)
+    if rescueTouches[id] then
+        rescueTouches[id] = nil
+        return true
+    end
+    local button = virtual_input.touchButton(id)
+    local released = virtual_input.release(id)
+    if button and released and not virtual_input.isDown(button) then
+        player_controller.release(button)
+    end
+    return released
 end
 
 function touch_gamepad.clearTouches()
+    local buttons = virtual_input.downButtons()
     virtual_input.clear()
+    for _, button in ipairs(buttons) do player_controller.release(button) end
 end
 
 local function findScene(ctx, id)
@@ -249,37 +393,43 @@ local function findScene(ctx, id)
     return nil
 end
 
-local function appendMobileFillAspect(loader)
+local function appendDeviceAspect(loader)
     if not (loader and isAndroid()) then return end
     local renderSurfaces = loader.engine and loader.engine.renderSurfaces
     local options = renderSurfaces and renderSurfaces.options
-    if type(options) ~= "table" then return end
+    if type(options) ~= "table" or not surface.getProfile(DEVICE_PROFILE) then return end
 
-    local found = nil
-    for i, id in ipairs(options) do
-        if id == MOBILE_FILL_PROFILE then found = i; break end
+    -- Keep an immutable copy of the Project-authored order. decorateOptions is
+    -- called repeatedly, so filtering the already-filtered table would slowly
+    -- erase choices and make toggling the controller non-reversible.
+    local authored = authoredSurfaceOptions[loader]
+    if not authored then
+        authored = {}
+        for _, id in ipairs(options) do
+            if id ~= DEVICE_PROFILE then authored[#authored + 1] = id end
+        end
+        authoredSurfaceOptions[loader] = authored
     end
 
-    local w, h = hostDimensions()
-    if w <= 0 or h <= 0 then return end
-    if w < h then
-        if found then table.remove(options, found) end
-        return
+    local w, h = love.graphics.getDimensions()
+    for i = #options, 1, -1 do options[i] = nil end
+    for _, id in ipairs(authored) do
+        if not touch_gamepad.isEnabled() or profileSupportsControls(id, w, h) then
+            options[#options + 1] = id
+        end
     end
-
-    touch_gamepad.updateMobileFillProfile(w, h)
-    if not found then options[#options + 1] = MOBILE_FILL_PROFILE end
+    -- DEVICE is the host-matched safe choice in either orientation.
+    options[#options + 1] = DEVICE_PROFILE
 end
 
--- The Options scene is authored campaign UI, while the virtual gamepad and the
--- device-width surface are host/platform features. Add them in memory rather
--- than saving mobile-only policy into the Project's portable scene data.
--- `source` remains backwards-compatible with the old scenes-only test seam;
--- runtime passes the loader so Android can also extend its authored ASPECT list.
+-- #1307 integration: Options remains authored campaign UI, while the virtual
+-- gamepad and handset-sized DEVICE surface are host/platform features. Extend
+-- the in-memory loader only; portable Project data remains device-independent.
+-- source keeps the old scenes-only unit seam working.
 function touch_gamepad.decorateOptions(source)
     local loader = type(source) == "table" and source.scenes and source or nil
     local scenes = loader and loader.scenes or source
-    if loader then appendMobileFillAspect(loader) end
+    if loader then appendDeviceAspect(loader) end
 
     for _, scene in ipairs(scenes or {}) do
         local commands = scene.config and scene.config.optionsCommands
@@ -293,7 +443,7 @@ function touch_gamepad.decorateOptions(source)
                 commands[#commands + 1] = {
                     id = "touch_gamepad",
                     name = "VIRTUAL GAMEPAD",
-                    help = "Show or hide the touch controller. Defaults on for Android.",
+                    help = "Show or hide the touch controller. On Android, double-tap anywhere to restore it when hidden.",
                 }
             end
             decorated[scene] = {
@@ -310,7 +460,7 @@ function touch_gamepad.decorateOptions(source)
                             inner = old:sub(2, -2)
                         end
                         if not tostring(old):find("touch_gamepad", 1, true) then
-                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or id == 'aspect' and sceneState.aspect == 'mobile_fill' and 'DEVICE' or (" .. inner .. ")}";
+                            item.formatRight = "{id == 'touch_gamepad' and (sceneState.touchGamepad and 'ON' or 'OFF') or id == 'aspect' and sceneState.aspect == 'mobile_device' and 'DEVICE' or (" .. inner .. ")}";
                         end
                     end
                 end
@@ -326,12 +476,6 @@ local function installHost()
     local scene_host = require("engine.scene_host")
     local originalRunHook = scene_host.runHook
     local originalUpdate = scene_host.update
-    -- Captured after love.load has installed the real keyboard callback. Modern
-    -- scenes consume semantic hooks directly below. The callback is only a
-    -- compatibility bridge for legacy host-owned input (notably dialogue), and
-    -- receives the player's CURRENT binding rather than a hardcoded W/Z/etc.
-    local hostKeyPressed = love and love.keypressed
-
     scene_host.runHook = function(hookName, ctx)
         if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
         local state = scene_host.getCurrentState()
@@ -360,35 +504,11 @@ local function installHost()
         return handled
     end
 
-    local function dispatchLogicalButton(button, ctx)
-        local hook = input_map.BUTTON_TO_HOOK[button]
-        if hook and scene_host.runHook(hook, ctx) then return true end
-
-        -- Dialogue/event input is still intentionally owned by main.lua rather
-        -- than scene hooks. Re-enter that NORMAL host path only when the
-        -- semantic scene path declines the action. No touch layout knows a
-        -- keyboard literal: the compatibility key is resolved from the current
-        -- rebindable map at dispatch time. Once dialogue becomes hook-driven,
-        -- this bridge naturally stops being used for it.
-        local bindings = input_map.getBindings()
-        local key = bindings and bindings[button]
-        if key and hostKeyPressed then
-            hostKeyPressed(key, nil, false)
-            return true
-        end
-        return false
-    end
-
     scene_host.update = function(dt, ctx)
+        inputContext = ctx
         if ctx and ctx.loader then touch_gamepad.decorateOptions(ctx.loader) end
-        if touch_gamepad.isEnabled() then
-            local config = require("engine.config")
-            local ui = config.ui or {}
-            virtual_input.update(dt, function(button)
-                dispatchLogicalButton(button, ctx)
-            end, ui.autoRepeatInitial or 0.30, ui.autoRepeatInterval or 0.06)
-        else
-            virtual_input.clear()
+        if not touch_gamepad.isEnabled() and virtual_input.activeTouchCount() > 0 then
+            touch_gamepad.clearTouches()
         end
         return originalUpdate(dt, ctx)
     end
@@ -411,18 +531,28 @@ end
 
 local function drawButton(button)
     local down = virtual_input.isDown(button.button)
-    love.graphics.setColor(0.08, 0.08, 0.10, down and 0.62 or 0.38)
+    if down then
+        -- Deliberately invert the control while held. A subtle alpha change was
+        -- effectively invisible on a phone; this must read as tactile feedback.
+        love.graphics.setColor(0.92, 0.92, 0.96, 0.82)
+    else
+        love.graphics.setColor(0.08, 0.08, 0.10, 0.42)
+    end
     if button.shape == "circle" then
         love.graphics.circle("fill", button.x, button.y, button.r)
-        love.graphics.setColor(1, 1, 1, 0.75)
+        love.graphics.setColor(1, 1, 1, down and 1 or 0.75)
         love.graphics.circle("line", button.x, button.y, button.r)
     else
         love.graphics.rectangle("fill", button.x, button.y, button.w, button.h, 2, 2)
-        love.graphics.setColor(1, 1, 1, 0.70)
+        love.graphics.setColor(1, 1, 1, down and 1 or 0.70)
         love.graphics.rectangle("line", button.x, button.y, button.w, button.h, 2, 2)
     end
 
-    love.graphics.setColor(1, 1, 1, 0.86)
+    if down then
+        love.graphics.setColor(0.06, 0.06, 0.08, 1)
+    else
+        love.graphics.setColor(1, 1, 1, 0.90)
+    end
     if button.glyph == "up" or button.glyph == "down"
         or button.glyph == "left" or button.glyph == "right" then
         local cx = button.x + button.w / 2

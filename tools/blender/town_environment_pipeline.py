@@ -31,6 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from blender_locator import blender_executable  # noqa: E402
+import render_profiles
 
 
 def _operator_kwargs(operator, candidate_dict):
@@ -42,13 +43,14 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
-                            bake_samples: int = 16, flat_bake: bool = False, backend: str = "cycles",
-                            eevee=None):
+def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
+                            bake_samples: int = None, flat_bake: bool = False, backend: str = "cycles",
+                            eevee=None, cycles_device="AUTO", render_profile="export", bake_bindings=None,
+                            atlas_denoise=None, uv_texel_align=None):
     """Bake an authored .blend into a runtime environment package.
 
     ``flat_bake`` selects the exterior profile: one sample, no light bounces
-    and no bake margin, for a street whose atlas already carries its lighting.
+    and one-texel dilation, for a street whose atlas already carries its lighting.
     It defaults off so the interior rooms keep the multi-sample, bounced,
     margin-4 bake their shipped atlases were made with -- the exterior pipeline
     on PR #998 hardcoded the flat values, which would silently have re-baked
@@ -56,9 +58,11 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
 
     ``backend`` chooses how the atlas is made: ``"cycles"`` is the selected-to-active bake the shipped
     packages were made with; ``"eevee"`` is a camera-projection bake (`eevee_bake.EeveeBake`, passed as
-    ``eevee``), which has the same contract and runs in seconds where the Cycles exterior bake takes
-    a quarter of an hour.
+    ``eevee``). Cycles device selection is explicit; GPU callers configure their
+    device in the current Blender process without saving global preferences.
     """
+    import time
+    started = time.perf_counter()
     import bpy
     from mathutils import Vector, Matrix
 
@@ -90,18 +94,20 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     for col in (col_preview_actors, col_preview_only, col_collision, col_anchors, col_camera):
         if col:
             col.hide_render = True
-            for obj in col.all_objects:
+            for obj in list(col.all_objects):
                 if obj:
                     obj.hide_render = True
 
     # Ensure source and render are visible in render for baking
     col_source.hide_render = False
-    for obj in col_source.all_objects:
+    # Visibility edits invalidate Blender's live collection iterator for nested
+    # assembly hierarchies. Snapshot membership before changing any member.
+    for obj in list(col_source.all_objects):
         if obj:
-            obj.hide_render = False
+            obj.hide_render = backend == "cycles" and obj.get("sr_bake_role") == "receiver"
 
     col_render.hide_render = False
-    for obj in col_render.all_objects:
+    for obj in list(col_render.all_objects):
         if obj:
             obj.hide_render = False
 
@@ -173,6 +179,12 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     if backend not in ("cycles", "eevee"):
         raise RuntimeError(f"unknown bake backend {backend!r}; use cycles or eevee")
     eevee_report = None
+    quality_record = None
+    device_record = None
+    source_count = None
+    correspondence = None
+    denoise_report = None
+    texel_report = None
     if backend == "eevee":
         if eevee is None:
             raise RuntimeError("the eevee backend needs its settings (eevee_bake.EeveeBake)")
@@ -181,17 +193,25 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         eevee_report = eevee_bake.bake_atlas(eevee, scene, target_obj, col_source, bake_image, opacity=opacity)
     else:
         # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
-        scene.render.engine = 'CYCLES'
-        try:
-            scene.cycles.device = 'CPU'
-        except Exception:
-            pass
+        import render_profiles
+        import cycles_source
+        profile = render_profiles.resolve(render_profile, engine="cycles", samples=bake_samples)
+        align_uv = profile.atlas_texel_align if uv_texel_align is None else uv_texel_align
+        if align_uv:
+            import atlas_denoise as denoiser
+            texel_report=denoiser.snap_to_texels(target_obj.data,atlas_size)
+        quality_record = render_profiles.apply(scene, profile, bake=True)
+        bake_samples = profile.samples
+        device_record = render_profiles.configure_device(scene, cycles_device)
+        cycles_device = device_record["device"]
+        source_batch, source_count = cycles_source.batch_source(col_source)
         if flat_bake:
             scene.cycles.samples = 1
             scene.cycles.max_bounces = 0
             scene.cycles.diffuse_bounces = 0
             scene.cycles.glossy_bounces = 0
             scene.cycles.transparent_max_bounces = 8
+            quality_record.update(samples=1, max_bounces=0, diffuse_bounces=0, glossy_bounces=0)
         else:
             scene.cycles.samples = bake_samples
         scene.cycles.bake_type = 'COMBINED'
@@ -199,6 +219,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         # Keep the opaque fill above; clearing would restore transparent black and
         # reintroduce the ambiguity this pass exists to remove.
         scene.render.bake.use_clear = False
+        scene.render.bake.use_cage = False
         scene.render.bake.cage_extrusion = 0.15
         scene.render.bake.max_ray_distance = 1.0
         # One texel of dilation for the exterior, and only one.
@@ -213,19 +234,36 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         # completely, for one texel per island boundary.
         scene.render.bake.margin = 1 if flat_bake else 4
 
-        # Select all source objects as Selected, target_obj as Active.
-        # target_obj must NOT be in the selected set during selected-to-active bake,
-        # or Cycles attempts to bake target_obj onto itself, triggering self-occlusion
-        # and circular dependency warnings (#1023).
+        if bake_bindings is not None:
+            import bake_correspondence
+            correspondence = bake_correspondence.validate(source_batch, target_obj, bake_bindings,
+                extrusion=scene.render.bake.cage_extrusion,
+                ray_distance=scene.render.bake.max_ray_distance,
+                report_path=output_dir / "bake-correspondence.json")
+
+        # Selected-to-active requires the receiver to remain selected and active.
+        # Pass the mode explicitly to the operator; its defaults must not turn
+        # this into separate bakes onto every source material's image node.
         bpy.ops.object.select_all(action='DESELECT')
-        for obj in col_source.all_objects:
-            if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'}:
+        for obj in list(col_source.all_objects):
+            if obj and obj.type in {'MESH', 'CURVE', 'SURFACE'} and obj.get("sr_bake_role") != "receiver":
                 obj.select_set(True)
-        target_obj.select_set(False)
+        target_obj.select_set(True)
         scene.view_layers[0].objects.active = target_obj
 
         print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-        bpy.ops.object.bake(type='COMBINED')
+        bpy.ops.object.bake(type='COMBINED', use_selected_to_active=True, use_cage=False,
+                            use_clear=False, margin=scene.render.bake.margin,
+                            cage_extrusion=scene.render.bake.cage_extrusion,
+                            max_ray_distance=scene.render.bake.max_ray_distance)
+
+        denoise_mode = profile.atlas_denoise if atlas_denoise is None else atlas_denoise
+        if denoise_mode == "oidn-fast":
+            import atlas_denoise as denoiser
+            denoise_report = denoiser.denoise(bake_image, target_obj.data)
+            print("[pipeline] Atlas denoise: " + json.dumps(denoise_report))
+        elif denoise_mode != "none":
+            raise ValueError(f"Unknown atlas denoise mode: {denoise_mode!r}")
 
     atlas_alpha.apply(bake_image, opacity)
     if opacity is not None:
@@ -281,7 +319,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         "Kd 1.000 1.000 1.000\n"
         "map_Kd environment.png\n"
     )
-    mtl_path.write_text(mtl_content, encoding="utf-8")
+    mtl_path.write_text(mtl_content, encoding="utf-8", newline="\n")
 
     # 6. Export TH_COLLISION if present
     collision_filename = None
@@ -382,16 +420,26 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         }
     }
     if eevee_report is not None:
-        # Only an EEVEE bake says so: a Cycles package keeps the manifest it always had.
         manifest["provenance"]["bake"] = {"backend": "eevee", **eevee_report["settings"]}
+    else:
+        manifest["provenance"]["bake"] = {"backend":"cycles", "device":cycles_device,
+            "samples":1 if flat_bake else bake_samples, "selectedToActive":True,
+            "quality":quality_record, "hardware":device_record, "batchedSourceObjects":source_count}
 
+    if correspondence is not None:
+        manifest["provenance"]["bake"]["correspondence"] = correspondence
+    if backend == "cycles":
+        manifest["provenance"]["bake"]["atlasDenoise"] = denoise_report or {"method":"none"}
+        manifest["provenance"]["bake"]["texelAlignment"] = texel_report or {"method":"none"}
+    manifest["provenance"]["exportSeconds"] = time.perf_counter() - started
     manifest_path = output_dir / "environment.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print(f"[pipeline] Manifest written to {manifest_path}")
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = render_profiles.DEFAULT_ATLAS_SIZE,
+                               bake_samples: int = None, atlas_denoise=None, uv_texel_align=None):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -406,7 +454,7 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples}, atlas_denoise={atlas_denoise!r}, uv_texel_align={uv_texel_align!r})\n"
     )
     temp_runner.close()
 
@@ -429,11 +477,14 @@ def main():
     parser = argparse.ArgumentParser(description="Bake and export Blender environment to runtime package.")
     parser.add_argument("blend", help="Input .blend source path")
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
-    parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
-    parser.add_argument("--samples", type=int, default=16, help="Cycles bake samples")
+    parser.add_argument("--atlas-size", type=int, default=render_profiles.DEFAULT_ATLAS_SIZE, help="Atlas texture dimension")
+    parser.add_argument("--samples", type=int, default=None, help="Override central Cycles sample count")
+    parser.add_argument("--atlas-denoise", choices=("none","oidn-fast"), default=None)
+    parser.add_argument("--uv-texel-align", action=argparse.BooleanOptionalAction, default=None)
     args = parser.parse_args()
 
-    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)
+    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples,
+                               atlas_denoise=args.atlas_denoise, uv_texel_align=args.uv_texel_align)
 
 
 if __name__ == "__main__":

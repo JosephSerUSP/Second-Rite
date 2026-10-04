@@ -32,6 +32,9 @@ import bpy
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import emissive_lights  # noqa: E402
@@ -39,9 +42,10 @@ import light_fixtures  # noqa: E402
 import material_library  # noqa: E402
 import second_rite_asset_core as asset_core  # noqa: E402
 import thestra_camera  # noqa: E402
+import render_profiles
 
 DEFAULT_CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
-DEFAULT_WALKER = ROOT / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
+DEFAULT_WALKER = PROJECT / "assets" / "character" / "walker.png"
 WALKER_WORLD_HEIGHT = 1.75
 WALKER_NATIVE_PIXELS = 48.0
 MODEL_COLLECTION = "TH_SOURCE"
@@ -393,19 +397,9 @@ def configure_render_quality(scene, args) -> dict:
     is why "still too bright" and "not enough ambient occlusion" are one
     problem and not two.
     """
-    record = {"engine": scene.render.engine}
+    record = render_profiles.apply(scene, render_profiles.resolve(
+        args.render_profile, engine=args.engine, samples=args.samples, supersample=args.supersample), device="AUTO")
     if scene.render.engine == "CYCLES":
-        cycles = scene.cycles
-        cycles.samples = max(1, args.samples)
-        cycles.use_adaptive_sampling = True
-        cycles.use_denoising = True
-        cycles.denoiser = "OPENIMAGEDENOISE"
-        # ACCURATE prefilter with albedo+normal guides: at 32 samples the
-        # noise is heavy, and the guide passes are what let the denoiser
-        # keep an edge it would otherwise smear.
-        cycles.denoising_prefilter = "ACCURATE"
-        cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
-        record.update(samples=cycles.samples, denoiser=cycles.denoiser)
         return record
 
     eevee = scene.eevee
@@ -728,7 +722,7 @@ def main() -> None:
                              "measurably sharper and deliberately not the look "
                              "(see the docstring). Fixed camera only, and it "
                              "edits the geometry in memory")
-    parser.add_argument("--supersample", type=int, default=3, metavar="N",
+    parser.add_argument("--supersample", type=int, default=None, metavar="N",
                         help="render at N times the target and area-average "
                              "back down; 1 disables it")
     parser.add_argument("--fill", type=float, nargs=3,
@@ -765,7 +759,7 @@ def main() -> None:
     parser.add_argument("--no-materials", dest="materials", action="store_false",
                         help="skip material-library rebinding and keep raw MTL")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
-                        default="eevee",
+                        default=None,
                         help="EEVEE by default with probes and lighting shims; Cycles is an explicit comparison")
     parser.add_argument("--raytracing", action=argparse.BooleanOptionalAction,
                         default=True,
@@ -836,15 +830,21 @@ def main() -> None:
                         help="EEVEE: a small mesh around a point or spot light (a lantern's flame and cage) "
                              "stops casting shadows, so the lamp can light the wall beside it the way it "
                              "does in Cycles. See light_fixtures.py")
-    parser.add_argument("--samples", type=int, default=32,
-                        help="Cycles sample count. Low on purpose: the "
-                             "denoiser below is doing the heavy lifting, and "
-                             "the output is a 256px plate")
+    parser.add_argument("--samples", type=int, default=None,
+                        help="explicit sample-count override for the selected render profile")
     parser.add_argument("--out", type=Path, default=None, help="save a .blend")
     parser.add_argument("--render", type=Path, default=None, help="render a 426x240 PNG")
     parser.add_argument("--tolerance", type=float, default=0.5,
                         help="allowed Walker pixel-height error")
+    parser.add_argument("--render-profile", choices=tuple(render_profiles.PROFILES), default="review")
     args = parser.parse_args(argv)
+    profile = render_profiles.resolve(args.render_profile, engine=args.engine,
+                                      samples=args.samples, supersample=args.supersample)
+    args.engine = next(key for key, value in render_profiles.ENGINES.items() if value == profile.engine)
+    args.samples = profile.samples
+    args.supersample = profile.supersample
+    if args.show_walker and args.supersample > 1:
+        parser.error("Supersampling filters Walker pixels; use --no-walker for environment-only review")
     import environment_sources
     lighting = (environment_sources.entry_for(args.model) or {}).get("eevee", {}) if args.engine == "eevee" else {}
     if args.exposure is None:

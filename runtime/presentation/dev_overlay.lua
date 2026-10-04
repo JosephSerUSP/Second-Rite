@@ -41,6 +41,40 @@ function dev_overlay.draw()
         lines[#lines + 1] = string.format("DRAW: %d", drawcalls)
         lines[#lines + 1] = string.format("FRAME: %.2fms", frameMs)
         lines[#lines + 1] = string.format("LUA: %.0fKB", memoryKb)
+
+        local surface = require("presentation.surface")
+        local output = require("presentation.output")
+        local hostW, hostH = love.graphics.getDimensions()
+        local hostPW, hostPH = hostW, hostH
+        if love.graphics.getPixelDimensions then
+            hostPW, hostPH = love.graphics.getPixelDimensions()
+        end
+        local rw, rh = surface.renderSize()
+        local originX, originY = surface.compositionOrigin()
+        local outScale, outX, outY = output.transform(hostW, hostH)
+        lines[#lines + 1] = string.format(
+            "HOST: %dx%d / %dx%dPX", hostW, hostH, hostPW, hostPH)
+        lines[#lines + 1] = string.format(
+            "SURFACE: %s %dx%d ORIGIN %d,%d",
+            tostring(surface.getProfileId()), rw, rh, originX, originY)
+        lines[#lines + 1] = string.format(
+            "OUTPUT: %s %.3fX / %.3fPX OFF %.2f,%.2f",
+            string.upper(tostring(output.getMode())), outScale,
+            output.physicalOutputScale(outScale), outX, outY)
+
+        local canvas = love.graphics.getCanvas()
+        if canvas and canvas.getPixelDimensions then
+            local lw, lh = canvas:getDimensions()
+            local pw, ph = canvas:getPixelDimensions()
+            lines[#lines + 1] = string.format("RASTER: %dx%d / %dx%dPX", lw, lh, pw, ph)
+            local hostDpi = love.window.getDPIScale and love.window.getDPIScale()
+                or (love.graphics.getDPIScale and love.graphics.getDPIScale()) or 1
+            local gameDpi = canvas.getDPIScale and canvas:getDPIScale() or 1
+            local font = ui.getMainFont and ui.getMainFont() or nil
+            local fontDpi = font and font.getDPIScale and font:getDPIScale() or 1
+            lines[#lines + 1] = string.format(
+                "DPI: HOST %.2f GAME %.2f FONT %.2f", hostDpi, gameDpi, fontDpi)
+        end
     end
 
     local width = 0

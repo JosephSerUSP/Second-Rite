@@ -18,7 +18,11 @@ from pathlib import Path
 
 TOOL = Path(__file__).resolve().parent
 ROOT = TOOL.parents[1]
-MANIFEST = ROOT / "assets" / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_fractured" / "manifest.json"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+MANIFEST = PROJECT / 'assets' / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_fractured" / "manifest.json"
 OUT = TOOL / "batches" / "first_stratum_fractured_20260807.json"
 
 NEGATIVE = ("interior room, corridor, tunnel, passage, architecture scene, "

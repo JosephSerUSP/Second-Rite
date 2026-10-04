@@ -2,6 +2,7 @@
 -- happen only at full black, with a short dark hold on either side.
 local subtractive_fade = require("presentation.subtractive_fade")
 local util = require("presentation.util")
+local world_view = require("engine.generated.world-view")
 
 local door_transition = {}
 local state = nil
@@ -16,10 +17,39 @@ local DURATIONS = {
     exit_reveal = 0.58,
 }
 
-function door_transition.begin(onCovered)
+function door_transition.begin(onCovered, options)
     if state then return false end
-    state = { phase = "entry_approach", elapsed = 0, onCovered = onCovered }
+    local approach = not (options and options.approach == false)
+    local actorDirection = options and options.actorDirection
+    if actorDirection then world_view.transitionArrowAxis(actorDirection) end
+    state = { phase = (approach or actorDirection) and "entry_approach" or "entry_cover", elapsed = 0,
+        onCovered = onCovered, approach = approach, actorDirection = actorDirection }
     return true
+end
+
+function door_transition.setArrivalDirection(direction)
+    if not state then return end
+    world_view.transitionArrowAxis(direction)
+    state.arrivalDirection = direction
+end
+
+-- Visual offsets never change the lane root, collision or arrival anchor.
+-- Both plate and mesh renderers consume this one resolved walking pose.
+function door_transition.actorPose()
+    if not state then return nil end
+    local direction, distance, elapsed
+    if state.actorDirection and (state.phase == "entry_approach" or state.phase == "entry_cover") then
+        direction = state.actorDirection
+        elapsed = state.elapsed + (state.phase == "entry_cover" and DURATIONS.entry_approach or 0)
+        distance = math.min(1, elapsed / 0.48) * 1.2
+    elseif state.arrivalDirection and state.phase == "entry_reveal" then
+        direction = state.arrivalDirection
+        elapsed = state.elapsed
+        distance = (1 - util.easeOut(math.min(1, elapsed / DURATIONS.entry_reveal))) * 1.2
+    else return nil end
+    local axis = world_view.transitionArrowAxis(direction)
+    return {x = axis.x * distance, y = axis.y * distance,
+        frame = math.floor(elapsed * 12) % 6, direction = direction}
 end
 
 function door_transition.beginExit(onCovered)
@@ -62,6 +92,7 @@ end
 
 function door_transition.approachProgress()
     if not state then return 0 end
+    if state.approach == false then return 0 end
     if state.phase == "entry_approach" then
         local p = math.min(1, state.elapsed / DURATIONS.entry_approach)
         return util.easeOut(p)

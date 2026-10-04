@@ -1,0 +1,49 @@
+{
+  "sourceBlend": "st_maria_B13.blend",
+  "sourceSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
+  "parentSource": "st_maria_B12.blend",
+  "camera": {
+    "projection": "perspective",
+    "pitchDegrees": -17.5,
+    "actorHeight": 49.53618049621582
+  },
+  "connections": [
+    {
+      "destination": "Churchyard stair landing",
+      "laneS": 0,
+      "button": "LEFT"
+    },
+    {
+      "destination": "Cortico",
+      "laneS": 9,
+      "button": "DOWN"
+    },
+    {
+      "destination": "Registry",
+      "laneS": 19,
+      "button": "UP"
+    },
+    {
+      "destination": "Chapel",
+      "laneS": 36,
+      "button": "UP"
+    }
+  ],
+  "sourceChecks": {
+    "samples": 1993,
+    "collisions": 0,
+    "terrainIntrusions": 0
+  },
+  "limits": [
+    "Point samples are not swept-body collision proof.",
+    "Materials, terrain massing and vegetation remain prototype art.",
+    "Phone acceptance belongs to the owner.",
+    "Existing absolute G5 Options debt #1331 remains; no references changed."
+  ],
+  "checks": [
+    "Final candidate G1 VALIDATE OK.",
+    "Native opening playthrough: 25 arrivals, shops, recovery, labyrinth return and save/load.",
+    "Five native phone-layout captures reviewed.",
+    "Canonical staged full unit suite ALL UNIT TESTS OK. Candidate-replaced shipping maps do not satisfy three canonical fixture suites."
+  ]
+}

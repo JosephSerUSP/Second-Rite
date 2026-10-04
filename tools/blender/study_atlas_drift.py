@@ -34,10 +34,13 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import blender_locator  # noqa: E402
 
-PROJECT = ROOT / "projects" / "hichaukitoden-game" / "assets"
+PROJECT = PROJECT / "assets"
 SOURCES = PROJECT / "authoring" / "environments"
 PACKAGES = PROJECT / "environments" / "st_maria_town"
 

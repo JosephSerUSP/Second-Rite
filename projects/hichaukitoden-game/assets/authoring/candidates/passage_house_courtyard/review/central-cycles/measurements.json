@@ -1,0 +1,107 @@
+{
+  "courtyard": {
+    "stats": {
+      "triangleCount": 3675,
+      "vertexCount": 2693,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 1271206,
+      "renderMeshSizeBytes": 335343,
+      "packageSizeBytes": 1607136
+    },
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 128,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 128,
+        "supersample": 1,
+        "denoise": false,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 1803
+    },
+    "pipelineSeconds": 40.06980779999867,
+    "rasterizedUVCoverage": 0.9194202423095703,
+    "hashes": {
+      "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+      "environment.json": "1225d0df65123817e25fe2b9048b60e1a688e9c8cc7071c6bdd3d73df111fa86",
+      "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+      "environment.obj": "3d218879839f61cbc98ad100d8ecd0aa2a05691e8652ee8e9cd267c317a0c548",
+      "environment.png": "f8fc76a03fb8e97783e52a40b59cb77ce0082cfa5ee95a86f99b774a58442f45"
+    }
+  },
+  "padaria": {
+    "stats": {
+      "triangleCount": 3208,
+      "vertexCount": 1934,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 1843900,
+      "renderMeshSizeBytes": 298505,
+      "packageSizeBytes": 2143204
+    },
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 128,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 128,
+        "supersample": 1,
+        "denoise": false,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 47
+    },
+    "pipelineSeconds": 14.121265099995071,
+    "rasterizedUVCoverage": 0.7707662582397461,
+    "hashes": {
+      "collision.obj": "e0d731d87ec03be16aba0a70a63b10b16d35f0862acba47b6870ae95a3dbb2b0",
+      "environment.json": "ee0ac12c5db1e9a1f8f43d7943f6aababf1c6fbe5ac90f89705e87b3327ce80c",
+      "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+      "environment.obj": "c87089ed15fdd175316c3b82255b1b83f675aaafa7d224ac9c00b360d5741f3f",
+      "environment.png": "26cc65ebc137d5044a5fb82709c875100d97301f5b4017fdfe19a2f953e78384"
+    }
+  },
+  "wholeProcessSeconds": {
+    "courtyardFirst": 66.6,
+    "courtyardRepeat": 64.9,
+    "padaria": 21.4
+  },
+  "sources": {
+    "passage_house_courtyard.blend": "2484856271cfba2b321515a7bf674f2aa5a728efaaf52844e93a6f8e3094c7ec",
+    "alicias_padaria.blend": "8453c716b259d494b3ddf1391cd1dd9a47aa641a4f1c38c194bd5aaaa7a960ed"
+  }
+}

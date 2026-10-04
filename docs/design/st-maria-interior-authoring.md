@@ -715,3 +715,14 @@ Read the place's own text in `projects/hichaukitoden-game/docs/walkthrough/`
 and `data/commonEvents.json` before inventing anything. Room 3's straw, feed
 bowl, low coat hook and missing picture all came from three sentences of
 authored text, and they carry the room.
+
+
+## Detail geometry in new sources
+
+For future environments, bake shallow door/window panels, shutters, trim and masonry
+relief into textures wherever silhouette, parallax and interaction permit. Keep the
+detailed editable source; retain runtime geometry for meaningful openings, massing,
+walk surfaces and silhouettes. Judge the result at native Classic/Wide sizes before
+retaining decorative triangles. The exterior EEVEE exporter has an explicit
+`sr_bake_role` source/receiver mechanism; see the exterior brief for its supported
+contract. Do not assume the room exporter implements those roles.

@@ -151,7 +151,7 @@ function retro_mesh_shader.buildWorldShader()
     uniform float baseViewportHeight;
     uniform float targetWidth;
     uniform float targetHeight;
-    uniform vec2 compositionOrigin;
+    uniform mediump vec2 compositionOrigin;
     uniform float viewportCenterX;
     uniform float viewportCenterY;
     uniform float affineTextures;
@@ -262,7 +262,7 @@ function retro_mesh_shader.buildWorldShader()
     varying float cameraDepth;
     uniform vec3 fogColor;
     uniform float ditherLevels;
-    uniform vec2 compositionOrigin;
+    uniform mediump vec2 compositionOrigin;
     uniform float roomBakePass;
     uniform float roomBakeFar;
     // Emission. `glowMap` is sampled at the SAME uv as the albedo, so it must

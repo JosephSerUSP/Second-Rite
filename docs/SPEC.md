@@ -131,6 +131,7 @@ numeric fields coerce or reject according to their command contract).
   `engine.json scripting.allowRawAccess` defaults to false and the
   validator asserts that.
 
+
 ### 1.1.2 One semantic authority, not necessarily one execution host
 
 An execution host is where code runs. A semantic authority is the one authored
@@ -259,6 +260,16 @@ the icon palette mirror (`presentation/ui.lua` and
 `studio/editor/js/icon-renderer.js`) remain paired, tested/pinned cases with no
 permission for additional copies. Future changes should migrate them to the
 shared/generated class or give the migration an explicit follow-up issue.
+
+Asset authoring root selection consumes `tools/semantic-roots.js`, the same
+authority Studio uses. `tools/shared/project_paths.py` forwards the explicit
+or environment selector to a small JSON CLI and caches its resolved result
+per selector/cwd input. Node owns validation and defaulting; Python does not
+mirror the policy. Project content stays separate from installation tools,
+contracts and scratch output. This adds one Node invocation per distinct
+selection within a Python process; the adapter requires the installation's
+Node runtime. Authoring routes and verification boundaries are in
+`tools/blender/README.md`.
 
 ### 1.2 Presentation
 
@@ -1378,6 +1389,19 @@ layer; HUD and dialogue windows remain unaffected above it. The room remains
 completely motionless afterward. St. Maria's initial set is the
 assigned home, Alicia's bakery, Laura's forge, the Rusty Tankard and the chapel.
 Their native runtime PNGs are palette-limited, game-resolution derivatives.
+
+Town navigation markers use the authored floating 3D arrow model with filled faces across plate and modelled views. Direction comes from the authored transition axis. Arrows are visible by default; the Options navigation-arrow toggle persists in player settings and hides only the models, keeping doorway prompts and interactions available.
+
+Bounded-lane thresholds use the Event's authored `direction` for the marker,
+input and destination prompt: `away` is UP, `toward` is DOWN, and `left`/`right`
+follow the street. A depth door on a lane bound remains a deliberate UP/DOWN
+interaction; sideways movement never activates it. Street-boundary prompts
+appear within 2.5 world units without enlarging the doorway activation radius.
+Town transfers animate the live player's walk cycle and depth projection while
+the camera stays still. Transfer commands execute once under full cover; the
+arrival pose settles from the destination threshold onto its lane. These are
+presentation offsets, consumed by both plate and mesh views, rather than
+changes to gameplay coordinates or collision.
 High-resolution generation sources are local working files and are ignored.
 
 The blackout uses the shared subtractive fade primitive rather than an
@@ -1791,6 +1815,15 @@ to black, loads Floor 1 underneath, then slowly reveals the live polygonal world
 an additive bell-and-roots plate and exact string-picture title fade away.
 Later descents retain the slow world reveal but do not replay the discovery
 card.
+
+The Passage Office is map 33, a bounded-lane interior reached through the
+Passage Office transition in the Praca (map 17). Registrar Celina's existing
+registration and Crossing Writ command tree lives inside the office; its exit
+returns to the retained `npc_registrar` Praca anchor. That anchor keeps its
+historical identifier while serving the office entrance. The room consumes
+`st_maria_town/passage_office/environment.json`, derived from the adopted
+`passage_office.blend`. The owner approved its composition and explicitly
+waived a composition playtest before integration.
 
 The authored environmental encounters continue that relationship through the
 deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions

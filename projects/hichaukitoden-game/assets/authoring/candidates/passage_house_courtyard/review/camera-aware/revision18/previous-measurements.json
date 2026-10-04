@@ -1,0 +1,463 @@
+{
+  "revision": "Revision 17: chamfered foreground wash cistern, continuous background terrain, camera-area bias 1",
+  "sourceSHA256": "62c55792bd42664d998fdf7eed7d11599cd954964227e7fe3be7835d3a1eec2f",
+  "sourceBytes": 2098693,
+  "sourceTriangleInterpretation": "Evaluated beauty geometry across the entire editable source, including off-range buildings. Runtime counts are the exported view envelope; the ratio is not a pure same-surface decimation ratio.",
+  "package": {
+    "triangleCount": 6159,
+    "vertexCount": 3684,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1418875,
+    "renderMeshSizeBytes": 543738,
+    "packageSizeBytes": 1963200
+  },
+  "packageSHA256": {
+    "bake-correspondence.json": "202652ceb696a865309b9be71a737fd529ebc96275be219a12cbfe779f98275e",
+    "collision.obj": "73c36eef3af6b4e3207f1148f34f34329a780030edc2305be432597f0c5de31f",
+    "environment.json": "66791fbb1003d7ad0675b5c3418be9d965f0d5db8636ae7a30916d5e58ade6cc",
+    "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+    "environment.obj": "3d54601e8d865a1465948dffbf4677d868b0968cbf240caaa2235f536dded121",
+    "environment.png": "fb76191e660a2460a1941d195a40ac5f01838d86ca9f8f2e3a6887c5f584c020"
+  },
+  "bounds": [
+    -24.0,
+    -16.4,
+    -0.14,
+    19.0,
+    32.4,
+    8.81
+  ],
+  "anchors": {
+    "cortico_entry": {
+      "id": "cortico_entry",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "lodging_entry": {
+      "id": "lodging_entry",
+      "position": [
+        0.0,
+        11.5,
+        0.3
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "savedRenderSettings": {
+    "engine": "CYCLES",
+    "device": "GPU",
+    "renderSamples": 64,
+    "viewportSamples": 64,
+    "renderDenoise": true,
+    "viewportDenoise": true,
+    "exposureEV": 0.0,
+    "resolution": [
+      256,
+      240
+    ],
+    "atlasSize": 1024,
+    "viewBias": 1.0
+  },
+  "sourceBeautyTriangles": 220818,
+  "sourceMeshRoles": {
+    "both": 270,
+    "source": 2038,
+    "receiver": 51
+  },
+  "atlasUVOccupancyRasterized": 0.5478963851928711,
+  "exportSeconds": 54.4662002,
+  "exportTimingInterpretation": "Measured whole-process single export, not a hard cap or repeated timing proof.",
+  "renderSettings": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "passage_house_courtyard.blend",
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 64,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 64,
+        "supersample": 1,
+        "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 2308,
+      "correspondence": {
+        "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+        "extrusion": 0.15000000596046448,
+        "maxRayDistance": 1.0,
+        "bindings": [
+          {
+            "receiver": "Court door leaf target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal fanlight",
+            "samples": 64,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal -1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court portal splayed reveal 1",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_l target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_jamb_r target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court inner panelled door_lintel target",
+            "samples": 8,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          },
+          {
+            "receiver": "Court cistern folded linen",
+            "samples": 24,
+            "missing": 0,
+            "wrongSource": 0,
+            "examples": []
+          }
+        ],
+        "errors": []
+      },
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 4.900797600013902,
+        "filteredCharts": 141,
+        "preservedSmallCharts": 1093,
+        "filteredTexels": 528123,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 511,
+        "preservedUnsafeCharts": 1129,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 1024
+      }
+    },
+    "exportSeconds": 25.912690899975132,
+    "atlasAllocation": {
+      "measurementStage": "After UV packing, before guarded pixel-corner alignment",
+      "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+      "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+      "visibleIslandTexelsPerScreenPixelPercentiles": {
+        "p10": 0.8379569149491903,
+        "p50": 0.8394727847149401,
+        "p90": 0.8616326524012359
+      },
+      "peakScreenTexelDemand": 128948.0,
+      "atlasSize": 1024,
+      "viewBias": 1.0,
+      "floor": 0.04,
+      "gutterTexels": 2.0,
+      "cameras": [
+        0.35,
+        0.6,
+        1.95,
+        3.3,
+        4.65,
+        6.0,
+        7.35,
+        8.7,
+        10.05,
+        11.4,
+        11.65
+      ],
+      "islands": 1640,
+      "visibleIslands": 387,
+      "polygons": 3297,
+      "visiblePolygons": 668,
+      "meanVisiblePixelsPerSquareMetre": 42.42
+    },
+    "lightingPolicy": "source",
+    "cameraCalibration": {
+      "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",
+      "record": {
+        "baseViewportHeight": 144,
+        "baseViewportWidth": 256,
+        "contract": "thestra.world-camera-calibration",
+        "coordinateSystem": {
+          "blenderCameraForward": "-Z",
+          "blenderCameraUp": "+Y",
+          "cameraForward": "+depth",
+          "cameraRight": "+right",
+          "handedness": "right-handed",
+          "screenOrigin": "top-left",
+          "screenY": "+down",
+          "worldHorizontal": "XY",
+          "worldUp": "+Z"
+        },
+        "eye": {
+          "x": -19.98914649569168,
+          "y": 6,
+          "z": 1.3212953588491052
+        },
+        "farPlane": 128,
+        "fovHalfX": 0.24999999999999997,
+        "fovHalfY": 0.14062499999999997,
+        "nearPlane": 0.05,
+        "orientation": {
+          "forwardX": 1,
+          "forwardY": 0,
+          "pitchRadians": -0.30543261909900765,
+          "rightX": 0,
+          "rightY": 1
+        },
+        "projection": "perspective",
+        "projectionScale": {
+          "x": 1,
+          "y": 1
+        },
+        "projectionWindowOffsetX": 0,
+        "projectionWindowOffsetY": -161.43297990603955,
+        "targetHeight": 240,
+        "targetWidth": 256,
+        "version": 1,
+        "viewportCenterX": 128,
+        "viewportCenterY": -71.43297990603955
+      }
+    }
+  },
+  "reviewPositions": [
+    0,
+    0.5,
+    2,
+    5,
+    8,
+    11.5,
+    12
+  ],
+  "cameraCalibration": {
+    "source": "projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/camera.json",
+    "record": {
+      "baseViewportHeight": 144,
+      "baseViewportWidth": 256,
+      "contract": "thestra.world-camera-calibration",
+      "coordinateSystem": {
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "handedness": "right-handed",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "worldHorizontal": "XY",
+        "worldUp": "+Z"
+      },
+      "eye": {
+        "x": -19.98914649569168,
+        "y": 6,
+        "z": 1.3212953588491052
+      },
+      "farPlane": 128,
+      "fovHalfX": 0.24999999999999997,
+      "fovHalfY": 0.14062499999999997,
+      "nearPlane": 0.05,
+      "orientation": {
+        "forwardX": 1,
+        "forwardY": 0,
+        "pitchRadians": -0.30543261909900765,
+        "rightX": 0,
+        "rightY": 1
+      },
+      "projection": "perspective",
+      "projectionScale": {
+        "x": 1,
+        "y": 1
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -161.43297990603955,
+      "targetHeight": 240,
+      "targetWidth": 256,
+      "version": 1,
+      "viewportCenterX": 128,
+      "viewportCenterY": -71.43297990603955
+    }
+  },
+  "cameraTracking": {
+    "minOffsetX": -72,
+    "maxOffsetX": 72,
+    "source": "32.json#/traversal/camera/tracking",
+    "poses": "camera-views.json resolved by actual bounded_lane and world_camera_calibration"
+  },
+  "sourceReview": "camera-aware/revision17/surfaces: source clay/beauty and runtime clay/atlas, cistern and full envelope",
+  "currentReviewSHA256": {
+    "runtime\\classic\\0.5.png": "00e9abce10409639a7a9e73981d3c2b293c7445ba46b9451a6ed0f1b97ab9b84",
+    "runtime\\classic\\0.png": "0b2cc18971529ad5092677294f47851f5feb4af0a03c62b1a38dcb0fb44ab1a2",
+    "runtime\\classic\\11.5.png": "8ff13dbe8a89ed3fb59d1a3e3838df7e98dcc81cf69041840047178848231ee7",
+    "runtime\\classic\\12.png": "9f9741f03da7a76acec3d39fd8865c9a5eca0108b7ca6aa149e8bd5f4bff37f6",
+    "runtime\\classic\\2.png": "3e1cf9e55e2d554c4e495c570b5612bc2a11d4a1ce80452b7b347ead7fc50d5e",
+    "runtime\\classic\\5.png": "6568e3a6c12aeb31670bf8b3473ba04078ae966c811fd32c74732a0e9904b81f",
+    "runtime\\classic\\8.png": "d9481e5ff042d70bc00babad7cedf77ef9cdba09ad0e755246fa402304e8b960",
+    "runtime\\wide\\0.5.png": "a4159dc126c88a216a450ee6e3d35f1d1c18fe396f847802fac1f907a2cb029c",
+    "runtime\\wide\\0.png": "c00103c843dfee3e406dae6230aa0472b98a728c2e73598cb28b05d3c3406c59",
+    "runtime\\wide\\11.5.png": "e2afe91747006681d86d650655e743dc2318b19b118308c3f9a36fd055bdd593",
+    "runtime\\wide\\12.png": "9d348a067df8dc57ad226120bdb63c8a5a48a0d659d0f9bd4cefc275acbd8628",
+    "runtime\\wide\\2.png": "79e3229987f3cadc86c393bcd6abc05d21bb3074e33ccba6fb6948590600c87f",
+    "runtime\\wide\\5.png": "ec545c50c25ae34ab15e30320fa776ec03376dc04c3e6196ce7425c55a9e53d6",
+    "runtime\\wide\\8.png": "da15790201d00312e64ff97c3ad0df376a6ad9248445739c0e8d3a402f9130af",
+    "surfaces\\runtime-atlas-cistern.png": "e56488fd334198956a50a26b70bc6f753b7f6dd8dad6201dd13a98f6496bd472",
+    "surfaces\\runtime-atlas-environment-envelope.png": "7cf3438c130db5e7a9c18327d6c2b18ebe228909fcab1cd5fc5447340c37d34a",
+    "surfaces\\runtime-clay-cistern.png": "a97f4f4d7b6301d420e0d5d84ba7ddf0ac7eaa9d3b166627dbc1f6d9d756eca3",
+    "surfaces\\runtime-clay-environment-envelope.png": "4676a50ff56206e7f868a64d34ab051b53fb143d57644108d404b36906b342e1",
+    "surfaces\\source-beauty-cistern.png": "e5596386c520769eb644e3860a6b8e69d305f4697b1678ea14d0f3c8ada2079d",
+    "surfaces\\source-beauty-environment-envelope.png": "913145e80e065070b9f974c83858ca618f0530fa5a7d1e1880abfeeadaa6aa88",
+    "surfaces\\source-clay-cistern.png": "7044bf3ff2b9db3f8c8219f882f312a8b99fe7f96553b2b25db4d5e15ae090b9",
+    "surfaces\\source-clay-environment-envelope.png": "85ba5be0bbe124c1ee3fc00f69aec9d6fb6bbf980b043f068965d404cab64403"
+  },
+  "previousRevision": "camera-aware/revision17/previous-measurements.json",
+  "cameraAwareStudies": "camera-aware/comparison.json (matched revision 16 controls)",
+  "receiverCorrespondence": {
+    "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+    "extrusion": 0.15000000596046448,
+    "maxRayDistance": 1.0,
+    "bindings": [
+      {
+        "receiver": "Court door leaf target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal fanlight",
+        "samples": 64,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal splayed reveal -1",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court portal splayed reveal 1",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_jamb_l target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_jamb_r target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court inner panelled door_lintel target",
+        "samples": 8,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      },
+      {
+        "receiver": "Court cistern folded linen",
+        "samples": 24,
+        "missing": 0,
+        "wrongSource": 0,
+        "examples": []
+      }
+    ],
+    "errors": []
+  },
+  "verification": "G1, staged units, source registry, town checks and candidate editor/geography checks pass. Seven Effekseer assertions unavailable. Blender recipe/export tests recorded in report.",
+  "ownerGeometryReview": "Visual and PLAYED acceptance pending. Independent runtime cistern inspection reveals dark corner seams; do not treat sampled linen correspondence as whole-atlas acceptance.",
+  "foregroundReview": "Cistern preserves hollow water volume and chamfered footprint; source linen clears coping. Menu obscures much of the near rank at lane midpoint; inspect both map ends too."
+}

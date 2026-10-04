@@ -1,0 +1,57 @@
+{
+  "method": "four barycentric samples per bound front-facing triangle; flat receiver normals; no cage",
+  "extrusion": 0.15000000596046448,
+  "maxRayDistance": 1.0,
+  "bindings": [
+    {
+      "receiver": "Court door leaf target",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court portal fanlight",
+      "samples": 64,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court portal splayed reveal -1",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court portal splayed reveal 1",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court inner panelled door_jamb_l target",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court inner panelled door_jamb_r target",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    },
+    {
+      "receiver": "Court inner panelled door_lintel target",
+      "samples": 8,
+      "missing": 0,
+      "wrongSource": 0,
+      "examples": []
+    }
+  ],
+  "errors": []
+}

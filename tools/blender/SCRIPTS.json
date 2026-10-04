@@ -1,0 +1,476 @@
+{
+  "version": 1,
+  "scope": "Top-level Python and JavaScript files; preserved paths, no inferred disposal.",
+  "scripts": [
+    {
+      "path": "asset_library.py",
+      "role": "production",
+      "purpose": "Browse a Blender remote asset library without Blender, and without downloading an asset."
+    },
+    {
+      "path": "asset_library_source.py",
+      "role": "library",
+      "purpose": "Blender side of build_asset_library.py: mark SR_GroundCover as an asset, or describe it."
+    },
+    {
+      "path": "atlas_allocation.py",
+      "role": "library",
+      "purpose": "Atlas layout for a room: packed tight, and optionally spent where the camera looks (#877)."
+    },
+    {
+      "path": "atlas_alpha.py",
+      "role": "library",
+      "purpose": "Preserve authored cutout coverage independently of atlas beauty and camera visibility."
+    },
+    {
+      "path": "atlas_denoise.py",
+      "role": "library",
+      "purpose": "Fast OIDN study on isolated UV charts, preserving small charts and alpha."
+    },
+    {
+      "path": "bake_correspondence.py",
+      "role": "library",
+      "purpose": "Sampled selected-to-active ray preflight with authored receiver/source bindings."
+    },
+    {
+      "path": "blender_locator.py",
+      "role": "library",
+      "purpose": "The one place a Blender executable is chosen, and its version asserted."
+    },
+    {
+      "path": "build_asset_library.py",
+      "role": "production",
+      "purpose": "Our own Blender asset library: SR_GroundCover, browsable like any remote library."
+    },
+    {
+      "path": "build_registry_readability_review.py",
+      "role": "study",
+      "purpose": "Pair native before/after frames with isolated source-shape inspections."
+    },
+    {
+      "path": "build_synthetic_environment.py",
+      "role": "library",
+      "purpose": "Build a synthetic Blender environment fixture conforming to the Second Rite V0 contract."
+    },
+    {
+      "path": "build_world_props.py",
+      "role": "library",
+      "purpose": "Blender-side staged builder for deterministic Second Rite world props."
+    },
+    {
+      "path": "capture_courtyard.py",
+      "role": "study",
+      "purpose": "Capture the staged courtyard through the native compositor; never recapture goldens."
+    },
+    {
+      "path": "capture_environment.py",
+      "role": "production",
+      "purpose": "Capture one staged environment at real runtime surfaces, including device ratios."
+    },
+    {
+      "path": "check_thestra_camera.py",
+      "role": "production",
+      "purpose": "Run the #837 runtime->Blender WorldCamera numerical parity fixture."
+    },
+    {
+      "path": "compile_item_blend.py",
+      "role": "library",
+      "purpose": "Compile one already-open authoritative item ``.blend`` into runtime OBJ/MTL."
+    },
+    {
+      "path": "compile_item_blends.py",
+      "role": "production",
+      "purpose": "Compile authoritative item ``.blend`` sources without allowing source writes."
+    },
+    {
+      "path": "cycles_source.py",
+      "role": "library",
+      "purpose": "Temporary evaluated beauty batching for selected-to-active Cycles baking."
+    },
+    {
+      "path": "define_registry_bay.py",
+      "role": "one-shot",
+      "purpose": "Fix counter support and add a wall-connected timber service screen."
+    },
+    {
+      "path": "depth_baseline.py",
+      "role": "study",
+      "purpose": "Verify deterministic Blender depth maps and manage reviewed baseline changes."
+    },
+    {
+      "path": "eevee_bake.py",
+      "role": "library",
+      "purpose": "The EEVEE atlas bake: what an exporter runs in place of Cycles' selected-to-active bake."
+    },
+    {
+      "path": "eevee_projection.py",
+      "role": "library",
+      "purpose": "Bake an atlas with EEVEE, by camera projection: the shared core of the EEVEE atlas bake."
+    },
+    {
+      "path": "emissive_lights.py",
+      "role": "library",
+      "purpose": "Companion area lights for emissive surfaces, so EEVEE lights a room the way a glowing surface should."
+    },
+    {
+      "path": "enrich_registry_source.py",
+      "role": "one-shot",
+      "purpose": "Edit the Registry document: tactile finishes, coherent windows, selected props."
+    },
+    {
+      "path": "environment_sources.py",
+      "role": "production",
+      "purpose": "Which `.blend` is the source of an environment, as a record rather than a guess (#1269)."
+    },
+    {
+      "path": "export_exterior_environment.py",
+      "role": "production",
+      "purpose": "Bake an authored modelled exterior into its runtime environment package."
+    },
+    {
+      "path": "export_map_blend.js",
+      "role": "production",
+      "purpose": "Export a renderable map bundle through the canonical Studio authority."
+    },
+    {
+      "path": "export_room_environment.py",
+      "role": "production",
+      "purpose": "Bake one authored interior into a real-3D town environment package."
+    },
+    {
+      "path": "extend_registry_frontage.py",
+      "role": "one-shot",
+      "purpose": "Extend existing service joinery to the right wall and add a wall-backed cabinet."
+    },
+    {
+      "path": "finish_registry_shell.py",
+      "role": "one-shot",
+      "purpose": "Close the retained Registry ceiling junction without regenerating the room."
+    },
+    {
+      "path": "fit_registry_ceiling.py",
+      "role": "one-shot",
+      "purpose": "Fit the retained timber service divider to the existing ceiling and beams."
+    },
+    {
+      "path": "furnishings_catalogue.py",
+      "role": "production",
+      "purpose": "Generate/check the furnishing catalogue without importing bpy on the host."
+    },
+    {
+      "path": "ground_cover.py",
+      "role": "library",
+      "purpose": "Ground cover as a Geometry Nodes modifier (the #1257 pilot)."
+    },
+    {
+      "path": "ground_cover_placement.py",
+      "role": "study",
+      "purpose": "Ground-cover placement on the adopted Praca: the candidate layouts and how they are painted (#1270)."
+    },
+    {
+      "path": "import_map_bundle.py",
+      "role": "library",
+      "purpose": "Blender-side importer for Thestra's authoritative renderable-bundle JSON."
+    },
+    {
+      "path": "inspect_architectural_assembly.py",
+      "role": "production",
+      "purpose": "Render a source assembly independently from its scene, without saving changes."
+    },
+    {
+      "path": "inspect_environment_parts.py",
+      "role": "production",
+      "purpose": "Inspect named source furnishings individually without saving the document."
+    },
+    {
+      "path": "inspect_environment_surfaces.py",
+      "role": "production",
+      "purpose": "Read-only source/package geometry and atlas inspection from independent cameras."
+    },
+    {
+      "path": "install_room_3d.py",
+      "role": "production",
+      "purpose": "Install a baked room export as a runtime town environment package."
+    },
+    {
+      "path": "item_mtl_runtime.py",
+      "role": "library",
+      "purpose": "Finalize Blender-exported item MTL files with Second Rite runtime passes."
+    },
+    {
+      "path": "light_fixtures.py",
+      "role": "library",
+      "purpose": "Let a lamp shine out of a fixture smaller than itself: the housing stops shadowing its light."
+    },
+    {
+      "path": "make_town_camera.py",
+      "role": "production",
+      "purpose": "Derive the Second Gate town side-view camera calibration record."
+    },
+    {
+      "path": "map_bundle_scene.py",
+      "role": "library",
+      "purpose": "Pure planning helpers for Thestra renderable-bundle -> Blender scene import."
+    },
+    {
+      "path": "material_library.py",
+      "role": "library",
+      "purpose": "Second Gate material library: textures bound to semantic material IDs."
+    },
+    {
+      "path": "mesh_export_geometry.py",
+      "role": "library",
+      "purpose": "Derived mesh preparation; never alters authored mesh datablocks."
+    },
+    {
+      "path": "offline_blender.py",
+      "role": "production",
+      "purpose": "Run a Blender Python tool with Python network connections denied in this process."
+    },
+    {
+      "path": "open_registry_plan.py",
+      "role": "one-shot",
+      "purpose": "Remove the detached masonry frame from an existing Registry source revision."
+    },
+    {
+      "path": "pack_environment_source.py",
+      "role": "production",
+      "purpose": "Save a new self-contained source revision from a working source document."
+    },
+    {
+      "path": "photograph_room_package.py",
+      "role": "production",
+      "purpose": "Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size."
+    },
+    {
+      "path": "preview_diff_sheet.py",
+      "role": "production",
+      "purpose": "A before / after / difference sheet for renders that should look alike."
+    },
+    {
+      "path": "probe_registry_shell.py",
+      "role": "one-shot",
+      "purpose": "Read-only probe of the recorded Registry shell experiment."
+    },
+    {
+      "path": "reauthor_praca_spiral.py",
+      "role": "one-shot",
+      "purpose": "Re-author st_maria_praca.blend for the spiral layout."
+    },
+    {
+      "path": "refine_registry_cabinet.py",
+      "role": "one-shot",
+      "purpose": "Edit the retained Registry: larger records press and a public-side woven runner."
+    },
+    {
+      "path": "refine_registry_materials.py",
+      "role": "one-shot",
+      "purpose": "Refine the existing Registry source: book silhouettes and material hierarchy."
+    },
+    {
+      "path": "registry_workflow.py",
+      "role": "study",
+      "purpose": "Run a repeatable Registry experiment from an editable source into native review."
+    },
+    {
+      "path": "render_furnishings_catalogue.py",
+      "role": "library",
+      "purpose": "Pinned-Blender worker for furnishings_catalogue.py; never saves a .blend."
+    },
+    {
+      "path": "render_profiles.py",
+      "role": "library",
+      "purpose": "Shared render quality; camera, lighting, output encoding and source files belong to callers."
+    },
+    {
+      "path": "review_courtyard.py",
+      "role": "study",
+      "purpose": "Native source review and floor/profile verification, without saving the source."
+    },
+    {
+      "path": "review_room_source.py",
+      "role": "production",
+      "purpose": "Photograph an interior source using camera records from native staged captures."
+    },
+    {
+      "path": "revise_registry_source.py",
+      "role": "one-shot",
+      "purpose": "Edit an existing Registry document into the recessed service-hatch study."
+    },
+    {
+      "path": "script_index.py",
+      "role": "production",
+      "purpose": "Generate/check the role index for every top-level Blender Python/JS tool."
+    },
+    {
+      "path": "second_rite_asset_core.py",
+      "role": "library",
+      "purpose": "Shared Blender infrastructure for Second Rite asset pipelines."
+    },
+    {
+      "path": "source_dependencies.py",
+      "role": "library",
+      "purpose": "Fail before rendering when an editable source cannot resolve its dependencies."
+    },
+    {
+      "path": "stage_courtyard_candidate.js",
+      "role": "study",
+      "purpose": "Stage a recorded courtyard candidate for native review."
+    },
+    {
+      "path": "stage_registry_candidate.js",
+      "role": "study",
+      "purpose": "Stage a recorded Registry candidate for native review."
+    },
+    {
+      "path": "stage_room_model.py",
+      "role": "production",
+      "purpose": "Stage a generated room model against the calibrated Second Gate town camera."
+    },
+    {
+      "path": "study_atlas_denoise.py",
+      "role": "study",
+      "purpose": "Create a denoised comparison package without overwriting its raw input."
+    },
+    {
+      "path": "study_atlas_drift.py",
+      "role": "study",
+      "purpose": "What does Blender 5.2.2 change in the baked atlases we already ship? A measurement."
+    },
+    {
+      "path": "study_courtyard_geometry_loss.py",
+      "role": "study",
+      "purpose": "Measure export geometry loss without altering the scaffold or production package."
+    },
+    {
+      "path": "study_cycles_courtyard.py",
+      "role": "study",
+      "purpose": "Native full-geometry Cycles budget study; never saves or exports the source."
+    },
+    {
+      "path": "study_cycles_surface_bake.py",
+      "role": "study",
+      "purpose": "Actual Cycles selected-to-active atlas study; source stays unchanged."
+    },
+    {
+      "path": "study_eevee_atlas.py",
+      "role": "study",
+      "purpose": "Can an atlas be baked with EEVEE? A camera-projection bake, measured against Cycles."
+    },
+    {
+      "path": "study_eevee_exterior.py",
+      "role": "study",
+      "purpose": "The Praça exterior: its atlas as Cycles bakes it today, and as EEVEE would by projection."
+    },
+    {
+      "path": "study_eevee_exterior_blender.py",
+      "role": "study",
+      "purpose": "Blender side of study_eevee_exterior.py: the Praça atlas baked by Cycles today and by EEVEE projection."
+    },
+    {
+      "path": "study_eevee_pilot.py",
+      "role": "study",
+      "purpose": "One room, plate and atlas both on EEVEE, judged next to Cycles: the Padaria pilot."
+    },
+    {
+      "path": "study_engine_parity.py",
+      "role": "study",
+      "purpose": "Can EEVEE stand in for Cycles on the interior plates? A measurement, not a switch."
+    },
+    {
+      "path": "study_environment_receivers.py",
+      "role": "study",
+      "purpose": "Inspect receiver admission/culling and geometric source correspondence without saving."
+    },
+    {
+      "path": "study_ground_cover_placement.py",
+      "role": "study",
+      "purpose": "Where should grass grow on the adopted Praça? Candidate layouts at the plate camera (#1270)."
+    },
+    {
+      "path": "study_ground_cover_sheet.py",
+      "role": "study",
+      "purpose": "Contact sheets for the ground-cover placement study (`study_ground_cover_placement.py`)."
+    },
+    {
+      "path": "study_house_grammar.py",
+      "role": "study",
+      "purpose": "Photograph the first grammar-generated building as CLAY, against the real camera."
+    },
+    {
+      "path": "study_town_perspective.py",
+      "role": "study",
+      "purpose": "Compare level/pitched town cameras on an exterior and an interior."
+    },
+    {
+      "path": "surface_finishes.py",
+      "role": "library",
+      "purpose": "World-scale procedural finishes for authored environment studies."
+    },
+    {
+      "path": "sync_asset_core.py",
+      "role": "production",
+      "purpose": "Synchronize canonical Blender contract sources into the portable toolkit."
+    },
+    {
+      "path": "thestra_camera.py",
+      "role": "library",
+      "purpose": "Blender preview helpers for serialized Thestra WorldCamera calibration records."
+    },
+    {
+      "path": "town_environment_pipeline.py",
+      "role": "library",
+      "purpose": "Blender-authored baked environment pipeline for Second Gate town slices."
+    },
+    {
+      "path": "tree_generator.py",
+      "role": "library",
+      "purpose": "Deterministic, low-poly procedural tree skeletons."
+    },
+    {
+      "path": "tree_material.py",
+      "role": "library",
+      "purpose": "The one Blender material for foliage atlas cards."
+    },
+    {
+      "path": "tree_mesh.py",
+      "role": "library",
+      "purpose": "Blender-free meshing for :mod:`tree_generator` skeletons."
+    },
+    {
+      "path": "validate_item_obj_runtime.py",
+      "role": "production",
+      "purpose": "Validate item OBJ products against the runtime's non-degenerate-face contract."
+    },
+    {
+      "path": "vendor_assets.py",
+      "role": "production",
+      "purpose": "Acquire named assets deliberately, or verify the committed selection entirely offline."
+    },
+    {
+      "path": "vendor_assets_blender.py",
+      "role": "library",
+      "purpose": "Build/check a portable named-datablock library; no network or preferences changes."
+    },
+    {
+      "path": "wide_screen.py",
+      "role": "library",
+      "purpose": "Render a whole side-view location in one frame, at canon scale."
+    },
+    {
+      "path": "placement_rules.py",
+      "role": "library",
+      "purpose": "Pure authoring support and protected-volume checks; not runtime collision."
+    },
+    {
+      "path": "furnishing_geometry.py",
+      "role": "library",
+      "purpose": "Evaluated geometry measurements shared by catalogue and scaffold placement."
+    },
+    {
+      "path": "compile_room_spec.py",
+      "role": "production",
+      "purpose": "Compile relational JSON scaffolds through existing Interior and furnishing builders."
+    }
+  ]
+}

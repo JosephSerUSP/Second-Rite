@@ -21,6 +21,9 @@ import bpy
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import atlas_allocation  # noqa: E402
 import eevee_projection as projection  # noqa: E402
@@ -29,7 +32,7 @@ import stage_room_model as stager  # noqa: E402
 import town_environment_pipeline as pipeline  # noqa: E402
 from atlas_allocation import triangle_mask  # noqa: E402
 
-DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "environments"
+DEFAULT_BLEND = (PROJECT / "assets" / "authoring" / "environments"
                  / "st_maria_praca_modelled.blend")
 
 

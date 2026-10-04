@@ -6,5 +6,10 @@
   "executableName": "Second Rite",
   "buildSlug": "Second-Rite",
   "windowTitle": "Second Rite",
-  "productVersion": "0.0.0-dev"
+  "productVersion": "0.0.0-dev",
+  "android": {
+    "applicationId": "io.github.josephserusp.hichaukitoden",
+    "displayName": "Second Gate",
+    "orientation": "landscape"
+  }
 }

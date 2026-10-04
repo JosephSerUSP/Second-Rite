@@ -37,10 +37,13 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import blender_locator  # noqa: E402
 
-ENVIRONMENTS = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "environments"
+ENVIRONMENTS = PROJECT / "assets" / "authoring" / "environments"
 ROOMS = ("alicias_padaria", "lauras_smith")
 STAGER = ROOT / "tools" / "blender" / "stage_room_model.py"
 COMMON = ["--lamp-scale", "0.3", "--accent-scale", "0.4",

@@ -73,6 +73,23 @@
         "fixtureLights": false,
         "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
       }
+    },
+    "passage_house_courtyard.blend": {
+      "status": "scaffold",
+      "basis": "Revision 18 visually approved by owner and promoted on 2026-10-01. Scaffold recipe retained; source profile authority is data/maps/32.json. Shipping source geometry and atlas match the approved study; further foreground refinement remains issue 1308.",
+      "eevee": {
+        "exposureEV": 0.0,
+        "supersample": 2,
+        "probeCells": 0,
+        "emissiveLights": false,
+        "fixtureLights": false,
+        "basis": "EEVEE at neutral exposure with authored dusk sun, sky and lamps attached to visible lantern fixtures; automatic lighting shims disabled."
+      }
+    },
+    "passage_office.blend": {
+      "status": "adopted",
+      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; byte-identical copy of preserved candidate. Edit directly; never regenerate.",
+      "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7"
     }
   }
 }

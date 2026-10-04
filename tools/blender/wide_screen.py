@@ -31,8 +31,12 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools/blender"))
 import thestra_camera  # noqa: E402
+import render_profiles
 
 FIXTURE_PATH = ROOT / "tools/blender/fixtures/town_sideview_camera.json"
 
@@ -79,6 +83,7 @@ def main():
                     metavar=("X", "Y"), help="world point whose feet the pitch pins")
     ap.add_argument("--hide", nargs="*", default=("TH_RENDER", "11_SCALE_GUIDES",
                                                   "10_LEVEL_DESIGN"))
+    ap.add_argument("--render-profile", choices=tuple(render_profiles.PROFILES), default="review")
     args = ap.parse_args(argv)
 
     record = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
@@ -123,7 +128,7 @@ def main():
 
     if args.walker_y is not None:
         actor = thestra_camera.create_actor_preview(
-            ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png",
+            PROJECT / 'assets/character/npc_alicia.png',
             camera, anchor=(args.lane_x, args.walker_y, 0.0),
             world_height=1.75, name="WIDE_walker")
         actor.hide_render = False
@@ -133,7 +138,7 @@ def main():
         if collection:
             collection.hide_render = True
 
-    scene.render.engine = "BLENDER_EEVEE"
+    render_profiles.apply(scene, render_profiles.resolve(args.render_profile), device="AUTO")
     scene.render.film_transparent = False
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(args.out.resolve())

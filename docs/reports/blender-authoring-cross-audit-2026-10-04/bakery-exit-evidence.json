@@ -1,0 +1,80 @@
+{
+  "source": "projects/hichaukitoden-game/assets/authoring/environments/alicias_padaria.blend",
+  "sourceSHA256": "8453c716b259d494b3ddf1391cd1dd9a47aa641a4f1c38c194bd5aaaa7a960ed",
+  "sourceRole": "adopted; opened read-only without saving",
+  "blender": "5.2.2",
+  "objects": [
+    {
+      "name": "exit_threshold",
+      "min": [
+        -3.6363637447357178,
+        -3.9000000953674316,
+        -0.3499999940395355
+      ],
+      "max": [
+        -2.133333444595337,
+        -2.4000000953674316,
+        0.0
+      ],
+      "hidden_render": false
+    },
+    {
+      "name": "flour_front",
+      "min": [
+        0.142868310213089,
+        -2.746858596801758,
+        0.0
+      ],
+      "max": [
+        0.9836452007293701,
+        -1.616007685661316,
+        0.5799999833106995
+      ],
+      "hidden_render": false
+    },
+    {
+      "name": "water",
+      "min": [
+        -1.1670000553131104,
+        -3.4162960052490234,
+        0.0
+      ],
+      "max": [
+        -0.5700000524520874,
+        -2.799999952316284,
+        1.2389764785766602
+      ],
+      "hidden_render": false
+    }
+  ],
+  "mapId": 28,
+  "lane": {
+    "minY": 0.35,
+    "maxY": 7.4167,
+    "depthX": 0.0,
+    "groundZ": 0.0,
+    "speed": 3.4
+  },
+  "blockedRanges": [],
+  "capture": {
+    "unobstructed": false,
+    "shownFrame": "classic/6.png",
+    "surfaces": [
+      "classic",
+      "four_three",
+      "wide",
+      "device"
+    ],
+    "positions": [
+      1,
+      3,
+      6
+    ]
+  },
+  "issue": 1357,
+  "limits": [
+    "No interactive exit traversal reproduced",
+    "No source or package edit",
+    "Bounds are broad-phase observations, not proof of sprite-footprint clearance"
+  ]
+}

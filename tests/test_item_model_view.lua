@@ -6,6 +6,7 @@ local loader = require("engine.data.loader")
 local item_presentation = require("presentation.item_presentation")
 local item_model_view = require("presentation.item_model_view")
 local retro_mesh_shader = require("presentation.retro_mesh_shader")
+local surface = require("presentation.surface")
 
 print("[TEST] Starting 3D item model viewer tests...")
 
@@ -208,6 +209,37 @@ if love.graphics and love.graphics.isCreated() then
     check(nonZeroAlpha > 0, "Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (" .. nonZeroAlpha .. " px)")
 end
 
+-------------------------------------------------- 6a. Item raster DPI contract --
+
+if love.graphics and love.graphics.isCreated() then
+    item_model_view.clearCache()
+    local originalNewRasterCanvas = surface.newRasterCanvas
+    local rasterCalls = {}
+    surface.newRasterCanvas = function(w, h, settings)
+        rasterCalls[#rasterCalls + 1] = {
+            w = w, h = h, format = settings and settings.format or "color",
+        }
+        return originalNewRasterCanvas(w, h, settings)
+    end
+
+    local okDraw, drawErr = pcall(item_model_view.draw,
+        0, 0, 73, 61, "assets/models/items/silver_blade.obj",
+        "dpi_contract_window", "dpi_contract_item", 0)
+    surface.newRasterCanvas = originalNewRasterCanvas
+
+    check(okDraw, "Item raster DPI contract draw succeeds: " .. tostring(drawErr))
+    check(#rasterCalls >= 2,
+        "Item turntable allocates colour and depth through surface.newRasterCanvas")
+    check(rasterCalls[1] and rasterCalls[1].w == 73 and rasterCalls[1].h == 61
+            and rasterCalls[1].format == "color",
+        "Item colour target uses the logical item viewport dimensions")
+    check(rasterCalls[2] and rasterCalls[2].w == 73 and rasterCalls[2].h == 61
+            and (rasterCalls[2].format == "depth24stencil8"
+                or rasterCalls[2].format == "depth16"),
+        "Item depth target uses the same DPI-neutral logical dimensions")
+    item_model_view.clearCache()
+end
+
 -------------------------------------------------- 6b. Material overlay passes --
 
 -- The shader cannot compute specular, reflection or refraction (SPEC 1.25), so
@@ -402,6 +434,17 @@ check(worldShader:find("uniform vec2 playerLightPosition;", 1, true) ~= nil
         and worldShader:find("length(VertexPosition.xy - playerLightPosition)", 1, true) ~= nil
         and worldShader:find("length(relative.xy)", 1, true) == nil,
     "Player light owns an explicit world anchor instead of assuming camera equals player")
+
+local _, compositionOriginDeclarations = worldShader:gsub(
+    "uniform mediump vec2 compositionOrigin;", "")
+check(compositionOriginDeclarations == 2,
+    "World shader pins compositionOrigin to matching mediump precision in vertex and pixel stages")
+local worldShaderCompiles, compiledWorldShader = pcall(love.graphics.newShader, worldShader)
+check(worldShaderCompiles,
+    "World shader with explicit GLES precision still compiles on the desktop LÖVE backend")
+if worldShaderCompiles and compiledWorldShader and compiledWorldShader.release then
+    compiledWorldShader:release()
+end
 
 check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);", 1, true) ~= nil
         and worldShader:find("float ndcY;", 1, true) ~= nil

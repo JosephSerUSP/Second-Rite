@@ -1047,16 +1047,18 @@ end
 
 function ui.loadFont(name, size)
     size = size or 8
+    -- Fonts are part of the low-resolution game raster. Do not inherit
+    -- Android/Retina DPI density; final host/CRT presentation owns scaling.
     local path = name and name ~= "Lucida" and ("assets/fonts/" .. name .. ".ttf")
     local ok, font
     if path and love.filesystem.getInfo(path) then
-        ok, font = pcall(love.graphics.newFont, path, size, "mono")
+        ok, font = pcall(love.graphics.newFont, path, size, "mono", 1)
     end
     if not ok or not font then
-        ok, font = pcall(love.graphics.newFont, size, "mono")
+        ok, font = pcall(love.graphics.newFont, size, "mono", 1)
     end
     if not ok or not font then
-        ok, font = pcall(love.graphics.newFont, size)
+        ok, font = pcall(love.graphics.newFont, size, "normal", 1)
     end
     if ok and font then
         font:setFilter("nearest", "nearest")
@@ -1096,6 +1098,10 @@ end
 
 function ui.loadPopupFont(name, size)
     popupFont = ui.loadFont(name, size)
+end
+
+function ui.getMainFont()
+    return mainFont
 end
 
 function ui.getPopupNumberFont()

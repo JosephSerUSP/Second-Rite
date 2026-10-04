@@ -1,0 +1,9 @@
+# Passage Office integration
+
+The owner approved the r13 composition and requested implementation while explicitly waiving a composition playtest. The approved candidate was copied byte-for-byte to `assets/authoring/environments/passage_office.blend` and recorded as adopted source authority. Prior candidate revisions remain preserved. The 1024 atlas package is installed at `assets/environments/st_maria_town/passage_office`; its provenance names the adopted source. No rebake was needed because the adopted document is identical to the reviewed source.
+
+New map 33 uses the reviewed bounded-lane camera, lane and environment anchors. Celina's original map-17 command tree and artwork were moved inside without changing their commands. Map 17 now has a Passage Office transition at her prior location, using its retained `npc_registrar` anchor. Entering arrives at the room's `exit_door`; leaving returns to that Praca anchor. The existing transition-arrow vocabulary identifies the entrance. No exterior facade or window assembly was altered; facade correspondence remains a separate future task.
+
+Map 28 remains the bakery. No engine or battle behavior changed. The shared ceiling construction correction is already in the room's reviewed package; existing authored-room updates remain issue #1322.
+
+Verification evidence is in `out/registry-integration/` and `out/registry-workflow/promotion-evidence.json`: source-copy SHA equality, exact registrar command-tree preservation, unchanged bakery data, canonical Project export, staged G1 validation, staged runtime unit suite, source-provenance check and save round-trip. G4 identified the added map and its generated report was refreshed. No visual golden was recaptured. Composition playtesting and physical-phone testing were intentionally not performed; approval and integration do not claim played acceptance.

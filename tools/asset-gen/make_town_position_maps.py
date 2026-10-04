@@ -36,10 +36,13 @@ from town_projection import (PlateCamera, self_check, ACTOR_HEIGHT,
                              PIXELS_PER_UNIT, plate_width_for)
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "towngen"))
 from build_town import WORLD_H as VISIBLE_WORLD_ROWS  # noqa: E402
 
-GAME = ROOT / "projects" / "hichaukitoden-game"
+GAME = PROJECT
 PLAYER = GAME / "assets" / "character" / "player.png"
 
 # A plate is the WHOLE street, not one window onto it: the runtime scrolls a

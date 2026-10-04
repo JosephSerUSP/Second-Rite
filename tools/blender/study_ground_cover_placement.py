@@ -35,10 +35,13 @@ from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import ground_cover  # noqa: E402
 
-BLEND = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "environments" / "st_maria_praca_modelled.blend"
+BLEND = PROJECT / "assets" / "authoring" / "environments" / "st_maria_praca_modelled.blend"
 from ground_cover_placement import (  # noqa: E402
     BUILDING_PREFIXES, CANDIDATES, GROUP, MENU_TOP_ROW, PLATE, SCAFFOLD_PREFIXES, Field,
     build_guide, fit_to_budget, paint, tufts)

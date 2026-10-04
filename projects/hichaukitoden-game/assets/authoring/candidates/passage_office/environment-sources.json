@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "passage_office_r13.blend": {
+      "status": "reference",
+      "basis": "Owner-approved revision 13 (2026-10-02): final ceiling junction pass. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit. Kept for comparison. Revisions r2-r12 were pruned on 2026-10-04 (#1349); they remain in git history and their findings in docs/reports/passage-office-*-2026-10-02.md.",
+      "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7",
+      "exitY": 1.0833,
+      "registrarY": 4.5833,
+      "registrarX": 1.15
+    }
+  }
+}

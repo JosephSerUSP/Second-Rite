@@ -150,6 +150,246 @@ def cabinet(room, name, at, *, width=1.05, depth=0.5, height=1.85):
                   (x - depth / 2.0 - 0.04, y, height * 0.55), room.iron)
 
 
+def records_press(room, name, at, *, width=2.1, depth=.82, height=2.8, panel_mat=None):
+    """Tall civic records cupboard: framed doors, labelled drawers and stepped cornice."""
+    x,y=at;front=x-depth/2
+    with room.piece(name):
+        room.part(name+'_case',(depth,width,height-.10),(x,y,(height-.10)/2),room.wood)
+        room.part(name+'_plinth',(depth+.07,width+.10,.16),(x-.01,y,.08),room.wood)
+        room.part(name+'_crown_lower',(depth+.09,width+.13,.11),(x-.01,y,height-.06),room.wood)
+        room.part(name+'_crown_upper',(depth+.15,width+.22,.08),(x-.025,y,height+.025),room.wood)
+        for side in (-1,1):
+            cy=y+side*width*.245;door_width=width*.44
+            room.part(name+'_door_panel',(.034,door_width-.10,1.57),
+                      (front-.028,cy,1.78),panel_mat or room.wood)
+            for edge in (-1,1):
+                room.part(name+'_door_stile',(.067,.065,1.76),(front-.035,cy+edge*door_width/2,1.78),room.wood)
+                room.part(name+'_door_rail',(.067,door_width,.075),(front-.035,cy,1.78+edge*.845),room.wood)
+            room.part(name+'_meeting_rail',(.058,door_width,.055),(front-.037,cy,1.77),room.wood)
+            for z in (1.12,2.42):
+                room.part(name+'_hinge',(.025,.030,.11),(front-.081,cy+side*door_width*.44,z),room.iron)
+            room.part(name+'_keyplate',(.026,.055,.12),(front-.085,cy-side*door_width*.34,1.62),room.bronze)
+            room.part(name+'_handle',(.056,.11,.028),(front-.104,cy-side*door_width*.34,1.64),room.bronze)
+        for z in (.34,.65):
+            room.part(name+'_drawer',(.047,width-.17,.24),(front-.028,y,z),panel_mat or room.wood)
+            room.part(name+'_drawer_label',(.006,.22,.072),(front-.057,y,z+.018),room.paper)
+            for side in (-1,1):
+                room.part(name+'_drawer_pull',(.06,.12,.027),(front-.075,y+side*width*.26,z),room.bronze)
+
+
+def woven_runner(room, name, at, *, length=4.7, width=1.55, cloth_mat, border_mat, motif_mat):
+    """Flat decorative textile with broad borders and restrained lozenge repeats."""
+    x,y=at
+    with room.piece(name):
+        room.part(name+'_field',(width,length,.012),(x,y,.008),cloth_mat)
+        for side in (-1,1):
+            room.part(name+'_long_border',(.13,length-.12,.004),(x+side*(width/2-.09),y,.016),border_mat)
+            room.part(name+'_end_border',(width-.12,.13,.004),(x,y+side*(length/2-.09),.016),border_mat)
+        for i in range(5):
+            obj=room.part(name+'_lozenge',(.25,.25,.003),(x,y+(i-2)*.74,.017),motif_mat)
+            obj.rotation_euler.z=math.pi/4
+            obj=room.part(name+'_lozenge_inset',(.12,.12,.003),(x,y+(i-2)*.74,.020),cloth_mat)
+            obj.rotation_euler.z=math.pi/4
+
+
+def ledger(room, name, at, *, length=0.42, width=0.24, open_book=False):
+    """A narrow bound account book; place on a desk with room.surface()."""
+    x, y = at
+    with room.piece(name):
+        room.part(f"{name}_cover", (width, length, 0.014),
+                  (x, y, 0.007), room.leather)
+        if open_book:
+            for index, offset in enumerate((-length * 0.245, length * 0.245)):
+                room.part(f"{name}_page_{index}", (width * 0.93, length * 0.46, 0.032),
+                          (x, y + offset, 0.030), room.paper)
+            room.part(f"{name}_binding", (width, 0.018, 0.055),
+                      (x, y, 0.0275), room.leather)
+            # A pale page surface remains the dominant native-size accent.
+            room.part(f"{name}_ribbon", (width * 0.82, 0.009, 0.003),
+                      (x, y - length * 0.28, 0.048), room.leather)
+        else:
+            room.part(f"{name}_pages", (width * 0.94, length * 0.94, 0.04),
+                      (x, y, 0.034), room.paper)
+            room.part(f"{name}_lid", (width, length, 0.015),
+                      (x, y, 0.0615), room.leather)
+            room.part(f"{name}_spine", (width, 0.023, 0.069),
+                      (x, y - length / 2, 0.0345), room.leather)
+
+
+def bound_volume(room, name, at, *, height=.43, thickness=.095, depth=.34, cover_mat=None):
+    """Upright ledger with recessed page block, projecting boards and visible spine."""
+    x,y=at
+    cover=cover_mat or room.leather
+    with room.piece(name):
+        room.part(name+'_pages',(depth-.045,thickness-.028,height-.045),
+                  (x+.012,y,height/2),room.paper)
+        for side in (-1,1):
+            room.part(name+'_board',(depth, .014,height),
+                      (x,y+side*(thickness/2-.007),height/2),cover)
+        room.part(name+'_spine',(.028,thickness,height),(x-depth/2+.014,y,height/2),cover)
+        for z in (.10,height-.09):
+            room.part(name+'_raised_band',(.038,thickness+.009,.019),(x-depth/2+.009,y,z),cover)
+        room.part(name+'_label',(.004,thickness*.65,height*.18),
+                  (x-depth/2-.003,y,height*.58),room.paper)
+
+
+def seal_stamp(room, name, at):
+    """A handled brass seal beside its dark ink pad."""
+    x, y = at
+    with room.piece(name):
+        _revolved(room, f"{name}_die", (x,y), (.043,.043),
+                  [(1,0),(1,.021),(.55,.03),(.4,.048)], mat=room.bronze, sides=12)
+        _revolved(room, f"{name}_grip", (x,y), (.035,.035),
+                  [(.38,.045),(.6,.067),(1,.09),(.9,.13),(.6,.15)], mat=room.wood, sides=12)
+        room.part(f"{name}_pad_tray", (0.13, 0.17, 0.018), (x, y + 0.19, 0.009), room.wood)
+        room.part(f"{name}_pad", (0.105, 0.145, 0.006), (x, y + 0.19, 0.021), room.ink)
+
+
+def waiting_bench(room, name, at, *, length=1.75):
+    """Heavy waiting bench with supported back and a lower stretcher."""
+    x,y=at
+    with room.piece(name):
+        room.part(f'{name}_seat',(.48,length,.085),(x,y,.46),room.wood)
+        for i,side in enumerate((-1,1)):
+            room.part(f'{name}_leg_{i}',(.35,.12,.43),(x,y+side*(length/2-.13),.215),room.wood)
+            room.part(f'{name}_post_{i}',(.085,.085,1.0),(x+.20,y+side*(length/2-.12),.5),room.wood)
+        room.part(f'{name}_back',(.06,length,.33),(x+.21,y,.86),room.wood)
+        room.part(f'{name}_brace',(.07,length-.25,.08),(x,y,.19),room.wood)
+
+
+def record_bay(room, name, at, *, width=1.5, height=1.65, columns=3, rows=3):
+    """Open document pigeonholes with visible grouped paper bundles."""
+    x,y=at
+    with room.piece(name):
+        room.part(f'{name}_back',(.055,width,height),(x+.20,y,height/2),room.wood)
+        for i in range(rows+1):
+            room.part(f'{name}_shelf_{i}',(.46,width,.055),(x,y,i*height/rows),room.wood)
+        for i in range(columns+1):
+            room.part(f'{name}_divider_{i}',(.46,.055,height),(x,y-width/2+i*width/columns,height/2),room.wood)
+        for row in range(rows):
+            for col in range(columns):
+                py=y-width/2+(col+.5)*width/columns
+                z=row*height/rows+.075
+                amount=3+(row+col)%3
+                for j in range(amount):
+                    room.part(f'{name}_paper_{row}_{col}_{j}',(.32,width/columns*.7,.045),
+                              (x-.035,py,z+j*.048),room.paper)
+                room.part(f'{name}_cord_{row}_{col}',(.33,.025,.012),
+                          (x-.035,py,z+(amount-.5)*.048),room.leather)
+
+
+def service_screen(room, name, *, front, rear, left, right, panel_mat=None,
+                   height=2.78, transom_top=None, beam_spans=()):
+    """L-shaped counter joinery: an open serving transom and wall-connected return."""
+    if rear<=front or left<=right:raise ValueError('Screen needs positive depth and width')
+    transom_top=height if transom_top is None else transom_top
+    if transom_top<=2.43 or height<transom_top:raise ValueError('Screen head must sit above serving transom')
+    with room.piece(name):
+        for y in (left,right):
+            room.part('service_screen_front_post',(.12,.12,height),(front,y,height/2),room.wood)
+        room.part('service_screen_return_post',(.12,.12,height),(rear-.04,left,height/2),room.wood)
+        for z in (2.43,transom_top):
+            room.part('service_transom_rail',(.10,left-right+.12,.08),(front,(left+right)/2,z),room.wood)
+            room.part('return_transom_rail',(rear-front+.08,.10,.08),((front+rear)/2,left,z),room.wood)
+        for j in range(1,8):
+            room.part('service_transom_spindle',(.045,.035,transom_top-2.43),
+                      (front,right+j*(left-right)/8,(transom_top+2.43)/2),room.wood)
+        if beam_spans:
+            # Beam pockets are omitted from the infill, leaving existing timbers intact.
+            base=transom_top+.04
+            cursor=right-.06
+            spans=[]
+            for low,high in sorted(beam_spans):
+                low=max(low,right-.06);high=min(high,left+.06)
+                if high<=low:continue
+                if low>cursor:spans.append((cursor,low))
+                cursor=max(cursor,high)
+            if cursor<left+.06:spans.append((cursor,left+.06))
+            for low,high in spans:
+                room.part('notched_front_head_infill',(.09,high-low,height-base),
+                          (front,(low+high)/2,(height+base)/2),panel_mat or room.wood)
+                room.part('notched_front_crown',(.13,high-low,.07),
+                          (front,(low+high)/2,height-.035),room.wood)
+            room.part('return_head_infill',(rear-front,.09,height-base),
+                      ((front+rear)/2,left,(height+base)/2),panel_mat or room.wood)
+            room.part('return_crown',(rear-front+.08,.13,.07),
+                      ((front+rear)/2,left,height-.035),room.wood)
+        room.part('service_return_base',(rear-front,.09,.90),((front+rear)/2,left,.45),panel_mat or room.wood)
+        room.part('service_return_dado',(rear-front+.08,.12,.07),((front+rear)/2,left,.97),room.wood)
+        for j in range(1,7):
+            room.part('return_upright',(.065,.075,1.43),(front+j*(rear-front)/7,left,1.715),room.wood)
+        room.part('return_middle_rail',(rear-front,.075,.05),((front+rear)/2,left,1.78),room.wood)
+
+
+def counter_returns(room, name, at, *, length=3.8, depth=.95, height=.92, panel_mat=None):
+    """Low cabinetry returning behind a counter; no freestanding architectural frame."""
+    x,y=at
+    with room.piece(name):
+        for side in (-1,1):
+            py=y+side*(length/2+.045)
+            room.part(name+'_end_panel',(depth,.075,height-.10),
+                      (x+depth/2,py,(height-.10)/2),panel_mat or room.wood)
+            room.part(name+'_cap',(depth+.06,.12,.075),
+                      (x+depth/2,py,height+.025),room.wood)
+            room.part(name+'_plinth',(depth,.10,.10),(x+depth/2,py,.05),room.wood)
+
+
+def service_counter(room, name, at, *, length=3.8, height=.92):
+    """Panelled civic counter with overhanging writing surface and foot rail."""
+    x,y=at
+    counter(room,name,at,length=length,width=.88,height=height,panels=5)
+    with room.piece(f'{name}_writing_station'):
+        room.part(f'{name}_writing_pad',(.52,1.15,.014),(x-.05,y,height+.087),room.leather)
+        room.part(f'{name}_tray_base',(.45,.50,.04),(x,y+1.35,height+.10),room.wood)
+        for side in (-1,1):
+            room.part(f'{name}_tray_edge_{side}',(.45,.04,.10),(x,y+1.35+side*.24,height+.15),room.wood)
+        room.part(f'{name}_writs',(.33,.36,.065),(x,y+1.35,height+.152),room.paper)
+
+
+def framed_picture(room, name, at, *, width=1.15, height=.82, artwork):
+    """A back-wall frame with recessed canvas and explicitly mapped image UVs."""
+    import bpy
+    x,y,z=at
+    with room.piece(name):
+        for side in (-1,1):
+            room.part(name+'_stile',(.075,.065,height+.12),(x,y+side*(width/2+.0325),z),room.wood)
+            room.part(name+'_rail',(.075,width,.065),(x,y,z+side*(height/2+.0325)),room.wood)
+        mesh=bpy.data.meshes.new(name+'_canvas')
+        mesh.from_pydata([(x-.018,y-width/2,z-height/2),(x-.018,y+width/2,z-height/2),
+                          (x-.018,y+width/2,z+height/2),(x-.018,y-width/2,z+height/2)],[],[(3,2,1,0)])
+        layer=mesh.uv_layers.new(name='Artwork')
+        uv=[(1,0),(0,0),(0,1),(1,1)]
+        for loop in mesh.loops:layer.data[loop.index].uv=uv[loop.vertex_index]
+        obj=bpy.data.objects.new(name+'_canvas',mesh);bpy.context.collection.objects.link(obj)
+        asset_core.parent_local(obj,room.root,loc=(0,0,room.lift))
+        asset_core.assign_material(obj,artwork);room.parts.append(obj)
+
+
+def potted_plant(room, name, at, *, foliage_mat, pot_mat=None):
+    """One clay pot with folded, broad-leaved foliage and separate stem silhouettes."""
+    import bmesh
+    from mathutils import Vector
+    x,y=at
+    with room.piece(name):
+        jar(room,name+'_pot',at,height=.31,radius=.19,mat=pot_mat or room.terracotta)
+        for i in range(7):
+            angle=i*2.399963
+            start=Vector((x,y,.27));tip=Vector((x+math.cos(angle)*.32,y+math.sin(angle)*.32,.64+.12*(i%3)))
+            length=(tip-start).length
+            stem=room.part(name+'_stem',(.016,.016,length),tuple((start+tip)/2),foliage_mat)
+            stem.rotation_euler=(tip-start).to_track_quat('Z','Y').to_euler()
+            reach=Vector((math.cos(angle)*.40,math.sin(angle)*.40,.12-.06*(i%3)))
+            cross=Vector((-math.sin(angle),math.cos(angle),0))*.135
+            bm=bmesh.new()
+            verts=[bm.verts.new(tuple(point)) for point in
+                (tip,tip+reach*.25+cross*.75,tip+reach*.65+cross,tip+reach,
+                 tip+reach*.65-cross,tip+reach*.25-cross*.75,tip+reach*.5+Vector((0,0,.065)))]
+            for j in range(6):bm.faces.new((verts[j],verts[(j+1)%6],verts[6]))
+            obj=asset_core.mesh_object_from_bmesh(name+'_leaf',bm)
+            asset_core.parent_local(obj,room.root,loc=(0,0,room.lift))
+            asset_core.assign_material(obj,foliage_mat);room.parts.append(obj)
+
+
 def table(room, name, at, *, length=1.25, width=0.7, height=0.76):
     """A table on turned legs."""
     x, y = at
@@ -339,7 +579,7 @@ def stair(room, name, *, y, x_start, steps=7, rise=0.19, run=0.3, width=1.5,
 # ---------------------------------------------------------------------------
 
 def counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3,
-            top_mat=None):
+            top_mat=None, body_mat=None, panel_mat=None):
     """A merchant shop counter (*balcao*): heavy dark timber carcass, recessed
     front panelling, overhanging top slab and a plinth.
 
@@ -351,8 +591,8 @@ def counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3,
     x, y = at
     with room.piece(name):
         room.part(f"{name}_carcass",
-                  (width * 0.88, length * 0.94, height * 0.88),
-                  (x, y, height * 0.44), room.wood)
+                  (width * 0.88, length * 0.94, height),
+                  (x, y, height / 2.0), body_mat or room.wood)
         room.part(f"{name}_top", (width, length, 0.08),
                   (x, y, height + 0.04), top_mat or room.wood)
         room.part(f"{name}_plinth", (width * 0.92, length * 0.96, 0.10),
@@ -364,7 +604,7 @@ def counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3,
             py = y - (length * 0.8) / 2.0 + panel_w * (index + 0.5)
             room.part(f"{name}_panel_{index}",
                       (0.03, panel_w * 0.82, height * 0.58),
-                      (front_x, py, height * 0.52), room.wood)
+                      (front_x, py, height * 0.52), panel_mat or room.wood)
 
 
 def bread_oven(room, name, at, *, length=1.5, depth=1.3, height=1.6):

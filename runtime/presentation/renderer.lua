@@ -601,7 +601,7 @@ end
 -- Renders the Map Scene
 local eventLabelAnim = { label = nil, target = nil, changedAt = 0 }
 
-local function drawAnimatedEventLabel(label)
+local function drawAnimatedEventLabel(label, placement)
     local now = love.timer.getTime()
     if label ~= eventLabelAnim.target then
         eventLabelAnim.target = label
@@ -620,17 +620,30 @@ local function drawAnimatedEventLabel(label)
         return
     end
 
+    local compactTop = placement == "compact_top"
     local screenW = ui.toPx(ui.screenWidthTiles)
-    local fullW = math.max(120, ui.measureText(shown) + 16)
-    local fullH = 26
+    local fullW = math.max(compactTop and ui.toPx(8) or 120, ui.measureText(shown) + 16)
+    local fullH = compactTop and ui.toPx(2) or 26
     local w = math.max(16, fullW * amount)
     local h = math.max(8, fullH * amount)
     local x = math.floor((screenW - w) / 2)
-    local y = 118 - h / 2
+    local y
+    local textY
+    if compactTop then
+        -- Side-view maps keep the interaction label out of the playfield:
+        -- settle it one UI tile below the top edge and collapse toward that
+        -- final panel's centre while opening/closing.
+        local settledY = ui.tileSize
+        y = math.floor(settledY + (fullH - h) / 2)
+        textY = settledY + math.floor((fullH - ui.lineHeight) / 2)
+    else
+        y = 118 - h / 2
+        textY = 112
+    end
     ui.drawPanel(x, y, w, h)
     love.graphics.push("all")
     love.graphics.setScissor(x, y, w, h)
-    ui.drawString(shown, math.floor((screenW - fullW) / 2) + 4, 112,
+    ui.drawString(shown, math.floor((screenW - fullW) / 2) + 4, textY,
         {1, 1, 0.5, 1}, "center", fullW - 8)
     love.graphics.pop()
 end
@@ -676,15 +689,11 @@ function renderer.drawMap(worldPresentation)
             if doorway.eventInstanceId then doorwayEvents[doorway.eventInstanceId] = true end
         end
         local label = nil
-        local nearDoorway = lane.nearDoorway(renderer.session)
-        -- Walking on to the next street is not an interaction, so the end of a
-        -- street stays silent. Only a door the player must choose to open
-        -- announces itself.
-        if lane.isEdgeDoorway(renderer.session, nearDoorway) then nearDoorway = nil end
+        local nearDoorway = lane.promptDoorway(renderer.session)
         local doorEvent = lane.eventFor(renderer.session, nearDoorway)
         if doorEvent then
             label = (doorEvent.name and doorEvent.name ~= "" and doorEvent.name or "Door")
-                .. "  - UP"
+                .. "  - " .. lane.doorwayButton(renderer.session, nearDoorway)
         else
             local state = renderer.session.townTraversal
             local nearest, nearestDistance
@@ -705,7 +714,7 @@ function renderer.drawMap(worldPresentation)
             end
         end
         if require("presentation.door_transition").isActive() then label = nil end
-        drawAnimatedEventLabel(label)
+        drawAnimatedEventLabel(label, "compact_top")
         surface.endComposition()
         return
     end

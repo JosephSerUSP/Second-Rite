@@ -4,6 +4,7 @@
 
 local obj_model = require("presentation.obj_model")
 local retro_mesh_shader = require("presentation.retro_mesh_shader")
+local surface = require("presentation.surface")
 
 local item_model_view = {}
 
@@ -85,10 +86,15 @@ local function getCanvasBuffers(w, h)
     local key = math.floor(w) .. "," .. math.floor(h)
     if canvasCache[key] then return canvasCache[key] end
     local bw, bh = math.max(1, math.floor(w)), math.max(1, math.floor(h))
-    local ok1, colorCanvas = pcall(love.graphics.newCanvas, bw, bh)
-    local ok2, depthCanvas = pcall(love.graphics.newCanvas, bw, bh, { format = "depth24stencil8" })
+    -- Item turntables are another game-raster target, not host-resolution UI.
+    -- Raw newCanvas() inherits Android/Retina DPI, which made this one 3D path
+    -- rasterize its Bayer dither and vertex grid at a different density from
+    -- the dungeon canvas. Keep both colour and depth attachments explicitly
+    -- logical-pixel-sized through the same authority as the main game raster.
+    local ok1, colorCanvas = pcall(surface.newRasterCanvas, bw, bh)
+    local ok2, depthCanvas = pcall(surface.newRasterCanvas, bw, bh, { format = "depth24stencil8" })
     if not ok2 then
-        ok2, depthCanvas = pcall(love.graphics.newCanvas, bw, bh, { format = "depth16" })
+        ok2, depthCanvas = pcall(surface.newRasterCanvas, bw, bh, { format = "depth16" })
     end
 
     if not ok1 or not colorCanvas or not ok2 or not depthCanvas then

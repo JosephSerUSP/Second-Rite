@@ -4,7 +4,10 @@ from pathlib import Path
 from mathutils import Vector
 
 
-OUT_DIR = Path(r"D:\Antigravity\Hichaukitoden\projects\hichaukitoden-game\assets\authoring\title")
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from tools.shared.project_paths import project_root
+OUT_DIR = project_root() / 'assets/authoring/title'
 BLEND_PATH = OUT_DIR / "second-gate-logo-codex.blend"
 PREVIEW_PATH = OUT_DIR / "second-gate-logo-codex-preview.png"
 

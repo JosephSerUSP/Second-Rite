@@ -17,6 +17,7 @@ def load_module(path, name):
 
 
 COMPARE = load_module(ROOT / "tools/golden/compare-relative.py", "relative_compare")
+EXPECTED_DELTA = load_module(ROOT / "tools/golden/expected_delta.py", "expected_delta")
 CAPTURE = load_module(ROOT / "tools/golden/relative-capture.py", "relative_capture")
 RECORD = load_module(ROOT / "tools/golden/record.py", "relative_record")
 EDITOR_FRONT = load_module(ROOT / "tools/golden/editor-screens.py", "relative_editor_screens")
@@ -25,6 +26,13 @@ EDITOR_FRONT = load_module(ROOT / "tools/golden/editor-screens.py", "relative_ed
 def write_png(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     Image.new("RGBA", (2, 2), value).save(str(path))
+
+
+def mark_capture_complete(path):
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "relative-capture.json").write_text(
+        json.dumps({"captureComplete": True}), encoding="utf-8"
+    )
 
 
 class RelativeComparatorTests(unittest.TestCase):
@@ -105,7 +113,7 @@ class RelativeComparatorTests(unittest.TestCase):
             self.assertEqual(payload["status"], "candidate-diff")
             self.assertEqual(len(payload["surfaces"]["classic"]["stableCandidateDifferences"]), 1)
 
-    def test_missing_candidate_frame_is_an_infrastructure_failure(self):
+    def test_missing_candidate_frame_is_a_red_topology_delta(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             for label in ("base-a", "base-b", "candidate"):
@@ -125,7 +133,8 @@ class RelativeComparatorTests(unittest.TestCase):
             ])
             self.assertEqual(code, 1)
             payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
-            self.assertEqual(payload["status"], "incomplete-capture")
+            self.assertEqual(payload["status"], "candidate-diff")
+            self.assertEqual(payload["state"], "red")
             self.assertEqual(payload["surfaces"]["editor"]["missingCandidateFrames"], ["frame.png"])
 
     def test_new_candidate_target_is_reported_without_a_false_regression(self):
@@ -148,11 +157,122 @@ class RelativeComparatorTests(unittest.TestCase):
                 "--candidate-ref", "candidate",
                 "--output", str(output),
             ])
-            self.assertEqual(code, 0)
+            self.assertEqual(code, 1)
             payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
-            self.assertEqual(payload["status"], "coverage-expanded")
+            self.assertEqual(payload["status"], "candidate-diff")
+            self.assertEqual(payload["state"], "red")
             self.assertEqual(payload["surfaces"]["editor"]["newCandidateFrames"], ["new.png"])
             self.assertEqual(payload["surfaces"]["editor"]["stableCandidateDifferences"], [])
+
+    def test_matching_durable_approval_promotes_red_to_orange(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            approvals = root / "approvals"
+            for label in ("base-a", "base-b", "candidate"):
+                mark_capture_complete(root / label)
+                (root / label / "captures/editor").mkdir(parents=True)
+            write_png(root / "base-a/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "base-b/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "candidate/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "candidate/captures/editor/new.png", (4, 4, 4, 255))
+
+            output = root / "report.md"
+            args = [
+                "--gate", "g6",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+                "--expected-deltas", str(approvals),
+            ]
+            self.assertEqual(COMPARE.main(args), 1)
+            red = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            approval = EXPECTED_DELTA.build_approval(
+                red, "options-topology", "reviewer",
+                "Options intentionally added a new scripted capture state.", ["#1314"],
+            )
+            approvals.mkdir(parents=True)
+            (approvals / "options-topology.json").write_text(
+                json.dumps(approval, indent=2) + "\n", encoding="utf-8"
+            )
+
+            self.assertEqual(COMPARE.main(args), 0)
+            orange = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            self.assertEqual(orange["status"], "expected-delta")
+            self.assertEqual(orange["state"], "orange")
+            self.assertEqual(orange["expectedDelta"]["rationale"], approval["rationale"])
+            self.assertIn("EXPECTED VISUAL DELTA (ORANGE)", output.read_text(encoding="utf-8"))
+
+    def test_additional_evidence_invalidates_orange_back_to_red(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            approvals = root / "approvals"
+            for label in ("base-a", "base-b", "candidate"):
+                mark_capture_complete(root / label)
+                (root / label / "captures/editor").mkdir(parents=True)
+            write_png(root / "base-a/captures/editor/frame.png", (0, 0, 0, 255))
+            write_png(root / "base-b/captures/editor/frame.png", (0, 0, 0, 255))
+            write_png(root / "candidate/captures/editor/frame.png", (9, 0, 0, 255))
+
+            output = root / "report.md"
+            args = [
+                "--gate", "g6",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+                "--expected-deltas", str(approvals),
+            ]
+            self.assertEqual(COMPARE.main(args), 1)
+            red = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            approval = EXPECTED_DELTA.build_approval(
+                red, "pixel-shift", "reviewer", "Known intentional pixel change."
+            )
+            approvals.mkdir(parents=True)
+            (approvals / "pixel-shift.json").write_text(json.dumps(approval), encoding="utf-8")
+            self.assertEqual(COMPARE.main(args), 0)
+
+            write_png(root / "candidate/captures/editor/extra.png", (1, 2, 3, 255))
+            self.assertEqual(COMPARE.main(args), 1)
+            changed = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            self.assertEqual(changed["status"], "candidate-diff")
+            self.assertEqual(changed["state"], "red")
+
+    def test_incomplete_capture_cannot_be_promoted(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for label in ("base-a", "base-b", "candidate"):
+                mark_capture_complete(root / label)
+                (root / label / "captures/editor").mkdir(parents=True)
+            write_png(root / "base-a/captures/editor/frame.png", (0, 0, 0, 255))
+            write_png(root / "base-b/captures/editor/frame.png", (0, 0, 0, 255))
+            write_png(root / "candidate/captures/editor/frame.png", (9, 0, 0, 255))
+            (root / "candidate/relative-capture.json").write_text(
+                json.dumps({"captureComplete": False, "error": "readiness stall"}),
+                encoding="utf-8",
+            )
+
+            output = root / "report.md"
+            code = COMPARE.main([
+                "--gate", "g6",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+            ])
+            self.assertEqual(code, 1)
+            payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "incomplete-capture")
+            with self.assertRaises(ValueError):
+                EXPECTED_DELTA.build_approval(
+                    payload, "bad", "reviewer", "Infrastructure is understood."
+                )
 
 
 class PullRequestIntegrationSelectionTests(unittest.TestCase):

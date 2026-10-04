@@ -87,6 +87,11 @@
         "anchor": "east_backstreet",
         "eventInstanceId": "st-maria-praca-east_backstreet",
         "radius": 0.9
+      },
+      {
+        "anchor": "npc_registrar",
+        "eventInstanceId": "st-maria-praca-passage-office",
+        "radius": 0.9
       }
     ]
   },
@@ -117,8 +122,8 @@
     },
     {
       "id": 1702,
-      "instanceId": "st-maria-praca-registrar",
-      "name": "Registrar",
+      "instanceId": "st-maria-praca-passage-office",
+      "name": "Passage Office",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -126,82 +131,16 @@
         16.763,
         0.0
       ],
-      "trigger": "interact",
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "direction": "away",
       "commands": [
         {
-          "condition": "hasItem:198",
-          "commands": [
-            {
-              "text": "Celina glances at your pass. \"Still legible. A promising start.\"",
-              "speaker": "Registrar Celina",
-              "expression": 4,
-              "cmd": "TEXT"
-            },
-            {
-              "options": [
-                {
-                  "label": "Ask about St. Maria.",
-                  "commands": [
-                    {
-                      "text": "\"The village sells meals, beds, steel and funerals. Summoners bring demand for all four.\"",
-                      "speaker": "Registrar Celina",
-                      "expression": 2,
-                      "cmd": "TEXT"
-                    }
-                  ]
-                },
-                {
-                  "label": "Ask about the Labyrinth.",
-                  "commands": [
-                    {
-                      "text": "\"Return before your MP makes the decision for you. Pride is not accepted as payment at the infirmary.\"",
-                      "speaker": "Registrar Celina",
-                      "expression": 5,
-                      "cmd": "TEXT"
-                    }
-                  ]
-                },
-                {
-                  "label": "Leave.",
-                  "commands": []
-                }
-              ],
-              "cmd": "CHOICE"
-            }
-          ],
-          "elseCommands": [
-            {
-              "text": "Celina holds out one hand. \"Your Summoner's seal. Not your name. We keep those separate here.\"",
-              "speaker": "Registrar Celina",
-              "expression": 2,
-              "cmd": "TEXT"
-            },
-            {
-              "text": "She copies the seal into a narrow ledger. Most of the page is empty. The previous page is not.",
-              "speaker": "Registrar Celina",
-              "expression": 1,
-              "cmd": "TEXT"
-            },
-            {
-              "item": "198",
-              "count": 1,
-              "cmd": "CHANGE_ITEM"
-            },
-            {
-              "text": "Obtained Crossing Writ. \"The guard will let you descend now. Coming back remains your responsibility.\"",
-              "speaker": "Registrar Celina",
-              "expression": 5,
-              "cmd": "TEXT"
-            }
-          ],
-          "cmd": "CONDITIONAL_BRANCH"
+          "cmd": "LOAD_MAP",
+          "mapId": 33,
+          "arrival": "exit_door"
         }
-      ],
-      "sprite": "assets/character/npc_celina.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
+      ]
     },
     {
       "id": 1703,

@@ -15,13 +15,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 TOOLS = ROOT / "tools" / "blender"
 
 
 def blender(*arguments, timeout=600):
-    return subprocess.run([blender_locator.blender_executable(), "-b", "-noaudio", "--factory-startup",
+    return subprocess.run([blender_test_support.blender_executable(), "-b", "-noaudio", "--factory-startup",
                            "--python-exit-code", "1", *arguments], capture_output=True, text=True, timeout=timeout)
 
 
@@ -38,10 +40,12 @@ class EeveeBackendTests(unittest.TestCase):
             raise AssertionError(f"could not build the room:\n{made.stdout[-1500:]}\n{made.stderr[-800:]}")
         for backend in ("cycles", "eevee"):
             output = base / backend
+            # Compare backends under one UV policy: Cycles' export quality profile
+            # aligns atlas texels by default, whereas EEVEE uses its own settings.
             result = blender("-P", str(TOOLS / "export_room_environment.py"), "--",
                              "--blend", str(source), "--output", str(output), "--exit-y", "6.5",
-                             "--atlas-size", "128", "--samples", "8", *(["--bake-backend", backend] if backend == "cycles" else []),
-                             "--bake-supersample", "1")
+                             "--atlas-size", "128", "--samples", "8", "--bake-backend", backend, "--cycles-device", "CPU",
+                             "--bake-supersample", "1", "--no-uv-texel-align")
             if "ROOM 3D EXPORT OK" not in result.stdout:
                 raise AssertionError(f"{backend} export failed:\n{result.stdout[-2500:]}\n{result.stderr[-1000:]}")
             cls.packages[backend] = output
@@ -98,8 +102,12 @@ class EeveeBackendTests(unittest.TestCase):
         self.assertTrue(bake["emissiveLights"])
         self.assertTrue(bake["fixtureLights"])
 
-    def test_a_cycles_package_keeps_the_manifest_it_always_had(self):
-        self.assertNotIn("bake", self.manifest("cycles")["provenance"])
+    def test_cycles_package_records_effective_quality(self):
+        record = self.manifest("cycles")["provenance"]["bake"]
+        self.assertEqual(record["backend"], "cycles")
+        self.assertEqual(record["quality"]["samples"], 8)
+        self.assertFalse(record["quality"]["denoise"])
+        self.assertEqual(record["texelAlignment"]["method"], "none")
 
 
 if __name__ == "__main__":

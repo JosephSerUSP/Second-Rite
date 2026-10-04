@@ -1,0 +1,192 @@
+{
+  "id": 33,
+  "title": "St. Maria - Passage Office",
+  "intro": "A narrow ledger, a seal, and a place to wait.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "solid",
+  "fog": {
+    "minFactor": 1.0
+  },
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/passage_office/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.35,
+      "maxY": 7.4167,
+      "depthX": 0.0,
+      "groundZ": 0.0,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0.0,
+        "y": 3.8833,
+        "z": 2.2604
+      },
+      "distance": 18.6667,
+      "yawDegrees": 0.0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionWindowOffsetY": -107.16301268,
+      "projectionFrame": {
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 3.8833,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-passage-office-exit_door",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 3301,
+      "instanceId": "st-maria-passage-office-registrar",
+      "name": "Registrar",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        1.15,
+        4.5833,
+        0.0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "text": "Celina glances at your pass. \"Still legible. A promising start.\"",
+              "speaker": "Registrar Celina",
+              "expression": 4,
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Ask about St. Maria.",
+                  "commands": [
+                    {
+                      "text": "\"You are standing in the Praça. Uphill is the Churchyard and the Labyrinth gate. Downhill, Market Row has Alicia's padaria; keep descending to the Port for Laura's forge. Your room is back through the Cortiço.\"",
+                      "speaker": "Registrar Celina",
+                      "expression": 2,
+                      "cmd": "TEXT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Ask about the Labyrinth.",
+                  "commands": [
+                    {
+                      "text": "\"Walking does not spend your seal. Calling every manifestation fully into a fight does. Return before your MP makes the decision for you.\"",
+                      "speaker": "Registrar Celina",
+                      "expression": 5,
+                      "cmd": "TEXT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Celina holds out one hand. \"Your Summoner's seal. Not your name. We keep those separate here.\"",
+              "speaker": "Registrar Celina",
+              "expression": 2,
+              "cmd": "TEXT"
+            },
+            {
+              "text": "She copies the seal into a narrow ledger. Most of the page is empty. The previous page is not.",
+              "speaker": "Registrar Celina",
+              "expression": 1,
+              "cmd": "TEXT"
+            },
+            {
+              "item": "198",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "text": "Obtained Crossing Writ. \"The gate is uphill in the Churchyard. Alicia sells provisions downhill on Market Row; Laura's forge is at the Port. Coming back remains your responsibility.\"",
+              "speaker": "Registrar Celina",
+              "expression": 5,
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/npc_celina.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 3302,
+      "instanceId": "st-maria-passage-office-exit_door",
+      "name": "Out to the Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        1.0833,
+        0.0
+      ],
+      "trigger": "bump",
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 17,
+          "arrival": "npc_registrar"
+        }
+      ],
+      "direction": "toward"
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

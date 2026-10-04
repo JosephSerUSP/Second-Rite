@@ -8,6 +8,7 @@
     "quest_log.json",
     "map.json",
     "items.json",
+    "actor_change.json",
     "status.json",
     "recruit.json",
     "battle.json",

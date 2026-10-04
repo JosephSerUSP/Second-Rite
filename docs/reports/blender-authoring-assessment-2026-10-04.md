@@ -339,7 +339,7 @@ worked example is the single most valuable aid. Without one, it improvises
 the three-rank near stack and the camera distance and gets them wrong. A
 middle path: a worked example that is clearly *not a place* (a neutral test
 street in the Gate-Room spirit), so copying it yields correct structure but no
-St. Maria identity to clone. This is the owner's call. It is listed here
+St. Maria identity to clone. This is the owner's call (#1350). It is listed here
 because it bears directly on the weak-agent goal.
 
 ---
@@ -547,15 +547,15 @@ Issues, not a checklist. Each carries an acceptance test.
 
 | Step | Work | Accept when |
 |---|---|---|
-| 1 | `project_paths.py`; migrate the 22 root-path files; add `asset-production/tests` and `check_item_models.py` to `verify.yml` | Both run green in CI. `grep` finds no repo-root `assets`/`data` path in `tools/` |
-| 2 | Deletion list (§6) | The 85 top-level scripts drop to ≤ 35 production entries. No orphan lists |
-| 3 | `tools/blender/README.md` routing table; history moved out of `BLENDER_CORE.md` and the item README | Each lane reachable in ≤ 2 hops from `AGENTS.md` |
-| 4 | Host tests `skipTest` without Blender | `discover` reports every bpy-free test without a Blender install |
-| 5 | Furnishings catalogue + gate (5.2) | Every public furnishing has a docstring, thumbnail and parameter row; gate red otherwise |
-| 6 | Interior staging predicates (5.5) | Each rule has a negative-control test |
-| 7 | Place-spec pilot on the Padaria (5.1) | Spec-built `.blend` is geometrically equivalent to the recipe-built scaffold; Python recipe deleted |
-| 8 | Item templates (5.3) + finish presets (5.4) | One legacy item replaced end to end by a rung-1 agent through `new_item.py`, passing compile, runtime and corpus gates |
-| 9 | Revision policy for candidates (F4) | Candidate folder holds ≤ 2 `.blend`; LFS or out-of-repo decided by the owner |
+| 1 (#1341) | `project_paths.py`; migrate the 22 root-path files; add `asset-production/tests` and `check_item_models.py` to `verify.yml` | Both run green in CI. `grep` finds no repo-root `assets`/`data` path in `tools/` |
+| 2 (#1342) | Deletion list (§6) | The 85 top-level scripts drop to ≤ 35 production entries. No orphan lists |
+| 3 (#1343) | `tools/blender/README.md` routing table; history moved out of `BLENDER_CORE.md` and the item README | Each lane reachable in ≤ 2 hops from `AGENTS.md` |
+| 4 (#1344) | Host tests `skipTest` without Blender | `discover` reports every bpy-free test without a Blender install |
+| 5 (#1345) | Furnishings catalogue + gate (5.2) | Every public furnishing has a docstring, thumbnail and parameter row; gate red otherwise |
+| 6 (#1346) | Interior staging predicates (5.5) | Each rule has a negative-control test |
+| 7 (#1347) | Place-spec pilot on the Padaria (5.1) | Spec-built `.blend` is geometrically equivalent to the recipe-built scaffold; Python recipe deleted |
+| 8 (#1348) | Item templates (5.3) + finish presets (5.4) | One legacy item replaced end to end by a rung-1 agent through `new_item.py`, passing compile, runtime and corpus gates |
+| 9 (#1349) | Revision policy for candidates (F4) | Candidate folder holds ≤ 2 `.blend`; LFS or out-of-repo decided by the owner |
 
 ---
 

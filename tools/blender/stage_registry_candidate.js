@@ -11,7 +11,7 @@ function stage(output, packageDir) {
     const project = path.join(root, 'projects/hichaukitoden-game');
     const read = id => JSON.parse(fs.readFileSync(path.join(project, `data/maps/${id}.json`)));
     const map = read(28);
-    const registrar = read(17).events.find(e => e.instanceId === 'st-maria-praca-registrar');
+    const registrar = read(33).events.find(e => e.instanceId === 'st-maria-passage-office-registrar');
     if (!registrar) throw new Error('Authored Registrar event missing');
     const packagePath = 'assets/environments/review/passage_office/environment.json';
     const manifest = JSON.parse(fs.readFileSync(path.join(packageDir, 'environment.json')));
@@ -46,7 +46,7 @@ function stage(output, packageDir) {
     fs.copyFileSync(path.join(__dirname, 'tests/environment_frames.lua'), path.join(result.stageDir, 'tests/environment_frames.lua'));
     fs.writeFileSync(path.join(output, 'candidate.json'), JSON.stringify({mapId:28, package:packagePath,
         sourceBlend:manifest.provenance.sourceBlend, replacedOnlyInStage:true,
-        registrarCommandsSource:'projects/hichaukitoden-game/data/maps/17.json',
+        registrarCommandsSource:'projects/hichaukitoden-game/data/maps/33.json',
         registrarSprite:celina.sprite}, null, 2)+'\n');
     console.log(JSON.stringify(result, null, 2));
     return result;

@@ -37,6 +37,10 @@ function readManifest(manifestPath = DEFAULT_MANIFEST) {
     manifest.rootFiles.forEach(value => requireRelativePath(value, 'rootFiles entry'));
     manifest.runtimeDirectories.forEach(value => requireRelativePath(value, 'runtimeDirectories entry'));
     manifest.projectDirectories.forEach(value => requireRelativePath(value, 'projectDirectories entry'));
+    if (manifest.projectExcludedPaths !== undefined && !Array.isArray(manifest.projectExcludedPaths)) {
+        throw new Error('runtime manifest projectExcludedPaths must be an array');
+    }
+    (manifest.projectExcludedPaths || []).forEach(value => requireRelativePath(value, 'projectExcludedPaths entry'));
     manifest.authoredDataExtensions.forEach(value => {
         if (typeof value !== 'string' || !value.startsWith('.')) throw new Error(`Invalid authored-data extension: ${value}`);
     });
@@ -49,9 +53,16 @@ function copyFile(source, destination) {
     fs.copyFileSync(source, destination);
 }
 
-function copyDirectory(source, destination) {
+function copyDirectory(source, destination, excludedPaths = []) {
     if (!fs.statSync(source).isDirectory()) throw new Error(`Manifest source directory is missing: ${source}`);
-    fs.cpSync(source, destination, { recursive: true, force: true, errorOnExist: false });
+    fs.cpSync(source, destination, {
+        recursive: true, force: true, errorOnExist: false,
+        filter: candidate => !excludedPaths.some(excluded => {
+            const relative = path.relative(excluded, candidate);
+            return relative === '' || (!relative.startsWith('..' + path.sep)
+                && relative !== '..' && !path.isAbsolute(relative));
+        }),
+    });
 }
 
 function copyAuthoredData(source, destination, extensions) {
@@ -93,7 +104,8 @@ function stageGame({ projectDir, runtimeDir, outputDir, manifestPath = DEFAULT_M
     fs.mkdirSync(stageDir, { recursive: true });
     for (const relative of manifest.rootFiles) copyFile(path.join(runtimeDir, relative), path.join(stageDir, relative));
     for (const relative of manifest.runtimeDirectories) copyDirectory(path.join(runtimeDir, relative), path.join(stageDir, relative));
-    for (const relative of manifest.projectDirectories) copyDirectory(path.join(projectDir, relative), path.join(stageDir, relative));
+    const excludedPaths = (manifest.projectExcludedPaths || []).map(relative => path.resolve(projectDir, relative));
+    for (const relative of manifest.projectDirectories) copyDirectory(path.join(projectDir, relative), path.join(stageDir, relative), excludedPaths);
     copyFile(path.join(runtimeDir, manifest.releaseConfig), path.join(stageDir, 'conf.lua'));
 
     const stagedData = path.join(stageDir, 'data');

@@ -22,7 +22,7 @@ loader.init()
 local game = session.GameSession.new(loader)
 game:initializeStartingParty()
 
-local CHURCHYARD, PRACA = 16, 17
+local CHURCHYARD, PRACA = 1006, 1005
 
 exploration.loadMap(game, loader.getMapIndex(CHURCHYARD))
 check(lane.isActive(game), "the churchyard screen selects bounded_lane")
@@ -30,13 +30,13 @@ check(game.townTraversal.environment.manifest.contractVersion == 1,
     "runtime reads the environment manifest")
 
 local state = game.townTraversal
-check(state.x == 7.8, "spawn depth comes from the package anchor")
+check(state.x == 0, "spawn depth comes from the package anchor")
 local laneCentre = (state.minY + state.maxY) / 2
 check(math.abs(state.y - laneCentre) < 0.001, "spawn lands on the lane centre anchor")
 
 local preRendered = state.environment.preRendered
 check(preRendered ~= nil, "the churchyard screen is a pre-rendered package")
-check(state.environment.manifest.provenance.plateSourceViewTransform == "Standard",
+check(state.environment.manifest.provenance.sourceBlend == "st_maria_core.blend",
     "generated town plates record their source view transform")
 check(#preRendered.slicePositions == 1, "a flat plate needs exactly one slice")
 -- Plate widths are authored per screen: a street is long, a room is not. The
@@ -48,7 +48,7 @@ check(preRendered.imageSize[1] >= 256, "a plate is at least as wide as a Classic
 -- Movement
 local startY = state.y
 check(lane.move(game, 1) and state.y > startY, "right movement increases lane position")
-check(state.x == 7.8, "horizontal movement keeps authored depth fixed")
+check(state.x == 0, "horizontal movement keeps authored depth fixed")
 check(state.cameraTargetOffsetX == 0,
     "scrolling is a draw offset and never moves the projection window")
 
@@ -60,12 +60,12 @@ check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound
 -- Arrival anchors: entering a screen through a named door must land on that
 -- door, not on the destination's default spawn.
 -- The Praca is modelled geometry now, and its churchyard exit is a stair partway
--- along the square rather than the west bound: the anchor is churchyard_stair,
+-- along the square rather than the west bound: the anchor is to-churchyard-stair,
 -- and the west end of the lane belongs to the quay.
-exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "churchyard_stair" })
+exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "to-churchyard-stair" })
 local praca = game.townTraversal
-local stair = praca.environment.anchors["churchyard_stair"]
-check(stair ~= nil, "the praca package publishes its churchyard_stair anchor")
+local stair = praca.environment.anchors["to-churchyard-stair"]
+check(stair ~= nil, "the praca package publishes its to-churchyard-stair anchor")
 check(math.abs(praca.y - stair.position[2]) < 0.001,
     "arrival through a named door spawns on that door's anchor")
 check(math.abs(praca.y - (praca.minY + praca.maxY) / 2) > 0.5,
@@ -213,26 +213,26 @@ check(math.abs(lane.groundAt(game, 4) - game.townTraversal.groundZ) < 0.001,
 -- tells them apart by exact position on a bound, and Market Row is the case
 -- that rules out a radius test: the weaponsmith stands 0.86 from the east end
 -- with a 0.9 radius, so any tolerant test would call a shop door an exit.
-exploration.loadMap(game, loader.getMapIndex(18))
+exploration.loadMap(game, loader.getMapIndex(1002))
 local market = game.townTraversal
 local byAnchor = {}
 for _, doorway in ipairs(market.doorways) do byAnchor[doorway.anchor] = doorway end
-check(lane.isEdgeDoorway(game, byAnchor["east_quay"]),
-    "Market Row continues into the Quay at its east end, silently")
-check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
+check(not lane.isEdgeDoorway(game, byAnchor["to-quay"]),
+    "the foreshortened Quay approach is a depth transfer")
+check(not lane.isEdgeDoorway(game, byAnchor["door-bakery"]),
     "the weaponsmith door is a door, not an edge exit")
 -- A passage between the town's two levels is something the player chooses to
 -- take, so it is authored just INSIDE the bound rather than on it. On the
 -- bound it would be classified as the street continuing and announce nothing.
-check(not lane.isEdgeDoorway(game, byAnchor["back_steps"]),
-    "the stair up to the Backstreet announces itself rather than reading as the street continuing")
+check(lane.isEdgeDoorway(game, byAnchor["to-court"]),
+    "the court street continues beyond the market's left edge")
 
 -- Shop arrivals are deliberately one interaction radius inside the exit.
 -- Decimal 0.9 is not exactly representable, so equality at that boundary
 -- needs the same tolerance as every other world-space comparison.
-exploration.loadMap(game, loader.getMapIndex(27))
+exploration.loadMap(game, loader.getMapIndex(28))
 local arrivalExit = lane.interact(game)
-check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_door",
+check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria_3d-exit_door",
     "Up can reopen the shop exit from its arrival spawn")
 
 -- Town lanes share z=0 as their base groundZ, but a lane may layer
@@ -242,15 +242,15 @@ check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_d
 --
 -- The guarantee the old two-convention crossing existed to protect still holds:
 -- a transit re-derives height from the DESTINATION.
-for _, screen in ipairs({ 16, 18, 19, 21, 22, 23, 24, 25, 26, 27, 31 }) do
+for _, screen in ipairs({ 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 21, 22, 25, 28, 29, 33 }) do
     exploration.loadMap(game, loader.getMapIndex(screen))
     check(math.abs(game.townTraversal.groundZ) < 0.001,
         "map " .. screen .. " stands on the town's single floor at z=0")
     check(math.abs(game.townTraversal.z - lane.groundAt(game, game.townTraversal.y)) < 0.001,
         "map " .. screen .. " puts the player on its authored floor")
 end
-exploration.loadMap(game, loader.getMapIndex(18))
-exploration.loadMap(game, loader.getMapIndex(27), { arrival = "exit_door" })
+exploration.loadMap(game, loader.getMapIndex(1002))
+exploration.loadMap(game, loader.getMapIndex(28), { arrival = "exit_door" })
 check(math.abs(game.townTraversal.z - 0.0) < 0.001,
     "a transit still lands the player on the destination's floor")
 
@@ -262,26 +262,26 @@ check(math.abs(game.townTraversal.z - 0.0) < 0.001,
 -- This asserts the half that is testable headlessly - that a lane is fully
 -- functional with no pre-rendered block at all.
 local flatEnv = require("engine.environment_package").load(
-    "assets/environments/st_maria_town/quay/environment.json")
+    "assets/environments/st_maria_core/quay/environment.json")
 check(flatEnv.preRendered ~= nil, "the quay package is pre-rendered today")
 check(flatEnv.renderMesh ~= nil and flatEnv.anchors ~= nil,
     "and it already carries the mesh and anchors a 3D scene would use")
 local as3d = {}
 for key, value in pairs(flatEnv) do as3d[key] = value end
 as3d.preRendered = nil
-local quayMap = loader.maps[loader.getMapIndex(19)]
+local quayMap = loader.maps[loader.getMapIndex(1003)]
 game.currentMapData = quayMap
 lane.initialize(game, quayMap, as3d, nil)
 check(lane.isActive(game), "a lane with no pre-rendered block still initialises")
 local rx, ry, rz = lane.actorRoot(game)
-check(rx == 7.8 and ry ~= nil and rz ~= nil,
+check(rx == 0 and ry ~= nil and rz ~= nil,
     "and still publishes an actor root for the 3D path to billboard")
 -- The approved six-screen spiral gives the Quay ordinary street exits at both
 -- ends: Market Row to the west and the Port to the east.
 check(lane.edgeDoorway(game, -1) ~= nil,
     "the quay continues into Market Row at its west end")
-check(lane.edgeDoorway(game, 1) ~= nil,
-    "the quay continues into the Port at its east end")
+check(lane.edgeDoorway(game, 1) == nil,
+    "the quay's far end does not invent an unauthored transfer")
 
 -- The town loops. A player can leave the praca by the alley and arrive at
 -- Market Row without ever walking back through the square, which is the whole
@@ -317,11 +317,11 @@ local function doorTargets(mapId)
     for _, event in ipairs(map.events or {}) do walk(event.commands) end
     return targets
 end
-check(doorTargets(17)[26], "the praca opens on to the backstreet")
-check(doorTargets(26)[18], "the backstreet drops into market row")
-check(doorTargets(26)[32] and doorTargets(32)[25], "the court connects the backstreet to the rented room")
-check(doorTargets(17)[16], "the praca stair climbs to the churchyard")
-check(doorTargets(16)[2], "the churchyard holds the way into the labyrinth")
+check(doorTargets(1005)[1001], "the praca opens on to the backstreet")
+check(doorTargets(1001)[1002], "the backstreet drops into market row")
+check(doorTargets(1001)[25] and doorTargets(25)[1001], "the court connects the backstreet to the rented room")
+check(doorTargets(1005)[1009] and doorTargets(1009)[1006], "the praca stair climbs to the churchyard")
+check(doorTargets(1006)[1007] and doorTargets(1007)[2], "the churchyard holds the way into the labyrinth")
 
 -- Authored width is a design statement: the square is the widest place in the
 -- town and a room is not a street. A regression that flattened every plate to
@@ -367,14 +367,13 @@ end
 local exteriorWidths, roomWidths = {}, {}
 for _, entry in ipairs(plateMaps) do
     local id = entry.map.id
-    local isStreet = (id == 16 or id == 17 or id == 18 or id == 19
-        or id == 26 or id == 31)
+    local isStreet = id >= 1001 and id <= 1009
     -- Three interiors are architecturally long rather than small rooms: the
     -- Pub is the town's only two-level room, the Chapel is a nave with the
     -- altar at the far end, and the Padaria hearth (23) is a through-building
     -- passage spanning between the Cortico and the market shop.
     local list = isStreet and exteriorWidths or roomWidths
-    if id == 21 or id == 22 or id == 23 then list = nil end
+    if id == 21 or id == 22 or id == 30 then list = nil end
     if list then list[#list + 1] = widthOf[id] end
 end
 local distinct, distinctCount = {}, 0

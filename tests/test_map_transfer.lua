@@ -1127,7 +1127,7 @@ check(actingNode and actingNode.expression == 4,
     "TEXT preserves the authored 1-5 portrait expression in the event graph")
 
 local alicia
-for _, ev in ipairs(loader.maps[1].events or {}) do
+for _, ev in ipairs(loader.maps[loader.getMapIndex(28)].events or {}) do
     if ev.name == "Alicia" then alicia = ev break end
 end
 check(alicia and alicia.pages and alicia.pages[1]

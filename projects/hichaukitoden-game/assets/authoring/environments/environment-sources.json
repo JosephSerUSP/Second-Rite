@@ -90,6 +90,10 @@
       "status": "adopted",
       "basis": "Owner approved r13 and authorized game integration on 2026-10-02; byte-identical copy of preserved candidate. Edit directly; never regenerate.",
       "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7"
+    },
+    "st_maria_core.blend": {
+      "status": "adopted",
+      "basis": "Owner requested the B18 playable town become the default Project town on 2026-10-04. Direct source copy; edit this adopted source, never regenerate it."
     }
   }
 }

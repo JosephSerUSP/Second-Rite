@@ -2,6 +2,7 @@
 -- session.eventOverrides silently reverts after save/load because numeric keys
 -- become strings through JSON object encoding/decoding.
 local loader = require("engine.data.loader")
+local restoreGridFixture = require("tests.event_state_grid_fixture")(loader)
 local session = require("engine.session")
 local interpreter = require("engine.interpreter")
 local exploration = require("engine.exploration")
@@ -157,3 +158,5 @@ require("tests.test_game_variables")
 require("tests.test_json_codec")
 
 print("=== eventOverrides save regression: all checks passed ===")
+
+restoreGridFixture()

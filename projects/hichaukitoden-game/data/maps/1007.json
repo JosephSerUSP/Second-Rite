@@ -1,0 +1,853 @@
+{
+  "id": 1007,
+  "title": "St. Maria / Labyrinth forecourt",
+  "intro": "A street of St. Maria.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_core/threshold/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 28.0,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0.0,
+          "z": 0.0
+        },
+        {
+          "y": 0.2,
+          "z": 0.0
+        },
+        {
+          "y": 0.4,
+          "z": 0.0
+        },
+        {
+          "y": 0.6,
+          "z": 0.0
+        },
+        {
+          "y": 0.8,
+          "z": 0.0
+        },
+        {
+          "y": 1.0,
+          "z": 0.0
+        },
+        {
+          "y": 1.2,
+          "z": 0.0
+        },
+        {
+          "y": 1.4,
+          "z": 0.0
+        },
+        {
+          "y": 1.6,
+          "z": 0.0
+        },
+        {
+          "y": 1.8,
+          "z": 0.0
+        },
+        {
+          "y": 2.0,
+          "z": 0.0
+        },
+        {
+          "y": 2.2,
+          "z": 0.0
+        },
+        {
+          "y": 2.4,
+          "z": 0.0
+        },
+        {
+          "y": 2.6,
+          "z": 4e-06
+        },
+        {
+          "y": 2.8,
+          "z": 0.0
+        },
+        {
+          "y": 3.0,
+          "z": 0.0
+        },
+        {
+          "y": 3.2,
+          "z": 0.0
+        },
+        {
+          "y": 3.4,
+          "z": 0.0
+        },
+        {
+          "y": 3.6,
+          "z": 0.0
+        },
+        {
+          "y": 3.8,
+          "z": 0.0
+        },
+        {
+          "y": 4.0,
+          "z": 0.0
+        },
+        {
+          "y": 4.2,
+          "z": 0.0
+        },
+        {
+          "y": 4.4,
+          "z": 0.0
+        },
+        {
+          "y": 4.6,
+          "z": 0.0
+        },
+        {
+          "y": 4.8,
+          "z": 0.0
+        },
+        {
+          "y": 5.0,
+          "z": 0.0
+        },
+        {
+          "y": 5.2,
+          "z": 0.0
+        },
+        {
+          "y": 5.4,
+          "z": 0.0
+        },
+        {
+          "y": 5.6,
+          "z": 0.0
+        },
+        {
+          "y": 5.8,
+          "z": 0.0
+        },
+        {
+          "y": 6.0,
+          "z": 0.0
+        },
+        {
+          "y": 6.2,
+          "z": 0.0
+        },
+        {
+          "y": 6.4,
+          "z": 0.0
+        },
+        {
+          "y": 6.6,
+          "z": 0.0
+        },
+        {
+          "y": 6.8,
+          "z": 0.0
+        },
+        {
+          "y": 7.0,
+          "z": 0.0
+        },
+        {
+          "y": 7.2,
+          "z": 0.0
+        },
+        {
+          "y": 7.4,
+          "z": 0.0
+        },
+        {
+          "y": 7.6,
+          "z": 0.0
+        },
+        {
+          "y": 7.8,
+          "z": 0.0
+        },
+        {
+          "y": 8.0,
+          "z": 0.0
+        },
+        {
+          "y": 8.2,
+          "z": 0.0
+        },
+        {
+          "y": 8.4,
+          "z": 0.0
+        },
+        {
+          "y": 8.6,
+          "z": 0.0
+        },
+        {
+          "y": 8.8,
+          "z": 0.0
+        },
+        {
+          "y": 9.0,
+          "z": 0.0
+        },
+        {
+          "y": 9.2,
+          "z": 0.0
+        },
+        {
+          "y": 9.4,
+          "z": 0.0
+        },
+        {
+          "y": 9.6,
+          "z": 0.0
+        },
+        {
+          "y": 9.8,
+          "z": 0.0
+        },
+        {
+          "y": 10.0,
+          "z": 0.0
+        },
+        {
+          "y": 10.2,
+          "z": 0.0
+        },
+        {
+          "y": 10.4,
+          "z": 0.0
+        },
+        {
+          "y": 10.6,
+          "z": 0.0
+        },
+        {
+          "y": 10.8,
+          "z": 0.0
+        },
+        {
+          "y": 11.0,
+          "z": 0.0
+        },
+        {
+          "y": 11.2,
+          "z": 0.0
+        },
+        {
+          "y": 11.4,
+          "z": 0.0
+        },
+        {
+          "y": 11.6,
+          "z": 0.0
+        },
+        {
+          "y": 11.8,
+          "z": 0.0
+        },
+        {
+          "y": 12.0,
+          "z": 0.0
+        },
+        {
+          "y": 12.2,
+          "z": 0.0
+        },
+        {
+          "y": 12.4,
+          "z": 0.0
+        },
+        {
+          "y": 12.6,
+          "z": 0.0
+        },
+        {
+          "y": 12.8,
+          "z": 0.0
+        },
+        {
+          "y": 13.0,
+          "z": 0.0
+        },
+        {
+          "y": 13.2,
+          "z": 0.0
+        },
+        {
+          "y": 13.4,
+          "z": 0.0
+        },
+        {
+          "y": 13.6,
+          "z": 0.0
+        },
+        {
+          "y": 13.8,
+          "z": 0.0
+        },
+        {
+          "y": 14.0,
+          "z": 0.0
+        },
+        {
+          "y": 14.2,
+          "z": 0.0
+        },
+        {
+          "y": 14.4,
+          "z": 0.0
+        },
+        {
+          "y": 14.6,
+          "z": 0.0
+        },
+        {
+          "y": 14.8,
+          "z": 0.0
+        },
+        {
+          "y": 15.0,
+          "z": 0.0
+        },
+        {
+          "y": 15.2,
+          "z": 0.0
+        },
+        {
+          "y": 15.4,
+          "z": 0.0
+        },
+        {
+          "y": 15.6,
+          "z": 0.0
+        },
+        {
+          "y": 15.8,
+          "z": 0.0
+        },
+        {
+          "y": 16.0,
+          "z": 0.0
+        },
+        {
+          "y": 16.2,
+          "z": 0.0
+        },
+        {
+          "y": 16.4,
+          "z": 0.0
+        },
+        {
+          "y": 16.6,
+          "z": 0.0
+        },
+        {
+          "y": 16.8,
+          "z": 0.0
+        },
+        {
+          "y": 17.0,
+          "z": 0.0
+        },
+        {
+          "y": 17.2,
+          "z": 0.0
+        },
+        {
+          "y": 17.4,
+          "z": 0.0
+        },
+        {
+          "y": 17.6,
+          "z": 0.0
+        },
+        {
+          "y": 17.8,
+          "z": 0.0
+        },
+        {
+          "y": 18.0,
+          "z": 0.0
+        },
+        {
+          "y": 18.2,
+          "z": 0.0
+        },
+        {
+          "y": 18.4,
+          "z": 0.0
+        },
+        {
+          "y": 18.6,
+          "z": 0.0
+        },
+        {
+          "y": 18.8,
+          "z": 0.0
+        },
+        {
+          "y": 19.0,
+          "z": 0.0
+        },
+        {
+          "y": 19.2,
+          "z": 0.0
+        },
+        {
+          "y": 19.4,
+          "z": 0.0
+        },
+        {
+          "y": 19.6,
+          "z": 0.0
+        },
+        {
+          "y": 19.8,
+          "z": 0.0
+        },
+        {
+          "y": 20.0,
+          "z": 0.0
+        },
+        {
+          "y": 20.2,
+          "z": 0.0
+        },
+        {
+          "y": 20.4,
+          "z": 0.0
+        },
+        {
+          "y": 20.6,
+          "z": 0.0
+        },
+        {
+          "y": 20.8,
+          "z": 0.0
+        },
+        {
+          "y": 21.0,
+          "z": 0.0
+        },
+        {
+          "y": 21.2,
+          "z": 0.0
+        },
+        {
+          "y": 21.4,
+          "z": 0.0
+        },
+        {
+          "y": 21.6,
+          "z": 0.0
+        },
+        {
+          "y": 21.8,
+          "z": 0.0
+        },
+        {
+          "y": 22.0,
+          "z": 0.0
+        },
+        {
+          "y": 22.2,
+          "z": 0.0
+        },
+        {
+          "y": 22.4,
+          "z": 0.0
+        },
+        {
+          "y": 22.6,
+          "z": 0.0
+        },
+        {
+          "y": 22.8,
+          "z": 0.0
+        },
+        {
+          "y": 23.0,
+          "z": 0.0
+        },
+        {
+          "y": 23.2,
+          "z": 0.0
+        },
+        {
+          "y": 23.4,
+          "z": 0.0
+        },
+        {
+          "y": 23.6,
+          "z": 0.0
+        },
+        {
+          "y": 23.8,
+          "z": 0.0
+        },
+        {
+          "y": 24.0,
+          "z": 0.0
+        },
+        {
+          "y": 24.2,
+          "z": 0.0
+        },
+        {
+          "y": 24.4,
+          "z": 0.0
+        },
+        {
+          "y": 24.6,
+          "z": 0.0
+        },
+        {
+          "y": 24.8,
+          "z": 0.0
+        },
+        {
+          "y": 25.0,
+          "z": 0.0
+        },
+        {
+          "y": 25.2,
+          "z": 0.0
+        },
+        {
+          "y": 25.4,
+          "z": 4e-06
+        },
+        {
+          "y": 25.6,
+          "z": 0.0
+        },
+        {
+          "y": 25.8,
+          "z": 0.0
+        },
+        {
+          "y": 26.0,
+          "z": 0.0
+        },
+        {
+          "y": 26.2,
+          "z": 0.0
+        },
+        {
+          "y": 26.4,
+          "z": 0.0
+        },
+        {
+          "y": 26.6,
+          "z": 0.0
+        },
+        {
+          "y": 26.8,
+          "z": 0.0
+        },
+        {
+          "y": 27.0,
+          "z": 0.0
+        },
+        {
+          "y": 27.2,
+          "z": 0.0
+        },
+        {
+          "y": 27.4,
+          "z": 0.0
+        },
+        {
+          "y": 27.6,
+          "z": 0.0
+        },
+        {
+          "y": 27.8,
+          "z": 0.0
+        },
+        {
+          "y": 28.0,
+          "z": 0.0
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 14.0,
+        "z": 2.2604
+      },
+      "distance": 28.0,
+      "yawDegrees": 0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333000001,
+      "fovDegrees": 18.937643664992333,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionFrame": {
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 14.0,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "to-churchyard",
+        "eventInstanceId": "core-run-threshold-to-churchyard",
+        "radius": 0.65
+      },
+      {
+        "anchor": "labyrinth-gate",
+        "eventInstanceId": "core-run-threshold-labyrinth-gate",
+        "radius": 0.65
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 100701,
+      "instanceId": "core-run-threshold-to-churchyard",
+      "name": "Churchyard / upper island",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        25,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1006,
+          "arrival": "to-threshold"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100702,
+      "instanceId": "core-run-threshold-labyrinth-gate",
+      "name": "Labyrinth Gate",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        18,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "commonEventId": 43,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The guard lowers her spear across the threshold. \"Crossing Writ first. The Labyrinth will still be hungry when you return.\"",
+              "speaker": "Gate Guard",
+              "expression": 2,
+              "cmd": "TEXT"
+            },
+            {
+              "commonEventId": 34,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100703,
+      "instanceId": "core-run-st-maria-churchyard-guard",
+      "name": "Guard",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        16,
+        0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "condition": "flag:shipment_investigated",
+              "commands": [
+                {
+                  "text": "So Alicia heard them stop near the chasm? Damn. That means goblins or worse. Thanks for the intel. I'll double the watch.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "questId": "silent_shipment",
+                  "cmd": "QUEST_COMPLETE"
+                },
+                {
+                  "text": "You did good work. Watch your back out there.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Your writ is in order. Follow the path onward to the Labyrinth forecourt; the iron gate is there."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Any news on the shipment? Ask Alicia, she usually hears the carts coming.",
+                  "cmd": "TEXT"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered, hasItem:198",
+              "commands": [
+                {
+                  "text": "Ready to descend again? Don't make me carry your body out.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Your writ is in order. Follow the path onward to the Labyrinth forecourt; the iron gate is there."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "questStatus:silent_shipment:completed",
+                  "commands": [
+                    {
+                      "text": "You did good work. Watch your back out there.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Your writ is in order. Follow the path onward to the Labyrinth forecourt; the iron gate is there."
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "hasItem:198",
+                      "commands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "Your writ is in order. Follow the path onward to the Labyrinth forecourt; the iron gate is there."
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "text": "No Crossing Writ. Speak to the Registrar at the Passage Office. And don\u2019t try to slip past. I\u2019ve buried faster people than you.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Anything strange happening?",
+                              "commands": [
+                                {
+                                  "text": "Strange? Always. But the supply shipment is late. Very late. It usually comes through the old tunnel, but it's silent.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "I'll investigate.",
+                                      "commands": [
+                                        {
+                                          "questId": "silent_shipment",
+                                          "cmd": "QUEST_OFFER"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Not my problem.",
+                                      "commands": []
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                }
+                              ],
+                              "condition": "questStatus:silent_shipment:inactive"
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": []
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_gate_guard.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

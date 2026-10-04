@@ -1,0 +1,466 @@
+{
+  "id": 1006,
+  "title": "St. Maria / Churchyard / upper island",
+  "intro": "A street of St. Maria.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_core/churchyard/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 15.000000000031044,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0.0,
+          "z": 0.0
+        },
+        {
+          "y": 0.19736842105304006,
+          "z": 0.0
+        },
+        {
+          "y": 0.3947368421060801,
+          "z": 0.0
+        },
+        {
+          "y": 0.5921052631591202,
+          "z": 2e-06
+        },
+        {
+          "y": 0.7894736842121602,
+          "z": 2e-06
+        },
+        {
+          "y": 0.9868421052652001,
+          "z": 2e-06
+        },
+        {
+          "y": 1.1842105263182403,
+          "z": 4e-06
+        },
+        {
+          "y": 1.3815789473712805,
+          "z": 4e-06
+        },
+        {
+          "y": 1.5789473684243205,
+          "z": 4e-06
+        },
+        {
+          "y": 1.7763157894773602,
+          "z": 4e-06
+        },
+        {
+          "y": 1.9736842105304002,
+          "z": 4e-06
+        },
+        {
+          "y": 2.1710526315834406,
+          "z": 4e-06
+        },
+        {
+          "y": 2.3684210526364806,
+          "z": 4e-06
+        },
+        {
+          "y": 2.5657894736895206,
+          "z": 4e-06
+        },
+        {
+          "y": 2.763157894742561,
+          "z": 6e-06
+        },
+        {
+          "y": 2.960526315795601,
+          "z": 6e-06
+        },
+        {
+          "y": 3.157894736848641,
+          "z": 6e-06
+        },
+        {
+          "y": 3.3552631579016805,
+          "z": 8e-06
+        },
+        {
+          "y": 3.5526315789547205,
+          "z": 8e-06
+        },
+        {
+          "y": 3.7500000000077605,
+          "z": 8e-06
+        },
+        {
+          "y": 3.9473684210608004,
+          "z": 8e-06
+        },
+        {
+          "y": 4.144736842113841,
+          "z": 8e-06
+        },
+        {
+          "y": 4.342105263166881,
+          "z": 1e-05
+        },
+        {
+          "y": 4.539473684219921,
+          "z": 1e-05
+        },
+        {
+          "y": 4.736842105272961,
+          "z": 1e-05
+        },
+        {
+          "y": 4.934210526326001,
+          "z": 1.1e-05
+        },
+        {
+          "y": 5.131578947379041,
+          "z": 1.1e-05
+        },
+        {
+          "y": 5.328947368432081,
+          "z": 1.1e-05
+        },
+        {
+          "y": 5.526315789485122,
+          "z": 1.1e-05
+        },
+        {
+          "y": 5.723684210538162,
+          "z": 1.1e-05
+        },
+        {
+          "y": 5.921052631591202,
+          "z": 1.1e-05
+        },
+        {
+          "y": 6.1184210526442415,
+          "z": 1.1e-05
+        },
+        {
+          "y": 6.315789473697282,
+          "z": 1.3e-05
+        },
+        {
+          "y": 6.5131578947503215,
+          "z": 1.3e-05
+        },
+        {
+          "y": 6.710526315803361,
+          "z": 1.3e-05
+        },
+        {
+          "y": 6.907894736856401,
+          "z": 1.5e-05
+        },
+        {
+          "y": 7.105263157909441,
+          "z": 1.5e-05
+        },
+        {
+          "y": 7.302631578962481,
+          "z": 1.5e-05
+        },
+        {
+          "y": 7.500000000015521,
+          "z": 1.5e-05
+        },
+        {
+          "y": 7.697368421068561,
+          "z": 1.5e-05
+        },
+        {
+          "y": 7.894736842121601,
+          "z": 1.5e-05
+        },
+        {
+          "y": 8.092105263174643,
+          "z": 1.5e-05
+        },
+        {
+          "y": 8.289473684227682,
+          "z": 1.5e-05
+        },
+        {
+          "y": 8.486842105280722,
+          "z": 1.7e-05
+        },
+        {
+          "y": 8.684210526333763,
+          "z": 1.7e-05
+        },
+        {
+          "y": 8.881578947386803,
+          "z": 1.9e-05
+        },
+        {
+          "y": 9.078947368439842,
+          "z": 1.9e-05
+        },
+        {
+          "y": 9.276315789492882,
+          "z": 1.9e-05
+        },
+        {
+          "y": 9.473684210545922,
+          "z": 1.9e-05
+        },
+        {
+          "y": 9.671052631598963,
+          "z": 1.9e-05
+        },
+        {
+          "y": 9.868421052652002,
+          "z": 1.9e-05
+        },
+        {
+          "y": 10.065789473705042,
+          "z": 1.9e-05
+        },
+        {
+          "y": 10.263157894758082,
+          "z": 2.1e-05
+        },
+        {
+          "y": 10.460526315811123,
+          "z": 2.1e-05
+        },
+        {
+          "y": 10.657894736864161,
+          "z": 2.1e-05
+        },
+        {
+          "y": 10.855263157917202,
+          "z": 2.3e-05
+        },
+        {
+          "y": 11.052631578970244,
+          "z": 2.3e-05
+        },
+        {
+          "y": 11.250000000023283,
+          "z": 2.3e-05
+        },
+        {
+          "y": 11.447368421076323,
+          "z": 2.3e-05
+        },
+        {
+          "y": 11.644736842129364,
+          "z": 2.3e-05
+        },
+        {
+          "y": 11.842105263182404,
+          "z": 2.5e-05
+        },
+        {
+          "y": 12.039473684235443,
+          "z": 2.5e-05
+        },
+        {
+          "y": 12.236842105288483,
+          "z": 2.5e-05
+        },
+        {
+          "y": 12.434210526341523,
+          "z": 2.7e-05
+        },
+        {
+          "y": 12.631578947394564,
+          "z": 2.7e-05
+        },
+        {
+          "y": 12.828947368447603,
+          "z": 2.7e-05
+        },
+        {
+          "y": 13.026315789500643,
+          "z": 2.7e-05
+        },
+        {
+          "y": 13.223684210553683,
+          "z": 2.7e-05
+        },
+        {
+          "y": 13.421052631606722,
+          "z": 2.7e-05
+        },
+        {
+          "y": 13.618421052659764,
+          "z": 2.7e-05
+        },
+        {
+          "y": 13.815789473712803,
+          "z": 2.7e-05
+        },
+        {
+          "y": 14.013157894765845,
+          "z": 2.9e-05
+        },
+        {
+          "y": 14.210526315818882,
+          "z": 2.9e-05
+        },
+        {
+          "y": 14.407894736871924,
+          "z": 2.9e-05
+        },
+        {
+          "y": 14.605263157924963,
+          "z": 3.1e-05
+        },
+        {
+          "y": 14.802631578978003,
+          "z": 3.1e-05
+        },
+        {
+          "y": 15.000000000031042,
+          "z": 3.1e-05
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 7.500000000015522,
+        "z": 2.2604
+      },
+      "distance": 18.6667,
+      "yawDegrees": 0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333000001,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionFrame": {
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 7.500000000015522,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "to-threshold",
+        "eventInstanceId": "core-run-churchyard-to-threshold",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-churchyard-stair",
+        "eventInstanceId": "core-run-churchyard-to-churchyard-stair",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-praca-climb",
+        "eventInstanceId": "core-run-churchyard-to-praca-climb",
+        "radius": 0.65
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 100601,
+      "instanceId": "core-run-churchyard-to-threshold",
+      "name": "Labyrinth forecourt",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        11,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1007,
+          "arrival": "to-churchyard"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100602,
+      "instanceId": "core-run-churchyard-to-churchyard-stair",
+      "name": "Churchyard stair landing",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        6,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1009,
+          "arrival": "to-churchyard"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100603,
+      "instanceId": "core-run-churchyard-to-praca-climb",
+      "name": "Down the service ladder to Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        15,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1005,
+          "arrival": "to-churchyard-climb"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

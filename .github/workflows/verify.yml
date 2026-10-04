@@ -228,7 +228,7 @@ jobs:
           }
           "THESTRA_GATE_ROOT=$gateRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: towngen - the generator still owns what it writes
+      - name: Town packages, arrival anchors and reachability
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"

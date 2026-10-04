@@ -1392,6 +1392,16 @@ Their native runtime PNGs are palette-limited, game-resolution derivatives.
 
 Town navigation markers use the authored floating 3D arrow model with filled faces across plate and modelled views. Direction comes from the authored transition axis. Arrows are visible by default; the Options navigation-arrow toggle persists in player settings and hides only the models, keeping doorway prompts and interactions available.
 
+St. Maria's default Project town uses maps 1001-1009 and the six public
+interiors (21, 22, 25, 28, 29, 33). New Game arrives in Room 3 (25);
+normal dungeon returns reach the Labyrinth forecourt (1007). The exterior
+packages are under `assets/environments/st_maria_core/`, baked from the
+adopted `st_maria_core.blend`. Android, desktop and Studio Test Play consume
+the same authored Project through the standard exporter. There is no
+post-export town installer or Android-only layout selection. The retired
+town generator cannot overwrite the adopted maps. The town connection gate
+checks the active bounded-lane graph from the authored spawn.
+
 Bounded-lane thresholds use the Event's authored `direction` for the marker,
 input and destination prompt: `away` is UP, `toward` is DOWN, and `left`/`right`
 follow the street. A depth door on a lane bound remains a deliberate UP/DOWN

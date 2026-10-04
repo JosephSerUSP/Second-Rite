@@ -155,6 +155,10 @@
             }
           ],
           "cmd": "CONDITIONAL_BRANCH"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "From the Praca, take the stairs uphill to the churchyard, then follow the path to the Labyrinth forecourt. Supplies are downhill: bakery, pub and forge. Return here whenever you need directions."
         }
       ],
       "sprite": "assets/character/npc_celina.png",
@@ -166,7 +170,7 @@
     {
       "id": 3302,
       "instanceId": "st-maria-passage-office-exit_door",
-      "name": "Out to the Praca",
+      "name": "Out to Praça / Passage Office",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -179,8 +183,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
-          "arrival": "npc_registrar"
+          "mapId": 1005,
+          "arrival": "door-registry"
         }
       ],
       "direction": "toward"

@@ -23,7 +23,10 @@ from pathlib import Path
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ITEMS_JSON = REPO_ROOT / "data" / "items.json"
+# Since #700 the repository root is not a game: item data and models live in
+# the Project, and a model path in items.json is Project-relative.
+PROJECT_ROOT = REPO_ROOT / "projects" / "hichaukitoden-game"
+ITEMS_JSON = PROJECT_ROOT / "data" / "items.json"
 
 # Normalized geometry is rounded to this many decimals before hashing. Coarse
 # enough that float noise from two runs of the same recipe collapses together,
@@ -212,7 +215,7 @@ def load_item_models(items_json: Path = ITEMS_JSON) -> dict[str, Path]:
         model = item.get("model")
         if not model:
             continue
-        path = REPO_ROOT / model
+        path = items_json.parent.parent / model
         if not path.exists():
             raise ItemModelError(f"item {item.get('name')!r} references missing {model}")
         models[item["name"]] = path

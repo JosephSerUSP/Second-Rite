@@ -219,13 +219,12 @@ current-main staged units passed. G4 also identified the stale scene rows from
 the merged Actor Change work; the canonical state capture regenerated those
 rows and G4 passed. No gameplay mechanic changed in this reconciliation.
 Native frames and the walk/transfer probe were refreshed against current main.
-G2 passed all three battle fixtures. G3 remains red for current main's starting
+G2 passed all three battle fixtures. G3 initially failed for current main's starting
 MP change (900 versus the 3000 reference) and missing Actor Change scene log;
 these are also documented in
 [Issue #1365](https://github.com/JosephSerUSP/Second-Rite/issues/1365).
-The golden logs were preserved. Their reconciliation needs the owner approval
-required by AGENTS.md; this branch is not represented as merge-green. The
-hosted verification on `aa1285f3` subsequently passed required Blender/item-source
+The golden logs were preserved while their reconciliation awaited the owner
+approval required by AGENTS.md. The hosted verification on `aa1285f3` subsequently passed required Blender/item-source
 checks, portability and both relative G5/G6 comparisons. Windows verification
 reached G3 and failed on exactly those two reference conditions.
 
@@ -241,13 +240,17 @@ remaining proposed reference reconciliation: all 60 battle MP readings change
 from 3000 to the authored 900, with every other battle trace line unchanged;
 the missing Actor Change reference contains only its scene-registration header
 between the golden markers. It does not provide interaction coverage for Actor
-Change. These candidate files are outside committed references and remain
-pending explicit maintainer approval. No G5/G6 reference update is proposed.
+Change. The human owner explicitly approved these two G3 updates in this task on
+2026-10-04. Before applying them, the agent mechanically checked that the diff
+contains exactly those 60 MP changes and the three-line scene registration.
+G3 then passed locally against the freshly staged current-main runtime. This
+approval covers those reference updates; it does not establish Actor Change
+interaction coverage or owner PLAYED acceptance. No G5/G6 reference was updated.
 
 Catalogue integrity/search and tool-index checks took **434 / 405 / 305 ms**
 respectively on their recorded cold local runs. The focused catalogue rebuild
-suite took **12.437 s**, and the scaffold integration **5.919 s**. No committed
-golden was recaptured. This work changes neither battle nor editor rendering;
+suite took **12.437 s**, and the scaffold integration **5.919 s**. Only the two explicitly approved G3 logs changed; G2/G5/G6
+references were preserved. This work changes neither battle nor editor rendering;
 native room evidence supplies the placement review that their fixtures cannot.
 
 The useful next experiment is a fresh author receiving only the catalogue,

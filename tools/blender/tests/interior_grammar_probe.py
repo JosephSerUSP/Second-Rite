@@ -153,4 +153,28 @@ result["pieceTurn"] = {"spanX": round(max(c.x for c in xs) - min(c.x for c in xs
                        "centre": [round(sum(c.x for c in xs) / len(xs), 4),
                                   round(sum(c.y for c in xs) / len(xs), 4)]}
 
+roof = room(half_width=8)
+roof.pitched_ceiling(rise=1.4, bays=9)
+bpy.context.view_layer.update()
+slopes = [o for o in roof.parts if o.name.startswith('roof_slope')]
+points = [o.matrix_world @ v.co for o in slopes for v in o.data.vertices]
+centre = (roof.front_x + roof.back_x) / 2
+result['pitchedRoof'] = {
+    'ridgeZ': max(p.z for p in points if abs(p.x-centre) < .2),
+    'eaveZ': max(p.z for p in points if abs(p.x-centre) > 2),
+    'gables': len([o for o in roof.parts if o.name.startswith('roof_gable')]),
+}
+import furnishings
+from mathutils import Vector
+altar_room = room()
+furnishings.altar(altar_room, 'probe_altar', (0, 0))
+altar_room.finish()
+bpy.context.view_layer.update()
+altar = next(o for o in altar_room.parts if o.name == 'probe_altar')
+inv = altar.matrix_world.inverted()
+def altar_hit(y):
+    hit, location, normal, index = altar.ray_cast(inv @ Vector((-1,y,1.674)), Vector((1,0,0)))
+    assert hit
+    return (altar.matrix_world @ location).x
+result['retableDepth'] = altar_hit(0) - altar_hit(.7)
 print("PROBE " + json.dumps(result))

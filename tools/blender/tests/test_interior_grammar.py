@@ -134,6 +134,14 @@ class InteriorGrammarTests(unittest.TestCase):
             self.assertFalse(case["accepted"], label)
             self.assertIn("proscenium", case["message"], label)
 
+    def test_pitched_roof_rises_and_closes_both_ends(self):
+        roof = self.probe['pitchedRoof']
+        self.assertGreater(roof['ridgeZ'] - roof['eaveZ'], .8)
+        self.assertEqual(roof['gables'], 2)
+
+    def test_retable_has_a_physical_recess(self):
+        self.assertGreater(self.probe['retableDepth'], .15)
+
     def test_overlapping_alcoves_are_refused(self):
         self.assertFalse(self.probe["alcoveOverlapRefused"]["accepted"])
 

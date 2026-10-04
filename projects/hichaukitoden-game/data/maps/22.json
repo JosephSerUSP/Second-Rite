@@ -7,7 +7,7 @@
   "category": "town",
   "generation": "Fixed",
   "tileset": "town_default",
-  "ceilingStyle": "sky",
+  "ceilingStyle": "solid",
   "music": "town1",
   "layout": [
     "."
@@ -19,46 +19,48 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/chapel/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/st_maria_chapel_3d/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
-      "maxY": 16.0,
-      "depthX": 7.8,
-      "groundZ": 0.0,
+      "minY": 3.6,
+      "maxY": 15.4,
+      "depthX": 0,
+      "groundZ": 0,
       "speed": 3.4
     },
     "blockedRanges": [],
     "camera": {
       "profile": "town_sideview",
       "target": {
-        "x": 7.8,
-        "y": 8.0,
-        "z": 0.0
+        "x": 0,
+        "y": 7.5,
+        "z": 2.2604
       },
-      "distance": 18.666666666666668,
-      "yawDegrees": 0.0,
+      "distance": 12,
+      "yawDegrees": 12,
       "pitchDegrees": -17.5,
-      "eyeHeight": 2.2604166666666665,
-      "fovDegrees": 28.072486935852957,
+      "eyeHeight": -1.4583333333,
+      "fovDegrees": 42.501,
       "nearPlane": 0.05,
-      "farPlane": 128.0,
+      "farPlane": 128,
       "projectionScale": {
-        "x": 1.0,
-        "y": 1.0
+        "x": 0.94079629,
+        "y": 0.9116197588
       },
+      "projectionWindowOffsetY": -54.7,
       "projectionFrame": {
-        "canonicalCenterX": 213,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
         "canonicalHorizonY": 66
       },
       "tracking": {
         "axis": "y",
-        "center": 8.0,
-        "minOffsetX": 0,
-        "maxOffsetX": 0,
-        "interpolationSpeed": 12.0,
-        "movementInterpolationSpeed": 14.0,
-        "animationFps": 8.0
+        "center": 8,
+        "minOffsetX": -78,
+        "maxOffsetX": 78,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
       }
     },
     "doorways": [
@@ -77,9 +79,9 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        7.8,
-        12.651,
-        0.0
+        0.6,
+        3.8,
+        0
       ],
       "trigger": "interact",
       "commands": [
@@ -128,9 +130,9 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        7.8,
-        15.7135,
-        0.0
+        0,
+        15.4,
+        0
       ],
       "trigger": "bump",
       "model": "assets/models/st_maria/transition_arrow.obj",
@@ -141,10 +143,13 @@
           "arrival": "door-chapel"
         }
       ],
-      "direction": "toward"
+      "direction": "right"
     }
   ],
   "treasures": [],
   "encounters": [],
-  "recruits": []
+  "recruits": [],
+  "fog": {
+    "minFactor": 1
+  }
 }

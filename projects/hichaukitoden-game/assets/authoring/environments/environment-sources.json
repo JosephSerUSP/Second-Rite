@@ -96,8 +96,8 @@
       "basis": "Owner requested the B18 playable town become the default Project town on 2026-10-04. Direct source copy; edit this adopted source, never regenerate it."
     },
     "st_maria_chapel.blend": {
-      "status": "scaffold",
-      "basis": "Written by recipes/st_maria_chapel.py (Sister Agnes's chapel, map 22): a 16 m nave seen side-on, exported with --span 16. No shipped package is baked from it, and no adoption is recorded.",
+      "status": "adopted",
+      "basis": "Owner authorized chapel integration and roof/recess improvements on 2026-10-04. Reviewed native package ships on map 22. Edit the adopted source directly; never regenerate it.",
       "eevee": {
         "exposureEV": 0.0,
         "probeCells": 2,

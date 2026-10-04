@@ -37,6 +37,7 @@
     },
     {
       "cmd": "CHOICE",
+      "cancelOption": 2,
       "options": [
         {
           "label": "Pay 15 Gold",

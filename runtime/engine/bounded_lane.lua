@@ -200,6 +200,20 @@ function bounded_lane.isActive(session)
     return session and session.townTraversal and session.townTraversal.provider == "bounded_lane"
 end
 
+-- Side-view town menus intentionally live as modal modes inside the map scene
+-- so the world remains visible underneath them. Continuous traversal is polled
+-- every frame rather than arriving through the scene's directional hooks, so
+-- it must honor that same modal ownership explicitly or a held direction leaks
+-- through the menu. Keep the policy here at the traversal boundary so every
+-- bounded-lane map inherits it instead of each authored menu disabling walking.
+local function mapModalOwnsInput()
+    local scene_host = require("engine.scene_host")
+    if scene_host.getCurrent() ~= "map" then return false end
+    local sceneState = scene_host.getCurrentState()
+    local mode = sceneState and sceneState.v and tonumber(sceneState.v.mode)
+    return mode ~= nil and mode ~= 0
+end
+
 -- The one place lane position changes. Continuous walking and the discrete
 -- nudge used by harnesses both go through it, so bounds and blocked ranges
 -- cannot drift apart between them.
@@ -245,6 +259,7 @@ function bounded_lane.update(session, dt, held)
     local state = session and session.townTraversal
     if not state then return end
     held = tonumber(held) or 0
+    if held ~= 0 and mapModalOwnsInput() then held = 0 end
     if dt == nil then
         state.walking = false
         state.walkFrameIndex = 0

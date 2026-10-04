@@ -7,7 +7,8 @@ sys.path.insert(0,str(r/'tools/blender'));import thestra_camera as optics
 d=json.loads((c/'screen-contract.json').read_text(encoding='utf8'))
 assert Path(bpy.data.filepath).name==d['sourceBlend']
 assert hashlib.sha256(Path(bpy.data.filepath).read_bytes()).hexdigest()==d['sourceSHA256']
-frames=json.loads((c/'runtime/town-B18-transfers/captures.json').read_text(encoding='utf8'))
+capture_path=c/(sys.argv[sys.argv.index('--captures')+1] if '--captures' in sys.argv else 'runtime/town-B18-transfers/captures.json')
+frames=json.loads(capture_path.read_text(encoding='utf8'))
 s=bpy.data.scenes['B7 Churchyard plate and ecological material study'];bpy.context.window.scene=s
 rows={row['mapId']:row for row in d['screens']};results=[]
 for f in frames:

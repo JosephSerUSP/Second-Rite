@@ -34,9 +34,15 @@ by_id = {m['id']: m for m in maps}
 common = read(STAGE / 'data/commonEvents.json')
 rest_event_id = max(int(key) for key in common) + 1
 common[str(rest_event_id)] = dict(name='Passage House rest', commands=[dict(cmd='RECOVER_PARTY')])
-home = by_id[25]['events'][0]
-home['name'] = 'Passage House caretaker'
-home['sprite'] = 'assets/character/town/npc_agnes.png'
+home_map = by_id[25]
+# Room 3's only authored event is now its exit. Add the optional candidate
+# caretaker separately; replacing the first event would erase that transfer.
+home = dict(id=max(e['id'] for e in home_map['events'])+1,
+    instanceId='core-run-home-caretaker',name='Passage House caretaker',
+    sprite='assets/character/town/npc_agnes.png',x=0,y=0,
+    worldPosition=[home_map['traversal']['lane']['depthX'],4.0,0],
+    trigger='bump',direction='away')
+home_map['events'].append(home)
 home['commands'] = [text('Your room is ready. Registration is at the Passage Office in the Praca: leave the house, take the right-hand street, then enter the Registry.'),
     dict(cmd='CHOICE', options=[
         dict(label='Rest in Room 3.', commands=[dict(cmd='CALL_COMMON_EVENT', commonEventId=rest_event_id), text('You and your companions rest. HP, MP and spell charges are restored.')]),

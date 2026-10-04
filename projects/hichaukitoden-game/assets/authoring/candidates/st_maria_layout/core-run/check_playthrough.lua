@@ -117,9 +117,15 @@ function M.run(loader)
     local _, writ=hasWrit(); assert(not writ)
     session.mp=1
     local before=session.mp
-    run(loader.maps[loader.getMapIndex(25)].events[1].commands, 'Leave.')
+    local caretaker,homeExit
+    for _,event in ipairs(session.currentMapData.events) do
+        if event.name=='Passage House caretaker' then caretaker=event end
+        if event.instanceId=='st-maria-lodging-exit_door' then homeExit=event end
+    end
+    assert(caretaker and homeExit and caretaker~=homeExit,'Room 3 caretaker replaced its exit')
+    run(caretaker.commands, 'Leave.')
     assert(session.mp==before, 'Opening a lodging dialogue healed eagerly')
-    run(loader.maps[loader.getMapIndex(25)].events[1].commands, 'Rest in Room 3.')
+    run(caretaker.commands, 'Rest in Room 3.')
     assert(session.mp>before, 'Rest did not recover MP')
     _, writ=hasWrit(); assert(not writ, 'Lodging granted writ')
     door('exit_door',1001)

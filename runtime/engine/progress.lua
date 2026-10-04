@@ -44,7 +44,9 @@ end
 
 -- One creature's durable presentation-relevant state, as of now. Current HP,
 -- states and equipment are deliberately absent: Actor Change is development,
--- not a generic mutation inspector.
+-- not a generic mutation inspector. `name` is the individual's persistent
+-- name; `formName` is species/form identity and can change while the individual
+-- name deliberately survives promotion.
 local function snapshotMember(battler, session)
     local params = {}
     for _, p in ipairs(growth.PARAMS) do
@@ -53,6 +55,7 @@ local function snapshotMember(battler, session)
     return {
         actorId = battler.actorData and battler.actorData.id,
         name = battler.name,
+        formName = (battler.actorData and battler.actorData.name) or battler.name,
         portraitKey = (battler.actorData and battler.actorData.portrait) or "",
         level = battler.level or 1,
         exp = battler.exp or 0,
@@ -156,9 +159,12 @@ local function diffMember(session, was, now, liveBattler)
             or ("- " .. now.name .. " forgets " .. name .. "."))
     end
     if formChanged then
+        -- Promotion/transformation preserves the creature's individual name.
+        -- Report the form transition as “Puck becomes High Pixie”, rather than
+        -- comparing the preserved nickname to itself.
         table.insert(notes, (loader and loader.formatTerm)
-            and loader.formatTerm("battle.transform", "- {0} becomes {1}!", was.name, now.name)
-            or ("- " .. was.name .. " becomes " .. now.name .. "!"))
+            and loader.formatTerm("battle.transform", "- {0} becomes {1}!", was.name, now.formName)
+            or ("- " .. was.name .. " becomes " .. now.formName .. "!"))
     end
 
     -- Potential unlock is specifically an upward level crossing.
@@ -184,8 +190,11 @@ local function diffMember(session, was, now, liveBattler)
         kind = kind,
         title = title,
         name = now.name,
-        fromName = was.name,
-        toName = now.name,
+        -- For ordinary development these remain the individual's name. On a
+        -- form change they deliberately expose the before/after species while
+        -- `name` continues to identify the same creature.
+        fromName = formChanged and (was.formName or was.name) or was.name,
+        toName = formChanged and (now.formName or now.name) or now.name,
         portraitKey = now.portraitKey or "",
         fromLevel = was.level,
         toLevel = now.level,

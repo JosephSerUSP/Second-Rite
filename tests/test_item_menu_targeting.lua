@@ -164,7 +164,10 @@ end)
 
 test("Actor Change reports skillbook learning as durable development", function()
     local sess = session.GameSession.new(loader)
-    sess:recruitActor("pixie", 1)
+    -- Pixie already knows Wind Blade, so use a real creature whose authored
+    -- starting skill set does not contain it; this test is about learning,
+    -- not the already-known no-op guarded by item usability.
+    sess:recruitActor("cerberus", 1)
     sess:addItem(45, 1) -- Tome: Wind Blade
 
     local before = progress.snapshot(sess)
@@ -254,7 +257,7 @@ test("Items Scene leaves ordinary healing on the existing popup path", function(
     assert((v.popupTimer or 0) > 0, "ordinary healing feedback should keep its popup timer")
 end)
 
-test("map/common fallback reports an out-of-battle GAIN_EXP transaction", function()
+test("map/common fallback reports an out-of-battle GRANT_XP transaction", function()
     local sess = session.GameSession.new(loader)
     local hero = sess:recruitActor("pixie", 1)
     local ctx = { session = sess, loader = loader, party = sess.party }
@@ -265,7 +268,7 @@ test("map/common fallback reports an out-of-battle GAIN_EXP transaction", functi
     local previous = scene_host.bindPlayerInput({
         fallback = function()
             interpreter.runImmediate({
-                { cmd = "GAIN_EXP", target = "target", amount = progression.nextLevelExp(hero.level) },
+                { cmd = "GRANT_XP", target = "target", amount = progression.nextLevelExp(hero.level) },
             }, {
                 session = sess,
                 loader = loader,
@@ -285,7 +288,7 @@ test("map/common fallback reports an out-of-battle GAIN_EXP transaction", functi
     assert(ok, err)
 
     assert(handled == true, "fallback input should remain handled")
-    assert(sess.party[1].level == 2, "control: authored GAIN_EXP crosses the level threshold")
+    assert(sess.party[1].level == 2, "control: authored GRANT_XP crosses the level threshold")
     assert(scene_host.getCurrent() == "actor_change" and scene_host.getPrevious() == "map",
         "resolved field-event development should open the generic Actor Change modal")
     local v = scene_host.getCurrentState().v

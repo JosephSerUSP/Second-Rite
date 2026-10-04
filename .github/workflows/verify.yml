@@ -275,17 +275,18 @@ jobs:
           node tools/ci/time-step.js --record --label "asset library browser" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "asset library browser tests failed (exit $__code)" }
 
-      - name: Courtyard candidate profile commands and staged traversal
+      - name: Default town profile commands, progression and transfer boundaries
         shell: pwsh
         run: |
           node --test tools/blender/tests/test_courtyard_candidate.js
           if ($LASTEXITCODE -ne 0) { throw "Candidate profile tests failed" }
-          node tools/blender/stage_courtyard_candidate.js --output out/ci-courtyard --package projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package
-          if ($LASTEXITCODE -ne 0) { throw "Candidate staging failed" }
-          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-validate.ps1 -GameRoot out/ci-courtyard/game
-          if ($LASTEXITCODE -ne 0) { throw "Candidate G1 failed" }
-          powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot out/ci-courtyard/game
-          if ($LASTEXITCODE -ne 0) { throw "Candidate units failed" }
+          $env:LOVEC_PATH = $env:LOVEC
+          python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/build_playtest.py
+          if ($LASTEXITCODE -ne 0) { throw "Default town staging failed" }
+          python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/run_playthrough.py
+          if ($LASTEXITCODE -ne 0) { throw "Default town progression failed" }
+          python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/run_transfer_checks.py --output out/st-maria-default-transfers
+          if ($LASTEXITCODE -ne 0) { throw "Default town transfer proof failed" }
 
       - name: G1 - data validation
         shell: pwsh

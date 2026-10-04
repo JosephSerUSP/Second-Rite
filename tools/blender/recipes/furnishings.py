@@ -1298,11 +1298,20 @@ def altar(room, name, at, *, length=1.9, depth=0.8, height=1.0,
 
         rx = x + depth / 2.0 + 0.16
         width = length + 0.5
-        room.part(f"{name}_retable", (0.16, width, retable_height),
-                  (rx, y, retable_height / 2.0), room.wood)
-        # The recess: a dark panel set back into the retable, framed in gilt.
+        # Build around the opening rather than hiding a solid board under a panel.
+        recess_w = width * .34
+        recess_h = retable_height * .36
+        recess_z = retable_height * .62
+        for index, side in enumerate((-1, 1)):
+            room.part(f"{name}_retable_side_{index}", (.24, (width-recess_w)/2, retable_height),
+                      (rx, y + side * (width+recess_w)/4, retable_height/2), room.wood)
+        for suffix, low, high in (("lower", 0, recess_z-recess_h/2),
+                                  ("upper", recess_z+recess_h/2, retable_height)):
+            room.part(f"{name}_retable_{suffix}", (.24, recess_w, high-low),
+                      (rx, y, (low+high)/2), room.wood)
+        # Backing sits behind the front reveals, leaving a real 20 cm niche.
         room.part(f"{name}_recess", (0.05, width * 0.34, retable_height * 0.36),
-                  (rx - 0.06, y, retable_height * 0.62), room.charcoal)
+                  (rx + 0.105, y, retable_height * 0.62), room.charcoal)
         frame = 0.06
         cz = retable_height * 0.62
         hz = retable_height * 0.18 + frame / 2.0

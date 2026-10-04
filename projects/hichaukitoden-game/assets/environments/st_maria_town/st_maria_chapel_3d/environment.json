@@ -1,0 +1,41 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -2.1968,
+    -0.5,
+    -0.35,
+    4.3867,
+    17.105,
+    6.1359
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        14.5,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        15.4,
+        0.0
+      ]
+    },
+    "npc_agnes": {
+      "position": [
+        0.6,
+        3.8,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "sourceBlend": "st_maria_chapel.blend"
+  }
+}

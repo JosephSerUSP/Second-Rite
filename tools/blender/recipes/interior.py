@@ -413,6 +413,41 @@ class Interior:
                               self.wall_thick, self.side_openings[sign], mat,
                               axis="x")
 
+    def pitched_ceiling(self, *, rise=1.4, bays=9, mat=None):
+        """Timber roof along Y, with paired rafters and closed masonry gables."""
+        if rise <= 0 or bays < 2:
+            raise ValueError("pitched ceiling requires positive rise and at least two bays")
+        mat = mat or self.wood
+        centre = (self.front_x + self.back_x) / 2
+        half = (self.back_x - self.front_x) / 2
+        angle = math.atan2(rise, half)
+        slope = math.hypot(half, rise)
+        for side in (-1, 1):
+            rotation = (0, side * angle, 0)
+            self.part(f"roof_slope_{side}", (slope, self.half_width * 2, self.ceiling_thick),
+                      (centre + side * half / 2, 0, self.ceiling_z + rise / 2), mat,
+                      rotation=rotation)
+            for bay in range(bays):
+                y = -self.half_width + bay * self.half_width * 2 / (bays - 1)
+                self.part(f"roof_rafter_{side}_{bay}", (slope, .18, .22),
+                          (centre + side * half / 2, y, self.ceiling_z + rise / 2 - .16),
+                          mat, rotation=rotation)
+        self.part("roof_ridge", (.22, self.half_width * 2, .24),
+                  (centre, 0, self.ceiling_z + rise - .16), mat)
+        for side in (-1, 1):
+            y = side * (self.half_width + self.wall_thick / 2)
+            vertices = [(x, yy, z) for yy in (y-self.wall_thick/2, y+self.wall_thick/2)
+                        for x, z in ((self.front_x, self.ceiling_z),
+                                     (self.back_x, self.ceiling_z),
+                                     (centre, self.ceiling_z + rise))]
+            mesh = bpy.data.meshes.new(f"roof_gable_{side}")
+            mesh.from_pydata(vertices, [], [(0,2,1),(3,4,5),(0,1,4,3),(1,2,5,4),(2,0,3,5)])
+            mesh.materials.append(self.whitewash)
+            obj = bpy.data.objects.new(mesh.name, mesh)
+            bpy.context.collection.objects.link(obj)
+            obj.parent = self.root
+            self.parts.append(obj)
+
     def ceiling(self, *, beams=0, beam_span=1.5, mat=None):
         mat = mat or self.wood
         centre = (self.front_x + self.back_x) / 2.0

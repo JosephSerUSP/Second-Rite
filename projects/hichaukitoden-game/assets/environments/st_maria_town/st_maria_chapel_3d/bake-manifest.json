@@ -1,0 +1,133 @@
+{
+  "contractVersion": 1,
+  "environmentId": "st_maria_chapel",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -2.1968,
+    -9.105,
+    -0.35,
+    4.3867,
+    8.5,
+    6.1359
+  ],
+  "stats": {
+    "triangleCount": 4000,
+    "vertexCount": 2640,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 1680781,
+    "renderMeshSizeBytes": 393305,
+    "packageSizeBytes": 2074889
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        14.5,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "id": "exit_door",
+      "position": [
+        0.0,
+        15.4,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_agnes": {
+      "id": "npc_agnes",
+      "position": [
+        0.6,
+        3.8,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "st_maria_chapel.blend",
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 64,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 64,
+        "supersample": 1,
+        "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 92,
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 9.144748700025957,
+        "filteredCharts": 158,
+        "preservedSmallCharts": 1560,
+        "filteredTexels": 398846,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 932,
+        "preservedUnsafeCharts": 991,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 1024
+      }
+    },
+    "exportSeconds": 19.464924600033555
+  },
+  "laneCentre": 8.0
+}

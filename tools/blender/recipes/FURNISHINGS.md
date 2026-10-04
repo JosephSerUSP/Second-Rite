@@ -56,7 +56,7 @@ These flat-colour orthographic illustrations show isolated construction, not nat
 | [scrap_heap](#scrap-heap) | 1.013 × 1.044 × 0.284 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [grindstone](#grindstone) | 0.680 × 1.250 × 1.199 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [fine_bench](#fine-bench) | 0.605 × 1.150 × 1.070 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
-| [altar](#altar) | 1.120 × 2.520 × 2.820 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [altar](#altar) | 1.170 × 2.520 × 2.820 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [pew](#pew) | 0.515 × 2.440 × 0.825 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [votive_stand](#votive-stand) | 0.370 × 0.930 × 1.350 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [font](#font) | 0.540 × 0.514 × 0.950 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
@@ -1298,7 +1298,7 @@ The frontal faces -X; `turn=90` faces it -Y, down a hall seen side-on.
 
 Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
 
-Measured bounds: `[[-0.48, -1.26, -0.0], [0.64, 1.26, 2.82]]` metres. Built meshes: 1; lights: 0.
+Measured bounds: `[[-0.48, -1.26, -0.0], [0.69, 1.26, 2.82]]` metres. Built meshes: 1; lights: 0.
 
 Materials: `aged_cloth`, `charcoal`, `dark_wood`, `oxidized_bronze`, `ritual_gold`, `rough_limestone`, `sr_lamp_glow`, `wax`, `whitewash`.
 

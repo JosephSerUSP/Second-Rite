@@ -1,9 +1,9 @@
 {
   "version": 1,
   "fingerprint": {
-    "tools/blender/recipes/furnishings.py": "c0f28aa04716005b05256410d84365fe7e7352b7c6ac7aa78028112580e9fda5",
+    "tools/blender/recipes/furnishings.py": "4b36794626a50056165218794a9c7d82248c2bd1c21ef698fc359d79cf03ab6d",
     "tools/blender/recipes/catalogue-fixtures.json": "a4021ca7e3cd3fc24df5ee47bbde81856fde2b66641182588f337ec39f4e1081",
-    "tools/blender/recipes/interior.py": "d05e08cf98f00ee92aa92b941a6b86b775045805fca6b931c64232b7b99ee704",
+    "tools/blender/recipes/interior.py": "8337303d1d12361aa3b98d39dcec5aecb8717fa3fbcec2dd2e7827144a052cb0",
     "tools/blender/second_rite_asset_core.py": "250ced208b568a27ee6e5e42128b3654cba4271034f28b8c0b35209207042564",
     "tools/blender/recipes/first_stratum/common.py": "a00bb9a30366793b2129d92d361c1829593db380868317c4abb51d892dfacedd",
     "tools/asset-language/materials.json": "9dbebd25977c8ea5fa9e452430b7eba70c92c26503521992d83fdf7f51c2b807",
@@ -3438,13 +3438,13 @@
           -0.0
         ],
         [
-          0.64,
+          0.69,
           1.26,
           2.82
         ]
       ],
       "dimensions": [
-        1.12,
+        1.17,
         2.52,
         2.82
       ],
@@ -3742,7 +3742,7 @@
     }
   ],
   "images": {
-    "altar.png": "c5f0871cd876405f24eb01f8e7e46966e52b3cead8fb3ed1ab6c91f76237391d",
+    "altar.png": "0324a559720a391e91bc7520e11ed70e72399973a185b4ba77c662caac501f56",
     "anvil.png": "445077568525ecbc7012fc3640577f5bd03eb4c85ebad10ef1d8e5949ecd6598",
     "azulejo_dado.png": "8250c9a765f036216a708c42f80ed39a19ba6bfb4c646a77052c2dbe19a8131e",
     "barrel.png": "e4e20d581c3b80794754f79bdfce15be900cb432b0c622c75b97b3beea92194f",
@@ -3755,7 +3755,7 @@
     "chair.png": "7f971b6b23d06deab9f560eb43066fe77478ea8216eecd07d24f9e84024f82db",
     "chest.png": "2bea92a237364e9cff971e9e58c1ba5c406b11a505753a34073941643426c550",
     "cloth_bundle.png": "9a8b77d76f449a15303bbb7846fa6659f4ce572fd4ca69f67696f449c30a56ce",
-    "contact-sheet.png": "ce9d1f91c49a831a89fddc8406e13779453778a7a13941348083e7e68bcd26c4",
+    "contact-sheet.png": "c6b0060e0756e922f1cfc14022784c6e45d0e4e053bd66f69c0bb7427c7f18f8",
     "counter.png": "0f6c8375110fd8022c8338dd5f20384ccca7901d44e3b62de38741ebb1cbe03e",
     "counter_returns.png": "bcd5109445d162e82997d77221a313056bd1fd25aa7f387f32770071e6584af2",
     "demijohn.png": "7b760caa7b9e9630913d62bb09a39ce701b780d49320deba905c0a4226aaffbd",

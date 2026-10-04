@@ -31,7 +31,10 @@ Blender Y is screen LEFT. This room is exported with `--span 16`, so its
 engine lane Y is `8 - blender_y`: the altar end is engine Y ~0, the door end
 ~16.
 
-    python tools/blender/run.py tools/blender/recipes/st_maria_chapel.py
+The shipped source is adopted. This recipe documents its original scaffold;
+edit st_maria_chapel.blend directly rather than rebuilding the adopted file.
+
+    python tools/blender/run.py tools/blender/recipes/st_maria_chapel.py -- --blend out/chapel-scaffold.blend
 """
 
 from __future__ import annotations
@@ -94,7 +97,7 @@ def build():
     door_x0, door_x1, door_z = DOOR
     room.back_wall(openings=list(WINDOWS))
     room.side_walls(openings={-1: [(door_x0, door_x1, 0.0, door_z)]})
-    room.ceiling(beams=9)
+    room.pitched_ceiling(rise=1.4, bays=9)
     for opening in WINDOWS:
         room.window(*opening)
     door_cx, door_wall = room.side_doorway("door", -1, door_x0, door_x1, door_z,

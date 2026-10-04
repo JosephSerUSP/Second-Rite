@@ -130,6 +130,13 @@ inverts the projection if you need another scanline.
 
 ## 3. Rules that are not negotiable
 
+For a nave or hall with a pitched timber roof, use
+`Interior.pitched_ceiling(rise=1.4, bays=9)`. The ridge runs along the Y lane;
+paired rafters meet it across the room, and masonry gables close both ends.
+Choose rise and bay count for the building rather than changing the camera
+to disguise a flat ceiling. An altar niche should have physical reveals and
+a recessed backing; a dark rectangle over an unbroken board has no depth.
+
 **Two rooms must not read as one room redressed.** The cheapest thing that
 tells two interiors apart at 256 px is not a prop — it is the colour of the
 largest surface in the frame. An adversarial review of the Padaria and the

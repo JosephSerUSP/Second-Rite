@@ -1,0 +1,85 @@
+{
+  "id": "actor_change",
+  "name": "Actor Change",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "config": {
+    "note": "Generic modal for already-resolved durable creature changes. Source hosts own the transaction and seed actorChange* Scene State before pushing this scene.",
+    "actorChangeReports": []
+  },
+  "hooks": {
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.actorChangeCount > 0 and sceneState.actorChangeIndex < sceneState.actorChangeCount",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "actorChangeIndex", "value": "sceneState.actorChangeIndex + 1" }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.actorChangeCount > 0 and sceneState.actorChangeIndex >= sceneState.actorChangeCount",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              { "name": "actorChangeCount", "value": 0 },
+              { "name": "actorChangeIndex", "value": 1 }
+            ]
+          },
+          { "cmd": "SCENE_EVENT", "kind": "pop" }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          { "name": "actorChangeCount", "value": 0 },
+          { "name": "actorChangeIndex", "value": 1 }
+        ]
+      },
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "windows": [
+    {
+      "id": "actor_change_head",
+      "rect": { "x": 3, "y": 5, "w": 26, "h": 12 },
+      "visible": "(sceneState.actorChangeCount or 0) > 0",
+      "style": "panel",
+      "title": "{sceneState.actorChangeTitle}",
+      "portrait": "sceneState.actorChangePortrait",
+      "portraitX": 1,
+      "portraitY": 2,
+      "portraitW": 7.33,
+      "portraitH": 7.5,
+      "contentX": 9.5,
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.actorChangeName}  {sceneState.actorChangeCounter}\n\n{sceneState.actorChangeFromLevel ~= sceneState.actorChangeToLevel and ('Lv ' .. sceneState.actorChangeFromLevel .. ' > ' .. sceneState.actorChangeToLevel) or ''}\n{sceneState.actorChangeNoteText}"
+        }
+      ],
+      "anim": {
+        "open": { "duration": 0.16, "effect": "rescale" },
+        "close": { "duration": 0.1, "effect": "rescale" }
+      }
+    },
+    {
+      "id": "actor_change_stats",
+      "rect": { "x": 3, "y": 12, "w": 26, "h": 7 },
+      "visible": "(sceneState.actorChangeCount or 0) > 0 and #sceneState.levelUpRows > 0",
+      "style": "levelUpStats",
+      "title": null,
+      "content": [],
+      "anim": {
+        "open": { "duration": 0.16, "effect": "rescale" },
+        "close": { "duration": 0.1, "effect": "rescale" }
+      }
+    }
+  ]
+}

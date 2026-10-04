@@ -22,6 +22,12 @@
   "flavor": "A celestial being tasked with guiding the lost. Its patience is legendary.",
   "expGrowth": 5,
   "gold": 20,
+  "drops": [
+    {
+      "itemId": 8,
+      "chance": 0.15
+    }
+  ],
   "evolutions": [
     {
       "level": 6,
@@ -42,6 +48,7 @@
     },
     {
       "cmd": "CHOICE",
+      "cancelOption": 2,
       "options": [
         {
           "label": "Pay 30 Gold",
@@ -79,12 +86,6 @@
   ],
   "isEvolved": false,
   "traits": [],
-  "drops": [
-    {
-      "itemId": 8,
-      "chance": 0.15
-    }
-  ],
   "unlocked": false,
   "tier": 1,
   "discipline": "cooking",

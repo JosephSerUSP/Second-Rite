@@ -5,7 +5,7 @@ local failed, passed = 0, 0
 local function check(value, message)
     if value then passed=passed+1 else failed=failed+1; print('CHECK FAILED: '..message) end
 end
-local game = {currentMapData={events={}}, townTraversal={x=0,y=5,minY=0,maxY=10,
+local game = {currentMapData={events={}}, townTraversal={provider='bounded_lane',x=0,y=5,minY=0,maxY=10,
     doorways={},environment={anchors={}}}}
 local function door(id,y,direction)
     local d={anchor=id,eventInstanceId=id,radius=.65}
@@ -35,6 +35,8 @@ check(renderedName=='Out to the Cortico' and renderedDirection=='LEFT',
     'renderer doorway sentence resolves into destination and direction projection')
 check(town_prompt.parseRenderedDoorLabel('Talk to Agnes')==nil,
     'ordinary NPC prompts are not mistaken for directed door prompts')
+check(town_prompt.parseRenderedDoorLabel('Door - DIAGONAL')==nil,
+    'unsupported direction words are not projected as valid controls')
 game.townTraversal.y=0
 check(lane.edgeDoorway(game,-1)==nil,'pushing a bound cannot hijack its depth doorway')
 check(not lane.isEdgeDoorway(game,foreground),'a foreground door on a bound remains a DOWN interaction')

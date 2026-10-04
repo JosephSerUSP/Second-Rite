@@ -9,6 +9,45 @@ function M.run(loader)
     local conditions = require('engine.conditions')
     local visited, shops = {}, {}
     local function hasWrit() return conditions.evalPrefixed('hasItem:198', session) end
+    -- Content conversations must be played, not replaced with isolated shop primitives.
+    require('tests.test_weaponsmith_dialogue')
+    local singletonSprites={['assets/character/npc_alicia.png']=0,
+        ['assets/character/npc_laura.png']=0,['assets/character/town/npc_gate_guard.png']=0}
+    for _,map in ipairs(loader.maps) do
+        for _,event in ipairs(map.events or {}) do
+            if singletonSprites[event.sprite] then singletonSprites[event.sprite]=singletonSprites[event.sprite]+1 end
+        end
+    end
+    for sprite,count in pairs(singletonSprites) do assert(count==1,'Duplicate town character: '..sprite..' count '..count) end
+    local climbs={}
+    for mapId=1001,1009 do
+        local probe=require('engine.session').GameSession.new(loader)
+        exploration.loadMap(probe,loader.getMapIndex(mapId))
+        local state=probe.townTraversal
+        assert(state.environment.collisionMesh and #state.groundProfile>1,'Missing walking support on '..mapId)
+        local mesh=assert(love.filesystem.read(state.environment.collisionMesh))
+        local vertices={}
+        for x,y,z in mesh:gmatch('\nv ([^ ]+) ([^ ]+) ([^\r\n]+)') do
+            vertices[#vertices+1]={tonumber(x),tonumber(y),tonumber(z)}
+        end
+        assert(#vertices==#state.groundProfile*2,'Walking mesh omits profile samples')
+        for i,point in ipairs(state.groundProfile) do
+            for side=1,2 do
+                local v=vertices[(i-1)*2+side]
+                assert(math.abs(v[2]-point.y)<.00001 and math.abs(v[3]-point.z)<.00001,'Walking mesh disagrees with native ground')
+            end
+        end
+        lane.update(probe,(state.y-state.minY)/state.speed,-1); lane.update(probe)
+        local lo,hi=state.z,state.z
+        for tick=1,3000 do
+            lane.update(probe,1/30,1)
+            lo=math.min(lo,state.z);hi=math.max(hi,state.z)
+            if state.y==state.maxY then break end
+        end
+        assert(state.y==state.maxY,'Cannot traverse full walking support on '..mapId)
+        if hi-lo>.4 then climbs[#climbs+1]=mapId end
+    end
+    assert(#climbs>=2,'Town still exports only flat walking profiles')
     local function run(commands, choice)
         local ctx = {session=session, loader=loader, party=session.party,
             recoverParty=function() session:rest() end}
@@ -20,10 +59,12 @@ function M.run(loader)
             if node.type == 'CHOICE' then
                 local chosen
                 for i, option in ipairs(node.options) do
-                    if option.label == choice then chosen=i end
+                    local requested=type(choice)=='table' and choice[1] or choice
+                    if option.label == requested then chosen=i end
                 end
                 assert(chosen, 'Missing choice '..tostring(choice))
                 walker:selectChoice(chosen)
+                if type(choice)=='table' then table.remove(choice,1) end
             elseif node.type == 'ACTION' then
                 if node.action == 'RUN_IMMEDIATE' then
                     interpreter.runImmediate(node.commands, ctx)
@@ -38,6 +79,10 @@ function M.run(loader)
                     walker:advance()
                 elseif node.action == 'WAIT_EVENT' then
                     walker:advance()
+                elseif node.action == 'OFFER_QUEST' then
+                    require('engine.quest').offer(session,loader,node.questId);walker:advance()
+                elseif node.action == 'COMPLETE_QUEST' then
+                    require('engine.quest').complete(session,loader,node.questId);walker:advance()
                 else error('Unhandled native graph action '..tostring(node.action)) end
             else walker:advance() end
         end
@@ -86,20 +131,12 @@ function M.run(loader)
     door('to-court',1001)
     door('to-market',1002)
     door('door-bakery',28)
-    for _,event in ipairs(session.currentMapData.events) do
-        if event.name~='Out to Bakery side street' and event.commands then
-            -- Shop event trees are validated separately; open their authored
-            -- shop primitives through the native interpreter graph.
-            local function find(commands)
-                for _,cmd in ipairs(commands) do
-                    if cmd.cmd=='OPEN_SHOP' then run({cmd}) end
-                    if cmd.commands then find(cmd.commands) end
-                    if cmd.options then for _,opt in ipairs(cmd.options) do find(opt.commands or {}) end end
-                end
-            end
-            find(event.commands)
-        end
-    end
+    local alicia
+    for _,event in ipairs(session.currentMapData.events) do if event.name=='Alicia' then alicia=event end end
+    run(assert(alicia).commands,{'Buy','Ask about the town','Leave'})
+    require('engine.quest').offer(session,loader,'silent_shipment')
+    run(alicia.commands,{'Goblins? I should tell the guard.','Leave'})
+    assert(session.flags.shipment_investigated,'The single Alicia cannot advance the shipment quest')
     door('exit_door',1002)
     door('to-quay',1003)
     door('to-forge',1004)
@@ -108,9 +145,15 @@ function M.run(loader)
     door('to-port',1008)
     door('to-court',1001)
     door('to-praca',1005)
+    door('to-churchyard-climb',1006)
+    door('to-praca-climb',1005)
     door('to-churchyard-stair',1009)
     door('to-churchyard',1006)
     door('to-threshold',1007)
+    local guard
+    for _,event in ipairs(session.currentMapData.events) do if event.name=='Guard' then guard=event end end
+    run(assert(guard,'Guard is not stationed at the Labyrinth').commands)
+    assert(session.flags['quest:silent_shipment:completed'],'Gate guard cannot finish Alicia shipment report')
     door('labyrinth-gate',2)
     assert(session.flags.dungeon_entered and session.flags.stratum_bellroot_seen)
     local stairs
@@ -131,7 +174,7 @@ function M.run(loader)
     assert(restored.currentMapData.id==25 and restored.flags.first_return)
     local _, restoredWrit=conditions.evalPrefixed('hasItem:198',restored)
     assert(restoredWrit)
-    print('PLAYTEST LOOP OK '..require('engine.data.json').encode({arrivals=visited,shops=shops,
+    print('PLAYTEST LOOP OK '..require('engine.data.json').encode({arrivals=visited,shops=shops,climbingMaps=climbs,
         proof='Native lane movement and interpreter graphs; no combat or physical Android acceptance implied'}))
 end
 return M

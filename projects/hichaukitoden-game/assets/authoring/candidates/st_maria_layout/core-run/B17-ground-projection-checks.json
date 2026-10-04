@@ -1,0 +1,58 @@
+[
+  {
+    "screen": "court",
+    "laneY": 0,
+    "sourceY": 141.05769395828247,
+    "nativeY": 140.6529292414121,
+    "errorPixels": 0.40476471687037474
+  },
+  {
+    "screen": "court",
+    "laneY": 18,
+    "sourceY": 130.8271050453186,
+    "nativeY": 130.73962668284645,
+    "errorPixels": 0.08747836247215446
+  },
+  {
+    "screen": "court",
+    "laneY": 27,
+    "sourceY": 125.74249505996704,
+    "nativeY": 125.81270253218355,
+    "errorPixels": 0.07020747221650936
+  },
+  {
+    "screen": "court",
+    "laneY": 36,
+    "sourceY": 120.67813396453857,
+    "nativeY": 120.90538268096617,
+    "errorPixels": 0.2272487164275958
+  },
+  {
+    "screen": "court",
+    "laneY": 46,
+    "sourceY": 115.07473468780518,
+    "nativeY": 115.47578532747747,
+    "errorPixels": 0.4010506396722917
+  },
+  {
+    "screen": "market",
+    "laneY": 7,
+    "sourceY": 127.99999952316284,
+    "nativeY": 128,
+    "errorPixels": 4.76837158203125e-07
+  },
+  {
+    "screen": "market",
+    "laneY": 10,
+    "sourceY": 133.64130020141602,
+    "nativeY": 133.46634317677479,
+    "errorPixels": 0.17495702464123042
+  },
+  {
+    "screen": "market",
+    "laneY": 14,
+    "sourceY": 141.2212586402893,
+    "nativeY": 140.81123417501743,
+    "errorPixels": 0.4100244652718743
+  }
+]

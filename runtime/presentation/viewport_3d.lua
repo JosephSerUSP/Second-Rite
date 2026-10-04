@@ -1382,7 +1382,8 @@ local function drawTownPrerender(session, inspection)
             projectedY + groundScreenOffsetY, denominator
     end
     local function screenXForTownY(y)
-        local x, _, denominator = projectTownPoint(depthX, y, state.groundZ or 0)
+        local groundZ = require("engine.bounded_lane").groundAt(session, y) or state.groundZ or 0
+        local x, _, denominator = projectTownPoint(depthX, y, groundZ)
         return panX + centerX + (x - plateGroundX), denominator
     end
     -- Runtime-proof telemetry: this is resolved composition state, captured
@@ -1397,16 +1398,16 @@ local function drawTownPrerender(session, inspection)
         cameraTargetY = townCamera.targetY,
     }
 
-    -- Where the floor is at a given point along the lane. The camera looks
-    -- straight at the facades with no vanishing point, so one scale converts
-    -- both axes and a world height difference is a plain pixel offset from
-    -- the authored foot line.
+    -- Ground follows the same pitched perspective as the plate's source camera.
+    -- A linear height-to-pixel offset drifts away from a visible slope.
     local lanes = require("engine.bounded_lane")
     local function screenFootY(y)
         local groundZ = lanes.groundAt(session, y)
         if not groundZ then return screenY end
-        return screenY - (groundZ - state.groundZ) * pixelsPerRuntimeY
+        local _, footY = toScreen(depthX, y, groundZ)
+        return footY
     end
+    state.lastPrerenderComposition.laneScreenY = screenFootY(actorY)
 
     local function eventSpriteSize(event)
         local height = tonumber(event.worldHeight) or 1.75

@@ -8,7 +8,7 @@ on:
         required: true
         default: main
       st_maria_playtest:
-        description: Package the B12 playable St. Maria town candidate
+        description: Package the playable St. Maria route candidate
         type: boolean
         default: false
   pull_request:
@@ -150,8 +150,8 @@ jobs:
           const fs = require('fs');
           const path = 'projects/hichaukitoden-game/data/project.json';
           const project = JSON.parse(fs.readFileSync(path, 'utf8'));
-          project.android.applicationId += '.stmaria.town';
-          project.android.displayName += ' St. Maria Town';
+          project.android.applicationId += '.stmaria.routes';
+          project.android.displayName += ' St. Maria Routes';
           fs.writeFileSync(path, JSON.stringify(project, null, 2) + '\n');
           NODE
 

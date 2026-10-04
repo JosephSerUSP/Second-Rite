@@ -724,6 +724,7 @@ function love.load(arg)
             "test_baked_environment_package",
             "test_bounded_lane",
             "test_town_threshold_direction", "test_transition_markers",
+            "test_weaponsmith_dialogue",
             "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do

@@ -36,6 +36,7 @@ rest_event_id = max(int(key) for key in common) + 1
 common[str(rest_event_id)] = dict(name='Passage House rest', commands=[dict(cmd='RECOVER_PARTY')])
 home = by_id[25]['events'][0]
 home['name'] = 'Passage House caretaker'
+home['sprite'] = 'assets/character/town/npc_agnes.png'
 home['commands'] = [text('Your room is ready. Registration is at the Passage Office in the Praca: leave the house, take the right-hand street, then enter the Registry.'),
     dict(cmd='CHOICE', options=[
         dict(label='Rest in Room 3.', commands=[dict(cmd='CALL_COMMON_EVENT', commonEventId=rest_event_id), text('You and your companions rest. HP, MP and spell charges are restored.')]),
@@ -59,7 +60,7 @@ def orient_guard(command):
     if command.get('cmd') == 'CALL_COMMON_EVENT' and command.get('commonEventId') == 33:
         command.clear()
         command.update(text('Your writ is in order. Follow the path onward to the Labyrinth forecourt; the iron gate is there.'))
-visit(by_id[1006]['events'], orient_guard)
+visit(by_id[1007]['events'], orient_guard)
 
 def town_return(command):
     if command.get('cmd') in ['LOAD_MAP', 'SET_MAP_PRESENTATION'] and str(command.get('mapId')) == '1':

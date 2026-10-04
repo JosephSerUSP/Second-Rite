@@ -12139,7 +12139,9 @@
       "aS": 0,
       "b": "court",
       "bS": 46,
-      "route": "market-court"
+      "route": "market-court",
+      "aDirection": "left",
+      "bDirection": "right"
     },
     {
       "id": "market-quay",
@@ -12147,7 +12149,9 @@
       "aS": 14,
       "b": "quay",
       "bS": 13.0225,
-      "route": "market-quay"
+      "route": "market-quay",
+      "aDirection": "right",
+      "bDirection": "away"
     },
     {
       "id": "court-praca",
@@ -12155,7 +12159,9 @@
       "aS": 9,
       "b": "praca",
       "bS": 9,
-      "route": "court-praca"
+      "route": "court-praca",
+      "aDirection": "away",
+      "bDirection": "toward"
     },
     {
       "id": "churchyard-threshold",
@@ -12205,7 +12211,9 @@
           103,
           35.35805130004883
         ]
-      ]
+      ],
+      "aDirection": "away",
+      "bDirection": "toward"
     },
     {
       "id": "quay-forge",
@@ -13330,7 +13338,9 @@
           ],
           "support": "walk surface"
         }
-      ]
+      ],
+      "aDirection": "left",
+      "bDirection": "right"
     },
     {
       "id": "forge-port",
@@ -13556,7 +13566,9 @@
             0.3149999976158142
           ]
         }
-      ]
+      ],
+      "aDirection": "toward",
+      "bDirection": "left"
     },
     {
       "id": "praca-stair",
@@ -13576,7 +13588,9 @@
           54.42302322387695,
           14.241684913635254
         ]
-      ]
+      ],
+      "aDirection": "toward",
+      "bDirection": "toward"
     },
     {
       "id": "stair-churchyard",
@@ -15811,7 +15825,9 @@
             24.075
           ]
         }
-      ]
+      ],
+      "aDirection": "away",
+      "bDirection": "toward"
     }
   ],
   "buildings": [
@@ -16353,5 +16369,8 @@
   "navigationDecision": "One foreshortened stair landing shows the climb into depth. UP transfers to the Churchyard; no chain of dead stair screens and no initial fast travel.",
   "cameraRule": "Default pitch -17.5 degrees. Praca keeps its explicitly measured high downward exception.",
   "workerPortArrivalS": 2,
-  "navigationDoorDecision": "Distinct doorway positions: forge/port connection separated from forge door; workers stair inside port bounds; return from sanctuary separated from gate."
+  "navigationDoorDecision": "Distinct doorway positions: forge/port connection separated from forge door; workers stair inside port bounds; return from sanctuary separated from gate.",
+  "workerCourtDirection": "toward",
+  "workerPortDirection": "away",
+  "interactionRule": "Event direction owns marker, input and prompt. away=UP, toward=DOWN; left/right continue along the street. Interior returns face the foreground and use DOWN. Screen camera rotation can change the same path's verb across a transfer."
 }

@@ -53,8 +53,16 @@ function M.run(loader)
     end
     local function door(anchor, expected)
         walk(assert(session.townTraversal.environment.anchors[anchor]).position[2])
-        assert(lane.nearDoorway(session).anchor==anchor, 'Wrong normal door')
-        local event=assert(lane.interact(session))
+        local doorway
+        for _, candidate in ipairs(session.townTraversal.doorways) do
+            if candidate.anchor == anchor then doorway=candidate end
+        end
+        local button = assert(lane.doorwayButton(session, doorway))
+        assert(lane.nearDoorway(session, button).anchor==anchor, 'Wrong directed door')
+        if button == 'DOWN' then
+            assert(lane.interact(session,'UP')~=lane.eventFor(session,doorway),'UP opened a DOWN exit')
+        end
+        local event=assert(lane.interact(session,button))
         run(event.commands)
         assert(session.currentMapData.id==expected, 'Wrong arrival')
         visited[#visited+1]=expected

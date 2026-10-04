@@ -1,21 +1,18 @@
--- Level-up reporting: what changed about a creature between two points in time.
+-- Durable actor-change reporting: what persistently changed about a creature
+-- between two points in time.
 --
--- The engine has never had a way to SAY that a creature grew. Battler:gainExp
--- applies growth silently and returns a boolean, so the only visible trace of a
--- level-up was the victory panel's gauge rolling over. This module turns "the
--- party before" and "the party now" into structured rows a window can draw.
+-- This began as the battle level-up report, but level is only one way a
+-- creature can develop. Stat-up items, skillbooks, scripted permanent rewards,
+-- promotion and automatic form changes all need the same answer: compare the
+-- authoritative creature before/after and describe the durable difference.
 --
--- It lives here, not in the battle scene, for two reasons. It is not
--- battle-specific -- any host that can grant EXP (a quest reward, a ritual, a
--- future training site) can snapshot around its own grant and get the same
--- report. And the battle scene's job is to PUBLISH this onto its scene vars, so
--- the window itself stays entirely data-authored (data/scenes.json +
--- engine.json windowLayout) rather than a bespoke Lua drawer.
+-- Nothing here MUTATES progression. The owning subsystem commits gameplay
+-- first; this module only snapshots and projects the resolved facts for
+-- presentation. Hosts decide when a transaction deserves a report.
 --
--- Snapshots are keyed by PARTY SLOT, never by battler identity: a level-up can
--- fire an automatic transform (engine/transform.lua), which replaces the object
--- sitting in session.party[i] with a new one. Identity-keyed lookup would lose
--- exactly the creature whose report matters most.
+-- Party snapshots are keyed by SLOT, never battler identity: a transform can
+-- replace the object sitting in session.party[i], and identity-keyed lookup
+-- would lose exactly the creature whose before/after report matters most.
 local growth = require("engine.growth")
 local progression = require("engine.progression")
 local traits = require("engine.traits")
@@ -24,9 +21,9 @@ local state_value = require("engine.state_value")
 
 local progress = {}
 
--- Growth's PARAMS list stays the single source of WHICH parameters exist;
--- engine.json -> paramLabels names them, shared with the item/trait readouts
--- (presentation/item_presentation.lua) so "ATK" is one word in one place.
+-- Growth's PARAMS list stays the single source of which durable parameters the
+-- growth report presents. engine.json -> paramLabels owns their player-facing
+-- names, shared with the item/trait readouts.
 local function paramLabel(param)
     local loader = require("engine.data.loader")
     local labels = (loader and loader.engine and loader.engine.paramLabels) or {}
@@ -39,16 +36,23 @@ local function skillIds(battler)
     return out
 end
 
--- One party slot's state, as of now.
+local function skillName(loader, id)
+    local sk = loader and loader.getSkill and loader.getSkill(id)
+    return (sk and sk.name) or tostring(id)
+end
+
+-- One creature's durable presentation-relevant state, as of now. Current HP,
+-- states and equipment are deliberately absent: Actor Change is development,
+-- not a generic mutation inspector.
 local function snapshotMember(battler, session)
     local params = {}
     for _, p in ipairs(growth.PARAMS) do
         params[p] = traits.getParam(battler, p, session)
     end
     return {
-        battler = battler,
         actorId = battler.actorData and battler.actorData.id,
         name = battler.name,
+        portraitKey = (battler.actorData and battler.actorData.portrait) or "",
         level = battler.level or 1,
         exp = battler.exp or 0,
         params = params,
@@ -56,7 +60,10 @@ local function snapshotMember(battler, session)
     }
 end
 
--- The whole active party, indexed by slot. Take one before granting EXP.
+progress.snapshotMember = snapshotMember
+
+-- The whole active party, indexed by slot. Take one before a durable-change
+-- transaction (EXP grant, permanent item, promotion, scripted growth, ...).
 function progress.snapshot(session)
     local snap = {}
     for i = 1, config.MAX_PARTY_SIZE do
@@ -66,104 +73,182 @@ function progress.snapshot(session)
     return snap
 end
 
--- Compares the party against `before` and returns one entry per creature that
--- gained a level, in party order. Creatures that were reaped, replaced or left
--- the party in between simply produce no entry -- there is nobody left to show
--- the report to.
-function progress.levelUps(session, before)
+local function classify(levelDelta, formChanged, rows, learned, forgotten)
+    -- A level-triggered hatch/metamorphosis is still presented as the level
+    -- transaction that caused it; a standalone form swap gets its own heading.
+    if levelDelta > 0 then return "level", "LEVEL UP!" end
+    if levelDelta < 0 then return "level", "LEVEL DOWN!" end
+    if formChanged then return "form", "FORM CHANGE!" end
+
+    if #rows > 0 then
+        local up, down = false, false
+        for _, row in ipairs(rows) do
+            if row.delta > 0 then up = true elseif row.delta < 0 then down = true end
+        end
+        if up and not down then return "attribute", "ATTRIBUTE UP!" end
+        if down and not up then return "attribute", "ATTRIBUTE DOWN!" end
+        return "attribute", "ATTRIBUTE CHANGE"
+    end
+
+    if #learned > 0 and #forgotten == 0 then return "skill", "SKILL LEARNED!" end
+    if #forgotten > 0 and #learned == 0 then return "skill", "SKILL FORGOTTEN" end
+    if #learned > 0 or #forgotten > 0 then return "skill", "SKILL CHANGE!" end
+    return "change", "ACTOR CHANGE"
+end
+
+local function diffMember(session, was, now, liveBattler)
+    if not was or not now then return nil end
     local loader = session.loader
+    local levelDelta = (now.level or 1) - (was.level or 1)
+    local levelChanged = levelDelta ~= 0
+    local formChanged = now.actorId ~= was.actorId
+
+    local rows = {}
+    for _, p in ipairs(growth.PARAMS) do
+        local from, to = was.params[p] or 0, now.params[p] or 0
+        local delta = to - from
+        -- Preserve the old level-up screen's complete stat table, including a
+        -- stat that happened to gain +0 this level. For other Actor Changes,
+        -- showing only rows that actually changed keeps a stat fruit concise.
+        if delta ~= 0 or levelChanged then
+            table.insert(rows, {
+                param = p,
+                label = paramLabel(p),
+                from = from,
+                to = to,
+                delta = delta,
+                deltaText = delta > 0 and ("+" .. delta)
+                    or (delta < 0 and tostring(delta) or ""),
+            })
+        end
+    end
+
+    local notes = {}
+    local learned, forgotten = {}, {}
+    for id in pairs(now.skills or {}) do
+        if not (was.skills or {})[id] then table.insert(learned, skillName(loader, id)) end
+    end
+    for id in pairs(was.skills or {}) do
+        if not (now.skills or {})[id] then table.insert(forgotten, skillName(loader, id)) end
+    end
+    table.sort(learned)
+    table.sort(forgotten)
+
+    for _, name in ipairs(learned) do
+        table.insert(notes, (loader and loader.formatTerm)
+            and loader.formatTerm("battle.learns_skill", "- {0} learns {1}!", now.name, name)
+            or ("- " .. now.name .. " learns " .. name .. "!"))
+    end
+    for _, name in ipairs(forgotten) do
+        table.insert(notes, (loader and loader.formatTerm)
+            and loader.formatTerm("battle.forgets_skill", "- {0} forgets {1}.", now.name, name)
+            or ("- " .. now.name .. " forgets " .. name .. "."))
+    end
+    if formChanged then
+        table.insert(notes, (loader and loader.formatTerm)
+            and loader.formatTerm("battle.transform", "- {0} becomes {1}!", was.name, now.name)
+            or ("- " .. was.name .. " becomes " .. now.name .. "!"))
+    end
+
+    -- Potential unlock is specifically an upward level crossing.
+    if levelDelta > 0 and liveBattler then
+        for _, evolution in ipairs((liveBattler.actorData and liveBattler.actorData.evolutions) or {}) do
+            local required = tonumber(evolution.level)
+            if required and was.level < required and now.level >= required then
+                table.insert(notes, (loader and loader.formatTerm)
+                    and loader.formatTerm("battle.potential_unlocked",
+                        "...{0}'s potential has been unlocked!", now.name)
+                    or ("..." .. now.name .. "'s potential has been unlocked!"))
+            end
+        end
+    end
+
+    local skillChanged = #learned > 0 or #forgotten > 0
+    if not levelChanged and not formChanged and #rows == 0 and not skillChanged then
+        return nil
+    end
+
+    local kind, title = classify(levelDelta, formChanged, rows, learned, forgotten)
+    return {
+        kind = kind,
+        title = title,
+        name = now.name,
+        fromName = was.name,
+        toName = now.name,
+        portraitKey = now.portraitKey or "",
+        fromLevel = was.level,
+        toLevel = now.level,
+        levelDelta = levelDelta,
+        levelChanged = levelChanged,
+        formChanged = formChanged,
+        exp = now.exp,
+        expNeeded = progression.nextLevelExp(now.level),
+        rows = rows,
+        learnedSkills = learned,
+        forgottenSkills = forgotten,
+        noteText = table.concat(notes, "\n"),
+    }
+end
+
+-- Generic Actor Change query. Returns one entry per active creature whose
+-- durable development state changed, in party-slot order.
+function progress.changes(session, before)
     local entries = {}
     for i = 1, config.MAX_PARTY_SIZE do
-        local now = session.party[i]
+        local live = session.party[i]
         local was = before and before[i]
-        if now and was and (now.level or 1) > was.level then
-            local after = snapshotMember(now, session)
-            local rows = {}
-            for _, p in ipairs(growth.PARAMS) do
-                local from, to = was.params[p] or 0, after.params[p] or 0
-                local delta = to - from
-                table.insert(rows, {
-                    param = p,
-                    label = paramLabel(p),
-                    from = from,
-                    to = to,
-                    delta = delta,
-                    -- Pre-signed so a format string can print it directly; a
-                    -- level that skipped a stat shows nothing rather than "+0".
-                    deltaText = delta > 0 and ("+" .. delta) or (delta < 0 and tostring(delta) or ""),
-                })
-            end
-
-            -- Notes: what changed that isn't a number. Skills first (a new
-            -- skill is the most actionable thing a level-up can grant), then a
-            -- transform, which renames the creature's whole form.
-            local notes = {}
-            local learned = {}
-            for id in pairs(after.skills) do
-                if not was.skills[id] then
-                    local sk = loader and loader.getSkill and loader.getSkill(id)
-                    table.insert(learned, (sk and sk.name) or tostring(id))
-                end
-            end
-            table.sort(learned)
-            for _, name in ipairs(learned) do
-                table.insert(notes, (loader and loader.formatTerm)
-                    and loader.formatTerm("battle.learns_skill", "- {0} learns {1}!", after.name, name)
-                    or ("- " .. after.name .. " learns " .. name .. "!"))
-            end
-            if after.actorId ~= was.actorId then
-                table.insert(notes, (loader and loader.formatTerm)
-                    and loader.formatTerm("battle.transform", "- {0} becomes {1}!", was.name, after.name)
-                    or ("- " .. was.name .. " becomes " .. after.name .. "!"))
-            end
-            for _, evolution in ipairs((now.actorData and now.actorData.evolutions) or {}) do
-                local required = tonumber(evolution.level)
-                if required and was.level < required and after.level >= required then
-                    table.insert(notes, (loader and loader.formatTerm)
-                        and loader.formatTerm("battle.potential_unlocked",
-                            "...{0}'s potential has been unlocked!", after.name)
-                        or ("..." .. after.name .. "'s potential has been unlocked!"))
-                end
-            end
-
-            table.insert(entries, {
-                name = after.name,
-                portraitKey = (now.actorData and now.actorData.portrait) or "",
-                fromLevel = was.level,
-                toLevel = after.level,
-                exp = after.exp,
-                expNeeded = progression.nextLevelExp(after.level),
-                rows = rows,
-                noteText = table.concat(notes, "\n"),
-            })
+        if live and was then
+            local entry = diffMember(session, was, snapshotMember(live, session), live)
+            if entry then table.insert(entries, entry) end
         end
     end
     return entries
 end
 
--- Publishes entry `index` of a `progress.levelUps` list onto a scene's var
--- table, under the names data/scenes.json and engine.json's windowLayout read.
--- Nothing here decides how any of it looks: this is the seam that lets the
--- level-up window be authored data instead of a drawer.
+-- Compatibility query for the battle host and older callers. The underlying
+-- diff is generic; the old Level-Up API continues to mean upward crossings.
+function progress.levelUps(session, before)
+    local out = {}
+    for _, entry in ipairs(progress.changes(session, before)) do
+        if (entry.levelDelta or 0) > 0 then table.insert(out, entry) end
+    end
+    return out
+end
+
+-- Publishes one Actor Change entry onto Scene State. `actorChange*` is the new
+-- generic contract. `levelUp*` aliases remain during migration because the
+-- existing battle window/style consumes those names; both projections are
+-- value copies so Scene State never contains aliased subtrees.
 function progress.publish(v, entries, index)
     local e = entries and entries[index]
-    -- Scene state is a value TREE, never an object graph. `entries` itself is
-    -- retained in v.levelUps, so assigning e.rows here aliases the same table
-    -- into two Scene-state paths (levelUps[i].rows and levelUpRows). The Scene
-    -- host correctly rejects that at the next hook boundary. Publish a value
-    -- copy instead: this is a projection of the selected entry, not shared
-    -- mutable storage.
-    v.levelUpRows = e and state_value.copy(e.rows or {}, "level-up rows") or {}
-    v.levelUpName = e and e.name or ""
-    v.levelUpPortrait = e and e.portraitKey or ""
-    v.levelUpFromLevel = e and e.fromLevel or 0
-    v.levelUpToLevel = e and e.toLevel or 0
-    v.levelUpExp = e and e.exp or 0
-    v.levelUpExpNeeded = e and e.expNeeded or 0
-    v.levelUpNoteText = e and e.noteText or ""
-    -- "2/3" only while there is more than one to read; a single level-up
-    -- needs no position indicator.
-    v.levelUpCounter = (entries and #entries > 1) and (index .. "/" .. #entries) or ""
+    local rows = e and e.rows or {}
+
+    v.actorChangeRows = state_value.copy(rows, "actor-change rows")
+    v.actorChangeName = e and e.name or ""
+    v.actorChangeFromName = e and e.fromName or ""
+    v.actorChangeToName = e and e.toName or ""
+    v.actorChangePortrait = e and e.portraitKey or ""
+    v.actorChangeFromLevel = e and e.fromLevel or 0
+    v.actorChangeToLevel = e and e.toLevel or 0
+    v.actorChangeExp = e and e.exp or 0
+    v.actorChangeExpNeeded = e and e.expNeeded or 0
+    v.actorChangeNoteText = e and e.noteText or ""
+    v.actorChangeKind = e and e.kind or ""
+    v.actorChangeTitle = e and e.title or "ACTOR CHANGE"
+    v.actorChangeCounter = (entries and #entries > 1 and e)
+        and (index .. "/" .. #entries) or ""
+
+    -- Legacy battle presentation aliases. Do not alias actorChangeRows itself:
+    -- the Scene host requires authored state to remain a value tree.
+    v.levelUpRows = state_value.copy(rows, "level-up rows")
+    v.levelUpName = v.actorChangeName
+    v.levelUpPortrait = v.actorChangePortrait
+    v.levelUpFromLevel = v.actorChangeFromLevel
+    v.levelUpToLevel = v.actorChangeToLevel
+    v.levelUpExp = v.actorChangeExp
+    v.levelUpExpNeeded = v.actorChangeExpNeeded
+    v.levelUpNoteText = v.actorChangeNoteText
+    v.levelUpCounter = v.actorChangeCounter
 end
 
 return progress

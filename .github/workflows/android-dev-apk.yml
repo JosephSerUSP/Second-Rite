@@ -7,6 +7,10 @@ on:
         description: Trusted branch, tag, or commit to package
         required: true
         default: main
+      st_maria_playtest:
+        description: Package the B12 playable St. Maria town candidate
+        type: boolean
+        default: false
   pull_request:
     paths:
       - ".github/workflows/android-dev-apk.yml"
@@ -130,6 +134,27 @@ jobs:
           fi
           echo "THESTRA_ANDROID_VERSION_CODE=$version_code" >> "$GITHUB_ENV"
 
+      - name: Install St. Maria playtest into canonical export
+        if: github.event_name == 'workflow_dispatch' && inputs.st_maria_playtest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install Pillow
+          python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/build_playtest.py --from-love "$THESTRA_GAME_LOVE"
+          xvfb-run -a "$LOVEC" out/st-maria-playtest/game validate
+          export LOVEC_PATH="$LOVEC"
+          xvfb-run -a python projects/hichaukitoden-game/assets/authoring/candidates/st_maria_layout/core-run/run_playthrough.py
+          # This candidate installs beside the regular dev APK. Its save
+          # identity is isolated too, so old town saves cannot bypass the route.
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = 'projects/hichaukitoden-game/data/project.json';
+          const project = JSON.parse(fs.readFileSync(path, 'utf8'));
+          project.android.applicationId += '.stmaria.navigation';
+          project.android.displayName += ' St. Maria Navigation';
+          fs.writeFileSync(path, JSON.stringify(project, null, 2) + '\n');
+          NODE
+
       - name: Check out pinned official love-android wrapper
         uses: actions/checkout@v4
         with:
@@ -215,7 +240,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon assembleEmbedNoRecordRelease
+          ./gradlew --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=512m" assembleEmbedNoRecordRelease
 
       - name: Align, sign, and verify APK
         shell: bash

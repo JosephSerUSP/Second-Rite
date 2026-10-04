@@ -1,0 +1,174 @@
+{
+  "sourceSHA256": "d70b06ad97d9d53bc047dab29d45a6b87387877b5e691fce36d51f9c381fc232",
+  "doorways": [
+    {
+      "mapId": 21,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 22,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 25,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 28,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 29,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 33,
+      "anchor": "exit_door",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1001,
+      "anchor": "to-market",
+      "direction": "right"
+    },
+    {
+      "mapId": 1001,
+      "anchor": "to-praca",
+      "direction": "away"
+    },
+    {
+      "mapId": 1001,
+      "anchor": "to-port",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1001,
+      "anchor": "door-passage-house",
+      "direction": "away"
+    },
+    {
+      "mapId": 1002,
+      "anchor": "to-court",
+      "direction": "left"
+    },
+    {
+      "mapId": 1002,
+      "anchor": "to-quay",
+      "direction": "right"
+    },
+    {
+      "mapId": 1002,
+      "anchor": "door-bakery",
+      "direction": "away"
+    },
+    {
+      "mapId": 1003,
+      "anchor": "to-market",
+      "direction": "away"
+    },
+    {
+      "mapId": 1003,
+      "anchor": "to-forge",
+      "direction": "left"
+    },
+    {
+      "mapId": 1003,
+      "anchor": "door-pub",
+      "direction": "away"
+    },
+    {
+      "mapId": 1004,
+      "anchor": "to-quay",
+      "direction": "right"
+    },
+    {
+      "mapId": 1004,
+      "anchor": "to-port",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1004,
+      "anchor": "door-forge",
+      "direction": "away"
+    },
+    {
+      "mapId": 1005,
+      "anchor": "to-court",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1005,
+      "anchor": "to-churchyard-stair",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1005,
+      "anchor": "door-chapel",
+      "direction": "away"
+    },
+    {
+      "mapId": 1005,
+      "anchor": "door-registry",
+      "direction": "away"
+    },
+    {
+      "mapId": 1006,
+      "anchor": "to-threshold",
+      "direction": "away"
+    },
+    {
+      "mapId": 1006,
+      "anchor": "to-churchyard-stair",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1007,
+      "anchor": "to-churchyard",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1007,
+      "anchor": "labyrinth-gate",
+      "direction": "away"
+    },
+    {
+      "mapId": 1008,
+      "anchor": "to-forge",
+      "direction": "left"
+    },
+    {
+      "mapId": 1008,
+      "anchor": "to-court",
+      "direction": "away"
+    },
+    {
+      "mapId": 1009,
+      "anchor": "to-praca",
+      "direction": "toward"
+    },
+    {
+      "mapId": 1009,
+      "anchor": "to-churchyard",
+      "direction": "away"
+    }
+  ],
+  "nativePhoneFrames": 7,
+  "checks": [
+    "G1 VALIDATE OK",
+    "Native directional route: 25 transfer arrivals, Registry, bakery, dungeon return, recovery and save/load",
+    "Full staged unit suite passes",
+    "21 focused direction, animation and held-input checks",
+    "G3 UI traces match",
+    "G4 engine state matches"
+  ],
+  "absoluteG5": "Red: existing Options references issue #1331; 12 affected frames per surface reproduced identically from previous source",
+  "limits": [
+    "Existing walk-cycle artwork reused; no new front/back sprite sheet.",
+    "Phone owner play pending."
+  ]
+}

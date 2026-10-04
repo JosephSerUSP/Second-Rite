@@ -1282,6 +1282,14 @@ validator.run = function(loader)
     -- had been handing out nothing at all.
     for mi, map in ipairs(loader.maps or {}) do
         local where = "map #" .. mi .. " ('" .. tostring(map.name or map.title or "?") .. "')"
+        if map.traversal and map.traversal.provider == "bounded_lane" then
+            local lane = require("engine.bounded_lane")
+            for _, door in ipairs(map.traversal.doorways or {}) do
+                local ok, button = pcall(lane.doorwayButton, {currentMapData=map}, door)
+                check(ok and button ~= nil, where .. " doorway '" .. tostring(door.anchor)
+                    .. "' must resolve to an Event with a valid authored direction")
+            end
+        end
         -- The shared Stairs Down common event descends with
         -- `LOAD_MAP mapId: session.floor + 2`, which is only correct while a
         -- dungeon map's id is its depth plus one. Safe maps (town, the

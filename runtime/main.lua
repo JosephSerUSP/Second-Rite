@@ -717,6 +717,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_town_threshold_direction",
             "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do
@@ -1781,7 +1782,7 @@ local function commandsForMapEvent(ev)
     return ev.commands
 end
 
-local function enterDoorEvent(ev)
+local function enterDoorEvent(ev, button)
     local commands = commandsForMapEvent(ev)
     if not commands then return false end
     local lane = require("engine.bounded_lane")
@@ -1792,9 +1793,21 @@ local function enterDoorEvent(ev)
             break
         end
     end
-    return door_transition.begin(function()
+    local sourceMapId = activeSession.currentMapData.id
+    local town = lane.isActive(activeSession)
+    local depthDirection = town and (ev.direction == "away" or ev.direction == "toward")
+        and ev.direction or nil
+    local started = door_transition.begin(function()
         runEventCommands(ev, commands)
-    end, {approach = not edgeExit})
+        if town and activeSession.currentMapData.id ~= sourceMapId and lane.isActive(activeSession) then
+            local arrival = lane.eventFor(activeSession, lane.nearDoorway(activeSession))
+            if arrival then door_transition.setArrivalDirection(arrival.direction) end
+        end
+    end, {approach = not town and not edgeExit, actorDirection = depthDirection})
+    if started and town and button then
+        require("engine.player_controller").consumeUntilRelease(button)
+    end
+    return started
 end
 
 -- Which way the player is holding, from the authored bindings and the touch
@@ -1961,18 +1974,10 @@ handleKeyPressed = function(button)
                 -- the held key. The press itself does nothing; swallowing it
                 -- here keeps it from reaching the grid movement underneath.
                 return true
-            elseif button == "DOWN" then
-                -- A bounded lane has no backwards grid step. Letting Down
-                -- escape into the one-cell fallback map made it look like the
-                -- shop's outward door verb, even though Up is the authored
-                -- door convention everywhere in the town.
-                return true
-            elseif button == "UP" then
-                -- Up is the door verb. It reaches doorways only, so it can
-                -- never start a conversation the player did not aim at.
-                local doorEvent = lane.interact(activeSession)
+            elseif button == "UP" or button == "DOWN" then
+                local doorEvent = lane.interact(activeSession, button)
                 if doorEvent and commandsForMapEvent(doorEvent) then
-                    enterDoorEvent(doorEvent)
+                    enterDoorEvent(doorEvent, button)
                 end
                 return true
             elseif button == "A" or button == "START" then

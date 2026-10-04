@@ -1042,9 +1042,18 @@ end
 local PLAYER_IDLE_SPRITE = "assets/character/player.png"
 local PLAYER_WALK_SPRITE = "assets/character/walker.png"
 
-local function playerSpritePath(state)
-    if state and (state.walking or state.moving) then return PLAYER_WALK_SPRITE end
+local function playerSpritePath(state, pose)
+    if pose or (state and (state.walking or state.moving)) then return PLAYER_WALK_SPRITE end
     return PLAYER_IDLE_SPRITE
+end
+
+local function townPlayerPose(session)
+    local state = session.townTraversal
+    local x, y, z = require("engine.bounded_lane").actorRoot(session)
+    local pose = require("presentation.door_transition").actorPose()
+    return {x = x + (pose and pose.x or 0), y = y + (pose and pose.y or 0), z = z,
+        frame = pose and pose.frame or state.walkFrameIndex or 0,
+        facing = state.facing or 1, moving = pose}
 end
 
 local function drawTownPrerenderSprite(image, x, footY, width, height,
@@ -1454,12 +1463,16 @@ local function drawTownPrerender(session, inspection)
         end
     end
 
-    local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+    local playerPose = townPlayerPose(session)
+    local playerImage = getEventSprite({ sprite = playerSpritePath(state, playerPose.moving) }, session)
     if playerImage then
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
-            screenFootY(actorY),
-            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
-            state.facing or 1)
+        local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
+        local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
+        local scale = baseDepth / poseDepth
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY) + poseX - baseX,
+            screenFootY(actorY) + poseY - baseY,
+            actorWidth * scale, actorHeight * scale, 24, 48, playerPose.frame,
+            playerPose.facing)
     end
 
     -- The matching foreground cutout follows the same pan and is composited
@@ -3296,11 +3309,11 @@ end
 
     if session.townTraversal then
         local state = session.townTraversal
-        local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+        local pose = townPlayerPose(session)
+        local playerImage = getEventSprite({ sprite = playerSpritePath(state, pose.moving) }, session)
         if playerImage then
-            local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
-            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
-                state.walkFrameIndex or 0, state.facing or 1)
+            addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
+                pose.frame, pose.facing)
         end
     end
 

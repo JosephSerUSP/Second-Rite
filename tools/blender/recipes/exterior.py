@@ -68,6 +68,9 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -200,7 +203,7 @@ class Exterior:
         """
         if getattr(self, "_card_mat", None) is not None:
             return self._card_mat
-        sheet = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+        sheet = (PROJECT / "assets"
                  / "materials" / "foliage_card")
         record = json.loads(
             (sheet / "material.json").read_text(encoding="utf-8"))

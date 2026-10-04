@@ -1,0 +1,135 @@
+{
+  "assessmentParent": "205f99fb26822e289342b69d8c68875aceb6c869",
+  "branch": "codex/blender-authoring-foundation-1341",
+  "suites": {
+    "blender-host-discovery.log": {
+      "tests": 360,
+      "seconds": 21.06,
+      "ok": true,
+      "skips": 22
+    },
+    "blender-integration.log": {
+      "tests": 468,
+      "seconds": 492.666,
+      "ok": true,
+      "skips": 0
+    },
+    "asset-production.log": {
+      "tests": 55,
+      "seconds": 13.432,
+      "ok": true,
+      "skips": 0
+    },
+    "asset-gen-tests.log": {
+      "tests": 37,
+      "seconds": 17.641,
+      "ok": true,
+      "skips": 0
+    },
+    "asset-language-tests.log": {
+      "tests": 48,
+      "seconds": 8.727,
+      "ok": true,
+      "skips": 0
+    },
+    "final-boundary-tests.log": {
+      "tests": 18,
+      "seconds": 2.016,
+      "ok": true,
+      "skips": 0
+    }
+  },
+  "nativeCaptures": [
+    {
+      "surface": "classic",
+      "config": {
+        "mapId": 28,
+        "positions": [
+          1.0,
+          3.0,
+          6.0
+        ],
+        "unobstructed": false,
+        "surface": "classic"
+      },
+      "frameCount": 3
+    },
+    {
+      "surface": "device",
+      "config": {
+        "mapId": 28,
+        "positions": [
+          1.0,
+          3.0,
+          6.0
+        ],
+        "unobstructed": false,
+        "device": [
+          2100,
+          900
+        ]
+      },
+      "frameCount": 3
+    },
+    {
+      "surface": "four_three",
+      "config": {
+        "mapId": 28,
+        "positions": [
+          1.0,
+          3.0,
+          6.0
+        ],
+        "unobstructed": false,
+        "surface": "four_three"
+      },
+      "frameCount": 3
+    },
+    {
+      "surface": "wide",
+      "config": {
+        "mapId": 28,
+        "positions": [
+          1.0,
+          3.0,
+          6.0
+        ],
+        "unobstructed": false,
+        "surface": "wide"
+      },
+      "frameCount": 3
+    }
+  ],
+  "captureFailure": {
+    "seconds": 14.0,
+    "exit": 1,
+    "mainRestored": true,
+    "callerProbeRestored": true,
+    "error": "Traceback (most recent call last):\n  File \"C:\\Users\\josep\\.codex\\worktrees\\blender-authoring-foundation-1341\\Hichaukitoden\\tools\\blender\\capture_environment.py\", line 103, in <module>\n    main()\n  File \"C:\\Users\\josep\\.codex\\worktrees\\blender-authoring-foundation-1341\\Hichaukitoden\\tools\\blender\\capture_environment.py\", line 96, in main\n    capture(args)\n  File \"C:\\Users\\josep\\.codex\\worktrees\\blender-authoring-foundation-1341\\Hichaukitoden\\tools\\blender\\capture_environment.py\", line 54, in capture\n    raise RuntimeError(f'{name}: environment capture exited {result.returncode}\\n' +\nRuntimeError: classic: environment capture exited 1\n--------------------------------------------------\nSECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)\n--------------------------------------------------\nENVIRONMENT CAPTURE ERROR\ntests/environment_frames.lua:1: DELIBERATE FOUNDATION CAPTURE FAILURE\nstack traceback:\n\t[love \"boot.lua\"]:352: in function <[love \"boot.lua\"]:348>\n\t[C]: in function 'error'\n\ttests/environment_frames.lua:1: in main chunk\n\t[C]: in function 'require'\n\tmain.lua:808: in function 'load'\n\t[love \"callbacks.lua\"]:136: in function <[love \"callbacks.lua\"]:135>\n\t[C]: in function 'xpcall'\n\t[love \"boot.lua\"]:368: in function <[love \"boot.lua\"]:355>\n\t[C]: in function 'xpcall'\n\t[love \"boot.lua\"]:377: in function <[love \"boot.lua\"]:344>\n\n"
+  },
+  "surfaceProvenance": {
+    "changed": [
+      "projects/hichaukitoden-game/assets/geometry/2_procedural_surface_baselines/manifest.json",
+      "projects/hichaukitoden-game/assets/geometry/2_procedural_surface_baselines/ceiling_shallow_coffers/baseline.json",
+      "projects/hichaukitoden-game/assets/geometry/2_procedural_surface_baselines/floor_broken_flagstones/baseline.json",
+      "projects/hichaukitoden-game/assets/geometry/2_procedural_surface_baselines/wall_ossuary_boulders/baseline.json",
+      "projects/hichaukitoden-game/assets/geometry/2_procedural_surface_baselines/wall_ritual_pilasters/baseline.json"
+    ],
+    "onlyChangedField": "generatorSourceSha256",
+    "allPngBytesIdentical": true
+  },
+  "existingCompilerGap": {
+    "sourceSha256": "d0cefdc0bf31c21bb0dd4e4846570099a443f6a66883aee7b43cd05204ee51c1",
+    "parentAndCandidateObjIdentical": true,
+    "committedMatches": false,
+    "difference": "vn -0.3608 becomes -0.3607; reproduced by parent compiler on Windows Blender 5.2.2"
+  },
+  "allTrackedBlendBytesMatchGit": true,
+  "verifiedBlendCount": 122,
+  "itemScratchCompile32": true,
+  "canonicalG1": true,
+  "canonicalG4": true,
+  "canonicalUnit": true,
+  "nativeEffekseerCoverage": false,
+  "hostedChecks": "See the foundation PR; local results are not hosted acceptance"
+}

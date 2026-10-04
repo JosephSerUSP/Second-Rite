@@ -18,7 +18,11 @@ from scipy.ndimage import gaussian_filter
 import build_surface_fixture_batch_20260806 as base
 
 ROOT = Path(__file__).resolve().parents[2]
-BATCH_ROOT = ROOT / "assets" / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_followup"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+BATCH_ROOT = PROJECT / 'assets' / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_followup"
 
 
 def floor_slabs_denser(size: int):

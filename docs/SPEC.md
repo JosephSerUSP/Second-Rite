@@ -260,6 +260,16 @@ the icon palette mirror (`presentation/ui.lua` and
 permission for additional copies. Future changes should migrate them to the
 shared/generated class or give the migration an explicit follow-up issue.
 
+Asset authoring root selection consumes `tools/semantic-roots.js`, the same
+authority Studio uses. `tools/shared/project_paths.py` forwards the explicit
+or environment selector to a small JSON CLI and caches its resolved result
+per selector/cwd input. Node owns validation and defaulting; Python does not
+mirror the policy. Project content stays separate from installation tools,
+contracts and scratch output. This adds one Node invocation per distinct
+selection within a Python process; the adapter requires the installation's
+Node runtime. Authoring routes and verification boundaries are in
+`tools/blender/README.md`.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,

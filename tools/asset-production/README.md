@@ -8,6 +8,12 @@ that already work.
 
 ## First Stratum set
 
+These adapters select a Project with `SECOND_RITE_PROJECT` or their explicit
+`--project-root` option. The shared resolver consumes `tools/semantic-roots.js`;
+Node is required. Paths inside an asset set are Project-relative, while the
+contract and recipe implementations remain installation-owned. Surfaces pass
+the same Project to asset-gen's `--project` mode.
+
 `assets/authoring/first_stratum/asset-set.json` currently describes:
 
 - four depth-conditioned wall/floor/ceiling surface products;

@@ -373,6 +373,8 @@ no draw mode (G1); a registry entry nothing implements (G4 reports it).
 
 ## Where things live
 
+For Blender work, start at [the authoring routes](tools/blender/README.md).
+
 ```
 main.lua                 host: love.load/update/draw, CLI modes, input
 main.js                  Electron shell for the editor (npm start / runEditor.bat)
@@ -396,40 +398,9 @@ tools/asset-gen/         image-model art generation (Python) + its own local web
                          Seamless textures are scored, not eyeballed: see the
                          "Local generation" section of its README before
                          touching anything that tiles.
-tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
-                         shared shell/threshold/light vocabulary and
-                         `furnishings.py` the shared furniture grammar; a map
-                         file declares only what makes that place itself.
-                         BEFORE authoring one, read
-                         `docs/design/st-maria-interior-authoring.md` -- it is
-                         the complete self-contained brief (colonial Portuguese
-                         vocabulary, the camera contract, the character floor
-                         limit, threshold direction, the no-key lighting rule).
-                         `exterior.py` is the outdoor vocabulary, with
-                         `docs/design/st-maria-exterior-authoring.md` as its
-                         brief -- an exterior is NOT an interior with the
-                         ceiling off: the ground runs off the bottom of the
-                         frame, the near stack is three ranks, and the same
-                         camera distance applies (the 21.1175 in the exterior
-                         maps belongs to the 2D plate, not to a camera). Its
-                         worked example, `recipes/examples/exterior_reference.py`,
-                         is deliberately NOT a place: copy its structure
-                         (ranks, ground, camera-derived heights, self-checks),
-                         never its look. `example_*` files are refused as
-                         sources by `environment_sources.py --check`.
-                         A `.blend` under
-                         `projects/*/assets/authoring/environments/` is
-                         regenerable scaffold output UNTIL its owner adopts or
-                         hand-edits it; after that it is SOURCE AUTHORITY --
-                         edit it directly and never regenerate it. Which state
-                         each file is in is recorded in
-                         `environment-sources.json` beside it, and every shipped
-                         `environment.json` names its `provenance.sourceBlend`;
-                         `python tools/blender/environment_sources.py --check`
-                         gates both (#1269).
-                         `save_source_blend` refuses to overwrite either way,
-                         so the safe default holds: `--force` is the moment you
-                         must know which state the document is in.
+tools/blender/          Read `tools/blender/README.md` for intent -> entry point
+                         -> gate -> lane brief. Adopted .blend files are SOURCE
+                         AUTHORITY: edit directly; never regenerate them.
 tools/golden/            gate scripts + reference logs
 tests/                   unit suites, registered in main.lua's unittest branch
 userPerform/             .bat gate runners for the owner to run locally

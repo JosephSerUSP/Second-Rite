@@ -32,7 +32,11 @@ import build_surface_fixture_batch_20260806 as base
 from lib import fixture_alpha as fa
 
 ROOT = Path(__file__).resolve().parents[2]
-BATCH_ROOT = ROOT / "assets" / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_v2"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+BATCH_ROOT = PROJECT / 'assets' / "geometry" / "3_authored_surface_maps" / "first_stratum_20260807_v2"
 CONDITIONING_DIR = BATCH_ROOT / "conditioning"
 
 SIZE = base.SIZE

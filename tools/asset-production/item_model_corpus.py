@@ -23,9 +23,13 @@ from pathlib import Path
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+import sys
+sys.path.insert(0, str(REPO_ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 # Since #700 the repository root is not a game: item data and models live in
 # the Project, and a model path in items.json is Project-relative.
-PROJECT_ROOT = REPO_ROOT / "projects" / "hichaukitoden-game"
+PROJECT_ROOT = PROJECT
 ITEMS_JSON = PROJECT_ROOT / "data" / "items.json"
 
 # Normalized geometry is rounded to this many decimals before hashing. Coarse

@@ -5,8 +5,10 @@
 const fs=require('node:fs'), path=require('node:path');
 const {stageProjectGates}=require('../ci/stage-project-gates');
 const View=require('../../studio/editor/js/generated/world-view');
-const root=path.resolve(__dirname,'../..'), shipping=path.join(root,'projects/hichaukitoden-game');
+const {resolveProjectRoot,PROJECT_ENV}=require('../semantic-roots');
+const root=path.resolve(__dirname,'../..');
 function stage(output,packageDir) {
+    const shipping=resolveProjectRoot(process.env[PROJECT_ENV]);
     output=path.resolve(output);
     if (!output.startsWith(path.join(root,'out')+path.sep)) throw new Error('Review stages must stay inside repository out/');
     if (fs.existsSync(output)) throw new Error('Refusing to overwrite an existing review stage');

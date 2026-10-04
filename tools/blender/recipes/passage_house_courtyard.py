@@ -3,9 +3,12 @@ import argparse
 import sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0,str(ROOT/'tools/blender'))
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-OUTPUT=ROOT/'projects/hichaukitoden-game/assets/authoring/environments/passage_house_courtyard.blend'
+OUTPUT=PROJECT / 'assets/authoring/environments/passage_house_courtyard.blend'
 
 def build(output):
     from courtyard_scene import build as build_scene

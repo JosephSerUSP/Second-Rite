@@ -53,7 +53,9 @@ function assertRuntimeRoot(value, label = 'runtime root') {
 }
 
 function resolveProjectRoot(configured, { defaultProjectRoot = DEFAULT_PROJECT_ROOT } = {}) {
-    if (!configured) return assertProjectRoot(path.resolve(defaultProjectRoot), 'default Project root');
+    if (!configured || (typeof configured === 'string' && !configured.trim())) {
+        return assertProjectRoot(path.resolve(defaultProjectRoot), 'default Project root');
+    }
     return assertProjectRoot(configured, PROJECT_ENV);
 }
 
@@ -110,3 +112,25 @@ module.exports = {
     resolveSemanticRoots,
     resolveWithin,
 };
+
+// Python authoring tools consume the same root authority through JSON (#1341).
+// One request per process boot; no Python copy of Project selection policy.
+if (require.main === module) {
+    try {
+        const request = JSON.parse(fs.readFileSync(0, 'utf8'));
+        if (request.mode === 'metadata') {
+            process.stdout.write(JSON.stringify({ defaultProjectRoot: DEFAULT_PROJECT_ROOT,
+                projectEnv: PROJECT_ENV }));
+            return;
+        }
+        const root = resolveProjectRoot(request.projectRoot === undefined
+            ? process.env[PROJECT_ENV] : request.projectRoot, {
+            defaultProjectRoot: request.defaultProjectRoot || DEFAULT_PROJECT_ROOT,
+        });
+        process.stdout.write(JSON.stringify({ projectRoot: root,
+            defaultProjectRoot: DEFAULT_PROJECT_ROOT, projectEnv: PROJECT_ENV }));
+    } catch (error) {
+        process.stderr.write(`${error.message}\n`);
+        process.exitCode = 1;
+    }
+}

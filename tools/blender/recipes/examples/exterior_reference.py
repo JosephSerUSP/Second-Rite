@@ -52,6 +52,9 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 sys.path.insert(0, str(ROOT / "tools" / "blender" / "recipes"))
 
@@ -167,7 +170,7 @@ def render(ext, out_dir, lanes=(SPAN / 2.0,)):
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
     camera = thestra_camera.create_or_update_camera(ext.record, make_active=True)
-    sheet = ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png"
+    sheet = PROJECT / 'assets/character/npc_alicia.png'
     frames = []
     for lane in lanes:
         camera.location.y = ext.y(lane)

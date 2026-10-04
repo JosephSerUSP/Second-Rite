@@ -13,7 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 import build_asset_library as lib  # noqa: E402
 
 MARKER = "ASSET_LIBRARY_DESCRIPTION "
@@ -22,7 +24,7 @@ MARKER = "ASSET_LIBRARY_DESCRIPTION "
 def describe(*extra):
     script = ROOT / "tools" / "blender" / "asset_library_source.py"
     result = subprocess.run(
-        [blender_locator.blender_executable(), "--background", "--factory-startup", "-noaudio",
+        [blender_test_support.blender_executable(), "--background", "--factory-startup", "-noaudio",
          "--python-exit-code", "1", "--python", str(script), "--", "describe", *extra],
         capture_output=True, text=True, timeout=300)
     line = next((l for l in result.stdout.splitlines() if l.startswith(MARKER)), None)

@@ -27,7 +27,11 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.ndimage import distance_transform_edt, gaussian_filter
 
 ROOT = Path(__file__).resolve().parents[2]
-BATCH_ROOT = ROOT / "assets" / "geometry" / "3_authored_surface_maps" / "first_stratum_20260806"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+BATCH_ROOT = PROJECT / 'assets' / "geometry" / "3_authored_surface_maps" / "first_stratum_20260806"
 HEIGHT_DIR = BATCH_ROOT / "height"
 MANIFEST_PATH = BATCH_ROOT / "manifest.json"
 CONTACT_PATH = BATCH_ROOT / "contact-sheet.png"

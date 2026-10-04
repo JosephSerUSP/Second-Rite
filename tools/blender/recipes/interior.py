@@ -36,6 +36,9 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -46,7 +49,7 @@ from first_stratum.common import box  # noqa: E402
 from shell_geometry import ceiling_members  # noqa: E402
 
 CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
-ENVIRONMENT_DIR = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+ENVIRONMENT_DIR = (PROJECT / "assets"
                    / "authoring" / "environments")
 
 FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit

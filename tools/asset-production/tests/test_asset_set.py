@@ -15,7 +15,7 @@ import asset_set  # noqa: E402
 
 class AssetSetTests(unittest.TestCase):
     def test_first_stratum_set_is_valid_and_coherent(self):
-        data = asset_set.load_asset_set(root=ROOT, check_files=True)
+        data = asset_set.load_asset_set(root=asset_set.project_root(), check_files=True)
         self.assertEqual(data["id"], "first_stratum")
         self.assertEqual(len(data["assets"]), 7)
         chest = asset_set.get_asset(data, "first_stratum_treasure_chest", kind="world_prop")
@@ -24,21 +24,23 @@ class AssetSetTests(unittest.TestCase):
         self.assertEqual(set(chest["products"]["states"]), {"closed", "open"})
 
     def test_surface_command_resolves_existing_generator(self):
-        data = asset_set.load_asset_set(root=ROOT, check_files=True)
+        data = asset_set.load_asset_set(root=asset_set.project_root(), check_files=True)
         floor = asset_set.get_asset(data, "first_stratum_floor_broken_flagstones", kind="surface")
         command = asset_set.surface_generate_command(
-            floor, root=ROOT,
+            floor, root=asset_set.project_root(),
             overrides={"variants": 2, "seed": 104, "loras": ["JoStyle:0.7"]},
             python_executable="python",
         )
-        self.assertEqual(command[:4], ["python", "tools/asset-gen/gen.py", "generate", "texturePiece"])
+        self.assertEqual(command[:2], ["python", "tools/asset-gen/gen.py"])
+        self.assertEqual(command[2:4], ['--project', str(asset_set.project_root())])
+        self.assertEqual(command[4:6], ['generate', 'texturePiece'])
         self.assertIn("--height", command)
         self.assertIn("--depth-weight", command)
         self.assertEqual(command[command.index("--variants") + 1], "2")
         self.assertEqual(command[-2:], ["--lora", "JoStyle:0.7"])
 
     def test_run_annotation_preserves_existing_manifest(self):
-        data = asset_set.load_asset_set(root=ROOT, check_files=True)
+        data = asset_set.load_asset_set(root=asset_set.project_root(), check_files=True)
         wall = asset_set.get_asset(data, "first_stratum_wall_ritual_pilasters", kind="surface")
         with tempfile.TemporaryDirectory() as directory:
             run = Path(directory)
@@ -46,7 +48,7 @@ class AssetSetTests(unittest.TestCase):
                         "name": "existing", "variants": [{"index": 1}]}
             (run / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             record = asset_set.annotate_run_manifest(
-                run, asset_set=data, asset=wall, root=ROOT
+                run, asset_set=data, asset=wall, root=asset_set.project_root()
             )
             updated = json.loads((run / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(updated["name"], "existing")
@@ -57,7 +59,7 @@ class AssetSetTests(unittest.TestCase):
 
     def test_repository_path_rejects_escape(self):
         with self.assertRaises(asset_set.AssetSetError):
-            asset_set.repository_path("../outside", root=ROOT)
+            asset_set.repository_path("../outside", root=asset_set.project_root())
 
 
 if __name__ == "__main__":

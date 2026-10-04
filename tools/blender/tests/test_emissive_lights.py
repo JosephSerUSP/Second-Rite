@@ -15,7 +15,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 
 class EmissiveLightsTests(unittest.TestCase):
@@ -25,7 +27,7 @@ class EmissiveLightsTests(unittest.TestCase):
     def setUpClass(cls):
         script = ROOT / "tools" / "blender" / "tests" / "emissive_lights_blender.py"
         result = subprocess.run(
-            [blender_locator.blender_executable(), "-b", "-noaudio", "--factory-startup",
+            [blender_test_support.blender_executable(), "-b", "-noaudio", "--factory-startup",
              "--python-exit-code", "1", "-P", str(script)],
             capture_output=True, text=True, timeout=300)
         marker = "EMISSIVE_LIGHTS_PROBE "

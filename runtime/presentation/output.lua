@@ -70,6 +70,7 @@ local CRT_LAB_PRESET_ORDER = {
     "aperture",
     "slot-mask",
     "composite",
+    "integrated",
     "convergence",
     "curved",
     "maximal",
@@ -79,8 +80,11 @@ local CRT_LAB_DEFAULTS = {
     beamStrength = 0.28,
     beamStart = 0.14,
     beamCompensation = 0.48,
+    beamDriveExpansion = 0.0,
     horizontalSoftness = 0.18,
+    lumaBleed = 0.0,
     halationStrength = 0.0,
+    bloomStrength = 0.0,
     halationRadius = 1.25,
     grilleStrength = 0.0,
     slotMaskStrength = 0.0,
@@ -128,6 +132,22 @@ local CRT_LAB_PRESETS = {
         halationStrength = 0.12,
         halationRadius = 1.10,
     },
+    integrated = {
+        -- Composite is the perceptual anchor, but this candidate spreads luma
+        -- and bright-beam energy too so colour bleed is no longer doing nearly
+        -- all of the pixel integration by itself.
+        beamStrength = 0.38,
+        beamStart = 0.07,
+        beamCompensation = 0.58,
+        beamDriveExpansion = 0.58,
+        horizontalSoftness = 0.12,
+        lumaBleed = 0.34,
+        compositeBleed = 0.62,
+        ghostStrength = 0.045,
+        bloomStrength = 0.22,
+        halationStrength = 0.18,
+        halationRadius = 1.25,
+    },
     convergence = {
         beamStrength = 0.29,
         beamStart = 0.11,
@@ -168,8 +188,11 @@ local CRT_LAB_SHADER = [[
     extern number beamStrength;
     extern number beamStart;
     extern number beamCompensation;
+    extern number beamDriveExpansion;
     extern number horizontalSoftness;
+    extern number lumaBleed;
     extern number halationStrength;
+    extern number bloomStrength;
     extern number halationRadius;
     extern number grilleStrength;
     extern number slotMaskStrength;
@@ -233,17 +256,20 @@ local CRT_LAB_SHADER = [[
             px.b = pb.b;
         }
 
-        // Composite-like chroma bandwidth loss without changing luma detail.
-        if (compositeBleed > 0.0) {
-            vec2 chromaDx = vec2(1.35 / sourceSize.x, 0.0);
-            vec3 left = reconstruct(tex, uv - chromaDx).rgb;
-            vec3 right = reconstruct(tex, uv + chromaDx).rgb;
+        // Composite-like signal bandwidth loss. Chroma and luma are authored
+        // separately so a candidate can let neighbouring source pixels fuse in
+        // brightness as well as colour instead of relying on chroma smear alone.
+        if (compositeBleed > 0.0 || lumaBleed > 0.0) {
+            vec2 signalDx = vec2(1.35 / sourceSize.x, 0.0);
+            vec3 left = reconstruct(tex, uv - signalDx).rgb;
+            vec3 right = reconstruct(tex, uv + signalDx).rgb;
             vec3 soft = (left + px.rgb * 2.0 + right) * 0.25;
             number y0 = luminance(px.rgb);
             number ys = luminance(soft);
             vec3 chroma0 = px.rgb - vec3(y0);
             vec3 chromaSoft = soft - vec3(ys);
-            px.rgb = vec3(y0) + mix(chroma0, chromaSoft, compositeBleed);
+            number y = mix(y0, ys, lumaBleed);
+            px.rgb = vec3(y) + mix(chroma0, chromaSoft, compositeBleed);
 
             if (ghostStrength > 0.0) {
                 vec3 delayed = reconstruct(
@@ -252,8 +278,11 @@ local CRT_LAB_SHADER = [[
             }
         }
 
-        // Cheap single-pass halation: four bright-neighbour taps, biased warm.
-        if (halationStrength > 0.0) {
+        // Cheap single-pass phosphor bloom / halation: the same four bright
+        // neighbours can contribute neutral light spread and a warmer glass-like
+        // halo independently. This lets a strong recipe reinforce brightness
+        // without making every edge disproportionately orange.
+        if (halationStrength > 0.0 || bloomStrength > 0.0) {
             vec2 haloStep = vec2(halationRadius) / sourceSize;
             vec3 halo =
                 brightPart(reconstruct(tex, uv + vec2(haloStep.x, 0.0)).rgb)
@@ -261,15 +290,22 @@ local CRT_LAB_SHADER = [[
                 + brightPart(reconstruct(tex, uv + vec2(0.0, haloStep.y)).rgb)
                 + brightPart(reconstruct(tex, uv - vec2(0.0, haloStep.y)).rgb);
             halo *= 0.25;
+            px.rgb += halo * bloomStrength;
             px.rgb += halo * vec3(1.10, 0.72, 0.56) * halationStrength;
         }
 
-        // Source-line beam envelope. Unlike the shipping CRT's fixed 0.22
-        // strength, lab presets deliberately push this into conspicuous territory.
+        // Source-line beam envelope. Bright drive widens the effective beam in
+        // the integrated candidate: highlights bridge more of the dark scanline
+        // boundary while low-level pixels retain stronger separation, closer to
+        // the way a CRT spot grows with drive instead of every source pixel
+        // remaining the same hard-edged rectangle.
         number phase = abs(fract(uv.y * sourceSize.y) - 0.5) * 2.0;
         number scaleWeight = clamp((physicalOutputScale - 1.25) / 2.0, 0.0, 1.0);
         number scanStrength = beamStrength * scaleWeight;
-        number beam = 1.0 - scanStrength
+        number drive = clamp(max(max(px.r, px.g), px.b), 0.0, 1.0);
+        number localScanStrength = scanStrength
+            * (1.0 - beamDriveExpansion * drive * 0.72);
+        number beam = 1.0 - localScanStrength
             * smoothstep(beamStart, 1.0, phase);
         px.rgb *= beam * (1.0 + scanStrength * beamCompensation);
 

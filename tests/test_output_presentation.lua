@@ -123,7 +123,7 @@ do
 
     local presetIds = output.crtLabPresetIds()
     local labModes = output.crtLabModeIds()
-    assert(#presetIds == 8, "expected eight CRT lab presets")
+    assert(#presetIds == 9, "expected nine CRT lab presets")
     assert(#labModes == #presetIds, "CRT lab mode/preset count drifted")
 
     local expectedScale = 1000 / 426
@@ -142,6 +142,16 @@ do
         assert(ok, modeId .. " shader failed native compilation: " .. tostring(err))
     end
 
+    local composite = output.crtLabPreset("composite")
+    assert(composite and composite.compositeBleed == 0.68 and composite.lumaBleed == 0,
+        "Composite must remain the unchanged chroma-led comparison anchor")
+
+    local integrated = output.crtLabPreset("integrated")
+    assert(integrated and integrated.curvature == 0 and integrated.grilleStrength == 0
+        and integrated.lumaBleed > 0 and integrated.compositeBleed > 0
+        and integrated.bloomStrength > 0 and integrated.beamDriveExpansion > 0,
+        "integrated CRT candidate must combine flat luma/chroma/beam reconstruction")
+
     local maximal = output.crtLabPreset("maximal")
     assert(maximal and maximal.curvature > 0 and maximal.grilleStrength > 0
         and maximal.compositeBleed > 0 and maximal.halationStrength > 0,
@@ -153,6 +163,12 @@ do
         "unknown CRT lab preset should not resolve")
 
     local labSource = output.crtLabShaderSource()
+    assert(labSource:find("lumaBleed", 1, true),
+        "CRT lab shader must expose luma bandwidth integration")
+    assert(labSource:find("bloomStrength", 1, true),
+        "CRT lab shader must expose neutral bright-pixel bloom")
+    assert(labSource:find("beamDriveExpansion", 1, true),
+        "CRT lab shader must expose drive-dependent beam width")
     assert(labSource:find("halationStrength", 1, true),
         "CRT lab shader must expose halation")
     assert(labSource:find("grilleStrength", 1, true),

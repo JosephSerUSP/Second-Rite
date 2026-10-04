@@ -161,6 +161,7 @@
       "commands": [
         {
           "cmd": "CHOICE",
+          "cancelOption": 6,
           "options": [
             {
               "label": "Thestra Showcase Room",
@@ -399,6 +400,7 @@
         },
         {
           "cmd": "CHOICE",
+          "cancelOption": 7,
           "options": [
             {
               "label": "Pixie (Lv 1)",

@@ -10,6 +10,8 @@ in `out/`. Node is required. Set `BLENDER_EXECUTABLE` to the exact version in
 
 | Intent | Entry point | Check before promotion | Lane brief |
 |---|---|---|---|
+| Choose a furnishing and its parameters | [Generated catalogue](recipes/FURNISHINGS.md); `furnishings_catalogue.py --check` | Dimensions include the complete built assembly; review placement context and material bindings | [Interior brief](../../docs/design/st-maria-interior-authoring.md) |
+| Place scaffold props by relationship | `compile_room_spec.py`; [serving-corner example](recipes/examples/README.md) | Actual support face, measured gaps and declared keep-clear volumes; native visual review still required | [Interior brief](../../docs/design/st-maria-interior-authoring.md) |
 | Edit or give an item useful source structure | Open its existing `.blend`; scaffold only a new item; `compile_item_blends.py --check` | Source hashes unchanged, runtime OBJ valid, corpus check, real item viewer | [Item source contract](../../projects/hichaukitoden-game/assets/authoring/items/README.md) |
 | Author a St. Maria interior scaffold | `recipes/interior.py` + `recipes/furnishings.py`; edit an adopted source directly | Source record check; native capture across lane positions and surfaces | [Interior brief](../../docs/design/st-maria-interior-authoring.md) |
 | Author a St. Maria exterior scaffold | `recipes/exterior.py`; structure example in `recipes/examples/exterior_reference.py` | Source record check; ground, near stack and native capture | [Exterior brief](../../docs/design/st-maria-exterior-authoring.md) |
@@ -19,6 +21,17 @@ in `out/`. Node is required. Set `BLENDER_EXECUTABLE` to the exact version in
 | Generate canonical scalar surface baselines | `tools/asset-gen/surface_baselines_v2.py` | `--verify`; Blender previews are derivatives | [Surface contract](../../docs/asset-pipeline/SURFACE_BASELINES_V2.md) |
 | Browse or reuse library assets | `asset_library.py` for listings; `vendor_assets.py` for curated offline assets | Provenance and hashes; local listing/group checks | [Library contract](../../docs/asset-pipeline/BLENDER_CORE.md#browsing-asset-libraries-read-only) |
 | Work interactively in Blender | `live_bridge/`; preserve the same source authority | Bridge tests plus the source's ordinary compile/export/native checks | [Bridge protocol and usage](live_bridge/README.md) |
+
+The [generated tool-role index](SCRIPTS.md) classifies every top-level Python
+and JavaScript file. Start with its supported entry points; studies and recorded
+source surgery remain available for their original evidence. Add a role in
+`SCRIPTS.json` when adding a tool, then run `script_index.py --write`.
+
+Agents can query measured pieces without loading Blender or reading the whole
+library: `python tools/blender/furnishings_catalogue.py --find "water"` prints
+the matching builders, dimensions, signature and placement notes. `--build`
+uses pinned Blender to regenerate all images and measurements; `--check`
+checks coverage, input fingerprints and image integrity without rendering.
 
 ## Rules that keep authoring reliable
 

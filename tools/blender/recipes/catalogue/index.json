@@ -1,0 +1,3346 @@
+{
+  "version": 1,
+  "fingerprint": {
+    "tools/blender/recipes/furnishings.py": "1ea31c4a7f4d3dec5badc5ae3c46a5a5da4be537e4c7cb119519c721a09bb043",
+    "tools/blender/recipes/catalogue-fixtures.json": "ad34efd4bce308f7e1fe444709c836400b19d3efd3db394f243925d9d52a2d4f",
+    "tools/blender/recipes/interior.py": "346acee292d84fb7dcb5ea5f35efc00a899805413765446550190234b1fa568a",
+    "tools/blender/second_rite_asset_core.py": "250ced208b568a27ee6e5e42128b3654cba4271034f28b8c0b35209207042564",
+    "tools/blender/recipes/first_stratum/common.py": "a00bb9a30366793b2129d92d361c1829593db380868317c4abb51d892dfacedd",
+    "tools/asset-language/materials.json": "be69d7e11e0e4ddc9e954a77e14693fe7b1bd312e85e01687fbf5a9693e40d3e",
+    "tools/blender/furnishings_catalogue.py": "46bbb44e5d8179eeb83578cb51a628c21949a70ed943c5b1baf1be13e5427f22",
+    "tools/blender/render_furnishings_catalogue.py": "8de4524f3f100e673250faf27f7c91960970becbaab92f0fd18ce21d1ad06e77",
+    "tools/blender/blender-pin.json": "2b409254a23e801d0a31bbf750a0e845bccec21bc2beba457243b3f5aa7ef347",
+    "tools/blender/fixtures/town_sideview_camera.json": "f802bfa217ffbfb273352dfa07b9db3c70be558798e7f0ffde14f78e786fd4cd",
+    "tools/blender/recipes/shell_geometry.py": "5b3d12c6de871c5b766ae57c81142e314bae961e978bfbf546ceb036022c869d",
+    "tools/blender/furnishing_geometry.py": "cec2a64cccfc73d60f812414e2c777736135d0f38655458e4b2e76b526b2c17a"
+  },
+  "entries": [
+    {
+      "id": "chest",
+      "signature": "chest(room, name, at, *, length=1.15, depth=0.55, height=0.58)",
+      "description": "A banded chest (*arca*). The workhorse of a colonial interior: storage,\nseat, and the thing a lodger actually owns.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.15"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.55"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.58"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.315,
+          -0.6,
+          0.0
+        ],
+        [
+          0.31,
+          0.6,
+          0.58
+        ]
+      ],
+      "dimensions": [
+        0.625,
+        1.2,
+        0.58
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "bed",
+      "signature": "bed(room, name, at, *, length=1.95, width=0.95, height=0.5)",
+      "description": "A bed with turned posts, headboard toward the back wall.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.95"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.95"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.5"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.475,
+          -0.975,
+          0.0
+        ],
+        [
+          0.515,
+          0.975,
+          1.05
+        ]
+      ],
+      "dimensions": [
+        0.99,
+        1.95,
+        1.05
+      ],
+      "materials": [
+        "aged_cloth",
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "cabinet",
+      "signature": "cabinet(room, name, at, *, width=1.05, depth=0.5, height=1.85)",
+      "description": "A panelled cabinet (*armario*). Tall, dark and heavy: the room's\nvertical mass.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.05"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.5"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.85"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.315,
+          -0.57,
+          0.0
+        ],
+        [
+          0.295,
+          0.57,
+          1.95
+        ]
+      ],
+      "dimensions": [
+        0.61,
+        1.14,
+        1.95
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "records_press",
+      "signature": "records_press(room, name, at, *, width=2.1, depth=0.82, height=2.8, panel_mat=None)",
+      "description": "Tall civic records cupboard: framed doors, labelled drawers and stepped cornice.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.1"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.82"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.8"
+        },
+        {
+          "name": "panel_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.542,
+          -1.16,
+          0.0
+        ],
+        [
+          0.46,
+          1.16,
+          2.865
+        ]
+      ],
+      "dimensions": [
+        1.002,
+        2.32,
+        2.865
+      ],
+      "materials": [
+        "dark_wood",
+        "oxidized_bronze",
+        "paper",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "woven_runner",
+      "signature": "woven_runner(room, name, at, *, length=4.7, width=1.55, cloth_mat, border_mat, motif_mat)",
+      "description": "Flat decorative textile with broad borders and restrained lozenge repeats.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "4.7"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.55"
+        },
+        {
+          "name": "cloth_mat",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "border_mat",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "motif_mat",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        }
+      ],
+      "fixture": {
+        "cloth_mat": {
+          "material": "aged_cloth"
+        },
+        "border_mat": {
+          "material": "dark_wood"
+        },
+        "motif_mat": {
+          "material": "paper"
+        }
+      },
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.775,
+          -2.35,
+          0.002
+        ],
+        [
+          0.775,
+          2.35,
+          0.0215
+        ]
+      ],
+      "dimensions": [
+        1.55,
+        4.7,
+        0.0195
+      ],
+      "materials": [
+        "aged_cloth",
+        "dark_wood",
+        "paper"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "ledger",
+      "signature": "ledger(room, name, at, *, length=0.42, width=0.24, open_book=False)",
+      "description": "A narrow bound account book; place on a desk with room.surface().",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.42"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.24"
+        },
+        {
+          "name": "open_book",
+          "keywordOnly": true,
+          "required": false,
+          "default": "False"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.12,
+          -0.2215,
+          0.0
+        ],
+        [
+          0.12,
+          0.21,
+          0.069
+        ]
+      ],
+      "dimensions": [
+        0.24,
+        0.4315,
+        0.069
+      ],
+      "materials": [
+        "book_leather",
+        "paper"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "bound_volume",
+      "signature": "bound_volume(room, name, at, *, height=0.43, thickness=0.095, depth=0.34, cover_mat=None)",
+      "description": "Upright ledger with recessed page block, projecting boards and visible spine.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.43"
+        },
+        {
+          "name": "thickness",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.095"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.34"
+        },
+        {
+          "name": "cover_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.18,
+          -0.052,
+          0.0
+        ],
+        [
+          0.17,
+          0.052,
+          0.43
+        ]
+      ],
+      "dimensions": [
+        0.35,
+        0.104,
+        0.43
+      ],
+      "materials": [
+        "book_leather",
+        "paper"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "seal_stamp",
+      "signature": "seal_stamp(room, name, at)",
+      "description": "A handled brass seal beside its dark ink pad.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.065,
+          -0.043,
+          0.0
+        ],
+        [
+          0.065,
+          0.275,
+          0.15
+        ]
+      ],
+      "dimensions": [
+        0.13,
+        0.318,
+        0.15
+      ],
+      "materials": [
+        "dark_wood",
+        "oxidized_bronze",
+        "writing_ink"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "waiting_bench",
+      "signature": "waiting_bench(room, name, at, *, length=1.75)",
+      "description": "Heavy waiting bench with supported back and a lower stretcher.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.75"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.24,
+          -0.875,
+          0.0
+        ],
+        [
+          0.2425,
+          0.875,
+          1.025
+        ]
+      ],
+      "dimensions": [
+        0.4825,
+        1.75,
+        1.025
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "record_bay",
+      "signature": "record_bay(room, name, at, *, width=1.5, height=1.65, columns=3, rows=3)",
+      "description": "Open document pigeonholes with visible grouped paper bundles.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.5"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.65"
+        },
+        {
+          "name": "columns",
+          "keywordOnly": true,
+          "required": false,
+          "default": "3"
+        },
+        {
+          "name": "rows",
+          "keywordOnly": true,
+          "required": false,
+          "default": "3"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.23,
+          -0.7775,
+          -0.0275
+        ],
+        [
+          0.23,
+          0.7775,
+          1.6775
+        ]
+      ],
+      "dimensions": [
+        0.46,
+        1.555,
+        1.705
+      ],
+      "materials": [
+        "book_leather",
+        "dark_wood",
+        "paper"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "service_screen",
+      "signature": "service_screen(room, name, *, front, rear, left, right, panel_mat=None, height=2.78, transom_top=None, beam_spans=())",
+      "description": "L-shaped counter joinery: an open serving transom and wall-connected return.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "front",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "rear",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "left",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "right",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "panel_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.78"
+        },
+        {
+          "name": "transom_top",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "beam_spans",
+          "keywordOnly": true,
+          "required": false,
+          "default": "()"
+        }
+      ],
+      "fixture": {
+        "front": 0,
+        "rear": 1.8,
+        "left": 1.9,
+        "right": -1.9
+      },
+      "placement": "Architectural assembly: explicit front/rear and left/right extents; serving transom above 2.43 m. Align return with room joinery.",
+      "bounds": [
+        [
+          -0.06,
+          -1.96,
+          0.0
+        ],
+        [
+          1.84,
+          1.96,
+          2.82
+        ]
+      ],
+      "dimensions": [
+        1.9,
+        3.92,
+        2.82
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "counter_returns",
+      "signature": "counter_returns(room, name, at, *, length=3.8, depth=0.95, height=0.92, panel_mat=None)",
+      "description": "Low cabinetry returning behind a counter; no freestanding architectural frame.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "3.8"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.95"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.92"
+        },
+        {
+          "name": "panel_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Assembly behind a counter; at is the front of the return, not its footprint centre.",
+      "bounds": [
+        [
+          -0.03,
+          -2.005,
+          0.0
+        ],
+        [
+          0.98,
+          2.005,
+          0.9825
+        ]
+      ],
+      "dimensions": [
+        1.01,
+        4.01,
+        0.9825
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "service_counter",
+      "signature": "service_counter(room, name, at, *, length=3.8, height=0.92)",
+      "description": "Panelled civic counter with overhanging writing surface and foot rail.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "3.8"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.92"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor assembly with a separate writing station; keep the public side reachable.",
+      "bounds": [
+        [
+          -0.44,
+          -1.9,
+          0.0
+        ],
+        [
+          0.44,
+          1.9,
+          1.12
+        ]
+      ],
+      "dimensions": [
+        0.88,
+        3.8,
+        1.12
+      ],
+      "materials": [
+        "book_leather",
+        "dark_wood",
+        "paper"
+      ],
+      "meshCount": 2,
+      "lightCount": 0
+    },
+    {
+      "id": "framed_picture",
+      "signature": "framed_picture(room, name, at, *, width=1.15, height=0.82, artwork)",
+      "description": "A back-wall frame with recessed canvas and explicitly mapped image UVs.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.15"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.82"
+        },
+        {
+          "name": "artwork",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        }
+      ],
+      "fixture": {
+        "at": [
+          0,
+          0,
+          1.6
+        ],
+        "artwork": {
+          "material": "paper"
+        }
+      },
+      "placement": "Back-wall mounting; at includes centre height. Bind an artwork material with its own image; preview uses plain paper.",
+      "bounds": [
+        [
+          -0.0375,
+          -0.64,
+          1.125
+        ],
+        [
+          0.0375,
+          0.64,
+          2.075
+        ]
+      ],
+      "dimensions": [
+        0.075,
+        1.28,
+        0.95
+      ],
+      "materials": [
+        "dark_wood",
+        "paper"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "potted_plant",
+      "signature": "potted_plant(room, name, at, *, foliage_mat, pot_mat=None)",
+      "description": "One clay pot with folded, broad-leaved foliage and separate stem silhouettes.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "foliage_mat",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "pot_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {
+        "foliage_mat": {
+          "material": "foliage"
+        }
+      },
+      "placement": "Floor or support surface. Bind foliage_mat; preview uses the semantic foliage colour without its texture.",
+      "bounds": [
+        [
+          -0.708994,
+          -0.717243,
+          0.0
+        ],
+        [
+          0.72,
+          0.695315,
+          0.945
+        ]
+      ],
+      "dimensions": [
+        1.428994,
+        1.412558,
+        0.945
+      ],
+      "materials": [
+        "foliage",
+        "terracotta"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "table",
+      "signature": "table(room, name, at, *, length=1.25, width=0.7, height=0.76)",
+      "description": "A table on turned legs.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.25"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.7"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.76"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.35,
+          -0.625,
+          0.0
+        ],
+        [
+          0.35,
+          0.625,
+          0.795
+        ]
+      ],
+      "dimensions": [
+        0.7,
+        1.25,
+        0.795
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "chair",
+      "signature": "chair(room, name, at, *, seat=0.44, width=0.44)",
+      "description": "A straight-backed chair.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "seat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.44"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.44"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.22,
+          -0.22,
+          0.0
+        ],
+        [
+          0.22,
+          0.22,
+          0.98
+        ]
+      ],
+      "dimensions": [
+        0.44,
+        0.44,
+        0.98
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "jar",
+      "signature": "jar(room, name, at, *, height=0.46, radius=0.19, sides=8, mat=None)",
+      "description": "An unglazed jar (*pote*). Radial, so it breaks up an interior of\nboxes.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.46"
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.19"
+        },
+        {
+          "name": "sides",
+          "keywordOnly": true,
+          "required": false,
+          "default": "8"
+        },
+        {
+          "name": "mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.19,
+          -0.19,
+          0.0
+        ],
+        [
+          0.19,
+          0.19,
+          0.46
+        ]
+      ],
+      "dimensions": [
+        0.38,
+        0.38,
+        0.46
+      ],
+      "materials": [
+        "terracotta"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "shelf",
+      "signature": "shelf(room, name, *, y, z, length=1.3, depth=0.26)",
+      "description": "A shelf against the back wall, with its brackets.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "z",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.3"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.26"
+        }
+      ],
+      "fixture": {
+        "y": 0,
+        "z": 1.5
+      },
+      "placement": "Back-wall mounting at y and z; depth is derived from room.back_x.",
+      "bounds": [
+        [
+          3.606667,
+          -0.65,
+          1.32
+        ],
+        [
+          3.866667,
+          0.65,
+          1.525
+        ]
+      ],
+      "dimensions": [
+        0.26,
+        1.3,
+        0.205
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "lantern",
+      "signature": "lantern(room, name, *, y, z=2.1, energy=13.0)",
+      "description": "A wrought-iron wall lantern, and the light it actually casts.\n\nThe light is a separate object by necessity -- a lamp cannot be joined\ninto a mesh -- so it stays a sibling of the joined lantern body.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "z",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.1"
+        },
+        {
+          "name": "energy",
+          "keywordOnly": true,
+          "required": false,
+          "default": "13.0"
+        }
+      ],
+      "fixture": {
+        "y": 0
+      },
+      "placement": "Back-wall mounting with a separate point light; catalogue flat preview does not show its illumination.",
+      "bounds": [
+        [
+          3.626667,
+          -0.08,
+          1.99
+        ],
+        [
+          3.896667,
+          0.08,
+          2.305
+        ]
+      ],
+      "dimensions": [
+        0.27,
+        0.16,
+        0.315
+      ],
+      "materials": [
+        "sr_lamp_glow",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "barrel",
+      "signature": "barrel(room, name, at, *, radius=0.32, height=0.76)",
+      "description": "A staved storage barrel with iron reinforcement hoops.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.32"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.76"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.3552,
+          -0.3552,
+          0.0
+        ],
+        [
+          0.3552,
+          0.3552,
+          0.76
+        ]
+      ],
+      "dimensions": [
+        0.7104,
+        0.7104,
+        0.76
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "sack",
+      "signature": "sack(room, name, at, *, width=0.46, depth=0.42, height=0.58, rotation=0.0)",
+      "description": "A burlap sack of flour or grain, gathered and tied at the neck.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.46"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.42"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.58"
+        },
+        {
+          "name": "rotation",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.2205,
+          -0.2415,
+          0.0
+        ],
+        [
+          0.2205,
+          0.2415,
+          0.58
+        ]
+      ],
+      "dimensions": [
+        0.441,
+        0.483,
+        0.58
+      ],
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "sack_stack",
+      "signature": "sack_stack(room, name, at, count=3)",
+      "description": "A leaning cluster of sacks. One piece, not three.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "count",
+          "keywordOnly": false,
+          "required": false,
+          "default": "3"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.407132,
+          -0.546858,
+          0.0
+        ],
+        [
+          0.433645,
+          0.583992,
+          0.58
+        ]
+      ],
+      "dimensions": [
+        0.840777,
+        1.13085,
+        0.58
+      ],
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "azulejo_dado",
+      "signature": "azulejo_dado(room, *, height=1.15, y0=None, y1=None, proud=0.02, margin=0.06)",
+      "description": "The tiled band along the back wall, broken around every opening.\n\nWaist-high, and only ever a band. A whole wall of azulejo reads as a church\nor a station, not a room somebody lives in.\n\nTiling is applied to a WALL, so it stops at each doorway and starts again\non the far side. Running one band across the openings makes the doors look\npainted on; `room.openings` (recorded by `Interior.back_wall`) is the same\nlist the wall itself was built from, so the two can never disagree.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.15"
+        },
+        {
+          "name": "y0",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "y1",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "proud",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.02"
+        },
+        {
+          "name": "margin",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.06"
+        }
+      ],
+      "fixture": {},
+      "placement": "Wall treatment; uses room.back_x, half_width and openings. Fixture includes a doorway to demonstrate the interruption.",
+      "bounds": [
+        [
+          3.816667,
+          -3.0,
+          0.0
+        ],
+        [
+          3.876667,
+          3.0,
+          1.21
+        ]
+      ],
+      "dimensions": [
+        0.06,
+        6.0,
+        1.21
+      ],
+      "materials": [
+        "azulejo",
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "window_dressing",
+      "signature": "window_dressing(room, name, y0, y1, z0, z1, *, grille=True, shutters=True)",
+      "description": "An iron grille over the opening, and shutters folded back beside it.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y0",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y1",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "z0",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "z1",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "grille",
+          "keywordOnly": true,
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "shutters",
+          "keywordOnly": true,
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "fixture": {
+        "y0": -0.7,
+        "y1": 0.7,
+        "z0": 1.2,
+        "z1": 2.6
+      },
+      "placement": "Back-wall opening coordinates y0/y1/z0/z1; pair with the same opening used by the shell.",
+      "bounds": [
+        [
+          3.701667,
+          -1.176,
+          1.2
+        ],
+        [
+          3.846667,
+          1.176,
+          2.6
+        ]
+      ],
+      "dimensions": [
+        0.145,
+        2.352,
+        1.4
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "stair",
+      "signature": "stair(room, name, *, y, x_start, steps=7, rise=0.19, run=0.3, width=1.5, direction=-1.0)",
+      "description": "A flight of steps going DOWN, away from the floor plane.\n\nThe way out of a storey. `direction` is the axis the flight travels:\n-1 steps toward the camera, +1 steps away from it. At this camera a flight\nrunning toward the viewer disappears under the status menu almost at once,\nso a visible stair down normally runs AWAY, through an opening.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "x_start",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "steps",
+          "keywordOnly": true,
+          "required": false,
+          "default": "7"
+        },
+        {
+          "name": "rise",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.19"
+        },
+        {
+          "name": "run",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.3"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.5"
+        },
+        {
+          "name": "direction",
+          "keywordOnly": true,
+          "required": false,
+          "default": "-1.0"
+        }
+      ],
+      "fixture": {
+        "y": 0,
+        "x_start": 0
+      },
+      "placement": "Descending stair; geometry extends below Z=0. Review the threshold and character-floor projection in native views.",
+      "bounds": [
+        [
+          -1.95,
+          -0.75,
+          -1.35
+        ],
+        [
+          0.15,
+          0.75,
+          0.0
+        ]
+      ],
+      "dimensions": [
+        2.1,
+        1.5,
+        1.35
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "counter",
+      "signature": "counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3, top_mat=None, body_mat=None, panel_mat=None)",
+      "description": "A merchant shop counter (*balcao*): heavy dark timber carcass, recessed\nfront panelling, overhanging top slab and a plinth.\n\n`top_mat` gives the counter a stone slab instead of a timber top. Worth\nreaching for in a shop: a dark carcass with a dark top is one unbroken mass\nacross the middle of the frame, and anything standing on it disappears.\nA limestone top is also what a counter that gets scrubbed daily is made of.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.8"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.68"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.88"
+        },
+        {
+          "name": "panels",
+          "keywordOnly": true,
+          "required": false,
+          "default": "3"
+        },
+        {
+          "name": "top_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "body_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "panel_mat",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.34,
+          -0.9,
+          0.0
+        ],
+        [
+          0.34,
+          0.9,
+          0.96
+        ]
+      ],
+      "dimensions": [
+        0.68,
+        1.8,
+        0.96
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "bread_oven",
+      "signature": "bread_oven(room, name, at, *, length=1.5, depth=1.3, height=1.6)",
+      "description": "A masonry wood-fired bread oven (*forno a lenha*).\n\nThick stone base with a firewood niche under it, a clay baking vault over\nthat, an open mouth showing the ember bed, and a terracotta flue. The\nembers are emissive and want a `room.light` beside them.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.5"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.3"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.6"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.663,
+          -0.75,
+          0.0
+        ],
+        [
+          0.65,
+          0.75,
+          3.2
+        ]
+      ],
+      "dimensions": [
+        1.313,
+        1.5,
+        3.2
+      ],
+      "materials": [
+        "dark_wood",
+        "rough_limestone",
+        "sr_hearth_embers",
+        "terracotta",
+        "whitewash"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "bread_basket",
+      "signature": "bread_basket(room, name, at, *, radius=0.22, height=0.14, loaves=None)",
+      "description": "A woven basket of crusty loaves (*broas*).",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.22"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.14"
+        },
+        {
+          "name": "loaves",
+          "keywordOnly": true,
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.2596,
+          -0.2596,
+          0.0
+        ],
+        [
+          0.2596,
+          0.2596,
+          0.2376
+        ]
+      ],
+      "dimensions": [
+        0.5192,
+        0.5192,
+        0.2376
+      ],
+      "materials": [
+        "bread_crust",
+        "wax"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "peel",
+      "signature": "peel(room, name, at, *, length=1.75, angle_deg=14.0)",
+      "description": "A baker's peel (*pa de forno*), leaning against the wall or the oven.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.75"
+        },
+        {
+          "name": "angle_deg",
+          "keywordOnly": true,
+          "required": false,
+          "default": "14.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.17,
+          -0.14,
+          -0.006048
+        ],
+        [
+          0.426453,
+          0.14,
+          1.704066
+        ]
+      ],
+      "dimensions": [
+        0.596453,
+        0.28,
+        1.710114
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "demijohn",
+      "signature": "demijohn(room, name, at, *, height=0.52, radius=0.18)",
+      "description": "A wicker-cased glass demijohn (*garrafao*) for oil or wine.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.52"
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.18"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.198,
+          -0.198,
+          0.0
+        ],
+        [
+          0.198,
+          0.198,
+          0.59
+        ]
+      ],
+      "dimensions": [
+        0.396,
+        0.396,
+        0.59
+      ],
+      "materials": [
+        "dark_wood",
+        "wax"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "scales",
+      "signature": "scales(room, name, at, *, height=0.42, width=0.38)",
+      "description": "A tabletop balance (*balanca*) for weighing dry goods and coin.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.42"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.38"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.08,
+          -0.21,
+          0.0
+        ],
+        [
+          0.08,
+          0.21,
+          0.42
+        ]
+      ],
+      "dimensions": [
+        0.16,
+        0.42,
+        0.42
+      ],
+      "materials": [
+        "oxidized_bronze",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "wax_bench",
+      "signature": "wax_bench(room, name, at, *, length=1.6, width=0.64, height=0.78)",
+      "description": "The candle bench: a wax tray, a dipping frame, and finished lanterns.\n\nAlicia is scraping wax from a tray when the player finds her during the\nVigil, and the lantern she hides behind the counter bears no human name.\nSo the bakery is also where St. Maria's lanterns are made -- which is not a\ncoincidence but an economy: the oven is already hot, and rendering wax\nwants exactly the heat that is otherwise going up the flue.\n\nFaces the camera: the tray and the taper row read from -X.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.6"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.64"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.78"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.32,
+          -0.8,
+          0.0
+        ],
+        [
+          0.32,
+          0.8,
+          1.525
+        ]
+      ],
+      "dimensions": [
+        0.64,
+        1.6,
+        1.525
+      ],
+      "materials": [
+        "charcoal",
+        "dark_wood",
+        "wax",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "cloth_bundle",
+      "signature": "cloth_bundle(room, name, at, *, radius=0.17, height=0.24, rotation=0.0)",
+      "description": "Goods tied into a cloth, ready to be carried (*embrulho*).\n\nAlicia ties bread, cheese and a bruised pear into a cloth for Laura, and\nthe cloth comes back folded into a perfect square. A shop where everything\nis still on a shelf has not sold anything yet; a bundle is a transaction\nthat has already happened.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.17"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.24"
+        },
+        {
+          "name": "rotation",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.17,
+          -0.1564,
+          0.0
+        ],
+        [
+          0.17,
+          0.1564,
+          0.30043
+        ]
+      ],
+      "dimensions": [
+        0.34,
+        0.3128,
+        0.30043
+      ],
+      "materials": [
+        "aged_cloth"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "stock_shelf",
+      "signature": "stock_shelf(room, name, at, *, length=1.9, depth=0.42, height=2.05, tiers=4)",
+      "description": "An open stock rack, loaded to the top (*prateleira*).\n\n\"Watching people leave with full bags... it means they might come back.\"\nA shop reads as a shop because of VOLUME, not because of three\nrepresentative props, and a rack is the cheapest volume in this\nvocabulary. Stock is graded by tier the way a real shop grades it: heavy\nand dull below, small and valuable at eye level, overflow above the reach.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.9"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.42"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.05"
+        },
+        {
+          "name": "tiers",
+          "keywordOnly": true,
+          "required": false,
+          "default": "4"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.21,
+          -0.95,
+          0.0
+        ],
+        [
+          0.21,
+          0.95,
+          2.235
+        ]
+      ],
+      "dimensions": [
+        0.42,
+        1.9,
+        2.235
+      ],
+      "materials": [
+        "aged_cloth",
+        "bone",
+        "dark_wood",
+        "oxidized_bronze",
+        "wax"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "water_stand",
+      "signature": "water_stand(room, name, at, *, height=0.55, radius=0.28)",
+      "description": "A water crock on a stand, with a dipper and a cup (*talha de agua*).\n\n\"Please drink water before you descend. People return looking like they\nforgot they have bodies.\" It is the first thing Alicia says to the player\nand the only free thing in the shop, so it stands where a customer can\nreach it rather than behind the counter.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.55"
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.28"
+        }
+      ],
+      "fixture": {},
+      "placement": "Customer-reachable drinking water. Keep the stand outside the exit approach and review its silhouette with the player present.",
+      "bounds": [
+        [
+          -0.317,
+          -0.266296,
+          0.0
+        ],
+        [
+          0.28,
+          0.35,
+          1.238976
+        ]
+      ],
+      "dimensions": [
+        0.597,
+        0.616296,
+        1.238976
+      ],
+      "materials": [
+        "bone",
+        "dark_wood",
+        "oxidized_bronze",
+        "terracotta"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "forge",
+      "signature": "forge(room, name, at, *, length=1.8, depth=1.1, height=0.86, chimney_h=2.3)",
+      "description": "A masonry forge hearth (*forja*): stone body, a charcoal bed with\nincandescent coke, an iron hood and a flue.\n\nThe ember bed is emissive but casts nothing on its own -- give it a\n`room.light` so the shadows in the room come from the fire that motivates\nthem.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.8"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.1"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.86"
+        },
+        {
+          "name": "chimney_h",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.3"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.55,
+          -0.93,
+          0.0
+        ],
+        [
+          0.589,
+          0.93,
+          4.51
+        ]
+      ],
+      "dimensions": [
+        1.139,
+        1.86,
+        4.51
+      ],
+      "materials": [
+        "charcoal",
+        "rough_limestone",
+        "sr_hearth_embers",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "anvil",
+      "signature": "anvil(room, name, at, *, horn_len=0.78, width=0.26, height=0.44, stump_h=0.46)",
+      "description": "An anvil (*bigorna*) on a banded hardwood stump (*cepo*).",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "horn_len",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.78"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.26"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.44"
+        },
+        {
+          "name": "stump_h",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.46"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.26,
+          -0.4446,
+          0.0
+        ],
+        [
+          0.26,
+          0.3159,
+          0.8956
+        ]
+      ],
+      "dimensions": [
+        0.52,
+        0.7605,
+        0.8956
+      ],
+      "materials": [
+        "dark_wood",
+        "forge_scale",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "quench_tub",
+      "signature": "quench_tub(room, name, at, *, radius=0.32, height=0.56)",
+      "description": "A staved slack tub (*tina de tempera*) with iron hoops, standing full.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.32"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.56"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.368,
+          -0.368,
+          0.0
+        ],
+        [
+          0.368,
+          0.368,
+          0.56
+        ]
+      ],
+      "dimensions": [
+        0.736,
+        0.736,
+        0.56
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "bellows",
+      "signature": "bellows(room, name, at, *, length=1.1, width=0.52, height=0.38)",
+      "description": "Leather and hardwood bellows (*fole*), nozzle pointing into the forge.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.1"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.52"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.38"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.8525,
+          -0.26,
+          0.055
+        ],
+        [
+          0.88,
+          0.26,
+          0.49
+        ]
+      ],
+      "dimensions": [
+        1.7325,
+        0.52,
+        0.435
+      ],
+      "materials": [
+        "aged_cloth",
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "weapon_rack",
+      "signature": "weapon_rack(room, name, at, *, length=1.65, depth=0.45, height=1.75)",
+      "description": "A display rack of forged blades, with a shield blank leaning on it.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.65"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.45"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.75"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.225,
+          -0.825,
+          0.0
+        ],
+        [
+          0.225,
+          0.845,
+          1.75
+        ]
+      ],
+      "dimensions": [
+        0.45,
+        1.67,
+        1.75
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "tool_rail",
+      "signature": "tool_rail(room, name, *, y, z, length=1.3)",
+      "description": "A wall batten hung with tongs and hammers.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "y",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "z",
+          "keywordOnly": true,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.3"
+        }
+      ],
+      "fixture": {
+        "y": 0,
+        "z": 1.5
+      },
+      "placement": "Back-wall mounting at y and z.",
+      "bounds": [
+        [
+          3.646667,
+          -0.65,
+          0.945
+        ],
+        [
+          3.826667,
+          0.65,
+          1.55
+        ]
+      ],
+      "dimensions": [
+        0.18,
+        1.3,
+        0.605
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "ingot_stack",
+      "signature": "ingot_stack(room, name, at, rows=3, cols=2)",
+      "description": "A stack of cast iron and bronze ingots.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "rows",
+          "keywordOnly": false,
+          "required": false,
+          "default": "3"
+        },
+        {
+          "name": "cols",
+          "keywordOnly": false,
+          "required": false,
+          "default": "2"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.15,
+          -0.16,
+          0.0
+        ],
+        [
+          0.15,
+          0.2,
+          0.21
+        ]
+      ],
+      "dimensions": [
+        0.3,
+        0.36,
+        0.21
+      ],
+      "materials": [
+        "oxidized_bronze",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "workbench",
+      "signature": "workbench(room, name, at, *, length=1.65, width=0.68, height=0.86)",
+      "description": "A smith's workbench with a bench vice and a tool shelf under it.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.65"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.68"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.86"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.34,
+          -0.825,
+          0.0
+        ],
+        [
+          0.34,
+          0.825,
+          1.1
+        ]
+      ],
+      "dimensions": [
+        0.68,
+        1.65,
+        1.1
+      ],
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "scrap_heap",
+      "signature": "scrap_heap(room, name, at, *, spread=0.9, layers=7)",
+      "description": "Salvage waiting to be decided about: flattened lantern frames, and\nwhatever the Labyrinth failed to digest.\n\n\"She is hammering old lantern frames flat for reuse.\" Laura's stock is not\nbought, it is recovered, and this is the only disorder her room is allowed\n-- everything else she has already made a decision about. Flat plates lying\nat angles read as a heap at this camera where a mound of boxes does not.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "spread",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.9"
+        },
+        {
+          "name": "layers",
+          "keywordOnly": true,
+          "required": false,
+          "default": "7"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.585149,
+          -0.527535,
+          -0.021871
+        ],
+        [
+          0.427605,
+          0.516855,
+          0.261871
+        ]
+      ],
+      "dimensions": [
+        1.012754,
+        1.04439,
+        0.283742
+      ],
+      "materials": [
+        "forge_scale",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "grindstone",
+      "signature": "grindstone(room, name, at, *, radius=0.34, height=0.74, rotation=0.0)",
+      "description": "A treadle grindstone in its frame, over a water trough (*mo de afiar*).\n\nThe wheel is the only curve in this vocabulary that reads in ELEVATION\nrather than in plan -- every other radial piece is a jar seen end-on. Next\nto an anvil and a rack of straight bars that is worth a great deal, and it\nis also the fixture that says a smith SHARPENS as well as forges.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.34"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.74"
+        },
+        {
+          "name": "rotation",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.34,
+          -0.54,
+          -0.0
+        ],
+        [
+          0.34,
+          0.71,
+          1.199
+        ]
+      ],
+      "dimensions": [
+        0.68,
+        1.25,
+        1.199
+      ],
+      "materials": [
+        "dark_wood",
+        "rough_limestone",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "fine_bench",
+      "signature": "fine_bench(room, name, at, *, length=1.15, width=0.52, height=0.92)",
+      "description": "The precious-metal bench: high, small, and slung with a catch skin.\n\n\"The gold is pure... untouched.\" Laura takes goldwork as well as blade\nwork, and the two are not done at the same bench -- fine work is done\nSITTING, high, close to the eye, over a leather skin that catches every\nfiling worth sweeping up. Putting that beside the anvil is what stops the\nforge reading as one generic hammering station.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.15"
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.52"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.92"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.345,
+          -0.575,
+          0.0
+        ],
+        [
+          0.26,
+          0.575,
+          1.07
+        ]
+      ],
+      "dimensions": [
+        0.605,
+        1.15,
+        1.07
+      ],
+      "materials": [
+        "aged_cloth",
+        "dark_wood",
+        "forge_scale",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    }
+  ],
+  "images": {
+    "anvil.png": "445077568525ecbc7012fc3640577f5bd03eb4c85ebad10ef1d8e5949ecd6598",
+    "azulejo_dado.png": "8250c9a765f036216a708c42f80ed39a19ba6bfb4c646a77052c2dbe19a8131e",
+    "barrel.png": "e4e20d581c3b80794754f79bdfce15be900cb432b0c622c75b97b3beea92194f",
+    "bed.png": "b8521c396a939d81d042e6522d4bdc5ef48e2696267fd751ae86187fdc90b2ac",
+    "bellows.png": "b765e80a2aa31d91a1394e912cb3700ff56c7a1e969dcb9e66a0d4e83ee37b7d",
+    "bound_volume.png": "1dd449ddaf02d632faffd50c9db7ca8e714d970df98ae6e6fe74df7988c7f4d2",
+    "bread_basket.png": "0a83b8f0a09e87e81d1af3d0ae540a337126e81f93642f169c7426a343cecb65",
+    "bread_oven.png": "ad214d53b24580a44aa227e0cbcf6aab8ddcd5a1b87a8f2e6d0c8212a68729cf",
+    "cabinet.png": "47e413aeb9451e7add79a1821f560840c9037a8bccdcbb90fd5f3a91702e8b9a",
+    "chair.png": "7f971b6b23d06deab9f560eb43066fe77478ea8216eecd07d24f9e84024f82db",
+    "chest.png": "2bea92a237364e9cff971e9e58c1ba5c406b11a505753a34073941643426c550",
+    "cloth_bundle.png": "9a8b77d76f449a15303bbb7846fa6659f4ce572fd4ca69f67696f449c30a56ce",
+    "contact-sheet.png": "6a01324259a653be0e834f4e724441967557f0ed49d234a57dfdb9a51e81a95e",
+    "counter.png": "0f6c8375110fd8022c8338dd5f20384ccca7901d44e3b62de38741ebb1cbe03e",
+    "counter_returns.png": "bcd5109445d162e82997d77221a313056bd1fd25aa7f387f32770071e6584af2",
+    "demijohn.png": "7b760caa7b9e9630913d62bb09a39ce701b780d49320deba905c0a4226aaffbd",
+    "fine_bench.png": "d149b271b06e6c091d592bdc109dee431619b8311d6a4d1823a9394bfc72405c",
+    "forge.png": "a7c21cc76bb4deaa00834720be036c43152d47be23dc622eeaac7030c12e20f4",
+    "framed_picture.png": "588f2e82ede922b0d7c604d7189ae6f3b06c02824c74b6d7f94ac91497899137",
+    "grindstone.png": "8d642b7b2e66bc56ad00391ec324ffe1c3e716fa2bfc1271c2d0c3f14f6e27f3",
+    "ingot_stack.png": "140df23f0491b1fb69baad6951df3677679a2856b4678591268ece998c38f81b",
+    "jar.png": "82ed33c76e0d3913fe26d4973dbee69e34a7ffb0d848bbaf267b00392b4892a0",
+    "lantern.png": "b389eca4de1447c68486324fbb217fc12053c8a15ca1f230a63b3cf9f25cbbee",
+    "ledger.png": "4cae02e2669bca3b960e574f30da68aa9e9c4eb582c8435ec9863ad7a0b8e250",
+    "peel.png": "1392e7012e1e9be83749c61a685378e78cffb8071db99f15ca306f68360f1b18",
+    "potted_plant.png": "dee81eae08d9b55cf460d4da6ff36a65fda4c1fa391205f45ef463d62d2aaa05",
+    "quench_tub.png": "8d1c1917363f5a753a9a5826cdefac5d33a927d406b34db45b887ccd9af47e25",
+    "record_bay.png": "7e27d8865ac60e312289973315fd63bda6d6a63da0bc692e2fa8c1acfbecfd76",
+    "records_press.png": "4fe1b38a08dd0b5f385888de60e41049eaaaff4831b4582aaf84d82bfe2c3a93",
+    "sack.png": "5f3740a8d14744b8c7e8f07df1d83526ef201444dbddd93c8ad782300d743d20",
+    "sack_stack.png": "2d994e41f34e0371738b9764e5a4be407d4fe66e8cc69d45a307a29cccb990cb",
+    "scales.png": "a6d24ec2d1dbe5eb30b039ad568930daefb197e60aab45133dd03259ba6e79a3",
+    "scrap_heap.png": "9983d519a2d27ed234fd3eaa9fb387472ef6828d73642469cfbdec640bb7dfbf",
+    "seal_stamp.png": "12265497f6c3d3183775fe9bca5d61f4f9799200b9e9c5b0120dd3b9cb2a0b28",
+    "service_counter.png": "212ad84e0760f5aa2351a5851934d91980db028ac33442baacf9e83abee84663",
+    "service_screen.png": "50e6641786a92041d7622478010b4275571dcb884a583387bb93078ecc55c429",
+    "shelf.png": "539cf8c99d0e5e57d85002f4398800642ad34828db61a5689dbe088f565931b3",
+    "stair.png": "a17519c197a51a16871e059323733d0f276d6a14481573841e2c14b05cd27ff7",
+    "stock_shelf.png": "c19ffe765d96b28b5ec314dbf223ed97102177cd366ded81c2e8cf7696a28259",
+    "table.png": "35a4422447163f49ca0b5bb1bdf8ae6ac80841d66695c8483787a43382464522",
+    "tool_rail.png": "6447960015640e7d73c6a2bc836e307ab2046d65277dee7de68caa72a49b54c9",
+    "waiting_bench.png": "ed35fd660dc565cec7b046f9c493f9487abc5a7787d15d5485ef5663326f664a",
+    "water_stand.png": "2eb2cbf5c37a905cf13c970303e67f90d039f21c9120bce966008c0a66eced45",
+    "wax_bench.png": "96daf69510a77ff4bc14ce4ff184510b6cb30d7d2bff54b19c522d6b9e76025d",
+    "weapon_rack.png": "14bf194f4ca86e73ef1201d424a0f2f23a089ce603cc0abc1ef8b9dfcc6c1f7d",
+    "window_dressing.png": "2e2a1c346851186f09b5101300add0129dd14af1510a61d26a2ea20af3c9c79f",
+    "workbench.png": "26d3dd248765e4e6f285458dd3b54cbb62acfce583243791e002b3201222fab8",
+    "woven_runner.png": "56d0dbdc0e79a41e459eb0bb60d23baab363507a1c6652f4d8a09c945b13a07b"
+  }
+}

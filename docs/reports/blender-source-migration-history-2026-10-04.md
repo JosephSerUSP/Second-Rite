@@ -143,4 +143,3 @@ The legacy depth pipeline sampled evaluated Blender geometry with first-hit ray
 casts. Repeated Blender 5.1.2 diagnostics proved that
 `wall_boulders_rough` was not pixel-repeatable on one machine. That experiment
 is retained as evidence but no longer defines the future surface contract.
-

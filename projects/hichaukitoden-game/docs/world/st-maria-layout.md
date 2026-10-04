@@ -25,11 +25,13 @@ the retirement of P1.
 | Sea visible from many screens. Upper is sky and horizon, lower is the water's edge. | canon |
 | Alicia operates the padaria and **lives in its attached house with Laura**. | canon |
 | Laura **occupies an abandoned forge across town, near the pub**. | canon |
-| The Passage House is one building: corridor, Room 3, and Celina's office. | authored |
+| The **Passage House** is the player's lodging on the Cortiço; its arrival court and Room 3 are domestic/personal space. | authored |
+| The **Passage Office / Registry** is the civic office on the Praça. Celina registers Summoners there, not in Room 3. | authored; #1323/#1330 |
 
-The last two are the sharpest, because together they specify a **walk**. Laura's
-home and her work must be far apart, her forge must be near the pub, and the
-route between them is the most characterful line the map can draw.
+The last three are especially useful because together they specify repeated
+walks rather than a collection of services. Laura's home and her work must be
+far apart, her forge must be near the pub, and a new Summoner must leave the
+Passage House and reach the civic centre before the Labyrinth opens to them.
 
 ---
 
@@ -46,7 +48,7 @@ bottom and back up.
                         |                          |
               [ 17 Praça ]                         |
                         |                          |
-              [ 26 Backstreet / Cortiço ]          | the climb
+              [ 26 Cortiço ]                       | the climb
                         |                          | (closes the ring)
               [ 18 Market Row ]                    |
                         |                          |
@@ -128,8 +130,8 @@ want to.
 | # | Screen | Altitude | Outlook | Holds |
 |---|--------|----------|---------|-------|
 | 16 | **The Churchyard** | highest | horizon over every roof in town | The sealed Labyrinth gate. The Guard. The graveyard. |
-| 17 | **The Praça** | high | sea between buildings | Chapel (Agnes). The fountain. Spawn. |
-| 26 | **The Cortiço** | mid | glimpses, over laundry | Many households. The Passage House. |
+| 17 | **The Praça** | high | sea between buildings | Passage Office / Registry. Chapel (Agnes). The fountain. |
+| 26 | **The Cortiço** | mid | glimpses, over laundry | Many households. Passage House and its arrival court. |
 | 18 | **Market Row** | mid-low | roofs below, water beyond | The padaria and its attached house. Stalls. |
 | 19 | **The Quay** | low | the water itself | The Rusty Tankard. |
 | 31 | **The Port** | lowest | open sea, hulls, sky | Laura's forge. Shipping. The beaten ship. |
@@ -143,6 +145,19 @@ becomes the address for everyone in §5.6's register who holds no frontage, and
 for the Passage House, which belongs beside them precisely because it is the one
 building that is nobody's home.
 
+### The Praça Registry
+
+The Passage Office is a civic frontage on the Praça. It is intentionally not the
+player's lodging: leaving Room 3, crossing the Passage House court and reaching
+the Registry is the opening's first useful piece of town learning. Celina gives
+the Crossing Writ there and can describe the town in altitude terms the player
+can immediately act on: Churchyard/gate uphill, Market Row downhill, Port below,
+Cortiço and the Passage House behind them.
+
+This distinction is functional, not environment-count expansion. **Room 3 is
+where expedition history becomes personal; the Registry is where the town
+recognises the Summoner institutionally.**
+
 ### The Port
 
 The new screen, and the one the town has never had. Working shipping, moored
@@ -153,15 +168,23 @@ adjacent to the pub on the Quay exactly as canon requires.
 
 ---
 
-## 4. The walk this produces
+## 4. The walks this produces
 
 **Laura goes home** from the Port, through the Quay past the Tankard where the
 barkeep is, through Market Row, to the padaria — three screens, uphill, at the
 end of the day. She is the only person in St. Maria who commutes, and now the
 map says so.
 
-**The player's first loop** is Praça → down the stair → Quay → Market for
-supplies → back up. The Labyrinth is visible from the start and reached last.
+**The player's first civic loop** begins in Passage House Room 3. The player
+leaves through the Arrival Court to the Cortiço, reaches the Praça, and registers
+at the Passage Office. Only then are preparation and descent meaningful choices:
+Churchyard and the Gate are uphill; Market Row/Padaria and the Port/forge are
+below. The first trip therefore teaches a useful mental map instead of asking the
+player to wander until the correct NPC happens to appear.
+
+**The return loop** should be faster because the player now knows the chords.
+Coming home is not dead travel: familiar spaces are where changed NPC dialogue,
+rest, shopping and expedition consequences become legible.
 
 ---
 
@@ -169,16 +192,18 @@ supplies → back up. The Labyrinth is visible from the start and reached last.
 
 Independent of the shape above, and true under any layout:
 
-| Now | Becomes |
+| Earlier state | Current spatial role |
 |---|---|
 | 24 Alicia's Room (off Praça) | a room of **the padaria building**, off Market Row |
-| 23 Laura's House (off Backstreet) | retired as a house; Laura sleeps in the padaria's attached home |
+| 23 Laura's House (off Backstreet) | retired as a separate house; Laura sleeps in the padaria's attached home |
 | 27 Padaria (off Market) | the shop half of the same building |
 | 20 Weaponsmith | Laura's forge, re-sited to the Port |
-| 25 Passage House Room 3 | one room of the Passage House, on the Cortiço |
+| 25 Passage House | **Room 3**, personal lodging reached through the Passage House Arrival Court on the Cortiço |
+| Registrar previously copied into Room 3 | removed; registration belongs only to map 33 **Passage Office / Registry** on the Praça |
 
-This is W1, W2 and W4 resolved together, and it is the change that makes the two
-women's living arrangement legible instead of contradicted.
+This is W1, W2 and W4 resolved together, while #1323/#1330 separate domestic
+Passage House space from the civic Registry so the first town traversal has a
+reason to exist.
 
 ---
 
@@ -203,7 +228,8 @@ pass has something true to dress.
 
 1. ~~Does the spiral hold?~~ **Approved**, on the condition that it is a shape
    rather than a folded line — hence the four chords above.
-2. **Celina's bed** — still open from `st-maria.md` §6. The Cortiço is the
-   proposal.
+2. **Celina's bed** — still open from `st-maria.md` §6. Her workplace is now
+   unambiguously the Praça Registry; her private address remains a separate
+   worldbuilding question.
 3. **Map 20's authored 3D room** is a smith interior. Re-siting the forge to the
    Port changes which exterior its door returns to, not the room.

@@ -140,11 +140,15 @@ def finish_material(name,color,roughness=.9,weather=False,grain=False):
         tree.links.new(fine.outputs['Fac'],bump.inputs['Height']);tree.links.new(bump.outputs['Normal'],bsdf.inputs['Normal'])
     return material
 
-def build(output):
+def build(output, *, map_data=None, profile_authority='data/maps/32.json'):
     from architectural_surfaces import adapted_material,profile_surface
     if output.exists():raise FileExistsError('Refusing to overwrite editable source: '+str(output))
     library=ROOT/'tools/blender/vendor-library';manifest=verify(library)
-    map_data=json.loads((PROJECT / 'data/maps/32.json').read_text(encoding='utf-8'));profile=map_data['traversal']['lane']['groundProfile']
+    if map_data is None:
+        map_data=json.loads((PROJECT / 'data/maps/32.json').read_text(encoding='utf-8'))
+    if not map_data.get('traversal', {}).get('lane', {}).get('groundProfile'):
+        raise ValueError('The old courtyard map is retired. Supply --map-source with an explicit scaffold profile; the adopted default town must not be regenerated.')
+    profile=map_data['traversal']['lane']['groundProfile']
     upper=profile[-1]['z']
     bpy.ops.wm.read_factory_settings(use_empty=True);scene=bpy.context.scene;b=Builder()
     for name in ['TH_RENDER','TH_ANCHORS','TH_COLLISION','TH_PREVIEW_ACTORS']:core.ensure_collection(name)
@@ -438,7 +442,7 @@ def build(output):
     scene['render_settings_note']='Classic 256x240 preview, Cycles 64 render/viewport samples, OIDN, neutral exposure; export atlas 1024. Device availability belongs to the launching Blender process.'
     scene.view_settings.view_transform='AgX'
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
-    scene['courtyard_revision']=18;scene['authored_map']=json.dumps(map_data);scene['source_profile_authority']='data/maps/32.json'
+    scene['courtyard_revision']=18;scene['authored_map']=json.dumps(map_data);scene['source_profile_authority']=profile_authority
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0

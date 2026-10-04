@@ -7,7 +7,7 @@ const Commands=require('../../../studio/editor/js/second-rite-editor-commands');
 const History=require('../../../studio/editor/js/studio-history');
 const View=require('../../../studio/editor/js/generated/world-view');
 const root=path.resolve(__dirname,'../../..');
-const candidate=path.join(root,'projects/hichaukitoden-game/data/maps/32.json');
+const candidate=path.join(root,'tests/fixtures/walk_profile_courtyard_map.json');
 
 test('candidate profile uses real Studio move, split, undo and redo commands',()=>{
     const map=JSON.parse(fs.readFileSync(candidate));
@@ -32,15 +32,14 @@ test('candidate profile uses real Studio move, split, undo and redo commands',()
 const {audit}=require('../../towngen/audit_geography');
 test('town geography extraction preserves doorway identity and nested transfer provenance',()=>{
  const graph=audit();
- const lodging=graph.edges.find(edge=>edge.from===26&&edge.to===32);
- assert.equal(lodging.event,'st-maria-cortico-lodging_door');
- assert.equal(lodging.arrival,'cortico_entry');
- assert.ok(graph.edges.some(edge=>edge.from===32&&edge.to===25));
- assert.ok(graph.edges.some(edge=>edge.from===25&&edge.to===32));
+ const lodging=graph.edges.find(edge=>edge.from===1001&&edge.to===25);
+ assert.equal(lodging.event,'core-run-court-door-passage-house');
+ assert.equal(lodging.arrival,'exit_door');
+ assert.ok(graph.edges.some(edge=>edge.from===25&&edge.to===1001));
  assert.ok(Array.isArray(lodging.arrivalPosition));
  const room=graph.maps.find(map=>map.id===25);
  assert.equal(room.spawnAnchor,'spawn_player');
  assert.ok(room.environmentAnchors.spawn_player.position); 
  assert.ok(graph.edges.some(edge=>edge.location.includes('/common:')));
- assert.ok(graph.maps.find(map=>map.id===26).lane.groundProfile.length>2);
+ assert.ok(graph.maps.find(map=>map.id===1001).lane.groundProfile.length>2);
 });

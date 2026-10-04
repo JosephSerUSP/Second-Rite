@@ -9,13 +9,20 @@ function M.run(check)
     local savegame = require("engine.savegame")
     local json = require("engine.data.json")
 
-    local town = loader.maps[1]
-    local registrar, gate
-    for _, ev in ipairs(town.events) do
-        if ev.label == "Registrar Celina" then registrar = ev end
+    local registrar = loader.maps[loader.getMapIndex(33)].events[1]
+    local gate
+    for _, ev in ipairs(loader.maps[loader.getMapIndex(1007)].events) do
         if ev.name == "Labyrinth Gate" then gate = ev end
     end
-    local writ = registrar.commands[1].elseCommands[3]
+    local function findWrit(value)
+        if type(value) ~= "table" then return end
+        if value.cmd == "CHANGE_ITEM" and tonumber(value.item) == 198 then return value end
+        for _, child in pairs(value) do
+            local found = findWrit(child)
+            if found then return found end
+        end
+    end
+    local writ = assert(findWrit(registrar.commands))
     local enter = loader.commonEvents["43"].commands
     local climb = loader.commonEvents["40"].commands[2].options[1].commands[1].commands
 
@@ -24,12 +31,12 @@ function M.run(check)
             and enter[1].flag == "dungeon_entered"
             and enter[5].cmd == "LOAD_MAP" and tonumber(enter[5].mapId) == 2
             and climb[1].flag == "first_return"
-            and climb[3].cmd == "LOAD_MAP" and tonumber(climb[3].mapId) == 1,
+            and climb[3].cmd == "LOAD_MAP" and tonumber(climb[3].mapId) == 1007,
         "authored St. Maria Writ and transfer path is intact")
 
     local s = session.GameSession.new(loader)
     s:initializeStartingParty()
-    exploration.loadMap(s, 1)
+    exploration.loadMap(s, loader.getMapIndex(33))
     local ctx = { session = s, loader = loader, party = s.party, events = {}, v = {} }
     local matched, allowed = conditions.evalPrefixed(gate.commands[1].condition, s)
     check(matched and not allowed, "the Labyrinth gate is closed before the Writ")
@@ -44,7 +51,7 @@ function M.run(check)
 
     interpreter.runImmediate({ climb[1], climb[3] }, ctx)
     matched, allowed = conditions.evalPrefixed(gate.commands[1].condition, s)
-    check(s.currentMapData.id == 1 and s.flags.first_return and s:hasItem(198)
+    check(s.currentMapData.id == 1007 and s.flags.first_return and s:hasItem(198)
             and matched and allowed,
         "returning to St. Maria keeps the Writ")
 

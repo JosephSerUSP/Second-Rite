@@ -1,4 +1,5 @@
 local loader = require("engine.data.loader")
+local restoreGridFixture = require("tests.event_state_grid_fixture")(loader)
 local sessionModule = require("engine.session")
 local exploration = require("engine.exploration")
 local event_self_state = require("engine.event_self_state")
@@ -285,3 +286,5 @@ do
 end
 
 failFast("event_self_state", failed, passed)
+
+restoreGridFixture()

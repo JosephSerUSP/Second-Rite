@@ -1,0 +1,255 @@
+{
+  "id": 1009,
+  "title": "St. Maria / Churchyard stair landing",
+  "intro": "A street of St. Maria.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_core/churchyard-stair/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 3,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0.0,
+          "z": 0.0
+        },
+        {
+          "y": 0.1,
+          "z": 0.0
+        },
+        {
+          "y": 0.2,
+          "z": 0.0
+        },
+        {
+          "y": 0.3,
+          "z": 0.0
+        },
+        {
+          "y": 0.4,
+          "z": 0.0
+        },
+        {
+          "y": 0.5,
+          "z": 0.0
+        },
+        {
+          "y": 0.6,
+          "z": -1e-06
+        },
+        {
+          "y": 0.7,
+          "z": 0.0
+        },
+        {
+          "y": 0.8,
+          "z": 1e-06
+        },
+        {
+          "y": 0.9,
+          "z": 0.0
+        },
+        {
+          "y": 1.0,
+          "z": 1e-06
+        },
+        {
+          "y": 1.1,
+          "z": 0.0
+        },
+        {
+          "y": 1.2,
+          "z": 0.0
+        },
+        {
+          "y": 1.3,
+          "z": -1e-06
+        },
+        {
+          "y": 1.4,
+          "z": 0.0
+        },
+        {
+          "y": 1.5,
+          "z": 0.0
+        },
+        {
+          "y": 1.6,
+          "z": 0.0
+        },
+        {
+          "y": 1.7,
+          "z": -1e-06
+        },
+        {
+          "y": 1.8,
+          "z": 0.0
+        },
+        {
+          "y": 1.9,
+          "z": 0.0
+        },
+        {
+          "y": 2.0,
+          "z": 1e-06
+        },
+        {
+          "y": 2.1,
+          "z": 0.0
+        },
+        {
+          "y": 2.2,
+          "z": 1e-06
+        },
+        {
+          "y": 2.3,
+          "z": 0.0
+        },
+        {
+          "y": 2.4,
+          "z": -1e-06
+        },
+        {
+          "y": 2.5,
+          "z": 0.0
+        },
+        {
+          "y": 2.6,
+          "z": 0.0
+        },
+        {
+          "y": 2.7,
+          "z": 0.0
+        },
+        {
+          "y": 2.8,
+          "z": 0.0
+        },
+        {
+          "y": 2.9,
+          "z": 0.0
+        },
+        {
+          "y": 3.0,
+          "z": 0.0
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 1.5,
+        "z": 2.2604
+      },
+      "distance": 18.66670163373617,
+      "yawDegrees": 0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333000001,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionFrame": {
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 1.5,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "to-praca",
+        "eventInstanceId": "core-run-churchyard-stair-to-praca",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-churchyard",
+        "eventInstanceId": "core-run-churchyard-stair-to-churchyard",
+        "radius": 0.65
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 100901,
+      "instanceId": "core-run-churchyard-stair-to-praca",
+      "name": "Pra\u00e7a / Passage Office",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        0,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1005,
+          "arrival": "to-churchyard-stair"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100902,
+      "instanceId": "core-run-churchyard-stair-to-churchyard",
+      "name": "Churchyard / upper island",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        1.5,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1006,
+          "arrival": "to-churchyard-stair"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

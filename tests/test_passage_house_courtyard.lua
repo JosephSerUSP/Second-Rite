@@ -19,38 +19,25 @@ local function useDoor(instance)
     check(event and event.instanceId == instance, "actual nearest doorway is " .. instance)
     interpreter.runImmediate(event.commands, {session = game, loader = loader})
 end
-load(26, "lodging_door")
+load(1001, "door-passage-house")
 local entryY, entryZ = game.townTraversal.y, game.townTraversal.z
-useDoor("st-maria-cortico-lodging_door")
-check(game.currentMapData.id == 32, "Cortico enters the arrival court")
-check(math.abs(game.townTraversal.y - 0) < 1e-6 and game.townTraversal.z == 0, "entry lands on lower landing")
-check(lane.isEdgeDoorway(game,lane.nearDoorway(game)), "Cortico return is a lane exit, not an Up wall door")
-for _, direction in ipairs({1,-1}) do
-    local previousZ = game.townTraversal.z
-    for _ = 1, 240 do
-        lane.update(game, 1/60, direction)
-        local state = game.townTraversal
-        check(math.abs(state.z - lane.groundAt(game, state.y)) < 1e-6, "walk feet follow profile")
-        check(direction * (state.z - previousZ) >= -1e-6, "continuous monotone climb/descent")
-        check(math.abs(state.cameraOffsetX) <= 72, "camera respects authored end limits")
-        previousZ = state.z
-    end
-    check(math.abs(game.townTraversal.z - (direction > 0 and 0.3 or 0)) < 1e-6, "slope endpoint")
-end
-load(32,"cortico_entry")
-local lowerOffset=game.townTraversal.cameraOffsetX
-lane.update(game,1/60,1)
-check(game.townTraversal.cameraOffsetX==lowerOffset,"camera stays still as player leaves lower extremity")
-load(32,"lodging_entry")
-check(math.abs(game.townTraversal.z-0.3)<1e-6,"upper doorway arrival")
-useDoor("st-maria-passage-court-lodging_entry")
-check(game.currentMapData.id==25,"upper doorway reaches lodging")
+useDoor("core-run-court-door-passage-house")
+check(game.currentMapData.id == 25, "Cortico enters Passage House directly")
 useDoor("st-maria-lodging-exit_door")
-check(game.currentMapData.id==32 and math.abs(game.townTraversal.y-11.5)<1e-6,"lodging returns to upper landing")
-load(32,"cortico_entry")
-useDoor("st-maria-passage-court-cortico_entry")
-check(game.currentMapData.id==26 and math.abs(game.townTraversal.y-entryY)<1e-6
-    and math.abs(game.townTraversal.z-entryZ)<1e-6,"return preserves Cortico doorway position and elevation")
+check(game.currentMapData.id == 1001 and math.abs(game.townTraversal.y-entryY)<1e-6
+    and math.abs(game.townTraversal.z-entryZ)<1e-6, "return preserves physical doorstep and elevation")
+local state = game.townTraversal
+state.y = state.minY
+for _, direction in ipairs({1,-1}) do
+    local previousZ = lane.groundAt(game, state.y)
+    for _ = 1, 1200 do
+        lane.update(game, 1/60, direction)
+        check(math.abs(state.z-lane.groundAt(game,state.y))<1e-6, "walking feet follow graded court")
+        check(direction*(state.z-previousZ)>=-1e-6, "continuous monotone grade")
+        previousZ=state.z
+    end
+    check(math.abs(state.y-(direction>0 and state.maxY or state.minY))<1e-6, "whole court remains traversable")
+end
 load(25,nil)
 check(game.currentMapData.id==25,"introduction can still arrive directly in lodging")
 require("tests.fail_fast")("passage_house_courtyard",failed,passed)

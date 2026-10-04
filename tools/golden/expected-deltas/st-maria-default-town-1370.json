@@ -1,0 +1,317 @@
+{
+  "evidence": {
+    "gate": "g5",
+    "schemaVersion": 1,
+    "surfaces": {
+      "classic": {
+        "baseCaptureFingerprint": "957d766e147f4c5657f7e186c0db03d66b03a1f076387535c88da2863c886071",
+        "candidateCaptureFingerprint": "adb4137819c5f81b070c88214edf65118f173f9eb20cefaa412c17cd0057669e",
+        "missingTargets": [],
+        "newTargets": [],
+        "stableDifferences": [
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "e1e18e11c22d40099cfdde3284f2743ea8b81cc184a1c7e21d39d061214a1714",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/00-initial.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "15b9cae4b6b97ce8e144307871f72ce241763499c7498214700f4eec4525d7ca",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "24de8dd46d5f734b35ae3318dc579849a55c05a601105c90baedc6fbf1851aaf",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/01-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "0b924b9c8f162df6a328d8a1e5cd30f1877ed74028e6205e5bdea2017abe53e2",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "16552ed2fd42fa0e31e64ea5cc0a63aa626a3f0b94bef8d890fe373f336e7b22",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/02-after-right.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "a7fc5b5da9c337364cf1628110559aef8e0e477cb09fb48e48eff9213fd2abc7",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "235342cd7a79baa8fb62e22aeef05af7cabea36ecc1967546fcf9e6dace7a361",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/03-after-right.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "516bb6f2d74ace26e699155b7eae6a52cef75805d315b4c21a625f380f210bee",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "6b8816dcec9e3e776421e42d17d2ef3f7765781ad8f2b1f35664bd99941cb1d0",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/04-after-left.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "d80ba74969363d91fcedbb4a61a8e1bb4f9b15fefadd9f3146219b68c4490f99",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "4c04e443bb95c7056ebe8b13d25bdcd50e32700225929f4f989ab20cfb6b2ab7",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/05-after-return.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "46bbb3bea6f0247762c2fd841af6b8b7915ecb292f3ab2da9a0d644f02dec916",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "16552ed2fd42fa0e31e64ea5cc0a63aa626a3f0b94bef8d890fe373f336e7b22",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/06-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "a7fc5b5da9c337364cf1628110559aef8e0e477cb09fb48e48eff9213fd2abc7",
+              "width": 256
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 61,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "e1e18e11c22d40099cfdde3284f2743ea8b81cc184a1c7e21d39d061214a1714",
+              "width": 256
+            },
+            "leftPresent": true,
+            "path": "map/map/07-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "15b9cae4b6b97ce8e144307871f72ce241763499c7498214700f4eec4525d7ca",
+              "width": 256
+            },
+            "rightPresent": true
+          }
+        ]
+      },
+      "wide": {
+        "baseCaptureFingerprint": "c55fe75f81ea0792cc929c2ee2ca09883ffeeaa917bc0723a11e9f935f35ca63",
+        "candidateCaptureFingerprint": "d8361ef712fea71606c76ddac95f4405fb91c57507b67e409f60b5b76ac5d06c",
+        "missingTargets": [],
+        "newTargets": [],
+        "stableDifferences": [
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "b28a2bedf35df4b8aeb9938efad8fec8e2ff87dbe1ec4af3b045f333e0921535",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/00-initial.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "f6ee484c6b7918ed8675848e70d10be0ad3cf1169b7794cb20202006419fa26c",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "96c43b18eb8e11eae0217e7e3e9e39ed9598ca90edd697c16ab3d0c8c7d176ad",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/01-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "bef53e4439043b716c4c639dc22ae2711a0224e6048ed0a4e4374a6d78eaa422",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "beea89b1db7b4735746668e9740c2f54bab6077526de3e50b1c08dc06942ece4",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/02-after-right.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "0a2666227e290fdc835633fc516a94f274d1aab79e6b0f32628de74b72370bed",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "74ac7ada9ad84e2909914055f9e193b4444bb177b52c48ae82446fc746bad9bf",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/03-after-right.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "f6dbb3e6cb7e81e40ef4e7699d2be2ad885635b4b40281fea1cc40033059db6c",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "96b259a6c7ff1ed5b544dc9fb5750a63a5af2ef7008de26074bbb245516f9e46",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/04-after-left.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "783e2acdfb3c206f5eec2dce6061f1bc7261128644af7c6c42d15f1a7d4be885",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "e1909a2ef2fee608b7950308542e70dcfb4964aeee18c4a50f316db7f42a02f7",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/05-after-return.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "164bef4615e027103ed00c2a15479bc7ae0e17bf2b23624654a7c59091a8b4f0",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "beea89b1db7b4735746668e9740c2f54bab6077526de3e50b1c08dc06942ece4",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/06-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "0a2666227e290fdc835633fc516a94f274d1aab79e6b0f32628de74b72370bed",
+              "width": 426
+            },
+            "rightPresent": true
+          },
+          {
+            "changedPixels": 60,
+            "leftImage": {
+              "height": 240,
+              "rgbaSha256": "b28a2bedf35df4b8aeb9938efad8fec8e2ff87dbe1ec4af3b045f333e0921535",
+              "width": 426
+            },
+            "leftPresent": true,
+            "path": "map/map/07-after-escape.png",
+            "rightImage": {
+              "height": 240,
+              "rgbaSha256": "f6ee484c6b7918ed8675848e70d10be0ad3cf1169b7794cb20202006419fa26c",
+              "width": 426
+            },
+            "rightPresent": true
+          }
+        ]
+      }
+    }
+  },
+  "evidenceFingerprint": "1caba99398455d7d67bde7cd5bd851abbf701c772facdac089e77403df6f5804",
+  "gate": "g5",
+  "id": "st-maria-default-town-1370",
+  "observedBaseRef": "db3b825d0dde5f09d6b5ecec8323580628ce2fa7",
+  "observedCandidateRef": "200e0452283b98aaf7f6f181b706d440814a81b8",
+  "pending": "approved reference recapture/update",
+  "rationale": "Reviewed stable base control and all 16 changed map frames. Only the removed duplicate keeper in retired grid map 1 and its minimap marker differ (61 pixels per Classic frame, 60 per Wide frame); every other captured frame is identical. The owner requested the promoted B18 town as the shared default. Native default-town route and transfer proofs pass. This accepts the exact relative evidence, not final art or canonical reference recapture.",
+  "recordedAt": "2026-10-04T20:44:06+00:00",
+  "references": [
+    "https://github.com/JosephSerUSP/Second-Rite/pull/1370",
+    "https://github.com/JosephSerUSP/Second-Rite/actions/runs/37232546803"
+  ],
+  "reviewer": "Codex",
+  "schemaVersion": 1,
+  "state": "expected-delta",
+  "summary": {
+    "missingTargets": [],
+    "newTargets": [],
+    "stableDifferences": [
+      "classic/map/map/00-initial.png",
+      "classic/map/map/01-after-escape.png",
+      "classic/map/map/02-after-right.png",
+      "classic/map/map/03-after-right.png",
+      "classic/map/map/04-after-left.png",
+      "classic/map/map/05-after-return.png",
+      "classic/map/map/06-after-escape.png",
+      "classic/map/map/07-after-escape.png",
+      "wide/map/map/00-initial.png",
+      "wide/map/map/01-after-escape.png",
+      "wide/map/map/02-after-right.png",
+      "wide/map/map/03-after-right.png",
+      "wide/map/map/04-after-left.png",
+      "wide/map/map/05-after-return.png",
+      "wide/map/map/06-after-escape.png",
+      "wide/map/map/07-after-escape.png"
+    ]
+  }
+}

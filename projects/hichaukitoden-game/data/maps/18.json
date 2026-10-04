@@ -17,68 +17,6 @@
     "y": 0,
     "dir": "E"
   },
-  "traversal": {
-    "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/market/environment.json",
-    "spawnAnchor": "spawn_player",
-    "lane": {
-      "minY": 0.0,
-      "maxY": 20.708,
-      "depthX": 7.8,
-      "groundZ": 0.0,
-      "speed": 3.4
-    },
-    "blockedRanges": [],
-    "camera": {
-      "profile": "town_sideview",
-      "target": {
-        "x": 7.8,
-        "y": 10.354,
-        "z": 0.0
-      },
-      "distance": 18.666666666666668,
-      "yawDegrees": 0.0,
-      "pitchDegrees": -17.5,
-      "eyeHeight": 2.2604166666666665,
-      "fovDegrees": 28.072486935852957,
-      "nearPlane": 0.05,
-      "farPlane": 128.0,
-      "projectionScale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "projectionFrame": {
-        "canonicalCenterX": 213,
-        "canonicalHorizonY": 66
-      },
-      "tracking": {
-        "axis": "y",
-        "center": 10.354,
-        "minOffsetX": 0,
-        "maxOffsetX": 0,
-        "interpolationSpeed": 12.0,
-        "movementInterpolationSpeed": 14.0,
-        "animationFps": 8.0
-      }
-    },
-    "doorways": [
-      {
-        "anchor": "west_cortico",
-        "eventInstanceId": "st-maria-market-west_cortico",
-        "radius": 0.9
-      },
-      {
-        "anchor": "padaria_door",
-        "eventInstanceId": "st-maria-market-padaria_door",
-        "radius": 0.9
-      },
-      {
-        "anchor": "east_quay",
-        "eventInstanceId": "st-maria-market-east_quay",
-        "radius": 0.9
-      }
-    ]
-  },
   "events": [
     {
       "id": 1801,

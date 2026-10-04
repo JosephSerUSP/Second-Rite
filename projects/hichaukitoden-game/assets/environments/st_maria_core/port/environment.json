@@ -1,0 +1,130 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "walk.obj",
+  "materialLibrary": "walk.mtl",
+  "textureAtlas": "../support.png",
+  "collisionMesh": "walk.obj",
+  "bounds": [
+    -2,
+    0,
+    -0.1,
+    2,
+    26.0,
+    20
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0,
+        13.0,
+        0
+      ]
+    },
+    "to-forge": {
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    "to-court": {
+      "position": [
+        0,
+        2,
+        0
+      ]
+    }
+  },
+  "bakedLighting": true,
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "panning",
+    "imageSize": [
+      1122,
+      240
+    ],
+    "slicePositions": [
+      13.0
+    ],
+    "backgrounds": [
+      "background.png"
+    ],
+    "scenes": [
+      "background.png"
+    ],
+    "foregrounds": [
+      "foreground.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 13.0,
+      "depthX": 0
+    },
+    "playerProjection": {
+      "centerX": 561.0,
+      "screenY": 128,
+      "width": 24.76808667,
+      "height": 49.53617334,
+      "pixelsPerRuntimeY": 26.763562560081482
+    }
+  },
+  "provenance": {
+    "sourceBlend": "st_maria_core.blend",
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+    "sourceScreen": "port",
+    "plateRecord": {
+      "contract": "thestra.world-camera-calibration",
+      "version": 1,
+      "projection": "perspective",
+      "eye": {
+        "x": 34.6667,
+        "y": -4.0,
+        "z": 2.575404445363635
+      },
+      "orientation": {
+        "forwardX": -1.0,
+        "forwardY": -0.0,
+        "rightX": 0.0,
+        "rightY": -1.0,
+        "pitchRadians": -0.30543261909900765
+      },
+      "projectionScale": {
+        "x": 0.8950638486586687,
+        "y": 0.8673055989887198
+      },
+      "fovHalfX": 0.25,
+      "fovHalfY": 0.140625,
+      "nearPlane": 0.05,
+      "farPlane": 1200,
+      "targetWidth": 1122,
+      "targetHeight": 240,
+      "baseViewportWidth": 256,
+      "baseViewportHeight": 144,
+      "viewportCenterX": 561.0,
+      "viewportCenterY": -79.92528445273638,
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -145.92528445273638,
+      "coordinateSystem": {
+        "handedness": "right-handed",
+        "worldUp": "+Z",
+        "worldHorizontal": "XY",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y"
+      },
+      "thestraComposition": {
+        "characterFloorLimit": 144.0,
+        "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+        "walkerFeetY": 128.0,
+        "walkerHeadY": 80.0,
+        "horizonY": 66.0,
+        "solvedDistance": 18.666666666666668,
+        "solvedEyeHeight": 2.260416666666667,
+        "pixelsPerWorldUnit": 27.428571428571427
+      },
+      "authoringCameraDecision": "Retain the working B13 harbour camera: the 28m position intersects the quay terrain."
+    }
+  }
+}

@@ -154,12 +154,23 @@
           ],
           "cmd": "CHOICE"
         }
+      ],
+      "pages": [
+        {
+          "condition": "flag:vigil_ready",
+          "commands": [
+            {
+              "commonEventId": 38,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
       ]
     },
     {
       "id": 2802,
       "instanceId": "st-maria-alicias_padaria_3d-exit_door",
-      "name": "Out to Market Row",
+      "name": "Out to Bakery side street",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -172,11 +183,11 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 18,
-          "arrival": "padaria_door"
+          "mapId": 1002,
+          "arrival": "door-bakery"
         }
       ],
-      "direction": "right"
+      "direction": "toward"
     }
   ],
   "treasures": [],

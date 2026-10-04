@@ -10,6 +10,9 @@
   "projectDirectories": [
     "assets"
   ],
+  "projectExcludedPaths": [
+    "assets/authoring"
+  ],
   "authoredDataExtensions": [
     ".json"
   ],

@@ -124,7 +124,7 @@
     {
       "id": 2202,
       "instanceId": "st-maria-chapel-exit_door",
-      "name": "Out to the Praca",
+      "name": "Out to Praça / Passage Office",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -137,11 +137,11 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
-          "arrival": "chapel_door"
+          "mapId": 1005,
+          "arrival": "door-chapel"
         }
       ],
-      "direction": "away"
+      "direction": "toward"
     }
   ],
   "treasures": [],

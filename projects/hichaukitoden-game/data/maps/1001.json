@@ -1,0 +1,1238 @@
+{
+  "id": 1001,
+  "title": "St. Maria / Corti\u00e7o / Passage House",
+  "intro": "A street of St. Maria.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_core/court/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0,
+      "maxY": 46.0,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4,
+      "groundProfile": [
+        {
+          "y": 0.0,
+          "z": -0.449998
+        },
+        {
+          "y": 0.2,
+          "z": -0.446087
+        },
+        {
+          "y": 0.4,
+          "z": -0.442174
+        },
+        {
+          "y": 0.6,
+          "z": -0.438261
+        },
+        {
+          "y": 0.8,
+          "z": -0.434348
+        },
+        {
+          "y": 1.0,
+          "z": -0.430435
+        },
+        {
+          "y": 1.2,
+          "z": -0.426522
+        },
+        {
+          "y": 1.4,
+          "z": -0.422608
+        },
+        {
+          "y": 1.6,
+          "z": -0.418695
+        },
+        {
+          "y": 1.8,
+          "z": -0.414782
+        },
+        {
+          "y": 2.0,
+          "z": -0.410869
+        },
+        {
+          "y": 2.2,
+          "z": -0.406957
+        },
+        {
+          "y": 2.4,
+          "z": -0.403044
+        },
+        {
+          "y": 2.6,
+          "z": -0.399131
+        },
+        {
+          "y": 2.8,
+          "z": -0.395217
+        },
+        {
+          "y": 3.0,
+          "z": -0.391305
+        },
+        {
+          "y": 3.2,
+          "z": -0.387391
+        },
+        {
+          "y": 3.4,
+          "z": -0.383478
+        },
+        {
+          "y": 3.6,
+          "z": -0.379565
+        },
+        {
+          "y": 3.8,
+          "z": -0.375652
+        },
+        {
+          "y": 4.0,
+          "z": -0.371739
+        },
+        {
+          "y": 4.2,
+          "z": -0.367826
+        },
+        {
+          "y": 4.4,
+          "z": -0.363913
+        },
+        {
+          "y": 4.6,
+          "z": -0.36
+        },
+        {
+          "y": 4.8,
+          "z": -0.356087
+        },
+        {
+          "y": 5.0,
+          "z": -0.352174
+        },
+        {
+          "y": 5.2,
+          "z": -0.348261
+        },
+        {
+          "y": 5.4,
+          "z": -0.344348
+        },
+        {
+          "y": 5.6,
+          "z": -0.340434
+        },
+        {
+          "y": 5.8,
+          "z": -0.336522
+        },
+        {
+          "y": 6.0,
+          "z": -0.332609
+        },
+        {
+          "y": 6.2,
+          "z": -0.328696
+        },
+        {
+          "y": 6.4,
+          "z": -0.324782
+        },
+        {
+          "y": 6.6,
+          "z": -0.320869
+        },
+        {
+          "y": 6.8,
+          "z": -0.316956
+        },
+        {
+          "y": 7.0,
+          "z": -0.313043
+        },
+        {
+          "y": 7.2,
+          "z": -0.309131
+        },
+        {
+          "y": 7.4,
+          "z": -0.305217
+        },
+        {
+          "y": 7.6,
+          "z": -0.301304
+        },
+        {
+          "y": 7.8,
+          "z": -0.297391
+        },
+        {
+          "y": 8.0,
+          "z": -0.293479
+        },
+        {
+          "y": 8.2,
+          "z": -0.289565
+        },
+        {
+          "y": 8.4,
+          "z": -0.285652
+        },
+        {
+          "y": 8.6,
+          "z": -0.281739
+        },
+        {
+          "y": 8.8,
+          "z": -0.277826
+        },
+        {
+          "y": 9.0,
+          "z": -0.273913
+        },
+        {
+          "y": 9.2,
+          "z": -0.27
+        },
+        {
+          "y": 9.4,
+          "z": -0.266087
+        },
+        {
+          "y": 9.6,
+          "z": -0.262174
+        },
+        {
+          "y": 9.8,
+          "z": -0.258261
+        },
+        {
+          "y": 10.0,
+          "z": -0.254348
+        },
+        {
+          "y": 10.2,
+          "z": -0.250434
+        },
+        {
+          "y": 10.4,
+          "z": -0.246522
+        },
+        {
+          "y": 10.6,
+          "z": -0.242609
+        },
+        {
+          "y": 10.8,
+          "z": -0.238696
+        },
+        {
+          "y": 11.0,
+          "z": -0.234783
+        },
+        {
+          "y": 11.2,
+          "z": -0.230869
+        },
+        {
+          "y": 11.4,
+          "z": -0.226957
+        },
+        {
+          "y": 11.6,
+          "z": -0.223043
+        },
+        {
+          "y": 11.8,
+          "z": -0.21913
+        },
+        {
+          "y": 12.0,
+          "z": -0.215217
+        },
+        {
+          "y": 12.2,
+          "z": -0.211305
+        },
+        {
+          "y": 12.4,
+          "z": -0.207391
+        },
+        {
+          "y": 12.6,
+          "z": -0.203478
+        },
+        {
+          "y": 12.8,
+          "z": -0.199565
+        },
+        {
+          "y": 13.0,
+          "z": -0.195652
+        },
+        {
+          "y": 13.2,
+          "z": -0.191739
+        },
+        {
+          "y": 13.4,
+          "z": -0.187826
+        },
+        {
+          "y": 13.6,
+          "z": -0.183913
+        },
+        {
+          "y": 13.8,
+          "z": -0.18
+        },
+        {
+          "y": 14.0,
+          "z": -0.176087
+        },
+        {
+          "y": 14.2,
+          "z": -0.172174
+        },
+        {
+          "y": 14.4,
+          "z": -0.168261
+        },
+        {
+          "y": 14.6,
+          "z": -0.164348
+        },
+        {
+          "y": 14.8,
+          "z": -0.160435
+        },
+        {
+          "y": 15.0,
+          "z": -0.156522
+        },
+        {
+          "y": 15.2,
+          "z": -0.152609
+        },
+        {
+          "y": 15.4,
+          "z": -0.148696
+        },
+        {
+          "y": 15.6,
+          "z": -0.144782
+        },
+        {
+          "y": 15.8,
+          "z": -0.140869
+        },
+        {
+          "y": 16.0,
+          "z": -0.136957
+        },
+        {
+          "y": 16.2,
+          "z": -0.133044
+        },
+        {
+          "y": 16.4,
+          "z": -0.12913
+        },
+        {
+          "y": 16.6,
+          "z": -0.125217
+        },
+        {
+          "y": 16.8,
+          "z": -0.121304
+        },
+        {
+          "y": 17.0,
+          "z": -0.117391
+        },
+        {
+          "y": 17.2,
+          "z": -0.113478
+        },
+        {
+          "y": 17.4,
+          "z": -0.109565
+        },
+        {
+          "y": 17.6,
+          "z": -0.105652
+        },
+        {
+          "y": 17.8,
+          "z": -0.101739
+        },
+        {
+          "y": 18.0,
+          "z": -0.097826
+        },
+        {
+          "y": 18.2,
+          "z": -0.093913
+        },
+        {
+          "y": 18.4,
+          "z": -0.09
+        },
+        {
+          "y": 18.6,
+          "z": -0.086087
+        },
+        {
+          "y": 18.8,
+          "z": -0.082174
+        },
+        {
+          "y": 19.0,
+          "z": -0.078261
+        },
+        {
+          "y": 19.2,
+          "z": -0.074348
+        },
+        {
+          "y": 19.4,
+          "z": -0.070434
+        },
+        {
+          "y": 19.6,
+          "z": -0.066522
+        },
+        {
+          "y": 19.8,
+          "z": -0.062609
+        },
+        {
+          "y": 20.0,
+          "z": -0.058695
+        },
+        {
+          "y": 20.2,
+          "z": -0.054782
+        },
+        {
+          "y": 20.4,
+          "z": -0.050869
+        },
+        {
+          "y": 20.6,
+          "z": -0.046956
+        },
+        {
+          "y": 20.8,
+          "z": -0.043043
+        },
+        {
+          "y": 21.0,
+          "z": -0.039131
+        },
+        {
+          "y": 21.2,
+          "z": -0.035218
+        },
+        {
+          "y": 21.4,
+          "z": -0.031305
+        },
+        {
+          "y": 21.6,
+          "z": -0.02739
+        },
+        {
+          "y": 21.8,
+          "z": -0.023478
+        },
+        {
+          "y": 22.0,
+          "z": -0.019565
+        },
+        {
+          "y": 22.2,
+          "z": -0.015652
+        },
+        {
+          "y": 22.4,
+          "z": -0.011739
+        },
+        {
+          "y": 22.6,
+          "z": -0.007826
+        },
+        {
+          "y": 22.8,
+          "z": -0.003913
+        },
+        {
+          "y": 23.0,
+          "z": -0.0
+        },
+        {
+          "y": 23.2,
+          "z": 0.003913
+        },
+        {
+          "y": 23.4,
+          "z": 0.007826
+        },
+        {
+          "y": 23.6,
+          "z": 0.011739
+        },
+        {
+          "y": 23.8,
+          "z": 0.015652
+        },
+        {
+          "y": 24.0,
+          "z": 0.019565
+        },
+        {
+          "y": 24.2,
+          "z": 0.023478
+        },
+        {
+          "y": 24.4,
+          "z": 0.027391
+        },
+        {
+          "y": 24.6,
+          "z": 0.031304
+        },
+        {
+          "y": 24.8,
+          "z": 0.035217
+        },
+        {
+          "y": 25.0,
+          "z": 0.039131
+        },
+        {
+          "y": 25.2,
+          "z": 0.043043
+        },
+        {
+          "y": 25.4,
+          "z": 0.046957
+        },
+        {
+          "y": 25.6,
+          "z": 0.05087
+        },
+        {
+          "y": 25.8,
+          "z": 0.054783
+        },
+        {
+          "y": 26.0,
+          "z": 0.058695
+        },
+        {
+          "y": 26.2,
+          "z": 0.062608
+        },
+        {
+          "y": 26.4,
+          "z": 0.066521
+        },
+        {
+          "y": 26.6,
+          "z": 0.070436
+        },
+        {
+          "y": 26.8,
+          "z": 0.074348
+        },
+        {
+          "y": 27.0,
+          "z": 0.07826
+        },
+        {
+          "y": 27.2,
+          "z": 0.082174
+        },
+        {
+          "y": 27.4,
+          "z": 0.086087
+        },
+        {
+          "y": 27.6,
+          "z": 0.09
+        },
+        {
+          "y": 27.8,
+          "z": 0.093913
+        },
+        {
+          "y": 28.0,
+          "z": 0.097826
+        },
+        {
+          "y": 28.2,
+          "z": 0.10174
+        },
+        {
+          "y": 28.4,
+          "z": 0.105652
+        },
+        {
+          "y": 28.6,
+          "z": 0.109565
+        },
+        {
+          "y": 28.8,
+          "z": 0.113478
+        },
+        {
+          "y": 29.0,
+          "z": 0.117391
+        },
+        {
+          "y": 29.2,
+          "z": 0.121304
+        },
+        {
+          "y": 29.4,
+          "z": 0.125217
+        },
+        {
+          "y": 29.6,
+          "z": 0.12913
+        },
+        {
+          "y": 29.8,
+          "z": 0.133044
+        },
+        {
+          "y": 30.0,
+          "z": 0.136957
+        },
+        {
+          "y": 30.2,
+          "z": 0.14087
+        },
+        {
+          "y": 30.4,
+          "z": 0.144783
+        },
+        {
+          "y": 30.6,
+          "z": 0.148696
+        },
+        {
+          "y": 30.8,
+          "z": 0.152609
+        },
+        {
+          "y": 31.0,
+          "z": 0.156521
+        },
+        {
+          "y": 31.2,
+          "z": 0.160434
+        },
+        {
+          "y": 31.4,
+          "z": 0.164348
+        },
+        {
+          "y": 31.6,
+          "z": 0.168261
+        },
+        {
+          "y": 31.8,
+          "z": 0.172174
+        },
+        {
+          "y": 32.0,
+          "z": 0.176087
+        },
+        {
+          "y": 32.2,
+          "z": 0.18
+        },
+        {
+          "y": 32.4,
+          "z": 0.183913
+        },
+        {
+          "y": 32.6,
+          "z": 0.187826
+        },
+        {
+          "y": 32.8,
+          "z": 0.19174
+        },
+        {
+          "y": 33.0,
+          "z": 0.195652
+        },
+        {
+          "y": 33.2,
+          "z": 0.199566
+        },
+        {
+          "y": 33.4,
+          "z": 0.203478
+        },
+        {
+          "y": 33.6,
+          "z": 0.207391
+        },
+        {
+          "y": 33.8,
+          "z": 0.211304
+        },
+        {
+          "y": 34.0,
+          "z": 0.215217
+        },
+        {
+          "y": 34.2,
+          "z": 0.219131
+        },
+        {
+          "y": 34.4,
+          "z": 0.223043
+        },
+        {
+          "y": 34.6,
+          "z": 0.226957
+        },
+        {
+          "y": 34.8,
+          "z": 0.23087
+        },
+        {
+          "y": 35.0,
+          "z": 0.234783
+        },
+        {
+          "y": 35.2,
+          "z": 0.238696
+        },
+        {
+          "y": 35.4,
+          "z": 0.242609
+        },
+        {
+          "y": 35.6,
+          "z": 0.246523
+        },
+        {
+          "y": 35.8,
+          "z": 0.250435
+        },
+        {
+          "y": 36.0,
+          "z": 0.254348
+        },
+        {
+          "y": 36.2,
+          "z": 0.25826
+        },
+        {
+          "y": 36.4,
+          "z": 0.262174
+        },
+        {
+          "y": 36.6,
+          "z": 0.266087
+        },
+        {
+          "y": 36.8,
+          "z": 0.27
+        },
+        {
+          "y": 37.0,
+          "z": 0.273913
+        },
+        {
+          "y": 37.2,
+          "z": 0.277826
+        },
+        {
+          "y": 37.4,
+          "z": 0.28174
+        },
+        {
+          "y": 37.6,
+          "z": 0.285652
+        },
+        {
+          "y": 37.8,
+          "z": 0.289565
+        },
+        {
+          "y": 38.0,
+          "z": 0.293478
+        },
+        {
+          "y": 38.2,
+          "z": 0.297392
+        },
+        {
+          "y": 38.4,
+          "z": 0.301305
+        },
+        {
+          "y": 38.6,
+          "z": 0.305217
+        },
+        {
+          "y": 38.8,
+          "z": 0.309131
+        },
+        {
+          "y": 39.0,
+          "z": 0.313043
+        },
+        {
+          "y": 39.2,
+          "z": 0.316956
+        },
+        {
+          "y": 39.4,
+          "z": 0.320869
+        },
+        {
+          "y": 39.6,
+          "z": 0.324783
+        },
+        {
+          "y": 39.8,
+          "z": 0.328696
+        },
+        {
+          "y": 40.0,
+          "z": 0.332609
+        },
+        {
+          "y": 40.2,
+          "z": 0.336522
+        },
+        {
+          "y": 40.4,
+          "z": 0.340435
+        },
+        {
+          "y": 40.6,
+          "z": 0.344349
+        },
+        {
+          "y": 40.8,
+          "z": 0.348261
+        },
+        {
+          "y": 41.0,
+          "z": 0.352173
+        },
+        {
+          "y": 41.2,
+          "z": 0.356086
+        },
+        {
+          "y": 41.4,
+          "z": 0.36
+        },
+        {
+          "y": 41.6,
+          "z": 0.363914
+        },
+        {
+          "y": 41.8,
+          "z": 0.367826
+        },
+        {
+          "y": 42.0,
+          "z": 0.371739
+        },
+        {
+          "y": 42.2,
+          "z": 0.375652
+        },
+        {
+          "y": 42.4,
+          "z": 0.379566
+        },
+        {
+          "y": 42.6,
+          "z": 0.383478
+        },
+        {
+          "y": 42.8,
+          "z": 0.387392
+        },
+        {
+          "y": 43.0,
+          "z": 0.391304
+        },
+        {
+          "y": 43.2,
+          "z": 0.395218
+        },
+        {
+          "y": 43.4,
+          "z": 0.39913
+        },
+        {
+          "y": 43.6,
+          "z": 0.403043
+        },
+        {
+          "y": 43.8,
+          "z": 0.406956
+        },
+        {
+          "y": 44.0,
+          "z": 0.410869
+        },
+        {
+          "y": 44.2,
+          "z": 0.414782
+        },
+        {
+          "y": 44.4,
+          "z": 0.418695
+        },
+        {
+          "y": 44.6,
+          "z": 0.422609
+        },
+        {
+          "y": 44.8,
+          "z": 0.426521
+        },
+        {
+          "y": 45.0,
+          "z": 0.430435
+        },
+        {
+          "y": 45.2,
+          "z": 0.434348
+        },
+        {
+          "y": 45.4,
+          "z": 0.438261
+        },
+        {
+          "y": 45.6,
+          "z": 0.442175
+        },
+        {
+          "y": 45.8,
+          "z": 0.446087
+        },
+        {
+          "y": 46.0,
+          "z": 0.449999
+        }
+      ]
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 23.0,
+        "z": 2.2604
+      },
+      "distance": 28.0,
+      "yawDegrees": 0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333000001,
+      "fovDegrees": 18.93767485514957,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionFrame": {
+        "baseViewportWidth": 256,
+        "baseViewportHeight": 144,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 23.0,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "to-market",
+        "eventInstanceId": "core-run-court-to-market",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-praca",
+        "eventInstanceId": "core-run-court-to-praca",
+        "radius": 0.65
+      },
+      {
+        "anchor": "to-port",
+        "eventInstanceId": "core-run-court-to-port",
+        "radius": 0.65
+      },
+      {
+        "anchor": "door-passage-house",
+        "eventInstanceId": "core-run-court-door-passage-house",
+        "radius": 0.65
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 100101,
+      "instanceId": "core-run-court-to-market",
+      "name": "Bakery side street",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        46.0,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1002,
+          "arrival": "to-court"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100102,
+      "instanceId": "core-run-court-to-praca",
+      "name": "Pra\u00e7a / Passage Office",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        9,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1005,
+          "arrival": "to-court"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100103,
+      "instanceId": "core-run-court-to-port",
+      "name": "Workers stair to port",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        3,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1008,
+          "arrival": "to-court"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100104,
+      "instanceId": "core-run-court-door-passage-house",
+      "name": "Passage House",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        26.297098127023673,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 25,
+          "arrival": "exit_door"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 100105,
+      "instanceId": "core-run-st-maria-cortico-scholar",
+      "name": "Scholar",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        7.3288,
+        0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:found_cerberus",
+          "commands": [
+            {
+              "condition": "questStatus:lost_hound:completed",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar nods quietly. \"At least I know he found his place in the dark. Thank you for telling me.\""
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You tell the Scholar about the blue-flamed dark hound down on Floor 2, and the scent of recognition in its eyes."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar pauses, looking down at his unlit pipe. \"So he's still walking... and still keeping watch. Take care of him out there.\""
+                },
+                {
+                  "cmd": "QUEST_COMPLETE",
+                  "questId": "lost_hound"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar looks around the empty basin with an unlit pipe. \"Slipped away while I was boiling root tea. Have you seen him around the square?\""
+                },
+                {
+                  "cmd": "QUEST_OFFER",
+                  "questId": "lost_hound"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:greeted_euler",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Scholar sees Euler leaning against you. \"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "\"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_scholar.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 100106,
+      "instanceId": "core-run-st-maria-cortico-euler",
+      "name": "Euler",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        11.9581,
+        0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:dungeon_entered",
+          "commands": [
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "image": "campaign_lost_hound.png",
+              "text": "A scruffy caramel stray dog with floppy ears rests by the basin."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It sniffs Saban's bridle, wags its tail, and leans its warm weight against your knee."
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "greeted_euler",
+              "value": true
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_euler.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

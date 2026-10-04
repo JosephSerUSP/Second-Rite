@@ -1,0 +1,151 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "walk.obj",
+  "materialLibrary": "walk.mtl",
+  "textureAtlas": "../support.png",
+  "collisionMesh": "walk.obj",
+  "bounds": [
+    -2,
+    0,
+    -0.100001,
+    2,
+    42.0,
+    20
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0,
+        21.0,
+        0
+      ]
+    },
+    "to-court": {
+      "position": [
+        0,
+        9,
+        0
+      ]
+    },
+    "to-churchyard-stair": {
+      "position": [
+        0,
+        2,
+        0
+      ]
+    },
+    "to-churchyard-climb": {
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    "door-chapel": {
+      "position": [
+        0,
+        34.49671243132161,
+        0
+      ]
+    },
+    "door-registry": {
+      "position": [
+        0,
+        19.20043898226777,
+        0
+      ]
+    }
+  },
+  "bakedLighting": true,
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "panning",
+    "imageSize": [
+      1543,
+      240
+    ],
+    "slicePositions": [
+      21.0
+    ],
+    "backgrounds": [
+      "background.png"
+    ],
+    "scenes": [
+      "background.png"
+    ],
+    "foregrounds": [
+      "foreground.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 21.0,
+      "depthX": 0
+    },
+    "playerProjection": {
+      "centerX": 771.5,
+      "screenY": 128,
+      "pixelsPerRuntimeY": 26.586455583572388,
+      "width": 24.768075942993164,
+      "height": 49.53615188598633
+    }
+  },
+  "provenance": {
+    "sourceBlend": "st_maria_core.blend",
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+    "sourceScreen": "praca",
+    "plateRecord": {
+      "contract": "thestra.world-camera-calibration",
+      "version": 1,
+      "projection": "perspective",
+      "eye": {
+        "x": 2.0,
+        "y": 40.0,
+        "z": 23.172751303786512
+      },
+      "orientation": {
+        "forwardX": 0.0,
+        "forwardY": 1.0,
+        "rightX": -1.0,
+        "rightY": 0.0,
+        "pitchRadians": -0.17453292519943295
+      },
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "fovHalfX": 0.17424421272966573,
+      "fovHalfY": 0.09801236966043697,
+      "nearPlane": 0.05,
+      "farPlane": 1200,
+      "targetWidth": 1543,
+      "targetHeight": 240,
+      "baseViewportWidth": 256,
+      "baseViewportHeight": 144,
+      "viewportCenterX": 771.5,
+      "viewportCenterY": -239.47022533416748,
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -305.4702253341675,
+      "coordinateSystem": {
+        "handedness": "right-handed",
+        "worldUp": "+Z",
+        "worldHorizontal": "XY",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y"
+      },
+      "thestraComposition": {
+        "characterFloorLimit": 144.0,
+        "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+        "walkerFeetY": 128.0,
+        "walkerHeadY": 80.0,
+        "horizonY": 66.0,
+        "solvedDistance": 18.666666666666668,
+        "solvedEyeHeight": 2.260416666666667,
+        "pixelsPerWorldUnit": 27.428571428571427
+      },
+      "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
+    }
+  }
+}

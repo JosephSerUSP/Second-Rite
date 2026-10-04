@@ -1,0 +1,128 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "walk.obj",
+  "materialLibrary": "walk.mtl",
+  "textureAtlas": "../support.png",
+  "collisionMesh": "walk.obj",
+  "bounds": [
+    -2,
+    0,
+    -0.549994,
+    2,
+    14.0,
+    20
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0,
+        7.0,
+        0
+      ]
+    },
+    "to-court": {
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    "to-quay": {
+      "position": [
+        0,
+        14.0,
+        0
+      ]
+    },
+    "door-bakery": {
+      "position": [
+        0,
+        6.999998086693267,
+        0
+      ]
+    }
+  },
+  "bakedLighting": true,
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "panning",
+    "imageSize": [
+      810,
+      240
+    ],
+    "slicePositions": [
+      7.0
+    ],
+    "backgrounds": [
+      "background.png"
+    ],
+    "scenes": [
+      "background.png"
+    ],
+    "foregrounds": [
+      "foreground.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 7.0,
+      "depthX": 0
+    },
+    "playerProjection": {
+      "centerX": 405.0,
+      "screenY": 128,
+      "width": 24.76809024810791,
+      "height": 49.53618049621582,
+      "pixelsPerRuntimeY": 27.428516507148743
+    }
+  },
+  "provenance": {
+    "sourceBlend": "st_maria_core.blend",
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+    "sourceScreen": "market",
+    "plateRecord": {
+      "contract": "thestra.world-camera-calibration",
+      "version": 1,
+      "projection": "perspective",
+      "eye": {
+        "x": -4.333300000000001,
+        "y": 31.999999999999996,
+        "z": 4.877066475965138
+      },
+      "orientation": {
+        "forwardX": -1,
+        "forwardY": 1.2246467991473532e-16,
+        "rightX": -1.2246467991473532e-16,
+        "rightY": -1,
+        "pitchRadians": -0.30543261909900765
+      },
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "nearPlane": 0.05,
+      "farPlane": 1200,
+      "targetWidth": 810,
+      "targetHeight": 240,
+      "baseViewportWidth": 256,
+      "baseViewportHeight": 144,
+      "viewportCenterX": 405.0,
+      "viewportCenterY": -46.94291165234989,
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -112.94291165234989,
+      "fovHalfX": 0.24999999999999997,
+      "fovHalfY": 0.14062499999999997,
+      "coordinateSystem": {
+        "handedness": "right-handed",
+        "worldUp": "+Z",
+        "worldHorizontal": "XY",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y"
+      },
+      "authoringCoordinateAdapter": "Core projection Y principal point reflected to top-origin Blender calibration; verified against actual foot projection",
+      "authoringFilmWindowCorrectionY": -5.425666886138913
+    }
+  }
+}

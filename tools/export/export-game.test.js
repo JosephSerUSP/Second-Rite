@@ -18,6 +18,7 @@ const MANIFEST = {
     rootFiles: ['main.lua'],
     runtimeDirectories: ['engine', 'presentation'],
     projectDirectories: ['assets'],
+    projectExcludedPaths: ['assets/authoring'],
     authoredDataExtensions: ['.json'],
     releaseConfig: 'release-conf.lua'
 };
@@ -27,6 +28,7 @@ function makeProject(root) {
     write(path.join(root, 'engine', 'runtime.lua'), 'return true');
     write(path.join(root, 'presentation', 'draw.lua'), 'return true');
     write(path.join(root, 'assets', 'sprite.png'), 'png');
+    write(path.join(root, 'assets', 'authoring', 'source.blend'), 'authoring');
     write(path.join(root, 'release-conf.lua'), 't.console = false');
     const manifestPath = path.join(root, 'manifest.json');
     write(manifestPath, JSON.stringify(MANIFEST));
@@ -125,6 +127,8 @@ test('stageGame copies only manifest runtime files plus Project-owned assets/dat
         write(path.join(project, 'main.lua'), 'wrong-project-main');
         write(path.join(project, 'engine', 'runtime.lua'), 'wrong-project-engine');
         write(path.join(project, 'assets', 'sprite.png'), 'project-asset');
+        write(path.join(project, 'assets', 'authoring', 'source.blend'), 'authoring-source');
+        write(path.join(project, 'assets', 'authoring-adjacent', 'sprite.png'), 'player-asset');
         write(path.join(project, 'data', 'system.json'), '{"id":"project"}');
         write(path.join(project, 'data', 'scenes', 'index.json'), '[]');
         write(path.join(project, 'data', 'notes.txt'), 'do not ship');
@@ -137,6 +141,8 @@ test('stageGame copies only manifest runtime files plus Project-owned assets/dat
         assert.equal(fs.readFileSync(path.join(outputDir, 'main.lua'), 'utf8'), 'runtime-main');
         assert.equal(fs.readFileSync(path.join(outputDir, 'engine', 'runtime.lua'), 'utf8'), 'runtime-engine');
         assert.equal(fs.readFileSync(path.join(outputDir, 'assets', 'sprite.png'), 'utf8'), 'project-asset');
+        assert.ok(!fs.existsSync(path.join(outputDir, 'assets', 'authoring')));
+        assert.equal(fs.readFileSync(path.join(outputDir, 'assets', 'authoring-adjacent', 'sprite.png'), 'utf8'), 'player-asset');
         assert.equal(JSON.parse(fs.readFileSync(path.join(outputDir, 'data', 'system.json'), 'utf8')).id, 'project');
         assert.ok(fs.existsSync(path.join(outputDir, 'data', 'scenes', 'index.json')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'data', 'notes.txt')));

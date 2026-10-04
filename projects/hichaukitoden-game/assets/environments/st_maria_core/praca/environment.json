@@ -90,7 +90,7 @@
   },
   "provenance": {
     "sourceBlend": "st_maria_core.blend",
-    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+    "sourceSHA256": "5182e990e8c1c81cfb3264b2eb5ed096389fd2fb4a4f3fe58f98c16468d69f44",
     "sourceScreen": "praca",
     "plateRecord": {
       "contract": "thestra.world-camera-calibration",
@@ -146,6 +146,7 @@
         "pixelsPerWorldUnit": 27.428571428571427
       },
       "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
-    }
+    },
+    "sourceRevision": "praca-approaches-20261004"
   }
 }

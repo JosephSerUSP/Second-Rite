@@ -142,6 +142,13 @@ jobs:
           fi
           echo "THESTRA_ANDROID_VERSION_CODE=$version_code" >> "$GITHUB_ENV"
 
+      - name: Stamp and validate Android developer profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/export/android-dev-profile.py --love "$THESTRA_GAME_LOVE"
+          xvfb-run -a "$LOVEC" "$THESTRA_GAME_LOVE" validate
+
       - name: Install St. Maria playtest into canonical export
         if: github.event_name == 'workflow_dispatch' && inputs.st_maria_playtest
         shell: bash
@@ -163,12 +170,6 @@ jobs:
           project.android.displayName += ' St. Maria Entrances';
           fs.writeFileSync(path, JSON.stringify(project, null, 2) + '\n');
           NODE
-      - name: Stamp and validate Android developer profile
-        shell: bash
-        run: |
-          set -euo pipefail
-          python tools/export/android-dev-profile.py --love "$THESTRA_GAME_LOVE"
-          xvfb-run -a "$LOVEC" "$THESTRA_GAME_LOVE" validate
 
       - name: Check out pinned official love-android wrapper
         uses: actions/checkout@v4
@@ -344,6 +345,9 @@ jobs:
             echo
             echo "- Source: \`${THESTRA_SOURCE_SHA:-unavailable}\`"
             echo "- developer profile: \`enabled\` (Developer Room + touch Developer Menu + live CRT Lab)"
+            if [ "${{ github.event_name == 'workflow_dispatch' && inputs.st_maria_playtest }}" = "true" ]; then
+              echo "- St. Maria playtest candidate: \`enabled\`"
+            fi
             echo "- love-android: \`$LOVE_ANDROID_LABEL\` / \`$LOVE_ANDROID_REF\`"
             echo "- versionCode: \`${THESTRA_ANDROID_VERSION_CODE:-unavailable}\`"
             echo "- signing: \`${THESTRA_ANDROID_SIGNING_MODE:-unavailable}\`"

@@ -42,7 +42,8 @@ FACE_ATTRIBUTE = "sr_face_id"
 LANE_CENTRE = 3.8833
 
 
-def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE):
+def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LANE_CENTRE,
+                record_path: Path | None = None, width: int = VIEW_WIDTH):
     """The town side-view camera, widened to the 426 px view, standing at lane position `lane_y`.
 
     `lane_y` is a position along the lane in ENGINE space, the space the anchors and the game use
@@ -55,8 +56,23 @@ def lane_camera(scene, lane_y: float, mirrored: bool = True, centre: float = LAN
     import stage_room_model as stager
     import thestra_camera
 
-    record = thestra_camera.load_calibration(str(CAMERA_RECORD))
-    record = stager.widen_record(record, VIEW_WIDTH)
+    path = Path(record_path or CAMERA_RECORD)
+    views_path = path.with_name(path.stem + '-views.json')
+    if views_path.is_file():
+        data = json.loads(views_path.read_text(encoding='utf-8'))
+        authored_path = path.with_name(data['sourceMap'])
+        if authored_path.is_file() and data['authoredCamera'] != json.loads(authored_path.read_text(encoding='utf-8'))['traversal']['camera']:
+            raise ValueError('Runtime camera views are stale; regenerate with runtime_lane_cameras')
+        matches = [view['record'] for view in data['views']
+                   if abs(view['y'] - lane_y) < 1e-8 and view['width'] == width]
+        if len(matches) < 1:
+            raise ValueError(f'No runtime camera calibration for lane {lane_y}, width {width}')
+        record = matches[0]
+        camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
+        bpy.context.view_layer.update()
+        return camera
+    record = thestra_camera.load_calibration(str(path))
+    record = stager.widen_record(record, width)
     camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
     camera.location.y = centre - lane_y if mirrored else lane_y
     bpy.context.view_layer.update()
@@ -139,8 +155,11 @@ def face_pixels(target, cameras: list[float], out: Path, mirrored: bool = True,
     saved = (scene.render.engine, scene.render.resolution_x, scene.render.resolution_y,
              scene.render.resolution_percentage, scene.render.filter_size,
              scene.view_settings.view_transform)
-    scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = 1
+    import render_profiles
+    cycles_saved = (scene.cycles.samples, scene.cycles.use_denoising)
+    render_profiles.apply(scene, render_profiles.resolve("draft", samples=1), device=render_profiles.DEFAULT_DEVICE)
+    scene.cycles.samples = 1
+    scene.cycles.use_denoising = False
     scene.render.filter_size = 0.0
     scene.render.resolution_x, scene.render.resolution_y = VIEW_WIDTH, VIEW_HEIGHT
     scene.render.resolution_percentage = 100
@@ -174,6 +193,7 @@ def face_pixels(target, cameras: list[float], out: Path, mirrored: bool = True,
         (scene.render.engine, scene.render.resolution_x, scene.render.resolution_y,
          scene.render.resolution_percentage, scene.render.filter_size,
          scene.view_settings.view_transform) = saved
+        scene.cycles.samples, scene.cycles.use_denoising = cycles_saved
         (out / "tmp_face_id.exr").unlink(missing_ok=True)
     return counts
 
@@ -187,6 +207,8 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     `floor` is the least density, as a fraction of the mean visible density, an island keeps,
     so surfaces no camera reaches are shrunk but never removed.
     """
+    if not 0 <= view_bias <= 1:
+        raise ValueError("view_bias must be between 0 and 1")
     out = Path(out) if out else Path(bpy.app.tempdir)
     pack(target, atlas_size, gutter_texels)
     mesh = target.data
@@ -234,7 +256,24 @@ def allocate_by_view(target, cameras: list[float], atlas_size: int, view_bias: f
     bpy.ops.object.mode_set(mode="EDIT")
     repack(gutter_texels / atlas_size)
     bpy.ops.object.mode_set(mode="OBJECT")
+    # Edit-mode packing can replace the mesh's UV storage. Reacquire its RNA
+    # collection before reading the packed layout rather than retaining a stale
+    # handle across the object/edit-mode boundary.
+    mesh = target.data
+    uv = mesh.uv_layers.active.data
+    packed_area = np.zeros(islands)
+    for poly in mesh.polygons:
+        pts = [np.array(uv[k].uv) for k in poly.loop_indices]
+        packed_area[island_of[poly.index]] += .5 * abs(sum(
+            pts[n][0]*pts[(n+1)%len(pts)][1]-pts[(n+1)%len(pts)][0]*pts[n][1]
+            for n in range(len(pts))))
+    ratios = np.sqrt(packed_area[visible] * atlas_size**2 / demand[visible])
     return {
+        "measurementStage": "After UV packing, before guarded pixel-corner alignment",
+        "densityInterpretation": "Area-equivalent texels per peak screen pixel; not anisotropic 1:1 or projection UVs. Hidden islands retain a density floor.",
+        "measurementRenderer": "Cycles emission ID pass, 1 sample, native Wide with Classic optical scale",
+        "visibleIslandTexelsPerScreenPixelPercentiles": dict(zip(('p10','p50','p90'),[float(v) for v in np.percentile(ratios,[10,50,90])])),
+        "peakScreenTexelDemand": float(demand.sum()),
         "atlasSize": atlas_size, "viewBias": view_bias, "floor": floor, "gutterTexels": gutter_texels,
         "cameras": [round(float(c), 3) for c in cameras], "islands": int(islands),
         "visibleIslands": int(visible.sum()), "polygons": len(mesh.polygons),

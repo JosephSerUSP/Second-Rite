@@ -1,0 +1,632 @@
+[
+  {
+    "anchor": "to-market",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 1468.5422278642654,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 210.34965029979162,
+      "laneScreenY": 115.47578532747747,
+      "platePanX": -1255
+    },
+    "eventName": "Bakery side street",
+    "groundZ": 0.449999,
+    "label": "1001-to-market",
+    "laneY": 46,
+    "mapId": 1001,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-praca",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 459.0177743434906,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 211.82510968380626,
+      "laneScreenY": 135.6863572899951,
+      "platePanX": -246
+    },
+    "eventName": "Pra\u00e7a / Passage Office",
+    "groundZ": -0.273913,
+    "label": "1001-to-praca",
+    "laneY": 9,
+    "mapId": 1001,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-port",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 295.3111062049866,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 210.87383780868618,
+      "laneScreenY": 138.99524347664948,
+      "platePanX": -82
+    },
+    "eventName": "Workers stair to port",
+    "groundZ": -0.391305,
+    "label": "1001-to-port",
+    "laneY": 3,
+    "mapId": 1001,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-passage-house",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 930.9594914834579,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 213.89360026378228,
+      "laneScreenY": 126.19678486357753,
+      "platePanX": -717
+    },
+    "eventName": "Passage House",
+    "groundZ": 0.06450772485521819,
+    "label": "1001-door-passage-house",
+    "laneY": 26.297098127023673,
+    "mapId": 1001,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-court",
+    "boundaryChecks": 2,
+    "button": "LEFT",
+    "composition": {
+      "actorPlateX": 213.0003844499588,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 214.4684284167381,
+      "laneScreenY": 115.38471096796798,
+      "platePanX": 0
+    },
+    "eventName": "Corti\u00e7o / Passage House",
+    "groundZ": 0.449993,
+    "label": "1002-to-court",
+    "laneY": 0,
+    "mapId": 1002,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-quay",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 596.9996155500412,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 215.49054553532295,
+      "laneScreenY": 140.81123417501743,
+      "platePanX": -383
+    },
+    "eventName": "Pub quay",
+    "groundZ": -0.449994,
+    "label": "1002-to-quay",
+    "laneY": 14,
+    "mapId": 1002,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-bakery",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 404.9999475208347,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 213.99994752082344,
+      "laneScreenY": 127.99999652528487,
+      "platePanX": -191
+    },
+    "eventName": "Bakery",
+    "groundZ": 1.2299692330602907e-07,
+    "label": "1002-door-bakery",
+    "laneY": 6.999998086693267,
+    "mapId": 1002,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-market",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 568.340276389232,
+      "cameraFovHalfX": 0.16678342452109002,
+      "cameraTargetY": 16.528516878793297,
+      "laneScreenX": 213.34020737013083,
+      "laneScreenY": 128,
+      "platePanX": -355
+    },
+    "eventName": "Bakery side street",
+    "groundZ": 0,
+    "label": "1003-to-market",
+    "laneY": 13.0225,
+    "mapId": 1003,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-forge",
+    "boundaryChecks": 2,
+    "button": "LEFT",
+    "composition": {
+      "actorPlateX": 213.02859541695386,
+      "cameraFovHalfX": 0.16678342452109002,
+      "cameraTargetY": 16.528516878793297,
+      "laneScreenX": 213.0282700382067,
+      "laneScreenY": 128,
+      "platePanX": 0
+    },
+    "eventName": "Forge quay",
+    "groundZ": 0,
+    "label": "1003-to-forge",
+    "laneY": 0,
+    "mapId": 1003,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-pub",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 669.6502806766807,
+      "cameraFovHalfX": 0.16678342452109002,
+      "cameraTargetY": 16.528516878793297,
+      "laneScreenX": 213.65028475339435,
+      "laneScreenY": 128,
+      "platePanX": -456
+    },
+    "eventName": "Pub",
+    "groundZ": 0,
+    "label": "1003-door-pub",
+    "laneY": 16.735604863941234,
+    "mapId": 1003,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-quay",
+    "boundaryChecks": 2,
+    "button": "RIGHT",
+    "composition": {
+      "actorPlateX": 612.682706698729,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.280109889280518,
+      "laneScreenX": 213.6826444669656,
+      "laneScreenY": 128,
+      "platePanX": -399
+    },
+    "eventName": "Pub quay",
+    "groundZ": 0,
+    "label": "1004-to-quay",
+    "laneY": 14.560219778561036,
+    "mapId": 1004,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-port",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 268.17435170714714,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.280109889280518,
+      "laneScreenX": 213.17439684253037,
+      "laneScreenY": 128,
+      "platePanX": -55
+    },
+    "eventName": "Working pier",
+    "groundZ": 0,
+    "label": "1004-to-port",
+    "laneY": 2,
+    "mapId": 1004,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-forge",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 382.46468411394267,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.280109889280518,
+      "laneScreenX": 213.46469363037292,
+      "laneScreenY": 128,
+      "platePanX": -169
+    },
+    "eventName": "Forge",
+    "groundZ": 0,
+    "label": "1004-door-forge",
+    "laneY": 6.166841450417728,
+    "mapId": 1004,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-court",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 452.46253299713135,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.46243896760018,
+      "laneScreenY": 128,
+      "platePanX": -239
+    },
+    "eventName": "Corti\u00e7o / Passage House",
+    "groundZ": 0,
+    "label": "1005-to-court",
+    "laneY": 9,
+    "mapId": 1005,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-churchyard-stair",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 266.35734391212463,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.35719165762424,
+      "laneScreenY": 128.00002774917687,
+      "platePanX": -53
+    },
+    "eventName": "Churchyard stair landing",
+    "groundZ": -1e-06,
+    "label": "1005-to-churchyard-stair",
+    "laneY": 2,
+    "mapId": 1005,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-churchyard-climb",
+    "boundaryChecks": 2,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 213.18443274497986,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.18426819330034,
+      "laneScreenY": 128,
+      "platePanX": 0
+    },
+    "eventName": "Climb the churchyard service ladder",
+    "groundZ": 0,
+    "label": "1005-to-churchyard-climb",
+    "laneY": 0,
+    "mapId": 1005,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-chapel",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 1130.3297455795814,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.32985133704324,
+      "laneScreenY": 128,
+      "platePanX": -917
+    },
+    "eventName": "Chapel",
+    "groundZ": 0,
+    "label": "1005-door-chapel",
+    "laneY": 34.49671243132161,
+    "mapId": 1005,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "door-registry",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 723.6560509321338,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.65603683114384,
+      "laneScreenY": 128,
+      "platePanX": -510
+    },
+    "eventName": "Passage Office",
+    "groundZ": 0,
+    "label": "1005-door-registry",
+    "laneY": 19.20043898226777,
+    "mapId": 1005,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-threshold",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 514.9998966451202,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.500000000015522,
+      "laneScreenX": 213.9997907654248,
+      "laneScreenY": 127.99935024053332,
+      "platePanX": -301
+    },
+    "eventName": "Labyrinth forecourt",
+    "groundZ": 2.3e-05,
+    "label": "1006-to-threshold",
+    "laneY": 11,
+    "mapId": 1006,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-churchyard-stair",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 377.8571871514831,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.500000000015522,
+      "laneScreenX": 213.85722407466906,
+      "laneScreenY": 127.9996892454086,
+      "platePanX": -164
+    },
+    "eventName": "Churchyard stair landing",
+    "groundZ": 1.1e-05,
+    "label": "1006-to-churchyard-stair",
+    "laneY": 6,
+    "mapId": 1006,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-praca-climb",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 624.7140642400299,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.500000000015522,
+      "laneScreenX": 213.71380917555655,
+      "laneScreenY": 127.99912423736066,
+      "platePanX": -411
+    },
+    "eventName": "Down the service ladder to Praca",
+    "groundZ": 3.1e-05,
+    "label": "1006-to-praca-climb",
+    "laneY": 15,
+    "mapId": 1006,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-churchyard",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 895.1294502019882,
+      "cameraFovHalfX": 0.1667832598255715,
+      "cameraTargetY": 14,
+      "laneScreenX": 213.12940387674826,
+      "laneScreenY": 128,
+      "platePanX": -682
+    },
+    "eventName": "Churchyard / upper island",
+    "groundZ": 0,
+    "label": "1007-to-churchyard",
+    "laneY": 25,
+    "mapId": 1007,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "labyrinth-gate",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 704.1379818916321,
+      "cameraFovHalfX": 0.1667832598255715,
+      "cameraTargetY": 14,
+      "laneScreenX": 213.13796504609024,
+      "laneScreenY": 128,
+      "platePanX": -491
+    },
+    "eventName": "Labyrinth Gate",
+    "groundZ": 0,
+    "label": "1007-labyrinth-gate",
+    "laneY": 18,
+    "mapId": 1007,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-forge",
+    "boundaryChecks": 2,
+    "button": "LEFT",
+    "composition": {
+      "actorPlateX": 213.07368671894073,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 13,
+      "laneScreenX": 213.07419497920142,
+      "laneScreenY": 128,
+      "platePanX": 0
+    },
+    "eventName": "Forge quay",
+    "groundZ": 0,
+    "label": "1008-to-forge",
+    "laneY": 0,
+    "mapId": 1008,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-court",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 266.6008118391037,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 13,
+      "laneScreenX": 213.6012419054781,
+      "laneScreenY": 128,
+      "platePanX": -53
+    },
+    "eventName": "Workers stair to Corti\u00e7o",
+    "groundZ": 0,
+    "label": "1008-to-court",
+    "laneY": 2,
+    "mapId": 1008,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-praca",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 213.35716810822487,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 1.5,
+      "laneScreenX": 213.3572199760791,
+      "laneScreenY": 128,
+      "platePanX": 0
+    },
+    "eventName": "Pra\u00e7a / Passage Office",
+    "groundZ": 0,
+    "label": "1009-to-praca",
+    "laneY": 0,
+    "mapId": 1009,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "to-churchyard",
+    "boundaryChecks": 4,
+    "button": "UP",
+    "composition": {
+      "actorPlateX": 254.5,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 1.5,
+      "laneScreenX": 213.5,
+      "laneScreenY": 128,
+      "platePanX": -41
+    },
+    "eventName": "Churchyard / upper island",
+    "groundZ": 0,
+    "label": "1009-to-churchyard",
+    "laneY": 1.5,
+    "mapId": 1009,
+    "radius": 0.65,
+    "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21"
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 404.0004285714286,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 5.2,
+      "laneScreenX": 386.0241164918373,
+      "laneScreenY": 136,
+      "platePanX": -30
+    },
+    "eventName": "Out to Corti\u00e7o / Passage House",
+    "groundZ": 0,
+    "label": "25-exit_door",
+    "laneY": 10.0625,
+    "mapId": 25,
+    "radius": 0.9
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "eventName": "Out to Bakery side street",
+    "groundZ": 0,
+    "label": "28-exit_door",
+    "laneY": 7.0333,
+    "mapId": 28,
+    "radius": 0.9
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 4,
+    "button": "DOWN",
+    "eventName": "Out to Forge quay",
+    "groundZ": 0,
+    "label": "29-exit_door",
+    "laneY": 4.2833,
+    "mapId": 29,
+    "radius": 0.9
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 459.00019999999995,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 6.25,
+      "laneScreenX": 324.38584713924155,
+      "laneScreenY": 136,
+      "platePanX": -149
+    },
+    "eventName": "Out to Pub quay",
+    "groundZ": 0,
+    "label": "21-exit_door",
+    "laneY": 12.0677,
+    "mapId": 21,
+    "radius": 0.9
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "composition": {
+      "actorPlateX": 558.9992857142856,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 8,
+      "laneScreenX": 331.07274931820814,
+      "laneScreenY": 136,
+      "platePanX": -247
+    },
+    "eventName": "Out to Pra\u00e7a / Passage Office",
+    "groundZ": 0,
+    "label": "22-exit_door",
+    "laneY": 15.7135,
+    "mapId": 22,
+    "radius": 0.9
+  },
+  {
+    "anchor": "exit_door",
+    "boundaryChecks": 2,
+    "button": "DOWN",
+    "eventName": "Out to Pra\u00e7a / Passage Office",
+    "groundZ": 0,
+    "label": "33-exit_door",
+    "laneY": 1.0833,
+    "mapId": 33,
+    "radius": 0.9
+  }
+]

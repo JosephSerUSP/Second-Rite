@@ -8,7 +8,7 @@ license: Apache-2.0
 metadata:
   upstream: "terminal-skills blender-3d-modeling 1.0.0"
   adapted_for: "JosephSerUSP/Second-Rite"
-  version: "1.0.0-second-rite.1"
+  version: "1.0.0-second-rite.2"
   category: design
   tags: ["blender", "3d-modeling", "procedural", "bmesh", "second-rite"]
 ---
@@ -18,6 +18,26 @@ metadata:
 This skill adapts the Apache-2.0 `blender-3d-modeling` terminal skill from
 `Andrew1326/dominations/.claude/skills/blender-3d-modeling` to the Second Rite
 asset contract and shared Blender core. Attribution details are in `NOTICE.md`.
+
+## Route by intent first
+
+Pick the lane before writing any code. Each lane has one entry point and one
+gate. Do not build a parallel exporter or a second recipe vocabulary.
+
+| I want to… | Lane / entry point | Gate before done |
+|---|---|---|
+| author or fix an **item model** | per-item source `projects/hichaukitoden-game/assets/authoring/items/<id>.blend`, compiled read-only by `python tools/blender/compile_item_blends.py [--source …]`; read that folder's `README.md` | `compile_item_blends.py --check`, then `python tools/asset-production/check_item_models.py` |
+| build a **town interior** (St. Maria) | a recipe under `tools/blender/recipes/` using `interior.py` (`Interior`) + `furnishings.py`; copy the shape of `alicias_padaria.py`; brief `docs/design/st-maria-interior-authoring.md` | register the `.blend` in `environment-sources.json`; `python tools/blender/environment_sources.py --check` |
+| build a **town exterior** | `recipes/exterior.py`; copy the STRUCTURE of `recipes/examples/exterior_reference.py` (a non-place example, never its look); buildings via `recipes/house_grammar/` (validated data); brief `docs/design/st-maria-exterior-authoring.md` | same as interiors |
+| add a **reusable prop for rooms** | a new function in `recipes/furnishings.py` (check the existing 49 first) | used by a recipe; no `room.part` copies of an existing furnishing |
+| bake/export an **environment package** | `export_room_environment.py` / `export_exterior_environment.py` (see `BLENDER_CORE.md` §EEVEE) | owner review; G5 for anything shipped |
+| bind or texture a **material** | a semantic id from `tools/asset-language/materials.json` (read the file, the id list grows); textures via `tools/blender/material_library.py` | `python tools/asset-language/check.py all` |
+| make a **surface relief** baseline | not this skill: use `second-rite-surface-baselines` | — |
+
+Never regenerate an **adopted** `.blend` (see `environment-sources.json` and
+`BLENDER_CORE.md`). Scripts named `study_*` or the `*registry*` revision
+scripts are history, not templates. Paths are Project-relative: the repository
+root has no `assets/` or `data/` since #700.
 
 ## Read first
 
@@ -135,22 +155,10 @@ express the same object.
 
 ## Materials
 
-Bind defensible semantic IDs from `materials.json`:
-
-```text
-old_limestone
-rough_limestone
-ritual_gold
-oxidized_bronze
-wrought_iron
-dark_wood
-aged_cloth
-smoked_glass
-wet_residue
-bone
-wax
-crystal
-```
+Bind defensible semantic IDs from `tools/asset-language/materials.json`. Read
+the file for the current list rather than relying on a copy (it holds stone,
+metal, wood, cloth, glass and St. Maria ids such as `whitewash`, `azulejo`,
+`terracotta`, `roof_tile`).
 
 Preserve explicit legacy numeric values when equivalence is required. Do not
 invent a semantic binding merely to eliminate an unbound-material report.

@@ -32,10 +32,13 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import blender_locator  # noqa: E402
 
-ENVIRONMENTS = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "environments"
+ENVIRONMENTS = PROJECT / "assets" / "authoring" / "environments"
 STAGER = ROOT / "tools" / "blender" / "stage_room_model.py"
 ATLAS_STUDY = ROOT / "tools" / "blender" / "study_eevee_atlas.py"
 BASE_LAMP_SCALE = 0.3

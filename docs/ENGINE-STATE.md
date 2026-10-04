@@ -15,6 +15,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | id | kind | draw | world | windows | hooks |
 |---|---|---|---|---|---|
 | `1` | menu | windows | - | 7 | 8 |
+| `actor_change` | menu | windows | - | 2 | 2 |
 | `battle` | battle | windows | - | 10 | 8 |
 | `cinematic` | menu | windows | - | 0 | 2 |
 | `controls` | menu | windows | - | 2 | 6 |
@@ -24,7 +25,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | `developer_menu` | menu | windows | - | 2 | 5 |
 | `dialogue` | menu | windows | - | 0 | 1 |
 | `game_over` | menu | windows | - | 3 | 4 |
-| `items` | menu | windows | - | 4 | 8 |
+| `items` | menu | windows | - | 6 | 8 |
 | `map` | map | world | map | 0 | 7 |
 | `options` | menu | windows | - | 3 | 5 |
 | `quest_log` | menu | windows | - | 3 | 4 |
@@ -85,7 +86,7 @@ The registry below is the closed semantic trigger vocabulary exposed by Studio.
 - item-creation disciplines across the roster: alchemyx15, blacksmithingx15, cookingx18, tinkeringx17
 - items: **207** (consumablex66, equipmentx124, questx17)
 - skills: **47**, passives: **41**, states: **14**, roles: **13**, elements: **5**
-- maps: **29**, common events: **20**, shops: **8**, quests: **5**, lore entries: **3**
+- maps: **31**, common events: **22**, shops: **8**, quests: **5**, lore entries: **3**
 - animations: **29**, tilesets: **15**
 
 ## Notes for agents

@@ -18,12 +18,12 @@ local sprite_sheet = require("presentation.sprite_sheet")
 local frame_renderer = require("presentation.frame_renderer")
 local door_transition = require("presentation.door_transition")
 local presentation_surface = require("presentation.surface")
+local presentation_output = require("presentation.output")
 
 -- Canonical authored composition dimensions. The logical render surface
 -- may be larger; presentation.surface owns that independent profile.
 local gameWidth, gameHeight = presentation_surface.compositionSize()
 local canvas
-local scale, scaleX, scaleY = 1, 1, 1
 
 -- Global Session and State Router
 
@@ -159,12 +159,17 @@ interpreter.bindPresentation({
     -- frame draws a 426-wide world into a 256-wide target.
     setRenderSurface = function(id)
         local presentation_surface = require("presentation.surface")
+        if id == "mobile_device" then
+            -- DEVICE is derived from live Android host geometry. Refresh before
+            -- activating it so returning from WIDE cannot resurrect a stale
+            -- boot-time profile sampled before immersive fullscreen settled.
+            local hostW, hostH = love.graphics.getDimensions()
+            require("presentation.touch_gamepad").refreshAndroidSurface(hostW, hostH)
+        end
         if not presentation_surface.getProfile(id) then return false end
         presentation_surface.setProfile(id)
         local w, h = presentation_surface.renderSize()
-        canvas = love.graphics.newCanvas(w, h)
-        -- Recompute the integer-nearest host transform for the new surface;
-        -- love.resize owns that maths, so ask it rather than duplicating it.
+        canvas = presentation_surface.newRasterCanvas(w, h)
         love.resize(love.graphics.getWidth(), love.graphics.getHeight())
         require("engine.user_settings").set("renderSurfaceProfile", id)
         return true
@@ -174,6 +179,24 @@ interpreter.bindPresentation({
     end,
     listRenderSurfaces = function()
         return require("presentation.surface").profileIds()
+    end,
+    setOutputPresentation = function(id)
+        local ok, err = presentation_output.setMode(id)
+        if not ok then
+            print("[output] " .. tostring(err))
+            return false
+        end
+        require("engine.user_settings").set("outputPresentationMode", id)
+        -- Output mode owns the final host transform. Recompute it immediately
+        -- so CRT/nearest changes do not wait for an unrelated resize event.
+        love.resize(love.graphics.getWidth(), love.graphics.getHeight())
+        return true
+    end,
+    getOutputPresentation = function()
+        return presentation_output.getMode()
+    end,
+    listOutputPresentations = function()
+        return presentation_output.modeIds()
     end,
     setFont = function(name)
         local ui = require("presentation.ui")
@@ -188,6 +211,12 @@ interpreter.bindPresentation({
     end,
     listFonts = function()
         return { "monogram-extended-italic", "monogram-extended" }
+    end,
+    setTransitionArrowsVisible = function(value)
+        return require("presentation.transition_markers").setVisible(value)
+    end,
+    getTransitionArrowsVisible = function()
+        return require("presentation.transition_markers").isVisible()
     end,
     setFpsToggle = function(val)
         require("presentation.dev_overlay").setFpsEnabled(val)
@@ -511,6 +540,8 @@ function love.load(arg)
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
                 cli.requestedSurfaceProfile = val:sub(#"surface=" + 1)
+            elseif val:match("^output=") then
+                cli.requestedOutputMode = val:sub(#"output=" + 1)
             end
             i = i + 1
         end
@@ -675,7 +706,9 @@ function love.load(arg)
             "test_reserve_list",
             "test_authored_storage",
             "test_presentation_surface",
+            "test_android_touch_boot",
             "test_render_surface_option",
+            "test_output_presentation",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_scene_state_boundary",
@@ -690,6 +723,9 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_town_threshold_direction", "test_transition_markers",
+            "test_weaponsmith_dialogue",
+            "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
@@ -985,6 +1021,12 @@ function love.load(arg)
         return
     end
     
+    -- Android's device-matched mobile profile must be registered only after
+    -- the native host window exists, but before the active surface is chosen.
+    -- It samples once: orientation/resizing remains package-owned rather than
+    -- rebuilding the LÖVE canvas live.
+    require("presentation.touch_gamepad").prepareAndroidSurface()
+
     -- Surface selection is a presentation concern. CLI fixtures above stay
     -- on their existing canonical canvases; normal play may choose a wider
     -- logical surface without changing authored UI coordinates. A command-
@@ -1000,7 +1042,18 @@ function love.load(arg)
     presentation_surface.setProfile(surfaceProfile)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    canvas = love.graphics.newCanvas(renderWidth, renderHeight)
+    canvas = presentation_surface.newRasterCanvas(renderWidth, renderHeight)
+
+    -- #1310 output reconstruction is orthogonal to render-surface/aspect
+    -- selection. Explicit CLI beats a stored experimental preference; captures
+    -- pin stored settings away unless they deliberately opt in via output=<id>.
+    local outputMode = cli.requestedOutputMode
+        or require("engine.user_settings").get("outputPresentationMode", nil)
+        or "nearest"
+    local outputOk, outputErr = presentation_output.setMode(outputMode)
+    if not outputOk then
+        print("[output] " .. tostring(outputErr) .. "; using nearest")
+    end
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader
@@ -1324,7 +1377,7 @@ function love.draw()
     
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1, 1) -- reset color before drawing canvas to prevent dark tinting leak
-    love.graphics.draw(canvas, scaleX, scaleY, 0, scale, scale)
+    presentation_output.draw(canvas)
     if cli.isTownProofShot and not cli.townProofCaptured then
         cli.townProofCaptured = true
         cli.townProofQuitTimer = 1.0
@@ -1736,12 +1789,32 @@ local function commandsForMapEvent(ev)
     return ev.commands
 end
 
-local function enterDoorEvent(ev)
+local function enterDoorEvent(ev, button)
     local commands = commandsForMapEvent(ev)
     if not commands then return false end
-    return door_transition.begin(function()
+    local lane = require("engine.bounded_lane")
+    local edgeExit = false
+    for _, doorway in ipairs((activeSession.townTraversal or {}).doorways or {}) do
+        if lane.eventFor(activeSession, doorway) == ev and lane.isEdgeDoorway(activeSession, doorway) then
+            edgeExit = true
+            break
+        end
+    end
+    local sourceMapId = activeSession.currentMapData.id
+    local town = lane.isActive(activeSession)
+    local depthDirection = town and (ev.direction == "away" or ev.direction == "toward")
+        and ev.direction or nil
+    local started = door_transition.begin(function()
         runEventCommands(ev, commands)
-    end)
+        if town and activeSession.currentMapData.id ~= sourceMapId and lane.isActive(activeSession) then
+            local arrival = lane.eventFor(activeSession, lane.nearDoorway(activeSession))
+            if arrival then door_transition.setArrivalDirection(arrival.direction) end
+        end
+    end, {approach = not town and not edgeExit, actorDirection = depthDirection})
+    if started and town and button then
+        require("engine.player_controller").consumeUntilRelease(button)
+    end
+    return started
 end
 
 -- Which way the player is holding, from the authored bindings and the touch
@@ -1908,18 +1981,10 @@ handleKeyPressed = function(button)
                 -- the held key. The press itself does nothing; swallowing it
                 -- here keeps it from reaching the grid movement underneath.
                 return true
-            elseif button == "DOWN" then
-                -- A bounded lane has no backwards grid step. Letting Down
-                -- escape into the one-cell fallback map made it look like the
-                -- shop's outward door verb, even though Up is the authored
-                -- door convention everywhere in the town.
-                return true
-            elseif button == "UP" then
-                -- Up is the door verb. It reaches doorways only, so it can
-                -- never start a conversation the player did not aim at.
-                local doorEvent = lane.interact(activeSession)
+            elseif button == "UP" or button == "DOWN" then
+                local doorEvent = lane.interact(activeSession, button)
                 if doorEvent and commandsForMapEvent(doorEvent) then
-                    enterDoorEvent(doorEvent)
+                    enterDoorEvent(doorEvent, button)
                 end
                 return true
             elseif button == "A" or button == "START" then
@@ -2294,5 +2359,15 @@ function love.keyreleased(key)
 end
 
 function love.resize(w, h)
-    scale, scaleX, scaleY = presentation_surface.outputTransform(w, h)
+    presentation_output.resize(w, h)
+
+    -- Android may deliver a second, wider content size after immersive mode has
+    -- settled. DEVICE is defined by that live host aspect, so refresh its
+    -- profile on native resize and rebuild the active raster when necessary.
+    local touch = require("presentation.touch_gamepad")
+    local changed = touch.refreshAndroidSurface(w, h)
+    if changed and presentation_surface.getProfileId() == "mobile_device" then
+        local rw, rh = presentation_surface.renderSize()
+        canvas = presentation_surface.newRasterCanvas(rw, rh)
+    end
 end

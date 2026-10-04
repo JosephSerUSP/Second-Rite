@@ -144,6 +144,47 @@ class NegativeControlTests(unittest.TestCase):
                  lambda d: d["sources"]["old.blend"].update(supersededBy="nowhere.blend"))
         self.assertTrue(any("superseded by" in e for e in sources.check_project(self.root)))
 
+    def _candidate(self, *names, status="scaffold"):
+        folder = sources.candidates_dir(self.root) / "room"
+        folder.mkdir(parents=True, exist_ok=True)
+        for name in names:
+            (folder / name).write_bytes(b"BLENDER")
+        (folder / sources.MANIFEST_NAME).write_text(json.dumps({"schemaVersion": 1, "sources": {
+            name: {"status": status, "basis": "test"} for name in names}}), encoding="utf-8")
+        return folder
+
+    def test_a_small_candidate_folder_passes(self):
+        self._candidate("room_r1.blend", "room_r2.blend")
+        self.assertEqual(sources.check_project(self.root), [])
+
+    def test_revision_history_as_files_fails(self):
+        self._candidate("room_r1.blend", "room_r2.blend", "room_r3.blend")
+        self.assertTrue(any("revisions are commits" in e for e in sources.check_project(self.root)))
+
+    def test_an_adopted_candidate_fails(self):
+        self._candidate("room_r1.blend", status="adopted")
+        self.assertTrue(any("marked adopted" in e for e in sources.check_project(self.root)))
+
+    def test_an_unrecorded_candidate_blend_fails(self):
+        folder = self._candidate("room_r1.blend")
+        (folder / "room_r2.blend").write_bytes(b"BLENDER")
+        self.assertTrue(any("room_r2.blend has no entry" in e
+                            for e in sources.check_project(self.root)))
+
+    def test_a_worked_example_in_the_authoring_folder_fails(self):
+        (self.authoring / "example_street.blend").write_bytes(b"BLENDER")
+        _rewrite(self.authoring / sources.MANIFEST_NAME,
+                 lambda d: d["sources"].update({"example_street.blend":
+                                                {"status": "adopted", "basis": "test"}}))
+        errors = sources.check_project(self.root)
+        self.assertTrue(any("is a worked example" in e for e in errors))
+        self.assertTrue(any("records a worked example" in e for e in errors))
+
+    def test_a_package_baked_from_a_worked_example_fails(self):
+        _rewrite(self.package, lambda d: d["provenance"].update(
+            sourceBlend="example_exterior_reference.blend"))
+        self.assertTrue(any("worked example" in e for e in sources.check_project(self.root)))
+
     def test_an_unknown_status_fails(self):
         _rewrite(self.authoring / sources.MANIFEST_NAME,
                  lambda d: d["sources"]["new.blend"].update(status="final"))

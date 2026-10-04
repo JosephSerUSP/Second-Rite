@@ -8,12 +8,13 @@ import sys
 from pathlib import Path
 
 from asset_set import (DEFAULT_SET, ROOT, annotate_run_manifest, get_asset,
-                       load_asset_set, surface_generate_command)
+                       load_asset_set, surface_generate_command, project_root)
 
 
 def _parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("asset", help="surface asset ID from the selected asset set")
+    parser.add_argument("--project-root", type=Path)
     parser.add_argument("--set", dest="asset_set", default=str(DEFAULT_SET))
     parser.add_argument("--variants", type=int)
     parser.add_argument("--provider")
@@ -32,7 +33,8 @@ def _parser():
 
 def main(argv=None):
     args = _parser().parse_args(argv)
-    asset_set = load_asset_set(args.asset_set, root=ROOT, check_files=True)
+    project = project_root(args.project_root)
+    asset_set = load_asset_set(args.asset_set, root=project, check_files=True)
     asset = get_asset(asset_set, args.asset, kind="surface")
     overrides = {
         key: value for key, value in {
@@ -44,7 +46,7 @@ def main(argv=None):
     }
     if args.lora:
         overrides["loras"] = args.lora
-    command = surface_generate_command(asset, root=ROOT, overrides=overrides)
+    command = surface_generate_command(asset, root=project, overrides=overrides)
     if args.dry_run:
         print(json.dumps({"assetId": asset["id"], "command": command}, indent=2))
         return 0
@@ -68,7 +70,7 @@ def main(argv=None):
     run_path = Path(staged)
     if not run_path.is_absolute():
         run_path = ROOT / run_path
-    record = annotate_run_manifest(run_path, asset_set=asset_set, asset=asset, root=ROOT)
+    record = annotate_run_manifest(run_path, asset_set=asset_set, asset=asset, root=project)
     print(json.dumps({
         "kind": "second_rite_surface_generation",
         "assetId": asset["id"],

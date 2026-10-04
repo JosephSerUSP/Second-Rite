@@ -14,6 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 BLENDER_TOOLS = ROOT / "tools" / "blender"
 sys.path.insert(0, str(BLENDER_TOOLS))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import blender_test_support
 
 import build_synthetic_environment
 import town_environment_pipeline
@@ -22,6 +24,7 @@ import town_environment_pipeline
 class TownEnvironmentPipelineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        blender_test_support.blender_executable()
         cls.temp_dir = Path(tempfile.mkdtemp(prefix="test_env_pipeline_"))
         cls.fixture_blend = cls.temp_dir / "town_slice_fixture.blend"
         cls.output_dir = cls.temp_dir / "exported_package"

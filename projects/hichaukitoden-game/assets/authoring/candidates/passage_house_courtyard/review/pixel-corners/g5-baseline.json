@@ -1,0 +1,85 @@
+{
+  "interpretation": "G5 remains red on ten frames per width with both old and corrected viewport. All twenty differing actual frames match baseline decoded RGBA; no golden reference changed. Crop invariant passes.",
+  "candidateBaselineActualComparisons": [
+    {
+      "frame": "screens-actual/battle\\battle\\98-skill-attack.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/battle\\battle\\99-effekseer-fixture.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\00-initial.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\01-after-down.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\02-after-return.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\03-after-return.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\04-after-escape.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\05-after-down.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\06-after-up.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual/menu\\title\\07-after-escape.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/battle\\battle\\98-skill-attack.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/battle\\battle\\99-effekseer-fixture.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\00-initial.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\01-after-down.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\02-after-return.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\03-after-return.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\04-after-escape.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\05-after-down.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\06-after-up.png",
+      "sameDecodedRGBA": true
+    },
+    {
+      "frame": "screens-actual-wide/menu\\title\\07-after-escape.png",
+      "sameDecodedRGBA": true
+    }
+  ]
+}

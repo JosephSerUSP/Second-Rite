@@ -61,8 +61,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Install the image reader the snapshot needs
-        run: python -m pip install --disable-pip-version-check pillow
+        run: python -m pip install --disable-pip-version-check pillow numpy
 
       # #827: this gate went unrun long enough for its baseline to drift 155
       # models, because nothing in CI exercised it and the checker was resolving
@@ -75,6 +79,14 @@ jobs:
 
       - name: Asset-language regression suite
         run: python -m unittest discover -s tools/asset-language/tests -t .
+
+      - name: Asset production and item corpus
+        run: |
+          python -m unittest discover -s tools/asset-production/tests
+          python tools/asset-production/check_item_models.py
+
+      - name: Blender host discovery (integration skips are explicit)
+        run: python -m unittest discover -s tools/blender/tests
 
   repo-hygiene:
     name: repository hygiene
@@ -249,7 +261,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Continue"
           $__sw = [System.Diagnostics.Stopwatch]::StartNew()
-          python -m unittest tools.blender.tests.test_asset_library
+          python -m unittest tools.blender.tests.test_asset_library tools.blender.tests.test_vendor_assets
           $__code = $LASTEXITCODE
           if ($__code -eq 0) {
             python tools/blender/build_asset_library.py --check
@@ -262,6 +274,18 @@ jobs:
           $__sw.Stop()
           node tools/ci/time-step.js --record --label "asset library browser" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "asset library browser tests failed (exit $__code)" }
+
+      - name: Courtyard candidate profile commands and staged traversal
+        shell: pwsh
+        run: |
+          node --test tools/blender/tests/test_courtyard_candidate.js
+          if ($LASTEXITCODE -ne 0) { throw "Candidate profile tests failed" }
+          node tools/blender/stage_courtyard_candidate.js --output out/ci-courtyard --package projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package
+          if ($LASTEXITCODE -ne 0) { throw "Candidate staging failed" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-validate.ps1 -GameRoot out/ci-courtyard/game
+          if ($LASTEXITCODE -ne 0) { throw "Candidate G1 failed" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot out/ci-courtyard/game
+          if ($LASTEXITCODE -ne 0) { throw "Candidate units failed" }
 
       - name: G1 - data validation
         shell: pwsh

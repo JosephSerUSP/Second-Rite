@@ -36,7 +36,9 @@ end
 -- rebuilds the canvas; what matters to the engine is only that the profile
 -- moves and the choice is reported back.
 local hostCalls = {}
+local fakeOutputMode = "nearest"
 local function bindFakeHost()
+    fakeOutputMode = "nearest"
     interpreter.bindPresentation({
         setRenderSurface = function(id)
             if not surface.getProfile(id) then return false end
@@ -46,6 +48,13 @@ local function bindFakeHost()
         end,
         getRenderSurface = function() return surface.getProfileId() end,
         listRenderSurfaces = function() return surface.profileIds() end,
+        setOutputPresentation = function(id)
+            if id ~= "nearest" and id ~= "crt" then return false end
+            fakeOutputMode = id
+            return true
+        end,
+        getOutputPresentation = function() return fakeOutputMode end,
+        listOutputPresentations = function() return { "nearest", "crt" } end,
     })
 end
 
@@ -67,6 +76,19 @@ check("cycle walks classic -> four_three -> wide -> classic", function()
         { cmd = "SCRIPT", code = "ctx.sceneState.aspect = api.cycleRenderSurface()" },
     }, ctx)
     eq(ctx.sceneState.aspect, "classic", "third cycle wraps")
+end)
+
+check("output presentation cycles nearest -> crt -> nearest", function()
+    bindFakeHost()
+    local ctx = ctxFor()
+    interpreter.runImmediate({
+        { cmd = "SCRIPT", code = "ctx.sceneState.output = api.cycleOutputPresentation()" },
+    }, ctx)
+    eq(ctx.sceneState.output, "crt", "first output cycle")
+    interpreter.runImmediate({
+        { cmd = "SCRIPT", code = "ctx.sceneState.output = api.cycleOutputPresentation()" },
+    }, ctx)
+    eq(ctx.sceneState.output, "nearest", "second output cycle wraps")
 end)
 
 check("getRenderSurface reports the active profile", function()
@@ -104,6 +126,11 @@ check("headless run with no presentation bound degrades to a no-op", function()
         { cmd = "SCRIPT", code = "ctx.sceneState.ok = api.setRenderSurface('wide')" },
     }, ctx)
     eq(ctx.sceneState.ok, false, "set reports failure rather than erroring")
+    interpreter.runImmediate({
+        { cmd = "SCRIPT", code = "ctx.sceneState.output = api.getOutputPresentation(); ctx.sceneState.outputOk = api.setOutputPresentation('crt')" },
+    }, ctx)
+    eq(ctx.sceneState.output, "nearest", "headless output defaults to nearest")
+    eq(ctx.sceneState.outputOk, false, "headless output change is refused safely")
 end)
 
 check("user settings round-trip and survive a cache reset", function()

@@ -15,7 +15,10 @@ MANIFEST_VERSION = 1
 RUN_RECORD_VERSION = 1
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SET = ROOT / "assets" / "authoring" / "first_stratum" / "asset-set.json"
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root, within
+
+DEFAULT_SET = Path("assets/authoring/first_stratum/asset-set.json")
 
 
 class AssetSetError(ValueError):
@@ -31,17 +34,23 @@ def _json(path: Path):
         raise AssetSetError(f"malformed JSON in {path}: {exc}") from exc
 
 
-def repository_path(value, *, root=ROOT, label="path") -> Path:
+def repository_path(value, *, root=None, label="path") -> Path:
+    root = project_root(root)
     path = Path(str(value))
     if path.is_absolute():
-        raise AssetSetError(f"{label} must be repository-relative: {value}")
+        raise AssetSetError(f"{label} must be Project-relative: {value}")
     normalized = Path(os.path.normpath(str(path)))
     if normalized.parts and normalized.parts[0] == "..":
-        raise AssetSetError(f"{label} escapes the repository: {value}")
-    return Path(root) / normalized
+        raise AssetSetError(f"{label} escapes the Project: {value}")
+    try:
+        return within(root, normalized)
+    except RuntimeError as error:
+        raise AssetSetError(str(error)) from error
 
 
-def relative_posix(path: Path, *, root=ROOT) -> str:
+def relative_posix(path: Path, *, root=None) -> str:
+    # Formatting accepts an explicit filesystem owner (including install/out).
+    root = project_root() if root is None else Path(root)
     try:
         return path.resolve().relative_to(Path(root).resolve()).as_posix()
     except ValueError:
@@ -135,18 +144,18 @@ def _validate_world_prop(asset, *, root):
         repository_path(path, root=root, label=f"{asset_id}.products.states.{state}")
 
 
-def load_asset_set(path=DEFAULT_SET, *, root=ROOT, check_files=True):
-    root = Path(root)
+def load_asset_set(path=DEFAULT_SET, *, root=None, check_files=True):
+    root = project_root(root)
     path = repository_path(path, root=root, label="asset set") if not Path(path).is_absolute() else Path(path)
     data = _json(path)
     if data.get("manifestKind") != MANIFEST_KIND or data.get("manifestVersion") != MANIFEST_VERSION:
         raise AssetSetError(f"unsupported asset-set manifest in {path}")
     if not ID_RE.fullmatch(str(data.get("id", ""))):
         raise AssetSetError("asset-set id must be lower snake case")
-    contract = _json(root / "tools" / "asset-language" / "contract.json")
+    contract = _json(ROOT / "tools" / "asset-language" / "contract.json")
     if data.get("contractVersion") != contract.get("contractVersion"):
         raise AssetSetError("asset-set contractVersion disagrees with contract.json")
-    material_registry = _json(root / "tools" / "asset-language" / "materials.json")
+    material_registry = _json(ROOT / "tools" / "asset-language" / "materials.json")
     material_ids = {row.get("id") for row in material_registry.get("materials", [])}
     assets = data.get("assets")
     if not isinstance(assets, list) or not assets:
@@ -180,7 +189,7 @@ def get_asset(asset_set, asset_id, *, kind=None):
     return asset
 
 
-def surface_generate_command(asset, *, root=ROOT, overrides=None,
+def surface_generate_command(asset, *, root=None, overrides=None,
                              python_executable=None):
     if asset.get("kind") != "surface":
         raise AssetSetError(f"{asset.get('id')} is not a surface")
@@ -189,11 +198,12 @@ def surface_generate_command(asset, *, root=ROOT, overrides=None,
     command = [
         python_executable or sys.executable,
         "tools/asset-gen/gen.py",
+        "--project", str(project_root(root)),
         "generate",
         generation["assetClass"],
         generation["name"],
         asset["description"],
-        "--height", generation["height"],
+        "--height", str(repository_path(generation["height"], root=root, label="height")),
         "--depth-weight", str(values.pop("depth_weight", generation["depthWeight"])),
         "--prompt-style", str(values.pop("prompt_style", generation["promptStyle"])),
         "--variants", str(values.pop("variants", generation["candidates"])),
@@ -214,7 +224,7 @@ def surface_generate_command(asset, *, root=ROOT, overrides=None,
     return command
 
 
-def annotate_run_manifest(run_path, *, asset_set, asset, root=ROOT):
+def annotate_run_manifest(run_path, *, asset_set, asset, root=None):
     run_path = Path(run_path)
     manifest_path = run_path / "manifest.json"
     manifest = _json(manifest_path)

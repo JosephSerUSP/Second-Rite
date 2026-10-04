@@ -270,6 +270,7 @@ local as3d = {}
 for key, value in pairs(flatEnv) do as3d[key] = value end
 as3d.preRendered = nil
 local quayMap = loader.maps[loader.getMapIndex(19)]
+game.currentMapData = quayMap
 lane.initialize(game, quayMap, as3d, nil)
 check(lane.isActive(game), "a lane with no pre-rendered block still initialises")
 local rx, ry, rz = lane.actorRoot(game)
@@ -318,7 +319,7 @@ local function doorTargets(mapId)
 end
 check(doorTargets(17)[26], "the praca opens on to the backstreet")
 check(doorTargets(26)[18], "the backstreet drops into market row")
-check(doorTargets(26)[25], "the backstreet is how a player returns to the rented room")
+check(doorTargets(26)[32] and doorTargets(32)[25], "the court connects the backstreet to the rented room")
 check(doorTargets(17)[16], "the praca stair climbs to the churchyard")
 check(doorTargets(16)[2], "the churchyard holds the way into the labyrinth")
 

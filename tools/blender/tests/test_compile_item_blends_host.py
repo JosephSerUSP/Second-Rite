@@ -51,6 +51,7 @@ class TestCompileItemBlendsHost(unittest.TestCase):
     def test_check_mode_fails_on_empty_source_discovery(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             empty_project = Path(temp_dir)
+            (empty_project / 'data').mkdir()
             with self.assertRaises(SystemExit) as ctx:
                 compile_item_blends.main(["--check", "--project-root", str(empty_project)])
             self.assertIn("cannot verify", str(ctx.exception))

@@ -36,6 +36,7 @@ class RuntimePassTests(unittest.TestCase):
                 text,
             )
             self.assertNotIn("newmtl bone\npass", text)
+            self.assertNotIn(b'\r', path.read_bytes(), 'compiled MTL bytes must be platform-independent')
 
     def test_rejects_more_than_shader_maximum(self):
         with self.assertRaises(RuntimePassError):

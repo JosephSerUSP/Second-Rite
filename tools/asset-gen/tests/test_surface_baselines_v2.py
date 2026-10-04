@@ -7,6 +7,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 MODULE_PATH = ROOT / "tools" / "asset-gen" / "surface_baselines_v2.py"
 
 
@@ -118,7 +121,7 @@ class SurfaceBaselinesV2Tests(unittest.TestCase):
                 self.assertEqual(surface.compare_directories(root, second), [])
 
     def test_tracked_baselines_match_generator(self):
-        tracked = ROOT / "assets" / "geometry" / "2_procedural_surface_baselines"
+        tracked = PROJECT / 'assets' / "geometry" / "2_procedural_surface_baselines"
         with tempfile.TemporaryDirectory() as directory:
             generated = Path(directory)
             surface.write_baselines(generated, sorted(surface.RECIPES), 128, 3)

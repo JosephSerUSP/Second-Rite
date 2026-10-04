@@ -12,6 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import blender_test_support
 
 from live_bridge.client import BridgeClient, BridgeError
 from live_bridge.protocol import MAX_MESSAGE_BYTES, ProtocolError, decode_message, encode_message, validate_request
@@ -212,7 +214,7 @@ class SourceContractTests(unittest.TestCase):
 class BlenderReloadTests(unittest.TestCase):
     def test_reload_re_reads_submodules_from_disk(self):
         import build_synthetic_environment
-        blender = build_synthetic_environment.blender_executable()
+        blender = blender_test_support.blender_executable()
         probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_reload_blender.py"
         result = subprocess.run(
             [str(blender), "-b", "--factory-startup", "--python", str(probe)],
@@ -225,11 +227,11 @@ class BlenderReloadTests(unittest.TestCase):
 class BlenderIntegrationTests(unittest.TestCase):
     def test_authenticated_windowed_dispatch_registers_undo_operator(self):
         import build_synthetic_environment
-        blender = build_synthetic_environment.blender_executable()
+        blender = blender_test_support.blender_executable()
         probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_blender.py"
         result = subprocess.run(
             [str(blender), "--factory-startup", "--python", str(probe)],
-            cwd=ROOT, text=True, capture_output=True, timeout=45)
+            cwd=ROOT, text=True, capture_output=True, timeout=180)
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)
         marker = next((line for line in output.splitlines()

@@ -88,7 +88,7 @@ The full deterministic/golden suite is documented in `AGENTS.md` and [`docs/SPEC
 - G5 guards rendered game frames.
 - G6 guards rendered Studio/editor frames.
 
-**Never recapture or regenerate G5/G6 references simply to make a failing gate green.** Committed visual references are owner-controlled evidence. Relative hosted A/B workflows can establish whether a candidate changed rendering, but they do not authorize replacing accepted references.
+**Never recapture or regenerate G5/G6 references simply to make a failing gate green.** Committed visual references are maintainer-approved evidence. Relative hosted A/B workflows can establish whether a candidate changed rendering, but they do not authorize replacing accepted references. A reviewed Red result may be recorded as Orange / expected delta while approved reference reconciliation is still pending; changed or additional evidence returns it to Red.
 
 ## Source tree
 
@@ -107,9 +107,9 @@ The full deterministic/golden suite is documented in `AGENTS.md` and [`docs/SPEC
 
 The physical monorepo is still being made to reflect semantic Project/runtime/Studio boundaries. Treat current path placement as implementation reality, not permission to collapse those owners together; `docs/SPEC.md` and relevant open Issues own the technical boundary contract.
 
-## Golden/reference ownership
+## Golden/reference approval
 
-Golden artifacts are evidence, not disposable test output. A red visual gate means “investigate the difference,” not “accept whatever was just rendered.” See `AGENTS.md` for absolute vs relative G5/G6 workflow and the owner-signoff rule.
+Golden artifacts are evidence, not disposable test output. A red visual gate means “investigate the difference,” not “accept whatever was just rendered.” See `AGENTS.md` for absolute vs relative G5/G6 workflow and the reviewer/reference-approval rule.
 
 ## Licensing
 

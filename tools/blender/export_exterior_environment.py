@@ -73,6 +73,8 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
+import bake_correspondence
+import render_profiles
 import atlas_allocation  # noqa: E402
 import atlas_alpha  # noqa: E402
 import eevee_bake  # noqa: E402
@@ -129,70 +131,83 @@ def _crossings(bvh, point, direction, limit=64):
 
 
 def cull_enclosed(target, samples, escape_ratio):
-    """Delete faces sealed inside the geometry, by an inside/outside test.
+    """Cull faces whose vertices, edge midpoints and centre lie in one solid.
 
-    These are what bakes black, and the reason is not the camera. The house
-    grammar builds closed bodies, so every wall has an inner face, every roof
-    an underside, every box a hidden back. Nothing reaches those surfaces --
-    no light, and no viewer either. A free camera could orbit forever and
-    never see them without clipping through the building.
-
-    The test is PARITY, not ray escape. Firing a hemisphere of rays and asking
-    whether any escapes sounds equivalent and is not: a face visible only
-    through a narrow aperture -- a window reveal, a gap between buildings --
-    has most directions blocked, so finite sampling calls it sealed. That bias
-    is measurable and does not converge. Culling the same mesh with an
-    escaping-ray test gave 2876 faces at 24 samples, 2752 at 64, 2635 at 128,
-    2569 at 256 and 2508 at 512, still falling; the owner saw the consequence
-    as facade faces missing from the export. Counting how many surfaces a ray
-    pierces on its way out answers the actual question -- odd means the point
-    began inside a solid -- and it is unbiased and cheaper. It reports 1713
-    sealed faces, so the escape test was removing about 1163 it should not.
-
-    Five directions are polled and the majority wins, so one grazing ray along
-    a coplanar seam cannot decide a face on its own.
-
-    ``samples`` and ``escape_ratio`` are retained for the CLI but no longer
-    steer the classification; the parity test has no sampling knob to turn.
+    Evaluate closed source bodies separately: global parity across overlapping
+    bodies is XOR rather than union. Centre-only coverage can delete an exposed
+    facade when a small intersecting object covers just its centre. Open sheets
+    and explicitly preserved structural receivers are retained. Partial or
+    ambiguous coverage retains geometry rather than exposing dark inner faces.
+    The legacy samples/escape_ratio arguments do not change this classification.
     """
-    import mathutils
     from mathutils.bvhtree import BVHTree
     mesh = target.data
-    # Parity is only meaningful for closed bodies. An open card (a ground-cover tuft is two crossed quads) has no
-    # inside: left in, it is culled for being "crossed" by its own twin, and it flips the verdict on any solid face
-    # whose ray happens to pass through it. So open faces are neither candidates nor occluders.
     marks = mesh.attributes.get(OPEN_FACE_ATTRIBUTE)
     is_open = [d.value for d in marks.data] if marks else [False] * len(mesh.polygons)
+    keep = mesh.attributes.get("sr_bake_preserve_face")
+    owners = mesh.attributes.get(bake_correspondence.OWNER_ATTRIBUTE)
     solid = [p for p in mesh.polygons if not is_open[p.index]]
-    bvh = BVHTree.FromPolygons([v.co.copy() for v in mesh.vertices],
-                               [tuple(p.vertices) for p in solid],
-                               all_triangles=False)
-    directions = [mathutils.Vector(d).normalized() for d in PARITY_DIRECTIONS]
-    needed = len(directions) // 2 + 1
+    groups = {}
+    if owners:
+        for poly in solid:
+            groups.setdefault(owners.data[poly.index].value, []).append(poly)
+    else:
+        # Synthetic/imported meshes without owner tags use connected bodies.
+        vertex_faces = {}
+        for poly in solid:
+            for vertex in poly.vertices:
+                vertex_faces.setdefault(vertex, []).append(poly.index)
+        pending = {p.index for p in solid}
+        while pending:
+            seed = pending.pop(); todo = [seed]; indices = [seed]
+            while todo:
+                current = mesh.polygons[todo.pop()]
+                for vertex in current.vertices:
+                    for index in vertex_faces[vertex]:
+                        if index in pending:
+                            pending.remove(index); todo.append(index); indices.append(index)
+            groups[seed] = [mesh.polygons[i] for i in indices]
+    vertices = [v.co.copy() for v in mesh.vertices]
+    bodies = []
+    for faces in groups.values():
+        # A body may lose degenerate faces during joining. Open bodies cannot
+        # classify enclosed points; never infer a solid from their bounding box.
+        edges = {}
+        for poly in faces:
+            for edge in poly.edge_keys:
+                key = tuple(sorted(edge)); edges[key] = edges.get(key, 0) + 1
+        if not edges or any(count != 2 for count in edges.values()):
+            continue
+        points = [vertices[i] for p in faces for i in p.vertices]
+        low = tuple(min(p[a] for p in points) for a in range(3))
+        high = tuple(max(p[a] for p in points) for a in range(3))
+        if any(high[a]-low[a] < 1e-6 for a in range(3)):
+            continue
+        bodies.append((low, high, BVHTree.FromPolygons(vertices, [tuple(p.vertices) for p in faces], all_triangles=False)))
+    directions = [Vector(d).normalized() for d in PARITY_DIRECTIONS]
+    def inside(point, body):
+        low, high, bvh = body
+        if any(point[a] <= low[a] or point[a] >= high[a] for a in range(3)):
+            return False
+        votes = sum(_crossings(bvh, point, direction) % 2 for direction in directions)
+        return votes >= len(directions)//2 + 1
     doomed = []
     for poly in solid:
-        # Start just OUTSIDE the face along its own normal: an outward-facing
-        # skin face is then outside its body, an inward-facing one is inside.
-        point = poly.center + poly.normal.normalized() * 1e-3
-        votes = 0
-        for direction in directions:
-            if _crossings(bvh, point, direction) % 2 == 1:
-                votes += 1
-                if votes >= needed:
-                    break
-        if votes >= needed:
-            doomed.append(poly)
-    if not doomed:
-        return 0
-    # Delete through bmesh, not by flagging polygons and running mesh.delete: that operator acts on the *edit-mode*
-    # selection, and vertices left selected by an earlier select_all flush every face into it. On a small mesh that
-    # deleted all 574 faces when 135 were doomed; the Praca only escaped by the luck of its selection state.
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
-    bm.faces.ensure_lookup_table()
-    bmesh.ops.delete(bm, geom=[bm.faces[poly.index] for poly in doomed], context="FACES")
-    bm.to_mesh(mesh)
-    bm.free()
+        if keep and keep.data[poly.index].value:
+            continue
+        offset = poly.normal.normalized()*1e-4
+        corners = [vertices[i] for i in poly.vertices]
+        samples = [p+offset for p in corners]
+        samples.extend((a+b)/2+offset for a,b in zip(corners,corners[1:]+corners[:1]))
+        samples.append(poly.center+offset)
+        # One body must contain the complete sampled face. Global parity over
+        # overlapping or touching bodies is XOR, not a reliable solid union.
+        if any(all(inside(point,body) for point in samples) for body in bodies):
+            doomed.append(poly.index)
+    if doomed:
+        bm = bmesh.new(); bm.from_mesh(mesh); bm.faces.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[bm.faces[i] for i in doomed], context='FACES')
+        bm.to_mesh(mesh); bm.free(); mesh.update()
     return len(doomed)
 
 
@@ -286,6 +301,50 @@ def in_square(obj, span, margin):
     return -margin <= centre.y <= span + margin
 
 
+def admitted_names(objects, span, margin):
+    """Admit authored building volumes as units, leaving loose objects bounded.
+
+    A partially visible building still needs its roof/returns. Its existing
+    building_volume root is the semantic boundary; unrelated parked copies remain
+    outside the lane envelope. Bounding corners use actual world transforms.
+    """
+    bpy.context.view_layer.update()
+    graph = bpy.context.evaluated_depsgraph_get()
+    groups = {}
+    loose = []
+    for obj in objects:
+        if obj.type != "MESH" or not is_bake_source(obj):
+            continue
+        parent = obj.parent
+        assembly = None
+        while parent:
+            if "building_volume" in parent:
+                assembly = parent
+            parent = parent.parent
+        if assembly is None:
+            loose.append(obj)
+        else:
+            groups.setdefault(assembly, []).append(obj)
+    admitted = set()
+    for obj in loose:
+        body = obj.evaluated_get(graph) if live_modifiers(obj) else obj
+        corners = [body.matrix_world @ Vector(corner) for corner in body.bound_box]
+        if corners and min(p.y for p in corners) <= span + margin and max(p.y for p in corners) >= -margin:
+            admitted.add(obj.name)
+    for members in groups.values():
+        # Assembly bounds need only runtime bodies/proxies: source micro-detail
+        # must not drag an otherwise off-range building into the package.
+        bodies = [obj for obj in members if bake_role(obj) != "source"]
+        if not bodies:
+            continue
+        corners = [body.matrix_world @ Vector(corner)
+                   for obj in bodies
+                   for body in [obj.evaluated_get(graph) if live_modifiers(obj) else obj]
+                   for corner in body.bound_box]
+        if min(p.y for p in corners) <= span + margin and max(p.y for p in corners) >= -margin:
+            admitted.update(obj.name for obj in members)
+    return admitted
+
 def is_bake_source(obj):
     """Does this object belong in the baked render mesh?
 
@@ -298,6 +357,14 @@ def is_bake_source(obj):
         return True
     return (obj.name.startswith("STUDY_") or obj.name in GROUND_NAMES
             or obj.name.startswith("FG_"))
+
+
+def bake_role(obj):
+    """Source detail can illuminate a simple receiver without shipping its geometry."""
+    role = obj.get("sr_bake_role", "both")
+    if role not in ("both", "source", "receiver"):
+        raise ValueError(f"{obj.name}: unknown sr_bake_role {role!r}")
+    return role
 
 
 def live_modifiers(obj):
@@ -455,7 +522,7 @@ def lane_positions(span):
     return [0.35] + [0.6 + i * (span - 1.2) / 8 for i in range(9)] + [span - 0.35]
 
 
-def allocate_atlas_by_view(target, span, atlas_size):
+def allocate_atlas_by_view(target, span, atlas_size, view_bias=.85):
     """Unwrap, and spend the atlas where the lane cameras look (#877). Returns the allocator's report.
 
     The ground is 59% of the pixels of a Praca frame and used to get a fixed 3% of the atlas, chosen when
@@ -468,28 +535,31 @@ def allocate_atlas_by_view(target, span, atlas_size):
         obj.hide_render = True
     try:
         # exterior sources are in engine space already: no mirror (see the module docstring)
-        return atlas_allocation.allocate_by_view(target, lane_positions(span), atlas_size, mirrored=False)
+        return atlas_allocation.allocate_by_view(target, lane_positions(span), atlas_size, view_bias=view_bias, mirrored=False)
     finally:
         for obj in hidden:
             obj.hide_render = False
 
 
 def bake_source_members(source, span, margin):
-    """The source meshes that were joined into the render mesh: what an EEVEE bake photographs.
+    """Beauty source meshes, including detail that is baked onto separate receivers.
 
     The rest of TH_SOURCE (level-design guides, scale actors, preview rigs) must never reach the atlas.
     """
     members = []
+    admitted = admitted_names(list(source.all_objects), span, margin)
     for obj in source.all_objects:
         if not obj or obj.type != "MESH" or obj.hide_render or not is_bake_source(obj):
             continue
-        if in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
+        if bake_role(obj) == "receiver":
+            continue
+        if obj.name in admitted:
             members.append(obj)
     return members
 
 
 def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
-                        clip_ground=GROUND_CLIP_MARGIN, layout="view", atlas_size=2048) -> None:
+                        clip_ground=GROUND_CLIP_MARGIN, layout="view", atlas_size=2048, view_bias=.85) -> None:
     print("[exterior] preparing render mesh", flush=True)
     source = bpy.data.collections["TH_SOURCE"]
     render = bpy.data.collections["TH_RENDER"]
@@ -518,15 +588,20 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     ground_tagged = []
     ground_tag = bpy.data.materials.new(GROUND_TAG_MATERIAL)
     source_objects = list(source.all_objects)
+    owner_names = bake_correspondence.registry(source_objects)
+    admitted = admitted_names(source_objects, span, margin)
     unbaked_modifiers = []
     for obj in source_objects:
-        if obj.type != "MESH" or obj.hide_render:
+        if obj.type != "MESH":
+            continue
+        role = bake_role(obj)
+        if role == "source" or (obj.hide_render and role != "receiver"):
             continue
         if not is_bake_source(obj):
             if live_modifiers(obj):
                 unbaked_modifiers.append(obj.name)
             continue
-        if not in_square(evaluated(obj)[0] if live_modifiers(obj) else obj, span, margin):
+        if obj.name not in admitted:
             print(f"[exterior] SKIPPING off-square {obj.name}", flush=True)
             skipped.append(obj.name)
             continue
@@ -534,12 +609,24 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         if obj.name in GROUND_NAMES:
             flatten_ground_sheet(obj)       # in memory, for the Cycles bake: see its docstring
         copy = obj.copy()
+        # A derived render proxy belongs to the render collection, not the
+        # authored assembly hierarchy. Preserve placement before detaching:
+        # moved assembly roots need world space, and the source hierarchy must
+        # not acquire temporary children belonging to the render export.
+        copy.parent = None
+        copy.matrix_world = obj.matrix_world.copy()
         copy.data = realised_mesh(obj)
+        bake_correspondence.tag(copy.data, obj.name, owner_names)
         atlas_alpha.preserve_uv(copy.data)
         copy.modifiers.clear()      # already applied above; join must not see them
-        if obj.get(ground_cover.OPEN_SURFACE_PROPERTY):
-            marks = copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
+        import mesh_export_geometry
+        is_open = mesh_export_geometry.prepare(copy.data)
+        if obj.get(ground_cover.OPEN_SURFACE_PROPERTY) or is_open:
+            marks = copy.data.attributes.get(OPEN_FACE_ATTRIBUTE) or copy.data.attributes.new(OPEN_FACE_ATTRIBUTE, "BOOLEAN", "FACE")
             marks.data.foreach_set("value", [True] * len(copy.data.polygons))
+        if obj.get("sr_bake_preserve"):
+            preserve = copy.data.attributes.new("sr_bake_preserve_face", "BOOLEAN", "FACE")
+            preserve.data.foreach_set("value", [True]*len(copy.data.polygons))
         copy.name = f"R_{obj.name}"
         copy.hide_viewport = False
         copy.hide_render = False
@@ -587,6 +674,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     if target is None or target.type != "MESH":
         raise RuntimeError("render join produced no active mesh")
     target.name = "st_maria_praca_TH_RENDER"
+    target[bake_correspondence.OWNER_RECORD] = json.dumps(owner_names)
     target.select_set(True)
     bpy.context.view_layer.objects.active = target
     bpy.ops.object.mode_set(mode="EDIT")
@@ -601,7 +689,8 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
     if ground_tagged and clip_ground is not None:
         clip_ground_to_view(target, span, clip_ground)
     if layout == "view":
-        report = allocate_atlas_by_view(target, span, atlas_size)
+        report = allocate_atlas_by_view(target, span, atlas_size, view_bias)
+        target["atlas_view_allocation"] = json.dumps(report)
         print(f"[exterior] atlas allocated by view: {report['visiblePolygons']} of {report['polygons']} faces "
               f"are seen, {report['visibleIslands']} of {report['islands']} islands", flush=True)
     else:
@@ -612,6 +701,7 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
         if ground_tagged:
             reallocate_ground(target, ground_share)
     target.data.calc_loop_triangles()
+    bpy.context.view_layer.update()
     if len(target.data.loop_triangles) < 100:
         raise RuntimeError(
             f"render join is implausibly small: {len(target.data.loop_triangles)} triangles")
@@ -619,11 +709,20 @@ def rebuild_render_mesh(span, margin, ground_share, cull_samples, cull_escape,
           f"{len(target.data.loop_triangles)} runtime triangles")
 
 
+def camera_provenance(path):
+    """Carry the actual serialized resolver output, without a second camera schema."""
+    path=Path(path).resolve()
+    source=path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
+    return {"source":source,"record":json.loads(path.read_text(encoding="utf-8"))}
+
+
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:]
     parser = argparse.ArgumentParser()
     parser.add_argument("--blend", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--camera", type=Path, default=atlas_allocation.CAMERA_RECORD,
+                        help="resolved WorldCamera calibration used for atlas projection")
     parser.add_argument("--span", type=float, default=23.699,
                         help="lane length; geometry beyond it is not this street")
     parser.add_argument("--ambient", type=float, default=0.35,
@@ -649,26 +748,39 @@ def main() -> None:
     parser.add_argument("--atlas-layout", choices=("view", "legacy"), default="view",
                         help="view spends the atlas where the lane cameras look (#877); legacy is the "
                              "original smart_project with a fixed --ground-share")
+    parser.add_argument("--atlas-view-bias", type=float, default=None,
+                        help="0 = uniform world-area density; 1 = peak visible camera footprint. Used with --atlas-layout view.")
     parser.add_argument("--keep-sealed", action="store_true",
                         help="disable sealed-face culling")
     parser.add_argument("--margin", type=float, default=6.0,
                         help="how far past the lane ends geometry may still belong")
-    parser.add_argument("--atlas-size", type=int, default=2048,
-                        help="2048 because the buildings measured 0.66 texels "
-                             "per screen pixel at 1024, against the 1-3 a "
-                             "backdrop wants; they need ~983k texels for 1.0 "
-                             "and a 1024 atlas holds 1,049k in total")
-    parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--atlas-size", type=int, default=None,
+                        help="Override saved export_atlas_size; otherwise use the source setting or shared 1024 default")
+    parser.add_argument("--samples", type=int, default=None)
+    parser.add_argument("--source-lighting", action="store_true",
+                        help="preserve authored world and lamps rather than staging the legacy exterior rig")
     eevee_bake.add_arguments(parser)
     args = parser.parse_args(argv)
+    if args.atlas_view_bias is not None and not 0 <= args.atlas_view_bias <= 1:
+        parser.error("--atlas-view-bias must be between 0 and 1")
+    atlas_allocation.CAMERA_RECORD = args.camera.resolve()
 
     opened = Path(bpy.data.filepath).resolve() if bpy.data.filepath else None
     if opened != args.blend.resolve():
         bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
+    if args.atlas_size is None:
+        args.atlas_size = bpy.context.scene.get("export_atlas_size", render_profiles.DEFAULT_ATLAS_SIZE)
+    if type(args.atlas_size) is not int or args.atlas_size <= 0:
+        parser.error("Atlas size must be a positive integer")
+    view_bias = args.atlas_view_bias
+    if view_bias is None:
+        view_bias = float(bpy.context.scene.get("export_atlas_view_bias", .85))
+    if not 0 <= view_bias <= 1:
+        parser.error("Saved export_atlas_view_bias must be between 0 and 1")
     rebuild_render_mesh(args.span, args.margin, args.ground_share,
                         0 if args.keep_sealed else args.cull_samples, args.cull_escape,
                         clip_ground=None if args.keep_full_ground else args.ground_clip_margin,
-                        layout=args.atlas_layout, atlas_size=args.atlas_size)
+                        layout=args.atlas_layout, atlas_size=args.atlas_size, view_bias=view_bias)
 
     # Same reason export_room_environment.py stages lighting before baking: a
     # Cycles bake that just opens the file is lit by whatever the .blend last
@@ -677,8 +789,9 @@ def main() -> None:
     # 0.8/0.9/0.7 against the shipped package's 30.0/27.6/23.9 -- a cave. The
     # interior uses an even fill because a room is lit by what it contains; a
     # street gets the fill AND the hard key, which is what outdoor_sun is for.
-    stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
-    stager.outdoor_sun(args.sun)
+    if not args.source_lighting:
+        stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
+        stager.outdoor_sun(args.sun)
 
     # An EEVEE bake photographs the source meshes that were joined, from 16 places along the lane. A town
     # source is in engine space already, so the lane cameras are not mirrored.
@@ -692,8 +805,19 @@ def main() -> None:
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,
                                      atlas_size=args.atlas_size,
                                      bake_samples=args.samples,
-                                     flat_bake=True,
-                                     backend=args.bake_backend, eevee=eevee)
+                                     flat_bake=False,
+                                     backend=args.bake_backend, eevee=eevee,
+                                     cycles_device=args.cycles_device, render_profile=args.render_profile,
+                                     bake_bindings=args.bake_bindings, atlas_denoise=args.atlas_denoise,
+                                     uv_texel_align=args.uv_texel_align)
+    manifest_path = output / "environment.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    target = bpy.data.objects.get("st_maria_praca_TH_RENDER")
+    if target and "atlas_view_allocation" in target:
+        manifest["provenance"]["atlasAllocation"] = json.loads(target["atlas_view_allocation"])
+    manifest["provenance"]["lightingPolicy"] = "source" if args.source_lighting else "staged-exterior"
+    manifest["provenance"]["cameraCalibration"] = camera_provenance(args.camera)
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print("EXTERIOR 3D EXPORT OK")
 
 

@@ -1,0 +1,22 @@
+{
+  "spec": {
+    "name": "Sleeping wing",
+    "front": 4.5,
+    "back": 9.5,
+    "start": -1.7,
+    "end": 8.45,
+    "floor": 0.3,
+    "eave": 3.8,
+    "ridge": 5.05,
+    "start_portal": false,
+    "end_portal": true
+  },
+  "views": [
+    "front",
+    "oblique",
+    "side",
+    "rear"
+  ],
+  "sourceMeshObjects": 378,
+  "source": "projects\\hichaukitoden-game\\assets\\authoring\\environments\\passage_house_courtyard.blend"
+}

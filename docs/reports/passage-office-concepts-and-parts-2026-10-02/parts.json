@@ -1,0 +1,326 @@
+{
+  "sourceSHA256": "171c55e3a59c4db5ec7e5c77be1d74e5dfb822d4ef8603f7f6722890d3af293d",
+  "profile": {
+    "name": "draft",
+    "engine": "CYCLES",
+    "samples": 64,
+    "supersample": 1,
+    "denoise": true,
+    "atlas_denoise": "oidn-fast",
+    "atlas_texel_align": true,
+    "max_bounces": 4,
+    "diffuse_bounces": 2,
+    "glossy_bounces": 2,
+    "seed": 3201
+  },
+  "parts": [
+    {
+      "name": "registrar_desk",
+      "dimensionsMetres": [
+        1.0500000715255737,
+        2.25,
+        0.8650000095367432
+      ],
+      "materials": [
+        "sr_dark_wood"
+      ],
+      "views": [
+        "registrar_desk-beauty-front.png",
+        "registrar_desk-beauty-oblique.png",
+        "registrar_desk-beauty-top.png",
+        "registrar_desk-clay-front.png",
+        "registrar_desk-clay-oblique.png",
+        "registrar_desk-clay-top.png"
+      ],
+      "triangles": 72,
+      "nativeProjectedBounds": [
+        140.6497344970703,
+        109.0389347076416,
+        199.3664093017578,
+        132.34100818634033
+      ],
+      "nativeProjectedSize": [
+        58.7166748046875,
+        23.30207347869873
+      ]
+    },
+    {
+      "name": "current_ledger",
+      "dimensionsMetres": [
+        0.24000000953674316,
+        0.41999995708465576,
+        0.06199997663497925
+      ],
+      "materials": [
+        "sr_dark_wood",
+        "sr_aged_cloth"
+      ],
+      "views": [
+        "current_ledger-beauty-front.png",
+        "current_ledger-beauty-oblique.png",
+        "current_ledger-beauty-top.png",
+        "current_ledger-clay-front.png",
+        "current_ledger-clay-oblique.png",
+        "current_ledger-clay-top.png"
+      ],
+      "triangles": 36,
+      "nativeProjectedBounds": [
+        167.35043334960938,
+        107.30084896087646,
+        178.38571166992188,
+        108.94818305969238
+      ],
+      "nativeProjectedSize": [
+        11.0352783203125,
+        1.647334098815918
+      ]
+    },
+    {
+      "name": "previous_ledger",
+      "dimensionsMetres": [
+        0.24000000953674316,
+        0.42000001668930054,
+        0.09999996423721313
+      ],
+      "materials": [
+        "sr_dark_wood",
+        "sr_aged_cloth"
+      ],
+      "views": [
+        "previous_ledger-beauty-front.png",
+        "previous_ledger-beauty-oblique.png",
+        "previous_ledger-beauty-top.png",
+        "previous_ledger-clay-front.png",
+        "previous_ledger-clay-oblique.png",
+        "previous_ledger-clay-top.png"
+      ],
+      "triangles": 36,
+      "nativeProjectedBounds": [
+        144.84385681152344,
+        106.36382102966309,
+        155.45700073242188,
+        108.97124290466309
+      ],
+      "nativeProjectedSize": [
+        10.613143920898438,
+        2.607421875
+      ]
+    },
+    {
+      "name": "registration_seal",
+      "dimensionsMetres": [
+        0.11999988555908203,
+        0.309999942779541,
+        0.14499998092651367
+      ],
+      "materials": [
+        "sr_oxidized_bronze",
+        "sr_dark_wood",
+        "sr_wrought_iron"
+      ],
+      "views": [
+        "registration_seal-beauty-front.png",
+        "registration_seal-beauty-oblique.png",
+        "registration_seal-beauty-top.png",
+        "registration_seal-clay-front.png",
+        "registration_seal-clay-oblique.png",
+        "registration_seal-clay-top.png"
+      ],
+      "triangles": 36,
+      "nativeProjectedBounds": [
+        180.56448364257812,
+        105.1175594329834,
+        188.78407287597656,
+        108.93420696258545
+      ],
+      "nativeProjectedSize": [
+        8.219589233398438,
+        3.816647529602051
+      ]
+    },
+    {
+      "name": "archive_cabinet",
+      "dimensionsMetres": [
+        0.7599999904632568,
+        1.5900001525878906,
+        2.450000047683716
+      ],
+      "materials": [
+        "sr_dark_wood",
+        "sr_wrought_iron"
+      ],
+      "views": [
+        "archive_cabinet-beauty-front.png",
+        "archive_cabinet-beauty-oblique.png",
+        "archive_cabinet-beauty-top.png",
+        "archive_cabinet-clay-front.png",
+        "archive_cabinet-clay-oblique.png",
+        "archive_cabinet-clay-top.png"
+      ],
+      "triangles": 60,
+      "nativeProjectedBounds": [
+        43.7104606628418,
+        72.62499332427979,
+        83.08971405029297,
+        129.8971939086914
+      ],
+      "nativeProjectedSize": [
+        39.37925338745117,
+        57.27220058441162
+      ]
+    },
+    {
+      "name": "visitor_bench",
+      "dimensionsMetres": [
+        0.43000006675720215,
+        1.6500000953674316,
+        0.4749999940395355
+      ],
+      "materials": [
+        "sr_dark_wood"
+      ],
+      "views": [
+        "visitor_bench-beauty-front.png",
+        "visitor_bench-beauty-oblique.png",
+        "visitor_bench-beauty-top.png",
+        "visitor_bench-clay-front.png",
+        "visitor_bench-clay-oblique.png",
+        "visitor_bench-clay-top.png"
+      ],
+      "triangles": 72,
+      "nativeProjectedBounds": [
+        72.67388916015625,
+        119.38229084014893,
+        115.99185943603516,
+        132.6085925102234
+      ],
+      "nativeProjectedSize": [
+        43.317970275878906,
+        13.226301670074463
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "albedo.png",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\dark_wood\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "albedo.png.001",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\whitewash\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "albedo.png.002",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\azulejo\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "albedo.png.003",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\terracotta\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "albedo.png.006",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\aged_cloth\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "albedo.png.007",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\wrought_iron\\albedo.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\dark_wood\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png.001",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\whitewash\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png.002",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\azulejo\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png.003",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\terracotta\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png.006",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\aged_cloth\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "ao.png.007",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\wrought_iron\\ao.png",
+      "packed": true
+    },
+    {
+      "name": "height.png",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\dark_wood\\height.png",
+      "packed": true
+    },
+    {
+      "name": "height.png.001",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\whitewash\\height.png",
+      "packed": true
+    },
+    {
+      "name": "height.png.002",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\azulejo\\height.png",
+      "packed": true
+    },
+    {
+      "name": "height.png.003",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\terracotta\\height.png",
+      "packed": true
+    },
+    {
+      "name": "height.png.006",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\aged_cloth\\height.png",
+      "packed": true
+    },
+    {
+      "name": "height.png.007",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\wrought_iron\\height.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\dark_wood\\roughness.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png.001",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\whitewash\\roughness.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png.002",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\azulejo\\roughness.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png.003",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\terracotta\\roughness.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png.006",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\aged_cloth\\roughness.png",
+      "packed": true
+    },
+    {
+      "name": "roughness.png.007",
+      "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\..\\..\\..\\materials\\wrought_iron\\roughness.png",
+      "packed": true
+    }
+  ],
+  "limits": "Studio closeups inspect source meshes. Projected bounds include occluded geometry and are not visible-pixel coverage. No source or global preferences saved."
+}

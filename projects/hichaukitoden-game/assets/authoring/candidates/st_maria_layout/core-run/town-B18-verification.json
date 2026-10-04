@@ -1,0 +1,46 @@
+{
+  "source": "st_maria_B18.blend",
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+  "parentSHA256": "89960da11ca75658a68cc4dc20524fed6c3527a920c5ceb3152c7d0bd8ae5f5d",
+  "sourcePointChecks": 2053,
+  "terrainIntrusions": 0,
+  "buildingCollisions": 0,
+  "retainedBuildings": 19,
+  "pavingSupportSamples": 302,
+  "serviceClimbSamples": 63,
+  "visibleExteriorMouths": 27,
+  "nativeTransferZones": 33,
+  "nativeBoundaryChecks": 104,
+  "maximumSourceNativePixelError": [
+    0.002790880713291699,
+    0.4100244652718743
+  ],
+  "nativeCaptures": "runtime/town-B18-current-main-transfers/captures.json",
+  "playthrough": "27 native arrivals: recovery, registration, shop, shipment investigation and guard completion, ladder both ways, normal stairs, Labyrinth descent/return, save/load",
+  "currentChecks": [
+    "Candidate and canonical G1 pass",
+    "Canonical full unit suite passes",
+    "G4 matches",
+    "All 33 native transfer centres and radius boundaries pass",
+    "All 27 exterior source mouths clear of camera-terrain occlusion",
+    "All six active public entrances align with visible door projection",
+    "After main integration: full unit, G1, G2, G4 and save tests pass",
+    "Android developer archive self-tests cover an extra authored option, idempotent stamping and Windows line endings"
+  ],
+  "limits": [
+    "No physical Android input acceptance",
+    "No full combat/economy expedition acceptance",
+    "Source clearance is point sampling, not swept-body proof",
+    "Materials, vegetation and island massing remain prototype art",
+    "Dedicated ladder climbing animation is not authored",
+    "Canonical visual references unchanged; existing Options debt remains #1331"
+  ],
+  "baseMainCommit": "15f3c896ce73174beb41d656cae57a48aa019c66",
+  "productionExport": "Canonical .love import, candidate install, progression proof and 33-zone checks pass; stamped Android developer profile validates",
+  "room3": "Optional candidate caretaker is a separate event. Authored Room 3 exit preserved; leaving does not recover MP, selected rest recovers it, and no writ is granted.",
+  "androidProfile": "Developer Room and CRT Lab retained; row positions derived from authored IDs so navigation-arrow preference stays intact.",
+  "referenceDebt": {
+    "G3": "Incoming battle MP 3000-to-900 trace and missing Actor Change reference: #1365",
+    "G5": "Incoming MP dock/Actor Change changes plus Options debt: #1365 and #1331; crop invariant passes; no recapture"
+  }
+}

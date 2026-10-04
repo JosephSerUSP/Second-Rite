@@ -1,0 +1,42 @@
+[
+  {
+    "arrowsVisible": true,
+    "label": "passage-house"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "praca-arrows"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "options-arrows-ON"
+  },
+  {
+    "arrowsVisible": false,
+    "label": "options-arrows-OFF"
+  },
+  {
+    "arrowsVisible": false,
+    "label": "praca-no-arrows"
+  },
+  {
+    "arrowsVisible": false,
+    "label": "bakery-no-arrows"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "bakery-arrows"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "stair-arrows"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "quay-arrows"
+  },
+  {
+    "arrowsVisible": true,
+    "label": "harbour-arrows"
+  }
+]

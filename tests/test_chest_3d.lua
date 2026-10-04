@@ -43,6 +43,17 @@ check(math.abs((tr.x - tl.x) - (br.x - bl.x)) < 1e-9
         and math.abs((tr.y - tl.y) - (br.y - bl.y)) < 1e-9,
     "pitched billboard keeps parallel screen-horizontal edges")
 
+local leftU0, leftV0, leftU1, leftV1 =
+    viewport_3d.billboardFrameUV(144, 48, 24, 48, 2, -1)
+local rightU0, rightV0, rightU1, rightV1 =
+    viewport_3d.billboardFrameUV(144, 48, 24, 48, 2, 1)
+check(leftU0 < leftU1 and rightU0 > rightU1
+        and leftV0 == rightV0 and leftV1 == rightV1,
+    "side-view billboard facing mirrors the selected frame horizontally")
+check(math.abs(leftU0 - rightU1) < 1e-12
+        and math.abs(leftU1 - rightU0) < 1e-12,
+    "billboard facing mirror preserves the exact walk-cycle frame")
+
 -- Screen-space horizon & low object direction verification:
 -- Positive pitch (looking down) shifts horizon geometry and low floor objects UPWARD on screen.
 local horizPitchedPos = 0.0 * math.cos(pitchRad) + 5.0 * math.sin(pitchRad) -- > 0 (moved UP on screen)

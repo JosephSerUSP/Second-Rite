@@ -43,15 +43,17 @@ from item_mtl_runtime import RuntimePassError, inject_runtime_passes, normalize_
 from validate_item_obj_runtime import validate as validate_runtime_obj
 
 ROOT = SCRIPT_DIR.parents[1]
-DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+DEFAULT_PROJECT_DIR = project_root()
 SOURCE_DIR = (
-    (DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT)
+    DEFAULT_PROJECT_DIR
     / "assets"
     / "authoring"
     / "items"
 )
 DEFAULT_MODEL_DIR = (
-    (DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT)
+    DEFAULT_PROJECT_DIR
     / "assets"
     / "models"
     / "items"

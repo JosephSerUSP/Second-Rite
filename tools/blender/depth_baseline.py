@@ -21,8 +21,11 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageEnhance
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 GENERATOR = ROOT / "tools" / "asset-gen" / "blendergeom.py"
-TRACKED = ROOT / "assets" / "geometry" / "1_blender_depth_maps"
+TRACKED = PROJECT / 'assets' / "geometry" / "1_blender_depth_maps"
 PRESETS = (
     "wall_pilasters",
     "floor_flagstones",

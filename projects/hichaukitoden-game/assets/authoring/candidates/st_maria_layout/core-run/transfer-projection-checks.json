@@ -1,0 +1,482 @@
+{
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+  "captures": 33,
+  "exteriorMouths": 27,
+  "maximumErrorPixels": [
+    0.002790880713291699,
+    0.4100244652718743
+  ],
+  "checks": [
+    {
+      "screen": "court",
+      "anchor": "to-market",
+      "button": "DOWN",
+      "sourcePixel": [
+        210.3496197462082,
+        115.07473468780518
+      ],
+      "nativePixel": [
+        210.34965029979162,
+        115.47578532747747
+      ],
+      "errorPixels": [
+        3.055358342862746e-05,
+        0.4010506396722917
+      ]
+    },
+    {
+      "screen": "court",
+      "anchor": "to-praca",
+      "button": "UP",
+      "sourcePixel": [
+        211.82509154081345,
+        135.9321928024292
+      ],
+      "nativePixel": [
+        211.82510968380626,
+        135.6863572899951
+      ],
+      "errorPixels": [
+        1.8142992814773606e-05,
+        0.2458355124340983
+      ]
+    },
+    {
+      "screen": "court",
+      "anchor": "to-port",
+      "button": "DOWN",
+      "sourcePixel": [
+        210.8738151192665,
+        139.34696674346924
+      ],
+      "nativePixel": [
+        210.87383780868618,
+        138.99524347664948
+      ],
+      "errorPixels": [
+        2.2689419665766764e-05,
+        0.35172326681976074
+      ]
+    },
+    {
+      "screen": "court",
+      "anchor": "door-passage-house",
+      "button": "UP",
+      "sourcePixel": [
+        213.89355671405792,
+        126.13887548446655
+      ],
+      "nativePixel": [
+        213.89360026378228,
+        126.19678486357753
+      ],
+      "errorPixels": [
+        4.3549724352942576e-05,
+        0.05790937911098126
+      ],
+      "doorPixelX": 213.89365696907043,
+      "doorHorizontalErrorPixels": 5.6705288159264455e-05
+    },
+    {
+      "screen": "market",
+      "anchor": "to-court",
+      "button": "LEFT",
+      "sourcePixel": [
+        214.46838408708572,
+        114.98096466064453
+      ],
+      "nativePixel": [
+        214.4684284167381,
+        115.38471096796798
+      ],
+      "errorPixels": [
+        4.4329652382657514e-05,
+        0.40374630732344485
+      ]
+    },
+    {
+      "screen": "market",
+      "anchor": "to-quay",
+      "button": "DOWN",
+      "sourcePixel": [
+        215.49051356315613,
+        141.2212586402893
+      ],
+      "nativePixel": [
+        215.49054553532295,
+        140.81123417501743
+      ],
+      "errorPixels": [
+        3.1972166823379666e-05,
+        0.4100244652718743
+      ]
+    },
+    {
+      "screen": "market",
+      "anchor": "door-bakery",
+      "button": "UP",
+      "sourcePixel": [
+        213.99997586011887,
+        127.99999952316284
+      ],
+      "nativePixel": [
+        213.99994752082344,
+        127.99999652528487
+      ],
+      "errorPixels": [
+        2.8339295425894306e-05,
+        2.9978779707562353e-06
+      ],
+      "doorPixelX": 213.99997586011887,
+      "doorHorizontalErrorPixels": 2.8339295425894306e-05
+    },
+    {
+      "screen": "quay",
+      "anchor": "to-market",
+      "button": "UP",
+      "sourcePixel": [
+        213.3390440940857,
+        127.99997091293335
+      ],
+      "nativePixel": [
+        213.34020737013083,
+        128
+      ],
+      "errorPixels": [
+        0.0011632760451334434,
+        2.9087066650390625e-05
+      ]
+    },
+    {
+      "screen": "quay",
+      "anchor": "to-forge",
+      "button": "LEFT",
+      "sourcePixel": [
+        213.0271143913269,
+        127.99997091293335
+      ],
+      "nativePixel": [
+        213.0282700382067,
+        128
+      ],
+      "errorPixels": [
+        0.0011556468797948583,
+        2.9087066650390625e-05
+      ]
+    },
+    {
+      "screen": "quay",
+      "anchor": "door-pub",
+      "button": "UP",
+      "sourcePixel": [
+        213.64913177490234,
+        127.99997091293335
+      ],
+      "nativePixel": [
+        213.65028475339435,
+        128
+      ],
+      "errorPixels": [
+        0.0011529784920014663,
+        2.9087066650390625e-05
+      ],
+      "doorPixelX": 213.64913177490234,
+      "doorHorizontalErrorPixels": 0.0011529784920014663
+    },
+    {
+      "screen": "forge",
+      "anchor": "to-quay",
+      "button": "RIGHT",
+      "sourcePixel": [
+        213.6825475692749,
+        127.99999237060547
+      ],
+      "nativePixel": [
+        213.6826444669656,
+        128
+      ],
+      "errorPixels": [
+        9.68976906960961e-05,
+        7.62939453125e-06
+      ]
+    },
+    {
+      "screen": "forge",
+      "anchor": "to-port",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.17433214187622,
+        127.99997806549072
+      ],
+      "nativePixel": [
+        213.17439684253037,
+        128
+      ],
+      "errorPixels": [
+        6.470065414987403e-05,
+        2.193450927734375e-05
+      ]
+    },
+    {
+      "screen": "forge",
+      "anchor": "door-forge",
+      "button": "UP",
+      "sourcePixel": [
+        213.4646348953247,
+        127.99997806549072
+      ],
+      "nativePixel": [
+        213.46469363037292,
+        128
+      ],
+      "errorPixels": [
+        5.873504821352071e-05,
+        2.193450927734375e-05
+      ],
+      "doorPixelX": 213.464659512043,
+      "doorHorizontalErrorPixels": 3.4118329921284385e-05
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-court",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.46239283680916,
+        127.99974203109741
+      ],
+      "nativePixel": [
+        213.46243896760018,
+        128
+      ],
+      "errorPixels": [
+        4.6130791020004835e-05,
+        0.0002579689025878906
+      ]
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-churchyard-stair",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.35714115202427,
+        127.99976348876953
+      ],
+      "nativePixel": [
+        213.35719165762424,
+        128.00002774917687
+      ],
+      "errorPixels": [
+        5.0505599972439086e-05,
+        0.0002642604073344046
+      ]
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-churchyard-climb",
+      "button": "UP",
+      "sourcePixel": [
+        213.1842219531536,
+        127.99974203109741
+      ],
+      "nativePixel": [
+        213.18426819330034,
+        128
+      ],
+      "errorPixels": [
+        4.624014673026977e-05,
+        0.0002579689025878906
+      ]
+    },
+    {
+      "screen": "praca",
+      "anchor": "door-chapel",
+      "button": "UP",
+      "sourcePixel": [
+        213.32983887195587,
+        127.99974203109741
+      ],
+      "nativePixel": [
+        213.32985133704324,
+        128
+      ],
+      "errorPixels": [
+        1.2465087365853833e-05,
+        0.0002579689025878906
+      ],
+      "doorPixelX": 213.32993084192276,
+      "doorHorizontalErrorPixels": 7.95048795225739e-05
+    },
+    {
+      "screen": "praca",
+      "anchor": "door-registry",
+      "button": "UP",
+      "sourcePixel": [
+        213.65602761507034,
+        127.99974203109741
+      ],
+      "nativePixel": [
+        213.65603683114384,
+        128
+      ],
+      "errorPixels": [
+        9.216073493689692e-06,
+        0.0002579689025878906
+      ],
+      "doorPixelX": 213.65602761507034,
+      "doorHorizontalErrorPixels": 9.216073493689692e-06
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-threshold",
+      "button": "UP",
+      "sourcePixel": [
+        213.99983823299408,
+        127.99974918365479
+      ],
+      "nativePixel": [
+        213.9997907654248,
+        127.99935024053332
+      ],
+      "errorPixels": [
+        4.7467569288528466e-05,
+        0.0003989431214677097
+      ]
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-churchyard-stair",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.85721218585968,
+        128.0000925064087
+      ],
+      "nativePixel": [
+        213.85722407466906,
+        127.9996892454086
+      ],
+      "errorPixels": [
+        1.188880938229886e-05,
+        0.0004032610000876957
+      ]
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-praca-climb",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.7139390707016,
+        127.99954175949097
+      ],
+      "nativePixel": [
+        213.71380917555655,
+        127.99912423736066
+      ],
+      "errorPixels": [
+        0.0001298951450507957,
+        0.0004175221303057697
+      ]
+    },
+    {
+      "screen": "threshold",
+      "anchor": "to-churchyard",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.13219475746155,
+        127.9999852180481
+      ],
+      "nativePixel": [
+        213.12940387674826,
+        128
+      ],
+      "errorPixels": [
+        0.002790880713291699,
+        1.4781951904296875e-05
+      ]
+    },
+    {
+      "screen": "threshold",
+      "anchor": "labyrinth-gate",
+      "button": "UP",
+      "sourcePixel": [
+        213.14075314998627,
+        127.9999852180481
+      ],
+      "nativePixel": [
+        213.13796504609024,
+        128
+      ],
+      "errorPixels": [
+        0.002788103896023131,
+        1.4781951904296875e-05
+      ]
+    },
+    {
+      "screen": "port",
+      "anchor": "to-forge",
+      "button": "LEFT",
+      "sourcePixel": [
+        213.07399821281433,
+        127.9999566078186
+      ],
+      "nativePixel": [
+        213.07419497920142,
+        128
+      ],
+      "errorPixels": [
+        0.00019676638709142935,
+        4.3392181396484375e-05
+      ]
+    },
+    {
+      "screen": "port",
+      "anchor": "to-court",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.6010754108429,
+        127.9999566078186
+      ],
+      "nativePixel": [
+        213.6012419054781,
+        128
+      ],
+      "errorPixels": [
+        0.0001664946352093466,
+        4.3392181396484375e-05
+      ]
+    },
+    {
+      "screen": "churchyard-stair",
+      "anchor": "to-praca",
+      "button": "DOWN",
+      "sourcePixel": [
+        213.35464385151863,
+        128.00000667572021
+      ],
+      "nativePixel": [
+        213.3572199760791,
+        128
+      ],
+      "errorPixels": [
+        0.0025761245604769556,
+        6.67572021484375e-06
+      ]
+    },
+    {
+      "screen": "churchyard-stair",
+      "anchor": "to-churchyard",
+      "button": "UP",
+      "sourcePixel": [
+        213.4974060356617,
+        128.00002098083496
+      ],
+      "nativePixel": [
+        213.5,
+        128
+      ],
+      "errorPixels": [
+        0.0025939643383026123,
+        2.09808349609375e-05
+      ]
+    }
+  ]
+}

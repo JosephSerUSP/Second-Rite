@@ -1,6 +1,6 @@
 # Shared Blender Asset Core
 
-Phase 4 establishes `tools/blender/second_rite_asset_core.py` as the canonical
+The shared implementation is `tools/blender/second_rite_asset_core.py`, the canonical
 low-level Blender infrastructure module for scene cleanup, collections,
 selection preservation, local transforms, materials, modifiers, metadata,
 bmesh objects, bounds, and OBJ export.
@@ -47,7 +47,7 @@ The shared exporter preserves:
 - temporary collection cleanup;
 - static shape-key variants.
 
-The Phase 4 item checks continue to require 49 marked roots, 53 OBJ outputs,
+The standalone library checks require 49 marked roots, 53 OBJ outputs,
 structural OBJ equivalence, ordered `usemtl` equivalence, parsed MTL semantic
 equivalence, vendor synchronization, and no provider or production writes.
 
@@ -85,8 +85,7 @@ history beneath that root is intentionally open-ended: meshes, profiles, Curve
 objects, Boolean cutters, modifiers, instances, Geometry Nodes, guides, and
 manual exceptions may all coexist when they are useful authoring handles.
 
-A/B/C from the 2026-08 item studies are therefore authoring vocabularies rather
-than separate runtime backends:
+The three item authoring vocabularies share one runtime backend:
 
 - A: profile/revolve and semantic-volume composition;
 - B: outline/thickness/Boolean fabrication;
@@ -131,14 +130,8 @@ migrated only when their useful construction intent has actually been preserved
 as an editable `.blend`; wrapping a baked OBJ in an anonymous Blender file does
 not count as source migration.
 
-The first production C migration places Barbed Spear, Blackroot, Cerberus Fang,
-and Water Scepter under this authority as editable Curve-based documents. Their
-compiled products were reviewed through the real four-angle item viewer against
-the canonical pre-migration models; coordinate-frame and material-pass drift
-found during that review were fixed at the source/compiler boundaries rather
-than accepted as migration noise.
-
-See `assets/authoring/items/README.md` for the author-facing convention.
+See [the item source contract](../../projects/hichaukitoden-game/assets/authoring/items/README.md) for authoring.
+Migration episodes are in [the historical record](../reports/blender-source-migration-history-2026-10-04.md).
 
 ## Environment source authority
 
@@ -149,7 +142,7 @@ status in `environment-sources.json` beside it, and every shipped
 | status | meaning |
 |---|---|
 | `adopted` | the source authority; edit it directly, never regenerate it; packages are baked from it |
-| `scaffold` | regenerable recipe output; nothing shipped is baked from it |
+| `scaffold` | regenerable recipe output until adoption; package provenance is checked separately |
 | `superseded` | replaced by `supersededBy`; tools refuse to write it, and no package may cite it |
 | `reference` | kept for looking at; not a recipe output and not a package source |
 
@@ -170,6 +163,20 @@ adopted and is what the shipped package is baked from; `st_maria_praca.blend` is
 `refine_st_maria_praca.py`, `replace_st_maria_tree.py`, `mark_st_maria_exits.py`,
 `reauthor_praca_spiral.py`, and the read-only `study_town_perspective.py`) are
 scaffold-only and say so.
+
+### Candidate revisions are commits, not files (#1349)
+
+A candidate room under `projects/*/assets/authoring/candidates/<name>/` keeps
+the same `environment-sources.json` record, never marks a file `adopted` (an
+adopted source is copied into `assets/authoring/environments/`), and holds at
+most two `.blend` files: the newest candidate and at most one under
+comparison. `environment_sources.py --check` enforces all three.
+
+Work between reviews goes to the gitignored `out/` (the review runners already
+write there). Commit a revision by replacing the candidate file, not by adding
+`<name>_rN+1.blend` beside it: git history keeps every revision, and a file per
+revision only adds clone weight and doubt about which one is real. Write one
+report per decision, not per step.
 
 ## Browsing asset libraries (read-only)
 
@@ -210,7 +217,7 @@ rather than adopting the file.
 ## Our own asset library (in the repository, not published)
 
 `tools/blender/asset-library/` is a Blender asset library holding one asset, the
-`SR_GroundCover` Geometry Nodes group, licensed CC0 (the owner's choice, 2026-09-30).
+`SR_GroundCover` Geometry Nodes group, licensed CC0 by owner choice.
 It has the same layout as a remote library (`_asset-library-meta.json`, `_v1/`, a
 catalogue file), so the browser reads it like one:
 
@@ -323,12 +330,6 @@ version fails with a message naming both. CI installs Blender through
 `.github/actions/install-blender` from the same file, so a pin change is one
 edit. There is no `PATH` search and no fallback.
 
-Blender's output is not stable across versions. Under 5.0 the OBJ exporter
-occasionally emitted different UV tables for identical sources
-(`docs/reports/b-item-blend-source-migration-2026-08-15.md`), and the Geometry
-Nodes item `phoenix_pinion` moved by up to about 2 mm between 5.0.1 and 5.2.2. That is why the pin is exact, and why a pin change re-runs
-`compile_item_blends.py --check` and may move an asset-regression baseline.
-
 Two places are deliberately outside that rule.
 
 **The item toolkit** (`tools/blender/second-rite-item-model-toolkit/`) is a
@@ -348,21 +349,7 @@ game project only, and a pin change does not require regenerating the fixture.
 Do not run `compile_item_blends.py --check --project-root projects/editor-fixture`
 expecting green.
 
-Why leaving it stale is safe, measured on 2026-09-30 under Blender 5.2.2: the
-fixture's 32 sources compile to products byte-identical to the game project's.
-Against the fixture's committed products, 31 differ only in the header comment
-and object group names, and `phoenix_pinion` also differs in vertex positions (at
-most about 2 mm). G6 previews exactly one model, `bottle_family__basis.obj`,
-which is not compiled from any of those 32 sources, and its model-picker list
-shows file names only. If the fixture is ever refreshed on purpose, compile with
-`--output-dir` into a scratch directory, compare, and run G6 before committing.
-
 ## Surface baseline authority
-
-The legacy depth pipeline sampled evaluated Blender geometry with first-hit ray
-casts. Repeated Blender 5.1.2 diagnostics proved that
-`wall_boulders_rough` was not pixel-repeatable on one machine. That experiment
-is retained as evidence but no longer defines the future surface contract.
 
 The V2 authority is:
 
@@ -411,3 +398,9 @@ Room plates read the same source lighting records as atlas exports. EEVEE enable
 `atlas_alpha.py` evaluates authored Principled alpha separately from lighting and camera coverage. Render copies preserve source UVs before atlas unwrapping. A temporary mesh in receiver UV space rasterises the opacity with EEVEE; the EEVEE projection UV pass uses this mask so leaf gaps reveal the geometry behind them. Both backends receive the same opacity, and texels outside geometry stay opaque rather than becoming accidental facade holes. Cycles exterior beauty allows eight transparent bounces so alpha cards do not block direct light at their transparent pixels.
 
 The opacity adapter accepts UV-based Principled alpha. Geometry-dependent alpha and Transparent-BSDF graphs fail explicitly rather than silently yielding an opaque atlas. Package photographs use atlas alpha just as the runtime does. Source documents are never saved by these steps.
+
+## Shared render quality profiles
+
+`tools/blender/render_profiles.py` owns quality selection without importing Blender. `draft`, `lookdev`, `review` and `export` use Cycles with 64, 64, 128 and 64 samples respectively. Atlas size defaults to 1024 in drafts and exports. All resolve to native-size rendering and neutral exposure. Source photographs use Open Image Denoise; Cycles atlas exports use the bundled OIDN RT FAST filter independently on each UV chart. Charts smaller than 256 texels or eight texels across retain their raw detail. Padding contains only that chart's colors; alpha and gutters remain unchanged. Before baking, valid UV chart boundaries snap inward to texel centres at the actual atlas size; any chart with a collapsed/flipped triangle or a newly shared texel across islands retains its original UVs. Bake dilation remains in place. `--no-uv-texel-align` provides the unsnapped control. Alignment affects receiver UVs, never the source geometry. This is beauty-only filtering, so new materials still need detail inspection. `--atlas-denoise none` on the room/exterior exporters provides a raw control; `--samples 128` provides a higher-sample control. `cycles-comparison` remains an explicit eight-sample photograph comparison. Profiles do not own cameras, lighting, dimensions, probe density or output encoding.
+
+Room staging, package photographs and wide-screen review accept `--render-profile`. Room staging defaults to `review`; `--samples`, `--engine` and `--supersample` are explicit overrides recorded in its report. Supersampling with a visible Walker fails: use `--no-walker` for an environment-only supersampled review. Walker is still measured before hiding. EEVEE camera projection remains an explicit comparison backend and retains its separate single-sample UV data pass; the production backend is Cycles selected-to-active. Town source photographs use review quality rather than inheriting the source engine. No tool saves an adopted source as a consequence of selecting a profile.

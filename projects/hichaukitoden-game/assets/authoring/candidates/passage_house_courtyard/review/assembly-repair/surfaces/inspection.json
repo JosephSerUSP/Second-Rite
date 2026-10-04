@@ -1,0 +1,55 @@
+{
+  "sourceSHA256": "b1b989a3093e67dbefb8188a3b7b17c17d8445d4e4625fc96a0488c2947c6ec5",
+  "sourceMeshes": 2192,
+  "runtimeMeshes": 1,
+  "views": [
+    {
+      "mode": "source-clay",
+      "views": [
+        "court-oblique",
+        "rear-houses",
+        "window",
+        "window-reverse",
+        "portal"
+      ]
+    },
+    {
+      "mode": "source-beauty",
+      "views": [
+        "court-oblique",
+        "rear-houses",
+        "window",
+        "window-reverse",
+        "portal"
+      ]
+    },
+    {
+      "mode": "runtime-clay",
+      "views": [
+        "court-oblique",
+        "rear-houses",
+        "window",
+        "window-reverse",
+        "portal"
+      ]
+    },
+    {
+      "mode": "runtime-atlas",
+      "views": [
+        "court-oblique",
+        "rear-houses",
+        "window",
+        "window-reverse",
+        "portal"
+      ]
+    }
+  ],
+  "interpretation": "Workbench clay with backface culling is geometry evidence. Emission atlas views remove additional scene lighting; baked shading remains in the texture. Source file unchanged.",
+  "renderProfile": {
+    "name": "draft",
+    "engine": "CYCLES",
+    "samples": 64,
+    "denoise": true,
+    "exposureEV": 0
+  }
+}

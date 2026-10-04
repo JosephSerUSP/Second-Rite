@@ -7,14 +7,16 @@
 -- only after the complete authored transaction has resolved.
 --
 -- This is deliberately NOT a global mutation watcher. Current HP, states and
--- equipment are outside progress.snapshot(), and Scenes must opt in to a
--- transaction boundary. That keeps ordinary equipment previews from becoming
--- accidental "growth" while letting items, training, rewards and rituals share
--- one report contract.
+-- equipment are outside progress.snapshot(), and authored Scenes must opt in to
+-- a transaction boundary. The one migration exception is the host fallback:
+-- map/common-event execution still lives behind scene_host's legacy input
+-- fallback, so that opaque transaction is bracketed as a whole until it becomes
+-- authored Scene behavior too.
 local progress = require("engine.progress")
 local state_value = require("engine.state_value")
 
 local actor_change = {}
+local pending = {}
 
 local function configured(sceneData)
     return sceneData and sceneData.config and sceneData.config.actorChangeReports
@@ -69,44 +71,37 @@ local function publishReports(v, changes)
     v.actorChangePresentedIndex = 1
 end
 
--- A source Scene may choose a dedicated modal instead of carrying Actor Change
--- windows itself. The transaction still belongs to that source hook; this only
--- hands the already-resolved, detached report to a generic presentation Scene.
--- Lazy requiring scene_host avoids a module-load cycle (scene_host requires us)
--- while keeping the dependency inside the engine layer.
-local function handoffToScene(sceneData, sourceV, session, changes)
-    local cfg = sceneData and sceneData.config
-    if not cfg or cfg.actorChangePresentation ~= "scene" then return false end
-
+local function queueReports(changes)
+    if type(changes) ~= "table" or #changes == 0 then return false end
     local seed = {}
     publishReports(seed, changes)
-    clearProjection(sourceV)
-
-    local host = require("engine.scene_host")
-    host.push("actor_change", {
-        session = session,
-        loader = session.loader,
-        party = session.party or {},
-    }, seed)
+    table.insert(pending, seed)
     return true
 end
 
 -- Called before one authored Scene hook. Nil means this hook is not a durable
 -- change transaction; finish() still runs afterwards so paging/closing an
--- already-published report remains declarative Scene State.
+-- already-published inline report remains declarative Scene State.
 function actor_change.begin(sceneData, hookName, session)
     if not session or not observesHook(sceneData, hookName) then return nil end
     return progress.snapshot(session)
 end
 
--- Called after the hook has completely resolved. Returns true while an Actor
--- Change report remains active, false otherwise.
+-- Called after the hook has completely resolved. `actorChangePresentation =
+-- "scene"` moves the detached result into the host queue instead of retaining
+-- it on the source Scene. scene_host drains that queue only after the source
+-- transaction and any authored transition events have settled.
 function actor_change.finish(sceneData, v, session, before)
     if not configured(sceneData) or not v or not session then return false end
 
     local changes = before and progress.changes(session, before) or {}
     if #changes > 0 then
-        if handoffToScene(sceneData, v, session, changes) then return false end
+        local cfg = sceneData and sceneData.config
+        if cfg and cfg.actorChangePresentation == "scene" then
+            queueReports(changes)
+            clearProjection(v)
+            return false
+        end
         publishReports(v, changes)
         return true
     end
@@ -135,6 +130,34 @@ function actor_change.finish(sceneData, v, session, before)
         v.actorChangePresentedIndex = index
     end
     return true
+end
+
+-- The legacy player-input fallback is the remaining map/common-event host. It
+-- is intentionally bracketed as ONE transaction rather than instrumenting
+-- GAIN_EXP, effects, scripts, or the interpreter globally. That preserves the
+-- same ownership rule as authored Scenes: gameplay resolves first, then the
+-- host projects whatever durable facts changed.
+function actor_change.beginFallback(session)
+    if not session then return nil end
+    return progress.snapshot(session)
+end
+
+function actor_change.finishFallback(session, before)
+    if not session or not before then return false end
+    return queueReports(progress.changes(session, before))
+end
+
+-- Host-owned handoff queue. Returning a detached Scene-state seed instead of
+-- pushing here keeps actor_change independent of scene_host and avoids a module
+-- cycle. The queue is FIFO so nested synchronous transactions cannot overwrite
+-- an earlier report.
+function actor_change.takePending()
+    if #pending == 0 then return nil end
+    return table.remove(pending, 1)
+end
+
+function actor_change.resetPending()
+    pending = {}
 end
 
 actor_change.clear = clearProjection

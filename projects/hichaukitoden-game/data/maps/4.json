@@ -132,6 +132,7 @@
                   "commands": []
                 }
               ],
+              "cancelOption": 2,
               "cmd": "CHOICE"
             }
           ],
@@ -176,6 +177,7 @@
             },
             {
               "cmd": "CHOICE",
+              "cancelOption": 2,
               "options": [
                 {
                   "label": "Engage the Red Dragon!",

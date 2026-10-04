@@ -240,7 +240,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew --no-daemon assembleEmbedNoRecordRelease
+          ./gradlew --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=512m" assembleEmbedNoRecordRelease
 
       - name: Align, sign, and verify APK
         shell: bash

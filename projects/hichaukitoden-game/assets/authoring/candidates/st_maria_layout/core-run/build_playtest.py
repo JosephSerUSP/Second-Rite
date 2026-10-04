@@ -91,7 +91,8 @@ if args.from_love:
     with zipfile.ZipFile(replacement, 'w', zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(STAGE.rglob('*')):
             relative = path.relative_to(STAGE)
-            if path.is_file() and relative.parts[0] not in ['tests']:
+            authoring = relative.parts[:2] == ('assets', 'authoring')
+            if path.is_file() and relative.parts[0] not in ['tests'] and not authoring:
                 archive.write(path, relative.as_posix())
     replacement.replace(package)
-    print('PLAYTEST LOVE PACKAGED:', package)
+    print('PLAYTEST LOVE PACKAGED:', package, package.stat().st_size, 'bytes; authoring sources excluded')

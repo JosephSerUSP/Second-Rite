@@ -62,13 +62,22 @@ test('a Port walk-profile edit changes runtime grounding and only its affected c
         const gameRoot = JSON.parse(staged[1]).stageDir;
         pinTownProofPresentationClock(gameRoot);
 
-        const before = captureTownFrames(previewExe, gameRoot);
+        // A fixed sloping specimen tests Studio edits independently of the
+        // owner's current town composition. It is installed only in this
+        // disposable proof stage; every player export uses the default town.
         const mapPath = path.join(gameRoot, 'data', 'maps.json');
         const maps = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
-        const mapIndex = maps.findIndex(candidate => candidate.id === 31);
+        const specimen = JSON.parse(fs.readFileSync(path.join(roots.DEFAULT_INSTALL_ROOT,
+            'tests', 'fixtures', 'walk_profile_port_map.json'), 'utf8'));
+        const mapIndex = maps.findIndex(candidate => candidate.id === specimen.id);
+        assert.ok(mapIndex >= 0, 'the reserved specimen slot exists');
+        maps[mapIndex] = specimen;
+        fs.writeFileSync(mapPath, JSON.stringify(maps, null, 2) + '\n');
+
+        const before = captureTownFrames(previewExe, gameRoot);
         const port = maps[mapIndex];
         assert.ok(port?.traversal?.lane?.groundProfile?.length >= 4,
-            'the staged Project retains Port as the existing non-flat profile specimen');
+            'the proof stage installs the fixed non-flat profile specimen');
         const lane = port.traversal.lane;
         const profile = lane.groundProfile;
         assert.ok(profile[0].y < lane.minY && profile.at(-1).y > lane.maxY,

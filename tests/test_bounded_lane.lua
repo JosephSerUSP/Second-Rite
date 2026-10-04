@@ -276,10 +276,10 @@ check(lane.isActive(game), "a lane with no pre-rendered block still initialises"
 local rx, ry, rz = lane.actorRoot(game)
 check(rx == 0 and ry ~= nil and rz ~= nil,
     "and still publishes an actor root for the 3D path to billboard")
--- The approved six-screen spiral gives the Quay ordinary street exits at both
--- ends: Market Row to the west and the Port to the east.
+-- The Quay continues laterally to the forge and reaches the market through
+-- a depth approach. Its far lane bound has no authored transfer.
 check(lane.edgeDoorway(game, -1) ~= nil,
-    "the quay continues into Market Row at its west end")
+    "the quay continues into the forge street at its left end")
 check(lane.edgeDoorway(game, 1) == nil,
     "the quay's far end does not invent an unauthored transfer")
 

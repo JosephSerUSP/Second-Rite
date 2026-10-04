@@ -31,6 +31,9 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools/blender"))
 import thestra_camera  # noqa: E402
 import render_profiles
@@ -125,7 +128,7 @@ def main():
 
     if args.walker_y is not None:
         actor = thestra_camera.create_actor_preview(
-            ROOT / "projects/hichaukitoden-game/assets/character/npc_alicia.png",
+            PROJECT / 'assets/character/npc_alicia.png',
             camera, anchor=(args.lane_x, args.walker_y, 0.0),
             world_height=1.75, name="WIDE_walker")
         actor.hide_render = False

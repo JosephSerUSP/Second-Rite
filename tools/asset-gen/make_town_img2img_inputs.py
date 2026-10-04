@@ -37,6 +37,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 
 # The three screens worth generating against. Every other town screen is either a
 # plate the AI produced in the first place -- feeding a model its own output back
@@ -48,8 +51,7 @@ REFERENCE_MAPS = (17, 28, 29)   # the Praca, Alicia's Padaria, Laura's Smithy
 CAPTURE = ROOT / "tools" / "golden" / "capture-town-proof.py"
 
 
-PLAYER_SPRITE = ("projects", "hichaukitoden-game", "assets", "character",
-                 "player.png")
+PLAYER_SPRITE = ('assets', 'character', 'player.png')
 # Where the player's feet sit inside the window, measured from its TOP. 129 of a
 # 146-tall window is where the interiors already stood, so they keep their
 # framing and every other screen is brought to them.
@@ -74,7 +76,7 @@ def find_player(image):
     """
     import numpy as np
     from PIL import Image
-    sprite = Image.open(str(ROOT.joinpath(*PLAYER_SPRITE))).convert("RGBA")
+    sprite = Image.open(str(PROJECT.joinpath(*PLAYER_SPRITE))).convert("RGBA")
     sprite = sprite.crop(sprite.getbbox())
     data = np.asarray(sprite)
     mask = data[:, :, 3] > 128
@@ -161,7 +163,7 @@ def main() -> None:
     by_label = {f["label"]: f for f in proof.get("frames", [])}
 
     titles = {}
-    maps_dir = ROOT / "projects" / "hichaukitoden-game" / "data" / "maps"
+    maps_dir = PROJECT / "data" / "maps"
     for path in maps_dir.glob("*.json"):
         try:
             titles[int(path.stem)] = json.loads(

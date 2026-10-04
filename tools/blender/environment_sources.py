@@ -6,8 +6,8 @@ Every project keeps its environment `.blend` files in
 
     adopted     the source authority. Edit it directly, never regenerate it.
                 Shipped packages are baked from it.
-    scaffold    regenerable output of a recipe. Nothing shipped is baked from it,
-                and a recipe may rewrite it (`save_source_blend` still refuses to
+    scaffold    regenerable output until adoption; package provenance is checked
+                separately. A recipe may rewrite it (`save_source_blend` refuses to
                 overwrite without `--force`).
     superseded  replaced by the file named in `supersededBy`. Tools refuse to
                 write it, and a package must not cite it as its source.

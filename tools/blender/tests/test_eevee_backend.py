@@ -15,13 +15,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 TOOLS = ROOT / "tools" / "blender"
 
 
 def blender(*arguments, timeout=600):
-    return subprocess.run([blender_locator.blender_executable(), "-b", "-noaudio", "--factory-startup",
+    return subprocess.run([blender_test_support.blender_executable(), "-b", "-noaudio", "--factory-startup",
                            "--python-exit-code", "1", *arguments], capture_output=True, text=True, timeout=timeout)
 
 

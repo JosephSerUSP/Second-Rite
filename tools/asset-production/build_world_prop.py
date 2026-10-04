@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from asset_set import DEFAULT_SET, ROOT, get_asset, load_asset_set
+from asset_set import DEFAULT_SET, ROOT, get_asset, load_asset_set, project_root
 
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import blender_locator  # noqa: E402
@@ -16,6 +16,7 @@ import blender_locator  # noqa: E402
 def _parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("asset", help="world_prop asset ID from the selected asset set")
+    parser.add_argument("--project-root", type=Path)
     parser.add_argument("--set", dest="asset_set", default=str(DEFAULT_SET))
     parser.add_argument("--out-dir", default="out/asset-production/world-props")
     parser.add_argument("--state", action="append", default=[])
@@ -25,14 +26,15 @@ def _parser():
 
 def main(argv=None):
     args = _parser().parse_args(argv)
-    asset_set = load_asset_set(args.asset_set, root=ROOT, check_files=True)
+    project = project_root(args.project_root)
+    asset_set = load_asset_set(args.asset_set, root=project, check_files=True)
     asset = get_asset(asset_set, args.asset, kind="world_prop")
     unknown = sorted(set(args.state) - set(asset["states"]))
     if unknown:
         raise SystemExit(f"unknown state(s) for {asset['id']}: {', '.join(unknown)}")
     set_path = Path(args.asset_set)
     if not set_path.is_absolute():
-        set_path = ROOT / set_path
+        set_path = project / set_path
     out_dir = Path(args.out_dir)
     if not out_dir.is_absolute():
         out_dir = ROOT / out_dir
@@ -40,7 +42,7 @@ def main(argv=None):
         "blender" if args.dry_run else blender_locator.blender_executable(), "--background", "--factory-startup",
         "--python", str(ROOT / "tools" / "blender" / "build_world_props.py"),
         "--", "--set", str(set_path), "--asset", asset["id"],
-        "--out-dir", str(out_dir),
+        "--out-dir", str(out_dir), "--project-root", str(project),
     ]
     for state in args.state:
         command.extend(["--state", state])

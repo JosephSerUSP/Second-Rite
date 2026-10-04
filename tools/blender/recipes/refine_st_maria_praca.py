@@ -18,11 +18,14 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import environment_sources  # noqa: E402
 import thestra_camera  # noqa: E402
 
-DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+DEFAULT_BLEND = (PROJECT / "assets"
                  / "authoring" / "environments" / "st_maria_praca.blend")
 CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 LANE_X, LANE_Y, GROUND_Z = 7.8, 11.85, -1.5

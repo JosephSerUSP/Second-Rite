@@ -25,6 +25,9 @@ from mathutils import Vector
 
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 GENERATOR_PATH = ROOT / "tools" / "asset-gen" / "surface_baselines_v2.py"
 CORE_DIR = ROOT / "tools" / "blender"
 if str(CORE_DIR) not in sys.path:
@@ -50,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--asset", required=True)
     parser.add_argument("--baseline-root", type=Path,
-                        default=ROOT / "assets" / "geometry" / "2_procedural_surface_baselines")
+                        default=PROJECT / 'assets' / "geometry" / "2_procedural_surface_baselines")
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--mesh-size", type=int, default=65)
     parser.add_argument("--render-size", type=int, default=768)

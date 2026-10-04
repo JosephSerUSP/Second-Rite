@@ -99,4 +99,4 @@ def inject_runtime_passes(path: Path, passes_by_material: Mapping[str, list[dict
     if missing:
         raise RuntimePassError(f"runtime-pass material(s) absent from exported MTL: {missing}")
 
-    path.write_text("\n".join(output) + "\n", encoding="utf-8")
+    path.write_text("\n".join(output) + "\n", encoding="utf-8", newline="\n")

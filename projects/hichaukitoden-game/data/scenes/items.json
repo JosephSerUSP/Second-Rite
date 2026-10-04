@@ -7,30 +7,15 @@
       {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
-          {
-            "name": "idx",
-            "value": 1
-          },
-          {
-            "name": "tab",
-            "value": 1
-          },
-          {
-            "name": "targetIdx",
-            "value": 1
-          },
-          {
-            "name": "state",
-            "value": 1
-          },
-          {
-            "name": "popupText",
-            "value": "''"
-          },
-          {
-            "name": "popupTimer",
-            "value": 0
-          }
+          { "name": "idx", "value": 1 },
+          { "name": "tab", "value": 1 },
+          { "name": "targetIdx", "value": 1 },
+          { "name": "state", "value": 1 },
+          { "name": "popupText", "value": "''" },
+          { "name": "popupTimer", "value": 0 },
+          { "name": "actorChangeIndex", "value": 1 },
+          { "name": "actorChangeCount", "value": 0 },
+          { "name": "actorChangePresentedIndex", "value": 0 }
         ]
       }
     ],
@@ -39,11 +24,7 @@
         "cmd": "IF",
         "condition": "sceneState.state == 1 and sceneState.idx > 1",
         "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx - 1"
-          }
+          { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx - 1" }
         ]
       },
       {
@@ -63,11 +44,7 @@
         "cmd": "IF",
         "condition": "sceneState.state == 1 and sceneState.idx < session.itemCount",
         "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx + 1"
-          }
+          { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx + 1" }
         ]
       },
       {
@@ -90,14 +67,8 @@
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
-              {
-                "name": "tab",
-                "value": "(sceneState.tab or 1) > 1 and ((sceneState.tab or 1) - 1) or 4"
-              },
-              {
-                "name": "idx",
-                "value": 1
-              }
+              { "name": "tab", "value": "(sceneState.tab or 1) > 1 and ((sceneState.tab or 1) - 1) or 4" },
+              { "name": "idx", "value": 1 }
             ]
           }
         ]
@@ -111,14 +82,8 @@
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
-              {
-                "name": "tab",
-                "value": "(sceneState.tab or 1) < 4 and ((sceneState.tab or 1) + 1) or 1"
-              },
-              {
-                "name": "idx",
-                "value": 1
-              }
+              { "name": "tab", "value": "(sceneState.tab or 1) < 4 and ((sceneState.tab or 1) + 1) or 1" },
+              { "name": "idx", "value": 1 }
             ]
           }
         ]
@@ -127,56 +92,54 @@
     "on_select": [
       {
         "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.actorChangeCount > 0 and sceneState.actorChangeIndex < sceneState.actorChangeCount",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "actorChangeIndex", "value": "sceneState.actorChangeIndex + 1" }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.actorChangeCount > 0 and sceneState.actorChangeIndex >= sceneState.actorChangeCount",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              { "name": "actorChangeCount", "value": 0 },
+              { "name": "actorChangeIndex", "value": 1 },
+              { "name": "state", "value": 1 },
+              { "name": "popupTimer", "value": 0 }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 1 and session.itemCount > 0",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "USE_ITEM",
-            "itemIndex": "sceneState.idx",
-            "target": 0
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "USE_ITEM", "itemIndex": "sceneState.idx", "target": 0 }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 2",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "USE_ITEM",
-            "itemIndex": "sceneState.idx",
-            "target": "sceneState.targetIdx"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "USE_ITEM", "itemIndex": "sceneState.idx", "target": "sceneState.targetIdx" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 3",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
-              {
-                "name": "state",
-                "value": 1
-              },
-              {
-                "name": "popupTimer",
-                "value": 0
-              }
+              { "name": "state", "value": 1 },
+              { "name": "popupTimer", "value": 0 }
             ]
           }
         ]
@@ -185,45 +148,39 @@
     "on_cancel": [
       {
         "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.actorChangeCount > 0",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              { "name": "actorChangeCount", "value": 0 },
+              { "name": "actorChangeIndex", "value": 1 },
+              { "name": "state", "value": 1 },
+              { "name": "popupTimer", "value": 0 }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 2",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "state",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "targetIdx",
-            "value": 1
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "state", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "targetIdx", "value": 1 }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 3",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
-              {
-                "name": "state",
-                "value": 1
-              },
-              {
-                "name": "popupTimer",
-                "value": 0
-              }
+              { "name": "state", "value": 1 },
+              { "name": "popupTimer", "value": 0 }
             ]
           }
         ]
@@ -232,15 +189,8 @@
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.state == 1",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCENE_EVENT",
-            "kind": "pop"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCENE_EVENT", "kind": "pop" }
         ]
       }
     ],
@@ -259,34 +209,24 @@
     ]
   },
   "config": {
+    "actorChangeReports": ["on_select"],
     "dock": {
       "variant": "item_inspect",
-      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
+      "visible": "(sceneState.actorChangeCount or 0) == 0 and (sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3)",
       "cursor": "sceneState.state == 2 and sceneState.targetIdx or 0"
     }
   },
-  "scripts": {},
   "draw": "windows",
   "backdrop": "map",
   "windows": [
     {
       "id": "items_left_panel",
-      "rect": {
-        "x": 0.5,
-        "y": 4.5,
-        "w": 20,
-        "h": 13
-      },
-      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
+      "rect": { "x": 0.5, "y": 4.5, "w": 20, "h": 13 },
+      "visible": "(sceneState.actorChangeCount or 0) == 0 and (sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3)",
       "style": "list",
       "title": null,
       "emptyText": "No items.",
-      "tabs": [
-        "All",
-        "Usable",
-        "Equip",
-        "Key"
-      ],
+      "tabs": ["All", "Usable", "Equip", "Key"],
       "tabVar": "sceneState.tab",
       "content": [
         {
@@ -300,27 +240,17 @@
     },
     {
       "id": "items_key_art",
-      "rect": {
-        "x": 20.5,
-        "y": 4.5,
-        "w": 11,
-        "h": 13
-      },
-      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
+      "rect": { "x": 20.5, "y": 4.5, "w": 11, "h": 13 },
+      "visible": "(sceneState.actorChangeCount or 0) == 0 and (sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3)",
       "style": "itemModel",
       "title": null,
       "content": [
-        {
-          "type": "list",
-          "listId": "inventory",
-          "cursor": "sceneState.idx",
-          "tabVar": "sceneState.tab"
-        }
+        { "type": "list", "listId": "inventory", "cursor": "sceneState.idx", "tabVar": "sceneState.tab" }
       ]
     },
     {
       "id": "help",
-      "visible": "sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3",
+      "visible": "(sceneState.actorChangeCount or 0) == 0 and (sceneState.state == 1 or sceneState.state == 2 or sceneState.state == 3)",
       "content": [
         {
           "type": "text",
@@ -330,58 +260,63 @@
     },
     {
       "id": "items_popup",
-      "rect": {
-        "x": 8,
-        "y": 10,
-        "w": 16,
-        "h": 3
-      },
-      "visible": "sceneState.popupTimer > 0",
+      "rect": { "x": 8, "y": 10, "w": 16, "h": 3 },
+      "visible": "sceneState.popupTimer > 0 and (sceneState.actorChangeCount or 0) == 0",
       "style": "frame",
       "title": null,
       "align": "center",
       "content": [
+        { "type": "text", "text": "{sceneState.popupText}" }
+      ],
+      "anim": {
+        "open": { "duration": 0.16, "effect": "rescale" },
+        "close": { "duration": 0.1, "effect": "rescale" }
+      }
+    },
+    {
+      "id": "actor_change_head",
+      "rect": { "x": 3, "y": 5, "w": 26, "h": 12 },
+      "visible": "(sceneState.actorChangeCount or 0) > 0",
+      "style": "panel",
+      "title": "{sceneState.actorChangeTitle}",
+      "portrait": "sceneState.actorChangePortrait",
+      "portraitX": 1,
+      "portraitY": 2,
+      "portraitW": 7.33,
+      "portraitH": 7.5,
+      "contentX": 9.5,
+      "content": [
         {
           "type": "text",
-          "text": "{sceneState.popupText}"
+          "text": "{sceneState.actorChangeName}  {sceneState.actorChangeCounter}\n\n{sceneState.actorChangeFromLevel ~= sceneState.actorChangeToLevel and ('Lv ' .. sceneState.actorChangeFromLevel .. ' > ' .. sceneState.actorChangeToLevel) or ''}\n{sceneState.actorChangeNoteText}"
         }
       ],
       "anim": {
-        "open": {
-          "duration": 0.16,
-          "effect": "rescale"
-        },
-        "close": {
-          "duration": 0.1,
-          "effect": "rescale"
-        }
+        "open": { "duration": 0.16, "effect": "rescale" },
+        "close": { "duration": 0.1, "effect": "rescale" }
+      }
+    },
+    {
+      "id": "actor_change_stats",
+      "rect": { "x": 3, "y": 12, "w": 26, "h": 7 },
+      "visible": "(sceneState.actorChangeCount or 0) > 0 and #sceneState.levelUpRows > 0",
+      "style": "levelUpStats",
+      "title": null,
+      "content": [],
+      "anim": {
+        "open": { "duration": 0.16, "effect": "rescale" },
+        "close": { "duration": 0.1, "effect": "rescale" }
       }
     }
   ],
   "goldenScript": [
-    {
-      "key": "down"
-    },
-    {
-      "key": "up"
-    },
-    {
-      "key": "return"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "return"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "escape"
-    },
-    {
-      "key": "escape"
-    }
+    { "key": "down" },
+    { "key": "up" },
+    { "key": "return" },
+    { "key": "down" },
+    { "key": "return" },
+    { "key": "down" },
+    { "key": "escape" },
+    { "key": "escape" }
   ]
 }

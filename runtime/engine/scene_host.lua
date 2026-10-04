@@ -1,4 +1,5 @@
 local interpreter = require("engine.interpreter")
+local actor_change = require("engine.actor_change")
 local input_map = require("engine.input_map")
 local scene_update_contract = require("engine.scene_update_contract")
 local state_value = require("engine.state_value")
@@ -70,12 +71,25 @@ local function getSceneData(ctx, id)
     return nil
 end
 
+-- Drain one already-resolved durable-change handoff only after the transaction
+-- that produced it has settled. Actor Change owns the value projection; the
+-- Scene host owns the stack transition. Keeping those responsibilities split
+-- avoids both presentation calls from gameplay effects and stack mutation in
+-- the middle of an interpreter command list.
+local function flushActorChange(ctx)
+    local seed = actor_change.takePending()
+    if not seed then return false end
+    scene_host.push("actor_change", ctx, seed)
+    return true
+end
+
 -- Native owner graphs belong in each Scene instance's `native` container;
 -- authored hooks are validated as a serializable value tree after every run.
 
 -- Initialize the host with an active session and loader
 function scene_host.init(startScene, ctx)
     sceneStack = {}
+    actor_change.resetPending()
     -- A new Scene-host session cannot inherit a held button from the outgoing
     -- run. Require lazily to keep scene_host/player_controller load direction
     -- acyclic at module initialization time.
@@ -234,7 +248,13 @@ function scene_host.runHook(hookName, ctx)
     ctx.hookHandled = false
     ctx.hookFallback = false
 
+    -- Durable development is observed at the Scene transaction boundary, not
+    -- inside individual effects. Only hooks explicitly opted in by Scene data
+    -- take a snapshot; finish() also owns paging/clearing already-published
+    -- reports on ordinary follow-up hooks.
+    local changeBefore = actor_change.begin(sceneData, hookName, ctx.session)
     local events = interpreter.runImmediate(cmds, ctx)
+    actor_change.finish(sceneData, state.v, ctx.session, changeBefore)
 
     -- Every authored hook must leave a detached, serializable value tree.
     -- Native owner graphs live beside (never inside) ctx.sceneState.
@@ -300,6 +320,10 @@ function scene_host.runHook(hookName, ctx)
     local fallback = ctx.hookFallback
     ctx.hookHandled = oldHookHandled
     ctx.hookFallback = oldHookFallback
+    -- A dedicated Actor Change scene is pushed only after every event emitted
+    -- by the source hook has been consumed, so the report never intercepts the
+    -- source Scene's own pop/push/goto transition.
+    flushActorChange(ctx)
     return not fallback
 end
 
@@ -524,7 +548,20 @@ function scene_host.buttonpressed(button, ctx)
     end
 
     if playerInput.fallback then
-        return playerInput.fallback(button, ctx) == true
+        -- The fallback is the remaining main-host transaction boundary for map
+        -- and common Event Programs. Snapshot around the whole logical input,
+        -- not around individual commands: one GAIN_EXP can cross several
+        -- levels, run LEVEL_REACHED policy and transform before presentation.
+        local changeBefore = actor_change.beginFallback(ctx and ctx.session)
+        local handled = playerInput.fallback(button, ctx) == true
+        -- An authored/nested transaction may already have opened the modal;
+        -- do not report the same durable change a second time from the wider
+        -- fallback bracket.
+        if scene_host.getCurrent() ~= "actor_change" then
+            actor_change.finishFallback(ctx and ctx.session, changeBefore)
+        end
+        local presented = flushActorChange(ctx)
+        return handled or presented
     end
     return false
 end

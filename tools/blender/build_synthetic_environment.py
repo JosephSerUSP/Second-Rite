@@ -19,6 +19,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from blender_locator import blender_executable  # noqa: E402
 
@@ -239,7 +242,7 @@ def build_synthetic_scene_in_blender(blend_output_path: Path):
     root_col.objects.unlink(actor_quad)
 
     # Preview actor material referencing walker.png if present
-    walker_path = ROOT / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
+    walker_path = PROJECT / "assets" / "character" / "walker.png"
     if walker_path.is_file():
         mat_walker = bpy.data.materials.new("WalkerPreview")
         mat_walker.use_nodes = True

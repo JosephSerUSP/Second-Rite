@@ -3,11 +3,12 @@ name: blender item source
 on:
   pull_request:
     paths:
-      - assets/authoring/items/**
-      - assets/models/items/**
       - projects/hichaukitoden-game/assets/authoring/items/**
       - projects/hichaukitoden-game/assets/models/items/**
       - tools/blender/**
+      - tools/asset-production/**
+      - tools/shared/project_paths.py
+      - tools/semantic-roots.js
       - tools/asset-language/contract.json
       - tools/asset-language/materials.json
       - .gitattributes
@@ -17,11 +18,12 @@ on:
   push:
     branches: [main]
     paths:
-      - assets/authoring/items/**
-      - assets/models/items/**
       - projects/hichaukitoden-game/assets/authoring/items/**
       - projects/hichaukitoden-game/assets/models/items/**
       - tools/blender/**
+      - tools/asset-production/**
+      - tools/shared/project_paths.py
+      - tools/semantic-roots.js
       - tools/asset-language/contract.json
       - tools/asset-language/materials.json
       - .gitattributes
@@ -36,36 +38,18 @@ permissions:
 jobs:
   item-source:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Test runtime OBJ and material finalization
-        run: |
-          python tools/blender/tests/test_validate_item_obj_runtime.py
-          python tools/blender/tests/test_item_mtl_runtime.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      # test_asset_core_host.py ran in no workflow, so the toolkit's integrity
-      # records rotted unobserved: two entries had drifted from the files they
-      # describe and two more recorded the wrong line-ending form (#901). The
-      # manifest is only worth keeping if something checks it, and these suites
-      # need neither Blender nor a display.
-      - name: Toolkit integrity records and asset-core host contract
-        run: |
-          python -m unittest discover -s tools/blender/tests -p 'test_asset_core_host.py' -v
-          python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
-          python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blends_host.py' -v
-          python -m unittest discover -s tools/blender/tests -p 'test_blender_locator.py' -v
-          python -m unittest tools.blender.tests.test_architectural_assemblies -v
-
-      # Blender numbered backups are rejected repository-wide by the
-      # repo-hygiene job in verify.yml (#671). The check that lived here
-      # scanned only assets/authoring/items, and this workflow is itself
-      # path-filtered to that tree, so it could never fail for a backup
-      # committed anywhere else. Keeping a second narrow copy would imply
-      # coverage it does not have.
+      - name: Install host test dependencies
+        run: python -m pip install --disable-pip-version-check pillow numpy
 
       - name: Install headless Blender dependencies
         run: |
@@ -76,69 +60,18 @@ jobs:
         # Version, URL and digest live in tools/blender/blender-pin.json (#1254).
         uses: ./.github/actions/install-blender
 
-      # A Geometry Nodes tree only evaluates inside Blender, so the ground
-      # cover's slope limit, keep-out, budget and determinism are checked on
-      # the realised mesh by a headless run of the pinned Blender (#1257).
-      - name: Ground cover Geometry Nodes headless check
-        shell: bash
+      - name: Require Blender integration prerequisites
         run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover -v
+          python tools/blender/blender_locator.py
+          echo "BLENDER_TESTS_REQUIRED=1" >> "$GITHUB_ENV"
 
-      # Our own asset library carries SR_GroundCover as a derived .blend that is not
-      # byte-reproducible, so identity with ground_cover.build_group() is judged by
-      # structure in the pinned Blender (#1257).
-      - name: Asset library group matches the builder
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_asset_library_group -v
+      # Same discovery as the optional host job, now with the pinned Blender
+      # required. New integration tests join CI without another handwritten list.
+      - name: Full Blender suite (required integrations)
+        run: xvfb-run -a python -m unittest discover -s tools/blender/tests -v
 
-      # A room's atlas is packed tight and can be spent where the camera looks (#877); the
-      # allocator measures demand by rendering, so it runs in the pinned Blender.
-      - name: Atlas allocation
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_atlas_allocation -v
-
-      # The Praca ground-cover adoption edits the adopted source, so it is proven on a copy: nothing
-      # that existed changes, only cover datablocks are added, a second run writes nothing, and the
-      # tufts stay inside the budget and the placement rules (#1270).
-      - name: Praca ground cover adoption
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_ground_cover_adoption -v
-
-      # EEVEE draws emission but does not cast it, and a lamp inside its own small housing is shadowed
-      # by it; both are fixed at render time, in the pinned Blender, and the second is judged by a
-      # real EEVEE render (docs/reports/eevee-emissive-lights-2026-09-30.md).
-      - name: EEVEE emissive companion lights and fixture shadows
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_emissive_lights tools.blender.tests.test_light_fixtures -v
-
-      # The room exporter bakes its atlas with EEVEE when asked (--bake-backend eevee): a tiny room goes
-      # through the real exporter with each backend, and the package contract must hold for both.
-      - name: Shared render profile contract
-        run: xvfb-run -a python -m unittest tools.blender.tests.test_render_profiles -v
-
-      - name: EEVEE atlas bake backend
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_eevee_backend -v
-
-      # The exterior bake once copied each object's base mesh, so a Geometry
-      # Nodes host baked to nothing and nothing said so. This joins a small town
-      # source through the real rebuild and counts what reaches the render mesh.
-      - name: Exterior bake carries Geometry Nodes output
-        shell: bash
-        run: |
-          set -euxo pipefail
-          xvfb-run -a python -m unittest tools.blender.tests.test_exterior_bake_source tools.blender.tests.test_bake_receivers tools.blender.tests.test_courtyard_recipe tools.blender.tests.test_cycles_surface_bake -v
+      - name: First Stratum prop states through the real builder
+        run: xvfb-run -a python tools/asset-production/build_world_prop.py first_stratum_treasure_chest --out-dir "$RUNNER_TEMP/asset-production-world-props"
 
       - name: Curated assets are portable without network access
         run: xvfb-run -a python tools/blender/vendor_assets.py check

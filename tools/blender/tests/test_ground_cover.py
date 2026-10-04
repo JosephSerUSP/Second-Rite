@@ -12,7 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import blender_locator  # noqa: E402
+import blender_test_support
 
 
 class GroundCoverTests(unittest.TestCase):
@@ -20,7 +22,7 @@ class GroundCoverTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        blender = blender_locator.blender_executable()
+        blender = blender_test_support.blender_executable()
         script = ROOT / "tools" / "blender" / "tests" / "ground_cover_blender.py"
         result = subprocess.run(
             [blender, "-b", "-noaudio", "--factory-startup", "-P", str(script)],

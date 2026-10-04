@@ -28,7 +28,9 @@ sys.path.insert(0, str(SCRIPT_DIR))
 import blender_locator  # noqa: E402
 
 ROOT = SCRIPT_DIR.parents[1]
-DEFAULT_PROJECT_DIR = ROOT / "projects" / "hichaukitoden-game"
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root as resolve_project, default_project_root
+DEFAULT_PROJECT_DIR = default_project_root()
 BLENDER_SCRIPT = SCRIPT_DIR / "compile_item_blend.py"
 
 if str(SCRIPT_DIR) not in sys.path:
@@ -74,7 +76,7 @@ def compare_bytes(actual: Path, expected: Path):
         )
 
 
-def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None, source_dir: Path | None = None):
+def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None, source_dir: Path | None = None, project: Path | None = None):
     if not source.is_file():
         raise RuntimeError(f"item source does not exist: {source}")
     if model_dir is None:
@@ -87,6 +89,8 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, mo
     preexisting_backups = {path for path in backup_candidates if path.exists()}
 
     env = os.environ.copy()
+    if project is not None:
+        env['SECOND_RITE_PROJECT'] = str(project)
     env["SECOND_RITE_ITEM_OUTPUT_DIR"] = str(output_dir)
     if source_dir:
         env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source_dir)
@@ -119,7 +123,6 @@ def main(argv=None):
     parser.add_argument(
         "--project-root",
         type=Path,
-        default=DEFAULT_PROJECT_DIR if DEFAULT_PROJECT_DIR.is_dir() else ROOT,
         help="Root directory of the project containing assets",
     )
     parser.add_argument("--source", action="append", default=[], help="compile only this .blend; repeatable")
@@ -136,7 +139,7 @@ def main(argv=None):
     if args.check and args.output_dir:
         raise SystemExit("--check and --output-dir are mutually exclusive")
 
-    project_root = Path(args.project_root).resolve()
+    project_root = resolve_project(args.project_root)
     source_dir = project_root / "assets" / "authoring" / "items"
     model_dir = project_root / "assets" / "models" / "items"
 
@@ -153,12 +156,12 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(prefix="second-rite-item-compile-") as temp:
             output_dir = Path(temp)
             for source in sources:
-                compile_one(blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir)
+                compile_one(blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir, project=project_root)
     else:
         output_dir = Path(args.output_dir).resolve() if args.output_dir else model_dir
         output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir)
+            compile_one(blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir, project=project_root)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

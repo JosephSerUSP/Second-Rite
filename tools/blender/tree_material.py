@@ -11,7 +11,11 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[2]
-CARDS = ROOT / "projects/hichaukitoden-game/assets/materials/foliage_card"
+import sys
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
+CARDS = PROJECT / 'assets/materials/foliage_card'
 ATLAS = CARDS / "kenney_branch_atlas.png"
 GRASS_ATLAS = CARDS / "kenney_grass_atlas.png"
 MATERIAL_NAME = "sr_foliage_kenney_atlas"

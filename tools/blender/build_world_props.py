@@ -26,6 +26,7 @@ import second_rite_asset_core as core  # noqa: E402
 def _arguments():
     raw = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--project-root", type=Path)
     parser.add_argument("--set", required=True)
     parser.add_argument("--asset", required=True)
     parser.add_argument("--out-dir", required=True)
@@ -82,9 +83,9 @@ def _source_commit():
         return os.environ.get("GIT_COMMIT")
 
 
-def _assert_staging_path(path):
+def _assert_staging_path(path, project):
     resolved = Path(path).resolve()
-    assets = (ROOT / "assets").resolve()
+    assets = (project / "assets").resolve()
     if resolved == assets or assets in resolved.parents:
         raise RuntimeError("world-prop builds must stage outside assets/; promotion is explicit")
     return resolved
@@ -135,8 +136,9 @@ def _build_state(asset_set_data, asset, state, out_root):
 
 def main():
     args = _arguments()
-    out_root = _assert_staging_path(args.out_dir)
-    asset_set_data = production.load_asset_set(args.set, root=ROOT, check_files=True)
+    project = production.project_root(args.project_root)
+    out_root = _assert_staging_path(args.out_dir, project)
+    asset_set_data = production.load_asset_set(args.set, root=project, check_files=True)
     asset = production.get_asset(asset_set_data, args.asset, kind="world_prop")
     selected = args.state or asset["states"]
     unknown = sorted(set(selected) - set(asset["states"]))

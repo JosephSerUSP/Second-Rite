@@ -40,9 +40,12 @@ except ImportError:  # plan() is importable outside Blender, so the live bridge
     bpy = None       # can push the same geometry without a second copy of it.
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools/blender"))
 import environment_sources  # noqa: E402
-DOCUMENT = ROOT / "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca.blend"
+DOCUMENT = PROJECT / 'assets/authoring/environments/st_maria_praca.blend'
 COLLECTION = "20_ARCHITECTURE"
 LIMESTONE, DARK = "sr_old_limestone", "sr_dark_wood"
 #: Wall face sits at x=14; portals are set into it and read from the lane.

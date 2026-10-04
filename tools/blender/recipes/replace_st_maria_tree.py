@@ -28,6 +28,9 @@ from pathlib import Path
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools/blender"))
 sys.path.insert(0, str(ROOT / "tools/blender/recipes"))
 import environment_sources  # noqa: E402
@@ -35,7 +38,7 @@ import tree_material  # noqa: E402
 from tree_generator import generate, preset, reduce_lod, validate  # noqa: E402
 from tree_mesh import branch_mesh, foliage_mesh  # noqa: E402
 
-DOCUMENT = ROOT / "projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca.blend"
+DOCUMENT = PROJECT / 'assets/authoring/environments/st_maria_praca.blend'
 #: The placeholder it replaces: an eight-vertex box trunk and a 42-vertex blob.
 REPLACES = ("FG_bougainvillea_trunk", "FG_bougainvillea_crown")
 COLLECTION = "21_FOREGROUND"

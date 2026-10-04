@@ -33,11 +33,14 @@ from PIL import Image
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 REPO_ROOT = HERE.parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 
 from lib import provider as provider_lib  # noqa: E402
 
 OUT = HERE / "out" / "matcaps"
-PROMOTE_DIR = REPO_ROOT / "assets" / "models" / "matcaps"
+PROMOTE_DIR = PROJECT / 'assets' / "models" / "matcaps"
 
 # Resolution is small on purpose. The sheen is sampled by normal direction and
 # then quantized to the palette with everything else, so detail beyond this is

@@ -21,15 +21,15 @@ import live_bridge.server as bridge_server
 from live_bridge import addon
 
 
-def run_request(server, callback):
+def run_request(server, callback, *, timeout=10):
     outcome = {}
 
     def request():
-        try: outcome["value"] = callback(BridgeClient(server.token, port=server.port, timeout=10))
+        try: outcome["value"] = callback(BridgeClient(server.token, port=server.port, timeout=timeout))
         except Exception as exc: outcome["error"] = exc
 
     thread = threading.Thread(target=request)
-    thread.start(); deadline = time.monotonic() + 20
+    thread.start(); deadline = time.monotonic() + 2 * timeout
     while thread.is_alive() and time.monotonic() < deadline:
         server._drain(); time.sleep(.005)
     thread.join(.5)
@@ -106,7 +106,10 @@ def main():
                 "viewport": viewport, "selection": selection, "camera": camera_capture,
                 "mutation": mutation, "stale": stale}
 
-    result = require_success(run_request(server, baseline))
+    # Software EEVEE's first camera render took 18s on the pinned Linux CI
+    # host. Give only this render-bearing request a cold-start budget; the
+    # protocol/timeout controls below retain their short bounds.
+    result = require_success(run_request(server, baseline, timeout=60))
     assert result["capabilities"]["protocolVersion"] == 1
     assert result["capabilities"]["classifications"]["transform_objects"] == "mutation"
     assert result["capabilities"]["classifications"]["delete_objects"] == "mutation"

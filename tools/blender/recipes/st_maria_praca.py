@@ -22,11 +22,14 @@ import bpy
 
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from tools.shared.project_paths import project_root
+PROJECT = project_root()
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import environment_sources  # noqa: E402
-DEFAULT_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+DEFAULT_BLEND = (PROJECT / "assets"
                  / "authoring" / "environments" / "st_maria_praca.blend")
-MAP = ROOT / "projects" / "hichaukitoden-game" / "data" / "maps" / "17.json"
+MAP = PROJECT / "data" / "maps" / "17.json"
 GROUND_Z = -1.5
 LANE_X = 7.8
 EVENT_PREFIX = "st-maria-praca-"

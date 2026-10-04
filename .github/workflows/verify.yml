@@ -61,8 +61,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Install the image reader the snapshot needs
-        run: python -m pip install --disable-pip-version-check pillow
+        run: python -m pip install --disable-pip-version-check pillow numpy
 
       # #827: this gate went unrun long enough for its baseline to drift 155
       # models, because nothing in CI exercised it and the checker was resolving
@@ -75,6 +79,14 @@ jobs:
 
       - name: Asset-language regression suite
         run: python -m unittest discover -s tools/asset-language/tests -t .
+
+      - name: Asset production and item corpus
+        run: |
+          python -m unittest discover -s tools/asset-production/tests
+          python tools/asset-production/check_item_models.py
+
+      - name: Blender host discovery (integration skips are explicit)
+        run: python -m unittest discover -s tools/blender/tests
 
   repo-hygiene:
     name: repository hygiene

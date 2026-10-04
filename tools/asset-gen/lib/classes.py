@@ -10,8 +10,11 @@ templating convention tools/campaign-gen uses.
 import json
 import os
 import re
+import sys
 
 INSTALL_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+sys.path.insert(0, INSTALL_ROOT)
+from tools.shared.project_paths import project_root as resolve_project, ProjectPathError
 # ROOT remains the selected content root for the rest of asset-gen.  It starts
 # at the repository root for the historical CLI and is switched by
 # `asset-gen --project ...` before any command resolves a class.  TOOL_DIR and
@@ -39,11 +42,10 @@ def configure(project_root=None):
     if not project_root:
         ROOT = INSTALL_ROOT
         return ROOT
-    candidate = os.path.abspath(os.path.expanduser(str(project_root)))
-    if not os.path.isdir(candidate):
-        raise ValueError(f"Project root does not exist: {candidate}")
-    if not os.path.isdir(os.path.join(candidate, "data")):
-        raise ValueError(f"{candidate} is not a Project: missing data/ directory")
+    try:
+        candidate = str(resolve_project(project_root))
+    except ProjectPathError as error:
+        raise ValueError(str(error)) from error
     ROOT = candidate
     return ROOT
 

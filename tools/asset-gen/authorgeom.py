@@ -22,7 +22,10 @@ import heightgen
 
 SIZE = 128
 NEUTRAL = 128
-ROOT = Path("assets/geometry")
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools.shared.project_paths import project_root
+ROOT = project_root() / 'assets/geometry'
 
 
 def noise(x, y, seed):

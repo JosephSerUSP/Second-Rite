@@ -1,0 +1,3094 @@
+{
+  "date": "2026-10-04",
+  "startCommit": "963602631863fc8e7f7a9d07805871a19511c7a9",
+  "dirtyCheckout": true,
+  "counts": {
+    "blender_python_files": 205,
+    "blender_test_python_files": 71,
+    "item_blend_sources": 32,
+    "item_obj_models": 208,
+    "environment_blend_sources": 10,
+    "environment_packages": 19,
+    "geometry_asset_records": 16,
+    "depth_blend_sources": 15,
+    "root_blender_scripts": 85,
+    "furnishing_public_functions": 47,
+    "tracked_blends": 135
+  },
+  "mapBindings": [
+    {
+      "id": 16,
+      "name": "St. Maria - The Churchyard",
+      "environment": "assets/environments/st_maria_town/churchyard/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 17,
+      "name": "St. Maria - The Praca",
+      "environment": "assets/environments/st_maria_town/praca/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 18,
+      "name": "St. Maria - Market Row",
+      "environment": "assets/environments/st_maria_town/market/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 19,
+      "name": "St. Maria - The Quay",
+      "environment": "assets/environments/st_maria_town/quay/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 20,
+      "name": "St. Maria - Laura's forge",
+      "environment": "assets/environments/st_maria_town/weaponsmith/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 21,
+      "name": "St. Maria - The Pub",
+      "environment": "assets/environments/st_maria_town/pub/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 22,
+      "name": "St. Maria - Chapel",
+      "environment": "assets/environments/st_maria_town/chapel/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 23,
+      "name": "St. Maria - The padaria, the hearth",
+      "environment": "assets/environments/st_maria_town/house_laura/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 24,
+      "name": "St. Maria - The padaria, the room upstairs",
+      "environment": "assets/environments/st_maria_town/house_alicia/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 25,
+      "name": "St. Maria - Passage House",
+      "environment": "assets/environments/st_maria_town/lodging/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 26,
+      "name": "St. Maria - The Cortico",
+      "environment": "assets/environments/st_maria_town/cortico/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 27,
+      "name": "St. Maria - Alicia's Padaria",
+      "environment": "assets/environments/st_maria_town/alicias_padaria/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 28,
+      "name": "St. Maria - Alicia's Padaria (3D)",
+      "environment": "assets/environments/st_maria_town/alicias_padaria_3d/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 29,
+      "name": "St. Maria - Laura's Smithy (3D)",
+      "environment": "assets/environments/st_maria_town/lauras_smith_3d/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 31,
+      "name": "St. Maria - The Port",
+      "environment": "assets/environments/st_maria_town/port/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 32,
+      "name": "St. Maria - Passage House Arrival Court",
+      "environment": "assets/environments/st_maria_town/passage_house_courtyard/environment.json",
+      "provider": "bounded_lane"
+    },
+    {
+      "id": 33,
+      "name": "St. Maria - Passage Office",
+      "environment": "assets/environments/st_maria_town/passage_office/environment.json",
+      "provider": "bounded_lane"
+    }
+  ],
+  "sourceInspection": [
+    {
+      "name": "alicias_padaria.blend",
+      "status": "adopted",
+      "sha256": "8453c716b259d494b3ddf1391cd1dd9a47aa641a4f1c38c194bd5aaaa7a960ed",
+      "objects": 54,
+      "types": {
+        "EMPTY": 1,
+        "MESH": 47,
+        "LIGHT": 6
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "samples": 4096,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.010",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\bread_crust\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.010",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\bread_crust\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.010",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\bread_crust\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "img2imgguide.blend",
+      "status": "reference",
+      "sha256": "b40d0619558fcfd55ba94331b8a308f9c2e0a45af0c7a219a502cbab73b2c85b",
+      "objects": 24,
+      "types": {
+        "CAMERA": 1,
+        "MESH": 7,
+        "EMPTY": 16
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          256,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "lauras_smith.blend",
+      "status": "adopted",
+      "sha256": "914b304b3a26a3c234d0bf156d2b9ec9c05e667ad1cce2e14b3f9e6b98eed364",
+      "objects": 41,
+      "types": {
+        "EMPTY": 1,
+        "MESH": 34,
+        "LIGHT": 6
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "samples": 4096,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.008",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\forge_scale\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.008",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\forge_scale\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.008",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\forge_scale\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\old_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\rough_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.008",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\forge_scale\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.009",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\charcoal\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "passage_house_corridor.blend",
+      "status": "scaffold",
+      "sha256": "b8a9c3c1ef30b941fe9b3564d3eea61c7459429c260365e1304f0cba0ff23787",
+      "objects": 84,
+      "types": {
+        "EMPTY": 1,
+        "MESH": 78,
+        "LIGHT": 5
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "samples": 4096,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "passage_house_courtyard.blend",
+      "status": "scaffold",
+      "sha256": "2e535bbf2007a3393131bfbe64f33c2e54d4cb695f86ab76b50082bc679e8d95",
+      "objects": 2506,
+      "types": {
+        "LIGHT": 5,
+        "CAMERA": 1,
+        "EMPTY": 40,
+        "MESH": 2460
+      },
+      "render": {
+        "engine": "CYCLES",
+        "resolution": [
+          256,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "streaks",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\home\\guest\\Downloads\\asset-demo-bundle-3.0-cube-diorama\\cube_diorama\\textures\\streaks.jpg",
+          "packed": true
+        },
+        {
+          "name": "walker.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\projects\\hichaukitoden-game\\assets\\character\\walker.png",
+          "packed": true
+        }
+      ]
+    },
+    {
+      "name": "passage_house_room3.blend",
+      "status": "scaffold",
+      "sha256": "f55cd53b0075d55cecf3b737e9731a81509667568759c55a0860c54f8e8e9e57",
+      "objects": 43,
+      "types": {
+        "EMPTY": 1,
+        "MESH": 38,
+        "LIGHT": 4
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          1920,
+          1080
+        ],
+        "samples": 4096,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\whitewash\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\azulejo\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\terracotta\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.006",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\aged_cloth\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\materials\\wrought_iron\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "passage_office.blend",
+      "status": "adopted",
+      "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7",
+      "objects": 98,
+      "types": {
+        "EMPTY": 1,
+        "MESH": 93,
+        "LIGHT": 4
+      },
+      "render": {
+        "engine": "CYCLES",
+        "resolution": [
+          256,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\azulejo\\albedo.png",
+          "packed": true
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\terracotta\\albedo.png",
+          "packed": true
+        },
+        {
+          "name": "albedo.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\albedo.png",
+          "packed": true
+        },
+        {
+          "name": "albedo.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\wrought_iron\\albedo.png",
+          "packed": true
+        },
+        {
+          "name": "ao.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\azulejo\\ao.png",
+          "packed": true
+        },
+        {
+          "name": "ao.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\terracotta\\ao.png",
+          "packed": true
+        },
+        {
+          "name": "ao.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\ao.png",
+          "packed": true
+        },
+        {
+          "name": "ao.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\wrought_iron\\ao.png",
+          "packed": true
+        },
+        {
+          "name": "harbour_painting.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\candidates\\passage_office\\art\\harbour_painting.png",
+          "packed": true
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\azulejo\\height.png",
+          "packed": true
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\terracotta\\height.png",
+          "packed": true
+        },
+        {
+          "name": "height.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\height.png",
+          "packed": true
+        },
+        {
+          "name": "height.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\wrought_iron\\height.png",
+          "packed": true
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\azulejo\\roughness.png",
+          "packed": true
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\terracotta\\roughness.png",
+          "packed": true
+        },
+        {
+          "name": "roughness.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\roughness.png",
+          "packed": true
+        },
+        {
+          "name": "roughness.png.007",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\..\\..\\..\\materials\\wrought_iron\\roughness.png",
+          "packed": true
+        }
+      ]
+    },
+    {
+      "name": "st_maria_port_spatial_reference.blend",
+      "status": "reference",
+      "sha256": "3197a9c5305e7f905f422f49e47b4ce02a36d4911f2254fd4cbf5695af9d5d34",
+      "objects": 63,
+      "types": {
+        "CAMERA": 1,
+        "MESH": 39,
+        "EMPTY": 22,
+        "LIGHT": 1
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          1065,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "style-reference.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\out\\towngen\\style-reference\\style-reference.png",
+          "packed": true
+        }
+      ]
+    },
+    {
+      "name": "st_maria_praca.blend",
+      "status": "scaffold",
+      "sha256": "4627b9507add7e856cf54ed292f718b8befd742b98f6fbdac4fefabeee587ed5",
+      "objects": 37,
+      "types": {
+        "CAMERA": 1,
+        "MESH": 19,
+        "LIGHT": 1,
+        "EMPTY": 16
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          256,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": [
+        {
+          "name": "albedo.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "albedo.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\albedo.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "ao.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\ao.png",
+          "packed": false
+        },
+        {
+          "name": "height.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\height.png",
+          "packed": false
+        },
+        {
+          "name": "height.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\height.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\whitewash\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.001",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\terracotta\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.002",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\old_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.003",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\rough_limestone\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.004",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\dark_wood\\roughness.png",
+          "packed": false
+        },
+        {
+          "name": "roughness.png.005",
+          "path": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\materials\\foliage\\roughness.png",
+          "packed": false
+        }
+      ]
+    },
+    {
+      "name": "st_maria_praca_modelled.blend",
+      "status": "adopted",
+      "sha256": "69585e1fd5a29d941811a3feb83b5dc5f22b2c83f287e7f8aab41312a98d3395",
+      "objects": 88,
+      "types": {
+        "CAMERA": 1,
+        "MESH": 65,
+        "EMPTY": 21,
+        "LIGHT": 1
+      },
+      "render": {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [
+          906,
+          240
+        ],
+        "samples": 64,
+        "exposure": 0.0
+      },
+      "dependencies": {
+        "error": "Source dependencies missing; refusing invalid beauty render:\nnpc_child.png: D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\character\\town\\npc_child.png\nnpc_laura.png: D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\character\\town\\npc_laura.png\nnpc_registrar.png: D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\character\\town\\npc_registrar.png\nnpc_weaponsmith.png: D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\character\\town\\npc_weaponsmith.png"
+      }
+    }
+  ],
+  "checks": {
+    "sourceManifest": "pass",
+    "localAssetListing": "pass",
+    "vendorHashAndBlender": "pass",
+    "coreSynchronization": "pass",
+    "stagedG1": "pass",
+    "focusedTests": [
+      148,
+      91
+    ],
+    "materialRegistry": "fail foliage_card issue 1326"
+  },
+  "discoveries": [
+    1339,
+    1340
+  ],
+  "captures": {
+    "native-office": {
+      "classic": {
+        "config": {
+          "mapId": 33,
+          "positions": [
+            0.35,
+            3.8833,
+            7.4167
+          ],
+          "unobstructed": false,
+          "surface": "classic"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 0.35,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 3.8833,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 7.4167,
+            "z": 0
+          }
+        ]
+      },
+      "device": {
+        "config": {
+          "mapId": 33,
+          "positions": [
+            0.35,
+            3.8833,
+            7.4167
+          ],
+          "unobstructed": false,
+          "device": [
+            2100,
+            900
+          ]
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 0.35,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 3.8833,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 7.4167,
+            "z": 0
+          }
+        ]
+      },
+      "four_three": {
+        "config": {
+          "mapId": 33,
+          "positions": [
+            0.35,
+            3.8833,
+            7.4167
+          ],
+          "unobstructed": false,
+          "surface": "four_three"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 0.35,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 3.8833,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 7.4167,
+            "z": 0
+          }
+        ]
+      },
+      "wide": {
+        "config": {
+          "mapId": 33,
+          "positions": [
+            0.35,
+            3.8833,
+            7.4167
+          ],
+          "unobstructed": false,
+          "surface": "wide"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 0.35,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 3.8833,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -18.6667,
+                "y": 3.8833,
+                "z": 0.8020666667000003
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 0.94079629,
+                "y": 0.9116197588
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -107.16301268,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": -41.163012679999994
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 7.4167,
+            "z": 0
+          }
+        ]
+      }
+    },
+    "native-courtyard": {
+      "classic": {
+        "config": {
+          "mapId": 32,
+          "positions": [
+            0.0,
+            6.0,
+            12.0
+          ],
+          "unobstructed": false,
+          "surface": "classic"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 200,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 6,
+            "z": 0.19999999999999998
+          },
+          {
+            "cameraOffsetX": -72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": -72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 56,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 12,
+            "z": 0.3
+          }
+        ]
+      },
+      "device": {
+        "config": {
+          "mapId": 32,
+          "positions": [
+            0.0,
+            6.0,
+            12.0
+          ],
+          "unobstructed": false,
+          "device": [
+            2100,
+            900
+          ]
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 352,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 6,
+            "z": 0.19999999999999998
+          },
+          {
+            "cameraOffsetX": -72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": -72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 208,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 12,
+            "z": 0.3
+          }
+        ]
+      },
+      "four_three": {
+        "config": {
+          "mapId": 32,
+          "positions": [
+            0.0,
+            6.0,
+            12.0
+          ],
+          "unobstructed": false,
+          "surface": "four_three"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 232,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 6,
+            "z": 0.19999999999999998
+          },
+          {
+            "cameraOffsetX": -72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": -72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 88,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 12,
+            "z": 0.3
+          }
+        ]
+      },
+      "wide": {
+        "config": {
+          "mapId": 32,
+          "positions": [
+            0.0,
+            6.0,
+            12.0
+          ],
+          "unobstructed": false,
+          "surface": "wide"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 285,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 0,
+            "z": 0
+          },
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 6,
+            "z": 0.19999999999999998
+          },
+          {
+            "cameraOffsetX": -72,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -19.98914649569168,
+                "y": 6,
+                "z": 1.3212953588491052
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": -72,
+              "projectionWindowOffsetY": -161.43297990603955,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 141,
+              "viewportCenterY": -71.43297990603955
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 12,
+            "z": 0.3
+          }
+        ]
+      }
+    },
+    "native-praca": {
+      "classic": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": false,
+          "surface": "classic"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "device": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": false,
+          "device": [
+            2100,
+            900
+          ]
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "four_three": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": false,
+          "surface": "four_three"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "wide": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": false,
+          "surface": "wide"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      }
+    },
+    "native-praca-world": {
+      "classic": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": true,
+          "surface": "classic"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 256,
+              "version": 1,
+              "viewportCenterX": 128,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "classic",
+            "width": 256,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "device": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": true,
+          "device": [
+            2100,
+            900
+          ]
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 560,
+              "version": 1,
+              "viewportCenterX": 280,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "mobile_device",
+            "width": 560,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "four_three": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": true,
+          "surface": "four_three"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 320,
+              "version": 1,
+              "viewportCenterX": 160,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "four_three",
+            "width": 320,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      },
+      "wide": {
+        "config": {
+          "mapId": 17,
+          "positions": [
+            11.85
+          ],
+          "unobstructed": true,
+          "surface": "wide"
+        },
+        "frames": [
+          {
+            "cameraOffsetX": 0,
+            "cameraRecord": {
+              "baseViewportHeight": 144,
+              "baseViewportWidth": 256,
+              "contract": "thestra.world-camera-calibration",
+              "coordinateSystem": {
+                "blenderCameraForward": "-Z",
+                "blenderCameraUp": "+Y",
+                "cameraForward": "+depth",
+                "cameraRight": "+right",
+                "handedness": "right-handed",
+                "screenOrigin": "top-left",
+                "screenY": "+down",
+                "worldHorizontal": "XY",
+                "worldUp": "+Z"
+              },
+              "eye": {
+                "x": -10.866699999999998,
+                "y": 11.85,
+                "z": -3.6251879023673204
+              },
+              "farPlane": 128,
+              "fovHalfX": 0.24999999999999997,
+              "fovHalfY": 0.14062499999999997,
+              "nearPlane": 0.05,
+              "orientation": {
+                "forwardX": 1,
+                "forwardY": 0,
+                "pitchRadians": -0.30543261909900765,
+                "rightX": 0,
+                "rightY": 1
+              },
+              "projection": "perspective",
+              "projectionScale": {
+                "x": 1,
+                "y": 1
+              },
+              "projectionWindowOffsetX": 0,
+              "projectionWindowOffsetY": 0,
+              "targetHeight": 240,
+              "targetWidth": 426,
+              "version": 1,
+              "viewportCenterX": 213,
+              "viewportCenterY": 66
+            },
+            "height": 240,
+            "surface": "wide",
+            "width": 426,
+            "y": 11.85,
+            "z": 0
+          }
+        ]
+      }
+    }
+  }
+}

@@ -26,6 +26,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+import item_model_corpus
 from item_model_corpus import (
     ItemModelError,
     SILHOUETTE_IOU_LIMIT,
@@ -60,6 +61,14 @@ def load_legacy_items() -> set[str]:
     return set(data.get("legacyItems", []))
 
 
+def _project_relative(path: Path) -> str:
+    """The path as items.json spells it, or the bare path outside the Project."""
+    try:
+        return path.relative_to(item_model_corpus.PROJECT_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def collect_violations(
     models: dict[str, Path], legacy: set[str] | None = None
 ) -> list[dict]:
@@ -83,7 +92,7 @@ def collect_violations(
                 {
                     "kind": "shared_file",
                     "members": sorted(names),
-                    "detail": str(path.relative_to(path.parents[3])),
+                    "detail": _project_relative(path),
                 }
             )
 

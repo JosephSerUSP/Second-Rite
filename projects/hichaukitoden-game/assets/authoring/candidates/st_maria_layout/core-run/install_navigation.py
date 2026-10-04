@@ -16,15 +16,8 @@ for row in d['screens']:
  camera=dict(profile='town_sideview',target=dict(x=0,y=row['span']/2,z=0),distance=128/plate['playerProjection']['pixelsPerRuntimeY']/.25,yawDegrees=0,pitchDegrees=0,eyeHeight=2.2604166667,fovDegrees=28.072486935852957,nearPlane=.05,farPlane=128,projectionScale=dict(x=1,y=1),projectionFrame=dict(baseViewportWidth=256,baseViewportHeight=144,compositionWidth=256,canonicalCenterX=128,canonicalHorizonY=66),tracking=dict(axis='y',center=row['span']/2,minOffsetX=0,maxOffsetX=0,interpolationSpeed=12,movementInterpolationSpeed=14,animationFps=8))
  m=dict(id=row['mapId'],title='St. Maria / '+row['label'],intro='Core route authoring candidate',depth=0,safe=True,category='town',generation='Fixed',tileset='town_default',ceilingStyle='sky',music='town1',layout=['.'],spawn=dict(x=0,y=0,dir='E'),traversal=dict(provider='bounded_lane',environmentPackage='assets/environments/review/core_run/'+ident+'/environment.json',spawnAnchor='spawn_player',lane=dict(minY=0,maxY=row['span'],depthX=0,groundZ=0,speed=3.4),blockedRanges=[],camera=camera,doorways=[]),events=[],treasures=[],encounters=[],recruits=[])
  if row.get('groundProfile'):m['traversal']['lane']['groundProfile']=row['groundProfile']
- camera['pitchDegrees']=round(plate['record']['orientation']['pitchRadians']*180/3.141592653589793,4)
  camera['target']['z']=2.2604
- camera['eyeHeight']=-1.4583333333 if camera['pitchDegrees']==-17.5 else 9.7396
- if ident=='port':camera['eyeHeight']=0
- if ident=='praca':
-  camera['eyeHeight']=-1.4583333333
-  camera['distance']=4
-  camera['projectionScale']=dict(plate['record']['projectionScale'])
- if ident!='praca':camera['projectionScale']=dict(x=.94079629,y=.9116197588)
+ camera.update(plate['runtimeOptics'])
  native.append(m)
 ns={r['id']:next(m for m in native if m['id']==r['mapId']) for r in d['screens']}
 def doorway(ident,anchor,y,target,arrival,name,commands=None,direction=None):
@@ -32,7 +25,7 @@ def doorway(ident,anchor,y,target,arrival,name,commands=None,direction=None):
  packages[ident]['anchors'][anchor]=dict(position=[0,y,0]);direction=direction or ('left' if y==0 else 'right' if y==byname[ident]['span'] else 'away')
  m['traversal']['doorways'].append(dict(anchor=anchor,eventInstanceId=instance,radius=.65))
  event=dict(id=eventId,instanceId=instance,name=name,x=0,y=0,worldPosition=[0,y,0],trigger='bump',direction=direction,commands=commands if commands is not None else [dict(cmd='LOAD_MAP',mapId=target,arrival=arrival)])
- if ident!='praca':event['model']='assets/models/st_maria/transition_arrow.obj'
+ event['model']='assets/models/st_maria/transition_arrow.obj'
  m['events'].append(event)
 for c in d['connections']:
  doorway(c['a'],'to-'+c['b'],c['aS'],byname[c['b']]['mapId'],'to-'+c['a'],byname[c['b']]['label'],direction=c['aDirection'])

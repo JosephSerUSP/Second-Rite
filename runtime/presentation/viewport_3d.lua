@@ -8,6 +8,7 @@ local geometryVisibility = require("engine.geometry.visibility_profile")
 local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
+local transitionMarkers = require("presentation.transition_markers")
 local buildProfiler = require("engine.map_build_profiler")
 
 -- Authored camera framing lives in Classic composition coordinates. Wider
@@ -1496,7 +1497,8 @@ local function drawTownPrerender(session, inspection)
     for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         if not rawEv.wallEvent then
             local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-            if presentation.visual == "model" and presentation.model then
+            if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                 local imageX, imageY = townEventWorldPosition(rawEv)
                 imageX = imageX or depthX
                 local model = townArrowModel(presentation.model)
@@ -1511,7 +1513,7 @@ local function drawTownPrerender(session, inspection)
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 for _, modelGroup in ipairs(model.groups or {}) do
                     local color = modelGroup.color or { 1, 0.65, 0.08, 1 }
-                    local lineSegments = {}
+                    local triangles = {}
                     for index = 1, #(modelGroup.vertices or {}), 3 do
                         local a, b, c = modelGroup.vertices[index],
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
@@ -1533,34 +1535,25 @@ local function drawTownPrerender(session, inspection)
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end
-                            local ax, ay = arrowPoint(a)
-                            local bx, by = arrowPoint(b)
-                            local cx, cy = arrowPoint(c)
-                            if isTransitionArrow then
-                                local function addSegment(x1, y1, x2, y2)
-                                    local keyA = string.format("%.3f,%.3f", x1, y1)
-                                    local keyB = string.format("%.3f,%.3f", x2, y2)
-                                    local key = keyA < keyB and keyA .. ":" .. keyB
-                                        or keyB .. ":" .. keyA
-                                    lineSegments[key] = { x1, y1, x2, y2 }
-                                end
-                                addSegment(ax, ay, bx, by)
-                                addSegment(bx, by, cx, cy)
-                                addSegment(cx, cy, ax, ay)
-                            else
-                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
-                            end
+                            local ax, ay, ad = arrowPoint(a)
+                            local bx, by, bd = arrowPoint(b)
+                            local cx, cy, cd = arrowPoint(c)
+                            local shade = isTransitionArrow and (0.55 + 0.45 * math.abs(a[8] or 0)) or 1
+                            triangles[#triangles + 1] = {
+                                depth = (ad + bd + cd) / 3,
+                                points = { ax, ay, bx, by, cx, cy },
+                                shade = shade,
+                            }
                         end
                     end
-                    if isTransitionArrow then
-                        love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                        love.graphics.setLineStyle("rough")
-                        love.graphics.setLineWidth(1)
-                        for _, segment in pairs(lineSegments) do
-                            love.graphics.line(segment)
-                        end
-                        love.graphics.setLineWidth(1)
+                    -- Filled model faces, ordered from the far side to the camera.
+                    -- Face shading keeps the shaft and head readable on a plate.
+                    table.sort(triangles, function(a, b) return a.depth > b.depth end)
+                    for _, triangle in ipairs(triangles) do
+                        local shade = triangle.shade
+                        love.graphics.setColor(color[1] * shade, color[2] * shade,
+                            color[3] * shade, color[4] or 1)
+                        love.graphics.polygon("fill", triangle.points)
                     end
                 end
             end
@@ -3268,7 +3261,8 @@ end
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-                if presentation.visual == "model" and presentation.model then
+                if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
                     if presentation.model:match("transition_arrow") then
                         modelSpec.transitionArrowDirection = rawEv.direction

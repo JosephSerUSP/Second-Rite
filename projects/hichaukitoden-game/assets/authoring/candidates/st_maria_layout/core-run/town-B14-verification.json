@@ -1,0 +1,38 @@
+{
+  "source": "st_maria_B14.blend",
+  "sourceSHA256": "8f26fafcf2b573513fe33a5406d9d091201e7675c7411b66ec0f98dc6d8b2840",
+  "parentSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
+  "sourceChecks": "source-checks.json",
+  "nativeCaptures": "runtime/town-B14-final/captures.json",
+  "visibilityPixelDifferences": {
+    "praca": {
+      "changedPixels": 101,
+      "bounds": [
+        209,
+        111,
+        220,
+        124
+      ]
+    },
+    "bakery": {
+      "changedPixels": 71,
+      "bounds": [
+        296,
+        116,
+        307,
+        129
+      ]
+    }
+  },
+  "gates": {
+    "candidateG1": "VALIDATE OK",
+    "canonicalUnit": "ALL UNIT TESTS OK; includes Options dispatch and persistence reload",
+    "G3": "All traces match",
+    "G4": "Engine state doc matches",
+    "G5": "Red only on Options; seven mismatches, five new captures, three orphan references per surface; crop invariant passes; references untouched; #1331"
+  },
+  "playthrough": "25 native arrivals, selected recovery, Registry writ, bakery shop, labyrinth descent/return and save/load; physical Android play and combat economy not claimed",
+  "cameraDecision": "28m narrow lens on court, quay, Praca and threshold. Default -17.5 degrees; Praca -10 exception. Harbour retains its working B13 camera because the distant position intersects terrain.",
+  "navigation": "Authored solid 3D arrows in both world paths; default ON with persistent Options toggle; prompts remain enabled.",
+  "flatGlyph": "Discarded from world navigation after owner feedback; interface label design remains open."
+}

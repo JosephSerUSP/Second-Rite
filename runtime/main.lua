@@ -212,6 +212,12 @@ interpreter.bindPresentation({
     listFonts = function()
         return { "monogram-extended-italic", "monogram-extended" }
     end,
+    setTransitionArrowsVisible = function(value)
+        return require("presentation.transition_markers").setVisible(value)
+    end,
+    getTransitionArrowsVisible = function()
+        return require("presentation.transition_markers").isVisible()
+    end,
     setFpsToggle = function(val)
         require("presentation.dev_overlay").setFpsEnabled(val)
     end,
@@ -717,7 +723,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
-            "test_town_threshold_direction",
+            "test_town_threshold_direction", "test_transition_markers",
             "test_passage_house_courtyard",
             "test_presentation_contract",
         }) do

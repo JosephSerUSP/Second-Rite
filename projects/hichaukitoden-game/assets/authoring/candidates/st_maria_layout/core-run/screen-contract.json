@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "authority": "Saved B13 source; stage-only navigation candidate",
-  "parentSHA256": "d70b06ad97d9d53bc047dab29d45a6b87387877b5e691fce36d51f9c381fc232",
+  "authority": "Saved B14 source; derived phone navigation candidate",
+  "parentSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
   "screens": [
     {
       "id": "market",
@@ -657,12 +657,22 @@
           "width": 24.76809024810791,
           "height": 49.53618049621582,
           "pixelsPerRuntimeY": 27.428516507148743
+        },
+        "runtimeOptics": {
+          "distance": 18.6667,
+          "eyeHeight": -1.4583333332999993,
+          "fovDegrees": 28.072486935852954,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
     {
       "id": "court",
-      "label": "Corti\u00e7o / Passage House",
+      "label": "Cortiço / Passage House",
       "mapId": 1001,
       "a": [
         23.0,
@@ -2539,41 +2549,42 @@
         "passage-house"
       ],
       "plate": {
-        "width": 1688,
+        "width": 1682,
         "height": 240,
         "sliceY": 23.0,
+        "cameraDistance": 28,
         "record": {
           "contract": "thestra.world-camera-calibration",
           "version": 1,
           "projection": "perspective",
           "eye": {
             "x": 0.0,
-            "y": 28.3333,
-            "z": 8.8770666667
+            "y": 19.0,
+            "z": 8.877066475965137
           },
           "orientation": {
-            "forwardX": 6.123233995736766e-17,
-            "forwardY": 1,
-            "rightX": -1,
-            "rightY": 6.123233995736766e-17,
+            "forwardX": 0.0,
+            "forwardY": 1.0,
+            "rightX": -1.0,
+            "rightY": 0.0,
             "pitchRadians": -0.30543261909900765
           },
           "projectionScale": {
             "x": 0.94079629,
             "y": 0.9116197588
           },
+          "fovHalfX": 0.16678353958234268,
+          "fovHalfY": 0.09381574101506776,
           "nearPlane": 0.05,
           "farPlane": 1200,
-          "targetWidth": 1688,
+          "targetWidth": 1682,
           "targetHeight": 240,
           "baseViewportWidth": 256,
           "baseViewportHeight": 144,
-          "viewportCenterX": 844.0,
-          "viewportCenterY": -46.94317453275585,
+          "viewportCenterX": 841.0,
+          "viewportCenterY": -122.60042762756348,
           "projectionWindowOffsetX": 0,
-          "projectionWindowOffsetY": -112.94317453275585,
-          "fovHalfX": 0.24999999999999997,
-          "fovHalfY": 0.14062499999999997,
+          "projectionWindowOffsetY": -188.60042762756348,
           "coordinateSystem": {
             "handedness": "right-handed",
             "worldUp": "+Z",
@@ -2585,21 +2596,40 @@
             "blenderCameraForward": "-Z",
             "blenderCameraUp": "+Y"
           },
-          "authoringCoordinateAdapter": "Core projection Y principal point reflected to top-origin Blender calibration; verified against actual foot projection",
-          "authoringFilmWindowCorrectionY": -5.42591722564697
+          "thestraComposition": {
+            "characterFloorLimit": 144.0,
+            "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+            "walkerFeetY": 128.0,
+            "walkerHeadY": 80.0,
+            "horizonY": 66.0,
+            "solvedDistance": 18.666666666666668,
+            "solvedEyeHeight": 2.260416666666667,
+            "pixelsPerWorldUnit": 27.428571428571427
+          },
+          "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
         },
         "playerProjection": {
-          "centerX": 844.0,
+          "centerX": 841.0,
           "screenY": 128,
-          "width": 24.76809024810791,
-          "height": 49.53618049621582,
-          "pixelsPerRuntimeY": 27.428516507148743
+          "pixelsPerRuntimeY": 27.28444468975067,
+          "width": 24.768097400665283,
+          "height": 49.536194801330566
+        },
+        "runtimeOptics": {
+          "distance": 28.0,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 18.93767485514957,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
     {
       "id": "praca",
-      "label": "Pra\u00e7a / Passage Office",
+      "label": "Praça / Passage Office",
       "mapId": 1005,
       "a": [
         23.0,
@@ -4317,41 +4347,42 @@
         "chapel"
       ],
       "plate": {
-        "width": 1645,
+        "width": 1543,
         "height": 240,
-        "sliceY": 21,
+        "sliceY": 21.0,
+        "cameraDistance": 28,
         "record": {
           "contract": "thestra.world-camera-calibration",
           "version": 1,
           "projection": "perspective",
           "eye": {
             "x": 2.0,
-            "y": 64.0,
-            "z": 14.8770667
+            "y": 40.0,
+            "z": 23.172751303786512
           },
           "orientation": {
-            "forwardX": 0,
-            "forwardY": 1,
-            "rightX": -1,
-            "rightY": 0,
-            "pitchRadians": -0.30543261909900765
+            "forwardX": 0.0,
+            "forwardY": 1.0,
+            "rightX": -1.0,
+            "rightY": 0.0,
+            "pitchRadians": -0.17453292519943295
           },
           "projectionScale": {
-            "x": 0.20250965354931463,
-            "y": 0.19622930435163363
+            "x": 0.94079629,
+            "y": 0.9116197588
           },
-          "fovHalfX": 0.25,
-          "fovHalfY": 0.140625,
+          "fovHalfX": 0.17424421272966573,
+          "fovHalfY": 0.09801236966043697,
           "nearPlane": 0.05,
           "farPlane": 1200,
-          "targetWidth": 1645,
+          "targetWidth": 1543,
           "targetHeight": 240,
           "baseViewportWidth": 256,
           "baseViewportHeight": 144,
-          "viewportCenterX": 822.5,
-          "viewportCenterY": 70.90823554992676,
+          "viewportCenterX": 771.5,
+          "viewportCenterY": -239.47022533416748,
           "projectionWindowOffsetX": 0,
-          "projectionWindowOffsetY": 4.908235549926758,
+          "projectionWindowOffsetY": -305.4702253341675,
           "coordinateSystem": {
             "handedness": "right-handed",
             "worldUp": "+Z",
@@ -4372,14 +4403,25 @@
             "solvedDistance": 18.666666666666668,
             "solvedEyeHeight": 2.260416666666667,
             "pixelsPerWorldUnit": 27.428571428571427
-          }
+          },
+          "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
         },
         "playerProjection": {
-          "centerX": 822.5,
+          "centerX": 771.5,
           "screenY": 128,
-          "pixelsPerRuntimeY": 29.013458847999573,
-          "width": 24.76809024810791,
-          "height": 49.53618049621582
+          "pixelsPerRuntimeY": 26.586455583572388,
+          "width": 24.768075942993164,
+          "height": 49.53615188598633
+        },
+        "runtimeOptics": {
+          "distance": 28.0,
+          "eyeHeight": 6.837351494521375,
+          "fovDegrees": 19.76844692163533,
+          "pitchDegrees": -10.0,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -5750,16 +5792,17 @@
         "pub"
       ],
       "plate": {
-        "width": 1333,
+        "width": 1328,
         "height": 240,
         "sliceY": 16.528516878793297,
+        "cameraDistance": 28,
         "record": {
           "contract": "thestra.world-camera-calibration",
           "version": 1,
           "projection": "perspective",
           "eye": {
-            "x": -25.403952916258945,
-            "y": -12.60499403530359,
+            "x": -24.85593231022358,
+            "y": -21.92219114303589,
             "z": 0.8770642258897965
           },
           "orientation": {
@@ -5773,18 +5816,18 @@
             "x": 0.94079629,
             "y": 0.9116197588
           },
-          "fovHalfX": 0.25,
-          "fovHalfY": 0.140625,
+          "fovHalfX": 0.16678342452109002,
+          "fovHalfY": 0.09381567629311313,
           "nearPlane": 0.05,
           "farPlane": 1200,
-          "targetWidth": 1333,
+          "targetWidth": 1328,
           "targetHeight": 240,
           "baseViewportWidth": 256,
           "baseViewportHeight": 144,
-          "viewportCenterX": 666.5,
-          "viewportCenterY": -46.94263833016157,
+          "viewportCenterX": 664.0,
+          "viewportCenterY": -122.59968376159668,
           "projectionWindowOffsetX": 0,
-          "projectionWindowOffsetY": -112.94263833016157,
+          "projectionWindowOffsetY": -188.59968376159668,
           "coordinateSystem": {
             "handedness": "right-handed",
             "worldUp": "+Z",
@@ -5805,14 +5848,25 @@
             "solvedDistance": 18.666666666666668,
             "solvedEyeHeight": 2.260416666666667,
             "pixelsPerWorldUnit": 27.428571428571427
-          }
+          },
+          "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
         },
         "playerProjection": {
-          "centerX": 666.5,
+          "centerX": 664.0,
           "screenY": 128,
+          "pixelsPerRuntimeY": 27.28444468975067,
           "width": 24.768097400665283,
-          "height": 49.536194801330566,
-          "pixelsPerRuntimeY": 27.428516507148743
+          "height": 49.536194801330566
+        },
+        "runtimeOptics": {
+          "distance": 27.99999994197762,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 18.937662026940085,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -6502,6 +6556,16 @@
           "width": 24.76806879043579,
           "height": 49.53613758087158,
           "pixelsPerRuntimeY": 27.42852920293808
+        },
+        "runtimeOptics": {
+          "distance": 18.666701204884927,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 28.072486935852957,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -7638,7 +7702,7 @@
             "solvedEyeHeight": 2.260416666666667,
             "pixelsPerWorldUnit": 27.428571428571427
           },
-          "authoringCameraDecision": "Raised eye clears shore retaining mass; default -17.5-degree pitch retained"
+          "authoringCameraDecision": "Retain the working B13 harbour camera: the 28m position intersects the quay terrain."
         },
         "playerProjection": {
           "centerX": 561.0,
@@ -7646,6 +7710,16 @@
           "width": 24.76808667,
           "height": 49.53617334,
           "pixelsPerRuntimeY": 26.763562560081482
+        },
+        "runtimeOptics": {
+          "distance": 19.130487536949236,
+          "eyeHeight": 0,
+          "fovDegrees": 28.072486935852957,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -8357,6 +8431,16 @@
           "width": 24.768118858337402,
           "height": 49.536237716674805,
           "pixelsPerRuntimeY": 27.428541898727417
+        },
+        "runtimeOptics": {
+          "distance": 18.6667,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 28.072486935852957,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -9519,16 +9603,17 @@
         "labyrinth"
       ],
       "plate": {
-        "width": 1194,
+        "width": 1190,
         "height": 240,
         "sliceY": 14.0,
+        "cameraDistance": 28,
         "record": {
           "contract": "thestra.world-camera-calibration",
           "version": 1,
           "projection": "perspective",
           "eye": {
             "x": 42.0,
-            "y": 84.33330000000001,
+            "y": 75.0,
             "z": 36.16011796674883
           },
           "orientation": {
@@ -9542,18 +9627,18 @@
             "x": 0.94079629,
             "y": 0.9116197588
           },
-          "fovHalfX": 0.25,
-          "fovHalfY": 0.140625,
+          "fovHalfX": 0.1667832598255715,
+          "fovHalfY": 0.09381558365188397,
           "nearPlane": 0.05,
           "farPlane": 1200,
-          "targetWidth": 1194,
+          "targetWidth": 1190,
           "targetHeight": 240,
           "baseViewportWidth": 256,
           "baseViewportHeight": 144,
-          "viewportCenterX": 597.0,
-          "viewportCenterY": -46.94089858233929,
+          "viewportCenterX": 595.0,
+          "viewportCenterY": -122.59743070602417,
           "projectionWindowOffsetX": 0,
-          "projectionWindowOffsetY": -112.94089858233929,
+          "projectionWindowOffsetY": -188.59743070602417,
           "coordinateSystem": {
             "handedness": "right-handed",
             "worldUp": "+Z",
@@ -9574,14 +9659,25 @@
             "solvedDistance": 18.666666666666668,
             "solvedEyeHeight": 2.260416666666667,
             "pixelsPerWorldUnit": 27.428571428571427
-          }
+          },
+          "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
         },
         "playerProjection": {
-          "centerX": 597.0,
+          "centerX": 595.0,
           "screenY": 128,
-          "width": 24.7680401802063,
-          "height": 49.5360803604126,
-          "pixelsPerRuntimeY": 27.428516507148743
+          "pixelsPerRuntimeY": 27.28449547290802,
+          "width": 24.768104553222656,
+          "height": 49.53620910644531
+        },
+        "runtimeOptics": {
+          "distance": 28.0,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 18.937643664992333,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     },
@@ -9926,6 +10022,16 @@
           "width": 24.768097400665283,
           "height": 49.536194801330566,
           "pixelsPerRuntimeY": 27.428554594516754
+        },
+        "runtimeOptics": {
+          "distance": 18.66670163373617,
+          "eyeHeight": -1.4583333333000001,
+          "fovDegrees": 28.072486935852957,
+          "pitchDegrees": -17.5,
+          "projectionScale": {
+            "x": 0.94079629,
+            "y": 0.9116197588
+          }
         }
       }
     }
@@ -15977,14 +16083,14 @@
       "object": "B7 / Passage House",
       "bounds": [
         [
-          -11.0,
-          53.0,
-          8.0
+          -16,
+          53,
+          8
         ],
         [
-          3.0,
-          61.0,
-          15.0
+          3,
+          61,
+          15.6
         ]
       ],
       "district": "Cortico",
@@ -16010,7 +16116,8 @@
           52.94,
           8.075
         ]
-      ]
+      ],
+      "exteriorDecision": "19 by 8 metre, two-storey lodging house. Existing map25 is Room3, not the whole building; threshold and walking lane retained."
     },
     {
       "id": "chapel",
@@ -16372,14 +16479,14 @@
     "Point samples are not swept-body or owner-play acceptance.",
     "Source art remains rough."
   ],
-  "sourceSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
+  "sourceSHA256": "8f26fafcf2b573513fe33a5406d9d091201e7675c7411b66ec0f98dc6d8b2840",
   "navigationDecision": "One foreshortened stair landing shows the climb into depth. UP transfers to the Churchyard; no chain of dead stair screens and no initial fast travel.",
-  "cameraRule": "Default -17.5 degrees, including Praca. Camera is inside southern perimeter; actor scale remains measured.",
+  "cameraRule": "Default -17.5 degrees. Wide screens use 28m camera standoff and narrower optical field; Praca uses a modest -10-degree exception with physical roof clearance.",
   "workerPortArrivalS": 2,
-  "navigationDoorDecision": "Distinct doorway positions: forge/port connection separated from forge door; workers stair inside port bounds; return from sanctuary separated from gate.",
+  "navigationDoorDecision": "Every town screen shows its authored solid 3D arrow model by default; one persistent Options toggle hides arrow models while retaining prompts and interactions.",
   "workerCourtDirection": "toward",
   "workerPortDirection": "away",
   "interactionRule": "Event direction owns marker, input and prompt. away=UP, toward=DOWN; left/right continue along the street. Interior returns face the foreground and use DOWN. Screen camera rotation can change the same path's verb across a transfer.",
-  "sourceBlend": "st_maria_B13.blend",
+  "sourceBlend": "st_maria_B14.blend",
   "pracaDecision": "Registry moved to centre frontage, chapel to west, Cortico descent at s9 and stair street turn at left bound. No clustered central nexus. Physical stair newels mark the Cortico descent; floating transfer models removed on Praca."
 }

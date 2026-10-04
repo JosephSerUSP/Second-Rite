@@ -1,4 +1,4 @@
-"""Export the saved B12 candidate into an isolated, playable native Project."""
+"""Export the saved source candidate into an isolated, playable native Project."""
 import json
 import subprocess
 import sys
@@ -80,7 +80,7 @@ write(STAGE / 'data/commonEvents.json', common)
 # Saves from the shipping Project cannot accidentally resume the old town.
 conf = STAGE / 'conf.lua'
 conf.write_text(conf.read_text(encoding='utf-8').replace('t.identity = "SecondRite"', 't.identity = "hichaukitoden-st-maria-playtest"'), encoding='utf-8')
-write(STAGE.parent / 'manifest.json', dict(source='st_maria_B12.blend',
+write(STAGE.parent / 'manifest.json', dict(source=read(CANDIDATE / 'screen-contract.json')['sourceBlend'],
     sourceSHA256=read(CANDIDATE / 'screen-contract.json')['sourceSHA256'],
     spawnMap=25, dungeonReturnMap=1007, registryMap=33,
     scope='Isolated native playtest. Existing expedition economy and battle behavior retained.'))

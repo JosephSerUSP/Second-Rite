@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "authority": "Saved B12 source; stage-only navigation candidate",
-  "parentSHA256": "da423d7770cbef87164753b0622363f861a556e59b76f748c631a3d1b9f8a66d",
+  "authority": "Saved B13 source; stage-only navigation candidate",
+  "parentSHA256": "d70b06ad97d9d53bc047dab29d45a6b87387877b5e691fce36d51f9c381fc232",
   "screens": [
     {
       "id": "market",
@@ -4317,41 +4317,41 @@
         "chapel"
       ],
       "plate": {
-        "width": 1782,
+        "width": 1645,
         "height": 240,
-        "sliceY": 21.0,
+        "sliceY": 21,
         "record": {
           "contract": "thestra.world-camera-calibration",
           "version": 1,
           "projection": "perspective",
           "eye": {
             "x": 2.0,
-            "y": 49.3333,
-            "z": 26.075
+            "y": 64.0,
+            "z": 14.8770667
           },
           "orientation": {
-            "forwardX": 6.123233995736766e-17,
+            "forwardX": 0,
             "forwardY": 1,
             "rightX": -1,
-            "rightY": 6.123233995736766e-17,
-            "pitchRadians": 0.5235987755982988
+            "rightY": 0,
+            "pitchRadians": -0.30543261909900765
           },
           "projectionScale": {
-            "x": 1.3977323742563197,
-            "y": 1.3543850708493945
+            "x": 0.20250965354931463,
+            "y": 0.19622930435163363
           },
+          "fovHalfX": 0.25,
+          "fovHalfY": 0.140625,
           "nearPlane": 0.05,
           "farPlane": 1200,
-          "targetWidth": 1782,
+          "targetWidth": 1645,
           "targetHeight": 240,
           "baseViewportWidth": 256,
           "baseViewportHeight": 144,
-          "viewportCenterX": 891.0,
-          "viewportCenterY": 93.81222168199184,
+          "viewportCenterX": 822.5,
+          "viewportCenterY": 70.90823554992676,
           "projectionWindowOffsetX": 0,
-          "projectionWindowOffsetY": 27.812221681991844,
-          "fovHalfX": 0.24999999999999997,
-          "fovHalfY": 0.14062499999999997,
+          "projectionWindowOffsetY": 4.908235549926758,
           "coordinateSystem": {
             "handedness": "right-handed",
             "worldUp": "+Z",
@@ -4363,16 +4363,23 @@
             "blenderCameraForward": "-Z",
             "blenderCameraUp": "+Y"
           },
-          "authoringCoordinateAdapter": "Core projection Y principal point reflected to top-origin Blender calibration; verified against actual foot projection",
-          "authoringFilmWindowCorrectionY": -0.7128039176940888,
-          "authoringScaleCorrection": "Uniform measured optical scale to retain street actor height; eye position retained to clear roofs"
+          "thestraComposition": {
+            "characterFloorLimit": 144.0,
+            "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+            "walkerFeetY": 128.0,
+            "walkerHeadY": 80.0,
+            "horizonY": 66.0,
+            "solvedDistance": 18.666666666666668,
+            "solvedEyeHeight": 2.260416666666667,
+            "pixelsPerWorldUnit": 27.428571428571427
+          }
         },
         "playerProjection": {
-          "centerX": 891.0,
+          "centerX": 822.5,
           "screenY": 128,
-          "width": 24.768093824386597,
-          "height": 49.53618764877319,
-          "pixelsPerRuntimeY": 32.28571003675461
+          "pixelsPerRuntimeY": 29.013458847999573,
+          "width": 24.76809024810791,
+          "height": 49.53618049621582
         }
       }
     },
@@ -12071,59 +12078,59 @@
       "id": "registry-door",
       "knots": [
         [
-          19.999998092651367,
+          3.999998092651367,
           68.0,
           14.074999809265137
         ],
         [
-          20,
+          4,
           70.94,
           14.075
         ]
       ],
       "profile": [
         [
-          19.999998092651367,
+          3.999998092651367,
           68.0,
           14.074999809265137
         ],
         [
-          19.999998092651367,
+          3.999998092651367,
           68.36750030517578,
           14.074999809265137
         ],
         [
-          19.999998092651367,
+          3.999998092651367,
           68.73500061035156,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           69.10250091552734,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           69.47000122070312,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           69.8375015258789,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           70.20500183105469,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           70.57250213623047,
           14.074999809265137
         ],
         [
-          20.0,
+          4.0,
           70.94000244140625,
           14.074999809265137
         ]
@@ -13589,7 +13596,7 @@
           14.241684913635254
         ]
       ],
-      "aDirection": "toward",
+      "aDirection": "left",
       "bDirection": "toward"
     },
     {
@@ -16051,12 +16058,12 @@
       "object": "B7 / Praca east frontage",
       "bounds": [
         [
-          17.0,
+          1.0,
           71.0,
           14.0
         ],
         [
-          23.0,
+          7.0,
           81.0,
           20.0
         ]
@@ -16066,20 +16073,20 @@
       "visitable": true,
       "runtimeMap": 33,
       "threshold": [
-        20,
+        4,
         70.94,
         14.075
       ],
       "laneScreen": "praca",
-      "laneS": 3.0,
+      "laneS": 19,
       "approach": [
         [
-          19.999998092651367,
-          68.0,
-          14.074999809265137
+          4,
+          68,
+          14.075
         ],
         [
-          20,
+          4,
           70.94,
           14.075
         ]
@@ -16365,12 +16372,14 @@
     "Point samples are not swept-body or owner-play acceptance.",
     "Source art remains rough."
   ],
-  "sourceSHA256": "d70b06ad97d9d53bc047dab29d45a6b87387877b5e691fce36d51f9c381fc232",
+  "sourceSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
   "navigationDecision": "One foreshortened stair landing shows the climb into depth. UP transfers to the Churchyard; no chain of dead stair screens and no initial fast travel.",
-  "cameraRule": "Default pitch -17.5 degrees. Praca keeps its explicitly measured high downward exception.",
+  "cameraRule": "Default -17.5 degrees, including Praca. Camera is inside southern perimeter; actor scale remains measured.",
   "workerPortArrivalS": 2,
   "navigationDoorDecision": "Distinct doorway positions: forge/port connection separated from forge door; workers stair inside port bounds; return from sanctuary separated from gate.",
   "workerCourtDirection": "toward",
   "workerPortDirection": "away",
-  "interactionRule": "Event direction owns marker, input and prompt. away=UP, toward=DOWN; left/right continue along the street. Interior returns face the foreground and use DOWN. Screen camera rotation can change the same path's verb across a transfer."
+  "interactionRule": "Event direction owns marker, input and prompt. away=UP, toward=DOWN; left/right continue along the street. Interior returns face the foreground and use DOWN. Screen camera rotation can change the same path's verb across a transfer.",
+  "sourceBlend": "st_maria_B13.blend",
+  "pracaDecision": "Registry moved to centre frontage, chapel to west, Cortico descent at s9 and stair street turn at left bound. No clustered central nexus. Physical stair newels mark the Cortico descent; floating transfer models removed on Praca."
 }

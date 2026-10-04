@@ -150,8 +150,8 @@ jobs:
           const fs = require('fs');
           const path = 'projects/hichaukitoden-game/data/project.json';
           const project = JSON.parse(fs.readFileSync(path, 'utf8'));
-          project.android.applicationId += '.stmaria.navigation';
-          project.android.displayName += ' St. Maria Navigation';
+          project.android.applicationId += '.stmaria.praca';
+          project.android.displayName += ' St. Maria Praca';
           fs.writeFileSync(path, JSON.stringify(project, null, 2) + '\n');
           NODE
 

@@ -1,0 +1,180 @@
+{
+  "sourceSHA256": "3d843304433bf0c72ca38ca664642d5b61385031eae05e2b034fb0b18fa14183",
+  "retainedBuildings": [
+    "forge",
+    "pub",
+    "bakery",
+    "passage-house",
+    "chapel",
+    "registry",
+    "support-01",
+    "support-02",
+    "support-03",
+    "support-04",
+    "support-05",
+    "support-06",
+    "support-07",
+    "support-08",
+    "support-09",
+    "support-10",
+    "support-11",
+    "support-12",
+    "support-13"
+  ],
+  "checks": [
+    {
+      "id": "market",
+      "samples": 71,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "court",
+      "samples": 231,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "praca",
+      "samples": 211,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "quay",
+      "samples": 167,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "forge",
+      "samples": 74,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "port",
+      "samples": 131,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "churchyard",
+      "samples": 77,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "threshold",
+      "samples": 141,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "churchyard-stair",
+      "samples": 31,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "market-court",
+      "samples": 25,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "market-quay",
+      "samples": 66,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "court-praca",
+      "samples": 54,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "praca-stair-foot",
+      "samples": 59,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "stair-yard-landing",
+      "samples": 6,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "churchyard-sanctuary",
+      "samples": 95,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "sanctuary-mouth",
+      "samples": 14,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "forge-door",
+      "samples": 14,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "pub-door",
+      "samples": 13,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "bakery-door",
+      "samples": 6,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "passage-house-door",
+      "samples": 16,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "chapel-door",
+      "samples": 9,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "registry-door",
+      "samples": 9,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "quay-forge-depth",
+      "samples": 124,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "forge-port-depth",
+      "samples": 31,
+      "collisions": [],
+      "intrusions": []
+    },
+    {
+      "id": "stair-churchyard-depth",
+      "samples": 318,
+      "collisions": [],
+      "intrusions": []
+    }
+  ],
+  "samples": 1993,
+  "collisions": 0,
+  "terrainIntrusions": 0,
+  "scope": "Source lane and approach point checks; not swept body or owner play"
+}

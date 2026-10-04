@@ -10,7 +10,8 @@
     "lantern": {"y": 0},
     "window_dressing": {"y0": -0.7, "y1": 0.7, "z0": 1.2, "z1": 2.6},
     "stair": {"y": 0, "x_start": 0},
-    "tool_rail": {"y": 0, "z": 1.5}
+    "tool_rail": {"y": 0, "z": 1.5},
+    "door_frame": {"lo": -0.6, "hi": 0.6, "height": 2.6}
   },
   "placement": {
     "service_screen": "Architectural assembly: explicit front/rear and left/right extents; serving transom above 2.43 m. Align return with room joinery.",
@@ -24,6 +25,7 @@
     "window_dressing": "Back-wall opening coordinates y0/y1/z0/z1; pair with the same opening used by the shell.",
     "stair": "Descending stair; geometry extends below Z=0. Review the threshold and character-floor projection in native views.",
     "tool_rail": "Back-wall mounting at y and z.",
-    "water_stand": "Customer-reachable drinking water. Keep the stand outside the exit approach and review its silhouette with the player present."
+    "water_stand": "Customer-reachable drinking water. Keep the stand outside the exit approach and review its silhouette with the player present.",
+    "door_frame": "Around a door opening on the back wall (lo/hi along Y) or an end wall (wall=-y/+y, lo/hi along X); pass the same span and height as the opening."
   }
 }

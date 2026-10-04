@@ -33,6 +33,7 @@ These flat-colour orthographic illustrations show isolated construction, not nat
 | [sack_stack](#sack-stack) | 0.841 × 1.131 × 0.580 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [azulejo_dado](#azulejo-dado) | 0.060 × 6.000 × 1.210 | Wall treatment; uses room.back_x, half_width and openings. Fixture includes a doorway to demonstrate the interruption. |
 | [window_dressing](#window-dressing) | 0.145 × 2.352 × 1.400 | Back-wall opening coordinates y0/y1/z0/z1; pair with the same opening used by the shell. |
+| [door_frame](#door-frame) | 0.340 × 1.600 × 2.900 | Around a door opening on the back wall (lo/hi along Y) or an end wall (wall=-y/+y, lo/hi along X); pass the same span and height as the opening. |
 | [stair](#stair) | 2.100 × 1.500 × 1.350 | Descending stair; geometry extends below Z=0. Review the threshold and character-floor projection in native views. |
 | [counter](#counter) | 0.680 × 1.800 × 0.960 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [bread_oven](#bread-oven) | 1.313 × 1.500 × 3.200 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
@@ -55,6 +56,11 @@ These flat-colour orthographic illustrations show isolated construction, not nat
 | [scrap_heap](#scrap-heap) | 1.013 × 1.044 × 0.284 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [grindstone](#grindstone) | 0.680 × 1.250 × 1.199 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 | [fine_bench](#fine-bench) | 0.605 × 1.150 × 1.070 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [altar](#altar) | 1.120 × 2.520 × 2.820 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [pew](#pew) | 0.515 × 2.440 × 0.825 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [votive_stand](#votive-stand) | 0.370 × 0.930 × 1.350 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [font](#font) | 0.540 × 0.514 × 0.950 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
+| [mortar_tub](#mortar-tub) | 0.490 × 0.466 × 0.347 | Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds. |
 
 ## chest
 
@@ -156,6 +162,9 @@ Variation handles: `width`, `depth`, `height`, `panel_mat`. These are inputs to 
 ![woven_runner](catalogue/woven_runner.png)
 
 Flat decorative textile with broad borders and restrained lozenge repeats.
+
+The lozenges repeat every 0.74 m along the length, so a long aisle runner
+carries its motif end to end (the 4.7 m default keeps its five).
 
 `woven_runner(room, name, at, *, length=4.7, width=1.55, cloth_mat, border_mat, motif_mat)`
 
@@ -661,6 +670,40 @@ Materials: `dark_wood`, `wrought_iron`.
 Preview bindings: `{"y0": -0.7, "y1": 0.7, "z0": 1.2, "z1": 2.6}`. All other values use builder defaults.
 
 Variation handles: `grille`, `shutters`. These are inputs to the same builder; review any changed proportions in context.
+
+## door_frame
+
+![door_frame](catalogue/door_frame.png)
+
+A cut-stone surround (*cantaria*) for a door.
+
+`lo`/`hi` span the opening along its wall: Y for the back wall, X for a
+side wall (`wall="-y"` or `"+y"`, the end walls of a long hall). Pair it
+with the same opening used by `back_wall`/`doorway` or
+`side_walls`/`side_doorway`. A colonial door is a dark panelled leaf in a
+limestone frame set into limewash: the frame is what makes an opening
+read as a door and not a hole. Jambs, a lintel with a keystone, a sill.
+
+`door_frame(room, name, lo, hi, height, *, wall='back', jamb=0.2, proud=0.06)`
+
+Around a door opening on the back wall (lo/hi along Y) or an end wall (wall=-y/+y, lo/hi along X); pass the same span and height as the opening.
+
+Measured bounds: `[[3.776667, -0.8, 0.0], [4.116667, 0.8, 2.9]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `rough_limestone`.
+
+| Parameter | Default / required |
+|---|---|
+| `lo` | `required` |
+| `hi` | `required` |
+| `height` | `required` |
+| `wall` | `'back'` |
+| `jamb` | `0.2` |
+| `proud` | `0.06` |
+
+Preview bindings: `{"height": 2.6, "hi": 0.6, "lo": -0.6}`. All other values use builder defaults.
+
+Variation handles: `wall`, `jamb`, `proud`. These are inputs to the same builder; review any changed proportions in context.
 
 ## stair
 
@@ -1234,3 +1277,153 @@ Materials: `aged_cloth`, `dark_wood`, `forge_scale`, `wrought_iron`.
 | `height` | `0.92` |
 
 Variation handles: `length`, `width`, `height`. These are inputs to the same builder; review any changed proportions in context.
+
+## altar
+
+![altar](catalogue/altar.png)
+
+A limewashed block altar under a gilt-framed retable (*retabulo*).
+
+A colonial chapel's altar is masonry, not furniture: a whitewashed block
+with a stone slab (the *mensa*) overhanging it, a linen frontal hanging
+over the face that meets the congregation, and behind it a dark timber
+retable whose only gold is its frame. The centre of the retable is a deep
+recess with nothing in it -- what a place keeps there is the map's
+business, not the furnishing's.
+
+`at` is the footprint centre of the block; the retable stands behind it.
+The frontal faces -X; `turn=90` faces it -Y, down a hall seen side-on.
+
+`altar(room, name, at, *, length=1.9, depth=0.8, height=1.0, retable_height=2.7, turn=0.0)`
+
+Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
+
+Measured bounds: `[[-0.48, -1.26, -0.0], [0.64, 1.26, 2.82]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `aged_cloth`, `charcoal`, `dark_wood`, `oxidized_bronze`, `ritual_gold`, `rough_limestone`, `sr_lamp_glow`, `wax`, `whitewash`.
+
+| Parameter | Default / required |
+|---|---|
+| `at` | `required` |
+| `length` | `1.9` |
+| `depth` | `0.8` |
+| `height` | `1.0` |
+| `retable_height` | `2.7` |
+| `turn` | `0.0` |
+
+Variation handles: `length`, `depth`, `height`, `retable_height`, `turn`. These are inputs to the same builder; review any changed proportions in context.
+
+## pew
+
+![pew](catalogue/pew.png)
+
+A heavy hardwood bench (*banco*) facing the altar (+X).
+
+Seen from the lane camera a pew shows its BACK, so the back rails and the
+end boards are what carry it: a congregation's seats read as a row of
+dark horizontals, not as chairs. The back is two rails with daylight
+between them and under the seat -- a solid back and full-height ends
+rendered as a row of black crates at native size.
+
+It faces +X; `turn=90` faces it +Y, so in a hall seen side-on the pews
+stand in rows across the lane and show their end boards. Those ends are
+low, with only a slender post carrying the back rail: as a foreground
+row in front of the player, full-height end boards were a wall of unlit
+slabs that hid everyone to the waist.
+
+`pew(room, name, at, *, length=2.4, depth=0.5, height=0.45, turn=0.0)`
+
+Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
+
+Measured bounds: `[[-0.265, -1.22, 0.0], [0.25, 1.22, 0.825]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `dark_wood`.
+
+| Parameter | Default / required |
+|---|---|
+| `at` | `required` |
+| `length` | `2.4` |
+| `depth` | `0.5` |
+| `height` | `0.45` |
+| `turn` | `0.0` |
+
+Variation handles: `length`, `depth`, `height`, `turn`. These are inputs to the same builder; review any changed proportions in context.
+
+## votive_stand
+
+![votive_stand](catalogue/votive_stand.png)
+
+An iron votive stand: a tray of candles, most of them burnt out.
+
+Cold wax is the point -- the stubs, the drips on the tray, the few still
+burning. `lit` candles get a flame; the rest are stubs of decreasing
+height. The flames are emissive and cast nothing, so a map that lights
+candles still places a `room.light` beside the stand.
+
+`votive_stand(room, name, at, *, width=0.9, depth=0.34, height=0.95, candles=7, lit=2)`
+
+Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
+
+Measured bounds: `[[-0.185, -0.465, 0.0], [0.185, 0.465, 1.35]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `sr_lamp_glow`, `wax`, `wrought_iron`.
+
+| Parameter | Default / required |
+|---|---|
+| `at` | `required` |
+| `width` | `0.9` |
+| `depth` | `0.34` |
+| `height` | `0.95` |
+| `candles` | `7` |
+| `lit` | `2` |
+
+Variation handles: `width`, `depth`, `height`, `candles`, `lit`. These are inputs to the same builder; review any changed proportions in context.
+
+## font
+
+![font](catalogue/font.png)
+
+A holy-water font (*pia*): a stone basin on a short column.
+
+Radial, and placed by the door, where a visitor meets it first.
+
+`font(room, name, at, *, height=0.95, radius=0.27)`
+
+Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
+
+Measured bounds: `[[-0.27, -0.256785, 0.0], [0.27, 0.256785, 0.95]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `old_limestone`.
+
+| Parameter | Default / required |
+|---|---|
+| `at` | `required` |
+| `height` | `0.95` |
+| `radius` | `0.27` |
+
+Variation handles: `height`, `radius`. These are inputs to the same builder; review any changed proportions in context.
+
+## mortar_tub
+
+![mortar_tub](catalogue/mortar_tub.png)
+
+A wooden tub of lime mortar with a trowel across its rim.
+
+A repair in progress: the sign that somebody is mending the fabric of the
+place rather than it simply being old.
+
+`mortar_tub(room, name, at, *, radius=0.24, height=0.3)`
+
+Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.
+
+Measured bounds: `[[-0.2448, -0.232819, 0.0], [0.2448, 0.232819, 0.3475]]` metres. Built meshes: 1; lights: 0.
+
+Materials: `dark_wood`, `whitewash`, `wrought_iron`.
+
+| Parameter | Default / required |
+|---|---|
+| `at` | `required` |
+| `radius` | `0.24` |
+| `height` | `0.3` |
+
+Variation handles: `radius`, `height`. These are inputs to the same builder; review any changed proportions in context.

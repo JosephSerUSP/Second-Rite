@@ -1,13 +1,13 @@
 {
   "version": 1,
   "fingerprint": {
-    "tools/blender/recipes/furnishings.py": "1ea31c4a7f4d3dec5badc5ae3c46a5a5da4be537e4c7cb119519c721a09bb043",
-    "tools/blender/recipes/catalogue-fixtures.json": "ad34efd4bce308f7e1fe444709c836400b19d3efd3db394f243925d9d52a2d4f",
-    "tools/blender/recipes/interior.py": "346acee292d84fb7dcb5ea5f35efc00a899805413765446550190234b1fa568a",
+    "tools/blender/recipes/furnishings.py": "c0f28aa04716005b05256410d84365fe7e7352b7c6ac7aa78028112580e9fda5",
+    "tools/blender/recipes/catalogue-fixtures.json": "a4021ca7e3cd3fc24df5ee47bbde81856fde2b66641182588f337ec39f4e1081",
+    "tools/blender/recipes/interior.py": "d05e08cf98f00ee92aa92b941a6b86b775045805fca6b931c64232b7b99ee704",
     "tools/blender/second_rite_asset_core.py": "250ced208b568a27ee6e5e42128b3654cba4271034f28b8c0b35209207042564",
     "tools/blender/recipes/first_stratum/common.py": "a00bb9a30366793b2129d92d361c1829593db380868317c4abb51d892dfacedd",
-    "tools/asset-language/materials.json": "be69d7e11e0e4ddc9e954a77e14693fe7b1bd312e85e01687fbf5a9693e40d3e",
-    "tools/blender/furnishings_catalogue.py": "46bbb44e5d8179eeb83578cb51a628c21949a70ed943c5b1baf1be13e5427f22",
+    "tools/asset-language/materials.json": "9dbebd25977c8ea5fa9e452430b7eba70c92c26503521992d83fdf7f51c2b807",
+    "tools/blender/furnishings_catalogue.py": "a709e3df652976b02c02fdfb34ef4051839f002c36d0f46435d79fbc796a5d9e",
     "tools/blender/render_furnishings_catalogue.py": "8de4524f3f100e673250faf27f7c91960970becbaab92f0fd18ce21d1ad06e77",
     "tools/blender/blender-pin.json": "2b409254a23e801d0a31bbf750a0e845bccec21bc2beba457243b3f5aa7ef347",
     "tools/blender/fixtures/town_sideview_camera.json": "f802bfa217ffbfb273352dfa07b9db3c70be558798e7f0ffde14f78e786fd4cd",
@@ -298,7 +298,7 @@
     {
       "id": "woven_runner",
       "signature": "woven_runner(room, name, at, *, length=4.7, width=1.55, cloth_mat, border_mat, motif_mat)",
-      "description": "Flat decorative textile with broad borders and restrained lozenge repeats.",
+      "description": "Flat decorative textile with broad borders and restrained lozenge repeats.\n\nThe lozenges repeat every 0.74 m along the length, so a long aisle runner\ncarries its motif end to end (the 4.7 m default keeps its five).",
       "parameters": [
         {
           "name": "room",
@@ -1761,6 +1761,89 @@
       "materials": [
         "dark_wood",
         "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "door_frame",
+      "signature": "door_frame(room, name, lo, hi, height, *, wall='back', jamb=0.2, proud=0.06)",
+      "description": "A cut-stone surround (*cantaria*) for a door.\n\n`lo`/`hi` span the opening along its wall: Y for the back wall, X for a\nside wall (`wall=\"-y\"` or `\"+y\"`, the end walls of a long hall). Pair it\nwith the same opening used by `back_wall`/`doorway` or\n`side_walls`/`side_doorway`. A colonial door is a dark panelled leaf in a\nlimestone frame set into limewash: the frame is what makes an opening\nread as a door and not a hole. Jambs, a lintel with a keystone, a sill.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "lo",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "hi",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "wall",
+          "keywordOnly": true,
+          "required": false,
+          "default": "'back'"
+        },
+        {
+          "name": "jamb",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.2"
+        },
+        {
+          "name": "proud",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.06"
+        }
+      ],
+      "fixture": {
+        "lo": -0.6,
+        "hi": 0.6,
+        "height": 2.6
+      },
+      "placement": "Around a door opening on the back wall (lo/hi along Y) or an end wall (wall=-y/+y, lo/hi along X); pass the same span and height as the opening.",
+      "bounds": [
+        [
+          3.776667,
+          -0.8,
+          0.0
+        ],
+        [
+          4.116667,
+          0.8,
+          2.9
+        ]
+      ],
+      "dimensions": [
+        0.34,
+        1.6,
+        2.9
+      ],
+      "materials": [
+        "rough_limestone"
       ],
       "meshCount": 1,
       "lightCount": 0
@@ -3291,9 +3374,375 @@
       ],
       "meshCount": 1,
       "lightCount": 0
+    },
+    {
+      "id": "altar",
+      "signature": "altar(room, name, at, *, length=1.9, depth=0.8, height=1.0, retable_height=2.7, turn=0.0)",
+      "description": "A limewashed block altar under a gilt-framed retable (*retabulo*).\n\nA colonial chapel's altar is masonry, not furniture: a whitewashed block\nwith a stone slab (the *mensa*) overhanging it, a linen frontal hanging\nover the face that meets the congregation, and behind it a dark timber\nretable whose only gold is its frame. The centre of the retable is a deep\nrecess with nothing in it -- what a place keeps there is the map's\nbusiness, not the furnishing's.\n\n`at` is the footprint centre of the block; the retable stands behind it.\nThe frontal faces -X; `turn=90` faces it -Y, down a hall seen side-on.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.9"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.8"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "1.0"
+        },
+        {
+          "name": "retable_height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.7"
+        },
+        {
+          "name": "turn",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.48,
+          -1.26,
+          -0.0
+        ],
+        [
+          0.64,
+          1.26,
+          2.82
+        ]
+      ],
+      "dimensions": [
+        1.12,
+        2.52,
+        2.82
+      ],
+      "materials": [
+        "aged_cloth",
+        "charcoal",
+        "dark_wood",
+        "oxidized_bronze",
+        "ritual_gold",
+        "rough_limestone",
+        "sr_lamp_glow",
+        "wax",
+        "whitewash"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "pew",
+      "signature": "pew(room, name, at, *, length=2.4, depth=0.5, height=0.45, turn=0.0)",
+      "description": "A heavy hardwood bench (*banco*) facing the altar (+X).\n\nSeen from the lane camera a pew shows its BACK, so the back rails and the\nend boards are what carry it: a congregation's seats read as a row of\ndark horizontals, not as chairs. The back is two rails with daylight\nbetween them and under the seat -- a solid back and full-height ends\nrendered as a row of black crates at native size.\n\nIt faces +X; `turn=90` faces it +Y, so in a hall seen side-on the pews\nstand in rows across the lane and show their end boards. Those ends are\nlow, with only a slender post carrying the back rail: as a foreground\nrow in front of the player, full-height end boards were a wall of unlit\nslabs that hid everyone to the waist.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "length",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2.4"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.5"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.45"
+        },
+        {
+          "name": "turn",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.0"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.265,
+          -1.22,
+          0.0
+        ],
+        [
+          0.25,
+          1.22,
+          0.825
+        ]
+      ],
+      "dimensions": [
+        0.515,
+        2.44,
+        0.825
+      ],
+      "materials": [
+        "dark_wood"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "votive_stand",
+      "signature": "votive_stand(room, name, at, *, width=0.9, depth=0.34, height=0.95, candles=7, lit=2)",
+      "description": "An iron votive stand: a tray of candles, most of them burnt out.\n\nCold wax is the point -- the stubs, the drips on the tray, the few still\nburning. `lit` candles get a flame; the rest are stubs of decreasing\nheight. The flames are emissive and cast nothing, so a map that lights\ncandles still places a `room.light` beside the stand.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "width",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.9"
+        },
+        {
+          "name": "depth",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.34"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.95"
+        },
+        {
+          "name": "candles",
+          "keywordOnly": true,
+          "required": false,
+          "default": "7"
+        },
+        {
+          "name": "lit",
+          "keywordOnly": true,
+          "required": false,
+          "default": "2"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.185,
+          -0.465,
+          0.0
+        ],
+        [
+          0.185,
+          0.465,
+          1.35
+        ]
+      ],
+      "dimensions": [
+        0.37,
+        0.93,
+        1.35
+      ],
+      "materials": [
+        "sr_lamp_glow",
+        "wax",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "font",
+      "signature": "font(room, name, at, *, height=0.95, radius=0.27)",
+      "description": "A holy-water font (*pia*): a stone basin on a short column.\n\nRadial, and placed by the door, where a visitor meets it first.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.95"
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.27"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.27,
+          -0.256785,
+          0.0
+        ],
+        [
+          0.27,
+          0.256785,
+          0.95
+        ]
+      ],
+      "dimensions": [
+        0.54,
+        0.51357,
+        0.95
+      ],
+      "materials": [
+        "old_limestone"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
+    },
+    {
+      "id": "mortar_tub",
+      "signature": "mortar_tub(room, name, at, *, radius=0.24, height=0.3)",
+      "description": "A wooden tub of lime mortar with a trowel across its rim.\n\nA repair in progress: the sign that somebody is mending the fabric of the\nplace rather than it simply being old.",
+      "parameters": [
+        {
+          "name": "room",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "name",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "at",
+          "keywordOnly": false,
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "radius",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.24"
+        },
+        {
+          "name": "height",
+          "keywordOnly": true,
+          "required": false,
+          "default": "0.3"
+        }
+      ],
+      "fixture": {},
+      "placement": "Floor at=(x,y), or use room.surface(z) for a support. +X is room depth, -Y is screen right; inspect the measured bounds.",
+      "bounds": [
+        [
+          -0.2448,
+          -0.232819,
+          0.0
+        ],
+        [
+          0.2448,
+          0.232819,
+          0.3475
+        ]
+      ],
+      "dimensions": [
+        0.4896,
+        0.465638,
+        0.3475
+      ],
+      "materials": [
+        "dark_wood",
+        "whitewash",
+        "wrought_iron"
+      ],
+      "meshCount": 1,
+      "lightCount": 0
     }
   ],
   "images": {
+    "altar.png": "c5f0871cd876405f24eb01f8e7e46966e52b3cead8fb3ed1ab6c91f76237391d",
     "anvil.png": "445077568525ecbc7012fc3640577f5bd03eb4c85ebad10ef1d8e5949ecd6598",
     "azulejo_dado.png": "8250c9a765f036216a708c42f80ed39a19ba6bfb4c646a77052c2dbe19a8131e",
     "barrel.png": "e4e20d581c3b80794754f79bdfce15be900cb432b0c622c75b97b3beea92194f",
@@ -3306,11 +3755,13 @@
     "chair.png": "7f971b6b23d06deab9f560eb43066fe77478ea8216eecd07d24f9e84024f82db",
     "chest.png": "2bea92a237364e9cff971e9e58c1ba5c406b11a505753a34073941643426c550",
     "cloth_bundle.png": "9a8b77d76f449a15303bbb7846fa6659f4ce572fd4ca69f67696f449c30a56ce",
-    "contact-sheet.png": "6a01324259a653be0e834f4e724441967557f0ed49d234a57dfdb9a51e81a95e",
+    "contact-sheet.png": "ce9d1f91c49a831a89fddc8406e13779453778a7a13941348083e7e68bcd26c4",
     "counter.png": "0f6c8375110fd8022c8338dd5f20384ccca7901d44e3b62de38741ebb1cbe03e",
     "counter_returns.png": "bcd5109445d162e82997d77221a313056bd1fd25aa7f387f32770071e6584af2",
     "demijohn.png": "7b760caa7b9e9630913d62bb09a39ce701b780d49320deba905c0a4226aaffbd",
+    "door_frame.png": "5d265090f22c377615dd4e70f7ff82fc4ac6b2499af1d7ea9fbd36ddad07dd5a",
     "fine_bench.png": "d149b271b06e6c091d592bdc109dee431619b8311d6a4d1823a9394bfc72405c",
+    "font.png": "e75f40f2a3e10e583eae35c4d83d6a1967f215bc09f534464730c9edbb66bfc6",
     "forge.png": "a7c21cc76bb4deaa00834720be036c43152d47be23dc622eeaac7030c12e20f4",
     "framed_picture.png": "588f2e82ede922b0d7c604d7189ae6f3b06c02824c74b6d7f94ac91497899137",
     "grindstone.png": "8d642b7b2e66bc56ad00391ec324ffe1c3e716fa2bfc1271c2d0c3f14f6e27f3",
@@ -3318,7 +3769,9 @@
     "jar.png": "82ed33c76e0d3913fe26d4973dbee69e34a7ffb0d848bbaf267b00392b4892a0",
     "lantern.png": "b389eca4de1447c68486324fbb217fc12053c8a15ca1f230a63b3cf9f25cbbee",
     "ledger.png": "4cae02e2669bca3b960e574f30da68aa9e9c4eb582c8435ec9863ad7a0b8e250",
+    "mortar_tub.png": "e079e860f91db60935f6b2fbec87a74ac11d7f642eaeff2442ca4e1dada6181a",
     "peel.png": "1392e7012e1e9be83749c61a685378e78cffb8071db99f15ca306f68360f1b18",
+    "pew.png": "281a67864ed24af7e3de76ef7febbe9a670ec9762450b1b4ee9f0e7836c32174",
     "potted_plant.png": "dee81eae08d9b55cf460d4da6ff36a65fda4c1fa391205f45ef463d62d2aaa05",
     "quench_tub.png": "8d1c1917363f5a753a9a5826cdefac5d33a927d406b34db45b887ccd9af47e25",
     "record_bay.png": "7e27d8865ac60e312289973315fd63bda6d6a63da0bc692e2fa8c1acfbecfd76",
@@ -3335,6 +3788,7 @@
     "stock_shelf.png": "c19ffe765d96b28b5ec314dbf223ed97102177cd366ded81c2e8cf7696a28259",
     "table.png": "35a4422447163f49ca0b5bb1bdf8ae6ac80841d66695c8483787a43382464522",
     "tool_rail.png": "6447960015640e7d73c6a2bc836e307ab2046d65277dee7de68caa72a49b54c9",
+    "votive_stand.png": "32360c6ce13600ed2dd4cd1a8a9a4d8da28cfec243c3bafd02d7ce65089f408e",
     "waiting_bench.png": "ed35fd660dc565cec7b046f9c493f9487abc5a7787d15d5485ef5663326f664a",
     "water_stand.png": "2eb2cbf5c37a905cf13c970303e67f90d039f21c9120bce966008c0a66eced45",
     "wax_bench.png": "96daf69510a77ff4bc14ce4ff184510b6cb30d7d2bff54b19c522d6b9e76025d",

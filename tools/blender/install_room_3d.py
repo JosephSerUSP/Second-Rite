@@ -16,6 +16,9 @@ The pipeline's own anchors are already engine-space (the exporter authors the
 empties there), so they pass through untouched.
 
     python tools/blender/install_room_3d.py --export <dir> --name alicias_padaria_3d
+
+To review a package before it ships, install it outside the Project with
+`--destination out/<review>/<name>`; the runtime stage then copies it in.
 """
 
 from __future__ import annotations
@@ -43,10 +46,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="install_room_3d")
     parser.add_argument("--export", type=Path, required=True)
     parser.add_argument("--name", required=True)
+    parser.add_argument("--destination", type=Path, default=None,
+                        help="install here instead of the shipped "
+                             "st_maria_town/<name> (use out/ for review)")
     args = parser.parse_args()
 
     manifest = json.loads((args.export / "environment.json").read_text("utf-8"))
-    destination = ENV_ROOT / args.name
+    destination = args.destination or ENV_ROOT / args.name
     destination.mkdir(parents=True, exist_ok=True)
 
     copied = []
@@ -57,8 +63,11 @@ def main() -> None:
             copied.append(asset)
 
     min_x, min_y, min_z, max_x, max_y, max_z = manifest["bounds"]
+    # The exporter records the centre it mirrored with; older exports predate
+    # the field and were all Classic-width rooms.
+    centre = manifest.get("laneCentre", LANE_CENTRE)
     # A reflection swaps which endpoint is the minimum.
-    lo, hi = sorted((LANE_CENTRE - min_y, LANE_CENTRE - max_y))
+    lo, hi = sorted((centre - min_y, centre - max_y))
 
     package = {
         "contractVersion": 1,

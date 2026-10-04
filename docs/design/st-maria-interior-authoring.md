@@ -33,7 +33,9 @@ comes from few sources, which is what makes the lighting rules below work.
 ## 2. The fixed contract
 
 Everything here is already solved. **Do not re-derive it, and do not change the
-lens.**
+lens** -- with one exception: a long, scrolling room may use a closer, wider,
+yawed camera that keeps the character scale (see "A long room may use a more
+creative camera" in section 6).
 
 - The game ships three width presets, all 240 tall: **256 × 240 ("Classic",
   the canon one)**, 320 × 240, and 426 × 240.
@@ -252,6 +254,7 @@ Copy `tools/blender/recipes/passage_house_room3.py` as the model for the
 | `.partition(name, y, x0, x1, height=)` | A stub wall dividing the plan, stopping short of the ceiling |
 | `.foreground(name, ahead, span=, z0=, z1=)` | A near-field occluder in front of the room; a proscenium is refused |
 | `.doorway(name, y0, y1, z1, recess=, lit=, open_back=)` | A door with an **inward** threshold |
+| `.side_doorway(name, side, x0, x1, z1, open_back=)` | A door in an END wall of a long room (pair with `side_walls(openings=)`): a church's main door, opposite the altar |
 | `.exit_threshold(y, width=)` | The way out: floor extruded **outward** |
 | `.window_light(y, z)` / `.doorway_light(x, y)` / `.light(...)` | Canonical sources |
 | `.part(name, size, location, material)` | Anything bespoke |
@@ -287,6 +290,16 @@ light, and leaves a `_light` sibling) · `barrel` · `sack` · `sack_stack`.
 **Forge, second trade** — `scrap_heap` (salvage not yet decided about) ·
 `grindstone` (a wheel on edge — the one curve here that reads in elevation) ·
 `fine_bench` (precious-metal work, over a catch skin).
+
+**Chapel** — `altar` (limewashed block, stone *mensa*, gilt-framed retable
+with an empty recess) · `pew` (seen from behind: open back, low ends) ·
+`votive_stand` (mostly burnt-out candles; `lit=` lights a few) · `font`
+(holy-water *pia*) · `mortar_tub` (a repair in progress). Candle wax is
+`room.wax`, gilt is `room.gilt`.
+
+`python tools/blender/furnishings_catalogue.py --find "<word>"` lists the
+measured size and signature of every piece; a hit marked *description only*
+matched prose, not the piece's name.
 
 **Add to this module rather than modelling furniture inside a map.** A vase or
 a cabinet built in one map is invisible to every other author; the same piece
@@ -554,6 +567,59 @@ Render it against the real camera with a Walker in shot:
 python tools/blender/run.py tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --render out/<map>.png
 ```
 
+The stager can move the Walker only in depth. To see the player at the spawn,
+an NPC or the exit, review the room in the real runtime:
+
+```bash
+python tools/blender/run.py tools/blender/export_room_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --output out/<map>/export --exit-y <engine y> --npc npc_<name>=<engine y>
+python tools/blender/install_room_3d.py --export out/<map>/export --name <map>_3d --destination out/<map>/<map>_3d
+node tools/blender/stage_candidate.js --output out/<map>/stage --package out/<map>/<map>_3d --map-id <id> --npc <eventInstanceId>=npc_<name>
+python tools/blender/capture_environment.py --game-root out/<map>/stage/game --output out/<map>/frames --map-id <id> --positions <engine y...>
+```
+
+**`--exit-y`, `--npc` and `--positions` are ENGINE lane Y, not the recipe's
+Blender Y:** `engine_y = 3.8833 - blender_y`. A recipe's `EXIT_Y = -3.0`
+(screen right) is `--exit-y 6.8833`. The walkable lane of a Classic-width
+room is engine Y 0.35 to 7.4167; screen right is the larger number.
+`--npc-x` moves an NPC off the aisle in depth.
+
+**A long hall scrolls.** Build it with `Interior(half_width=H)` and export it
+with `--span 2H`; its anchors are then `engine_y = H - blender_y`, so the hall
+covers engine Y 0..2H. Stage it with `--lane <min> <max>` (inside the end
+walls, short of any step) and `--track H <px>`, where `px` is how far the
+camera may move from the centre: `(H - 4.96) * 25.8` for the map 28 camera,
+78 for a 16 m hall. Capture positions along the whole lane; the stager's
+`--full-map` render shows the whole hall in one frame.
+
+**A long room may use a more creative camera** (owner direction, 2026-10-04):
+closer, wider and yawed off the lane, so the hall converges and the
+foreground cuts diagonally, as in the oblique references in
+[`references/st-maria-chapel.md`](references/st-maria-chapel.md). One
+invariant holds: `distance × tan(fovDegrees / 2)` stays **4.667 m**, which
+is what keeps the Walker at 48 px at the camera's target. The vertical
+framing (`projectionWindowOffsetY`) was calibrated for 18.667 m and must be
+re-solved with the distance. Verified in the runtime for the chapel:
+
+```bash
+--camera '{"distance":12.0,"fovDegrees":42.501,"yawDegrees":12,"target":{"y":7.5},"projectionWindowOffsetY":-54.70}'
+```
+
+**Yaw toward what the player walks to.** A yawed camera sees the end wall
+it sits nearest almost edge-on: at -12 degrees the chapel's main door (in the
+screen-right end wall) was a sliver, at +12 it reads as the room's
+destination. Yaw makes the character's size vary along the lane (about 45 to
+53 px over the chapel at 12 degrees; -24 degrees at 9.3 m ran 40 to 60 px,
+too much).
+A yawed camera can also clip the player at the frame edge near the end of the
+lane, so check the last position and shorten `--lane` if it does. Yaw alone
+at 18.667 m changes almost nothing: the lens is nearly orthographic there.
+
+`stage_candidate.js` gives the target map map 28's real-3D presentation
+(camera, lane, `ceilingStyle`, fog) and moves its exit and the listed NPC
+events onto the package's anchors, all inside `out/`. Nothing in the
+Project changes, so promoting the room onto its map remains a separate,
+owner-approved step.
+
 ### The renderer is Cycles, and that is a lighting decision
 
 These rooms are **sealed boxes**, so the world fill should barely reach
@@ -707,9 +773,15 @@ From the opening walkthrough, St. Maria's interiors are:
 - **Passage House corridor** — done (`passage_house_corridor`)
 - **Alicia's Padaria** — done (`alicias_padaria`, spends the side window)
 - **Laura's smith** — done (`lauras_smith`, spends the platform)
-- Passage Office (the Registry — grants the Crossing Writ)
+- Passage Office (the Registry — grants the Crossing Writ) — done
+  (`passage_office.blend`, adopted)
+- The Chapel (Sister Agnes) — scaffold (`st_maria_chapel`): a 16 m nave
+  seen side-on through a yawed camera, the aisle as the lane with a red
+  carpet, pews in a foreground and a background bank, the main door open in
+  the end wall opposite the altar; spends the platform (the chancel steps Agnes is
+  repairing). References: `references/st-maria-chapel.md`. Map 22 still shows its 2D plate; promoting the 3D room onto it
+  is an owner decision.
 - The Rusty Tankard (rumours)
-- The Chapel (Sister Agnes)
 
 Read the place's own text in `projects/hichaukitoden-game/docs/walkthrough/`
 and `data/commonEvents.json` before inventing anything. Room 3's straw, feed

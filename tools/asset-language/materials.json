@@ -544,6 +544,18 @@
       "generationTags": ["dark brown black ink"],
       "legacyMtl": {"kd": [0.133, 0.11, 0.094]},
       "notes": "Written entries and stamp pads."
+    },
+    {
+      "id": "red_wool",
+      "displayName": "Red Wool",
+      "family": "cloth",
+      "baseColorSrgb": [124, 30, 28],
+      "metallicHint": 0,
+      "roughnessHint": 0.95,
+      "opacityMode": "opaque",
+      "generationTags": ["deep red woollen runner", "church aisle carpet"],
+      "legacyMtl": {"kd": [0.486, 0.118, 0.11]},
+      "notes": "Woven red runner: the aisle carpet of a colonial chapel (Rosario, Cidade Velha; docs/design/references/st-maria-chapel.md)."
     }
   ]
 }

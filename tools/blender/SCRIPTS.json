@@ -477,6 +477,11 @@
       "path": "run.py",
       "role": "production",
       "purpose": "Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit."
+    },
+    {
+      "path": "stage_candidate.js",
+      "role": "production",
+      "purpose": "Stage a candidate 3D room package onto an existing map in a fresh out/ runtime stage, for native capture; the Project is untouched."
     }
   ]
 }

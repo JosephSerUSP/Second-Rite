@@ -133,4 +133,24 @@ result["alcoveStraddlingOpeningRefused"] = guarded(
     lambda: k.back_wall(openings=[(-1.6, -0.8, 1.0, 2.0)],
                         alcoves=[(-3.0, -1.2, 1.0)]))
 
+# -- a platform can face along the lane; a piece can turn ------------------
+e = room()
+e.platform("step", -1.0, 2.0, 1.0, 3.0, 0.2, edge="-y")
+riser = next(o for o in e.parts if o.name == "step_riser")
+result["platformEdgeMinusY"] = {"riserY": round(riser.location.y, 4),
+                                "riserSize": [round(v, 4) for v in riser.dimensions]}
+result["platformBadEdge"] = guarded(lambda: room().platform("s", 0, 1, 0, 1, 0.2, edge="+x"))
+
+t = room()
+with t.piece("turned", turn=90, about=(1.0, 0.0)):
+    t.part("turned_slab", (2.0, 0.2, 0.1), (1.0, 0.0, 0.05), t.wood)
+turned = next(o for o in t.parts if o.name == "turned")
+import bpy  # noqa: E402
+bpy.context.view_layer.update()
+xs = [(turned.matrix_world @ v.co) for v in turned.data.vertices]
+result["pieceTurn"] = {"spanX": round(max(c.x for c in xs) - min(c.x for c in xs), 4),
+                       "spanY": round(max(c.y for c in xs) - min(c.y for c in xs), 4),
+                       "centre": [round(sum(c.x for c in xs) / len(xs), 4),
+                                  round(sum(c.y for c in xs) / len(xs), 4)]}
+
 print("PROBE " + json.dumps(result))

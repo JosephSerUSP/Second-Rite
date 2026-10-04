@@ -178,17 +178,23 @@ def records_press(room, name, at, *, width=2.1, depth=.82, height=2.8, panel_mat
 
 
 def woven_runner(room, name, at, *, length=4.7, width=1.55, cloth_mat, border_mat, motif_mat):
-    """Flat decorative textile with broad borders and restrained lozenge repeats."""
+    """Flat decorative textile with broad borders and restrained lozenge repeats.
+
+    The lozenges repeat every 0.74 m along the length, so a long aisle runner
+    carries its motif end to end (the 4.7 m default keeps its five).
+    """
     x,y=at
+    count=max(1,int((length-0.6)/0.74))
     with room.piece(name):
         room.part(name+'_field',(width,length,.012),(x,y,.008),cloth_mat)
         for side in (-1,1):
             room.part(name+'_long_border',(.13,length-.12,.004),(x+side*(width/2-.09),y,.016),border_mat)
             room.part(name+'_end_border',(width-.12,.13,.004),(x,y+side*(length/2-.09),.016),border_mat)
-        for i in range(5):
-            obj=room.part(name+'_lozenge',(.25,.25,.003),(x,y+(i-2)*.74,.017),motif_mat)
+        for i in range(count):
+            offset=(i-(count-1)/2)*.74
+            obj=room.part(name+'_lozenge',(.25,.25,.003),(x,y+offset,.017),motif_mat)
             obj.rotation_euler.z=math.pi/4
-            obj=room.part(name+'_lozenge_inset',(.12,.12,.003),(x,y+(i-2)*.74,.020),cloth_mat)
+            obj=room.part(name+'_lozenge_inset',(.12,.12,.003),(x,y+offset,.020),cloth_mat)
             obj.rotation_euler.z=math.pi/4
 
 
@@ -554,6 +560,48 @@ def window_dressing(room, name, y0, y1, z0, z1, *, grille=True, shutters=True):
                           (0.05, span * 0.34, z1 - z0),
                           (x - 0.1, cy + side * (span * 0.5 + span * 0.17),
                            (z0 + z1) / 2.0), room.wood)
+
+
+def door_frame(room, name, lo, hi, height, *, wall="back", jamb=0.2, proud=0.06):
+    """A cut-stone surround (*cantaria*) for a door.
+
+    `lo`/`hi` span the opening along its wall: Y for the back wall, X for a
+    side wall (`wall="-y"` or `"+y"`, the end walls of a long hall). Pair it
+    with the same opening used by `back_wall`/`doorway` or
+    `side_walls`/`side_doorway`. A colonial door is a dark panelled leaf in a
+    limestone frame set into limewash: the frame is what makes an opening
+    read as a door and not a hole. Jambs, a lintel with a keystone, a sill.
+    """
+    if wall not in ("back", "-y", "+y"):
+        raise ValueError(f"door_frame {name!r}: wall must be back, -y or +y")
+    mid = (lo + hi) / 2.0
+    width = hi - lo + jamb * 2.0
+    if wall == "back":
+        face, depth_axis = room.back_x - proud / 2.0, 0
+        inward = -1.0
+    else:
+        sign = -1.0 if wall == "-y" else 1.0
+        face, depth_axis = sign * (room.half_width - proud / 2.0), 1
+        inward = -sign
+
+    def place(along, across_offset, size_along, size_across, size_z, z):
+        # Build in (along-the-wall, out-of-the-wall) terms, then map to X/Y.
+        across = face + across_offset
+        if depth_axis == 0:
+            return (size_across, size_along, size_z), (across, along, z)
+        return (size_along, size_across, size_z), (along, across, z)
+
+    with room.piece(name):
+        for index, edge in enumerate((lo - jamb / 2.0, hi + jamb / 2.0)):
+            size, at = place(edge, 0.0, jamb, proud, height, height / 2.0)
+            room.part(f"{name}_jamb_{index}", size, at, room.stone)
+        size, at = place(mid, 0.0, width, proud, jamb * 1.2, height + jamb * 0.6)
+        room.part(f"{name}_lintel", size, at, room.stone)
+        size, at = place(mid, inward * 0.015, jamb * 0.9, proud + 0.03, jamb * 1.5,
+                         height + jamb * 0.75)
+        room.part(f"{name}_keystone", size, at, room.stone)
+        size, at = place(mid, -inward * 0.13, width, 0.3, 0.04, 0.02)
+        room.part(f"{name}_sill", size, at, room.stone)
 
 
 def stair(room, name, *, y, x_start, steps=7, rise=0.19, run=0.3, width=1.5,
@@ -1202,3 +1250,179 @@ def fine_bench(room, name, at, *, length=1.15, width=0.52, height=0.92):
         room.part(f"{name}_box", (0.14, 0.20, 0.10),
                   (x + width * 0.18, y + length * 0.32, height + 0.09),
                   room.wood)
+
+
+# ---------------------------------------------------------------------------
+# Chapel
+# ---------------------------------------------------------------------------
+
+def altar(room, name, at, *, length=1.9, depth=0.8, height=1.0,
+          retable_height=2.7, turn=0.0):
+    """A limewashed block altar under a gilt-framed retable (*retabulo*).
+
+    A colonial chapel's altar is masonry, not furniture: a whitewashed block
+    with a stone slab (the *mensa*) overhanging it, a linen frontal hanging
+    over the face that meets the congregation, and behind it a dark timber
+    retable whose only gold is its frame. The centre of the retable is a deep
+    recess with nothing in it -- what a place keeps there is the map's
+    business, not the furnishing's.
+
+    `at` is the footprint centre of the block; the retable stands behind it.
+    The frontal faces -X; `turn=90` faces it -Y, down a hall seen side-on.
+    """
+    x, y = at
+    slab = 0.09
+    with room.piece(name, turn=turn, about=at):
+        room.part(f"{name}_block", (depth, length, height - slab),
+                  (x, y, (height - slab) / 2.0), room.whitewash)
+        room.part(f"{name}_mensa", (depth + 0.12, length + 0.14, slab),
+                  (x, y, height - slab / 2.0), room.stone)
+        # The frontal hangs over the camera-facing (-X) face.
+        room.part(f"{name}_frontal", (0.03, length * 0.82, height * 0.62),
+                  (x - depth / 2.0 - 0.065, y, height - height * 0.31),
+                  room.cloth)
+        room.part(f"{name}_cloth", (depth + 0.04, length + 0.02, 0.02),
+                  (x, y, height + 0.01), room.cloth)
+        # Two bronze candlesticks at the ends of the mensa. The flames are
+        # emissive and cast nothing; a map that lights them adds a light.
+        for index, dy in enumerate((-length * 0.36, length * 0.36)):
+            base = height + 0.02
+            room.part(f"{name}_stick_foot_{index}", (0.14, 0.14, 0.04),
+                      (x + 0.1, y + dy, base + 0.02), room.bronze)
+            room.part(f"{name}_stick_{index}", (0.04, 0.04, 0.34),
+                      (x + 0.1, y + dy, base + 0.21), room.bronze)
+            room.part(f"{name}_candle_{index}", (0.045, 0.045, 0.2),
+                      (x + 0.1, y + dy, base + 0.48), room.wax)
+            room.part(f"{name}_flame_{index}", (0.035, 0.035, 0.06),
+                      (x + 0.1, y + dy, base + 0.61), room.lamplight)
+
+        rx = x + depth / 2.0 + 0.16
+        width = length + 0.5
+        room.part(f"{name}_retable", (0.16, width, retable_height),
+                  (rx, y, retable_height / 2.0), room.wood)
+        # The recess: a dark panel set back into the retable, framed in gilt.
+        room.part(f"{name}_recess", (0.05, width * 0.34, retable_height * 0.36),
+                  (rx - 0.06, y, retable_height * 0.62), room.charcoal)
+        frame = 0.06
+        cz = retable_height * 0.62
+        hz = retable_height * 0.18 + frame / 2.0
+        hy = width * 0.17 + frame / 2.0
+        for index, dz in enumerate((-hz, hz)):
+            room.part(f"{name}_gilt_h_{index}", (0.06, width * 0.34 + frame * 2,
+                                                 frame),
+                      (rx - 0.1, y, cz + dz), room.gilt)
+        for index, dy in enumerate((-hy, hy)):
+            room.part(f"{name}_gilt_v_{index}", (0.06, frame,
+                                                 retable_height * 0.36),
+                      (rx - 0.1, y + dy, cz), room.gilt)
+        # The outer frame: two gilt pilasters and a cornice.
+        for index, dy in enumerate((-width / 2.0 + 0.07, width / 2.0 - 0.07)):
+            room.part(f"{name}_pilaster_{index}", (0.1, 0.12, retable_height),
+                      (rx - 0.06, y + dy, retable_height / 2.0), room.gilt)
+        room.part(f"{name}_cornice", (0.24, width + 0.12, 0.12),
+                  (rx - 0.04, y, retable_height + 0.06), room.gilt)
+
+
+def pew(room, name, at, *, length=2.4, depth=0.5, height=0.45, turn=0.0):
+    """A heavy hardwood bench (*banco*) facing the altar (+X).
+
+    Seen from the lane camera a pew shows its BACK, so the back rails and the
+    end boards are what carry it: a congregation's seats read as a row of
+    dark horizontals, not as chairs. The back is two rails with daylight
+    between them and under the seat -- a solid back and full-height ends
+    rendered as a row of black crates at native size.
+
+    It faces +X; `turn=90` faces it +Y, so in a hall seen side-on the pews
+    stand in rows across the lane and show their end boards. Those ends are
+    low, with only a slender post carrying the back rail: as a foreground
+    row in front of the player, full-height end boards were a wall of unlit
+    slabs that hid everyone to the waist.
+    """
+    x, y = at
+    back_x = x - depth / 2.0 + 0.03
+    rail_z = height + 0.34
+    with room.piece(name, turn=turn, about=at):
+        room.part(f"{name}_seat", (depth, length, 0.06),
+                  (x, y, height - 0.03), room.wood)
+        room.part(f"{name}_apron", (0.04, length - 0.16, 0.08),
+                  (back_x, y, height - 0.1), room.wood)
+        room.part(f"{name}_back_low", (0.05, length, 0.1),
+                  (back_x, y, height + 0.14), room.wood)
+        room.part(f"{name}_rail", (0.09, length + 0.04, 0.07),
+                  (back_x, y, rail_z), room.wood)
+        for index, dy in enumerate((-length / 2.0 + 0.04, length / 2.0 - 0.04)):
+            room.part(f"{name}_end_{index}", (depth * 0.8, 0.08, height + 0.08),
+                      (x, y + dy, (height + 0.08) / 2.0), room.wood)
+            room.part(f"{name}_post_{index}", (0.06, 0.07, rail_z - height),
+                      (back_x, y + dy, (height + rail_z) / 2.0), room.wood)
+
+
+def votive_stand(room, name, at, *, width=0.9, depth=0.34, height=0.95,
+                 candles=7, lit=2):
+    """An iron votive stand: a tray of candles, most of them burnt out.
+
+    Cold wax is the point -- the stubs, the drips on the tray, the few still
+    burning. `lit` candles get a flame; the rest are stubs of decreasing
+    height. The flames are emissive and cast nothing, so a map that lights
+    candles still places a `room.light` beside the stand.
+    """
+    x, y = at
+    with room.piece(name):
+        room.part(f"{name}_tray", (depth, width, 0.04),
+                  (x, y, height), room.iron)
+        room.part(f"{name}_lip", (depth + 0.03, width + 0.03, 0.03),
+                  (x, y, height + 0.035), room.iron)
+        for index, (dx, dy) in enumerate(((-1, -1), (-1, 1), (1, -1), (1, 1))):
+            _leg(room, f"{name}_leg_{index}", x + dx * (depth / 2.0 - 0.03),
+                 y + dy * (width / 2.0 - 0.03), 0.035, height, room.iron)
+        room.part(f"{name}_stretcher", (0.03, width - 0.06, 0.03),
+                  (x, y, height * 0.25), room.iron)
+        # Spilled wax pooled on the tray.
+        room.part(f"{name}_drip", (depth * 0.6, width * 0.7, 0.012),
+                  (x, y, height + 0.026), room.wax)
+        for index in range(candles):
+            cy = y - width / 2.0 + width * (index + 0.5) / candles
+            cx = x + (0.06 if index % 2 else -0.06)
+            # Candles are drawn at 2-3 native px wide (~0.07 m at the lane
+            # camera); thinner ones vanish into the iron below them.
+            tall = 0.3 - 0.035 * ((index * 3) % candles)
+            tall = max(tall, 0.07)
+            room.part(f"{name}_candle_{index}", (0.07, 0.07, tall),
+                      (cx, cy, height + 0.02 + tall / 2.0), room.wax)
+            if index < lit:
+                room.part(f"{name}_flame_{index}", (0.05, 0.05, 0.08),
+                          (cx, cy, height + 0.02 + tall + 0.04),
+                          room.lamplight)
+
+
+def font(room, name, at, *, height=0.95, radius=0.27):
+    """A holy-water font (*pia*): a stone basin on a short column.
+
+    Radial, and placed by the door, where a visitor meets it first.
+    """
+    profile = ((0.55, 0.0), (0.55, 0.08), (0.24, 0.12), (0.2, 0.62 * height),
+               (0.42, 0.72 * height), (1.0, 0.88 * height), (0.94, height))
+    with room.piece(name):
+        _revolved(room, name, at, (radius, radius), profile, mat=room.plaster,
+                  sides=10)
+
+
+def mortar_tub(room, name, at, *, radius=0.24, height=0.3):
+    """A wooden tub of lime mortar with a trowel across its rim.
+
+    A repair in progress: the sign that somebody is mending the fabric of the
+    place rather than it simply being old.
+    """
+    x, y = at
+    profile = ((0.86, 0.0), (1.0, height * 0.85), (1.02, height))
+    with room.piece(name):
+        _revolved(room, f"{name}_tub", at, (radius, radius), profile,
+                  mat=room.wood, sides=10)
+        room.part(f"{name}_mortar", (radius * 1.7, radius * 1.7, 0.03),
+                  (x, y, height * 0.82), room.whitewash)
+        room.part(f"{name}_blade", (0.2, 0.11, 0.012),
+                  (x + radius * 0.4, y, height + 0.012), room.iron,
+                  rotation=(0.0, 0.0, 0.5))
+        room.part(f"{name}_handle", (0.16, 0.035, 0.035),
+                  (x - radius * 0.5, y - 0.07, height + 0.03), room.wood,
+                  rotation=(0.0, 0.0, 0.5))

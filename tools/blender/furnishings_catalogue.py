@@ -158,14 +158,32 @@ def search(rows, query):
                   key=lambda row: (not all(w in row["id"] for w in words), row["id"]))
 
 
+PREVIEW_FIELDS = ("id", "fixture", "bounds", "dimensions", "materials", "meshCount", "lightCount")
+
+
 def build(output=OUTPUT, doc_path=DOCUMENT):
     from blender_locator import blender_executable
     from PIL import Image, ImageDraw
     output.mkdir(parents=True, exist_ok=True)
+    # Previews are not byte-stable across GPU/driver hosts, so a rebuild would
+    # otherwise rewrite every committed PNG when one builder is added. Keep a
+    # committed preview whose drawn content (measured geometry and materials) is
+    # unchanged; a docstring or signature edit does not change the picture.
+    previous = {}
+    if (output / "index.json").is_file():
+        old = json.loads((output / "index.json").read_text(encoding="utf-8"))
+        for entry in old["entries"]:
+            image = output / f"{entry['id']}.png"
+            if image.is_file() and digest(image) == old["images"].get(image.name):
+                previous[entry["id"]] = (entry, image.read_bytes())
     subprocess.run([blender_executable(), "--background", "--factory-startup", "--python-exit-code", "1",
                     "--python", str(HERE / "render_furnishings_catalogue.py"), "--", str(output)],
                    check=True)
     rows = json.loads((output / "measurements.json").read_text(encoding="utf-8"))
+    for row in rows:
+        kept = previous.get(row["id"])
+        if kept and all(kept[0].get(k) == row.get(k) for k in PREVIEW_FIELDS):
+            (output / f"{row['id']}.png").write_bytes(kept[1])
     cols, cell_w, cell_h = 5, 256, 250
     sheet = Image.new("RGB", (cols*cell_w, math.ceil(len(rows)/cols)*cell_h), "#e8e6e1")
     draw = ImageDraw.Draw(sheet)
@@ -195,8 +213,11 @@ def main():
             found = search(check(), args.find)
             if not found:
                 parser.exit(2, "No catalogue entry matches those words.\n")
+            words = args.find.casefold().split()
             for row in found:
-                print(f"{row['id']}: XYZ metres {row['dimensions']}")
+                how = ("name" if all(w in row["id"] for w in words)
+                       else "description only - check it is really what you want")
+                print(f"{row['id']}: XYZ metres {row['dimensions']}  [matched: {how}]")
                 print(row['signature'])
                 print(row['placement'])
                 print(f"tools/blender/recipes/FURNISHINGS.md#{row['id'].replace('_', '-')}\n")

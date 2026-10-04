@@ -63,6 +63,16 @@ import source_dependencies
 # side-view camera in fixtures/town_sideview_camera.json.
 LANE_CENTRE = 3.8833
 SPAN_DEFAULT = 7.7667
+
+
+def lane_centre(span):
+    """The engine Y the recipe's Blender Y=0 maps to: ``engine_y = centre - blender_y``.
+
+    A Classic-width room keeps the calibrated 3.8833. A longer room (``--span``)
+    is centred on its own span, so a hall of half-width H authored about Y=0
+    lands on engine Y 0..2H -- the same rule the EEVEE lane cameras use.
+    """
+    return LANE_CENTRE if abs(span - SPAN_DEFAULT) < 1e-9 else span / 2.0
 NEWLINE = chr(10)
 ACTION_PLANE_X = 0.0
 
@@ -261,7 +271,9 @@ def main() -> None:
                         help="must match the plate render or its focal lights have different contrast")
     parser.add_argument("--window-emission-scale", type=float, default=1.0,
                         help="must match the plate render or the window grille clips differently")
-    parser.add_argument("--span", type=float, default=7.7667)
+    parser.add_argument("--span", type=float, default=SPAN_DEFAULT,
+                        help="engine lane length; a scrolling hall of half-width H passes 2H, "
+                             "and its anchors are then engine_y = H - blender_y")
     parser.add_argument("--ceiling", type=float, default=3.9)
     parser.add_argument("--exit-y", type=float, required=True,
                         help="lane Y of the exit door, in ENGINE space")
@@ -316,9 +328,14 @@ def main() -> None:
                                      bake_bindings=args.bake_bindings, atlas_denoise=args.atlas_denoise,
                                      uv_texel_align=args.uv_texel_align)
 
-    faces = mirror_obj_file(output / "environment.obj", LANE_CENTRE)
+    centre = lane_centre(args.span)
+    faces = mirror_obj_file(output / "environment.obj", centre)
+    manifest_path = output / "environment.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["laneCentre"] = centre
+    manifest_path.write_text(json.dumps(manifest, indent=2) + NEWLINE, encoding="utf-8")
     print(f"[room3d] mirrored {faces} faces into engine space "
-          f"(engine_y = {LANE_CENTRE} - blender_y)")
+          f"(engine_y = {centre} - blender_y)")
     print("ROOM 3D EXPORT OK")
 
 

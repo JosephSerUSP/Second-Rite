@@ -90,6 +90,17 @@
       "status": "adopted",
       "basis": "Owner approved r13 and authorized game integration on 2026-10-02; byte-identical copy of preserved candidate. Edit directly; never regenerate.",
       "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7"
+    },
+    "st_maria_chapel.blend": {
+      "status": "scaffold",
+      "basis": "Written by recipes/st_maria_chapel.py (Sister Agnes's chapel, map 22): a 16 m nave seen side-on, exported with --span 16. No shipped package is baked from it, and no adoption is recorded.",
+      "eevee": {
+        "exposureEV": 0.0,
+        "probeCells": 2,
+        "emissiveLights": true,
+        "fixtureLights": true,
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
+      }
     }
   }
 }

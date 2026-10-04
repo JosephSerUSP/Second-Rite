@@ -279,6 +279,7 @@ jobs:
         shell: pwsh
         run: |
           node --test tools/blender/tests/test_courtyard_candidate.js
+          node --test tools/blender/tests/test_stage_candidate.js
           if ($LASTEXITCODE -ne 0) { throw "Candidate profile tests failed" }
           node tools/blender/stage_courtyard_candidate.js --output out/ci-courtyard --package projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/package
           if ($LASTEXITCODE -ne 0) { throw "Candidate staging failed" }

@@ -53,6 +53,22 @@ class InteriorGrammarTests(unittest.TestCase):
         self.assertAlmostEqual(self.probe["projectionRoundTrip"], 0.0,
                                places=4)
 
+    # -- long halls --------------------------------------------------------
+    def test_platform_edge_minus_y_puts_the_riser_on_the_low_y_side(self):
+        edge = self.probe["platformEdgeMinusY"]
+        self.assertLess(edge["riserY"], 1.0)
+        self.assertAlmostEqual(edge["riserSize"][0], 3.0, places=3)
+
+    def test_unknown_platform_edge_is_refused(self):
+        self.assertFalse(self.probe["platformBadEdge"]["accepted"])
+
+    def test_piece_turn_rotates_about_its_pivot(self):
+        turn = self.probe["pieceTurn"]
+        self.assertAlmostEqual(turn["spanX"], 0.2, places=3)
+        self.assertAlmostEqual(turn["spanY"], 2.0, places=3)
+        self.assertAlmostEqual(turn["centre"][0], 1.0, places=3)
+        self.assertAlmostEqual(turn["centre"][1], 0.0, places=3)
+
     # -- the axes ----------------------------------------------------------
     def test_plain_back_wall_is_one_plane(self):
         self.assertEqual(len(self.probe["plainBackWallPlanes"]), 1)

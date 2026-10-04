@@ -6,7 +6,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 
 **Run with** says how to start a file. `run.py` means it runs inside the pinned Blender: `python tools/blender/run.py tools/blender/<script> [--blend FILE] -- <args>` (never a hand-typed `blender --python` command, which exits 0 when the script raises). `python` and `node` mean an ordinary host command; `import` means the file is only imported or spawned by other tools.
 
-## Supported authoring and verification entry points (27)
+## Supported authoring and verification entry points (28)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -33,6 +33,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [review_room_source.py](review_room_source.py) | `run.py` | Photograph an interior source using camera records from native staged captures. |
 | [run.py](run.py) | `python` | Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit. |
 | [script_index.py](script_index.py) | `python` | Generate/check the role index for every top-level Blender Python/JS tool. |
+| [stage_candidate.js](stage_candidate.js) | `node` | Stage a candidate 3D room package onto an existing map in a fresh out/ runtime stage, for native capture; the Project is untouched. |
 | [stage_room_model.py](stage_room_model.py) | `run.py` | Stage a generated room model against the calibrated Second Gate town camera. |
 | [sync_asset_core.py](sync_asset_core.py) | `python` | Synchronize canonical Blender contract sources into the portable toolkit. |
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |

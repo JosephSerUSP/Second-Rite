@@ -187,6 +187,10 @@ class Interior:
         self.charcoal = material("charcoal")
         self.bread = material("bread_crust")
         self.straw = material("wax")
+        # The same semantic wax as `straw` (which predates it); named for what
+        # it is so a chapel author can find candle wax without guessing.
+        self.wax = self.straw
+        self.gilt = material("ritual_gold")
         self.crock = material("bone")
         self.paper = material("paper")
         self.leather = material("book_leather")
@@ -468,7 +472,8 @@ class Interior:
             (-0.25, -sign * 0.85, -0.46), energy, (1.0, 0.96, 0.86),
             size=1.5, size_y=1.25)
 
-    def platform(self, name, x0, x1, y0, y1, rise, *, mat=None, nosing=True):
+    def platform(self, name, x0, x1, y0, y1, rise, *, mat=None, nosing=True,
+                 edge="-x"):
         """A change of floor level: a raised dais, or a sunken pit.
 
         The floor LEVEL is the one fixed dimension in this vocabulary, so this
@@ -480,6 +485,10 @@ class Interior:
         than trusted -- a pit whose surface would push a character's feet past
         the character floor limit is refused, because that is the point at
         which the engine would need Y camera scrolling.
+
+        `edge` is the side whose riser shows. "-x" faces the camera (a dais
+        across the back of a room); "-y"/"+y" face along the lane, for a step
+        the player walks up to in a long hall -- a chancel, a stage.
         """
         mat = mat or self.wood
         rise = float(rise)
@@ -499,13 +508,23 @@ class Interior:
         thick = self.floor_thick
         self.part(f"{name}_deck", (x1 - x0, y1 - y0, thick),
                   ((x0 + x1) / 2.0, (y0 + y1) / 2.0, rise - thick / 2.0), mat)
-        if rise > 0.0:
+        if edge not in ("-x", "-y", "+y"):
+            raise ValueError(f"platform {name!r}: edge must be -x, -y or +y, not {edge!r}")
+        if rise > 0.0 and edge == "-x":
             # The riser faces the camera, so it is the edge that reads.
             self.part(f"{name}_riser", (thick, y1 - y0, rise),
                       (x0 - thick / 2.0, (y0 + y1) / 2.0, rise / 2.0), mat)
             if nosing:
                 self.part(f"{name}_nosing", (0.12, y1 - y0, 0.05),
                           (x0 - thick, (y0 + y1) / 2.0, rise - 0.025), mat)
+        elif rise > 0.0:
+            sign = -1.0 if edge == "-y" else 1.0
+            face = y0 if edge == "-y" else y1
+            self.part(f"{name}_riser", (x1 - x0, thick, rise),
+                      ((x0 + x1) / 2.0, face + sign * thick / 2.0, rise / 2.0), mat)
+            if nosing:
+                self.part(f"{name}_nosing", (x1 - x0, 0.12, 0.05),
+                          ((x0 + x1) / 2.0, face + sign * thick, rise - 0.025), mat)
         return rise
 
     def partition(self, name, y, x0, x1, *, height=None, thick=None,
@@ -648,6 +667,39 @@ class Interior:
                   (self.back_x + self.wall_thick / 2.0, cy, z1 + 0.07), self.wood)
         return cy
 
+    def side_doorway(self, name, side, x0, x1, z1, *, recess=0.5,
+                     open_back=False):
+        """A door in a SIDE wall -- the end wall of a long room seen side-on.
+
+        Pair it with the same opening in `side_walls(openings={side: [(x0, x1,
+        0.0, z1)]})`. In a hall whose lane runs along Y, the end walls are the
+        side walls, and a church's main entrance is in the end wall opposite
+        the altar: the lane leads straight to it. The floor runs on through
+        the wall as the threshold, the same continuation as `doorway`.
+
+        `open_back` leaves the door open onto daylight (an emissive plane
+        beyond the recess); otherwise a panel closes it. Returns the door's
+        centre on the wall, (x, y).
+        """
+        sign = -1.0 if side < 0 else 1.0
+        cx = (x0 + x1) / 2.0
+        wall = sign * self.half_width
+        self.part(f"{name}_threshold",
+                  (x1 - x0 - 0.12, recess + self.wall_thick, self.floor_thick),
+                  (cx, wall + sign * (recess + self.wall_thick) / 2.0,
+                   -self.floor_thick / 2.0), self.floor_material)
+        self.part(f"{name}_lintel", (x1 - x0 + 0.22, self.wall_thick + 0.1, 0.14),
+                  (cx, wall + sign * self.wall_thick / 2.0, z1 + 0.07), self.wood)
+        beyond = wall + sign * (self.wall_thick + recess + 0.08)
+        if open_back:
+            self.part(f"{name}_daylight", (x1 - x0 + 0.6, 0.05, z1 + 0.6),
+                      (cx, beyond, (z1 + 0.6) / 2.0), self.daylight)
+        else:
+            self.part(f"{name}_reveal_back", (x1 - x0, 0.12, z1),
+                      (cx, wall + sign * (self.wall_thick + 0.06), z1 / 2.0),
+                      self.wood)
+        return cx, wall
+
     def exit_threshold(self, y_centre, *, width=1.5, mat=None,
                        native_y=THRESHOLD_NATIVE_Y):
         """The way OUT: floor extruded outward, toward the camera.
@@ -742,8 +794,12 @@ class Interior:
 
     # -- pieces -----------------------------------------------------------
     @contextlib.contextmanager
-    def piece(self, name):
+    def piece(self, name, *, turn=0.0, about=None):
         """Build one furnishing, and leave ONE object behind.
+
+        `turn` rotates the finished piece by that many degrees about the
+        vertical axis through `about` (x, y), so a piece written facing +X can
+        face along a long hall: 90 turns +X to +Y.
 
         Every mesh created inside the block is joined into a single object
         named `name`. The `.blend` is the hand-editable source document, so a
@@ -764,6 +820,20 @@ class Interior:
         joined = join_parts(name, made, self.root)
         if joined is not None:
             self.parts[start:] = [joined] + survivors
+            if turn:
+                from mathutils import Matrix
+                # A just-joined object's matrix_world is stale in background
+                # mode until the depsgraph updates (brief section 7); turning
+                # the stale matrix moves the piece off its pivot.
+                bpy.context.view_layer.update()
+                px, py = about
+                pivot = Matrix.Translation((px, py, 0.0))
+                spin = Matrix.Rotation(math.radians(turn), 4, "Z")
+                for obj in [joined] + survivors:
+                    obj.matrix_world = (self.root.matrix_world @ pivot @ spin
+                                        @ pivot.inverted()
+                                        @ self.root.matrix_world.inverted()
+                                        @ obj.matrix_world)
 
     # -- finish -----------------------------------------------------------
     def finish(self, *, role="preview_only", authoring_space="preview",

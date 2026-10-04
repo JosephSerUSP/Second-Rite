@@ -35,6 +35,7 @@
     },
     {
       "cmd": "CHOICE",
+      "cancelOption": 2,
       "options": [
         {
           "label": "Battle Golem",
@@ -49,6 +50,7 @@
                 },
                 {
                   "cmd": "CHOICE",
+                  "cancelOption": 2,
                   "options": [
                     {
                       "label": "Recruit Golem",

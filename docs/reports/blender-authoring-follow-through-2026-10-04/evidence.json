@@ -180,8 +180,8 @@
       "y": 1,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21031,
-      "meanAbsoluteChannelDifference": 2.198562282986111,
+      "changedPixels": 21055,
+      "meanAbsoluteChannelDifference": 2.2004774305555554,
       "differenceBounds": [
         0,
         12,
@@ -193,9 +193,9 @@
       "surface": "classic",
       "y": 1,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 23617,
-      "meanAbsoluteChannelDifference": 3.5271647135416666,
+      "candidate": "candidate",
+      "changedPixels": 23607,
+      "meanAbsoluteChannelDifference": 3.5233452690972222,
       "differenceBounds": [
         0,
         4,
@@ -208,8 +208,8 @@
       "y": 3,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21119,
-      "meanAbsoluteChannelDifference": 2.2000325520833335,
+      "changedPixels": 21128,
+      "meanAbsoluteChannelDifference": 2.1991807725694446,
       "differenceBounds": [
         0,
         12,
@@ -221,9 +221,9 @@
       "surface": "classic",
       "y": 3,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 23710,
-      "meanAbsoluteChannelDifference": 3.537082248263889,
+      "candidate": "candidate",
+      "changedPixels": 23716,
+      "meanAbsoluteChannelDifference": 3.545187717013889,
       "differenceBounds": [
         0,
         4,
@@ -236,8 +236,8 @@
       "y": 6,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21026,
-      "meanAbsoluteChannelDifference": 2.2067003038194444,
+      "changedPixels": 21029,
+      "meanAbsoluteChannelDifference": 2.213818359375,
       "differenceBounds": [
         0,
         12,
@@ -249,9 +249,23 @@
       "surface": "classic",
       "y": 6,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 23634,
-      "meanAbsoluteChannelDifference": 3.5479166666666666,
+      "candidate": "candidate",
+      "changedPixels": 23639,
+      "meanAbsoluteChannelDifference": 3.5531141493055554,
+      "differenceBounds": [
+        0,
+        12,
+        256,
+        146
+      ]
+    },
+    {
+      "surface": "classic",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21005,
+      "meanAbsoluteChannelDifference": 2.2046549479166666,
       "differenceBounds": [
         0,
         4,
@@ -262,27 +276,13 @@
     {
       "surface": "classic",
       "y": 6.1333,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 20979,
-      "meanAbsoluteChannelDifference": 2.183968098958333,
-      "differenceBounds": [
-        0,
-        12,
-        256,
-        146
-      ]
-    },
-    {
-      "surface": "classic",
-      "y": 6.1333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 23561,
-      "meanAbsoluteChannelDifference": 3.514236111111111,
+      "candidate": "candidate",
+      "changedPixels": 23570,
+      "meanAbsoluteChannelDifference": 3.5281846788194446,
       "differenceBounds": [
         0,
-        12,
+        4,
         256,
         146
       ]
@@ -292,11 +292,11 @@
       "y": 7.0333,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21133,
-      "meanAbsoluteChannelDifference": 2.1951009114583333,
+      "changedPixels": 21140,
+      "meanAbsoluteChannelDifference": 2.1976942274305555,
       "differenceBounds": [
         0,
-        12,
+        4,
         256,
         146
       ]
@@ -305,12 +305,12 @@
       "surface": "classic",
       "y": 7.0333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 23724,
-      "meanAbsoluteChannelDifference": 3.6192491319444446,
+      "candidate": "candidate",
+      "changedPixels": 23725,
+      "meanAbsoluteChannelDifference": 3.617312282986111,
       "differenceBounds": [
         0,
-        12,
+        4,
         256,
         146
       ]
@@ -320,11 +320,11 @@
       "y": 1,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21981,
-      "meanAbsoluteChannelDifference": 1.8138715277777777,
+      "changedPixels": 21979,
+      "meanAbsoluteChannelDifference": 1.809939236111111,
       "differenceBounds": [
         15,
-        4,
+        12,
         305,
         146
       ]
@@ -333,9 +333,23 @@
       "surface": "four_three",
       "y": 1,
       "base": "control",
-      "candidate": "candidate-v2",
+      "candidate": "candidate",
       "changedPixels": 25261,
-      "meanAbsoluteChannelDifference": 2.9189105902777777,
+      "meanAbsoluteChannelDifference": 2.924197048611111,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22073,
+      "meanAbsoluteChannelDifference": 1.816853298611111,
       "differenceBounds": [
         15,
         12,
@@ -345,123 +359,235 @@
     },
     {
       "surface": "four_three",
+      "y": 3,
+      "base": "control",
+      "candidate": "candidate",
+      "changedPixels": 25349,
+      "meanAbsoluteChannelDifference": 2.9305512152777777,
+      "differenceBounds": [
+        15,
+        4,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21922,
+      "meanAbsoluteChannelDifference": 1.8022829861111112,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6,
+      "base": "control",
+      "candidate": "candidate",
+      "changedPixels": 25272,
+      "meanAbsoluteChannelDifference": 2.9359461805555553,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6.1333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21863,
+      "meanAbsoluteChannelDifference": 1.7815668402777778,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 6.1333,
+      "base": "control",
+      "candidate": "candidate",
+      "changedPixels": 25197,
+      "meanAbsoluteChannelDifference": 2.9105512152777777,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 7.0333,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21994,
+      "meanAbsoluteChannelDifference": 1.7887065972222222,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "four_three",
+      "y": 7.0333,
+      "base": "control",
+      "candidate": "candidate",
+      "changedPixels": 25319,
+      "meanAbsoluteChannelDifference": 2.981462673611111,
+      "differenceBounds": [
+        15,
+        12,
+        305,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 1,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 21976,
+      "meanAbsoluteChannelDifference": 1.3517931664058425,
+      "differenceBounds": [
+        68,
+        12,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
+      "y": 1,
+      "base": "control",
+      "candidate": "candidate",
+      "changedPixels": 25270,
+      "meanAbsoluteChannelDifference": 2.2032994261867502,
+      "differenceBounds": [
+        68,
+        4,
+        358,
+        146
+      ]
+    },
+    {
+      "surface": "wide",
       "y": 3,
       "base": "shipped",
       "candidate": "control",
       "changedPixels": 22075,
-      "meanAbsoluteChannelDifference": 1.820915798611111,
+      "meanAbsoluteChannelDifference": 1.3629597026604068,
       "differenceBounds": [
-        15,
-        4,
-        305,
+        68,
+        12,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 3,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25353,
-      "meanAbsoluteChannelDifference": 2.9291927083333333,
+      "candidate": "candidate",
+      "changedPixels": 25358,
+      "meanAbsoluteChannelDifference": 2.2096146322378716,
       "differenceBounds": [
-        15,
-        12,
-        305,
+        68,
+        4,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 6,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21976,
-      "meanAbsoluteChannelDifference": 1.8244878472222221,
+      "changedPixels": 21981,
+      "meanAbsoluteChannelDifference": 1.3713191184141889,
       "differenceBounds": [
-        15,
+        68,
         4,
-        305,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 6,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25278,
-      "meanAbsoluteChannelDifference": 2.938394097222222,
+      "candidate": "candidate",
+      "changedPixels": 25282,
+      "meanAbsoluteChannelDifference": 2.216216744913928,
       "differenceBounds": [
-        15,
-        12,
-        305,
+        68,
+        4,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 6.1333,
       "base": "shipped",
       "candidate": "control",
       "changedPixels": 21929,
-      "meanAbsoluteChannelDifference": 1.8010329861111112,
+      "meanAbsoluteChannelDifference": 1.3554023213354198,
       "differenceBounds": [
-        15,
+        68,
         4,
-        305,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 6.1333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25213,
-      "meanAbsoluteChannelDifference": 2.9204947916666666,
+      "candidate": "candidate",
+      "changedPixels": 25212,
+      "meanAbsoluteChannelDifference": 2.1992305685967657,
       "differenceBounds": [
-        15,
-        12,
-        305,
+        68,
+        4,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 7.0333,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 22058,
-      "meanAbsoluteChannelDifference": 1.803828125,
+      "changedPixels": 22068,
+      "meanAbsoluteChannelDifference": 1.3590016953573292,
       "differenceBounds": [
-        15,
+        68,
         4,
-        305,
+        358,
         146
       ]
     },
     {
-      "surface": "four_three",
+      "surface": "wide",
       "y": 7.0333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25367,
-      "meanAbsoluteChannelDifference": 2.9980338541666667,
-      "differenceBounds": [
-        15,
-        12,
-        305,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 1,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 21974,
-      "meanAbsoluteChannelDifference": 1.358946270213876,
+      "candidate": "candidate",
+      "changedPixels": 25370,
+      "meanAbsoluteChannelDifference": 2.2561391497130936,
       "differenceBounds": [
         68,
         4,
@@ -470,138 +596,12 @@
       ]
     },
     {
-      "surface": "wide",
+      "surface": "device",
       "y": 1,
-      "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25259,
-      "meanAbsoluteChannelDifference": 2.193371804903495,
-      "differenceBounds": [
-        68,
-        4,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 3,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 22071,
-      "meanAbsoluteChannelDifference": 1.365411450182577,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 3,
-      "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25347,
-      "meanAbsoluteChannelDifference": 2.197434141888367,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 6,
       "base": "shipped",
       "candidate": "control",
       "changedPixels": 21976,
-      "meanAbsoluteChannelDifference": 1.3668133802816902,
-      "differenceBounds": [
-        68,
-        4,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 6,
-      "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25271,
-      "meanAbsoluteChannelDifference": 2.203687402190923,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 6.1333,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 21920,
-      "meanAbsoluteChannelDifference": 1.3464756129368805,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 6.1333,
-      "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25200,
-      "meanAbsoluteChannelDifference": 2.1938086854460095,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 7.0333,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 22041,
-      "meanAbsoluteChannelDifference": 1.3480438184663537,
-      "differenceBounds": [
-        68,
-        4,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "wide",
-      "y": 7.0333,
-      "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25363,
-      "meanAbsoluteChannelDifference": 2.2532407407407407,
-      "differenceBounds": [
-        68,
-        12,
-        358,
-        146
-      ]
-    },
-    {
-      "surface": "device",
-      "y": 1,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 21978,
-      "meanAbsoluteChannelDifference": 1.0321602182539682,
+      "meanAbsoluteChannelDifference": 1.0314880952380951,
       "differenceBounds": [
         135,
         4,
@@ -613,9 +613,23 @@
       "surface": "device",
       "y": 1,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25257,
-      "meanAbsoluteChannelDifference": 1.6609300595238095,
+      "candidate": "candidate",
+      "changedPixels": 25270,
+      "meanAbsoluteChannelDifference": 1.666438492063492,
+      "differenceBounds": [
+        135,
+        12,
+        425,
+        146
+      ]
+    },
+    {
+      "surface": "device",
+      "y": 3,
+      "base": "shipped",
+      "candidate": "control",
+      "changedPixels": 22066,
+      "meanAbsoluteChannelDifference": 1.0313392857142858,
       "differenceBounds": [
         135,
         4,
@@ -626,27 +640,13 @@
     {
       "surface": "device",
       "y": 3,
-      "base": "shipped",
-      "candidate": "control",
-      "changedPixels": 22072,
-      "meanAbsoluteChannelDifference": 1.0362748015873016,
-      "differenceBounds": [
-        135,
-        4,
-        425,
-        146
-      ]
-    },
-    {
-      "surface": "device",
-      "y": 3,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25329,
-      "meanAbsoluteChannelDifference": 1.6627876984126984,
+      "candidate": "candidate",
+      "changedPixels": 25355,
+      "meanAbsoluteChannelDifference": 1.6694965277777778,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -656,11 +656,11 @@
       "y": 6,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21977,
-      "meanAbsoluteChannelDifference": 1.0392485119047619,
+      "changedPixels": 21936,
+      "meanAbsoluteChannelDifference": 1.0282762896825397,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -669,12 +669,12 @@
       "surface": "device",
       "y": 6,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25247,
-      "meanAbsoluteChannelDifference": 1.6673387896825398,
+      "candidate": "candidate",
+      "changedPixels": 25279,
+      "meanAbsoluteChannelDifference": 1.6738144841269842,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -684,11 +684,11 @@
       "y": 6.1333,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 21925,
-      "meanAbsoluteChannelDifference": 1.0274751984126984,
+      "changedPixels": 21883,
+      "meanAbsoluteChannelDifference": 1.0157911706349205,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -697,12 +697,12 @@
       "surface": "device",
       "y": 6.1333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25158,
-      "meanAbsoluteChannelDifference": 1.6532762896825397,
+      "candidate": "candidate",
+      "changedPixels": 25205,
+      "meanAbsoluteChannelDifference": 1.660421626984127,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -712,11 +712,11 @@
       "y": 7.0333,
       "base": "shipped",
       "candidate": "control",
-      "changedPixels": 22065,
-      "meanAbsoluteChannelDifference": 1.0315823412698413,
+      "changedPixels": 22059,
+      "meanAbsoluteChannelDifference": 1.0272916666666667,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -725,12 +725,12 @@
       "surface": "device",
       "y": 7.0333,
       "base": "control",
-      "candidate": "candidate-v2",
-      "changedPixels": 25304,
-      "meanAbsoluteChannelDifference": 1.6965873015873016,
+      "candidate": "candidate",
+      "changedPixels": 25361,
+      "meanAbsoluteChannelDifference": 1.7037276785714286,
       "differenceBounds": [
         135,
-        4,
+        12,
         425,
         146
       ]
@@ -756,5 +756,6 @@
     "Whole atlas is rebaked; unchanged-source control demonstrates existing exporter drift",
     "Catalogue illustrations do not establish native visual correctness",
     "No lower-effort agent trial was run"
-  ]
+  ],
+  "capturedRuntimeBase": "0f850baef65ad5e5c9277639b25a252fe17072b8"
 }

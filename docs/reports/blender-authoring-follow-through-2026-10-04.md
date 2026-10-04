@@ -152,9 +152,9 @@ export, then the retained relocation candidate. Images retain native pixels.
 ![Wide native bakery comparison: shipped, unchanged-source control, relocation](blender-authoring-follow-through-2026-10-04/bakery-wide.png)
 
 The control matters. At Classic spawn, the unchanged-source rebake changes
-20,979 pixels, with a mean absolute RGB-channel difference of **2.184/255**.
-Control-to-candidate changes 23,561 pixels, with a mean difference of
-**3.514/255**. Both deltas span the room. Consequently, the final package is
+21,005 pixels, with a mean absolute RGB-channel difference of **2.205/255**.
+Control-to-candidate changes 23,570 pixels, with a mean difference of
+**3.528/255**. Both deltas span the room. Consequently, the final package is
 not presented as a pixel-local edit: UV packing, exported normal indexing and
 the full atlas are regenerated, and there is existing exporter drift even
 before moving the water. The source edit itself remains one object translation.
@@ -202,6 +202,23 @@ staged units `ALL UNIT TESTS OK`; all three native capture runs; and the actual
 walk/transfer probe. The staged unit run explicitly reported **seven native
 Effekseer world-effect assertions unavailable** because its shim was absent.
 That coverage is not claimed.
+
+Full required-Blender discovery passed locally (**481 tests, 585.603 s**);
+the final focused search test also passed in the nine-test catalogue suite.
+Hosted Linux subsequently passed **482 tests, 432.793 s**, plus the read-only
+32-source item compilation and curated library checks.
+
+The branch then integrated current main `0f850bae`. Its hosted courtyard
+stage exposed three pre-existing MPD assertions that still expected a walking
+charge after #1332 made ordinary movement free; the same failures were observed
+on main run [37210613159](https://github.com/JosephSerUSP/Second-Rite/actions/runs/37210613159).
+[Issue #1364](https://github.com/JosephSerUSP/Second-Rite/issues/1364) records the
+evidence. The walking assertions now test the explicit authored rule; MPD
+queries and battle Strain checks remain effective. Both ordinary and courtyard
+current-main staged units passed. G4 also identified the stale scene rows from
+the merged Actor Change work; the canonical state capture regenerated those
+rows and G4 passed. No gameplay mechanic changed in this reconciliation.
+Native frames and the walk/transfer probe were refreshed against current main.
 
 Catalogue integrity/search and tool-index checks took **434 / 405 / 305 ms**
 respectively on their recorded cold local runs. The focused catalogue rebuild

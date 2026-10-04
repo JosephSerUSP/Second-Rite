@@ -1,9 +1,8 @@
--- The Summoner MP economy: traversal cost, Battle Strain, and the MPD floor.
+-- The Summoner MP economy: free ordinary traversal, Battle Strain, and the MPD floor.
 --
--- The design's whole expedition tension lives here -- a step costs exactly what
--- the living party costs to keep manifested, ordinary combat rounds cost
--- nothing, and only a prolonged battle bills you. Both halves used to be flat
--- numbers that ignored the party entirely.
+-- The authored exploration flow makes ordinary walking free (#1332); keeping
+-- companions manifested must not encourage reserve micromanagement. MPD still
+-- governs the independent battle economy, including prolonged-battle Strain.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
 local loader = require("engine.data.loader")
@@ -75,17 +74,16 @@ end
 
 do
     local sess = rig({ 1 })
-    check(step(sess) == 1, "a lone MPD-1 creature costs 1 MP per step")
+    check(step(sess) == 0, "a lone MPD-1 creature walks without an MP charge")
 end
 
 do
     local sess = rig({ 4, 6, 9 })
-    check(step(sess) == 19, "a heavy party costs the sum of its MPD per step")
+    check(step(sess) == 0, "a heavy manifested party walks without an MP charge")
 end
 
 do
-    -- The design's headline: the Summoner has no traversal cost of their own,
-    -- so an empty party walks free rather than paying a base rate.
+    -- Free ordinary movement includes a Summoner walking alone.
     local sess = rig({})
     check(step(sess) == 0, "the Summoner alone pays nothing to walk")
 end
@@ -97,15 +95,11 @@ do
 end
 
 do
-    -- Range, in the terms the design's table uses: 3000 MP against a party of
-    -- MPD 5 is 600 steps.
+    -- The old 600-step range must no longer exhaust a manifested party's MP.
+    -- Walk a fixed distance; do not loop until depletion under a free flow.
     local sess = rig({ 1, 4 })
-    local steps = 0
-    while sess.mp > 0 and steps < 5000 do
-        step(sess)
-        steps = steps + 1
-    end
-    check(steps == 600, "3000 MP buys 600 steps at party MPD 5 (" .. steps .. ")")
+    for _ = 1, 600 do step(sess) end
+    check(sess.mp == 3000, "600 ordinary steps at party MPD 5 preserve 3000 MP")
 end
 
 ------------------------------------------------------------------- Strain --

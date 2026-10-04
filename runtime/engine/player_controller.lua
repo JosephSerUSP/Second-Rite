@@ -39,6 +39,13 @@ function controller.release(button)
     return true
 end
 
+-- A map transfer consumes a directional press until the device releases it.
+-- Camera rotation can give the return threshold the same button as entry.
+function controller.consumeUntilRelease(button)
+    assertButton(button)
+    if held[button] then held[button].consumed = true end
+end
+
 function controller.isHeld(button)
     assertButton(button)
     return held[button] ~= nil
@@ -63,7 +70,7 @@ function controller.update(dt, ctx, options)
     local fired = false
     for _, button in ipairs(REPEAT_ORDER) do
         local state = held[button]
-        if state then
+        if state and not state.consumed then
             state.holdTime = state.holdTime + dt
             if state.holdTime >= initial then
                 local elapsed = state.holdTime - initial
@@ -83,7 +90,7 @@ end
 -- logical membrane instead of asking the keyboard which physical key is down.
 function controller.refireFirstHeld(ctx)
     for _, button in ipairs(REPEAT_ORDER) do
-        if repeatable[button] and held[button] then
+        if repeatable[button] and held[button] and not held[button].consumed then
             return dispatch(button, ctx), button
         end
     end

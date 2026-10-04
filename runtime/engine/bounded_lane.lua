@@ -281,13 +281,23 @@ function bounded_lane.actorRoot(session)
     return state.visualX or state.x, state.visualY or state.y, state.z
 end
 
-function bounded_lane.nearDoorway(session)
+-- Event.direction is the same authored axis used by the transfer marker.
+function bounded_lane.doorwayButton(session, doorway)
+    local event = bounded_lane.eventFor(session, doorway)
+    if not event then return nil end
+    local axis = world_view.transitionArrowAxis(event.direction)
+    if axis.x > 0 then return "UP" end
+    if axis.x < 0 then return "DOWN" end
+    return axis.y < 0 and "LEFT" or "RIGHT"
+end
+
+function bounded_lane.nearDoorway(session, button)
     local state = session and session.townTraversal
     if not state then return nil end
     local nearest, distance
     for _, doorway in ipairs(state.doorways) do
         local anchor = state.environment and state.environment.anchors[doorway.anchor]
-        if anchor then
+        if anchor and (not button or bounded_lane.doorwayButton(session, doorway) == button) then
             local dx = state.x - anchor.position[1]
             local dy = state.y - anchor.position[2]
             local d = math.sqrt(dx * dx + dy * dy)
@@ -317,7 +327,8 @@ function bounded_lane.edgeDoorway(session, direction)
     local fallback, fallbackDistance
     for _, doorway in ipairs(state.doorways) do
         local anchor = state.environment and state.environment.anchors[doorway.anchor]
-        if anchor then
+        if anchor and bounded_lane.doorwayButton(session, doorway)
+                == (direction < 0 and "LEFT" or "RIGHT") then
             local d = math.abs(anchor.position[2] - bound)
             if d <= number(doorway.radius or 0.65, "doorway radius")
                     and (not bestDistance or d < bestDistance) then
@@ -354,7 +365,9 @@ function bounded_lane.isEdgeDoorway(session, doorway)
     local anchor = state.environment and state.environment.anchors[doorway.anchor]
     if not anchor then return false end
     local y = tonumber(anchor.position[2]) or 0
-    return math.abs(y - state.minY) < 0.01 or math.abs(y - state.maxY) < 0.01
+    local button = bounded_lane.doorwayButton(session, doorway)
+    return (button == "LEFT" and math.abs(y - state.minY) < 0.01)
+        or (button == "RIGHT" and math.abs(y - state.maxY) < 0.01)
 end
 
 -- Resolve a doorway to the ordinary Map event that carries its commands.
@@ -362,15 +375,36 @@ end
 function bounded_lane.eventFor(session, doorway)
     if not doorway then return nil end
     for _, event in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
-        if event.instanceId == doorway.eventInstanceId or event.id == doorway.eventId then
+        if (doorway.eventInstanceId ~= nil and event.instanceId == doorway.eventInstanceId)
+                or (doorway.eventId ~= nil and event.id == doorway.eventId) then
             return event
         end
     end
     return nil
 end
 
-function bounded_lane.interact(session)
-    return bounded_lane.eventFor(session, bounded_lane.nearDoorway(session))
+function bounded_lane.interact(session, button)
+    return bounded_lane.eventFor(session, bounded_lane.nearDoorway(session, button))
+end
+
+-- Street names appear before reaching a bound, giving time to read them.
+function bounded_lane.promptDoorway(session)
+    local near = bounded_lane.nearDoorway(session)
+    if near then return near end
+    local state = session and session.townTraversal
+    if not state then return nil end
+    local best, distance
+    for _, direction in ipairs({-1, 1}) do
+        local doorway = bounded_lane.edgeDoorway(session, direction)
+        local anchor = doorway and state.environment.anchors[doorway.anchor]
+        if anchor then
+            local d = math.abs(state.y - anchor.position[2])
+            if d <= EDGE_REACH and (not distance or d < distance) then
+                best, distance = doorway, d
+            end
+        end
+    end
+    return best
 end
 
 return bounded_lane

@@ -37,7 +37,7 @@
         {
           "type": "list",
           "listId": "config:optionsCommands",
-          "formatRight": "{id == 'autoredirect' and (sceneState.autoRedirect and 'ON' or 'OFF') or id == 'aspect' and (sceneState.aspect == 'mobile_device' and 'DEVICE' or sceneState.aspect == 'wide' and 'WIDE' or sceneState.aspect == 'four_three' and '4:3' or 'CLASSIC') or id == 'output' and (sceneState.output == 'crt' and 'CRT' or 'NEAREST') or id == 'display_info' and (sceneState.displayInfo and 'ON' or 'OFF') or id == 'font' and (sceneState.font == 'monogram-extended' and 'REGULAR' or sceneState.font == 'monogram-extended-italic' and 'ITALIC' or sceneState.font) or ''}",
+          "formatRight": "{id == 'autoredirect' and (sceneState.autoRedirect and 'ON' or 'OFF') or id == 'aspect' and (sceneState.aspect == 'mobile_device' and 'DEVICE' or sceneState.aspect == 'wide' and 'WIDE' or sceneState.aspect == 'four_three' and '4:3' or 'CLASSIC') or id == 'output' and (sceneState.output == 'crt' and 'CRT' or 'NEAREST') or id == 'display_info' and (sceneState.displayInfo and 'ON' or 'OFF') or id == 'navigation_arrows' and (sceneState.navigationArrows and 'ON' or 'OFF') or id == 'font' and (sceneState.font == 'monogram-extended' and 'REGULAR' or sceneState.font == 'monogram-extended-italic' and 'ITALIC' or sceneState.font) or ''}",
           "cursor": "sceneState.idx"
         }
       ]
@@ -127,7 +127,7 @@
       },
       {
         "cmd": "SCRIPT",
-        "code": "ctx.sceneState.aspect = api.getRenderSurface(); ctx.sceneState.output = api.getOutputPresentation(); ctx.sceneState.displayInfo = api.getPerfToggle(); ctx.sceneState.font = api.getFont()"
+        "code": "ctx.sceneState.aspect = api.getRenderSurface(); ctx.sceneState.output = api.getOutputPresentation(); ctx.sceneState.displayInfo = api.getPerfToggle(); ctx.sceneState.font = api.getFont(); ctx.sceneState.navigationArrows = api.getTransitionArrowsVisible()"
       }
     ],
     "on_up": [
@@ -157,7 +157,7 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "sceneState.mode == 'nav' and sceneState.idx < 7",
+        "condition": "sceneState.mode == 'nav' and sceneState.idx < 8",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
@@ -291,6 +291,26 @@
           },
           {
             "cmd": "SET_SCENE_STATE",
+            "name": "navigationArrows",
+            "value": "not sceneState.navigationArrows"
+          },
+          {
+            "cmd": "SCRIPT",
+            "code": "api.setTransitionArrowsVisible(ctx.sceneState.navigationArrows)"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 8",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "mode",
@@ -400,6 +420,11 @@
         "id": "font",
         "name": "FONT",
         "help": "Switch between Regular and Italic pixel typography."
+      },
+      {
+        "id": "navigation_arrows",
+        "name": "NAVIGATION ARROWS",
+        "help": "Show or hide direction markers. Door and street prompts remain available."
       },
       {
         "id": "exit",

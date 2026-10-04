@@ -73,6 +73,7 @@ def crt_cycle_script() -> str:
 
 
 def patch_runtime_main(source: str) -> str:
+    source = source.replace("\r\n", "\n")
     if DEV_MODE_STAMP in source:
         return source
     count = source.count(DEV_MODE_SOURCE)
@@ -188,6 +189,13 @@ def _ensure_crt_format(block: dict, *, output_row: bool) -> None:
 
 def patch_options(scene: dict) -> None:
     rows = scene.setdefault("config", {}).setdefault("optionsCommands", [])
+    def row_index(row_id: str) -> int:
+        matches = [index for index, row in enumerate(rows, 1) if row.get("id") == row_id]
+        if len(matches) != 1:
+            raise ValueError(f"Options expected one {row_id} row, found {len(matches)}")
+        return matches[0]
+
+    original_exit_index = row_index("exit")
     _insert_before_id(rows, "exit", {
         "id": "developer_menu",
         "name": "DEVELOPER MENU",
@@ -198,8 +206,8 @@ def patch_options(scene: dict) -> None:
         "name": "CRT LAB",
         "help": "Developer build: cycle the curated strong CRT presets live. Curved and maximal experiments stay CLI-only.",
     })
-    if len(rows) != 9:
-        raise ValueError(f"unexpected Android-dev Options row count: {len(rows)}")
+    dev_index, crt_index, exit_index = (row_index(row_id) for row_id in
+                                       ("developer_menu", "crt_lab", "exit"))
 
     block = _list_block(scene, "options_list", "config:optionsCommands")
     _ensure_crt_format(block, output_row=True)
@@ -217,23 +225,23 @@ def patch_options(scene: dict) -> None:
     for command in _hook(scene, "on_down"):
         condition = str(command.get("condition", ""))
         if "sceneState.mode == 'nav'" in condition and "sceneState.idx <" in condition:
-            command["condition"] = "sceneState.mode == 'nav' and sceneState.idx < 9"
+            command["condition"] = f"sceneState.mode == 'nav' and sceneState.idx < {len(rows)}"
             break
     else:
         raise ValueError("Options scene has no nav on_down bound")
 
     select = _hook(scene, "on_select")
-    exit_handler = _nav_select_handler(select, 9)
+    exit_handler = _nav_select_handler(select, exit_index)
     if exit_handler is None:
-        exit_handler = _nav_select_handler(select, 7)
+        exit_handler = _nav_select_handler(select, original_exit_index)
         if exit_handler is None:
-            raise ValueError("Options EXIT handler is missing from nav index 7/9")
+            raise ValueError(f"Options EXIT handler is missing from nav index {original_exit_index}/{exit_index}")
         exit_handler["condition"] = str(exit_handler["condition"]).replace(
-            "sceneState.idx == 7", "sceneState.idx == 9", 1
+            f"sceneState.idx == {original_exit_index}", f"sceneState.idx == {exit_index}", 1
         )
 
     has_dev = any(
-        "sceneState.idx == 7" in str(command.get("condition", ""))
+        f"sceneState.idx == {dev_index}" in str(command.get("condition", ""))
         and any(step.get("cmd") == "SCENE_EVENT" and step.get("scene") == "developer_menu"
                 for step in command.get("then", []))
         for command in select
@@ -241,7 +249,7 @@ def patch_options(scene: dict) -> None:
     if not has_dev:
         select.insert(select.index(exit_handler), {
             "cmd": "IF",
-            "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 7",
+            "condition": f"locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == {dev_index}",
             "then": [
                 {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
                 {"cmd": "SCENE_EVENT", "kind": "push", "scene": "developer_menu"},
@@ -249,7 +257,7 @@ def patch_options(scene: dict) -> None:
         })
 
     has_crt = any(
-        "sceneState.idx == 8" in str(command.get("condition", ""))
+        f"sceneState.idx == {crt_index}" in str(command.get("condition", ""))
         and any(step.get("cmd") == "SCRIPT" and "crtLabMode" in str(step.get("code", ""))
                 for step in command.get("then", []))
         for command in select
@@ -257,7 +265,7 @@ def patch_options(scene: dict) -> None:
     if not has_crt:
         select.insert(select.index(exit_handler), {
             "cmd": "IF",
-            "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 8",
+            "condition": f"locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == {crt_index}",
             "then": [
                 {"cmd": "SET_LOCAL", "name": "_guard", "value": 1},
                 {"cmd": "SCRIPT", "code": crt_cycle_script()},
@@ -352,6 +360,8 @@ def patch_archive(love_path: Path) -> None:
             with zipfile.ZipFile(temp_path, "w") as target:
                 for info in infos:
                     target.writestr(info, replacements.get(info.filename, source.read(info.filename)))
+            # Windows cannot replace an archive while its input handle is open.
+            source.close()
             os.replace(temp_path, love_path)
         finally:
             if temp_path.exists():
@@ -418,13 +428,32 @@ def self_test() -> None:
     runtime_main = "function boot()\n" + DEV_MODE_SOURCE + "end\n"
 
     with tempfile.TemporaryDirectory() as td:
-        love_path = Path(td) / "test.love"
-        with zipfile.ZipFile(love_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr(SCENES_PATH, json.dumps([title, options, developer]))
-            archive.writestr(TERMS_PATH, json.dumps(terms))
-            archive.writestr(RUNTIME_MAIN, runtime_main)
-        patch_archive(love_path)
-        patch_archive(love_path)  # prove local/manual packaging retries are idempotent
+        for additional_row in (False, True):
+            input_scenes = json.loads(json.dumps([title, options, developer]))
+            if additional_row:
+                input_options = input_scenes[1]
+                input_options["config"]["optionsCommands"].insert(4, {"id": "navigation_arrows"})
+                input_options["hooks"]["on_down"][0]["condition"] = "sceneState.mode == 'nav' and sceneState.idx < 8"
+                input_options["hooks"]["on_select"][0]["condition"] = "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 8"
+                navigation_handler = {
+                    "cmd": "IF", "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 5",
+                    "then": [{"cmd": "SET_STATE", "name": "navigationArrows", "value": "not sceneState.navigationArrows"}],
+                }
+                input_options["hooks"]["on_select"].append(navigation_handler)
+            love_path = Path(td) / f"test-{additional_row}.love"
+            with zipfile.ZipFile(love_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr(SCENES_PATH, json.dumps(input_scenes))
+                archive.writestr(TERMS_PATH, json.dumps(terms))
+                archive.writestr(RUNTIME_MAIN, runtime_main.replace("\n", "\r\n") if additional_row else runtime_main)
+            patch_archive(love_path)
+            patch_archive(love_path)  # retries must preserve authored handlers
+            if additional_row:
+                with zipfile.ZipFile(love_path) as archive:
+                    patched_options = scene_by_id(json.loads(archive.read(SCENES_PATH)), "options")
+                assert _nav_select_handler(patched_options["hooks"]["on_select"], 5) == navigation_handler
+                rows = patched_options["config"]["optionsCommands"]
+                assert rows[7]["id"] == "developer_menu" and rows[8]["id"] == "crt_lab" and rows[9]["id"] == "exit"
+                assert _nav_select_handler(patched_options["hooks"]["on_select"], 10) is not None
 
     print("ANDROID DEV PROFILE SELF-TEST OK")
 

@@ -131,6 +131,7 @@ numeric fields coerce or reject according to their command contract).
   `engine.json scripting.allowRawAccess` defaults to false and the
   validator asserts that.
 
+
 ### 1.1.2 One semantic authority, not necessarily one execution host
 
 An execution host is where code runs. A semantic authority is the one authored
@@ -1388,6 +1389,19 @@ layer; HUD and dialogue windows remain unaffected above it. The room remains
 completely motionless afterward. St. Maria's initial set is the
 assigned home, Alicia's bakery, Laura's forge, the Rusty Tankard and the chapel.
 Their native runtime PNGs are palette-limited, game-resolution derivatives.
+
+Town navigation markers use the authored floating 3D arrow model with filled faces across plate and modelled views. Direction comes from the authored transition axis. Arrows are visible by default; the Options navigation-arrow toggle persists in player settings and hides only the models, keeping doorway prompts and interactions available.
+
+Bounded-lane thresholds use the Event's authored `direction` for the marker,
+input and destination prompt: `away` is UP, `toward` is DOWN, and `left`/`right`
+follow the street. A depth door on a lane bound remains a deliberate UP/DOWN
+interaction; sideways movement never activates it. Street-boundary prompts
+appear within 2.5 world units without enlarging the doorway activation radius.
+Town transfers animate the live player's walk cycle and depth projection while
+the camera stays still. Transfer commands execute once under full cover; the
+arrival pose settles from the destination threshold onto its lane. These are
+presentation offsets, consumed by both plate and mesh views, rather than
+changes to gameplay coordinates or collision.
 High-resolution generation sources are local working files and are ignored.
 
 The blackout uses the shared subtractive fade primitive rather than an

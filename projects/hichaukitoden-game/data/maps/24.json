@@ -96,33 +96,12 @@
               ],
               "elseCommands": [
                 {
-                  "text": "Oh! Are you looking for the supply cart? I heard it! I was listening to the wind near the chasm, and I heard squeaky wheels stop suddenly. Then... goblin noises. Lots of them.",
-                  "speaker": "Alicia",
-                  "cmd": "TEXT"
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 45
                 },
                 {
-                  "options": [
-                    {
-                      "label": "Goblins? I should tell the guard.",
-                      "commands": [
-                        {
-                          "flag": "shipment_investigated",
-                          "value": true,
-                          "cmd": "SET_FLAG"
-                        },
-                        {
-                          "text": "Please be careful! If the goblins have the food, they'll be... energetic.",
-                          "speaker": "Alicia",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "commonEventId": 30,
-                          "cmd": "CALL_COMMON_EVENT"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 30
                 }
               ],
               "cmd": "CONDITIONAL_BRANCH"

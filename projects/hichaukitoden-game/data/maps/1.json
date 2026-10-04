@@ -223,265 +223,8 @@
       "label": "Weaponsmith",
       "commands": [
         {
-          "name": "weaponsmith_hub",
-          "cmd": "LABEL"
-        },
-        {
-          "condition": "questStatus:shattered_blade_recovery:active, hasItem:26",
-          "commands": [
-            {
-              "text": "Let me see that... Hah! Yes. The core is intact. The steel is ancient, folded a thousand times. Give me an hour.",
-              "cmd": "TEXT"
-            },
-            {
-              "questId": "shattered_blade_recovery",
-              "cmd": "QUEST_COMPLETE"
-            },
-            {
-              "flag": "shattered_blade_reforged",
-              "value": true,
-              "cmd": "SET_FLAG"
-            },
-            {
-              "text": "Done. I've added my best work to the shop inventory. Special stock, just for you. Don't dull it on a rat's skull.",
-              "cmd": "TEXT"
-            },
-            {
-              "label": "weaponsmith_hub",
-              "cmd": "JUMP_TO_LABEL"
-            }
-          ],
-          "elseCommands": [
-            {
-              "condition": "questStatus:shattered_blade_recovery:active",
-              "commands": [
-                {
-                  "text": "Find that scrap metal yet? The forge is waiting.",
-                  "cmd": "TEXT"
-                },
-                {
-                  "label": "weaponsmith_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ],
-              "elseCommands": [
-                {
-                  "condition": "flag:shattered_blade_reforged",
-                  "commands": [
-                    {
-                      "text": "Good to see you alive. The forge is hot, and the steel is singing today. Need anything?",
-                      "cmd": "TEXT"
-                    }
-                  ],
-                  "elseCommands": [
-                    {
-                      "text": "Blades, hammers, axes. If it kills, I sell it. If it breaks, I fix it. If you break, that’s on you.",
-                      "cmd": "TEXT"
-                    }
-                  ],
-                  "cmd": "CONDITIONAL_BRANCH"
-                }
-              ],
-              "cmd": "CONDITIONAL_BRANCH"
-            }
-          ],
-          "cmd": "CONDITIONAL_BRANCH"
-        },
-        {
-          "options": [
-            {
-              "label": "Buy Weapons",
-              "commands": [
-                {
-                  "shopId": 8,
-                  "cmd": "OPEN_SHOP"
-                },
-                {
-                  "label": "weaponsmith_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ]
-            },
-            {
-              "label": "Ask about the dungeon",
-              "commands": [
-                {
-                  "text": "Down there? Don’t fight fair. Don’t fight pretty. Fight to leave. The only winning move is coming back with your hands still yours.",
-                  "cmd": "TEXT"
-                },
-                {
-                  "label": "weaponsmith_hub",
-                  "cmd": "JUMP_TO_LABEL"
-                }
-              ]
-            },
-            {
-              "label": "Ask about equipment",
-              "commands": [
-                {
-                  "text": "You want to know how to not die? Fine. Listen close.",
-                  "cmd": "TEXT"
-                },
-                {
-                  "options": [
-                    {
-                      "label": "Weapons",
-                      "commands": [
-                        {
-                          "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "name": "weaponsmith_equip",
-                          "cmd": "LABEL"
-                        },
-                        {
-                          "text": "You want to know how to not die? Fine. Listen close.",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "options": [
-                            {
-                              "label": "Weapons",
-                              "commands": [
-                                {
-                                  "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
-                                  "cmd": "TEXT"
-                                },
-                                {
-                                  "label": "weaponsmith_equip",
-                                  "cmd": "JUMP_TO_LABEL"
-                                }
-                              ]
-                            },
-                            {
-                              "label": "Armor",
-                              "commands": [
-                                {
-                                  "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
-                                  "cmd": "TEXT"
-                                },
-                                {
-                                  "label": "weaponsmith_equip",
-                                  "cmd": "JUMP_TO_LABEL"
-                                }
-                              ]
-                            },
-                            {
-                              "label": "Back",
-                              "commands": [
-                                {
-                                  "label": "weaponsmith_hub",
-                                  "cmd": "JUMP_TO_LABEL"
-                                }
-                              ]
-                            }
-                          ],
-                          "cmd": "CHOICE"
-                        }
-                      ]
-                    },
-                    {
-                      "label": "Armor",
-                      "commands": [
-                        {
-                          "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "label": "weaponsmith_equip",
-                          "cmd": "JUMP_TO_LABEL"
-                        }
-                      ]
-                    },
-                    {
-                      "label": "Back",
-                      "commands": [
-                        {
-                          "label": "weaponsmith_hub",
-                          "cmd": "JUMP_TO_LABEL"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
-                }
-              ]
-            },
-            {
-              "label": "Found anything interesting?",
-              "commands": [
-                {
-                  "condition": "questStatus:shattered_blade_recovery:completed",
-                  "commands": [
-                    {
-                      "text": "The blade is done. Check my wares if you have the coin.",
-                      "cmd": "TEXT"
-                    },
-                    {
-                      "label": "weaponsmith_hub",
-                      "cmd": "JUMP_TO_LABEL"
-                    }
-                  ],
-                  "elseCommands": [
-                    {
-                      "condition": "questStatus:shattered_blade_recovery:active",
-                      "commands": [
-                        {
-                          "text": "Find that scrap metal yet? The forge is waiting.",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "label": "weaponsmith_hub",
-                          "cmd": "JUMP_TO_LABEL"
-                        }
-                      ],
-                      "elseCommands": [
-                        {
-                          "text": "Interesting? Maybe. Legends say a 'Shattered Blade' lies in the Cryptic Vault. Floor 4, maybe 5. It's useless scrap to you, but I could reforge it into something... lethal.",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "options": [
-                            {
-                              "label": "I'll keep an eye out.",
-                              "commands": [
-                                {
-                                  "questId": "shattered_blade_recovery",
-                                  "cmd": "QUEST_OFFER"
-                                },
-                                {
-                                  "label": "weaponsmith_hub",
-                                  "cmd": "JUMP_TO_LABEL"
-                                }
-                              ]
-                            },
-                            {
-                              "label": "Not interested.",
-                              "commands": [
-                                {
-                                  "label": "weaponsmith_hub",
-                                  "cmd": "JUMP_TO_LABEL"
-                                }
-                              ]
-                            }
-                          ],
-                          "cmd": "CHOICE"
-                        }
-                      ],
-                      "cmd": "CONDITIONAL_BRANCH"
-                    }
-                  ],
-                  "cmd": "CONDITIONAL_BRANCH"
-                }
-              ]
-            },
-            {
-              "label": "Leave",
-              "commands": []
-            }
-          ],
-          "cmd": "CHOICE"
+          "cmd": "CALL_COMMON_EVENT",
+          "commonEventId": 44
         }
       ]
     },
@@ -781,33 +524,12 @@
               ],
               "elseCommands": [
                 {
-                  "text": "Oh! Are you looking for the supply cart? I heard it! I was listening to the wind near the chasm, and I heard squeaky wheels stop suddenly. Then... goblin noises. Lots of them.",
-                  "speaker": "Alicia",
-                  "cmd": "TEXT"
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 45
                 },
                 {
-                  "options": [
-                    {
-                      "label": "Goblins? I should tell the guard.",
-                      "commands": [
-                        {
-                          "flag": "shipment_investigated",
-                          "value": true,
-                          "cmd": "SET_FLAG"
-                        },
-                        {
-                          "text": "Please be careful! If the goblins have the food, they'll be... energetic.",
-                          "speaker": "Alicia",
-                          "cmd": "TEXT"
-                        },
-                        {
-                          "commonEventId": 30,
-                          "cmd": "CALL_COMMON_EVENT"
-                        }
-                      ]
-                    }
-                  ],
-                  "cmd": "CHOICE"
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 30
                 }
               ],
               "cmd": "CONDITIONAL_BRANCH"
@@ -2737,7 +2459,7 @@
       [
         -0.0001351376029962159,
         -0.00011486696254670026,
-        -0.000054055041198486364
+        -5.4055041198486364e-05
       ],
       [
         -0.31969392534780233,
@@ -3304,7 +3026,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -0.000054055041198472487
+        -5.4055041198472487e-05
       ],
       [
         -0.19084026149606736,
@@ -3859,7 +3581,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -0.000054055041198472487
+        -5.4055041198472487e-05
       ],
       [
         -0.025969143078590495,
@@ -3971,7 +3693,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -0.000054055041198472487
+        -5.4055041198472487e-05
       ],
       [
         0,

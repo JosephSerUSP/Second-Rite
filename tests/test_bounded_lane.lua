@@ -270,6 +270,7 @@ local as3d = {}
 for key, value in pairs(flatEnv) do as3d[key] = value end
 as3d.preRendered = nil
 local quayMap = loader.maps[loader.getMapIndex(19)]
+game.currentMapData = quayMap
 lane.initialize(game, quayMap, as3d, nil)
 check(lane.isActive(game), "a lane with no pre-rendered block still initialises")
 local rx, ry, rz = lane.actorRoot(game)

@@ -1,0 +1,29 @@
+{
+  "source": "st_maria_B17.blend",
+  "sourceSHA256": "89960da11ca75658a68cc4dc20524fed6c3527a920c5ceb3152c7d0bd8ae5f5d",
+  "parentSHA256": "8f26fafcf2b573513fe33a5406d9d091201e7675c7411b66ec0f98dc6d8b2840",
+  "sourceChecks": "source-checks.json",
+  "walkingSupportChecks": "ground-support-checks.json",
+  "climbChecks": "service-climb-checks.json",
+  "nativeCaptures": "runtime/town-B17-ready/captures.json",
+  "sourceNativeGroundMaximumErrorPixels": 0.4100244652718743,
+  "walkingSupport": "Nine finite-width walk meshes match their native ground profiles; court and market grades are continuous and monotonic, with .9m total height change.",
+  "shortcut": "Visible wall-fixed service ladder: UP from Praca, DOWN from churchyard. Saves one stair-screen transfer. Existing depth-transfer walking animation; dedicated climbing animation is not authored.",
+  "characters": "Candidate contains exactly one Alicia, Laura and gate-guard sprite across all packaged maps. Inactive presentations stripped; Laura shared event 44 fixes active-quest greeting loop and nested equipment menus. Alicia event 45 retains shipment investigation and guard report.",
+  "gates": {
+    "candidateG1": "VALIDATE OK",
+    "canonicalUnit": "ALL UNIT TESTS OK; seven actual-interpreter Laura conversation cases",
+    "G1": "VALIDATE OK",
+    "G2": "All battle fixtures match",
+    "G3": "All traces match",
+    "G4": "Engine state doc regenerated for two new common events; matches",
+    "G5": "Red only on known Options references: seven mismatches, five new captures and three orphan references per surface; crop invariant passes; references untouched; #1331"
+  },
+  "playthrough": "27 native arrivals including shortcut both ways, normal stairs, recovery, registration, Alicia shipment investigation and guard completion, labyrinth descent/return, save/load. All nine exterior lanes traversed. Physical Android and combat economy acceptance remain open.",
+  "limits": [
+    "Prototype materials, vegetation and island massing still need owner art review.",
+    "Walking remains a bounded lateral lane; depth approaches are directed transfers.",
+    "Source checks are point samples, not swept body proof.",
+    "Prior APK duplicate visuals were reported by the owner, not independently reproduced; packaged singleton counts are now enforced."
+  ]
+}

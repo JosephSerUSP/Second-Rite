@@ -8,6 +8,7 @@ local geometryVisibility = require("engine.geometry.visibility_profile")
 local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
+local transitionMarkers = require("presentation.transition_markers")
 local buildProfiler = require("engine.map_build_profiler")
 
 -- Authored camera framing lives in Classic composition coordinates. Wider
@@ -1042,9 +1043,18 @@ end
 local PLAYER_IDLE_SPRITE = "assets/character/player.png"
 local PLAYER_WALK_SPRITE = "assets/character/walker.png"
 
-local function playerSpritePath(state)
-    if state and (state.walking or state.moving) then return PLAYER_WALK_SPRITE end
+local function playerSpritePath(state, pose)
+    if pose or (state and (state.walking or state.moving)) then return PLAYER_WALK_SPRITE end
     return PLAYER_IDLE_SPRITE
+end
+
+local function townPlayerPose(session)
+    local state = session.townTraversal
+    local x, y, z = require("engine.bounded_lane").actorRoot(session)
+    local pose = require("presentation.door_transition").actorPose()
+    return {x = x + (pose and pose.x or 0), y = y + (pose and pose.y or 0), z = z,
+        frame = pose and pose.frame or state.walkFrameIndex or 0,
+        facing = state.facing or 1, moving = pose}
 end
 
 local function drawTownPrerenderSprite(image, x, footY, width, height,
@@ -1372,7 +1382,8 @@ local function drawTownPrerender(session, inspection)
             projectedY + groundScreenOffsetY, denominator
     end
     local function screenXForTownY(y)
-        local x, _, denominator = projectTownPoint(depthX, y, state.groundZ or 0)
+        local groundZ = require("engine.bounded_lane").groundAt(session, y) or state.groundZ or 0
+        local x, _, denominator = projectTownPoint(depthX, y, groundZ)
         return panX + centerX + (x - plateGroundX), denominator
     end
     -- Runtime-proof telemetry: this is resolved composition state, captured
@@ -1387,16 +1398,16 @@ local function drawTownPrerender(session, inspection)
         cameraTargetY = townCamera.targetY,
     }
 
-    -- Where the floor is at a given point along the lane. The camera looks
-    -- straight at the facades with no vanishing point, so one scale converts
-    -- both axes and a world height difference is a plain pixel offset from
-    -- the authored foot line.
+    -- Ground follows the same pitched perspective as the plate's source camera.
+    -- A linear height-to-pixel offset drifts away from a visible slope.
     local lanes = require("engine.bounded_lane")
     local function screenFootY(y)
         local groundZ = lanes.groundAt(session, y)
         if not groundZ then return screenY end
-        return screenY - (groundZ - state.groundZ) * pixelsPerRuntimeY
+        local _, footY = toScreen(depthX, y, groundZ)
+        return footY
     end
+    state.lastPrerenderComposition.laneScreenY = screenFootY(actorY)
 
     local function eventSpriteSize(event)
         local height = tonumber(event.worldHeight) or 1.75
@@ -1454,12 +1465,16 @@ local function drawTownPrerender(session, inspection)
         end
     end
 
-    local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+    local playerPose = townPlayerPose(session)
+    local playerImage = getEventSprite({ sprite = playerSpritePath(state, playerPose.moving) }, session)
     if playerImage then
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
-            screenFootY(actorY),
-            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
-            state.facing or 1)
+        local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
+        local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
+        local scale = baseDepth / poseDepth
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY) + poseX - baseX,
+            screenFootY(actorY) + poseY - baseY,
+            actorWidth * scale, actorHeight * scale, 24, 48, playerPose.frame,
+            playerPose.facing)
     end
 
     -- The matching foreground cutout follows the same pan and is composited
@@ -1483,7 +1498,8 @@ local function drawTownPrerender(session, inspection)
     for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         if not rawEv.wallEvent then
             local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-            if presentation.visual == "model" and presentation.model then
+            if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                 local imageX, imageY = townEventWorldPosition(rawEv)
                 imageX = imageX or depthX
                 local model = townArrowModel(presentation.model)
@@ -1498,7 +1514,7 @@ local function drawTownPrerender(session, inspection)
                 local groundZ = lanes.groundAt(session, imageY) or state.groundZ or 0
                 for _, modelGroup in ipairs(model.groups or {}) do
                     local color = modelGroup.color or { 1, 0.65, 0.08, 1 }
-                    local lineSegments = {}
+                    local triangles = {}
                     for index = 1, #(modelGroup.vertices or {}), 3 do
                         local a, b, c = modelGroup.vertices[index],
                             modelGroup.vertices[index + 1], modelGroup.vertices[index + 2]
@@ -1520,34 +1536,25 @@ local function drawTownPrerender(session, inspection)
                                 end
                                 return toScreen(worldX, worldY, worldZ)
                             end
-                            local ax, ay = arrowPoint(a)
-                            local bx, by = arrowPoint(b)
-                            local cx, cy = arrowPoint(c)
-                            if isTransitionArrow then
-                                local function addSegment(x1, y1, x2, y2)
-                                    local keyA = string.format("%.3f,%.3f", x1, y1)
-                                    local keyB = string.format("%.3f,%.3f", x2, y2)
-                                    local key = keyA < keyB and keyA .. ":" .. keyB
-                                        or keyB .. ":" .. keyA
-                                    lineSegments[key] = { x1, y1, x2, y2 }
-                                end
-                                addSegment(ax, ay, bx, by)
-                                addSegment(bx, by, cx, cy)
-                                addSegment(cx, cy, ax, ay)
-                            else
-                                love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                                love.graphics.polygon("fill", ax, ay, bx, by, cx, cy)
-                            end
+                            local ax, ay, ad = arrowPoint(a)
+                            local bx, by, bd = arrowPoint(b)
+                            local cx, cy, cd = arrowPoint(c)
+                            local shade = isTransitionArrow and (0.55 + 0.45 * math.abs(a[8] or 0)) or 1
+                            triangles[#triangles + 1] = {
+                                depth = (ad + bd + cd) / 3,
+                                points = { ax, ay, bx, by, cx, cy },
+                                shade = shade,
+                            }
                         end
                     end
-                    if isTransitionArrow then
-                        love.graphics.setColor(color[1], color[2], color[3], color[4] or 1)
-                        love.graphics.setLineStyle("rough")
-                        love.graphics.setLineWidth(1)
-                        for _, segment in pairs(lineSegments) do
-                            love.graphics.line(segment)
-                        end
-                        love.graphics.setLineWidth(1)
+                    -- Filled model faces, ordered from the far side to the camera.
+                    -- Face shading keeps the shaft and head readable on a plate.
+                    table.sort(triangles, function(a, b) return a.depth > b.depth end)
+                    for _, triangle in ipairs(triangles) do
+                        local shade = triangle.shade
+                        love.graphics.setColor(color[1] * shade, color[2] * shade,
+                            color[3] * shade, color[4] or 1)
+                        love.graphics.polygon("fill", triangle.points)
                     end
                 end
             end
@@ -3255,7 +3262,8 @@ end
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-                if presentation.visual == "model" and presentation.model then
+                if presentation.visual == "model" and presentation.model
+                and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
                     if presentation.model:match("transition_arrow") then
                         modelSpec.transitionArrowDirection = rawEv.direction
@@ -3296,11 +3304,11 @@ end
 
     if session.townTraversal then
         local state = session.townTraversal
-        local playerImage = getEventSprite({ sprite = playerSpritePath(state) }, session)
+        local pose = townPlayerPose(session)
+        local playerImage = getEventSprite({ sprite = playerSpritePath(state, pose.moving) }, session)
         if playerImage then
-            local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
-            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
-                state.walkFrameIndex or 0, state.facing or 1)
+            addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
+                pose.frame, pose.facing)
         end
     end
 

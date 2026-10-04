@@ -39,7 +39,7 @@ def main(argv=None):
     if not out_dir.is_absolute():
         out_dir = ROOT / out_dir
     command = [
-        "blender" if args.dry_run else blender_locator.blender_executable(), "--background", "--factory-startup",
+        "blender" if args.dry_run else blender_locator.blender_executable(), "--background", "--factory-startup", "--python-exit-code", "1",
         "--python", str(ROOT / "tools" / "blender" / "build_world_props.py"),
         "--", "--set", str(set_path), "--asset", asset["id"],
         "--out-dir", str(out_dir), "--project-root", str(project),

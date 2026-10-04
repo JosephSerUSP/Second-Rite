@@ -307,9 +307,14 @@ sign-offs. Exposure defaults to neutral 0 EV. The earlier Cycles-matching studie
 not a target brightness or an automatic exposure policy.
 
 ```
-blender -b --python tools/blender/export_room_environment.py -- --blend .../alicias_padaria.blend ^
-    --output out/padaria_3d --exit-y 6.5 --bake-backend eevee
+python tools/blender/run.py tools/blender/export_room_environment.py -- --blend projects/hichaukitoden-game/assets/authoring/environments/alicias_padaria.blend --output out/padaria_3d --exit-y 7.0333 --npc npc_alicia=2.3333 --bake-backend eevee
 ```
+
+`--exit-y` and `--npc` are the `anchors` of the shipped package's `environment.json`; other numbers move the
+exit and the NPC.
+
+`run.py` is the launcher for every Blender-side script: pinned Blender, headless, and a raised Python
+error becomes a non-zero exit (a bare `blender --python` command exits 0 when the script raises).
 
 ### The Praça ground (#1287)
 

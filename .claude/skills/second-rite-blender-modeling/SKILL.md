@@ -29,12 +29,15 @@ gate. Do not build a parallel exporter or a second recipe vocabulary.
 | author or fix an **item model** | per-item source `projects/hichaukitoden-game/assets/authoring/items/<id>.blend`, compiled read-only by `python tools/blender/compile_item_blends.py [--source …]`; read that folder's `README.md` | `compile_item_blends.py --check`, then `python tools/asset-production/check_item_models.py` |
 | build a **town interior** (St. Maria) | a recipe under `tools/blender/recipes/` using `interior.py` (`Interior`) + `furnishings.py`; copy the shape of `alicias_padaria.py`; brief `docs/design/st-maria-interior-authoring.md` | register the `.blend` in `environment-sources.json`; `python tools/blender/environment_sources.py --check` |
 | build a **town exterior** | `recipes/exterior.py`; copy the STRUCTURE of `recipes/examples/exterior_reference.py` (a non-place example, never its look); buildings via `recipes/house_grammar/` (validated data); brief `docs/design/st-maria-exterior-authoring.md` | same as interiors |
-| add a **reusable prop for rooms** | a new function in `recipes/furnishings.py` (check the existing 49 first) | used by a recipe; no `room.part` copies of an existing furnishing |
+| use an **existing furnishing** | `python tools/blender/furnishings_catalogue.py --find "<word>"` (measured size, signature, placement notes); browse `tools/blender/recipes/FURNISHINGS.md` | `furnishings_catalogue.py --check` |
+| place props **by relationship** (on / beside / keep-clear) | `compile_room_spec.py` with a JSON scaffold; copy `recipes/examples/serving_corner.json` | the compiler's own rejections; native visual review |
+| add a **reusable prop for rooms** | a new function in `recipes/furnishings.py`, only after `--find` shows nothing fits | used by a recipe; no `room.part` copies of an existing furnishing; `furnishings_catalogue.py --build` then `--check` |
 | bake/export an **environment package** | `export_room_environment.py` / `export_exterior_environment.py` (see `BLENDER_CORE.md` §EEVEE) | owner review; G5 for anything shipped |
 | bind or texture a **material** | a semantic id from `tools/asset-language/materials.json` (read the file, the id list grows); textures via `tools/blender/material_library.py` | `python tools/asset-language/check.py all` |
 | make a **surface relief** baseline | not this skill: use `second-rite-surface-baselines` | — |
 
-Never regenerate an **adopted** `.blend` (see `environment-sources.json` and
+The full intent table is `tools/blender/README.md`; where the two disagree, the
+README wins. Never regenerate an **adopted** `.blend` (see `environment-sources.json` and
 `BLENDER_CORE.md`). Scripts named `study_*` or the `*registry*` revision
 scripts are history, not templates. Paths are Project-relative: the repository
 root has no `assets/` or `data/` since #700.
@@ -191,10 +194,17 @@ canonical field hash.
 - Write builds and previews to temporary output unless production promotion is
   explicitly requested.
 
-Run Blender scripts headlessly:
+Run Blender scripts headlessly through the launcher, never a hand-typed
+`blender --python` command (that exits **0** when the script raises, so a
+crash reads as success):
 
 ```text
-blender --background --factory-startup --python <script.py> -- <arguments>
+python tools/blender/run.py <script.py> [--blend FILE.blend] -- <arguments>
 ```
+
+`tools/blender/SCRIPTS.md` has a **Run with** column: `run.py` scripts run
+inside Blender this way; `python` scripts are host tools run directly; `import`
+files are not entry points. With `BLENDER_EXECUTABLE` unset, Blender
+integration tests *skip* - a green unit run is then not Blender coverage.
 
 Print one machine-readable JSON result line for automation.

@@ -12,7 +12,7 @@ units and the character-to-screen ratio follows automatically.
 
 Run:
 
-    blender --background --python tools/blender/stage_room_model.py -- \
+    python tools/blender/run.py tools/blender/stage_room_model.py -- \
         --model out/hall.glb --model-height 7.0 \
         --out out/hall.blend --render out/hall.png
 

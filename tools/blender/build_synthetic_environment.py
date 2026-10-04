@@ -301,7 +301,8 @@ def generate_synthetic_blend(output_path: Path):
     temp_runner.close()
 
     try:
-        cmd = [blender, "--background", "--factory-startup", "--python", temp_runner.name]
+        cmd = [blender, "--background", "--factory-startup", "--python-exit-code", "1",
+               "--python", temp_runner.name]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
             print(res.stdout)

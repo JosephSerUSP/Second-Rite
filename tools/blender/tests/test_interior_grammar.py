@@ -34,7 +34,7 @@ class InteriorGrammarTests(unittest.TestCase):
     def setUpClass(cls):
         blender = blender_test_support.blender_executable()
         proc = subprocess.run(
-            [str(blender), "--background", "--factory-startup",
+            [str(blender), "--background", "--factory-startup", "--python-exit-code", "1",
              "--python", str(PROBE)],
             capture_output=True, text=True, timeout=600,
         )

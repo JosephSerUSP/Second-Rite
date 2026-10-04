@@ -1,7 +1,7 @@
 """Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size.
 
-    blender -b --factory-startup -P tools/blender/photograph_room_package.py -- \
-        --package projects/.../st_maria_town/alicias_padaria_3d --out out/look/padaria_new --lane-y 2.0 5.5
+    python tools/blender/run.py tools/blender/photograph_room_package.py -- \
+        --package projects/hichaukitoden-game/assets/environments/st_maria_town/alicias_padaria_3d --out out/look/padaria_new --lane-y 2.0 5.5
 
 Imports `environment.obj` (the runtime's axis convention, which Blender's importer reproduces),
 paints it with `environment.png` as an emission texture with Closest interpolation, and renders from

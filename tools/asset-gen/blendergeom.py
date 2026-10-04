@@ -67,7 +67,7 @@ from blender_locator import blender_executable  # noqa: E402
 def render(executable, preset, out_dir, size, contrast, blend=True):
     target = out_dir / f"{preset}.png"
     command = [
-        executable, "--background", "--factory-startup",
+        executable, "--background", "--factory-startup", "--python-exit-code", "1",
         "--python", str(SCRIPT), "--",
         "--preset", preset,
         "--out", str(target).replace("\\", "/"),

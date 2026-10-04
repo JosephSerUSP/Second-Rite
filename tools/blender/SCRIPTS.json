@@ -225,7 +225,8 @@
     {
       "path": "offline_blender.py",
       "role": "production",
-      "purpose": "Run a Blender Python tool with Python network connections denied in this process."
+      "purpose": "Run a Blender Python tool with Python network connections denied in this process.",
+      "run": "run.py"
     },
     {
       "path": "open_registry_plan.py",
@@ -471,6 +472,11 @@
       "path": "compile_room_spec.py",
       "role": "production",
       "purpose": "Compile relational JSON scaffolds through existing Interior and furnishing builders."
+    },
+    {
+      "path": "run.py",
+      "role": "production",
+      "purpose": "Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit."
     }
   ]
 }

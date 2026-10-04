@@ -25,8 +25,7 @@ into each recess: the same rule mirrored, and four of them side by side.
 The corridor runs off both frame edges, which is what makes it a lane rather
 than a box.
 
-    blender --background --factory-startup \
-        --python tools/blender/recipes/passage_house_corridor.py --
+    python tools/blender/run.py tools/blender/recipes/passage_house_corridor.py
 """
 
 from __future__ import annotations

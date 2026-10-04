@@ -545,13 +545,13 @@ experiments read as false null results before this was noticed.
 Scaffold the source document once:
 
 ```bash
-blender --background --factory-startup --python tools/blender/recipes/<map>.py --
+python tools/blender/run.py tools/blender/recipes/<map>.py
 ```
 
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --no-walker --render out/<map>.png
+python tools/blender/run.py tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --render out/<map>.png
 ```
 
 ### The renderer is Cycles, and that is a lighting decision

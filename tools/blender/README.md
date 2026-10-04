@@ -8,6 +8,17 @@ Project. Tools and contracts remain installation-owned; review output belongs
 in `out/`. Node is required. Set `BLENDER_EXECUTABLE` to the exact version in
 `blender-pin.json`; `python tools/blender/blender_locator.py` verifies it.
 
+Start every Blender-side script with the launcher, never a hand-typed
+`blender --python` command (Blender exits **0** when the script raises, so a
+crash reads as success):
+
+```text
+python tools/blender/run.py tools/blender/<script>.py [--blend FILE.blend] -- <script arguments>
+```
+
+[SCRIPTS.md](SCRIPTS.md)'s **Run with** column says whether a tool runs inside
+Blender (`run.py`), on the host (`python`, `node`) or is import-only.
+
 | Intent | Entry point | Check before promotion | Lane brief |
 |---|---|---|---|
 | Choose a furnishing and its parameters | [Generated catalogue](recipes/FURNISHINGS.md); `furnishings_catalogue.py --check` | Dimensions include the complete built assembly; review placement context and material bindings | [Interior brief](../../docs/design/st-maria-interior-authoring.md) |
@@ -15,7 +26,7 @@ in `out/`. Node is required. Set `BLENDER_EXECUTABLE` to the exact version in
 | Edit or give an item useful source structure | Open its existing `.blend`; scaffold only a new item; `compile_item_blends.py --check` | Source hashes unchanged, runtime OBJ valid, corpus check, real item viewer | [Item source contract](../../projects/hichaukitoden-game/assets/authoring/items/README.md) |
 | Author a St. Maria interior scaffold | `recipes/interior.py` + `recipes/furnishings.py`; edit an adopted source directly | Source record check; native capture across lane positions and surfaces | [Interior brief](../../docs/design/st-maria-interior-authoring.md) |
 | Author a St. Maria exterior scaffold | `recipes/exterior.py`; structure example in `recipes/examples/exterior_reference.py` | Source record check; ground, near stack and native capture | [Exterior brief](../../docs/design/st-maria-exterior-authoring.md) |
-| Bake an existing environment | Pinned Blender, `export_room_environment.py` or `export_exterior_environment.py`, output under `out/` | Package/source provenance and runtime capture; G1 and applicable G5 after integration | [Environment/export contract](../../docs/asset-pipeline/BLENDER_CORE.md) |
+| Bake an existing environment | `run.py` with `export_room_environment.py` or `export_exterior_environment.py`, output under `out/` | Package/source provenance and runtime capture; G1 and applicable G5 after integration | [Environment/export contract](../../docs/asset-pipeline/BLENDER_CORE.md) |
 | Render a room plate from source | `stage_room_model.py` | Native composition at the supported surfaces | [Plate workflow](../../docs/design/town-authoring-known-good.md) |
 | Build First Stratum props or depth-conditioned surfaces | `tools/asset-production/build_world_prop.py` or `generate_surface.py`; start with `--dry-run` | Asset-set checks and staged products; provider generation needs its own task authorization | [Production adapters](../asset-production/README.md) |
 | Generate canonical scalar surface baselines | `tools/asset-gen/surface_baselines_v2.py` | `--verify`; Blender previews are derivatives | [Surface contract](../../docs/asset-pipeline/SURFACE_BASELINES_V2.md) |

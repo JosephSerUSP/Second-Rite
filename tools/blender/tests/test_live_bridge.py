@@ -217,7 +217,8 @@ class BlenderReloadTests(unittest.TestCase):
         blender = blender_test_support.blender_executable()
         probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_reload_blender.py"
         result = subprocess.run(
-            [str(blender), "-b", "--factory-startup", "--python", str(probe)],
+            [str(blender), "-b", "--factory-startup", "--python-exit-code", "1",
+             "--python", str(probe)],
             cwd=ROOT, text=True, capture_output=True, timeout=120)
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)
@@ -230,7 +231,8 @@ class BlenderIntegrationTests(unittest.TestCase):
         blender = blender_test_support.blender_executable()
         probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_blender.py"
         result = subprocess.run(
-            [str(blender), "--factory-startup", "--python", str(probe)],
+            [str(blender), "--factory-startup", "--python-exit-code", "1",
+             "--python", str(probe)],
             cwd=ROOT, text=True, capture_output=True, timeout=180)
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)

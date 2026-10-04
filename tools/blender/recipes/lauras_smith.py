@@ -21,8 +21,7 @@ has: dark against bright, ordered against over-full, ember-orange against
 daylight, and almost no azulejo -- the dado is a domestic thing, and the one
 stretch of it here is beside the door where a customer waits.
 
-    blender --background --factory-startup \
-        --python tools/blender/recipes/lauras_smith.py -- --variant platform
+    python tools/blender/run.py tools/blender/recipes/lauras_smith.py -- --variant platform
 """
 
 from __future__ import annotations

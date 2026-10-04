@@ -19,8 +19,7 @@ The shell, thresholds and light vocabulary live in `interior.py`; the
 furnishings in `furnishings.py`. This file declares only what makes the Padaria
 itself, plus the one axis each contest variant spends.
 
-    blender --background --factory-startup \
-        --python tools/blender/recipes/alicias_padaria.py -- --variant alcove
+    python tools/blender/run.py tools/blender/recipes/alicias_padaria.py -- --variant alcove
 """
 
 from __future__ import annotations

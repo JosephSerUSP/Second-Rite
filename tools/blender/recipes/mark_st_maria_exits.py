@@ -18,7 +18,7 @@ A surgical edit, not a rebuild -- ``st_maria_praca.py`` would destroy hand
 authoring. Blender must not have the document open; it holds no lock, so a
 running session would overwrite this on its next save.
 
-    blender -b -noaudio --factory-startup -P tools/blender/recipes/mark_st_maria_exits.py
+    python tools/blender/run.py tools/blender/recipes/mark_st_maria_exits.py
 
 Scaffold-only (#1269): this targets st_maria_praca.blend, whose status is
 `scaffold` in environment-sources.json. The adopted Praca, the source of the

@@ -25,7 +25,7 @@ class GroundCoverTests(unittest.TestCase):
         blender = blender_test_support.blender_executable()
         script = ROOT / "tools" / "blender" / "tests" / "ground_cover_blender.py"
         result = subprocess.run(
-            [blender, "-b", "-noaudio", "--factory-startup", "-P", str(script)],
+            [blender, "-b", "-noaudio", "--factory-startup", "--python-exit-code", "1", "-P", str(script)],
             capture_output=True, text=True, timeout=300)
         marker = "GROUND_COVER_PROBE "
         line = next((l for l in result.stdout.splitlines() if l.startswith(marker)), None)

@@ -76,7 +76,7 @@ def run_runtime_half():
 
 def run_blender_half():
     command = [
-        blender_executable(), "--background", "--factory-startup",
+        blender_executable(), "--background", "--factory-startup", "--python-exit-code", "1",
         "--python", str(BLENDER_TEST), "--",
         "--root", str(ROOT), "--fixture", str(FIXTURE),
     ]

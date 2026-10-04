@@ -8,7 +8,7 @@ specimen to the same collection, and saves.  Everything else is left alone.
 Blender must not have the document open: it holds no lock, so a running
 session would simply overwrite this edit on its next save.
 
-    blender -b -noaudio --factory-startup -P tools/blender/recipes/replace_st_maria_tree.py
+    python tools/blender/run.py tools/blender/recipes/replace_st_maria_tree.py
 
 Pass ``-- --dry-run`` to report what would change without writing.
 

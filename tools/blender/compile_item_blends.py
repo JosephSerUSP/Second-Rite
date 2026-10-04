@@ -96,7 +96,8 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, mo
         env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source_dir)
     elif len(source.parents) >= 3:
         env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source.parent)
-    command = [blender, "--background", str(source), "--python", str(BLENDER_SCRIPT)]
+    command = [blender, "--background", "--factory-startup", "--python-exit-code", "1", str(source),
+               "--python", str(BLENDER_SCRIPT)]
     print("+", " ".join(command))
     subprocess.run(command, cwd=ROOT, env=env, check=True)
 

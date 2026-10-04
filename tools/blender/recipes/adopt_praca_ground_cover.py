@@ -24,7 +24,7 @@ Tufts` is then set to the budget as a backstop.
 Blender must not have the document open: it holds no lock, so a running session would overwrite
 this edit on its next save. Run through the pinned Blender:
 
-    blender -b -noaudio --factory-startup -P tools/blender/recipes/adopt_praca_ground_cover.py
+    python tools/blender/run.py tools/blender/recipes/adopt_praca_ground_cover.py
 
 Pass ``-- --dry-run`` to report what would change without writing, ``-- --document PATH`` to work on
 a copy. The adopted `.blend` is edited only by this script; the shipped package is not regenerated

@@ -84,7 +84,7 @@ jobs:
           output=/tmp/second-rite-item-source-fixture
           rm -f "$fixture" "$fixture"[0-9]*
           rm -rf "$output"
-          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python tools/blender/tests/create_item_source_fixture.py
+          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python-exit-code 1 --python tools/blender/tests/create_item_source_fixture.py
           sha256sum "$fixture" > /tmp/item-fixture-before.sha256
           xvfb-run -a python tools/blender/compile_item_blends.py \
             --source "$fixture" \

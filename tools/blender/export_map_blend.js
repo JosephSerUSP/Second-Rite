@@ -99,6 +99,7 @@ async function exportMapBlend(options) {
         run(blender, [
             '--background',
             '--factory-startup',
+            '--python-exit-code', '1',
             '--python', importer,
             '--', bundlePath, output, root,
         ], { stdio: 'inherit', cwd: root });

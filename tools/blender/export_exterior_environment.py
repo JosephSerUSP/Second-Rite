@@ -12,7 +12,9 @@ exactly three ways, and each is a property of the subject rather than a choice:
 * a room needs the stager's interior fill to match its plate, a street does
   not, so this runs the pipeline's flat profile.
 
-    blender -b -noaudio --python tools/blender/export_exterior_environment.py --         --blend projects/.../st_maria_praca_modelled.blend         --output projects/.../environments/st_maria_town/praca_3d
+    python tools/blender/run.py tools/blender/export_exterior_environment.py -- \
+        --blend projects/hichaukitoden-game/assets/authoring/environments/st_maria_praca_modelled.blend \
+        --output out/praca_3d
 
 ## Atlas coverage
 

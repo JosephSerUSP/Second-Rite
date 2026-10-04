@@ -8,9 +8,12 @@ is already there into the TH_* contract collections, so the walkable 3D room
 is provably the same room the plate photographs -- if the recipe changes, both
 outputs change together, and if it does not, neither drifts.
 
-    blender -b -noaudio --python tools/blender/export_room_environment.py -- \
-        --blend projects/.../alicias_padaria.blend \
-        --output projects/.../environments/st_maria_town/alicias_padaria_3d
+    python tools/blender/run.py tools/blender/export_room_environment.py -- \
+        --blend projects/hichaukitoden-game/assets/authoring/environments/alicias_padaria.blend \
+        --output out/alicias_padaria_3d --exit-y 7.0333 --npc npc_alicia=2.3333
+
+Take ``--exit-y`` and ``--npc`` from the ``anchors`` of the shipped package's
+``environment.json``; a rebake with other numbers moves the exit and the NPC.
 
 ## Why the mesh comes out mirrored
 

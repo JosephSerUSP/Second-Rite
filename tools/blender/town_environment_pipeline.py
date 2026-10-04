@@ -459,7 +459,8 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
     temp_runner.close()
 
     try:
-        cmd = [blender, "--background", str(blend_path), "--python", temp_runner.name]
+        cmd = [blender, "--background", "--factory-startup", "--python-exit-code", "1", str(blend_path),
+               "--python", temp_runner.name]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
             print(res.stdout)

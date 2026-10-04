@@ -36,7 +36,7 @@ output is the gitignored `out/`, a save under `projects/` is refused, and
 `environment_sources.py --check` rejects any `example_*` file recorded as a
 source.
 
-    blender -b --factory-startup --python tools/blender/recipes/examples/exterior_reference.py -- \\
+    python tools/blender/run.py tools/blender/recipes/examples/exterior_reference.py -- \\
         [--blend out/examples/example_exterior_reference.blend] [--render out/examples/frames]
 
 One machine-readable line is printed: `EXTERIOR_EXAMPLE {json}`.

@@ -99,7 +99,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          & $env:BLENDER_EXECUTABLE --background --factory-startup `
+          & $env:BLENDER_EXECUTABLE --background --factory-startup --python-exit-code 1 `
             --python tools/blender/tests/verify_map_blend.py -- $env:CI_MAP_BLEND 8
           if ($LASTEXITCODE -ne 0) { throw "Blender structural verification failed (exit $LASTEXITCODE)" }
 

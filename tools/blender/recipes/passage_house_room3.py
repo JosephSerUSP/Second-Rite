@@ -14,8 +14,7 @@ adult); and Saban's end has straw and a chipped feed bowl.
 The shell, thresholds and light vocabulary live in `interior.py`. This file
 declares only what makes Room 3 itself.
 
-    blender --background --factory-startup \
-        --python tools/blender/recipes/passage_house_room3.py --
+    python tools/blender/run.py tools/blender/recipes/passage_house_room3.py
 """
 
 from __future__ import annotations

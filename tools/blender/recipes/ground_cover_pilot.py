@@ -8,7 +8,7 @@ as a keep-out object -- and lets ``ground_cover.py`` scatter over it.
 
 Run through the pinned Blender::
 
-    blender -b --python tools/blender/recipes/ground_cover_pilot.py -- \
+    python tools/blender/run.py tools/blender/recipes/ground_cover_pilot.py -- \
         --output out/ground-cover/pilot.blend --render out/ground-cover/pilot.png
 """
 from __future__ import annotations

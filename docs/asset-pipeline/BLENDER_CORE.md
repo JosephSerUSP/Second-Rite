@@ -171,6 +171,20 @@ adopted and is what the shipped package is baked from; `st_maria_praca.blend` is
 `reauthor_praca_spiral.py`, and the read-only `study_town_perspective.py`) are
 scaffold-only and say so.
 
+### Candidate revisions are commits, not files (#1349)
+
+A candidate room under `projects/*/assets/authoring/candidates/<name>/` keeps
+the same `environment-sources.json` record, never marks a file `adopted` (an
+adopted source is copied into `assets/authoring/environments/`), and holds at
+most two `.blend` files: the newest candidate and at most one under
+comparison. `environment_sources.py --check` enforces all three.
+
+Work between reviews goes to the gitignored `out/` (the review runners already
+write there). Commit a revision by replacing the candidate file, not by adding
+`<name>_rN+1.blend` beside it: git history keeps every revision, and a file per
+revision only adds clone weight and doubt about which one is real. Write one
+report per decision, not per step.
+
 ## Browsing asset libraries (read-only)
 
 Blender 5.2 remote asset libraries are static JSON over HTTP, and every asset in

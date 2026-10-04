@@ -20,6 +20,10 @@ no `.blend` exists (a plate authored outside Blender, an unreferenced stub).
 
     python tools/blender/environment_sources.py --check
 
+Candidate folders under `assets/authoring/candidates/<name>/` keep the same
+record, may not mark a file adopted, and hold at most two `.blend` files:
+revisions are commits, not file names.
+
 Pure Python: no Blender, so it runs in the required `verify` gate.
 """
 
@@ -43,10 +47,18 @@ EEVEE_KEYS = {"exposureEV": (int, float), "probeCells": (int, float), "probeSamp
               "emissiveLights": (bool,), "fixtureLights": (bool,), "eeveeOptions": (list,),
               "supersample": (int,), "basis": (str,)}
 PROJECTS = ("hichaukitoden-game", "editor-fixture")
+# A candidate folder keeps the newest candidate, not its history: revisions are
+# commits, not file names (#1349). Two leaves room for the newest and one
+# under comparison.
+MAX_CANDIDATE_BLENDS = 2
 
 
 def authoring_dir(project_root: Path) -> Path:
     return Path(project_root) / "assets" / "authoring" / "environments"
+
+
+def candidates_dir(project_root: Path) -> Path:
+    return Path(project_root) / "assets" / "authoring" / "candidates"
 
 
 def package_dir(project_root: Path) -> Path:
@@ -171,11 +183,35 @@ def _check_packages(project_root: Path, label: str) -> list[str]:
     return errors
 
 
+def _check_candidates(project_root: Path, label: str) -> list[str]:
+    """Candidate folders follow the same record, hold no adopted file, and keep
+    no revision history as files."""
+    errors = []
+    root = candidates_dir(project_root)
+    if not root.is_dir():
+        return errors
+    for folder in sorted(p for p in root.iterdir() if p.is_dir()):
+        where = f"{label}: candidates/{folder.name}"
+        errors.extend(_check_sources(folder, where))
+        blends = sorted(folder.glob("*.blend"))
+        if len(blends) > MAX_CANDIDATE_BLENDS:
+            errors.append(
+                f"{where} holds {len(blends)} .blend files; keep at most "
+                f"{MAX_CANDIDATE_BLENDS} (revisions are commits, not file names)")
+        for name, entry in sorted(load_sources(folder).items()):
+            if entry.get("status") == "adopted":
+                errors.append(
+                    f"{where}: {name} is marked adopted; an adopted source lives "
+                    "in assets/authoring/environments/, not among candidates")
+    return errors
+
+
 def check_project(project_root: Path) -> list[str]:
     project_root = Path(project_root)
     label = project_root.name
     return (_check_sources(authoring_dir(project_root), label)
-            + _check_packages(project_root, label))
+            + _check_packages(project_root, label)
+            + _check_candidates(project_root, label))
 
 
 def main() -> int:

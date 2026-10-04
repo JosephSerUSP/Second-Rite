@@ -578,3 +578,11 @@ Still broken, not fixed here (each is step 1 above): `test_asset_set.py`
 (3 errors, repo-root paths), `test_model_census.py` (imports a deleted module),
 `build_world_props.py` (refuses every output path), and the other root-path
 tools listed in F1.
+
+### Follow-up (owner approved, 2026-10-04)
+
+- #1349: Passage Office revisions r2–r12 (and the r3 dependency record) were
+  removed from the tree. r13 stays as a `reference`; it is byte-identical to the
+  adopted `environments/passage_office.blend`. `environment_sources.py --check`
+  now covers candidate folders: same record, no `adopted` candidate, at most two
+  `.blend` files. The policy is in `BLENDER_CORE.md`.

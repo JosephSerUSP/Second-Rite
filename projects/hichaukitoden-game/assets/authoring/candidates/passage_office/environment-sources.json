@@ -1,88 +1,9 @@
 {
   "schemaVersion": 1,
   "sources": {
-    "passage_office_r2.blend": {
-      "status": "superseded",
-      "basis": "Historical copy with broken relative texture dependencies after relocation; preserved as rejected evidence. Use packed revision 3.",
-      "sha256": "ca04918d40ca0c15a4c432dd80f9f6cdcb91260d1b552420e3ce97e8931eb24a",
-      "exitY": 1.0833,
-      "registrarY": 5.5333,
-      "supersededBy": "passage_office_r3.blend"
-    },
-    "passage_office_r3.blend": {
-      "status": "scaffold",
-      "basis": "Packed revision of the working original source, preserving geometry and materials. All used images embedded. Current composition rejected by owner as generic room; retain as workflow evidence, not adopted art.",
-      "sha256": "171c55e3a59c4db5ec7e5c77be1d74e5dfb822d4ef8603f7f6722890d3af293d",
-      "exitY": 1.0833,
-      "registrarY": 5.5333
-    },
-    "passage_office_r5.blend": {
-      "status": "scaffold",
-      "basis": "Service-hatch Registry candidate edited from packed revision 3; twenty record compartments, counter, waiting bench and revised writing props. Visual acceptance pending.",
-      "sha256": "bb52a1311f305c29c5e3f7ecd9b3572962a2e1ede4c440c8f77ff3933ce962fe",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r6.blend": {
-      "status": "scaffold",
-      "basis": "Book silhouette and material hierarchy refinement of revision 5; owner visual acceptance pending.",
-      "sha256": "6bb58ef6d1cbd894d43e283cf8098d776c0a84134e715cf5fed0a1bd80353190",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r7.blend": {
-      "status": "scaffold",
-      "basis": "Tactile finishes, real screen-left daylight window, shared outward shutter / inward casement assemblies, harbour painting, notices and foreground plant. Owner visual acceptance pending; shipping exterior unchanged.",
-      "sha256": "f6e40ac29f7fef5ba3131657493244f7c1adf1e41de57ea1c22c754673b7c937",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r8.blend": {
-      "status": "scaffold",
-      "basis": "Open-room correction: detached masonry hatch removed, notices moved to rear wall, low timber counter returns. Owner visual acceptance pending.",
-      "sha256": "e3b52584f8953619c51dabc68e0518b66297f506683613be80c6718ac3fe4818",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r9.blend": {
-      "status": "scaffold",
-      "basis": "Counter carcass gap repaired; wall-connected L-shaped timber service screen restores service-bay distinction. Visual acceptance pending.",
-      "sha256": "beb725429436e947b4cd3bb553e5c6878be7e4c05ac038ef55839ad7cd62087c",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r10.blend": {
-      "status": "scaffold",
-      "basis": "Divider fitted to ceiling with notched infill around the two existing crossing beams. Ceiling and beam geometry, transforms and material assignments preserved. Visual acceptance pending.",
-      "sha256": "b761be3cb18384e72b81d482dae32d98e4be3b73e46244e7b5896f884ff725c4",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r11.blend": {
-      "status": "scaffold",
-      "basis": "Counter and ceiling-fitted divider extend to right wall; wall-backed records cabinet behind the counter. Beam/ceiling geometry preserved. Visual acceptance pending.",
-      "sha256": "11f674f4c2748d2d1a86d242a5e6b225b68afeb6383de7a52e364abac3ddfd6f",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
-    "passage_office_r12.blend": {
-      "status": "scaffold",
-      "basis": "Larger framed records press with drawers, labelled fronts and bronze fittings; rust/ochre woven public-side runner. Prior architecture and beams preserved. Visual acceptance pending.",
-      "sha256": "9ba6f678134a53c32fa04e1af4563ac0f439cdf8b17cc4203f46c69f29c0bd34",
-      "exitY": 1.0833,
-      "registrarY": 4.5833,
-      "registrarX": 1.15
-    },
     "passage_office_r13.blend": {
-      "status": "scaffold",
-      "basis": "Final ceiling junction pass: full wall-thickness roof coverage and embedded timber wall plates. Existing walls, beams and furniture preserved. Visual acceptance pending.",
+      "status": "reference",
+      "basis": "Owner-approved revision 13 (2026-10-02): final ceiling junction pass. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit. Kept for comparison. Revisions r2-r12 were pruned on 2026-10-04 (#1349); they remain in git history and their findings in docs/reports/passage-office-*-2026-10-02.md.",
       "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7",
       "exitY": 1.0833,
       "registrarY": 4.5833,

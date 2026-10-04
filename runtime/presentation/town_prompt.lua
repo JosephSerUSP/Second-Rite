@@ -48,8 +48,10 @@ end
 
 local function parseRenderedDoorLabel(text)
     if type(text) ~= "string" then return nil end
-    local name, direction = text:match("^(.-)%s+%-%s+(UP|DOWN|LEFT|RIGHT)$")
-    if not direction then return nil end
+    -- Lua patterns do not have regex alternation; capture the uppercase input
+    -- token, then validate it against the same four rotations the glyph owns.
+    local name, direction = text:match("^(.-)%s+%-%s+([A-Z]+)$")
+    if not direction or DIRECTION_ROTATION[direction] == nil then return nil end
     return name, direction
 end
 

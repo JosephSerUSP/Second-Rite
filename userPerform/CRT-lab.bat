@@ -40,7 +40,8 @@ echo   3. Halation         - warm glow around bright pixels
 echo   4. Aperture Grille  - visible RGB phosphor triads
 echo   5. Slot Mask        - staggered phosphor-slot structure
 echo   6. Composite        - chroma smear + faint signal ghost
-echo   7. Convergence      - RGB misregistration / fringing
+echo   7. Integrated       - Composite-led luma + phosphor fusion
+echo   8. Convergence      - RGB misregistration / fringing
 echo.
 echo   0. Exit
 echo.
@@ -52,7 +53,8 @@ if "%CHOICE%"=="3" set "MODE=crt-lab:halation"& set "LABEL=Halation"& goto launc
 if "%CHOICE%"=="4" set "MODE=crt-lab:aperture"& set "LABEL=Aperture Grille"& goto launch
 if "%CHOICE%"=="5" set "MODE=crt-lab:slot-mask"& set "LABEL=Slot Mask"& goto launch
 if "%CHOICE%"=="6" set "MODE=crt-lab:composite"& set "LABEL=Composite"& goto launch
-if "%CHOICE%"=="7" set "MODE=crt-lab:convergence"& set "LABEL=Convergence"& goto launch
+if "%CHOICE%"=="7" set "MODE=crt-lab:integrated"& set "LABEL=Integrated"& goto launch
+if "%CHOICE%"=="8" set "MODE=crt-lab:convergence"& set "LABEL=Convergence"& goto launch
 if "%CHOICE%"=="0" exit /b 0
 
 goto menu

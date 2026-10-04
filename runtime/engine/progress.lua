@@ -13,6 +13,7 @@
 -- Party snapshots are keyed by SLOT, never battler identity: a transform can
 -- replace the object sitting in session.party[i], and identity-keyed lookup
 -- would lose exactly the creature whose before/after report matters most.
+-- Expedition-reserve slots use the same rule under snapshot.reserve[i].
 local growth = require("engine.growth")
 local progression = require("engine.progression")
 local traits = require("engine.traits")
@@ -62,14 +63,24 @@ end
 
 progress.snapshotMember = snapshotMember
 
--- The whole active party, indexed by slot. Take one before a durable-change
--- transaction (EXP grant, permanent item, promotion, scripted growth, ...).
-function progress.snapshot(session)
+local function snapshotSlots(list, session, limit)
     local snap = {}
-    for i = 1, config.MAX_PARTY_SIZE do
-        local c = session.party[i]
+    for i = 1, limit do
+        local c = list and list[i]
         if c then snap[i] = snapshotMember(c, session) end
     end
+    return snap
+end
+
+-- The creatures currently addressable by field-development hosts. Active party
+-- slots stay at numeric keys for battle/API compatibility; expedition reserve
+-- lives under `reserve` so ritual promotion can use the exact same transaction
+-- contract without pretending reserve creatures are party members. Town storage
+-- is intentionally outside this snapshot until a storage host can mutate a
+-- creature in place.
+function progress.snapshot(session)
+    local snap = snapshotSlots(session.party, session, config.MAX_PARTY_SIZE)
+    snap.reserve = snapshotSlots(session.reserve, session, config.MAX_PARTY_SIZE)
     return snap
 end
 
@@ -190,18 +201,24 @@ local function diffMember(session, was, now, liveBattler)
     }
 end
 
--- Generic Actor Change query. Returns one entry per active creature whose
--- durable development state changed, in party-slot order.
-function progress.changes(session, before)
-    local entries = {}
-    for i = 1, config.MAX_PARTY_SIZE do
-        local live = session.party[i]
-        local was = before and before[i]
+local function appendSlotChanges(entries, session, liveSlots, beforeSlots, limit)
+    for i = 1, limit do
+        local live = liveSlots and liveSlots[i]
+        local was = beforeSlots and beforeSlots[i]
         if live and was then
             local entry = diffMember(session, was, snapshotMember(live, session), live)
             if entry then table.insert(entries, entry) end
         end
     end
+end
+
+-- Generic Actor Change query. Active party reports come first in party-slot
+-- order, followed by expedition-reserve reports in reserve-slot order.
+function progress.changes(session, before)
+    local entries = {}
+    appendSlotChanges(entries, session, session.party, before, config.MAX_PARTY_SIZE)
+    appendSlotChanges(entries, session, session.reserve,
+        before and before.reserve, config.MAX_PARTY_SIZE)
     return entries
 end
 

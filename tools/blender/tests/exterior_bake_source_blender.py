@@ -122,6 +122,14 @@ def ground_report():
             "bounds": [min(xs), max(xs), min(ys), max(ys)] if xs else None}
 
 
+def source_ground_report(mesh, polygons=None):
+    """Geometry at the bake boundary; coincident-face ray ties are host-dependent."""
+    polygons = list(mesh.polygons if polygons is None else polygons)
+    visible = [poly for poly in polygons if poly.area > 1e-9]
+    return {"faces": len(polygons), "nonzeroAreaFaces": len(visible),
+            "normalsZ": sorted(set(round(poly.normal.z, 3) for poly in visible))}
+
+
 def ground_bake(flatten):
     """Bake the ground with the real pipeline (Cycles, flat, 256 px) and report how much of its island is lit.
 
@@ -141,12 +149,21 @@ def ground_bake(flatten):
         with contextlib.redirect_stdout(io.StringIO()):
             exporter.rebuild_render_mesh(SPAN, MARGIN, 0.03, 24, 0.0, clip_ground=exporter.GROUND_CLIP_MARGIN,
                                          layout="legacy")
+            source_geometry = source_ground_report(bpy.data.objects["ARCH_square_ground"].data)
             stager.base_lighting(0.35, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
             stager.outdoor_sun(2.5)
             pipeline.run_pipeline_in_blender(Path("ground_bake.blend"), Path(tempfile.mkdtemp()), atlas_size=256,
                                              bake_samples=4, flat_bake=True)
     finally:
         exporter.flatten_ground_sheet = kept
+    # The original source is replaced by the temporary beauty batch. Verify
+    # its ground contribution too, so preparation cannot hide a lost underside.
+    import bake_correspondence
+    batch = bpy.data.objects["SR beauty batch"]
+    owner = json.loads(batch[bake_correspondence.SOURCE_RECORD]).index("ARCH_square_ground")
+    owners = batch.data.attributes[bake_correspondence.SOURCE_ATTRIBUTE].data
+    batched_geometry = source_ground_report(batch.data,
+        [poly for poly in batch.data.polygons if owners[poly.index].value == owner])
     size = 256
     pixels = np.array(bpy.data.images["environment_atlas"].pixels[:]).reshape(size, size, 4)[..., :3]
     mesh = bpy.data.objects["st_maria_praca_TH_RENDER"].data
@@ -159,7 +176,8 @@ def ground_bake(flatten):
     x0, x1 = int(island[:, 0].min() * size), max(int(island[:, 0].max() * size), int(island[:, 0].min() * size) + 1)
     y0, y1 = int(island[:, 1].min() * size), max(int(island[:, 1].max() * size), int(island[:, 1].min() * size) + 1)
     region = pixels[y0:y1, x0:x1]
-    return {"faces": 1, "litFraction": float((region.max(axis=2) > 0).mean()), "mean": float(region.mean())}
+    return {"faces": 1, "litFraction": float((region.max(axis=2) > 0).mean()), "mean": float(region.mean()),
+            "source": source_geometry, "batchedSource": batched_geometry}
 
 
 def main():

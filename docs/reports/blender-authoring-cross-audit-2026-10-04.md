@@ -82,6 +82,33 @@ Reproduction logs, parent/candidate compiler proof, capture restoration proof,
 scratch exports, surface-provenance proof and timing records are retained in
 the worktree's `out/`. The PR checks provide the separate hosted verdict.
 
+### Merge preflight: make the expanded checks portable
+
+The first complete hosted Linux discovery ran all 468 tests in 356 seconds
+and found two failures: the inherited copy-only ground bake assertion (#1354)
+and a live-bridge camera capture exceeding the probe's ten-second request
+timeout. The Linux software-rendered camera capture completed in eighteen
+seconds; its image existed, but the client had already timed out.
+
+The ground negative control now verifies its actual defect: an unflattened
+source retains two nonzero-area faces with opposite normals, both before and
+after beauty batching. Its pixel result remains recorded rather than asserted
+as universally lit or black: coincident-face ray selection differs between
+the observed Windows and Linux hosts. The positive production control now
+also requires a single upward source face before and after batching, and
+retains its lit-fraction and brightness assertions. No production exporter or
+authored source changed to make this test pass.
+
+Only the live-bridge probe's render-bearing baseline gets a sixty-second
+per-request allowance. Other request controls keep their short deadlines;
+the outer windowed process has a bounded 180-second limit. This is a cold
+software-rendering test allowance, not a change to the production client.
+
+Pinned Windows verification of these repairs: eleven exterior bake tests
+pass in 27 seconds and sixteen bridge tests pass in 17 seconds, including
+the real windowed probe and the bounded client-timeout negative control.
+Hosted verification must decide the corresponding Linux result before merge.
+
 ## Bakery exit readability: a concrete authoring failure
 
 The owner identified an apparent obstacle between the player and the bakery

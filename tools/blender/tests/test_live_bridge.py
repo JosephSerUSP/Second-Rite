@@ -231,7 +231,7 @@ class BlenderIntegrationTests(unittest.TestCase):
         probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_blender.py"
         result = subprocess.run(
             [str(blender), "--factory-startup", "--python", str(probe)],
-            cwd=ROOT, text=True, capture_output=True, timeout=45)
+            cwd=ROOT, text=True, capture_output=True, timeout=180)
         output = result.stdout + result.stderr
         self.assertEqual(result.returncode, 0, output)
         marker = next((line for line in output.splitlines()

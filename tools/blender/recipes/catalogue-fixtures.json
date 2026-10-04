@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "description": "Preview inputs only. Geometry and defaults remain furnishings.py authority; material bindings are illustrative semantic materials.",
+  "overrides": {
+    "woven_runner": {"cloth_mat": {"material": "aged_cloth"}, "border_mat": {"material": "dark_wood"}, "motif_mat": {"material": "paper"}},
+    "service_screen": {"front": 0, "rear": 1.8, "left": 1.9, "right": -1.9},
+    "framed_picture": {"at": [0, 0, 1.6], "artwork": {"material": "paper"}},
+    "potted_plant": {"foliage_mat": {"material": "foliage"}},
+    "shelf": {"y": 0, "z": 1.5},
+    "lantern": {"y": 0},
+    "window_dressing": {"y0": -0.7, "y1": 0.7, "z0": 1.2, "z1": 2.6},
+    "stair": {"y": 0, "x_start": 0},
+    "tool_rail": {"y": 0, "z": 1.5}
+  },
+  "placement": {
+    "service_screen": "Architectural assembly: explicit front/rear and left/right extents; serving transom above 2.43 m. Align return with room joinery.",
+    "counter_returns": "Assembly behind a counter; at is the front of the return, not its footprint centre.",
+    "service_counter": "Floor assembly with a separate writing station; keep the public side reachable.",
+    "framed_picture": "Back-wall mounting; at includes centre height. Bind an artwork material with its own image; preview uses plain paper.",
+    "potted_plant": "Floor or support surface. Bind foliage_mat; preview uses the semantic foliage colour without its texture.",
+    "shelf": "Back-wall mounting at y and z; depth is derived from room.back_x.",
+    "lantern": "Back-wall mounting with a separate point light; catalogue flat preview does not show its illumination.",
+    "azulejo_dado": "Wall treatment; uses room.back_x, half_width and openings. Fixture includes a doorway to demonstrate the interruption.",
+    "window_dressing": "Back-wall opening coordinates y0/y1/z0/z1; pair with the same opening used by the shell.",
+    "stair": "Descending stair; geometry extends below Z=0. Review the threshold and character-floor projection in native views.",
+    "tool_rail": "Back-wall mounting at y and z.",
+    "water_stand": "Customer-reachable drinking water. Keep the stand outside the exit approach and review its silhouette with the player present."
+  }
+}

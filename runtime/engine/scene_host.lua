@@ -1,4 +1,5 @@
 local interpreter = require("engine.interpreter")
+local actor_change = require("engine.actor_change")
 local input_map = require("engine.input_map")
 local scene_update_contract = require("engine.scene_update_contract")
 local state_value = require("engine.state_value")
@@ -234,7 +235,13 @@ function scene_host.runHook(hookName, ctx)
     ctx.hookHandled = false
     ctx.hookFallback = false
 
+    -- Durable development is observed at the Scene transaction boundary, not
+    -- inside individual effects. Only hooks explicitly opted in by Scene data
+    -- take a snapshot; finish() also owns paging/clearing already-published
+    -- reports on ordinary follow-up hooks.
+    local changeBefore = actor_change.begin(sceneData, hookName, ctx.session)
     local events = interpreter.runImmediate(cmds, ctx)
+    actor_change.finish(sceneData, state.v, ctx.session, changeBefore)
 
     -- Every authored hook must leave a detached, serializable value tree.
     -- Native owner graphs live beside (never inside) ctx.sceneState.

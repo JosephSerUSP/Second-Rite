@@ -14,6 +14,8 @@ local loader = require("engine.data.loader")
 local targeting = require("engine.targeting")
 local usability = require("engine.usability")
 local interpreter = require("engine.interpreter")
+local progress = require("engine.progress")
+local scene_host = require("engine.scene_host")
 
 loader.init()
 
@@ -29,6 +31,12 @@ local function test(name, fn)
         print("  [FAIL] " .. name)
         print("         " .. tostring(err))
         failed = failed + 1
+    end
+end
+
+local function rowFor(entry, param)
+    for _, row in ipairs((entry and entry.rows) or {}) do
+        if row.param == param then return row end
     end
 end
 
@@ -128,6 +136,121 @@ test("Detailed effect feedback for stat-up and skill learning", function()
     interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
     assert(ctx.sceneState.lastItemResult.success == true, "Param plus item should succeed")
     assert(ctx.sceneState.popupText:find("ATK rises by 2"), "Feedback text should include stat boost details: " .. tostring(ctx.sceneState.popupText))
+end)
+
+test("Actor Change reports a permanent stat item without requiring a level-up", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    sess:addItem(46, 1) -- Whetstone Draught: permanent ATK +2
+
+    local before = progress.snapshot(sess)
+    local ctx = {
+        session = sess,
+        loader = loader,
+        sceneState = { tab = 1, state = 2, idx = 1, targetIdx = 1 }
+    }
+    interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
+
+    local changes = progress.changes(sess, before)
+    assert(#changes == 1, "stat-up item should produce exactly one durable Actor Change")
+    assert(changes[1].kind == "attribute", "stat-only change should classify as attribute")
+    assert(changes[1].fromLevel == changes[1].toLevel, "stat item should not pretend a level was gained")
+    local atk = rowFor(changes[1], "atk")
+    assert(atk and atk.delta == 2, "Actor Change should report the actual +2 ATK delta")
+    assert(#changes[1].rows == 1, "stat-only report should omit unchanged parameters")
+    assert(hero == sess.party[1], "reporting must not replace or mutate the creature")
+end)
+
+test("Actor Change reports skillbook learning as durable development", function()
+    local sess = session.GameSession.new(loader)
+    sess:recruitActor("pixie", 1)
+    sess:addItem(45, 1) -- Tome: Wind Blade
+
+    local before = progress.snapshot(sess)
+    local ctx = {
+        session = sess,
+        loader = loader,
+        sceneState = { tab = 1, state = 2, idx = 1, targetIdx = 1 }
+    }
+    interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
+
+    local changes = progress.changes(sess, before)
+    assert(#changes == 1, "skillbook should produce one durable Actor Change")
+    assert(changes[1].kind == "skill", "skill-only change should classify as skill")
+    assert(#changes[1].learnedSkills == 1 and changes[1].learnedSkills[1] == "Wind Blade",
+        "Actor Change should name the learned skill")
+    assert(changes[1].noteText:find("Wind Blade"), "presentation note should mention Wind Blade")
+end)
+
+test("Actor Change ignores ordinary HP healing", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    hero.hp = 1
+    sess:addItem(1, 1) -- HP Tonic
+
+    local before = progress.snapshot(sess)
+    local ctx = {
+        session = sess,
+        loader = loader,
+        sceneState = { tab = 1, state = 2, idx = 1, targetIdx = 1 }
+    }
+    interpreter.runImmediate({ { cmd = "USE_ITEM", itemIndex = 1, target = 1 } }, ctx)
+
+    assert(hero.hp > 1, "control: HP Tonic should actually heal")
+    assert(#progress.changes(sess, before) == 0,
+        "transient HP recovery must not be misreported as durable Actor Change")
+end)
+
+test("Items Scene routes durable item use into Actor Change presentation", function()
+    local sess = session.GameSession.new(loader)
+    sess:recruitActor("pixie", 1)
+    sess:addItem(46, 1) -- Whetstone Draught
+    local ctx = { session = sess, loader = loader }
+
+    scene_host.init("items", ctx)
+    local v = scene_host.getCurrentState().v
+    v.state = 2
+    v.idx = 1
+    v.targetIdx = 1
+
+    assert(scene_host.runHook("on_select", ctx), "items on_select hook should be handled")
+
+    assert(v.state == 3, "item semantics should retain the ordinary resolved-use state underneath the overlay")
+    assert(v.actorChangeCount == 1 and v.actorChangeIndex == 1,
+        "single-target durable item should publish one selected Actor Change")
+    assert(v.actorChangeTitle == "ATTRIBUTE UP!",
+        "stat-up item should receive the semantic Actor Change heading")
+    assert(type(v.levelUpRows) == "table" and #v.levelUpRows == 1,
+        "existing levelUpStats renderer should receive the changed stat row")
+    assert(v.levelUpRows[1].param == "atk" and v.levelUpRows[1].delta == 2,
+        "published Actor Change should contain the actual ATK delta")
+
+    assert(scene_host.runHook("on_select", ctx), "select should dismiss the last Actor Change report")
+    assert(v.actorChangeCount == 0 and v.actorChanges == nil,
+        "dismissing the report should clear retained Actor Change data")
+    assert(v.state == 1, "dismissing the report should return to normal item browsing")
+end)
+
+test("Items Scene leaves ordinary healing on the existing popup path", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    hero.hp = 1
+    sess:addItem(1, 1) -- HP Tonic
+    local ctx = { session = sess, loader = loader }
+
+    scene_host.init("items", ctx)
+    local v = scene_host.getCurrentState().v
+    v.state = 2
+    v.idx = 1
+    v.targetIdx = 1
+
+    assert(scene_host.runHook("on_select", ctx), "items on_select hook should be handled")
+
+    assert(hero.hp > 1, "control: healing item should resolve normally")
+    assert(v.state == 3, "non-durable item should retain ordinary popup state")
+    assert((v.actorChangeCount or 0) == 0 and v.actorChanges == nil,
+        "healing should not manufacture Actor Change entries")
+    assert((v.popupTimer or 0) > 0, "ordinary healing feedback should keep its popup timer")
 end)
 
 print("=== Item Menu Tests Completed: " .. passed .. " passed, " .. failed .. " failed ===")

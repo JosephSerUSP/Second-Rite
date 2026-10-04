@@ -340,6 +340,10 @@
     {
       "token": "random(m, n)",
       "description": "The seeded math.random — deterministic under the golden harness."
+    },
+    {
+      "token": "api.setTransitionArrowsVisible(val) / api.getTransitionArrowsVisible()",
+      "description": "Read or persist the player navigation marker preference through the presentation seam; visible by default."
     }
   ],
   "commands": [

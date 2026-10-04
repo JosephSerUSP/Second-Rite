@@ -1,0 +1,6 @@
+{
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+  "samples": 63,
+  "maximumTerrainIntrusion": 0,
+  "scope": "Point terrain clearance and named ladder objects; not swept body or physical Android acceptance"
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "composition": {
+      "actorPlateX": 213.45777213573456,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 210.2323463777725,
+      "laneScreenY": 140.6529292414121,
+      "platePanX": 0
+    },
+    "groundZ": -0.449998,
+    "label": "court-east",
+    "laneY": 0,
+    "mapId": 1001
+  },
+  {
+    "composition": {
+      "actorPlateX": 704.5777765512466,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 213.42595320637997,
+      "laneScreenY": 130.73962668284645,
+      "platePanX": -491
+    },
+    "groundZ": -0.097826,
+    "label": "court-grade",
+    "laneY": 18,
+    "mapId": 1001
+  },
+  {
+    "composition": {
+      "actorPlateX": 950.1377787590027,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 213.04081285607316,
+      "laneScreenY": 125.81270253218355,
+      "platePanX": -737
+    },
+    "groundZ": 0.07826,
+    "label": "passage-house",
+    "laneY": 27,
+    "mapId": 1001
+  },
+  {
+    "composition": {
+      "actorPlateX": 1195.6977809667587,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 212.67558652294417,
+      "laneScreenY": 120.90538268096617,
+      "platePanX": -982
+    },
+    "groundZ": 0.254348,
+    "label": "court-west-grade",
+    "laneY": 36,
+    "mapId": 1001
+  },
+  {
+    "composition": {
+      "actorPlateX": 1468.5422278642654,
+      "cameraFovHalfX": 0.16678353958234268,
+      "cameraTargetY": 23,
+      "laneScreenX": 210.34965029979162,
+      "laneScreenY": 115.47578532747747,
+      "platePanX": -1255
+    },
+    "groundZ": 0.449999,
+    "label": "court-market-turn",
+    "laneY": 46,
+    "mapId": 1001
+  },
+  {
+    "composition": {
+      "actorPlateX": 405,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 214,
+      "laneScreenY": 128,
+      "platePanX": -191
+    },
+    "groundZ": 0,
+    "label": "bakery-frontage",
+    "laneY": 7,
+    "mapId": 1002
+  },
+  {
+    "composition": {
+      "actorPlateX": 487.2855495214462,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 213.55819774215774,
+      "laneScreenY": 133.46634317677479,
+      "platePanX": -274
+    },
+    "groundZ": -0.192857,
+    "label": "market-grade",
+    "laneY": 10,
+    "mapId": 1002
+  },
+  {
+    "composition": {
+      "actorPlateX": 596.9996155500412,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7,
+      "laneScreenX": 215.49054553532295,
+      "laneScreenY": 140.81123417501743,
+      "platePanX": -383
+    },
+    "groundZ": -0.449994,
+    "label": "market-quay-turn",
+    "laneY": 14,
+    "mapId": 1002
+  },
+  {
+    "composition": {
+      "actorPlateX": 239.77088832855225,
+      "cameraFovHalfX": 0.17424421272966573,
+      "cameraTargetY": 21,
+      "laneScreenX": 213.77073161266685,
+      "laneScreenY": 128,
+      "platePanX": -26
+    },
+    "groundZ": 0,
+    "label": "service-climb-foot",
+    "laneY": 1,
+    "mapId": 1005
+  },
+  {
+    "composition": {
+      "actorPlateX": 624.7140642400299,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 7.500000000015522,
+      "laneScreenX": 213.71380917555655,
+      "laneScreenY": 127.99912423736066,
+      "platePanX": -411
+    },
+    "groundZ": 3.1e-05,
+    "label": "service-climb-top",
+    "laneY": 15,
+    "mapId": 1006
+  },
+  {
+    "composition": {
+      "actorPlateX": 254.5,
+      "cameraFovHalfX": 0.24999999999999997,
+      "cameraTargetY": 1.5,
+      "laneScreenX": 213.5,
+      "laneScreenY": 128,
+      "platePanX": -41
+    },
+    "groundZ": 0,
+    "label": "churchyard-stair",
+    "laneY": 1.5,
+    "mapId": 1009
+  },
+  {
+    "composition": {
+      "actorPlateX": 649.568990945816,
+      "cameraFovHalfX": 0.1667832598255715,
+      "cameraTargetY": 14,
+      "laneScreenX": 213.56898252304512,
+      "laneScreenY": 128,
+      "platePanX": -436
+    },
+    "groundZ": 0,
+    "label": "gate-guard",
+    "laneY": 16,
+    "mapId": 1007
+  },
+  {
+    "groundZ": 0,
+    "label": "single-alicia",
+    "laneY": 2.3333000000000004,
+    "mapId": 28
+  },
+  {
+    "groundZ": 0,
+    "label": "laura",
+    "laneY": 2.7333,
+    "mapId": 29
+  }
+]

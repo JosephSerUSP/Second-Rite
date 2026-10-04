@@ -1,0 +1,169 @@
+{
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+  "mouths": [
+    {
+      "screen": "market",
+      "anchor": "to-court",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "court",
+      "anchor": "to-market",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "market",
+      "anchor": "to-quay",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "quay",
+      "anchor": "to-market",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "court",
+      "anchor": "to-praca",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-court",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-threshold",
+      "centerError": 1.9073486328125e-06,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "threshold",
+      "anchor": "to-churchyard",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "quay",
+      "anchor": "to-forge",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "forge",
+      "anchor": "to-quay",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "forge",
+      "anchor": "to-port",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "port",
+      "anchor": "to-forge",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-churchyard-stair",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "churchyard-stair",
+      "anchor": "to-praca",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "churchyard-stair",
+      "anchor": "to-churchyard",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-churchyard-stair",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "praca",
+      "anchor": "to-churchyard-climb",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "churchyard",
+      "anchor": "to-praca-climb",
+      "centerError": 1.9073486328125e-06,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "forge",
+      "anchor": "door-forge",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "quay",
+      "anchor": "door-pub",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "market",
+      "anchor": "door-bakery",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "court",
+      "anchor": "door-passage-house",
+      "centerError": 2.384185791015625e-07,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "praca",
+      "anchor": "door-chapel",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "praca",
+      "anchor": "door-registry",
+      "centerError": 2.384185791015625e-07,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "threshold",
+      "anchor": "labyrinth-gate",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "court",
+      "anchor": "to-port",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    },
+    {
+      "screen": "port",
+      "anchor": "to-court",
+      "centerError": 0.0,
+      "terrainOccluded": false
+    }
+  ],
+  "workerApronSamples": 19,
+  "scope": "Visible source band centres and connected port apron; native collisions checked in transfer captures"
+}

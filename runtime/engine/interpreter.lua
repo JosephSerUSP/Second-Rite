@@ -2937,6 +2937,13 @@ local function buildScriptApi(ctx)
     -- Developer overlays are presentation state, not save/session state. Keep
     -- the engine talking through the presentation seam so validation and other
     -- headless consumers do not load LOVE rendering modules.
+    function api.setTransitionArrowsVisible(value)
+        return present("setTransitionArrowsVisible", value)
+    end
+    function api.getTransitionArrowsVisible()
+        local value = present("getTransitionArrowsVisible")
+        return value ~= false
+    end
     function api.setFpsToggle(val)
         present("setFpsToggle", val and true or false)
     end

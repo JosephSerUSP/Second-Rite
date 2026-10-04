@@ -1,0 +1,36 @@
+{
+  "source": "st_maria_B18.blend",
+  "sourceSHA256": "17c268670898b509cff41ec346fedd41c1dcc4ebf158f931e1c7c525a1b18f21",
+  "parentSHA256": "89960da11ca75658a68cc4dc20524fed6c3527a920c5ceb3152c7d0bd8ae5f5d",
+  "sourcePointChecks": 2053,
+  "terrainIntrusions": 0,
+  "buildingCollisions": 0,
+  "retainedBuildings": 19,
+  "pavingSupportSamples": 302,
+  "serviceClimbSamples": 63,
+  "visibleExteriorMouths": 27,
+  "nativeTransferZones": 33,
+  "nativeBoundaryChecks": 104,
+  "maximumSourceNativePixelError": [
+    0.002790880713291699,
+    0.4100244652718743
+  ],
+  "nativeCaptures": "runtime/town-B18-transfers/captures.json",
+  "playthrough": "27 native arrivals: recovery, registration, shop, shipment investigation and guard completion, ladder both ways, normal stairs, Labyrinth descent/return, save/load",
+  "currentChecks": [
+    "Candidate and canonical G1 pass",
+    "Canonical full unit suite passes",
+    "G4 matches",
+    "All 33 native transfer centres and radius boundaries pass",
+    "All 27 exterior source mouths clear of camera-terrain occlusion",
+    "All six active public entrances align with visible door projection"
+  ],
+  "limits": [
+    "No physical Android input acceptance",
+    "No full combat/economy expedition acceptance",
+    "Source clearance is point sampling, not swept-body proof",
+    "Materials, vegetation and island massing remain prototype art",
+    "Dedicated ladder climbing animation is not authored",
+    "Canonical visual references unchanged; existing Options debt remains #1331"
+  ]
+}

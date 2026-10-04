@@ -15,6 +15,7 @@ local targeting = require("engine.targeting")
 local usability = require("engine.usability")
 local interpreter = require("engine.interpreter")
 local progress = require("engine.progress")
+local progression = require("engine.progression")
 local scene_host = require("engine.scene_host")
 
 loader.init()
@@ -251,6 +252,48 @@ test("Items Scene leaves ordinary healing on the existing popup path", function(
     assert((v.actorChangeCount or 0) == 0 and v.actorChanges == nil,
         "healing should not manufacture Actor Change entries")
     assert((v.popupTimer or 0) > 0, "ordinary healing feedback should keep its popup timer")
+end)
+
+test("map/common fallback reports an out-of-battle GAIN_EXP transaction", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    local ctx = { session = sess, loader = loader, party = sess.party }
+
+    scene_host.init("map", ctx)
+    scene_host.getCurrentState().v.mode = 0 -- map's authored on_select delegates to host fallback
+
+    local previous = scene_host.bindPlayerInput({
+        fallback = function()
+            interpreter.runImmediate({
+                { cmd = "GAIN_EXP", target = "target", amount = progression.nextLevelExp(hero.level) },
+            }, {
+                session = sess,
+                loader = loader,
+                target = hero,
+                a = hero,
+                events = {},
+            })
+            return true
+        end,
+    })
+
+    local handled
+    local ok, err = pcall(function()
+        handled = scene_host.buttonpressed("A", ctx)
+    end)
+    scene_host.bindPlayerInput(previous)
+    assert(ok, err)
+
+    assert(handled == true, "fallback input should remain handled")
+    assert(sess.party[1].level == 2, "control: authored GAIN_EXP crosses the level threshold")
+    assert(scene_host.getCurrent() == "actor_change" and scene_host.getPrevious() == "map",
+        "resolved field-event development should open the generic Actor Change modal")
+    local v = scene_host.getCurrentState().v
+    assert(v.actorChangeTitle == "LEVEL UP!" and v.actorChangeFromLevel == 1 and v.actorChangeToLevel == 2,
+        "fallback report should describe the complete resolved level transaction")
+
+    assert(scene_host.runHook("on_select", ctx), "Actor Change modal should dismiss through authored input")
+    assert(scene_host.getCurrent() == "map", "dismissing the report should return to the field map")
 end)
 
 print("=== Item Menu Tests Completed: " .. passed .. " passed, " .. failed .. " failed ===")

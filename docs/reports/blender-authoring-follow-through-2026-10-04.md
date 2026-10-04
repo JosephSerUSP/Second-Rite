@@ -225,7 +225,24 @@ these are also documented in
 [Issue #1365](https://github.com/JosephSerUSP/Second-Rite/issues/1365).
 The golden logs were preserved. Their reconciliation needs the owner approval
 required by AGENTS.md; this branch is not represented as merge-green. The
-latest hosted rerun remains a separate check of the final head.
+hosted verification on `aa1285f3` subsequently passed required Blender/item-source
+checks, portability and both relative G5/G6 comparisons. Windows verification
+reached G3 and failed on exactly those two reference conditions.
+
+Main then advanced to `15f3c896`, adding stronger MP economy coverage, including
+battle activation. The branch integrated that commit and retained main's test
+file verbatim; there is no remaining MP economy test delta against that base.
+The newly staged suite passed all 30 MP economy assertions and the complete
+unit run. G1, G2, G4 and save/load also passed again. Main's update does not
+change the bakery source, catalogue inputs or native capture evidence.
+
+The local review artifact `out/g3-reference-review/reference.diff` isolates the
+remaining proposed reference reconciliation: all 60 battle MP readings change
+from 3000 to the authored 900, with every other battle trace line unchanged;
+the missing Actor Change reference contains only its scene-registration header
+between the golden markers. It does not provide interaction coverage for Actor
+Change. These candidate files are outside committed references and remain
+pending explicit maintainer approval. No G5/G6 reference update is proposed.
 
 Catalogue integrity/search and tool-index checks took **434 / 405 / 305 ms**
 respectively on their recorded cold local runs. The focused catalogue rebuild

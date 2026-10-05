@@ -202,11 +202,47 @@ function M.run(loader)
     door('to-praca',1005)
     door('to-court',1001)
     door('door-passage-house',25)
+
+    -- Save from a deliberately non-spawn lane position. Bounded-lane Maps pin
+    -- legacy grid playerX/playerY to 1,1, so the provider coordinate itself is
+    -- the only truthful place to resume the actor.
+    walk(4.75)
+    session.townTraversal.facing=-1
+    lane.update(session)
+    local savedLaneY=session.townTraversal.y
     local saved=require('engine.savegame')
-    local restored=saved.deserialize(saved.serialize(session,loader,'town'),loader)
+    local payload=saved.serialize(session,loader,'town')
+    local restored=saved.deserialize(payload,loader)
     assert(restored.currentMapData.id==25 and restored.flags.first_return)
+    assert(restored.townTraversal and restored.townTraversal.provider=='bounded_lane',
+        'Save/load dropped the town traversal provider')
+    assert(restored.townTraversal.camera.profile=='town_sideview',
+        'Save/load fell back from town side-view presentation')
+    assert(math.abs(restored.townTraversal.y-savedLaneY)<.00001,
+        'Save/load lost the continuous town position')
+    assert(restored.townTraversal.facing==-1,
+        'Save/load lost the town facing direction')
+    assert(restored.worldCameraProjectionWindowOffsetX~=nil,
+        'Save/load did not restore town camera tracking')
     local _, restoredWrit=conditions.evalPrefixed('hasItem:198',restored)
     assert(restoredWrit)
+
+    -- The APK that exposed this bug already wrote valid v5 saves, but before
+    -- traversalState existed. Such a save cannot recover the exact lane Y that
+    -- was never serialized; it still must recover the authored provider,
+    -- presentation and collision instead of loading as a first-person dungeon.
+    payload.map.traversalState=nil
+    local legacy=saved.deserialize(payload,loader)
+    assert(legacy.townTraversal and legacy.townTraversal.provider=='bounded_lane'
+        and legacy.townTraversal.camera.profile=='town_sideview',
+        'Pre-fix v5 town save did not recover its authored traversal capability')
+    legacy.townTraversal.y=legacy.townTraversal.maxY
+    legacy.townTraversal.z=lane.groundAt(legacy,legacy.townTraversal.y)
+    lane.update(legacy)
+    local edgeY=legacy.townTraversal.y
+    assert(not lane.move(legacy,1) and legacy.townTraversal.y==edgeY,
+        'Restored town traversal lost its collision bound')
+
     print('PLAYTEST LOOP OK '..require('engine.data.json').encode({arrivals=visited,shops=shops,climbingMaps=climbs,
         proof='Native lane movement and interpreter graphs; no combat or physical Android acceptance implied'}))
 end

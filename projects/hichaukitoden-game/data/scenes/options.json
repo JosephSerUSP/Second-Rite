@@ -7,31 +7,18 @@
   "windows": [
     {
       "id": "options_help",
-      "rect": {
-        "x": 0,
-        "y": 0,
-        "w": 32,
-        "h": 4
-      },
+      "rect": { "x": 0, "y": 0, "w": 32, "h": 4 },
       "style": "frame",
       "title": null,
       "content": [
-        {
-          "type": "text",
-          "text": "{sel('options_list').help}"
-        }
+        { "type": "text", "text": "{sel('options_list').help}" }
       ]
     },
     {
       "id": "options_list",
-      "rect": {
-        "x": 4,
-        "y": 5,
-        "w": 24,
-        "h": 9
-      },
+      "rect": { "x": 4, "y": 5, "w": 24, "h": 10 },
       "style": "list",
-      "visibleRows": 5,
+      "visibleRows": 6,
       "title": "Options",
       "content": [
         {
@@ -44,20 +31,12 @@
     },
     {
       "id": "options_confirm",
-      "rect": {
-        "x": 4,
-        "y": 6,
-        "w": 24,
-        "h": 8
-      },
+      "rect": { "x": 4, "y": 6, "w": 24, "h": 8 },
       "style": "confirm",
       "title": "CONFIRM",
       "visible": "sceneState.mode == 'confirm'",
       "content": [
-        {
-          "type": "text",
-          "text": "Quit {terms.game.title} and exit to the desktop?"
-        },
+        { "type": "text", "text": "Quit {terms.game.title} and exit to the desktop?" },
         {
           "type": "list",
           "listId": "config:exitOptions",
@@ -68,114 +47,58 @@
     }
   ],
   "goldenScript": [
-    {
-      "key": "down"
-    },
-    {
-      "key": "up"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "return"
-    },
-    {
-      "key": "escape"
-    },
-    {
-      "key": "escape"
-    }
+    { "key": "down" },
+    { "key": "up" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "down" },
+    { "key": "return" },
+    { "key": "escape" },
+    { "key": "escape" }
   ],
   "hooks": {
     "on_enter": [
       {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
-          {
-            "name": "idx",
-            "value": 1
-          },
-          {
-            "name": "mode",
-            "value": "'nav'"
-          },
-          {
-            "name": "confirmIdx",
-            "value": 2
-          },
-          {
-            "name": "autoRedirect",
-            "value": "(session and session.autoRedirect ~= nil) and session.autoRedirect or false"
-          }
+          { "name": "idx", "value": 1 },
+          { "name": "mode", "value": "'nav'" },
+          { "name": "confirmIdx", "value": 2 },
+          { "name": "autoRedirect", "value": "(session and session.autoRedirect ~= nil) and session.autoRedirect or false" }
         ]
       },
       {
         "cmd": "SCRIPT",
-        "code": "ctx.sceneState.aspect = api.getRenderSurface(); ctx.sceneState.output = api.getOutputPresentation(); ctx.sceneState.displayInfo = api.getPerfToggle(); ctx.sceneState.font = api.getFont(); ctx.sceneState.navigationArrows = api.getTransitionArrowsVisible()"
+        "code": "local actualOutput = api.getOutputPresentation(); ctx.sceneState.output = actualOutput == 'nearest' and 'nearest' or 'crt'; ctx.sceneState.lastCrtOutput = actualOutput ~= 'nearest' and actualOutput or 'crt'; ctx.sceneState.aspect = api.getRenderSurface(); ctx.sceneState.displayInfo = api.getPerfToggle(); ctx.sceneState.font = api.getFont(); ctx.sceneState.navigationArrows = api.getTransitionArrowsVisible()"
       }
     ],
     "on_up": [
       {
         "cmd": "IF",
         "condition": "sceneState.mode == 'nav' and sceneState.idx > 1",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx - 1"
-          }
-        ]
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx - 1" } ]
       },
       {
         "cmd": "IF",
         "condition": "sceneState.mode == 'confirm'",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "confirmIdx",
-            "value": "sceneState.confirmIdx == 1 and 2 or 1"
-          }
-        ]
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "confirmIdx", "value": "sceneState.confirmIdx == 1 and 2 or 1" } ]
       }
     ],
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "sceneState.mode == 'nav' and sceneState.idx < 8",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx + 1"
-          }
-        ]
+        "condition": "sceneState.mode == 'nav' and sceneState.idx < 9",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx + 1" } ]
       },
       {
         "cmd": "IF",
         "condition": "sceneState.mode == 'confirm'",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "confirmIdx",
-            "value": "sceneState.confirmIdx == 1 and 2 or 1"
-          }
-        ]
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "confirmIdx", "value": "sceneState.confirmIdx == 1 and 2 or 1" } ]
       }
     ],
     "on_select": [
@@ -183,143 +106,80 @@
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 1",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCENE_EVENT",
-            "kind": "push",
-            "scene": "controls"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCENE_EVENT", "kind": "push", "scene": "controls" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 2",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "autoRedirect",
-            "value": "not (sceneState.autoRedirect or false)"
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "api.setAutoRedirect(ctx.sceneState.autoRedirect)"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "autoRedirect", "value": "not (sceneState.autoRedirect or false)" },
+          { "cmd": "SCRIPT", "code": "api.setAutoRedirect(ctx.sceneState.autoRedirect)" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 3",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "ctx.sceneState.aspect = api.cycleRenderSurface()"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCRIPT", "code": "ctx.sceneState.aspect = api.cycleRenderSurface()" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 4",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "ctx.sceneState.output = api.cycleOutputPresentation()"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCRIPT", "code": "local actual = api.getOutputPresentation(); if ctx.sceneState.output == 'nearest' then api.setOutputPresentation(ctx.sceneState.lastCrtOutput or 'crt') else if actual ~= 'nearest' then ctx.sceneState.lastCrtOutput = actual end; api.setOutputPresentation('nearest') end; ctx.sceneState.output = api.getOutputPresentation() == 'nearest' and 'nearest' or 'crt'" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 5",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "displayInfo",
-            "value": "not (sceneState.displayInfo or false)"
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "api.setPerfToggle(ctx.sceneState.displayInfo)"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCRIPT", "code": "if ctx.sceneState.output == 'nearest' then api.setOutputPresentation(ctx.sceneState.lastCrtOutput or 'crt') end; ctx.sceneState.output = 'crt'" },
+          { "cmd": "SCENE_EVENT", "kind": "push", "scene": "crt_options" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 6",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "ctx.sceneState.font = api.cycleFont()"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "displayInfo", "value": "not (sceneState.displayInfo or false)" },
+          { "cmd": "SCRIPT", "code": "api.setPerfToggle(ctx.sceneState.displayInfo)" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 7",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "navigationArrows",
-            "value": "not sceneState.navigationArrows"
-          },
-          {
-            "cmd": "SCRIPT",
-            "code": "api.setTransitionArrowsVisible(ctx.sceneState.navigationArrows)"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCRIPT", "code": "ctx.sceneState.font = api.cycleFont()" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 8",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "navigationArrows", "value": "not sceneState.navigationArrows" },
+          { "cmd": "SCRIPT", "code": "api.setTransitionArrowsVisible(ctx.sceneState.navigationArrows)" }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.mode == 'nav' and sceneState.idx == 9",
+        "then": [
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
-              {
-                "name": "mode",
-                "value": "'confirm'"
-              },
-              {
-                "name": "confirmIdx",
-                "value": 2
-              }
+              { "name": "mode", "value": "'confirm'" },
+              { "name": "confirmIdx", "value": 2 }
             ]
           }
         ]
@@ -328,30 +188,16 @@
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'confirm' and sceneState.confirmIdx == 1",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "QUIT_GAME"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "QUIT_GAME" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'confirm' and sceneState.confirmIdx == 2",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "mode",
-            "value": "'nav'"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "mode", "value": "'nav'" }
         ]
       }
     ],
@@ -360,89 +206,33 @@
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'confirm'",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "name": "mode",
-            "value": "'nav'"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SET_SCENE_STATE", "name": "mode", "value": "'nav'" }
         ]
       },
       {
         "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.mode == 'nav'",
         "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCENE_EVENT",
-            "kind": "pop"
-          }
+          { "cmd": "SET_LOCAL", "name": "_guard", "value": 1 },
+          { "cmd": "SCENE_EVENT", "kind": "pop" }
         ]
       }
     ]
   },
   "config": {
     "optionsCommands": [
-      {
-        "id": "controls",
-        "name": "CONTROLS",
-        "help": "View and rebind the SNES-style button layout."
-      },
-      {
-        "id": "autoredirect",
-        "name": "AUTO REDIRECT",
-        "help": "Toggle auto redirection when a target dies before skill execution."
-      },
-      {
-        "id": "aspect",
-        "name": "ASPECT",
-        "help": "Choose how much world the logical surface reveals. Android with touch controls hides layouts that cannot fit a complete controller."
-      },
-      {
-        "id": "output",
-        "name": "OUTPUT",
-        "help": "Switch final display reconstruction between crisp nearest-neighbour and the experimental fractional CRT pass."
-      },
-      {
-        "id": "display_info",
-        "name": "DISPLAY INFO",
-        "help": "Show frame time, host/raster size, DPI, active surface, output mode and final scale."
-      },
-      {
-        "id": "font",
-        "name": "FONT",
-        "help": "Switch between Regular and Italic pixel typography."
-      },
-      {
-        "id": "navigation_arrows",
-        "name": "NAVIGATION ARROWS",
-        "help": "Show or hide direction markers. Door and street prompts remain available."
-      },
-      {
-        "id": "exit",
-        "name": "EXIT",
-        "help": "Quit and return to the desktop."
-      }
+      { "id": "controls", "name": "CONTROLS", "help": "View and rebind the SNES-style button layout." },
+      { "id": "autoredirect", "name": "AUTO REDIRECT", "help": "Toggle auto redirection when a target dies before skill execution." },
+      { "id": "aspect", "name": "ASPECT", "help": "Choose how much world the logical surface reveals. Android with touch controls hides layouts that cannot fit a complete controller." },
+      { "id": "output", "name": "OUTPUT", "help": "Switch final display reconstruction between crisp nearest-neighbour and the player-configurable CRT pipeline." },
+      { "id": "crt_settings", "name": "CRT PARAMETERS", "help": "Open the CRT reconstruction controls. Values intentionally extend far beyond plausible hardware." },
+      { "id": "display_info", "name": "DISPLAY INFO", "help": "Show frame time, host/raster size, DPI, active surface, output mode and final scale." },
+      { "id": "font", "name": "FONT", "help": "Switch between Regular and Italic pixel typography." },
+      { "id": "navigation_arrows", "name": "NAVIGATION ARROWS", "help": "Show or hide direction markers. Door and street prompts remain available." },
+      { "id": "exit", "name": "EXIT", "help": "Quit and return to the desktop." }
     ],
-    "exitOptions": [
-      {
-        "name": "Yes"
-      },
-      {
-        "name": "No"
-      }
-    ],
-    "dock": {
-      "variant": "party_status",
-      "cursor": "0"
-    }
+    "exitOptions": [ { "name": "Yes" }, { "name": "No" } ],
+    "dock": { "variant": "party_status", "cursor": "0" }
   }
 }

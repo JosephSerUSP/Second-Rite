@@ -3,6 +3,13 @@
 -- The game renderer owns the low-resolution logical Canvas. This module owns
 -- only how that finished Canvas is reconstructed on the physical display.
 -- Render-surface/aspect selection remains presentation.surface's job.
+--
+-- CRT is intentionally a two-stage path:
+--   1. signal degradation at the native logical resolution (YIQ bandwidth),
+--   2. beam/phosphor reconstruction at host resolution.
+-- This keeps the expensive colour work proportional to the ~426x240 source
+-- rather than to the physical display, while making source pixels behave like
+-- samples feeding a luminous display instead of immutable square tiles.
 local surface = require("presentation.surface")
 
 local output = {}
@@ -10,60 +17,65 @@ local output = {}
 local MODES = { nearest = true, crt = true }
 local activeMode = "nearest"
 local hostWidth, hostHeight
+local signalShader = nil
+local signalShaderError = nil
 local crtShader = nil
 local crtShaderError = nil
-local crtLabShader = nil
-local crtLabShaderError = nil
+local signalCanvas = nil
+local signalCanvasWidth, signalCanvasHeight
+local activeParams = nil
 local activeLabPreset = nil
 
--- Original Thestra experiment for #1310. This is intentionally a small,
--- single-pass reconstruction shader rather than imported emulator shader code:
--- two explicit horizontal source taps, a luminance-neutral scanline/beam
--- envelope, no curvature, no phosphor mask, no temporal state.
-local CRT_SHADER = [[
-    extern vec2 sourceSize;
-    extern number physicalOutputScale;
+local PUBLIC_PARAM_ORDER = {
+    "beamStrength",
+    "beamWidth",
+    "beamDriveExpansion",
+    "signalSpread",
+    "lumaBleed",
+    "compositeBleed",
+    "chromaDelay",
+    "ghostStrength",
+    "bloomStrength",
+    "halationStrength",
+    "halationRadius",
+    "convergencePixels",
+    "grilleStrength",
+    "slotMaskStrength",
+    "curvature",
+    "vignette",
+    "noiseStrength",
+}
 
-    vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
-        // Pixel centres are integer coordinates in this space.
-        vec2 sourcePos = tc * sourceSize - vec2(0.5);
-        vec2 base = floor(sourcePos);
-        vec2 fracPart = fract(sourcePos);
+-- Deliberately assertive shipping CRT defaults. These are not intended as
+-- neutral emulation values: the project wants visible colour-bandwidth loss,
+-- overlapping luminous source rows and highlight spread. The player-facing
+-- submenu can move far beyond these defaults in either direction.
+local CRT_DEFAULTS = {
+    beamStrength = 0.82,
+    beamStart = 0.03,
+    beamCompensation = 0.42,
+    beamDriveExpansion = 1.25,
+    beamWidth = 0.82,
+    horizontalSoftness = 0.22,
+    signalSpread = 1.65,
+    lumaBleed = 0.52,
+    compositeBleed = 1.20,
+    chromaDelay = 0.35,
+    ghostStrength = 0.08,
+    bloomStrength = 0.42,
+    halationStrength = 0.24,
+    halationRadius = 1.55,
+    grilleStrength = 0.0,
+    slotMaskStrength = 0.0,
+    convergencePixels = 0.0,
+    curvature = 0.0,
+    vignette = 0.06,
+    noiseStrength = 0.006,
+}
 
-        // Reconstruct horizontally between neighbouring source samples while
-        // retaining one discrete source row. This softens fractional X scaling
-        // without turning the low-resolution frame into ordinary bilinear blur.
-        number row = floor(sourcePos.y + 0.5);
-        number blendX = smoothstep(0.18, 0.82, fracPart.x);
-        vec2 hi = max(sourceSize - vec2(1.0), vec2(0.0));
-        vec2 leftPixel = clamp(vec2(base.x, row), vec2(0.0), hi);
-        vec2 rightPixel = clamp(vec2(base.x + 1.0, row), vec2(0.0), hi);
-        vec4 leftPx = Texel(tex, (leftPixel + vec2(0.5)) / sourceSize);
-        vec4 rightPx = Texel(tex, (rightPixel + vec2(0.5)) / sourceSize);
-        vec4 px = mix(leftPx, rightPx, blendX);
-
-        // A source scanline is brightest around its centre and visibly darker
-        // near the row boundary. Calibrate against PHYSICAL source-pixel scale:
-        // on high-DPI Android, 1.55 logical host units can still be ~2.7 display
-        // pixels. Using logical scale here made the CRT path collapse into little
-        // more than pleasant horizontal smoothing on real phones.
-        number phase = abs(fract(tc.y * sourceSize.y) - 0.5) * 2.0;
-        number scaleWeight = clamp((physicalOutputScale - 1.25) / 2.0, 0.0, 1.0);
-        number scanStrength = 0.22 * scaleWeight;
-        number beam = 1.0 - scanStrength * smoothstep(0.18, 1.0, phase);
-
-        // Compensation keeps the stronger beam envelope from simply reading as
-        // a dark overlay while retaining an obvious CRT scan structure.
-        number compensation = 1.0 + scanStrength * 0.45;
-        px.rgb *= beam * compensation;
-        return px * color;
-    }
-]]
-
-
--- Developer-only CRT lab for #1310. These presets are intentionally absent
--- from modeIds(): they are visual-development experiments, not player-facing
--- display modes. Launch with output=crt-lab:<preset>.
+-- Developer comparison recipes remain launchable as crt-lab:<preset> and stay
+-- absent from modeIds(). They now run through the same two-stage CRT pipeline
+-- as the player-facing mode so comparisons exercise the shipping architecture.
 local CRT_LAB_PRESET_ORDER = {
     "heavy-beam",
     "halation",
@@ -81,7 +93,9 @@ local CRT_LAB_DEFAULTS = {
     beamStart = 0.14,
     beamCompensation = 0.48,
     beamDriveExpansion = 0.0,
+    beamWidth = 0.58,
     horizontalSoftness = 0.18,
+    signalSpread = 1.35,
     lumaBleed = 0.0,
     halationStrength = 0.0,
     bloomStrength = 0.0,
@@ -89,6 +103,7 @@ local CRT_LAB_DEFAULTS = {
     grilleStrength = 0.0,
     slotMaskStrength = 0.0,
     compositeBleed = 0.0,
+    chromaDelay = 0.0,
     ghostStrength = 0.0,
     convergencePixels = 0.0,
     curvature = 0.0,
@@ -101,12 +116,14 @@ local CRT_LAB_PRESETS = {
         beamStrength = 0.42,
         beamStart = 0.06,
         beamCompensation = 0.62,
+        beamWidth = 0.66,
         horizontalSoftness = 0.16,
     },
     halation = {
         beamStrength = 0.30,
         beamStart = 0.12,
         beamCompensation = 0.50,
+        beamWidth = 0.60,
         halationStrength = 0.28,
         halationRadius = 1.35,
     },
@@ -114,33 +131,36 @@ local CRT_LAB_PRESETS = {
         beamStrength = 0.31,
         beamStart = 0.10,
         beamCompensation = 0.52,
+        beamWidth = 0.60,
         grilleStrength = 0.34,
     },
     ["slot-mask"] = {
         beamStrength = 0.27,
         beamStart = 0.12,
         beamCompensation = 0.48,
+        beamWidth = 0.58,
         slotMaskStrength = 0.34,
     },
     composite = {
         beamStrength = 0.25,
         beamStart = 0.14,
         beamCompensation = 0.46,
+        beamWidth = 0.58,
         horizontalSoftness = 0.26,
+        signalSpread = 1.35,
         compositeBleed = 0.68,
         ghostStrength = 0.07,
         halationStrength = 0.12,
         halationRadius = 1.10,
     },
     integrated = {
-        -- Composite is the perceptual anchor, but this candidate spreads luma
-        -- and bright-beam energy too so colour bleed is no longer doing nearly
-        -- all of the pixel integration by itself.
         beamStrength = 0.38,
         beamStart = 0.07,
         beamCompensation = 0.58,
         beamDriveExpansion = 0.58,
+        beamWidth = 0.66,
         horizontalSoftness = 0.12,
+        signalSpread = 1.35,
         lumaBleed = 0.34,
         compositeBleed = 0.62,
         ghostStrength = 0.045,
@@ -152,6 +172,7 @@ local CRT_LAB_PRESETS = {
         beamStrength = 0.29,
         beamStart = 0.11,
         beamCompensation = 0.50,
+        beamWidth = 0.60,
         convergencePixels = 2.0,
         halationStrength = 0.08,
     },
@@ -159,6 +180,7 @@ local CRT_LAB_PRESETS = {
         beamStrength = 0.31,
         beamStart = 0.10,
         beamCompensation = 0.52,
+        beamWidth = 0.60,
         halationStrength = 0.20,
         halationRadius = 1.25,
         curvature = 0.075,
@@ -168,7 +190,10 @@ local CRT_LAB_PRESETS = {
         beamStrength = 0.36,
         beamStart = 0.07,
         beamCompensation = 0.58,
+        beamDriveExpansion = 0.45,
+        beamWidth = 0.66,
         horizontalSoftness = 0.25,
+        signalSpread = 1.45,
         halationStrength = 0.24,
         halationRadius = 1.45,
         grilleStrength = 0.20,
@@ -181,7 +206,80 @@ local CRT_LAB_PRESETS = {
     },
 }
 
-local CRT_LAB_SHADER = [[
+-- Native-resolution analogue signal stage. Luma and chroma bandwidth are
+-- separated in YIQ; compositeBleed may exceed 1.0 on purpose, allowing the
+-- player to over-smear colour well past a plausible television signal.
+local CRT_SIGNAL_SHADER = [[
+    extern vec2 sourceSize;
+    extern number signalSpread;
+    extern number horizontalSoftness;
+    extern number lumaBleed;
+    extern number compositeBleed;
+    extern number chromaDelay;
+    extern number ghostStrength;
+
+    vec3 rgbToYiq(vec3 c) {
+        return vec3(
+            dot(c, vec3(0.299, 0.587, 0.114)),
+            dot(c, vec3(0.596, -0.274, -0.322)),
+            dot(c, vec3(0.211, -0.523, 0.312))
+        );
+    }
+
+    vec3 yiqToRgb(vec3 c) {
+        return vec3(
+            c.x + 0.956 * c.y + 0.621 * c.z,
+            c.x - 0.272 * c.y - 0.647 * c.z,
+            c.x - 1.106 * c.y + 1.703 * c.z
+        );
+    }
+
+    vec3 brightPart(vec3 rgb) {
+        number peak = max(max(rgb.r, rgb.g), rgb.b);
+        number amount = max(peak - 0.48, 0.0);
+        return rgb * amount;
+    }
+
+    vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
+        vec2 dx = vec2(max(abs(signalSpread), 0.001) / sourceSize.x, 0.0);
+        vec3 c0 = Texel(tex, tc).rgb;
+        vec3 l1 = Texel(tex, tc - dx).rgb;
+        vec3 r1 = Texel(tex, tc + dx).rgb;
+        vec3 l2 = Texel(tex, tc - dx * 2.0).rgb;
+        vec3 r2 = Texel(tex, tc + dx * 2.0).rgb;
+
+        vec3 soft3 = (l1 + c0 * 2.0 + r1) * 0.25;
+        vec3 soft5 = (l2 + l1 * 2.0 + c0 * 4.0 + r1 * 2.0 + r2) * 0.10;
+        number kernelMix = clamp(horizontalSoftness * 2.0, 0.0, 1.0);
+        vec3 soft = mix(soft3, soft5, kernelMix);
+
+        vec3 baseYiq = rgbToYiq(c0);
+        vec3 softYiq = rgbToYiq(soft);
+        vec3 outYiq = baseYiq;
+        outYiq.x = mix(baseYiq.x, softYiq.x, lumaBleed);
+        outYiq.yz = mix(baseYiq.yz, softYiq.yz, compositeBleed);
+
+        if (chromaDelay != 0.0) {
+            vec2 delayUv = vec2(chromaDelay / sourceSize.x, 0.0);
+            vec3 delayedYiq = rgbToYiq(Texel(tex, tc - delayUv).rgb);
+            number delayMix = abs(chromaDelay) * 0.18;
+            outYiq.yz += (delayedYiq.yz - outYiq.yz) * delayMix;
+        }
+
+        vec3 rgb = yiqToRgb(outYiq);
+        if (ghostStrength != 0.0) {
+            vec2 ghostUv = vec2((2.25 + abs(chromaDelay)) / sourceSize.x, 0.0);
+            rgb += brightPart(Texel(tex, tc - ghostUv).rgb) * ghostStrength;
+        }
+        return vec4(max(rgb, vec3(0.0)), 1.0) * color;
+    }
+]]
+
+-- Host-resolution beam/phosphor reconstruction. Two adjacent native source
+-- rows contribute Gaussian-like footprints whose width grows with drive. The
+-- output therefore ceases to be a grid of enlarged source rectangles: glyphs,
+-- diagonals and highlights are shaped by overlap between luminous samples.
+local CRT_SHADER = [[
     extern vec2 sourceSize;
     extern number physicalOutputScale;
 
@@ -189,23 +287,16 @@ local CRT_LAB_SHADER = [[
     extern number beamStart;
     extern number beamCompensation;
     extern number beamDriveExpansion;
-    extern number horizontalSoftness;
-    extern number lumaBleed;
-    extern number halationStrength;
+    extern number beamWidth;
     extern number bloomStrength;
+    extern number halationStrength;
     extern number halationRadius;
     extern number grilleStrength;
     extern number slotMaskStrength;
-    extern number compositeBleed;
-    extern number ghostStrength;
     extern number convergencePixels;
     extern number curvature;
     extern number vignette;
     extern number noiseStrength;
-
-    number luminance(vec3 rgb) {
-        return dot(rgb, vec3(0.2126, 0.7152, 0.0722));
-    }
 
     vec2 warpedUv(vec2 uv) {
         vec2 p = uv * 2.0 - vec2(1.0);
@@ -214,26 +305,52 @@ local CRT_LAB_SHADER = [[
         return p * 0.5 + vec2(0.5);
     }
 
-    vec4 reconstruct(Image tex, vec2 uv) {
-        vec2 sourcePos = uv * sourceSize - vec2(0.5);
-        vec2 base = floor(sourcePos);
-        vec2 fracPart = fract(sourcePos);
-        number row = floor(sourcePos.y + 0.5);
-
-        number lo = clamp(horizontalSoftness, 0.02, 0.45);
-        number hiBlend = 1.0 - lo;
-        number blendX = smoothstep(lo, hiBlend, fracPart.x);
+    vec3 rowSample(Image tex, number sourceX, number row) {
+        number bx = floor(sourceX);
+        number fx = fract(sourceX);
         vec2 hi = max(sourceSize - vec2(1.0), vec2(0.0));
-        vec2 leftPixel = clamp(vec2(base.x, row), vec2(0.0), hi);
-        vec2 rightPixel = clamp(vec2(base.x + 1.0, row), vec2(0.0), hi);
-        vec4 leftPx = Texel(tex, (leftPixel + vec2(0.5)) / sourceSize);
-        vec4 rightPx = Texel(tex, (rightPixel + vec2(0.5)) / sourceSize);
-        return mix(leftPx, rightPx, blendX);
+        vec2 lp = clamp(vec2(bx, row), vec2(0.0), hi);
+        vec2 rp = clamp(vec2(bx + 1.0, row), vec2(0.0), hi);
+        vec3 a = Texel(tex, (lp + vec2(0.5)) / sourceSize).rgb;
+        vec3 b = Texel(tex, (rp + vec2(0.5)) / sourceSize).rgb;
+        number blendX = smoothstep(0.10, 0.90, fx);
+        return mix(a, b, blendX);
+    }
+
+    vec3 reconstructBeam(Image tex, vec2 uv) {
+        vec2 sourcePos = uv * sourceSize - vec2(0.5);
+        number row0 = floor(sourcePos.y);
+        number row1 = row0 + 1.0;
+        number fy = fract(sourcePos.y);
+        vec3 c0 = rowSample(tex, sourcePos.x, row0);
+        vec3 c1 = rowSample(tex, sourcePos.x, row1);
+        vec3 linear = mix(c0, c1, fy);
+
+        number drive = clamp(max(max(linear.r, linear.g), linear.b), 0.0, 2.0);
+        number sigma = max(0.035,
+            abs(beamWidth) * (1.0 + beamDriveExpansion * drive * 0.55));
+        number invSigma2 = 1.0 / max(sigma * sigma, 0.001);
+        number d0 = abs(sourcePos.y - row0);
+        number d1 = abs(row1 - sourcePos.y);
+        number w0 = exp2(-1.45 * d0 * d0 * invSigma2);
+        number w1 = exp2(-1.45 * d1 * d1 * invSigma2);
+        number centreNorm = 1.0 + exp2(-1.45 * invSigma2);
+        vec3 emitted = (c0 * w0 + c1 * w1) / max(centreNorm, 0.001);
+
+        // At low physical output scales there are not enough display pixels to
+        // describe a beam envelope cleanly, so fade the reconstruction toward
+        // ordinary vertical interpolation rather than generating moire mush.
+        number scaleWeight = clamp((physicalOutputScale - 1.0) / 1.4, 0.0, 1.0);
+        number amount = beamStrength * scaleWeight;
+        emitted = mix(emitted, linear, beamStart);
+        vec3 result = mix(linear, emitted, amount);
+        result *= 1.0 + beamStrength * beamCompensation * scaleWeight * 0.22;
+        return result;
     }
 
     vec3 brightPart(vec3 rgb) {
         number peak = max(max(rgb.r, rgb.g), rgb.b);
-        number amount = max(peak - 0.52, 0.0);
+        number amount = max(peak - 0.45, 0.0);
         return rgb * amount;
     }
 
@@ -243,122 +360,80 @@ local CRT_LAB_SHADER = [[
             return vec4(0.0, 0.0, 0.0, 1.0) * color;
         }
 
-        vec4 px = reconstruct(tex, uv);
+        vec3 px = reconstructBeam(tex, uv);
 
-        // Optional RGB convergence drift is expressed in physical output pixels
-        // so it has comparable visual weight at 720p, 1080p and high-DPI output.
         number convUv = convergencePixels
             / max(sourceSize.x * max(physicalOutputScale, 0.001), 1.0);
-        if (convergencePixels > 0.0) {
-            vec4 pr = reconstruct(tex, uv + vec2(convUv, 0.0));
-            vec4 pb = reconstruct(tex, uv - vec2(convUv, 0.0));
+        if (convergencePixels != 0.0) {
+            vec3 pr = reconstructBeam(tex, uv + vec2(convUv, 0.0));
+            vec3 pb = reconstructBeam(tex, uv - vec2(convUv, 0.0));
             px.r = pr.r;
             px.b = pb.b;
         }
 
-        // Composite-like signal bandwidth loss. Chroma and luma are authored
-        // separately so a candidate can let neighbouring source pixels fuse in
-        // brightness as well as colour instead of relying on chroma smear alone.
-        if (compositeBleed > 0.0 || lumaBleed > 0.0) {
-            vec2 signalDx = vec2(1.35 / sourceSize.x, 0.0);
-            vec3 left = reconstruct(tex, uv - signalDx).rgb;
-            vec3 right = reconstruct(tex, uv + signalDx).rgb;
-            vec3 soft = (left + px.rgb * 2.0 + right) * 0.25;
-            number y0 = luminance(px.rgb);
-            number ys = luminance(soft);
-            vec3 chroma0 = px.rgb - vec3(y0);
-            vec3 chromaSoft = soft - vec3(ys);
-            number y = mix(y0, ys, lumaBleed);
-            px.rgb = vec3(y) + mix(chroma0, chromaSoft, compositeBleed);
-
-            if (ghostStrength > 0.0) {
-                vec3 delayed = reconstruct(
-                    tex, uv - vec2(2.35 / sourceSize.x, 0.0)).rgb;
-                px.rgb += brightPart(delayed) * ghostStrength;
-            }
-        }
-
-        // Cheap single-pass phosphor bloom / halation: the same four bright
-        // neighbours can contribute neutral light spread and a warmer glass-like
-        // halo independently. This lets a strong recipe reinforce brightness
-        // without making every edge disproportionately orange.
-        if (halationStrength > 0.0 || bloomStrength > 0.0) {
-            vec2 haloStep = vec2(halationRadius) / sourceSize;
+        if (bloomStrength != 0.0 || halationStrength != 0.0) {
+            vec2 hs = vec2(max(abs(halationRadius), 0.05)) / sourceSize;
             vec3 halo =
-                brightPart(reconstruct(tex, uv + vec2(haloStep.x, 0.0)).rgb)
-                + brightPart(reconstruct(tex, uv - vec2(haloStep.x, 0.0)).rgb)
-                + brightPart(reconstruct(tex, uv + vec2(0.0, haloStep.y)).rgb)
-                + brightPart(reconstruct(tex, uv - vec2(0.0, haloStep.y)).rgb);
+                brightPart(Texel(tex, uv + vec2(hs.x, 0.0)).rgb)
+                + brightPart(Texel(tex, uv - vec2(hs.x, 0.0)).rgb)
+                + brightPart(Texel(tex, uv + vec2(0.0, hs.y)).rgb)
+                + brightPart(Texel(tex, uv - vec2(0.0, hs.y)).rgb);
             halo *= 0.25;
-            px.rgb += halo * bloomStrength;
-            px.rgb += halo * vec3(1.10, 0.72, 0.56) * halationStrength;
+            px += halo * bloomStrength;
+            px += halo * vec3(1.10, 0.72, 0.56) * halationStrength;
         }
 
-        // Source-line beam envelope. Bright drive widens the effective beam in
-        // the integrated candidate: highlights bridge more of the dark scanline
-        // boundary while low-level pixels retain stronger separation, closer to
-        // the way a CRT spot grows with drive instead of every source pixel
-        // remaining the same hard-edged rectangle.
-        number phase = abs(fract(uv.y * sourceSize.y) - 0.5) * 2.0;
-        number scaleWeight = clamp((physicalOutputScale - 1.25) / 2.0, 0.0, 1.0);
-        number scanStrength = beamStrength * scaleWeight;
-        number drive = clamp(max(max(px.r, px.g), px.b), 0.0, 1.0);
-        number localScanStrength = scanStrength
-            * (1.0 - beamDriveExpansion * drive * 0.72);
-        number beam = 1.0 - localScanStrength
-            * smoothstep(beamStart, 1.0, phase);
-        px.rgb *= beam * (1.0 + scanStrength * beamCompensation);
-
-        // Host-pixel mask experiments. They are intentionally independent of
-        // source scanlines: this is exactly the phone-panel/moire variable that
-        // #1310 needs to judge separately.
-        number maskWeight = clamp((physicalOutputScale - 1.75) / 1.75, 0.0, 1.0);
-        if (grilleStrength > 0.0) {
+        number maskWeight = clamp((physicalOutputScale - 1.65) / 1.6, 0.0, 1.0);
+        if (grilleStrength != 0.0) {
             number triad = mod(floor(sc.x), 3.0);
-            vec3 grille = vec3(0.72);
+            vec3 grille = vec3(0.70);
             if (triad < 1.0) {
-                grille = vec3(1.18, 0.72, 0.72);
+                grille = vec3(1.22, 0.70, 0.70);
             } else if (triad < 2.0) {
-                grille = vec3(0.72, 1.18, 0.72);
+                grille = vec3(0.70, 1.22, 0.70);
             } else {
-                grille = vec3(0.72, 0.72, 1.18);
+                grille = vec3(0.70, 0.70, 1.22);
             }
-            px.rgb *= mix(vec3(1.0), grille,
-                grilleStrength * maskWeight);
+            px *= mix(vec3(1.0), grille, grilleStrength * maskWeight);
         }
 
-        if (slotMaskStrength > 0.0) {
+        if (slotMaskStrength != 0.0) {
             number rowBand = mod(floor(sc.y / 2.0), 2.0);
             number slot = mod(floor(sc.x) + rowBand * 3.0, 6.0);
-            vec3 slotRgb = vec3(0.68);
+            vec3 slotRgb = vec3(0.66);
             if (slot < 2.0) {
-                slotRgb = vec3(1.16, 0.68, 0.68);
+                slotRgb = vec3(1.18, 0.66, 0.66);
             } else if (slot < 4.0) {
-                slotRgb = vec3(0.68, 1.16, 0.68);
+                slotRgb = vec3(0.66, 1.18, 0.66);
             } else {
-                slotRgb = vec3(0.68, 0.68, 1.16);
+                slotRgb = vec3(0.66, 0.66, 1.18);
             }
-            number rowGap = mix(1.0, 0.80, step(2.0, mod(floor(sc.y), 4.0)));
-            slotRgb *= rowGap;
-            px.rgb *= mix(vec3(1.0), slotRgb,
+            number rowGap = mix(1.0, 0.78, step(2.0, mod(floor(sc.y), 4.0)));
+            px *= mix(vec3(1.0), slotRgb * rowGap,
                 slotMaskStrength * maskWeight);
         }
 
-        if (vignette > 0.0) {
+        if (vignette != 0.0) {
             vec2 p = tc * 2.0 - vec2(1.0);
-            number edge = smoothstep(0.32, 1.25, dot(p, p));
-            px.rgb *= 1.0 - vignette * edge;
+            number edge = smoothstep(0.30, 1.25, dot(p, p));
+            px *= 1.0 - vignette * edge;
         }
 
-        if (noiseStrength > 0.0) {
+        if (noiseStrength != 0.0) {
             number n = fract(sin(dot(floor(sc.xy),
                 vec2(12.9898, 78.233))) * 43758.5453);
-            px.rgb *= 1.0 + (n - 0.5) * noiseStrength;
+            px *= 1.0 + (n - 0.5) * noiseStrength;
         }
 
-        return vec4(max(px.rgb, vec3(0.0)), px.a) * color;
+        return vec4(max(px, vec3(0.0)), 1.0) * color;
     }
 ]]
+
+local function copyTable(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do copy[key] = value end
+    return copy
+end
 
 local function dimensions()
     if hostWidth and hostHeight then return hostWidth, hostHeight end
@@ -367,6 +442,22 @@ local function dimensions()
     end
     local w, h = surface.renderSize()
     return w, h
+end
+
+local function buildSignalShader()
+    if signalShader then return signalShader end
+    if signalShaderError then return nil, signalShaderError end
+    if not (love and love.graphics and love.graphics.newShader) then
+        signalShaderError = "LÖVE shader support is unavailable"
+        return nil, signalShaderError
+    end
+    local ok, shaderOrError = pcall(love.graphics.newShader, CRT_SIGNAL_SHADER)
+    if not ok then
+        signalShaderError = tostring(shaderOrError)
+        return nil, signalShaderError
+    end
+    signalShader = shaderOrError
+    return signalShader
 end
 
 local function buildCrtShader()
@@ -385,20 +476,19 @@ local function buildCrtShader()
     return crtShader
 end
 
-local function buildCrtLabShader()
-    if crtLabShader then return crtLabShader end
-    if crtLabShaderError then return nil, crtLabShaderError end
-    if not (love and love.graphics and love.graphics.newShader) then
-        crtLabShaderError = "LÖVE shader support is unavailable"
-        return nil, crtLabShaderError
+local function ensureSignalCanvas(w, h)
+    if signalCanvas and signalCanvasWidth == w and signalCanvasHeight == h then
+        return signalCanvas
     end
-    local ok, shaderOrError = pcall(love.graphics.newShader, CRT_LAB_SHADER)
-    if not ok then
-        crtLabShaderError = tostring(shaderOrError)
-        return nil, crtLabShaderError
+    if not (love and love.graphics and love.graphics.newCanvas) then
+        return nil, "LÖVE Canvas support is unavailable"
     end
-    crtLabShader = shaderOrError
-    return crtLabShader
+    local ok, canvasOrError = pcall(love.graphics.newCanvas, w, h)
+    if not ok then return nil, tostring(canvasOrError) end
+    signalCanvas = canvasOrError
+    signalCanvasWidth, signalCanvasHeight = w, h
+    if signalCanvas.setFilter then signalCanvas:setFilter("nearest", "nearest") end
+    return signalCanvas
 end
 
 local function labPresetFromMode(id)
@@ -411,22 +501,86 @@ end
 local function resolvedLabPreset(id)
     local authored = CRT_LAB_PRESETS[id]
     if not authored then return nil end
-    local resolved = {}
-    for key, value in pairs(CRT_LAB_DEFAULTS) do resolved[key] = value end
+    local resolved = copyTable(CRT_LAB_DEFAULTS)
     for key, value in pairs(authored) do resolved[key] = value end
     return resolved
+end
+
+local function isPublicCrtMode(id)
+    return id == "crt" or (type(id) == "string" and id:match("^crt:") ~= nil)
+end
+
+local function resolvedPublicParams(id)
+    if not isPublicCrtMode(id) then return nil end
+    local resolved = copyTable(CRT_DEFAULTS)
+    if id == "crt" then return resolved end
+
+    local suffix = id:sub(5)
+    for key, raw in suffix:gmatch("([%a][%w_]*)=([^;]+)") do
+        if CRT_DEFAULTS[key] ~= nil then
+            local value = tonumber(raw)
+            if value and value == value and value > -1000 and value < 1000 then
+                resolved[key] = value
+            end
+        end
+    end
+    return resolved
+end
+
+local function resolvedParamsForMode(id)
+    local lab = labPresetFromMode(id)
+    if lab then return resolvedLabPreset(lab), lab end
+    return resolvedPublicParams(id), nil
+end
+
+local function ensureCrtPipeline()
+    local signal, signalErr = buildSignalShader()
+    if not signal then return nil, "CRT signal shader unavailable: " .. tostring(signalErr) end
+    local beam, beamErr = buildCrtShader()
+    if not beam then return nil, "CRT beam shader unavailable: " .. tostring(beamErr) end
+    return true
 end
 
 function output.shaderSource()
     return CRT_SHADER
 end
 
+function output.signalShaderSource()
+    return CRT_SIGNAL_SHADER
+end
+
 function output.crtLabShaderSource()
-    return CRT_LAB_SHADER
+    return CRT_SHADER
 end
 
 function output.modeIds()
     return { "nearest", "crt" }
+end
+
+function output.publicCrtParameterIds()
+    local ids = {}
+    for i, id in ipairs(PUBLIC_PARAM_ORDER) do ids[i] = id end
+    return ids
+end
+
+function output.publicCrtDefaults()
+    return copyTable(CRT_DEFAULTS)
+end
+
+function output.crtParameters(id)
+    return resolvedPublicParams(id or activeMode)
+end
+
+function output.encodeCrtParameters(params)
+    local values = copyTable(CRT_DEFAULTS)
+    for key, value in pairs(params or {}) do
+        if values[key] ~= nil and tonumber(value) then values[key] = tonumber(value) end
+    end
+    local parts = {}
+    for _, key in ipairs(PUBLIC_PARAM_ORDER) do
+        parts[#parts + 1] = key .. "=" .. string.format("%.4g", values[key])
+    end
+    return "crt:" .. table.concat(parts, ";")
 end
 
 function output.crtLabPresetIds()
@@ -437,9 +591,7 @@ end
 
 function output.crtLabModeIds()
     local ids = {}
-    for i, id in ipairs(CRT_LAB_PRESET_ORDER) do
-        ids[i] = "crt-lab:" .. id
-    end
+    for i, id in ipairs(CRT_LAB_PRESET_ORDER) do ids[i] = "crt-lab:" .. id end
     return ids
 end
 
@@ -448,7 +600,7 @@ function output.crtLabPreset(id)
 end
 
 function output.isKnownMode(id)
-    return MODES[id] == true or labPresetFromMode(id) ~= nil
+    return MODES[id] == true or isPublicCrtMode(id) or labPresetFromMode(id) ~= nil
 end
 
 function output.getMode()
@@ -458,28 +610,31 @@ end
 -- Returns false and restores the safe nearest path when the requested shader
 -- cannot be constructed on this graphics backend.
 function output.setMode(id)
-    local labPreset = labPresetFromMode(id)
-    if not MODES[id] and not labPreset then
+    if id == "nearest" then
         activeMode = "nearest"
+        activeParams = nil
+        activeLabPreset = nil
+        return true
+    end
+
+    local params, labPreset = resolvedParamsForMode(id)
+    if not params then
+        activeMode = "nearest"
+        activeParams = nil
         activeLabPreset = nil
         return false, "unknown output presentation mode '" .. tostring(id) .. "'"
     end
-    if id == "crt" then
-        local shader, err = buildCrtShader()
-        if not shader then
-            activeMode = "nearest"
-            activeLabPreset = nil
-            return false, "CRT shader unavailable: " .. tostring(err)
-        end
-    elseif labPreset then
-        local shader, err = buildCrtLabShader()
-        if not shader then
-            activeMode = "nearest"
-            activeLabPreset = nil
-            return false, "CRT lab shader unavailable: " .. tostring(err)
-        end
+
+    local ok, err = ensureCrtPipeline()
+    if not ok then
+        activeMode = "nearest"
+        activeParams = nil
+        activeLabPreset = nil
+        return false, err
     end
+
     activeMode = id
+    activeParams = params
     activeLabPreset = labPreset
     return true
 end
@@ -523,18 +678,15 @@ end
 
 -- Geometry is mode-specific but has ONE authority. Desktop/static nearest keeps
 -- the historical integer contract. Android always fractionally fits the chosen
--- logical surface: DEVICE already did this, but WIDE falling back to 1x on a
--- 1.55x-capable phone made the whole game suddenly tiny when CRT was disabled.
--- CRT uses the same largest aspect-preserving fractional fit everywhere.
+-- logical surface. CRT/custom-CRT/lab modes all use the same fractional fit.
 function output.transformForMode(mode, w, h)
     if mode == "nearest" then
         if isAndroid() then return fractionalFit(w, h) end
         return surface.outputTransform(w, h)
     end
-    if mode ~= "crt" and not labPresetFromMode(mode) then
+    if not isPublicCrtMode(mode) and not labPresetFromMode(mode) then
         error("unknown output presentation mode '" .. tostring(mode) .. "'", 2)
     end
-
     return fractionalFit(w, h)
 end
 
@@ -554,6 +706,45 @@ function output.hostToComposition(x, y)
     return surface.renderToComposition(rx, ry)
 end
 
+local function sendSignalUniforms(shader, params, w, h)
+    shader:send("sourceSize", { w, h })
+    shader:send("signalSpread", params.signalSpread)
+    shader:send("horizontalSoftness", params.horizontalSoftness)
+    shader:send("lumaBleed", params.lumaBleed)
+    shader:send("compositeBleed", params.compositeBleed)
+    shader:send("chromaDelay", params.chromaDelay)
+    shader:send("ghostStrength", params.ghostStrength)
+end
+
+local function sendBeamUniforms(shader, params, w, h, physicalScale)
+    shader:send("sourceSize", { w, h })
+    shader:send("physicalOutputScale", physicalScale)
+    shader:send("beamStrength", params.beamStrength)
+    shader:send("beamStart", params.beamStart)
+    shader:send("beamCompensation", params.beamCompensation)
+    shader:send("beamDriveExpansion", params.beamDriveExpansion)
+    shader:send("beamWidth", params.beamWidth)
+    shader:send("bloomStrength", params.bloomStrength)
+    shader:send("halationStrength", params.halationStrength)
+    shader:send("halationRadius", params.halationRadius)
+    shader:send("grilleStrength", params.grilleStrength)
+    shader:send("slotMaskStrength", params.slotMaskStrength)
+    shader:send("convergencePixels", params.convergencePixels)
+    shader:send("curvature", params.curvature)
+    shader:send("vignette", params.vignette)
+    shader:send("noiseStrength", params.noiseStrength)
+end
+
+local function disableCrt(w, h, reason)
+    activeMode = "nearest"
+    activeParams = nil
+    activeLabPreset = nil
+    local scale, offsetX, offsetY = output.transformForMode("nearest", w, h)
+    love.graphics.setShader()
+    print("[output] CRT disabled: " .. tostring(reason))
+    return scale, offsetX, offsetY
+end
+
 function output.draw(canvas)
     local w, h = dimensions()
     local scale, offsetX, offsetY = output.transformForMode(activeMode, w, h)
@@ -561,41 +752,48 @@ function output.draw(canvas)
     love.graphics.push("all")
     love.graphics.setColor(1, 1, 1, 1)
 
-    if activeMode == "crt" then
-        local shader, err = buildCrtShader()
-        if not shader then
-            -- A backend can disappear/reinitialize after mode selection. Keep
-            -- boot/play safe and make the effective geometry nearest too.
-            activeMode = "nearest"
-            activeLabPreset = nil
-            scale, offsetX, offsetY = output.transformForMode("nearest", w, h)
-            love.graphics.setShader()
-            print("[output] CRT disabled: " .. tostring(err))
-        else
-            shader:send("sourceSize", { canvas:getWidth(), canvas:getHeight() })
-            shader:send("physicalOutputScale", output.physicalOutputScale(scale))
-            love.graphics.setShader(shader)
-        end
-    elseif activeLabPreset then
-        local shader, err = buildCrtLabShader()
-        local preset = resolvedLabPreset(activeLabPreset)
-        if not shader or not preset then
-            activeMode = "nearest"
-            activeLabPreset = nil
-            scale, offsetX, offsetY = output.transformForMode("nearest", w, h)
-            love.graphics.setShader()
-            print("[output] CRT lab disabled: " .. tostring(err or "invalid preset"))
-        else
-            shader:send("sourceSize", { canvas:getWidth(), canvas:getHeight() })
-            shader:send("physicalOutputScale", output.physicalOutputScale(scale))
-            for key, value in pairs(preset) do shader:send(key, value) end
-            love.graphics.setShader(shader)
-        end
-    else
+    if activeMode == "nearest" then
         love.graphics.setShader()
+        love.graphics.draw(canvas, offsetX, offsetY, 0, scale, scale)
+        love.graphics.pop()
+        return activeMode, scale, offsetX, offsetY
     end
 
-    love.graphics.draw(canvas, offsetX, offsetY, 0, scale, scale)
+    local params = activeParams
+    if not params then
+        params, activeLabPreset = resolvedParamsForMode(activeMode)
+        activeParams = params
+    end
+    local signal, signalErr = buildSignalShader()
+    local beam, beamErr = buildCrtShader()
+    local degraded, canvasErr = ensureSignalCanvas(canvas:getWidth(), canvas:getHeight())
+    if not params or not signal or not beam or not degraded then
+        scale, offsetX, offsetY = disableCrt(w, h,
+            signalErr or beamErr or canvasErr or "invalid CRT parameters")
+        love.graphics.draw(canvas, offsetX, offsetY, 0, scale, scale)
+        love.graphics.pop()
+        return activeMode, scale, offsetX, offsetY
+    end
+
+    -- Stage 1: process the video signal at native source resolution. Preserve
+    -- whatever canvas the host had bound so output.draw remains composable.
+    local previousCanvas = love.graphics.getCanvas and love.graphics.getCanvas() or nil
+    love.graphics.setCanvas(degraded)
+    love.graphics.clear(0, 0, 0, 1)
+    love.graphics.setColor(1, 1, 1, 1)
+    sendSignalUniforms(signal, params, canvas:getWidth(), canvas:getHeight())
+    love.graphics.setShader(signal)
+    love.graphics.draw(canvas, 0, 0)
+
+    if previousCanvas then love.graphics.setCanvas(previousCanvas) else love.graphics.setCanvas() end
+
+    -- Stage 2: reconstruct the degraded signal into luminous beams on the host.
+    love.graphics.setColor(1, 1, 1, 1)
+    sendBeamUniforms(beam, params, degraded:getWidth(), degraded:getHeight(),
+        output.physicalOutputScale(scale))
+    love.graphics.setShader(beam)
+    love.graphics.draw(degraded, offsetX, offsetY, 0, scale, scale)
+
     love.graphics.pop()
     return activeMode, scale, offsetX, offsetY
 end

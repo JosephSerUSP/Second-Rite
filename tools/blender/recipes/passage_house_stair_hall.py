@@ -273,7 +273,7 @@ def registry_gate(hall, name, y):
         hall.part(f"{name}_padlock", (0.05, 0.1, 0.13), (x - 0.04, y + 0.18, 1.08), hall.bronze)
     back = hall.back_x + hall.wall_thick + 1.5
     hall.part(f"{name}_beyond_wall", (0.06, width + 0.5, GATE_TOP), (back, y, GATE_TOP / 2.0),
-              hall.lamplight)
+              hall.daylight)
     hall.part(f"{name}_beyond_counter", (0.7, 0.95, 0.92), (back - 0.6, y - 0.1, 0.46), hall.wood)
     hall.part(f"{name}_beyond_ledger", (0.3, 0.4, 0.04), (back - 0.6, y - 0.1, 0.94), hall.paper)
     hall.light(f"{name}_beyond_lamp", "POINT", (back - 0.9, y, GALLERY_Z + 1.9),

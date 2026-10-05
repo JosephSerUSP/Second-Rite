@@ -12,7 +12,7 @@ Run with the pinned Blender through run.py:
 
     python tools/blender/run.py tools/blender/add_registry_gate.py -- \
         --source projects/<project>/assets/authoring/environments/passage_office.blend \
-        --output projects/<project>/assets/authoring/candidates/passage_office/passage_office_r15.blend
+        --output projects/<project>/assets/authoring/candidates/passage_office/passage_office_r16.blend
 """
 import argparse
 import sys
@@ -60,7 +60,9 @@ def main():
     room.iron = kit.material('wrought_iron')
     room.bronze = kit.material('oxidized_bronze')
     room.azulejo = bpy.data.objects['azulejo_dado'].active_material
-    room.lamplight = kit.emissive('sr_lamp_glow', (0.46, 0.28, 0.13))
+    # What lies beyond a doorway onto bright space is overexposed, like a window: the
+    # window daylight material, not the dim lamp glow (which reads as beige).
+    room.daylight = kit.emissive('sr_window_daylight', (0.92, 0.95, 1.0))
 
     # --- the wall: one pier becomes a pier, a door and a pier ------------------
     corners = [(wall.matrix_world @ Vector(c))[1] for c in wall.bound_box]
@@ -90,7 +92,7 @@ def main():
             room.part(f'gate_rail_{index}', (0.05, width + 0.06, 0.06), (x, GATE_Y, z), room.iron)
         room.part('gate_handle', (0.05, 0.1, 0.13), (x - 0.04, GATE_Y - 0.18, 1.08), room.bronze)
     beyond = BACK_X + WALL_THICK + 1.5
-    room.part('gate_beyond', (0.06, width + 0.5, DOOR_TOP), (beyond, GATE_Y, DOOR_TOP / 2.0), room.lamplight)
+    room.part('gate_beyond', (0.06, width + 0.5, DOOR_TOP), (beyond, GATE_Y, DOOR_TOP / 2.0), room.daylight)
     kit.Interior.light(room, 'gate_beyond_lamp', 'POINT', (beyond - 0.9, GATE_Y, 1.9), (0.0, 0.0, -1.0), 40.0,
                        (1.0, 0.76, 0.46), radius=0.12)
     # An emissive panel only LOOKS lit: it casts nothing. The light that spills through

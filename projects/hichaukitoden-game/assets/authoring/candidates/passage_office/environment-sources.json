@@ -9,10 +9,10 @@
       "registrarY": 4.5833,
       "registrarX": 1.15
     },
-    "passage_office_r15.blend": {
+    "passage_office_r16.blend": {
       "status": "reference",
-      "basis": "Owner-approved revision 15 (2026-10-05): r13 plus the Passage House gate cut into the public back wall by tools/blender/add_registry_gate.py, with real light spilling through it. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit.",
-      "sha256": "71b7214b13b4d72a7d224596cb38486d86118390bfe551d5aef33a7a0e736d34"
+      "basis": "Owner-approved revision 16 (2026-10-05): r13 plus the Passage House gate cut into the public back wall by tools/blender/add_registry_gate.py, with real light spilling through it and a daylight-white doorway. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit. The tool must be run on r13, not on this revision.",
+      "sha256": "0920088532f46cbabb334c108ed9752591a7b620da8ff74dc6e977f52291f300"
     }
   }
 }

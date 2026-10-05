@@ -88,8 +88,8 @@
     },
     "passage_office.blend": {
       "status": "adopted",
-      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; r15 (r13 plus the Passage House gate in the public back wall, tools/blender/add_registry_gate.py) approved and promoted on 2026-10-05. Byte-identical copy of preserved candidate passage_office_r15.blend. Edit directly; never regenerate.",
-      "sha256": "71b7214b13b4d72a7d224596cb38486d86118390bfe551d5aef33a7a0e736d34"
+      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; r16 (r13 plus the Passage House gate in the public back wall with real spill light and a daylight-white doorway, tools/blender/add_registry_gate.py) approved and promoted on 2026-10-05. Byte-identical copy of preserved candidate passage_office_r16.blend. Edit directly; never regenerate.",
+      "sha256": "0920088532f46cbabb334c108ed9752591a7b620da8ff74dc6e977f52291f300"
     },
     "st_maria_core.blend": {
       "status": "adopted",

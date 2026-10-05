@@ -68,7 +68,6 @@ end
 local function releaseTargets()
     if not targets then return end
     releaseTarget(targets.envColorSS)
-    releaseTarget(targets.envDepthSS)
     releaseTarget(targets.envDepthNative)
     targets = nil
 end
@@ -87,7 +86,6 @@ local function ensureTargets(width, height, scale)
         height = height,
         scale = scale,
         envColorSS = envColorSS,
-        envDepthSS = newDepth(ssWidth, ssHeight),
         envDepthNative = newDepth(width, height),
     }
     return targets
@@ -104,6 +102,53 @@ end
 local function colorCanvas(binding)
     if type(binding) == "table" then return binding[1] end
     return binding
+end
+
+-- viewport_3d historically exposed stats for one logical frame. Selective AA
+-- turns that frame into three renderer calls, though: visible environment,
+-- depth-only environment, then visible live content. The final call used to
+-- overwrite the first one's counters, so a structural model that correctly
+-- moved into the environment pass misleadingly reported modelDraws=0.
+--
+-- Keep the instrumentation contract scale-invariant by summing only the two
+-- VISIBLE passes. The native depth rebuild is deliberately excluded because it
+-- is an implementation pass, not another logical draw of the frame.
+local function viewportFrameStats()
+    local ok, viewport = pcall(require, "presentation.viewport_3d")
+    if not ok or type(viewport) ~= "table"
+            or type(viewport.getLastFrameStats) ~= "function" then
+        return nil
+    end
+    local stats = viewport.getLastFrameStats()
+    if type(stats) ~= "table" then return nil end
+    return stats
+end
+
+local function mergeCategoryCounts(environment, live)
+    local merged = {}
+    for key, value in pairs(environment or {}) do merged[key] = value end
+    for key, value in pairs(live or {}) do merged[key] = (merged[key] or 0) + value end
+    return merged
+end
+
+function compositor.combineVisibleFrameStats(environmentStats, liveStats)
+    if type(environmentStats) ~= "table" or type(liveStats) ~= "table"
+            or environmentStats == liveStats then
+        return liveStats
+    end
+    local environmentModelDraws = environmentStats.modelDraws or 0
+    local liveModelDraws = liveStats.modelDraws or 0
+    liveStats.environmentModelDraws = environmentModelDraws
+    liveStats.liveModelDraws = liveModelDraws
+    liveStats.modelDraws = environmentModelDraws + liveModelDraws
+    liveStats.persistentBatchDraws = (environmentStats.persistentBatchDraws or 0)
+        + (liveStats.persistentBatchDraws or 0)
+    liveStats.dynamicMeshDraws = (environmentStats.dynamicMeshDraws or 0)
+        + (liveStats.dynamicMeshDraws or 0)
+    liveStats.dynamicByCategory = mergeCategoryCounts(
+        environmentStats.dynamicByCategory, liveStats.dynamicByCategory)
+    liveStats.selectiveAAVisiblePasses = 2
+    return liveStats
 end
 
 function compositor.draw(session, authoredCamera, inspection, drawWorld)
@@ -134,9 +179,18 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         -- renderer they resolve after live meshes against the same depth buffer.
         -- Baking them into this colour image would make a foreground flame or
         -- weather particle sit behind an actor regardless of world depth.
+        --
+        -- This pass only consumes depth while it is being rasterized; the
+        -- supersampled depth is never read afterwards. Use LÖVE's internally
+        -- managed depth/stencil attachment here, matching the ordinary world
+        -- renderer's binding shape. Besides avoiding an unnecessary persistent
+        -- depth Canvas, this keeps love.graphics.getCanvas() exposing the colour
+        -- Canvas directly so viewport_3d can resolve the real supersample target
+        -- dimensions instead of falling back to the native surface size.
         love.graphics.setCanvas({
             t.envColorSS,
-            depthstencil = t.envDepthSS,
+            depth = true,
+            stencil = true,
         })
         love.graphics.clear(0, 0, 0, 1, 0, 1)
         drawWorld(session, authoredCamera, inspection, {
@@ -148,6 +202,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
             drawPost = false,
             preserveDepth = false,
         })
+        local environmentStats = viewportFrameStats()
 
         -- 2. Resolve colour into the real native frame. LÖVE's ordinary linear
         -- minification point-samples this particular integer reduction, so use
@@ -196,6 +251,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
             drawPost = true,
             preserveDepth = false,
         })
+        compositor.combineVisibleFrameStats(environmentStats, viewportFrameStats())
 
         love.graphics.pop()
         pushed = false

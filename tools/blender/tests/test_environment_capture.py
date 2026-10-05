@@ -19,6 +19,11 @@ class CaptureSafetyTests(unittest.TestCase):
         return Namespace(game_root=root, output=root/'review', map_id=28,
             positions=[1], unobstructed=False, device=[2100, 900], lovec='lovec')
 
+    @staticmethod
+    def frame(visible=6000):
+        return {'y': 1, 'width': 256, 'height': 240,
+            'viewportVisiblePixels': visible, 'image': 'eA=='}
+
     def test_fresh_stage_installs_probe_and_restores_after_success(self):
         (ROOT/'out').mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(dir=ROOT/'out') as directory:
@@ -28,7 +33,7 @@ class CaptureSafetyTests(unittest.TestCase):
             def run(*args, **kwargs):
                 self.assertTrue((root/'tests/environment_frames.lua').is_file())
                 self.assertIn(b'love.errorhandler', main.read_bytes())
-                payload=json.dumps([{'y': 1, 'image': 'eA=='}])
+                payload=json.dumps([self.frame()])
                 return subprocess.CompletedProcess(args, 0, 'ENVIRONMENT FRAMES BEGIN'+payload+'ENVIRONMENT FRAMES END', '')
             with patch.object(capture.subprocess, 'run', side_effect=run):
                 capture.capture(self.arguments(root))
@@ -36,6 +41,28 @@ class CaptureSafetyTests(unittest.TestCase):
             self.assertFalse((root/'tests').exists())
             self.assertFalse((root/'environment-review.json').exists())
             self.assertEqual(len(list((root/'review').glob('*/1.png'))), 4)
+
+    def test_empty_viewport_fails_before_writing_evidence_and_restores_stage(self):
+        (ROOT/'out').mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=ROOT/'out') as directory:
+            root=Path(directory)
+            main=root/'main.lua'; original=b'cli_tools.runTownProofFrames(loader)\r\n'
+            main.write_bytes(original)
+            payload=json.dumps([self.frame(visible=648)])
+            result=subprocess.CompletedProcess([], 0,
+                'ENVIRONMENT FRAMES BEGIN'+payload+'ENVIRONMENT FRAMES END', '')
+            with patch.object(capture.subprocess, 'run', return_value=result), self.assertRaisesRegex(
+                    RuntimeError, 'environment viewport is effectively empty'):
+                capture.capture(self.arguments(root))
+            self.assertEqual(main.read_bytes(), original)
+            self.assertFalse((root/'review').exists())
+            self.assertFalse((root/'environment-review.json').exists())
+
+    def test_visibility_evidence_is_required(self):
+        with self.assertRaisesRegex(RuntimeError, 'omitted viewport visibility evidence'):
+            capture.validate_visible_environment('wide', [
+                {'y': 1, 'width': 426, 'height': 240}
+            ])
 
     def test_timeout_and_bad_payload_restore_borrowed_stage_files(self):
         (ROOT/'out').mkdir(exist_ok=True)

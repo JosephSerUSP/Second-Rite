@@ -2,6 +2,7 @@
 import argparse
 import base64
 import json
+import math
 import subprocess
 from pathlib import Path
 
@@ -12,6 +13,31 @@ ERROR_HANDLER = b'''\nlove.errorhandler = function(message)
   return function() return 1 end
 end
 '''
+
+
+def validate_visible_environment(surface_name, frames):
+    """Reject review payloads whose native viewport is effectively empty.
+
+    The capture frame itself may contain UI/Walker pixels, so the staged Lua
+    probe reports a viewport-only visible-pixel count through the production
+    compositor. Two percent is deliberately conservative for an environment
+    review: it rejects the ~Walker-sized remnant from #1393 while staying far
+    below the tens of thousands of pixels occupied by a real room.
+    """
+    for frame in frames:
+        width = frame.get('width')
+        height = frame.get('height')
+        visible = frame.get('viewportVisiblePixels')
+        if not isinstance(width, int) or not isinstance(height, int) or width <= 0 or height <= 0:
+            raise RuntimeError(f'{surface_name}: runtime omitted valid frame dimensions')
+        if not isinstance(visible, int) or visible < 0:
+            raise RuntimeError(f'{surface_name}: runtime omitted viewport visibility evidence')
+        minimum = max(1024, math.ceil(width * height * 0.02))
+        if visible < minimum:
+            y = frame.get('y', '?')
+            raise RuntimeError(
+                f'{surface_name}: environment viewport is effectively empty at y={y} '
+                f'({visible} visible pixels; expected at least {minimum})')
 
 
 def capture(args):
@@ -60,6 +86,7 @@ def capture(args):
             frames = json.loads(payload)
             if not isinstance(frames, list) or not frames:
                 raise RuntimeError(f'{name}: runtime emitted no environment frames')
+            validate_visible_environment(name, frames)
             # Decode the complete surface before creating its evidence folder.
             images = [(f"{frame['y']:g}.png", base64.b64decode(frame.pop('image'), validate=True)) for frame in frames]
             output = args.output / name

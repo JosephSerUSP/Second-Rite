@@ -56,4 +56,4 @@ check(viewport.surfacePresentationPass({ model = true }) == "environment",
     "unclassified placed models retain environment default")
 
 print(string.format("WORLD PASS COMPOSITOR TESTS: %d passed, %d failed", passed, failed))
-if failed > 0 then os.exit(1) end
+assert(failed == 0, string.format("world pass compositor suite had %d failure(s)", failed))

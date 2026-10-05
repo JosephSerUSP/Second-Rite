@@ -1,0 +1,34 @@
+name: Temporary fix selective AA attachment handling
+
+on:
+  push:
+    branches:
+      - agent/836-selective-environment-aa
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/836-selective-environment-aa
+          fetch-depth: 0
+      - name: Apply attachment-aware canvas fix
+        run: python3 tools/tmp_fix_836.py
+      - name: Commit fix when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add runtime/presentation/viewport_3d.lua
+          if git diff --cached --quiet; then
+            echo "fix already applied"
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "fix(#836): handle explicit depth attachment canvas"
+          git push origin HEAD:agent/836-selective-environment-aa

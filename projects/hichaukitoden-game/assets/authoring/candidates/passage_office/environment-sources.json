@@ -8,6 +8,11 @@
       "exitY": 1.0833,
       "registrarY": 4.5833,
       "registrarX": 1.15
+    },
+    "passage_office_r14.blend": {
+      "status": "scaffold",
+      "basis": "Candidate revision 14 (2026-10-05): r13 plus the Passage House gate cut into the public back wall by tools/blender/add_registry_gate.py. Awaiting owner approval; not promoted. The adopted passage_office.blend is unchanged.",
+      "sha256": "c471ff4f1f35b8e0e34d9951423c5413ee22e4247c2630a5fbd1b7395eeaf3dd"
     }
   }
 }

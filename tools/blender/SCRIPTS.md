@@ -107,10 +107,11 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [study_house_grammar.py](study_house_grammar.py) | `run.py` | Photograph the first grammar-generated building as CLAY, against the real camera. |
 | [study_town_perspective.py](study_town_perspective.py) | `run.py` | Compare level/pitched town cameras on an exterior and an interior. |
 
-## Recorded source surgery and migrations (11)
+## Recorded source surgery and migrations (12)
 
 | Script | Run with | Purpose |
 |---|---|---|
+| [add_registry_gate.py](add_registry_gate.py) | `run.py` | Cut the Passage House gate into the Registry's public back wall as a new source revision. |
 | [define_registry_bay.py](define_registry_bay.py) | `run.py` | Fix counter support and add a wall-connected timber service screen. |
 | [enrich_registry_source.py](enrich_registry_source.py) | `run.py` | Edit the Registry document: tactile finishes, coherent windows, selected props. |
 | [extend_registry_frontage.py](extend_registry_frontage.py) | `run.py` | Extend existing service joinery to the right wall and add a wall-backed cabinet. |

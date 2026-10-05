@@ -3,6 +3,11 @@
   "scope": "Top-level Python and JavaScript files; preserved paths, no inferred disposal.",
   "scripts": [
     {
+      "path": "add_registry_gate.py",
+      "role": "one-shot",
+      "purpose": "Cut the Passage House gate into the Registry's public back wall as a new source revision."
+    },
+    {
       "path": "asset_library.py",
       "role": "production",
       "purpose": "Browse a Blender remote asset library without Blender, and without downloading an asset."

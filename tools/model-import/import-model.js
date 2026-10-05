@@ -5,6 +5,7 @@ const path = require('node:path');
 const { NodeIO, Primitive } = require('@gltf-transform/core');
 const contract = require('./model-contract');
 const geometry = require('./static-geometry');
+const { compileAppearance } = require('./compile-appearance');
 
 function projectFile(projectRoot, relative, label) {
     const root = path.resolve(projectRoot);
@@ -218,18 +219,22 @@ async function normalizeObj({ filePath, recipe }) {
     return { geometry: output.finish(), diagnostics };
 }
 
-async function importRecipe({ projectRoot, recipe }) {
+async function importRecipe({ projectRoot, recipe, runtimeRoot }) {
     const validated = contract.validateRecipe(recipe.id, recipe);
     const filePath = projectFile(projectRoot, validated.source.path, `Model '${validated.id}' source`);
     const bytes = fs.readFileSync(filePath);
     const normalized = validated.source.kind === 'obj'
         ? await normalizeObj({ filePath, recipe: validated })
         : await normalizeGltf({ filePath, recipe: validated });
+    const appearance = validated.appearance
+        ? compileAppearance(projectRoot, validated, bytes.toString('utf8'), runtimeRoot) : {};
+    if (validated.appearance) normalized.diagnostics = normalized.diagnostics.filter(d => d.code !== 'OBJ_MTL_APPEARANCE_NOT_IMPORTED');
     const bundle = contract.makeBundle({
         recipe: validated,
         sourceSha256: contract.sha256(bytes),
         geometry: normalized.geometry,
         diagnostics: normalized.diagnostics,
+        ...appearance,
     });
     return contract.validateBundle(bundle);
 }

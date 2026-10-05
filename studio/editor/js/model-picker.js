@@ -90,6 +90,18 @@
 
         const promise = (async () => {
             const { THREE, OBJLoader, MTLLoader } = await loadThree();
+            const compiled = await fetch('/api/model-bundle?path=' + encodeURIComponent(path), { cache: 'no-store' });
+            if (compiled.status !== 204) {
+                if (!compiled.ok) throw new Error((await compiled.json()).error || 'Model compilation failed');
+                const bundle = await compiled.json();
+                await import('/model-bundle-contract.js');
+                await import('/model-bundle-three.js');
+                const object = root.ThestraModelBundleThree.toThreeObject(bundle, THREE);
+                return Object.assign(parseGeometryStats(object, THREE), {
+                    path, object, modelId: bundle.modelId, vertexCount: bundle.geometry.vertexCount,
+                    materialLibraries: [], bundle
+                });
+            }
             const objText = await fetchText(path);
             const objLoader = new OBJLoader();
             const materialLibraries = [];
@@ -135,7 +147,11 @@
 
         MODEL_CACHE.set(path, promise);
         try {
-            return await promise;
+            const result = await promise;
+            // A compiled source can change at the same filename. Reimport on
+            // the next selection; the build manifest is content-addressed.
+            if (result.modelId) MODEL_CACHE.delete(path);
+            return result;
         } catch (err) {
             MODEL_CACHE.delete(path);
             throw err;

@@ -6,7 +6,7 @@
 -- uses, preserves semantic provenance, and packages the result into plain Lua
 -- tables suitable for JSON transport or external-format serializers.
 local viewport_3d = require("presentation.viewport_3d")
-local obj_model = require("presentation.obj_model")
+local model_resource = require("presentation.model_resource")
 local mesh = require("presentation.mesh")
 local geometry = require("engine.geometry")
 local geometry_images = require("engine.geometry.images")
@@ -353,7 +353,7 @@ local function modelFor(spec)
     elseif spec.geometry then
         return geometry.load(spec.geometry)
     elseif spec.model then
-        return obj_model.load(spec.model)
+        return model_resource.load(spec.model)
     end
     error("map renderable placement has no mesh source", 0)
 end
@@ -387,47 +387,38 @@ local function modelMaterial(registry, model, modelGroup, context)
         { color = color })
 end
 
-local function orientPlacedXY(x, y, axis, normalX, normalY)
-    if normalX or normalY then
-        return viewport_3d.wallModelFrame(x, y, normalX, normalY)
-    elseif axis == "y" then
-        return -y, x
-    end
-    return x, y
-end
-
-local function placedTransform(originX, originY, axis, normalX, normalY)
-    local xx, xy = orientPlacedXY(1, 0, axis, normalX, normalY)
-    local yx, yy = orientPlacedXY(0, 1, axis, normalX, normalY)
-    return {
-        translation = { originX, originY, 0 },
-        -- Row-major 2x2 matrix. Consumers apply this exact runtime-authored
-        -- orientation to local positions and normals; they do not infer wall or
-        -- opening semantics from `source`.
-        matrix2d = { xx, yx, xy, yy },
-    }
+local function placedTransform(resolved)
+    local transform = resolved.transform
+    local m = transform.orientation
+    return { translation = transform.translation, matrix2d = { m[1], m[2], m[4], m[5] } }
 end
 
 local function addPlacedModel(surfaces, registry, name, source, spec,
-        originX, originY, axis, normalX, normalY, materialContext)
+        originX, originY, axis, normalX, normalY, materialContext, originZ)
     local model = modelFor(spec)
+    local resolved = viewport_3d.resolveModelInstance(spec, spec.instanceId or name,
+        model.modelId or viewport_3d.meshSource(spec) or name,
+        originX, originY, originZ or 0, axis, normalX, normalY, source)
+    local instance = require("engine.geometry.model_instance")
     for groupIndex, modelGroup in ipairs(model.groups or {}) do
         local materialName = modelGroup.material
         local suffix = (materialName and materialName ~= "") and materialName or ("part_" .. groupIndex)
         local surface = newSurface(surfaces, name .. "_" .. suffix, source,
             modelMaterial(registry, model, modelGroup, materialContext))
+        surface.modelInstance = resolved
+        surface.materialSlot = modelGroup.material
         if instance_transport.capturing() then
             surface._instanceTransport = instance_transport.capture(
                 model, groupIndex, modelGroup,
-                placedTransform(originX, originY, axis, normalX, normalY))
+                placedTransform(resolved))
         end
         for _, sourceVertex in ipairs(modelGroup.vertices or {}) do
             local lx, ly, lz = sourceVertex[1], sourceVertex[2], sourceVertex[3]
             local nx, ny, nz = sourceVertex[6] or 0, sourceVertex[7] or 0, sourceVertex[8] or 1
-            lx, ly = orientPlacedXY(lx, ly, axis, normalX, normalY)
-            nx, ny = orientPlacedXY(nx, ny, axis, normalX, normalY)
+            lx, ly, lz = instance.position(resolved, lx, ly, lz)
+            nx, ny, nz = instance.direction(resolved, nx, ny, nz)
             pushVertex(surface, vertex(
-                originX + lx, originY + ly, lz,
+                lx, ly, lz,
                 sourceVertex[4], sourceVertex[5], nx, ny, nz,
                 sourceVertex[9], sourceVertex[10], sourceVertex[11], sourceVertex[12]))
         end
@@ -743,7 +734,7 @@ function bundle.collect(session, profileName, options)
         addPlacedModel(surfaces, registry, "environment_render",
             { kind = "environment", path = environment.renderMesh,
                 manifestPath = environment.manifestPath, surface = "render" },
-            { model = environment.renderMesh }, 0, 0, "x")
+            { model = environment.renderMesh, bakedLighting = environment.bakedLighting }, 0, 0, "x")
         if options and options.includeCollision then
             addPlacedModel(surfaces, registry, "environment_collision",
                 { kind = "environment", path = environment.collisionMesh,
@@ -757,7 +748,8 @@ function bundle.collect(session, profileName, options)
             local id = placement.event and placement.event.id or index
             addPlacedModel(surfaces, registry, "event_" .. tostring(id),
                 { kind = "event", id = id },
-                { model = placement.model }, placement.x, placement.y, "x")
+                { model = placement.model, modelScale = placement.modelScale, instanceId = placement.instanceId },
+                placement.x, placement.y, "x", nil, nil, nil, placement.z)
         end
     end
 

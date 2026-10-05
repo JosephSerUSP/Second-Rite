@@ -1,5 +1,20 @@
 -- Generic stage-only review through runtime camera and native compositor.
 local module = {}
+
+local function visiblePixelCount(canvas)
+    local image = canvas:newImageData()
+    local width, height = image:getDimensions()
+    local count = 0
+    for y = 0, height - 1 do
+        for x = 0, width - 1 do
+            local r, g, b = image:getPixel(x, y)
+            if math.max(r, g, b) > 0.02 then count = count + 1 end
+        end
+    end
+    if image.release then image:release() end
+    return count
+end
+
 function module.run(loader)
     local json = require('engine.data.json')
     local config = json.decode(assert(love.filesystem.read('environment-review.json')))
@@ -35,6 +50,19 @@ function module.run(loader)
             projectionFrame={targetWidth=width, targetHeight=height,
                 baseViewportWidth=frame.baseViewportWidth, baseViewportHeight=frame.baseViewportHeight,
                 compositionWidth=frame.baseViewportWidth, canonicalCenterX=centerX, canonicalHorizonY=horizonY}})
+
+        -- #1393: the full frame can contain Walker/UI pixels even when the world
+        -- itself is black. Render the viewport alone through the SAME production
+        -- compositor and report its visible contribution. The Python wrapper
+        -- rejects Walker-sized remnants before writing review evidence.
+        local probe = surface.newRasterCanvas(width, height)
+        love.graphics.setCanvas({probe, depth=true, stencil=true})
+        love.graphics.clear(0,0,0,1,true,true); love.graphics.setColor(1,1,1,1)
+        view.draw(game, game.townTraversal.camera)
+        love.graphics.setCanvas()
+        local viewportVisiblePixels = visiblePixelCount(probe)
+        probe:release()
+
         local canvas = surface.newRasterCanvas(width, height)
         for draw = 1, 2 do
             love.graphics.setCanvas({canvas, depth=true, stencil=true})
@@ -47,6 +75,7 @@ function module.run(loader)
         local png = canvas:newImageData():encode('png')
         result[#result+1] = {y=y, z=game.townTraversal.z, width=width, height=height,
             cameraOffsetX=game.townTraversal.cameraOffsetX, surface=surface.getProfileId(), cameraRecord=record,
+            viewportVisiblePixels=viewportVisiblePixels,
             image=love.data.encode('string','base64',png)}
         canvas:release()
     end

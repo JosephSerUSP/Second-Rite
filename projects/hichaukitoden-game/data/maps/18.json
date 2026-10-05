@@ -86,6 +86,7 @@
                       ]
                     }
                   ],
+                  "cancelOption": 2,
                   "cmd": "CHOICE"
                 }
               ]
@@ -95,6 +96,7 @@
               "commands": []
             }
           ],
+          "cancelOption": 3,
           "cmd": "CHOICE"
         }
       ],

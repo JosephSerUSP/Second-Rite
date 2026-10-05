@@ -126,6 +126,7 @@
                   "commands": []
                 }
               ],
+              "cancelOption": 3,
               "cmd": "CHOICE"
             }
           ],

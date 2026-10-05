@@ -96,4 +96,63 @@ check(controller.isHeld('DOWN'),'consuming a press preserves physical held state
 controller.release('DOWN');controller.press('DOWN',{})
 check(presses==2,'releasing and pressing deliberately can use the return path')
 controller.reset();host.buttonpressed=originalDispatch
+
+-- Bounded-lane walking is continuous and therefore does not arrive through
+-- the map scene's directional hooks. A field menu is a modal mode *inside*
+-- that scene, so the provider must still surrender held directions while the
+-- modal owns input. This is the regression behind walking through St. Maria
+-- with the menu open.
+game.townTraversal.speed=3.4
+game.townTraversal.groundZ=0
+game.townTraversal.groundProfile=nil
+game.townTraversal.tracking={center=5,pixelsPerWorld=1,minOffsetX=0,maxOffsetX=0}
+game.townTraversal.camera={}
+game.townTraversal.y=5
+host.init('map',{})
+local mapState=host.getCurrentState()
+mapState.v.mode=1
+lane.update(game,.5,1)
+check(math.abs(game.townTraversal.y-5)<.001,
+    'a modal field menu owns held directions and freezes bounded-lane walking')
+mapState.v.mode=0
+lane.update(game,.5,1)
+check(math.abs(game.townTraversal.y-6.7)<.001,
+    'closing the field menu returns held directions to bounded-lane walking')
+host.init(nil,{})
+
+-- Recruitment choices are player-facing offers, never forced prompts. Keep B
+-- wired at every CHOICE layer (including challenge-before-recruit branches),
+-- so new units authored by Studio cannot silently reintroduce the historical
+-- Decline/Leave row that looked cancellable but ignored B.
+local dataLoader=require('engine.data.loader')
+dataLoader.init()
+local recruitChoiceCount=0
+local function auditRecruitChoices(cmds, unitId)
+    for _,cmd in ipairs(cmds or {}) do
+        if cmd.cmd=='CHOICE' then
+            recruitChoiceCount=recruitChoiceCount+1
+            local optionCount=#(cmd.options or {})
+            check(type(cmd.cancelOption)=='number'
+                    and cmd.cancelOption==math.floor(cmd.cancelOption)
+                    and cmd.cancelOption>=1 and cmd.cancelOption<=optionCount,
+                'recruitment CHOICE for '..tostring(unitId)..' needs a valid cancelOption')
+            for _,opt in ipairs(cmd.options or {}) do
+                auditRecruitChoices(opt.commands,unitId)
+            end
+        end
+        auditRecruitChoices(cmd.commands,unitId)
+        auditRecruitChoices(cmd.onVictory,unitId)
+        auditRecruitChoices(cmd.onDefeat,unitId)
+        auditRecruitChoices(cmd['then'],unitId)
+        auditRecruitChoices(cmd['else'],unitId)
+        auditRecruitChoices(cmd.elseCommands,unitId)
+    end
+end
+for _,unit in ipairs(dataLoader.units or {}) do
+    if type(unit.recruitEvent)=='table' and #unit.recruitEvent>0 then
+        auditRecruitChoices(unit.recruitEvent,unit.id)
+    end
+end
+check(recruitChoiceCount>0,'the recruitment cancel audit exercised at least one CHOICE')
+
 require('tests.fail_fast')('test_town_threshold_direction',failed,passed)

@@ -52,13 +52,17 @@ def root_for(stem: str, display_name: str):
 
 
 def profile_revolve(root, name, points, semantic_id, *, steps=12, smooth=True, closed=False):
-    """Editable X/Z profile with a live Screw modifier; points are (z, radius)."""
+    """Editable X/Z profile with live Screw and cylindrical UV generation."""
     verts = [(float(radius), 0.0, float(z)) for z, radius in points]
     edges = [(i, i + 1) for i in range(len(verts) - 1)]
     if closed:
         edges.append((len(verts) - 1, 0))
     mesh = bpy.data.meshes.new(f"{name}_profile_mesh")
     mesh.from_pydata(verts, edges, [])
+    # Screw only emits UVs when an input UV layer exists. The edge-only profile
+    # has no loops yet, but declaring the layer here gives the live modifier an
+    # authored UV target; use_stretch_u/v then fills the resolved surface.
+    mesh.uv_layers.new(name="UVMap")
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
@@ -72,6 +76,8 @@ def profile_revolve(root, name, points, semantic_id, *, steps=12, smooth=True, c
     screw.use_merge_vertices = True
     screw.merge_threshold = 0.0001
     screw.use_smooth_shade = smooth
+    screw.use_stretch_u = True
+    screw.use_stretch_v = True
     return obj
 
 

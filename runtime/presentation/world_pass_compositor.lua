@@ -68,7 +68,6 @@ end
 local function releaseTargets()
     if not targets then return end
     releaseTarget(targets.envColorSS)
-    releaseTarget(targets.envDepthSS)
     releaseTarget(targets.envDepthNative)
     targets = nil
 end
@@ -87,7 +86,6 @@ local function ensureTargets(width, height, scale)
         height = height,
         scale = scale,
         envColorSS = envColorSS,
-        envDepthSS = newDepth(ssWidth, ssHeight),
         envDepthNative = newDepth(width, height),
     }
     return targets
@@ -134,9 +132,18 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         -- renderer they resolve after live meshes against the same depth buffer.
         -- Baking them into this colour image would make a foreground flame or
         -- weather particle sit behind an actor regardless of world depth.
+        --
+        -- This pass only consumes depth while it is being rasterized; the
+        -- supersampled depth is never read afterwards. Use LÖVE's internally
+        -- managed depth/stencil attachment here, matching the ordinary world
+        -- renderer's binding shape. Besides avoiding an unnecessary persistent
+        -- depth Canvas, this keeps love.graphics.getCanvas() exposing the colour
+        -- Canvas directly so viewport_3d can resolve the real supersample target
+        -- dimensions instead of falling back to the native surface size.
         love.graphics.setCanvas({
             t.envColorSS,
-            depthstencil = t.envDepthSS,
+            depth = true,
+            stencil = true,
         })
         love.graphics.clear(0, 0, 0, 1, 0, 1)
         drawWorld(session, authoredCamera, inspection, {

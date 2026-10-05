@@ -2,7 +2,7 @@
   "note": "Corpus violations accepted as pre-existing. Owner-signed. `accepted` may only shrink. `legacyItems` names the batch-produced models still awaiting replacement; they are measured against the loose silhouette bar, while a pair of re-authored items faces the strict one. Remove an item from both lists when a cohort replaces it.",
   "counts": {
     "duplicate_geometry": 11,
-    "no_uvs": 124,
+    "no_uvs": 118,
     "shared_file": 1
   },
   "legacyItems": [
@@ -49,7 +49,6 @@
     "Elixir of Insight",
     "Ember Bit",
     "Emerald Ring",
-    "Ether",
     "Ether Drop",
     "Ether Flask",
     "Ether Robe",
@@ -71,11 +70,9 @@
     "HP Tonic",
     "Hazel Wand",
     "Healing Staff",
-    "Healing Water",
     "Hero Armor",
     "Hero Drink",
     "Hi-Ether",
-    "Hi-Potion",
     "Holy Sword Gram",
     "Holy Vestment",
     "Hook Spear",
@@ -93,7 +90,6 @@
     "Mandrake Tempura",
     "Mars Emblem",
     "Medicine Ring",
-    "Mega-Potion",
     "Melted Wax",
     "Mercury Crest",
     "Moa Harness",
@@ -111,7 +107,6 @@
     "Pearl Ring",
     "Pint of Stout",
     "Plate Armor",
-    "Potion",
     "Power Incense",
     "Protect Ring",
     "Provoke Badge",
@@ -171,8 +166,7 @@
     "White Cape",
     "Wind Charm",
     "Wind Dancer",
-    "Wind Robe",
-    "X-Potion"
+    "Wind Robe"
   ],
   "accepted": [
     "duplicate_geometry:Adamant Armor|Black Robe|Brigandine|Chainmail|Cocoon Husk|Coral Mail|Cotton Robe|Dragon Mail|Ether Robe|Flame Mail|Fortress Plate|Hero Armor|Holy Vestment|Leather Armor|Mage Robe|Plate Armor|Quarantine Coat|Ring Mail|Sage Robe|Scale Mail|Silk Robe|Slime Coat|Tin Armor|Traveler Coat|Wind Robe",
@@ -217,7 +211,6 @@
     "no_uvs:Echo Herbs",
     "no_uvs:Elixir",
     "no_uvs:Emerald Ring",
-    "no_uvs:Ether",
     "no_uvs:Ether Drop",
     "no_uvs:Ether Flask",
     "no_uvs:Ether Robe",
@@ -235,11 +228,9 @@
     "no_uvs:Guard Incense",
     "no_uvs:Hazel Wand",
     "no_uvs:Healing Staff",
-    "no_uvs:Healing Water",
     "no_uvs:Hero Armor",
     "no_uvs:Hero Drink",
     "no_uvs:Hi-Ether",
-    "no_uvs:Hi-Potion",
     "no_uvs:Holy Vestment",
     "no_uvs:Hook Spear",
     "no_uvs:Iron Knife",
@@ -254,7 +245,6 @@
     "no_uvs:Mana Congee",
     "no_uvs:Mandrake Tempura",
     "no_uvs:Medicine Ring",
-    "no_uvs:Mega-Potion",
     "no_uvs:Moa Harness",
     "no_uvs:Moa Saddle",
     "no_uvs:Moa Tamagoyaki",
@@ -266,7 +256,6 @@
     "no_uvs:Peace Ring",
     "no_uvs:Pearl Ring",
     "no_uvs:Plate Armor",
-    "no_uvs:Potion",
     "no_uvs:Power Incense",
     "no_uvs:Protect Ring",
     "no_uvs:Provoke Badge",
@@ -309,7 +298,6 @@
     "no_uvs:War Staff",
     "no_uvs:White Cape",
     "no_uvs:Wind Robe",
-    "no_uvs:X-Potion",
     "shared_file:Alert Charm|Light Amulet|Wind Charm"
   ]
 }

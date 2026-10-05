@@ -1,27 +1,34 @@
 # Consumable model rework — 2026-10-05
 
-Six legacy consumables from the 149–158 batch were re-authored from scratch rather than edited from the old shared bottle/profile generator:
+Six legacy consumables from the 149–158 batch were re-authored from scratch as **authoritative per-item Blender sources**, not edited from the old shared bottle/profile generator:
 
-- **Potion** — squat smoked-glass apothecary bottle with wax closure and cloth neck band.
-- **Hi-Potion** — taller medicine phial with a ritual-gold structural harness and tiered stopper.
-- **X-Potion** — crystalline biconic reliquary with an emphatic gold equator and foot.
-- **Mega-Potion** — broad canteen/grenade-like vessel with belt, side fittings, and hanging tag.
-- **Healing Water** — clear pilgrim-gourd/flask with cloth binding and dark-wood stopper.
-- **Ether** — narrow ampoule/retort with gold calibration rings, cloth marker, and crystal needle cap.
+- **Potion** — squat smoked-glass apothecary bottle with wax closure and cloth neck binding.
+- **Hi-Potion** — deliberately four-sided medicinal phial with a live ritual-gold harness/rib assembly.
+- **X-Potion** — six-sided crystalline biconic reliquary with gold equator and neck hardware.
+- **Mega-Potion** — flattened field-canteen/grenade vessel with live handles, harness rings, stopper and cloth seal.
+- **Healing Water** — clear pilgrim-gourd flask with waist/neck binding, wood stopper and curved carry cord.
+- **Ether** — narrow ampoule/retort with gold calibration rings and crystalline needle cap.
 
-## Intent
+## Source authority
 
-The previous batch differentiated most consumables by changing one rotational profile, material, side count, and optional bands/tags. This pass instead gives each item a recognisable object grammar and silhouette while preserving the existing low-poly semantic material vocabulary.
+The production authority is now:
 
-## Runtime contract
+`projects/hichaukitoden-game/assets/authoring/items/<item>.blend`
 
-- Existing item paths are preserved; `data/items.json` is untouched.
-- The same OBJ bytes are mirrored into the game Project and editor fixture.
-- Every face carries UV indices.
-- Only existing materials from `item_batch_149_158.mtl` are used.
-- Geometry is centred and non-degenerate.
-- Pairwise silhouette comparison among these six peaks at approximately **0.780 IoU**, below the corpus gate's **0.85** limit for new work.
+Each source contains exactly one `item_export` root with `sr_source_authority = "blend"`. Vessel bodies, collars and stoppers are sparse editable profile meshes with live **Screw** modifiers; ribs, handles, seals and cords use Blender **Curves** where spatial gesture is the useful editing handle. The first saves were created under the repository-pinned Blender 5.2.2 and then adopted as source documents. The one-shot bootstrap that created those first saves is removed after adoption; future edits operate on the `.blend` files themselves.
 
-## Source-authority note
+The runtime OBJ/MTL files are compiler products from `tools/blender/compile_item_blends.py`. No item database path or ID changed.
 
-These six belong to the legacy batch that predates per-item adopted Blender sources. This pass deliberately improves the runtime meshes now; it does **not** manufacture placeholder `.blend` authority without a Blender-backed authoring session. A later source migration should preserve these silhouettes and material decisions rather than reverting to the old batch bottle grammar.
+## UV and material treatment
+
+Every revolved source profile declares an authored UV layer and lets the live Screw modifier generate stretched cylindrical UVs (`use_stretch_u` / `use_stretch_v`). The compiled outputs have UV indices on every face line. Materials use the existing semantic material registry through `second_rite_asset_core`; no new material IDs were introduced.
+
+The compiled runtime OBJ/MTL pairs are mirrored byte-for-byte into the editor fixture so Studio and the game Project inspect the same products.
+
+## Silhouette result
+
+The re-authored six are measured using the same 64-pixel, three-view silhouette IoU method used by `item_model_corpus.py`. The worst pair is **X-Potion vs Healing Water at 0.8167 IoU**, below the **0.85** strict limit for new work. The two relationships that initially sat too near the bar were deliberately widened: Potion vs Hi-Potion is **0.7597**, and X-Potion vs Mega-Potion is **0.6802**.
+
+## Verification
+
+Before adoption, pinned-Blender CI successfully created all six first-save `.blend` documents and compiled every source through the production compiler. The adoption lane then installs those compiler products, removes only these six legacy/no-UV baseline exemptions, runs `compile_item_blends.py --check`, and runs the full item-model corpus gate before committing the source documents.

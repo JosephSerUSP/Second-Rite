@@ -104,6 +104,53 @@ local function colorCanvas(binding)
     return binding
 end
 
+-- viewport_3d historically exposed stats for one logical frame. Selective AA
+-- turns that frame into three renderer calls, though: visible environment,
+-- depth-only environment, then visible live content. The final call used to
+-- overwrite the first one's counters, so a structural model that correctly
+-- moved into the environment pass misleadingly reported modelDraws=0.
+--
+-- Keep the instrumentation contract scale-invariant by summing only the two
+-- VISIBLE passes. The native depth rebuild is deliberately excluded because it
+-- is an implementation pass, not another logical draw of the frame.
+local function viewportFrameStats()
+    local ok, viewport = pcall(require, "presentation.viewport_3d")
+    if not ok or type(viewport) ~= "table"
+            or type(viewport.getLastFrameStats) ~= "function" then
+        return nil
+    end
+    local stats = viewport.getLastFrameStats()
+    if type(stats) ~= "table" then return nil end
+    return stats
+end
+
+local function mergeCategoryCounts(environment, live)
+    local merged = {}
+    for key, value in pairs(environment or {}) do merged[key] = value end
+    for key, value in pairs(live or {}) do merged[key] = (merged[key] or 0) + value end
+    return merged
+end
+
+function compositor.combineVisibleFrameStats(environmentStats, liveStats)
+    if type(environmentStats) ~= "table" or type(liveStats) ~= "table"
+            or environmentStats == liveStats then
+        return liveStats
+    end
+    local environmentModelDraws = environmentStats.modelDraws or 0
+    local liveModelDraws = liveStats.modelDraws or 0
+    liveStats.environmentModelDraws = environmentModelDraws
+    liveStats.liveModelDraws = liveModelDraws
+    liveStats.modelDraws = environmentModelDraws + liveModelDraws
+    liveStats.persistentBatchDraws = (environmentStats.persistentBatchDraws or 0)
+        + (liveStats.persistentBatchDraws or 0)
+    liveStats.dynamicMeshDraws = (environmentStats.dynamicMeshDraws or 0)
+        + (liveStats.dynamicMeshDraws or 0)
+    liveStats.dynamicByCategory = mergeCategoryCounts(
+        environmentStats.dynamicByCategory, liveStats.dynamicByCategory)
+    liveStats.selectiveAAVisiblePasses = 2
+    return liveStats
+end
+
 function compositor.draw(session, authoredCamera, inspection, drawWorld)
     if not compositor.isEligible(session) then
         return drawWorld(session, authoredCamera, inspection, nil)
@@ -155,6 +202,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
             drawPost = false,
             preserveDepth = false,
         })
+        local environmentStats = viewportFrameStats()
 
         -- 2. Resolve colour into the real native frame. LÖVE's ordinary linear
         -- minification point-samples this particular integer reduction, so use
@@ -203,6 +251,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
             drawPost = true,
             preserveDepth = false,
         })
+        compositor.combineVisibleFrameStats(environmentStats, viewportFrameStats())
 
         love.graphics.pop()
         pushed = false

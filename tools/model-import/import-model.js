@@ -2,7 +2,6 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { NodeIO, Primitive } = require('@gltf-transform/core');
 const contract = require('./model-contract');
 const geometry = require('./static-geometry');
 const { compileAppearance } = require('./compile-appearance');
@@ -66,6 +65,7 @@ function gltfDiagnostics(root) {
 }
 
 async function normalizeGltf({ filePath, recipe }) {
+    const { NodeIO, Primitive } = require('@gltf-transform/core');
     const io = new NodeIO();
     const document = await io.read(filePath);
     const root = document.getRoot();

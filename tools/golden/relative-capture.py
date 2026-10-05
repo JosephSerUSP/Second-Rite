@@ -126,13 +126,14 @@ def normalize_pull_request_worktree(target, gate, environ=None):
     # The workflow provisioned dependencies against the originally requested
     # commit before calling this helper. Either normalized tree can inherit
     # dependency/vendor changes from current main, so refresh after checkout.
-    if gate == "g6":
+    if gate in ("g5", "g6"):
         npm = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
         install = subprocess.run(
             [npm, "ci", "--ignore-scripts"], cwd=str(target), check=False,
         )
         if install.returncode != 0:
             raise RuntimeError("npm ci failed after PR integration normalization")
+    if gate == "g6":
         vendor = subprocess.run(
             ["node", vendor_sync_script(target)], cwd=str(target), check=False,
         )

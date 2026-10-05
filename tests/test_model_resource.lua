@@ -24,6 +24,23 @@ check(compiled.modelId == "item.lantern", "registered source resolves to stable 
 check(compiled.vertexCount == legacy.vertexCount, "import preserves triangle count")
 check(resource.load("model:item.lantern") == compiled, "semantic reference and source adapter share one acquired Model")
 check(viewer.resolveModel(path) == compiled, "item viewer acquires the same Model as world placement")
+local sameUpload = #legacy.groups == #compiled.groups
+for groupIndex, group in ipairs(legacy.groups) do
+    local imported = compiled.groups[groupIndex]
+    if imported then
+        for vertexIndex = 1, group.mesh:getVertexCount() do
+            local a, b = { group.mesh:getVertex(vertexIndex) }, { imported.mesh:getVertex(vertexIndex) }
+            for field = 1, #a do
+                if a[field] ~= b[field] then
+                    sameUpload = false
+                    print(string.format("MODEL UPLOAD DIFFERENCE group=%d vertex=%d field=%d native=%.17g compiled=%.17g",
+                        groupIndex, vertexIndex, field, a[field], b[field]))
+                end
+            end
+        end
+    end
+end
+check(sameUpload, "native GPU vertex uploads must preserve positions, normals, UVs and vertex colors")
 
 local function captureItem(useCompiled, w, h, yaw, tilt)
     local old = viewer.resolveModel
@@ -31,6 +48,10 @@ local function captureItem(useCompiled, w, h, yaw, tilt)
     local target = require("presentation.surface").newRasterCanvas(w, h)
     love.graphics.push("all")
     love.graphics.setCanvas(target)
+    love.graphics.origin()
+    love.graphics.setScissor()
+    love.graphics.setShader()
+    love.graphics.setColor(1,1,1,1)
     love.graphics.clear(0, 0, 0, 0)
     viewer.draw(0, 0, w, h, path, "model-proof", "lantern", yaw, tilt)
     love.graphics.setCanvas()
@@ -43,8 +64,11 @@ for _, dimensions in ipairs({ {96,96}, {64,112}, {208,150}, {384,64} }) do
     for _, angle in ipairs({ {0.35,0.17}, {1.92,0.17}, {0.78,1.22}, {0.78,-0.96} }) do
         local nativePixels = captureItem(false, dimensions[1], dimensions[2], angle[1], angle[2])
         local compiledPixels = captureItem(true, dimensions[1], dimensions[2], angle[1], angle[2])
-        check(nativePixels == compiledPixels and nativePixels:find("[^%z]") ~= nil,
-            "compiled item must visibly render with the same pixels as direct OBJ")
+        local visible = nativePixels:find("[^%z]") ~= nil
+        check(nativePixels == compiledPixels and visible,
+            string.format("item %dx%d yaw=%.2f tilt=%.2f: equal=%s nativeVisible=%s",
+                dimensions[1], dimensions[2], angle[1], angle[2],
+                tostring(nativePixels == compiledPixels), tostring(visible)))
     end
 end
 
@@ -75,6 +99,7 @@ local function captureWorld(model)
     local canvas = require("presentation.surface").newRasterCanvas(256, 240)
     love.graphics.push("all")
     love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+    love.graphics.origin()
     love.graphics.setScissor()
     love.graphics.setShader()
     love.graphics.setColor(1,1,1,1)

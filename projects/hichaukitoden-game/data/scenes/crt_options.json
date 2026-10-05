@@ -1,0 +1,124 @@
+{
+  "id": "crt_options",
+  "name": "CRT Parameters",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "crt_help",
+      "rect": { "x": 0, "y": 0, "w": 32, "h": 4 },
+      "style": "frame",
+      "title": null,
+      "content": [
+        { "type": "text", "text": "{sel('crt_list').help}" }
+      ]
+    },
+    {
+      "id": "crt_list",
+      "rect": { "x": 2, "y": 4, "w": 28, "h": 12 },
+      "style": "list",
+      "visibleRows": 8,
+      "title": "CRT PARAMETERS",
+      "content": [
+        {
+          "type": "list",
+          "listId": "config:crtParams",
+          "format": "{name}",
+          "formatRight": "{sceneState.crt[id]}",
+          "cursor": "sceneState.idx"
+        }
+      ]
+    },
+    {
+      "id": "crt_footer",
+      "rect": { "x": 2, "y": 16, "w": 28, "h": 2 },
+      "style": "frame",
+      "title": null,
+      "content": [
+        { "type": "text", "text": "LEFT/RIGHT adjust   A reset   B back" }
+      ]
+    }
+  ],
+  "goldenScript": [
+    { "key": "right" },
+    { "key": "down" },
+    { "key": "right" },
+    { "key": "return" },
+    { "key": "escape" }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          { "name": "idx", "value": 1 }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "code": "local p = { beamStrength=0.82, beamWidth=0.82, beamDriveExpansion=1.25, signalSpread=1.65, lumaBleed=0.52, compositeBleed=1.20, chromaDelay=0.35, ghostStrength=0.08, bloomStrength=0.42, halationStrength=0.24, halationRadius=1.55, convergencePixels=0.0, grilleStrength=0.0, slotMaskStrength=0.0, curvature=0.0, vignette=0.06, noiseStrength=0.006 }; local mode = api.getOutputPresentation() or 'crt'; if string.sub(mode, 1, 4) == 'crt:' then for k, raw in string.gmatch(mode, '([%a][%w_]*)=([^;]+)') do if p[k] ~= nil then p[k] = tonumber(raw) or p[k] end end end; ctx.sceneState.crt = p"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx > 1",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx - 1" } ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx < 17",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "idx", "value": "sceneState.idx + 1" } ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SCRIPT",
+        "code": "local order={'beamStrength','beamWidth','beamDriveExpansion','signalSpread','lumaBleed','compositeBleed','chromaDelay','ghostStrength','bloomStrength','halationStrength','halationRadius','convergencePixels','grilleStrength','slotMaskStrength','curvature','vignette','noiseStrength'}; local step={beamStrength=0.05,beamWidth=0.05,beamDriveExpansion=0.10,signalSpread=0.10,lumaBleed=0.05,compositeBleed=0.10,chromaDelay=0.10,ghostStrength=0.05,bloomStrength=0.10,halationStrength=0.10,halationRadius=0.10,convergencePixels=0.25,grilleStrength=0.05,slotMaskStrength=0.05,curvature=0.01,vignette=0.05,noiseStrength=0.01}; local lo={beamStrength=0,beamWidth=0.05,beamDriveExpansion=0,signalSpread=0.10,lumaBleed=0,compositeBleed=0,chromaDelay=-12,ghostStrength=0,bloomStrength=0,halationStrength=0,halationRadius=0.05,convergencePixels=-16,grilleStrength=0,slotMaskStrength=0,curvature=-0.60,vignette=-1,noiseStrength=0}; local hi={beamStrength=3,beamWidth=6,beamDriveExpansion=8,signalSpread=12,lumaBleed=5,compositeBleed=8,chromaDelay=12,ghostStrength=4,bloomStrength=6,halationStrength=6,halationRadius=12,convergencePixels=16,grilleStrength=3,slotMaskStrength=3,curvature=0.60,vignette=3,noiseStrength=1}; local id=order[ctx.sceneState.idx]; local p=ctx.sceneState.crt; p[id]=math.max(lo[id],math.min(hi[id],p[id]-step[id])); local parts={}; for _,k in ipairs(order) do table.insert(parts,k..'='..string.format('%.4g',p[k])) end; api.setOutputPresentation('crt:'..table.concat(parts,';'))"
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SCRIPT",
+        "code": "local order={'beamStrength','beamWidth','beamDriveExpansion','signalSpread','lumaBleed','compositeBleed','chromaDelay','ghostStrength','bloomStrength','halationStrength','halationRadius','convergencePixels','grilleStrength','slotMaskStrength','curvature','vignette','noiseStrength'}; local step={beamStrength=0.05,beamWidth=0.05,beamDriveExpansion=0.10,signalSpread=0.10,lumaBleed=0.05,compositeBleed=0.10,chromaDelay=0.10,ghostStrength=0.05,bloomStrength=0.10,halationStrength=0.10,halationRadius=0.10,convergencePixels=0.25,grilleStrength=0.05,slotMaskStrength=0.05,curvature=0.01,vignette=0.05,noiseStrength=0.01}; local lo={beamStrength=0,beamWidth=0.05,beamDriveExpansion=0,signalSpread=0.10,lumaBleed=0,compositeBleed=0,chromaDelay=-12,ghostStrength=0,bloomStrength=0,halationStrength=0,halationRadius=0.05,convergencePixels=-16,grilleStrength=0,slotMaskStrength=0,curvature=-0.60,vignette=-1,noiseStrength=0}; local hi={beamStrength=3,beamWidth=6,beamDriveExpansion=8,signalSpread=12,lumaBleed=5,compositeBleed=8,chromaDelay=12,ghostStrength=4,bloomStrength=6,halationStrength=6,halationRadius=12,convergencePixels=16,grilleStrength=3,slotMaskStrength=3,curvature=0.60,vignette=3,noiseStrength=1}; local id=order[ctx.sceneState.idx]; local p=ctx.sceneState.crt; p[id]=math.max(lo[id],math.min(hi[id],p[id]+step[id])); local parts={}; for _,k in ipairs(order) do table.insert(parts,k..'='..string.format('%.4g',p[k])) end; api.setOutputPresentation('crt:'..table.concat(parts,';'))"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SCRIPT",
+        "code": "local order={'beamStrength','beamWidth','beamDriveExpansion','signalSpread','lumaBleed','compositeBleed','chromaDelay','ghostStrength','bloomStrength','halationStrength','halationRadius','convergencePixels','grilleStrength','slotMaskStrength','curvature','vignette','noiseStrength'}; local def={beamStrength=0.82,beamWidth=0.82,beamDriveExpansion=1.25,signalSpread=1.65,lumaBleed=0.52,compositeBleed=1.20,chromaDelay=0.35,ghostStrength=0.08,bloomStrength=0.42,halationStrength=0.24,halationRadius=1.55,convergencePixels=0.0,grilleStrength=0.0,slotMaskStrength=0.0,curvature=0.0,vignette=0.06,noiseStrength=0.006}; local id=order[ctx.sceneState.idx]; local p=ctx.sceneState.crt; p[id]=def[id]; local parts={}; for _,k in ipairs(order) do table.insert(parts,k..'='..string.format('%.4g',p[k])) end; api.setOutputPresentation('crt:'..table.concat(parts,';'))"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {
+    "crtParams": [
+      { "id": "beamStrength", "name": "BEAM MIX", "help": "How strongly the Gaussian beam reconstruction replaces ordinary vertical interpolation. 1 is already strong; values above 1 deliberately overdrive it." },
+      { "id": "beamWidth", "name": "BEAM WIDTH", "help": "Vertical phosphor spot width in native source-row units. High values make adjacent scanlines melt into one another." },
+      { "id": "beamDriveExpansion", "name": "DRIVE EXPANSION", "help": "How much bright pixels widen the beam. Extreme values make highlights swell far more than dark detail." },
+      { "id": "signalSpread", "name": "SIGNAL SPREAD", "help": "Horizontal source-pixel distance sampled by the analogue bandwidth filter. Large values destroy fine colour detail aggressively." },
+      { "id": "lumaBleed", "name": "LUMA BLEED", "help": "Low-pass filtering of brightness at native resolution. Values above 1 extrapolate beyond the filtered signal instead of stopping at a realistic blend." },
+      { "id": "compositeBleed", "name": "CHROMA BLEED", "help": "YIQ chroma bandwidth loss. This is the colour degradation control; the range intentionally goes far beyond plausible composite video." },
+      { "id": "chromaDelay", "name": "CHROMA DELAY", "help": "Horizontal chroma timing error in native pixels. Negative values reverse the direction; huge values can separate colour from structure." },
+      { "id": "ghostStrength", "name": "GHOST", "help": "Delayed bright-signal echo. At high values it stops being subtle RF damage and becomes a visible duplicate." },
+      { "id": "bloomStrength", "name": "BLOOM", "help": "Neutral highlight energy spread sampled from neighbouring source positions. The upper range is intentionally destructive." },
+      { "id": "halationStrength", "name": "HALATION", "help": "Warm glass-like highlight spread, independent of neutral bloom." },
+      { "id": "halationRadius", "name": "HALO RADIUS", "help": "Source-pixel radius used by bloom and halation. Large values pull light from distant image structure." },
+      { "id": "convergencePixels", "name": "CONVERGENCE", "help": "Red/blue registration drift in physical output pixels. Negative values swap the direction." },
+      { "id": "grilleStrength", "name": "APERTURE GRILLE", "help": "Physical RGB stripe mask strength. Values above 1 intentionally over-modulate channel brightness." },
+      { "id": "slotMaskStrength", "name": "SLOT MASK", "help": "Staggered RGB slot-mask strength. It can be combined with the aperture grille for deliberately implausible patterns." },
+      { "id": "curvature", "name": "CURVATURE", "help": "Barrel curvature. Negative values bend the opposite way; the range extends well beyond a believable tube." },
+      { "id": "vignette", "name": "VIGNETTE", "help": "Edge darkening. Negative values brighten the edges instead, while high positive values can crush them entirely." },
+      { "id": "noiseStrength", "name": "NOISE", "help": "Host-pixel multiplicative noise. The maximum is intentionally much stronger than useful television noise." }
+    ],
+    "dock": { "variant": "party_status", "cursor": "0" }
+  }
+}

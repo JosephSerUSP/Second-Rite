@@ -624,13 +624,14 @@
         function buildEntityForm(formPanel, item, schemaDef) {
             const data = schemaDef.resolve(item);
             if (!data) return false;
+            const markDirty = schemaDef.onChange || setDirty;
 
             const readValue = (spec) =>
                 spec.get ? spec.get(data, item) : data[spec.key];
             const writeValue = (spec, val) => {
                 if (spec.set) { spec.set(data, val); } else { data[spec.key] = val; }
                 if (spec.refreshList) initDatabaseEditor(true);
-                if (spec.rerender) loadFormForItem(item);
+                if (spec.rerender) (schemaDef.rerender || loadFormForItem)(item);
             };
 
             let currentRowId = null;
@@ -685,11 +686,28 @@
                     createFormField(container, spec.label, readValue(spec) || '', val => {
                         if (spec.deleteIfEmpty && val === '') { delete data[spec.key]; }
                         else { writeValue(spec, val); }
-                    });
+                    }, 'text', !!spec.readOnly, spec.inputId, true, markDirty);
 
                 } else if (spec.kind === 'number') {
-                    createFormField(container, spec.label, readValue(spec) !== undefined ? readValue(spec) : (spec.fallback || 0),
-                        val => writeValue(spec, parseInt(val) || spec.fallback || 0), 'number');
+                    const input = createFormField(container, spec.label, readValue(spec) !== undefined ? readValue(spec) : (spec.fallback || 0),
+                        val => writeValue(spec, spec.parse ? spec.parse(val) : (parseInt(val) || spec.fallback || 0)),
+                        'number', !!spec.readOnly, spec.inputId, true, markDirty);
+                    if (spec.step !== undefined) input.step = spec.step;
+
+                } else if (spec.kind === 'textarea') {
+                    const group = document.createElement('div');
+                    group.className = 'form-group';
+                    const label = document.createElement('label');
+                    label.textContent = spec.label;
+                    const input = document.createElement('textarea');
+                    input.className = 'form-control inset-bevel';
+                    input.setAttribute('aria-label', spec.label);
+                    input.rows = spec.rows || 3;
+                    input.value = readValue(spec) || '';
+                    input.readOnly = !!spec.readOnly;
+                    input.oninput = () => { writeValue(spec, input.value); markDirty(true); };
+                    group.append(label, input);
+                    container.appendChild(group);
 
                 } else if (spec.kind === 'checkbox') {
                     createCheckboxField(container, spec.label, readValue(spec), v => {
@@ -715,7 +733,7 @@
                         } else {
                             writeValue(spec, v);
                         }
-                    }));
+                    }, null, markDirty));
                     container.appendChild(group);
 
                 } else if (spec.kind === 'custom') {

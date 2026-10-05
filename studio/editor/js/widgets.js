@@ -581,7 +581,7 @@
             return box;
         }
 
-        function makeSelect(options, current, onChange, flex) {
+        function makeSelect(options, current, onChange, flex, onDirty = setDirty) {
             const sel = document.createElement('select');
             sel.className = 'win98-select';
             if (flex) sel.style.flex = flex;
@@ -600,7 +600,7 @@
                 sel.appendChild(opt);
             });
             syncTitle();
-            sel.onchange = () => { onChange(sel.value); setDirty(true); syncTitle(); };
+            sel.onchange = () => { onChange(sel.value); onDirty(true); syncTitle(); };
             return sel;
         }
 
@@ -2833,7 +2833,7 @@
             }
         }
 
-        function createFormField(container, labelText, value, onChange, type = 'text', readOnly = false, keyId = null, useBlockLayout = true) {
+        function createFormField(container, labelText, value, onChange, type = 'text', readOnly = false, keyId = null, useBlockLayout = true, onDirty = setDirty) {
             const group = document.createElement('div');
             group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
 
@@ -2846,6 +2846,7 @@
 
             const input = document.createElement('input');
             input.type = type;
+            input.setAttribute('aria-label', labelText);
             input.className = 'form-control inset-bevel';
             input.value = value;
             input.readOnly = readOnly;
@@ -2860,12 +2861,13 @@
             if (onChange && !readOnly) {
                 input.addEventListener('input', () => {
                     onChange(input.value);
-                    setDirty(true);
+                    onDirty(true);
                 });
             }
 
             group.appendChild(input);
             container.appendChild(group);
+            return input;
         }
 
         // Options for a field whose value must name an entry in an engine.json

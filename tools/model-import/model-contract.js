@@ -201,6 +201,7 @@ module.exports = {
     loadRegistry,
     makeBundle,
     materialSlotFor,
+    requireRelativePath,
     serialize,
     sha256,
     validateBundle,

@@ -64,10 +64,18 @@ function gltfDiagnostics(root) {
     return diagnostics;
 }
 
-async function normalizeGltf({ filePath, recipe }) {
+async function normalizeGltf({ filePath, recipe, projectRoot }) {
     const { NodeIO, Primitive } = require('@gltf-transform/core');
     const io = new NodeIO();
-    const document = await io.read(filePath);
+    const jsonDocument = await io.readAsJSON(filePath);
+    const document = await io.readJSON(jsonDocument);
+    const dependencies = Object.entries(jsonDocument.resources)
+        .filter(([uri]) => !uri.startsWith('@') && !uri.startsWith('data:'))
+        .map(([uri, bytes]) => {
+            const relative = path.posix.normalize(path.posix.join(path.posix.dirname(recipe.source.path), decodeURIComponent(uri)));
+            projectFile(projectRoot, relative, 'glTF dependency');
+            return { path: relative, sha256: contract.sha256(bytes) };
+        }).sort((a,b) => a.path.localeCompare(b.path));
     const root = document.getRoot();
     if (root.listAnimations().length > 0) {
         throw new Error(`Model '${recipe.id}' static importer does not accept animation; animated Model compilation is a separate contract`);
@@ -137,7 +145,7 @@ async function normalizeGltf({ filePath, recipe }) {
     }
 
     for (const rootNode of scene.listChildren()) rootNode.traverse(visit);
-    return { geometry: output.finish(), diagnostics: gltfDiagnostics(root) };
+    return { geometry: output.finish(), diagnostics: gltfDiagnostics(root), dependencies };
 }
 
 async function normalizeObj({ filePath, recipe, runtimeRoot = path.resolve(__dirname, '../../runtime') }) {
@@ -162,7 +170,7 @@ async function importRecipe({ projectRoot, recipe, runtimeRoot }) {
     const bytes = fs.readFileSync(filePath);
     const normalized = validated.source.kind === 'obj'
         ? await normalizeObj({ filePath, recipe: validated, runtimeRoot })
-        : await normalizeGltf({ filePath, recipe: validated });
+        : await normalizeGltf({ filePath, recipe: validated, projectRoot });
     const appearance = validated.appearance
         ? compileAppearance(projectRoot, validated, bytes.toString('utf8'), runtimeRoot) : {};
     if (validated.appearance) normalized.diagnostics = normalized.diagnostics.filter(d => d.code !== 'OBJ_MTL_APPEARANCE_NOT_IMPORTED');
@@ -172,6 +180,7 @@ async function importRecipe({ projectRoot, recipe, runtimeRoot }) {
         geometry: normalized.geometry,
         diagnostics: normalized.diagnostics,
         ...appearance,
+        ...(normalized.dependencies?.length ? { dependencies: normalized.dependencies } : {}),
     });
     return contract.validateBundle(bundle);
 }
@@ -183,7 +192,29 @@ async function importModel({ projectRoot, modelId, registryPath = 'data/models.j
     return importRecipe({ projectRoot, recipe });
 }
 
+// Authoring discovery uses the importer's actual source grammar. It does not
+// bind or migrate an existing recipe; reimport retains its authored slots.
+async function inspectSource({ projectRoot, source, runtimeRoot = path.resolve(__dirname, '../../runtime') }) {
+    const filePath = projectFile(projectRoot, contract.requireRelativePath(source.path, 'Model source'), 'Model source');
+    if (source.kind === 'obj') {
+        const parsed = require('./lua-source-host').parseObj(runtimeRoot, fs.readFileSync(filePath, 'utf8'));
+        return { materials: [...new Set(parsed.groups.map(group => group.material || ''))].sort(), mtllib: parsed.mtllib || null };
+    }
+    if (source.kind !== 'gltf') throw new Error('Model source.kind must be obj or gltf');
+    const { NodeIO } = require('@gltf-transform/core');
+    const document = await new NodeIO().read(filePath);
+    const root = document.getRoot();
+    sourceMaterialNames(root);
+    const names = new Set();
+    for (const node of selectedScene(root).listChildren()) node.traverse(child => {
+        const mesh = child.getMesh();
+        if (mesh) for (const primitive of mesh.listPrimitives()) names.add(primitive.getMaterial()?.getName() || '');
+    });
+    return { materials: [...names].sort(), mtllib: null };
+}
+
 module.exports = {
+    inspectSource,
     importModel,
     importRecipe,
     normalizeGltf,

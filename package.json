@@ -31,7 +31,7 @@
     "test:presentation-adapter": "node --test tools/presentation/adapter/second-gate-ui.test.js",
     "parity:presentation": "node tools/presentation/parity/run-parity.js",
     "test:presentation-parity": "node tools/presentation/parity/negative-control.js",
-    "test:model-import": "node --test tools/model-import/model-import.test.js tools/model-import/model-bundle-three.test.js tools/model-import/model-consumers.test.js tools/model-import/appearance.test.js",
+    "test:model-import": "node --test tools/model-import/model-import.test.js tools/model-import/model-bundle-three.test.js tools/model-import/model-consumers.test.js tools/model-import/appearance.test.js tools/model-import/model-library.test.js",
     "icons": "node studio/editor/build-icons.js",
     "icons:check": "node studio/editor/build-icons.js --check",
     "test:icons": "node --test studio/editor/test-icon-build.js",

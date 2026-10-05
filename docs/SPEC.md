@@ -552,6 +552,14 @@ renderable bundle and converts axes only at the renderer boundary. OBJ/MTL sourc
 projection executes the same pure Lua adapters in the local build host, with no
 independent JavaScript source parser. Authored CPU bounds retain their precision
 until renderer upload, so Three buffer rounding cannot change item framing.
+Studio's Model Library authors these recipes through the shared entity-form
+schema. Preview/Reimport compiles current source bytes without writing; Save
+requires that exact reviewed bundle and an unchanged registry revision. Source,
+MTL/texture and external glTF buffer dependencies participate in review identity.
+New imports discover slots through the importer; reimports retain authored slot
+identity and Surface references. Geometry-only recipes are labeled explicitly
+and do not displace existing source visuals. Models are a separately edited,
+possibly empty monolithic keyed registry in the shared storage manifest.
 This static migration does not implement
 the Surface Library, hierarchy or animated Model contract (#668/#669/#1379).
 

@@ -54,6 +54,7 @@ const dataDir = () => DATA_ROOT;
 const DATA_FILES = authoredStorage.bulkEditableResources();
 const modelImporter = require('../../tools/model-import/import-model');
 const modelContract = require('../../tools/model-import/model-contract');
+const modelLibrary = require('./model-library').createModelLibrary(PROJECT_ROOT, RUNTIME_ROOT);
 // Override with the LOVE_PATH environment variable if LÖVE lives elsewhere
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 
@@ -228,6 +229,24 @@ const server = http.createServer((req, res) => {
     if (req.method === 'GET' && /^\/model-bundle-(contract|three)\.js$/.test(pathname)) {
         res.writeHead(200, { 'Content-Type': 'text/javascript' });
         res.end(fs.readFileSync(path.join(INSTALL_ROOT, 'tools/model-import', pathname.slice(1))));
+    } else if (req.method === 'GET' && pathname === '/api/model-library') {
+        res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify(modelLibrary.read()));
+    } else if (req.method === 'POST' && /^\/api\/model-library\/(prepare|preview|save)$/.test(pathname)) {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', async () => {
+            try {
+                const result = await modelLibrary[pathname.split('/').pop()](JSON.parse(body));
+                if (pathname.endsWith('/save')) notifyRunningGame();
+                res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+                res.end(JSON.stringify(result));
+            } catch (error) {
+                res.writeHead(error.code === 'STALE_MODEL_REVIEW' || error.code === 'STALE_AUTHORED_DATA' ? 409 : 422,
+                    { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: error.message }));
+            }
+        });
     } else if (req.method === 'GET' && pathname === '/api/model-bundle') {
         const reference = new URL(req.url, 'http://localhost').searchParams.get('path');
         const registryPath = path.join(DATA_ROOT, 'models.json');
@@ -315,7 +334,8 @@ const server = http.createServer((req, res) => {
             entries.forEach(ent => {
                 const full = path.join(dir, ent.name);
                 if (ent.isDirectory()) { walk(full); return; }
-                if (!ent.isFile() || !/\.obj$/i.test(ent.name)) return;
+                const extensions = parsedUrl.searchParams.get('formats') === 'static' ? /\.(obj|glb|gltf)$/i : /\.obj$/i;
+                if (!ent.isFile() || !extensions.test(ent.name)) return;
                 let size = 0;
                 try { size = fs.statSync(full).size; } catch (e) {}
                 files.push({

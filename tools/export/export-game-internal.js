@@ -9,6 +9,7 @@ const path = require('path');
 const rtpResources = require('./rtp-resource-resolver');
 const rtpPlayerFiles = require('./rtp-player-files');
 const runtimeDataCompiler = require('./runtime-data-compiler');
+const { compileStagedModels } = require('../model-import/compile-models');
 
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
 const DEFAULT_LOVE = path.join('C:', 'Program Files', 'LOVE', 'love.exe');
@@ -129,6 +130,7 @@ function stageGame({ projectDir, runtimeDir, outputDir, manifestPath = DEFAULT_M
 function stageRuntimeGame(options = {}) {
     const staged = stageGame(options);
     staged.runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir: staged.stageDir });
+    staged.models = compileStagedModels(staged.stageDir);
     return staged;
 }
 

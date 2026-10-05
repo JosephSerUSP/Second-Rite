@@ -31,7 +31,7 @@
     "test:presentation-adapter": "node --test tools/presentation/adapter/second-gate-ui.test.js",
     "parity:presentation": "node tools/presentation/parity/run-parity.js",
     "test:presentation-parity": "node tools/presentation/parity/negative-control.js",
-    "test:model-import": "node --test tools/model-import/model-import.test.js tools/model-import/model-bundle-three.test.js",
+    "test:model-import": "node --test tools/model-import/model-import.test.js tools/model-import/model-bundle-three.test.js tools/model-import/model-consumers.test.js tools/model-import/appearance.test.js",
     "icons": "node studio/editor/build-icons.js",
     "icons:check": "node studio/editor/build-icons.js --check",
     "test:icons": "node --test studio/editor/test-icon-build.js",
@@ -48,6 +48,7 @@
     "@gltf-transform/core": "4.4.2",
     "chokidar": "4.0.3",
     "electron": "^43.2.0",
+    "fengari": "0.1.5",
     "playwright": "1.62.1",
     "three": "0.185.1",
     "yazl": "3.3.1"

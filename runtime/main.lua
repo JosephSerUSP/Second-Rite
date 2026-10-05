@@ -699,7 +699,7 @@ function love.load(arg)
             "test_developer_mode", "test_map_transfer", "test_battle_commands",
             "test_troops", "test_early_balance", "test_datalog", "test_dock",
             "test_geometry", "test_map_geometry_export", "test_map_build_profiler", "test_icons", "test_item_display",
-            "test_item_model_view", "test_item_model_assignments",
+            "test_item_model_view", "test_item_model_assignments", "test_model_resource",
             "test_reachability", "test_formation", "test_chest_3d",
             "test_projection_window", "test_world_pass_compositor",
             "test_battle_presentation_authority",

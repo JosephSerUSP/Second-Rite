@@ -1,10 +1,10 @@
 (function (root, factory) {
     if (typeof module === 'object' && module.exports) {
-        module.exports = factory(require('./thestra-editor-scene.js'), require('./vertex-shading.js'));
+        module.exports = factory(require('./thestra-editor-scene.js'), require('./vertex-shading.js'), () => require('./thestra-viewport-contract.js'));
     } else {
-        root.SecondRiteEditorAdapter = factory(root.ThestraEditorScene, root.ThestraVertexShading);
+        root.SecondRiteEditorAdapter = factory(root.ThestraEditorScene, root.ThestraVertexShading, () => root.ThestraViewportContract);
     }
-}(typeof self !== 'undefined' ? self : this, function (SceneModel, VertexShading) {
+}(typeof self !== 'undefined' ? self : this, function (SceneModel, VertexShading, getViewportContract) {
     'use strict';
 
     if (!SceneModel) throw new Error('SecondRiteEditorAdapter requires ThestraEditorScene.');
@@ -228,6 +228,11 @@
             out.normals[op] = matrix[0] * nx + matrix[1] * ny;
             out.normals[op + 1] = matrix[2] * nx + matrix[3] * ny;
             out.normals[op + 2] = normals[p + 2];
+            if (placement.modelInstance) {
+                const position = getViewportContract().transformModelInstancePoint(placement.modelInstance, positions.slice(p, p+3));
+                const normal = getViewportContract().transformModelInstancePoint(placement.modelInstance, normals.slice(p, p+3), true);
+                for (let component=0; component<3; component++) { out.positions[op+component] = position[component]; out.normals[op+component] = normal[component]; }
+            }
             out.colors[oc] = colors[c];
             out.colors[oc + 1] = colors[c + 1];
             out.colors[oc + 2] = colors[c + 2];
@@ -268,6 +273,10 @@
             world[p] = Number(translation[0]) + Number(matrix[0]) * x + Number(matrix[1]) * y;
             world[p + 1] = Number(translation[1]) + Number(matrix[2]) * x + Number(matrix[3]) * y;
             world[p + 2] = Number(translation[2]) + Number(positions[p + 2]);
+            if (placement.modelInstance) {
+                const position = getViewportContract().transformModelInstancePoint(placement.modelInstance, positions.slice(p, p+3));
+                for (let component=0; component<3; component++) world[p+component] = position[component];
+            }
         }
         return {
             id: placement.id,

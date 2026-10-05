@@ -3,6 +3,7 @@
 -- retro vertex snapping, affine UV mapping, dithering, and fixed directional lighting.
 
 local obj_model = require("presentation.obj_model")
+local model_resource = require("presentation.model_resource")
 local retro_mesh_shader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 
@@ -124,6 +125,11 @@ function item_model_view.resetState(stateKey)
 end
 
 function item_model_view.resolveModel(modelPath)
+    -- A registered Model is build-validated. Failure must remain visible rather
+    -- than being hidden by the legacy missing-OBJ placeholder policy.
+    if model_resource.modelId(modelPath) then
+        return model_resource.load(modelPath), modelPath, false
+    end
     local isFallbackRequest = not modelPath or type(modelPath) ~= "string" or modelPath == ""
     local requestedKey = isFallbackRequest and "<fallback>" or modelPath
 

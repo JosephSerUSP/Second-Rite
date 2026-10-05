@@ -162,6 +162,13 @@ jobs:
             $work = Join-Path $env:RUNNER_TEMP "g5-$label"
             git worktree add --detach $work $sha
             if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
+            Push-Location $work
+            try {
+              npm.cmd ci --ignore-scripts
+              if ($LASTEXITCODE -ne 0) { throw "npm ci failed in G5 worktree: $label" }
+            } finally {
+              Pop-Location
+            }
             python tools/golden/relative-capture.py --repo-root $work --gate g5 --output (Join-Path $ab $label)
             if ($LASTEXITCODE -ne 0) { throw "G5 relative capture incomplete: $label" }
           }

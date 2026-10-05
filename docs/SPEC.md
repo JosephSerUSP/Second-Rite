@@ -537,6 +537,24 @@ scene inventing its own chrome:
   itself is gone — a data key nothing renders is a trap for the next author who
   fills it in and waits for something to appear.
 
+Item inspection and world placements acquire registered static Models through
+`presentation/model_resource.lua`. Canonical staging compiles their geometry and
+explicit source-material binding into content-addressed Model Bundles. A bound
+recipe's source path resolves to stable Model identity; unregistered OBJ sources
+remain explicit migration inputs. The item window fits the acquired Model to
+its frame independently of its authored world-unit normalization.
+
+Resolved Model Instances carry Z-up translation, orientation, uniform scale,
+identity and provenance below Event/Map/environment semantics. Placed geometry
+reads an explicit `bakedLighting` policy; cache names and gameplay roles do not
+decide illumination. Studio transports those resolved facts through its existing
+renderable bundle and converts axes only at the renderer boundary. OBJ/MTL source
+projection executes the same pure Lua adapters in the local build host, with no
+independent JavaScript source parser. Authored CPU bounds retain their precision
+until renderer upload, so Three buffer rounding cannot change item framing.
+This static migration does not implement
+the Surface Library, hierarchy or animated Model contract (#668/#669/#1379).
+
 ### 1.4.1 Datalog
 
 Lore is authored in `data/lore.json`, keyed by stable string id. Each entry has

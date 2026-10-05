@@ -1,4 +1,14 @@
 {
+  "item.lantern": {
+    "id": "item.lantern",
+    "source": { "kind": "obj", "path": "assets/models/items/lantern.obj" },
+    "sourceUnitsToMapCells": 1,
+    "appearance": "obj-mtl",
+    "materialSlots": {
+      "frame": { "sourceMaterials": ["ritual_gold"] },
+      "body": { "sourceMaterials": ["aged_cloth"] }
+    }
+  },
   "system.placeholder_question": {
     "id": "system.placeholder_question",
     "source": {

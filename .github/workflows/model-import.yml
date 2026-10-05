@@ -7,6 +7,11 @@ on:
       - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "runtime/presentation/model_bundle.lua"
+      - "runtime/presentation/model_resource.lua"
+      - "runtime/presentation/mtl.lua"
+      - "runtime/engine/geometry/model_instance.lua"
+      - "runtime/engine/geometry/obj_source.lua"
+      - "tests/test_model_resource.lua"
       - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "package.json"
@@ -19,6 +24,11 @@ on:
       - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "runtime/presentation/model_bundle.lua"
+      - "runtime/presentation/model_resource.lua"
+      - "runtime/presentation/mtl.lua"
+      - "runtime/engine/geometry/model_instance.lua"
+      - "runtime/engine/geometry/obj_source.lua"
+      - "tests/test_model_resource.lua"
       - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "package.json"
@@ -86,6 +96,8 @@ jobs:
         # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
       - name: Import real Model bundle twice deterministically
         shell: pwsh
         run: |
@@ -150,6 +162,26 @@ jobs:
             Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
             Remove-Item tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
           }
+      - name: Prove real item/world pixels and resolved native/Three facts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $proofRoot = Join-Path $env:RUNNER_TEMP 'model-consumer-proof'
+          New-Item -ItemType Directory -Force $proofRoot | Out-Null
+          $env:THESTRA_MODEL_PROOF_OUTPUT = $proofRoot
+          node tools/ci/stage-project-gates.js --output out/model-consumer-game
+          if ($LASTEXITCODE -ne 0) { throw "Could not stage Model consumer proof" }
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot out/model-consumer-game -Lovec $env:LOVEC
+          if ($LASTEXITCODE -ne 0) { throw "Model consumer unit proof failed" }
+          node tools/model-import/check-native-proof.js $proofRoot
+          if ($LASTEXITCODE -ne 0) { throw "Model native/Three parity failed" }
+      - name: Upload consumer proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-consumer-proof
+          path: ${{ runner.temp }}/model-consumer-proof
+          if-no-files-found: warn
       - name: Assert checkout stayed clean
         shell: pwsh
         run: |

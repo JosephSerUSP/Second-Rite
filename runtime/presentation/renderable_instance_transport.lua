@@ -159,6 +159,8 @@ function transport.encode(bundle)
                 material = surface.material,
                 definition = instance.definition,
                 transform = instance.transform,
+                modelInstance = surface.modelInstance,
+                materialSlot = surface.materialSlot,
             }
         else
             surface.transportOrder = order

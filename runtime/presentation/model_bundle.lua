@@ -29,7 +29,13 @@ function bundle.validate(decoded)
         if type(slot) ~= "table" or type(slot.id) ~= "string" or slot.id == "" then
             error("Model Bundle materialSlots require ids", 0)
         end
+        if declaredSlots[slot.id] then error("duplicate Model material slot", 0) end
         declaredSlots[slot.id] = true
+        if slot.appearance then
+            local color = slot.appearance.color
+            if type(color) ~= "table" or #color ~= 4 then error("Model appearance requires RGBA", 0) end
+            for _, component in ipairs(color) do finite(component, "Model appearance color") end
+        end
     end
 
     local count = 0

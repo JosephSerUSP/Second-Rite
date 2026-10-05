@@ -52,6 +52,8 @@ const dataDir = () => DATA_ROOT;
 // editor. Semantic kind and physical representation are deliberately separate,
 // so a future scenes migration only changes the manifest representation.
 const DATA_FILES = authoredStorage.bulkEditableResources();
+const modelImporter = require('../../tools/model-import/import-model');
+const modelContract = require('../../tools/model-import/model-contract');
 // Override with the LOVE_PATH environment variable if LÖVE lives elsewhere
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 
@@ -223,7 +225,27 @@ const server = http.createServer((req, res) => {
         return;
     }
     
-    if (req.method === 'GET' && req.url === '/data') {
+    if (req.method === 'GET' && /^\/model-bundle-(contract|three)\.js$/.test(pathname)) {
+        res.writeHead(200, { 'Content-Type': 'text/javascript' });
+        res.end(fs.readFileSync(path.join(INSTALL_ROOT, 'tools/model-import', pathname.slice(1))));
+    } else if (req.method === 'GET' && pathname === '/api/model-bundle') {
+        const reference = new URL(req.url, 'http://localhost').searchParams.get('path');
+        const registryPath = path.join(DATA_ROOT, 'models.json');
+        const registry = fs.existsSync(registryPath) ? modelContract.loadRegistry(PROJECT_ROOT).models : {};
+        const recipe = registry[String(reference).replace(/^model:/, '')]
+            || Object.values(registry).find(value => value.source.path === reference);
+        if (!recipe && String(reference).startsWith('model:')) {
+            res.writeHead(422, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Unknown Model reference' }));
+        } else if (!recipe || (!recipe.appearance && !String(reference).startsWith('model:'))) { res.writeHead(204); res.end(); }
+        else modelImporter.importRecipe({ projectRoot: PROJECT_ROOT, recipe, runtimeRoot: RUNTIME_ROOT }).then(bundle => {
+            res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+            res.end(modelContract.serialize(bundle));
+        }).catch(error => {
+            res.writeHead(422, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        });
+    } else if (req.method === 'GET' && req.url === '/data') {
         const data = {};
         DATA_FILES.forEach(name => {
             try {

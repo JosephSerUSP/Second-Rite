@@ -280,7 +280,7 @@ test('runtime models retain an authored height and ground horizontal arrows on i
     const runtime = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'runtime', 'presentation', 'viewport_3d.lua'), 'utf8');
     const plateStudio = fs.readFileSync(path.resolve(__dirname, '..', '..', '..', 'studio', 'editor', 'js', 'three-composition-viewport.js'), 'utf8');
     assert.match(runtime, /local function ensurePlacedModel\(spec, cacheKey, originX, originY, axis, normalX, normalY, originZ\)/);
-    assert.match(runtime, /local wx, wy, wz = originX \+ lx, originY \+ ly, originZ \+ lz/);
+    assert.match(runtime, /wx, wy, wz = originX \+ lx, originY \+ ly, originZ \+ lz/);
     assert.match(runtime, /worldZ = worldZ \+ 0\.22 \* modelScale/,
         'a horizontal arrow must lift by its source radius instead of clipping through the floor');
     assert.match(runtime, /groundAt\(session, worldY\)/,

@@ -71,6 +71,11 @@
         "anchor": "exit_door",
         "eventInstanceId": "st-maria-passage-office-exit_door",
         "radius": 0.9
+      },
+      {
+        "anchor": "gate_door",
+        "eventInstanceId": "st-maria-passage-office-gate_door",
+        "radius": 0.9
       }
     ]
   },
@@ -189,6 +194,28 @@
         }
       ],
       "direction": "toward"
+    },
+    {
+      "id": 3303,
+      "instanceId": "st-maria-passage-office-gate_door",
+      "name": "Passage House gate",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        0.9833,
+        0.0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 34,
+          "arrival": "gate_door"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
     }
   ],
   "treasures": [],

@@ -1,132 +1,48 @@
 {
   "contractVersion": 1,
-  "environmentId": "passage_office",
   "renderMesh": "environment.obj",
   "materialLibrary": "environment.mtl",
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
     -3.6364,
-    -5.15,
+    -1.8283,
     -0.35,
-    5.612,
-    5.7116,
+    6.7,
+    9.0333,
     3.95
   ],
-  "stats": {
-    "triangleCount": 7888,
-    "vertexCount": 5241,
-    "materialGroupCount": 1,
-    "textureDimensions": [
-      1024,
-      1024
-    ],
-    "pngSizeBytes": 1546293,
-    "renderMeshSizeBytes": 787851,
-    "packageSizeBytes": 2334943
-  },
   "anchors": {
     "spawn_player": {
-      "id": "spawn_player",
       "position": [
         0.0,
         0.35,
         0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
       ]
     },
     "exit_door": {
-      "id": "exit_door",
       "position": [
         0.0,
         1.0833,
         0.0
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
-        0.0
       ]
     },
     "registrar": {
-      "id": "registrar",
       "position": [
         1.15,
         4.5833,
         0.0
-      ],
-      "rotation": [
+      ]
+    },
+    "gate_door": {
+      "position": [
         0.0,
-        -0.0,
-        0.0
-      ],
-      "forward": [
-        0.0,
-        1.0,
+        0.9833,
         0.0
       ]
     }
   },
   "provenance": {
-    "generator": "town_environment_pipeline.py",
-    "sourceBlend": "passage_office.blend",
-    "bake": {
-      "backend": "cycles",
-      "device": "GPU",
-      "samples": 64,
-      "selectedToActive": true,
-      "quality": {
-        "name": "export",
-        "engine": "CYCLES",
-        "samples": 64,
-        "supersample": 1,
-        "denoise": false,
-        "atlas_denoise": "oidn-fast",
-        "atlas_texel_align": true,
-        "max_bounces": 4,
-        "diffuse_bounces": 2,
-        "glossy_bounces": 2,
-        "seed": 3201
-      },
-      "hardware": {
-        "device": "GPU",
-        "computeBackend": "OPTIX",
-        "devices": [
-          "NVIDIA GeForce GTX 1650"
-        ]
-      },
-      "batchedSourceObjects": 93,
-      "atlasDenoise": {
-        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 12.512328699987847,
-        "filteredCharts": 151,
-        "preservedSmallCharts": 2336,
-        "filteredTexels": 290961,
-        "alphaUnchanged": true
-      },
-      "texelAlignment": {
-        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 1176,
-        "preservedUnsafeCharts": 2633,
-        "existingSharedTexelPairs": 0,
-        "newSharedTexelPairs": 0,
-        "atlasSize": 1024
-      }
-    },
-    "exportSeconds": 30.213297899987083
+    "sourceBlend": "passage_office.blend"
   }
 }

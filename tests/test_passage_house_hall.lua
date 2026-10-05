@@ -106,6 +106,24 @@ check(branch.cmd == "CONDITIONAL_BRANCH" and branch.condition == "hasItem:198",
 check(destinationOf({ commands = branch.commands }) == 33, "an opened gate leads into the Registry")
 check(destinationOf({ commands = branch.elseCommands }) == nil, "a locked gate leads nowhere")
 
+-- Through the gate, the Registry: its own gate door leads back to the gallery.
+check(select(2, destinationOf({ commands = branch.commands })) == "gate_door",
+    "the opened gate arrives at the Registry's gate door")
+local registry = load(33, "gate_door")
+check(registry.level == "ground" and math.abs(registry.y - 0.9833) < 0.001, "the Registry gate arrival is at its door")
+local registryGate = lane.nearDoorway(game, "UP")
+check(registryGate ~= nil and registryGate.anchor == "gate_door", "the Registry's gate door is reachable from its lane")
+local backMap, backArrival = destinationOf(lane.eventFor(game, registryGate))
+check(backMap == HALL and backArrival == "gate_door", "the Registry's gate leads back to the gallery")
+local backInHall = load(HALL, "gate_door")
+check(backInHall.level == "gallery" and math.abs(backInHall.y - 1.5) < 0.001,
+    "coming back through the gate lands on the gallery at the gate")
+load(HALL, "exit_door")
+state = game.townTraversal
+walkUntil(-1, function() return state.y <= 15.0 end)
+lane.beginClimb(game, lane.nearDoorway(game, "UP"))
+walkUntil(0, function() return state.climb == nil end)
+
 -- And back down.
 walkUntil(1, function() return state.y >= 9.4 end)
 local top = lane.nearDoorway(game, "DOWN")

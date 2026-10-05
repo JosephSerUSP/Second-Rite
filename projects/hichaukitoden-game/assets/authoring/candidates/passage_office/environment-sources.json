@@ -3,16 +3,16 @@
   "sources": {
     "passage_office_r13.blend": {
       "status": "reference",
-      "basis": "Owner-approved revision 13 (2026-10-02): final ceiling junction pass. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit. Kept for comparison. Revisions r2-r12 were pruned on 2026-10-04 (#1349); they remain in git history and their findings in docs/reports/passage-office-*-2026-10-02.md.",
+      "basis": "Owner-approved revision 13 (2026-10-02): final ceiling junction pass. Superseded as the adopted source by r15 on 2026-10-05; kept for comparison. Revisions r2-r12 were pruned on 2026-10-04 (#1349); they remain in git history and their findings in docs/reports/passage-office-*-2026-10-02.md.",
       "sha256": "49641e7a2abd14f5436479db44ef4f2e78ced71103561a0ad75fbadeae4fccc7",
       "exitY": 1.0833,
       "registrarY": 4.5833,
       "registrarX": 1.15
     },
-    "passage_office_r14.blend": {
-      "status": "scaffold",
-      "basis": "Candidate revision 14 (2026-10-05): r13 plus the Passage House gate cut into the public back wall by tools/blender/add_registry_gate.py. Awaiting owner approval; not promoted. The adopted passage_office.blend is unchanged.",
-      "sha256": "c471ff4f1f35b8e0e34d9951423c5413ee22e4247c2630a5fbd1b7395eeaf3dd"
+    "passage_office_r15.blend": {
+      "status": "reference",
+      "basis": "Owner-approved revision 15 (2026-10-05): r13 plus the Passage House gate cut into the public back wall by tools/blender/add_registry_gate.py, with real light spilling through it. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit.",
+      "sha256": "71b7214b13b4d72a7d224596cb38486d86118390bfe551d5aef33a7a0e736d34"
     }
   }
 }

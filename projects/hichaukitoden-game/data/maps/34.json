@@ -251,7 +251,8 @@
             },
             {
               "cmd": "LOAD_MAP",
-              "mapId": 33
+              "mapId": 33,
+              "arrival": "gate_door"
             }
           ],
           "elseCommands": [

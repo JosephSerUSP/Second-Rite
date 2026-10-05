@@ -12,7 +12,7 @@ Run with the pinned Blender through run.py:
 
     python tools/blender/run.py tools/blender/add_registry_gate.py -- \
         --source projects/<project>/assets/authoring/environments/passage_office.blend \
-        --output projects/<project>/assets/authoring/candidates/passage_office/passage_office_r14.blend
+        --output projects/<project>/assets/authoring/candidates/passage_office/passage_office_r15.blend
 """
 import argparse
 import sys
@@ -93,6 +93,13 @@ def main():
     room.part('gate_beyond', (0.06, width + 0.5, DOOR_TOP), (beyond, GATE_Y, DOOR_TOP / 2.0), room.lamplight)
     kit.Interior.light(room, 'gate_beyond_lamp', 'POINT', (beyond - 0.9, GATE_Y, 1.9), (0.0, 0.0, -1.0), 40.0,
                        (1.0, 0.76, 0.46), radius=0.12)
+    # An emissive panel only LOOKS lit: it casts nothing. The light that spills through
+    # the gate into the room is a real source standing in the doorway, aimed out
+    # across the floor and the counter the way Room 3's door lamp is.
+    kit.Interior.light(room, 'gate_spill', 'AREA', (BACK_X + 0.25, GATE_Y, 1.4), (-1.0, 0.0, -0.4), 420.0,
+                       (1.0, 0.76, 0.46), size=1.0, size_y=1.8)
+    kit.Interior.light(room, 'gate_floor_bounce', 'AREA', (BACK_X - 0.6, GATE_Y, 0.5), (-0.3, 0.0, -1.0), 180.0,
+                       (1.0, 0.7, 0.4), size=1.4, size_y=1.6)
 
     # --- make room: the painting hangs smaller beside the door, the bench slides ------
     painting = bpy.data.objects['harbour_painting']

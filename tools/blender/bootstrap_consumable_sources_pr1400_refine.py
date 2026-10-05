@@ -6,6 +6,13 @@ bootstrap scripts are deleted once the resulting .blend documents are adopted.
 """
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 import bootstrap_consumable_sources_pr1400 as base
 
 

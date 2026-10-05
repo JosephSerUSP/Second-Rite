@@ -18,7 +18,7 @@ function compileAppearance(projectRoot, recipe, sourceText, runtimeRoot = path.r
         return fs.readFileSync(absolute);
     }
     const bytes = sourceFile(relative);
-    const materials = require('./mtl-host').parseMtl(runtimeRoot, bytes.toString('utf8'));
+    const materials = require('./lua-source-host').parseMtl(runtimeRoot, bytes.toString('utf8'));
     const dependencies = new Map([[relative, contract.sha256(bytes)]]);
     const appearances = {};
     function texturePath(value) {

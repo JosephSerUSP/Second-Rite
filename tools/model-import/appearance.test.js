@@ -19,6 +19,22 @@ test('an empty Model registry stages a valid empty manifest', async () => {
     } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
+test('OBJ compilation preserves authored CPU precision and vertex RGB through the shared source adapter', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-obj-precision-test-'));
+    try {
+        fs.mkdirSync(path.join(root, 'assets'));
+        fs.writeFileSync(path.join(root, 'assets/precise.obj'),
+            'v -0.36 0 0 0.2 0.4 0.6\nv 0.36 0 0 1 0 0\nv 0 0.20500000000000002 0 0 1 0\nusemtl source\nf -3 -2 -1\n');
+        const recipe = { id: 'fixture.precise', source: { kind: 'obj', path: 'assets/precise.obj' },
+            sourceUnitsToMapCells: 1, materialSlots: { body: { sourceMaterials: ['source'] } } };
+        const bundle = await importRecipe({ projectRoot: root, recipe });
+        assert.equal(bundle.geometry.bounds.minX, -0.36);
+        assert.equal(bundle.geometry.bounds.maxZ, 0.20500000000000002);
+        assert.deepEqual(bundle.geometry.groups[0].vertices[0].slice(8), [0.2, 0.4, 0.6, 1]);
+        assert.equal(bundle.geometry.vertexCount, 3);
+    } finally { fs.rmSync(root, { recursive: true, force: true }); }
+});
+
 test('native MTL source projection is deterministic and invalidates when an appearance dependency changes', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(),'thestra-appearance-test-'));
     try {

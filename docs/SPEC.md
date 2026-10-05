@@ -548,9 +548,11 @@ Resolved Model Instances carry Z-up translation, orientation, uniform scale,
 identity and provenance below Event/Map/environment semantics. Placed geometry
 reads an explicit `bakedLighting` policy; cache names and gameplay roles do not
 decide illumination. Studio transports those resolved facts through its existing
-renderable bundle and converts axes only at the renderer boundary. MTL source
-projection executes the same Lua grammar in the local build host, with no
-independent JavaScript material parser. This static migration does not implement
+renderable bundle and converts axes only at the renderer boundary. OBJ/MTL source
+projection executes the same pure Lua adapters in the local build host, with no
+independent JavaScript source parser. Authored CPU bounds retain their precision
+until renderer upload, so Three buffer rounding cannot change item framing.
+This static migration does not implement
 the Surface Library, hierarchy or animated Model contract (#668/#669/#1379).
 
 ### 1.4.1 Datalog

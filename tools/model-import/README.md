@@ -5,6 +5,12 @@ normalizes OBJ/GLB geometry to Z-up/map-cell units, stable material slots and
 source/recipe provenance. `sourceUnitsToMapCells` is physical world scale;
 the item turntable independently fits the same geometry to its window.
 
+OBJ geometry projects through the same pure Lua source adapter and neutral
+builder as native acquisition. Authored CPU positions and bounds retain their
+precision until GPU upload; Three's buffer precision cannot alter item framing.
+The source adapter retains XYZ, UVs, normals, triangle/material grouping and the
+RGB vertex extension. Unrecognized source vocabulary fails at compilation.
+
 An OBJ migration recipe can explicitly select `appearance: "obj-mtl"` to compile
 its existing native material binding. The compiler executes the runtime's one
 Lua MTL grammar locally through the pinned Fengari host. It hashes MTL and

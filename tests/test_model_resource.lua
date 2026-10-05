@@ -41,6 +41,9 @@ for groupIndex, group in ipairs(legacy.groups) do
     end
 end
 check(sameUpload, "native GPU vertex uploads must preserve positions, normals, UVs and vertex colors")
+local sameBounds = true
+for key, value in pairs(legacy.bounds) do sameBounds = sameBounds and compiled.bounds[key] == value end
+check(sameBounds, "compiled CPU bounds preserve source precision before item framing")
 
 local function captureItem(useCompiled, w, h, yaw, tilt)
     local old = viewer.resolveModel

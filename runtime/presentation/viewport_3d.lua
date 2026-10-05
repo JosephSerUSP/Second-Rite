@@ -2189,7 +2189,24 @@ local function addWorldQuad(group, a, b, c, d, uv, colors)
     addWorldVertex(group, d.x, d.y, d.z, uv[1], uv[4], colors[4][1], colors[4][2], colors[4][3], colors[4][4])
 end
 
-local function drawWorldSpace(session, authoredCamera, inspection)
+-- Renderer-only pass ownership for selective presentation. This is not a
+-- gameplay taxonomy: structural geometry defaults to the environment pass,
+-- ordinary billboards default to the live pass, and producers may attach an
+-- explicit presentationPass when they have stronger presentation intent.
+function viewport_3d.surfacePresentationPass(surfaceEntry)
+    if type(surfaceEntry) == "table" and surfaceEntry.presentationPass then
+        return surfaceEntry.presentationPass
+    end
+    if type(surfaceEntry) == "table" and surfaceEntry.category == "billboard" then
+        return "live"
+    end
+    return "environment"
+end
+
+local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
+    passOptions = passOptions or {}
+    local rasterScale = math.max(1, tonumber(passOptions.rasterScale) or 1)
+    local worldPass = passOptions.presentationPass or "all"
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
@@ -2222,6 +2239,11 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     if targetCanvas then
         targetWidth, targetHeight = targetCanvas:getDimensions()
     end
+    -- A supersampled render target is a denser raster of the SAME logical
+    -- view, not a wider/taller camera. Resolve the WorldCamera in native logical
+    -- pixels, then scale the pixel-valued projection fields below.
+    local projectionTargetWidth = targetWidth / rasterScale
+    local projectionTargetHeight = targetHeight / rasterScale
     local squareAuthoringCamera = session.roomBakeSquareCamera == true
     local compositionWidth = surface.compositionWidth()
     local compositionHeight = surface.compositionHeight()
@@ -2248,13 +2270,21 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         focusOverride = focusCam,
         squareAuthoringCamera = squareAuthoringCamera,
         projectionFrame = {
-            targetWidth = targetWidth,
-            targetHeight = targetHeight,
+            targetWidth = projectionTargetWidth,
+            targetHeight = projectionTargetHeight,
             compositionWidth = compositionWidth,
             canonicalCenterX = canonicalCenterX,
             canonicalHorizonY = canonicalHorizonY,
         },
     })
+    if rasterScale ~= 1 then
+        camera.baseViewportWidth = camera.baseViewportWidth * rasterScale
+        camera.baseViewportHeight = camera.baseViewportHeight * rasterScale
+        camera.viewportCenterX = camera.viewportCenterX * rasterScale
+        camera.viewportCenterY = camera.viewportCenterY * rasterScale
+        camera.projectionWindowOffsetX = (camera.projectionWindowOffsetX or 0) * rasterScale
+        camera.projectionWindowOffsetY = (camera.projectionWindowOffsetY or 0) * rasterScale
+    end
     local cameraX, cameraY, cameraZ = camera.x, camera.y, camera.z
     local cAngle = camera.angle
     local dirX, dirY = camera.dirX, camera.dirY
@@ -2378,7 +2408,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     local psxCfg = session.loader and session.loader.system and session.loader.system.dungeon
         and session.loader.system.dungeon.psxRendering or {}
     local affineTextures = psxCfg.affineTextures ~= false
-    local vertexSnapPixels = math.max(0, tonumber(psxCfg.vertexSnapPixels) or 0)
+    local vertexSnapPixels = math.max(0, tonumber(psxCfg.vertexSnapPixels) or 0) * rasterScale
     -- #148: the CPU near-plane clip is off by default -- the GPU does it.
     --
     -- The world shader already emits true clip-space coordinates
@@ -2403,7 +2433,10 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     -- been played on the GPU path.
     local cpuNearClip = psxCfg.cpuNearClip == true
     local fogBands = math.max(0, math.floor(tonumber(fog.psxBands) or tonumber(psxCfg.fogBands) or 0))
-    local ditherLevels = math.max(0, tonumber(psxCfg.ditherLevels) or 0)
+    local configuredDitherLevels = math.max(0, tonumber(psxCfg.ditherLevels) or 0)
+    local ditherLevels = passOptions.ditherLevels ~= nil
+        and math.max(0, tonumber(passOptions.ditherLevels) or 0)
+        or configuredDitherLevels
     local function group(texture, category)
         category = category or "dynamic"
         local textureGroups = dynamicGroups[texture]
@@ -2413,7 +2446,12 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         end
         local grp = textureGroups[category]
         if not grp then
-            grp = { texture = texture, vertices = {}, category = category }
+            grp = {
+                texture = texture,
+                vertices = {},
+                category = category,
+                presentationPass = category == "billboard" and "live" or "environment",
+            }
             textureGroups[category] = grp
         end
         return grp
@@ -2984,7 +3022,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         arrow.angle = angle
     end
 
-    local function queuePlacedModels(placedGroups)
+    local function queuePlacedModels(placedGroups, presentationPass)
         -- Keep projection depth positive on the CPU, but leave the final cut
         -- to the GPU's 0.05 near plane. Cutting triangle soup exactly at the
         -- hardware plane produced one-pixel cracks between independently
@@ -3090,6 +3128,8 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                 drawable.depth = (placed.centerX - cameraX) * dirX
                     + (placed.centerY - cameraY) * dirY
                 drawable.sequence = #surfaces + 1
+                drawable.presentationPass = presentationPass
+                    or drawable.presentationPass or "environment"
                 surfaces[#surfaces + 1] = drawable
             end
             end
@@ -3289,7 +3329,9 @@ end
                     local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":"
                         .. tostring(worldX) .. "," .. tostring(worldY) .. "," .. tostring(worldZ)
                         .. ":" .. tostring(rawEv.direction or "")
-                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x", nil, nil, worldZ))
+                    queuePlacedModels(
+                        ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x", nil, nil, worldZ),
+                        "live")
                 elseif presentation.visual == "sprite" then
                     local image = getEventSprite(rawEv, session)
                     if image then
@@ -3335,6 +3377,7 @@ end
                 glow = glowForTexture[batch.texture],
                 depth = depthTotal / #batch.selected,
                 sequence = #surfaces + 1,
+                presentationPass = "environment",
             })
             persistentBatchDraws = persistentBatchDraws + 1
         end
@@ -3342,9 +3385,21 @@ end
 
     love.graphics.push("all")
     love.graphics.intersectScissor(0, 0, viewportWidth, viewportHeight)
-    drawFogBackground(fog, viewportWidth, viewportHeight)
-    if mapData and mapData.ceilingStyle == "sky" then
-        drawSkyBackdrop(atlas, viewportWidth, viewportHeight, cAngle)
+    if passOptions.drawBackground ~= false then
+        if rasterScale ~= 1 then
+            love.graphics.push()
+            love.graphics.scale(rasterScale, rasterScale)
+            drawFogBackground(fog, viewportWidth / rasterScale, viewportHeight / rasterScale)
+            if mapData and mapData.ceilingStyle == "sky" then
+                drawSkyBackdrop(atlas, viewportWidth / rasterScale, viewportHeight / rasterScale, cAngle)
+            end
+            love.graphics.pop()
+        else
+            drawFogBackground(fog, viewportWidth, viewportHeight)
+            if mapData and mapData.ceilingStyle == "sky" then
+                drawSkyBackdrop(atlas, viewportWidth, viewportHeight, cAngle)
+            end
+        end
     end
     love.graphics.setShader(shader)
     shader:send("cameraPosition", { cameraX, cameraY, cameraZ })
@@ -3363,7 +3418,11 @@ end
     shader:send("baseViewportHeight", camera.baseViewportHeight)
     shader:send("targetWidth", targetWidth)
     shader:send("targetHeight", targetHeight)
-    shader:send("compositionOrigin", { surface.compositionOrigin() })
+    local compositionOriginX, compositionOriginY = surface.compositionOrigin()
+    shader:send("compositionOrigin", {
+        compositionOriginX * rasterScale,
+        compositionOriginY * rasterScale,
+    })
     shader:send("viewportCenterX", camera.viewportCenterX)
     shader:send("viewportCenterY", camera.viewportCenterY)
     shader:send("affineTextures", affineTextures and 1.0 or 0.0)
@@ -3409,57 +3468,60 @@ end
     end)
     local modelDrawStarted = love.timer.getTime()
     for _, g in ipairs(surfaces) do
-        if g.mesh then
-            if g.model then modelDraws = modelDraws + 1 end
-            if not (profileVariant == "no-draw" and g.model) then
-                -- Resolved from the mesh's own texture, not from a field the
-                -- producer had to remember to set: this branch draws surface
-                -- batches AND placed/height-displaced model meshes, and only
-                -- the former could ever have carried a glow field down.
-                setGlowUniform(shader, g.glow or glowForMesh(g.mesh),
-                    atlas and atlas.glowStrength)
-                love.graphics.draw(g.mesh)
-            end
-        elseif #g.vertices > 0 then
-            dynamicMeshDraws = dynamicMeshDraws + 1
-            dynamicByCategory[g.category or "dynamic"] =
-                (dynamicByCategory[g.category or "dynamic"] or 0) + 1
-            structure.dynamicMeshPool = structure.dynamicMeshPool or {}
-            local texturePool = structure.dynamicMeshPool[g.texture]
-            if not texturePool then
-                texturePool = {}
-                structure.dynamicMeshPool[g.texture] = texturePool
-            end
-            local category = g.category or "dynamic"
-            local entry = texturePool[category]
-            local needed = #g.vertices
-            if not entry or entry.capacity < needed then
-                if entry and entry.mesh and entry.mesh.release then entry.mesh:release() end
-                local capacity = 6
-                while capacity < needed do capacity = capacity * 2 end
-                entry = {
-                    mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, capacity, "triangles", "stream"),
-                    capacity = capacity,
-                }
-                entry.mesh:setTexture(g.texture)
-                texturePool[category] = entry
-            end
-            entry.mesh:setVertices(g.vertices, 1, needed)
-            entry.mesh:setDrawRange(1, needed)
-            if not (profileVariant == "no-draw" and g.model) then
-                -- Dynamic geometry (billboards, placed models, sprites) has no
-                -- glow twin. Without this, a glowing wall earlier in the
-                -- depth-sorted list would leave its map bound and every model
-                -- drawn after it would emit through that wall's mask.
-                setGlowUniform(shader, glowForTexture[g.texture],
-                    atlas and atlas.glowStrength)
-                love.graphics.draw(entry.mesh)
+        if worldPass == "all" or viewport_3d.surfacePresentationPass(g) == worldPass then
+            if g.mesh then
+                if g.model then modelDraws = modelDraws + 1 end
+                if not (profileVariant == "no-draw" and g.model) then
+                    -- Resolved from the mesh's own texture, not from a field the
+                    -- producer had to remember to set: this branch draws surface
+                    -- batches AND placed/height-displaced model meshes, and only
+                    -- the former could ever have carried a glow field down.
+                    setGlowUniform(shader, g.glow or glowForMesh(g.mesh),
+                        atlas and atlas.glowStrength)
+                    love.graphics.draw(g.mesh)
+                end
+            elseif #g.vertices > 0 then
+                dynamicMeshDraws = dynamicMeshDraws + 1
+                dynamicByCategory[g.category or "dynamic"] =
+                    (dynamicByCategory[g.category or "dynamic"] or 0) + 1
+                structure.dynamicMeshPool = structure.dynamicMeshPool or {}
+                local texturePool = structure.dynamicMeshPool[g.texture]
+                if not texturePool then
+                    texturePool = {}
+                    structure.dynamicMeshPool[g.texture] = texturePool
+                end
+                local category = g.category or "dynamic"
+                local entry = texturePool[category]
+                local needed = #g.vertices
+                if not entry or entry.capacity < needed then
+                    if entry and entry.mesh and entry.mesh.release then entry.mesh:release() end
+                    local capacity = 6
+                    while capacity < needed do capacity = capacity * 2 end
+                    entry = {
+                        mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, capacity, "triangles", "stream"),
+                        capacity = capacity,
+                    }
+                    entry.mesh:setTexture(g.texture)
+                    texturePool[category] = entry
+                end
+                entry.mesh:setVertices(g.vertices, 1, needed)
+                entry.mesh:setDrawRange(1, needed)
+                if not (profileVariant == "no-draw" and g.model) then
+                    -- Dynamic geometry (billboards, placed models, sprites) has no
+                    -- glow twin. Without this, a glowing wall earlier in the
+                    -- depth-sorted list would leave its map bound and every model
+                    -- drawn after it would emit through that wall's mask.
+                    setGlowUniform(shader, glowForTexture[g.texture],
+                        atlas and atlas.glowStrength)
+                    love.graphics.draw(entry.mesh)
+                end
             end
         end
     end
     profile.modelDrawLoopMs = (love.timer.getTime() - modelDrawStarted) * 1000
     love.graphics.setShader()
-    if #(structure.worldEffectHandles or {}) > 0 or structure.ambientEffectHandle then
+    if passOptions.drawWorldEffects ~= false
+            and (#(structure.worldEffectHandles or {}) > 0 or structure.ambientEffectHandle) then
         require("presentation.effekseer").drawWorld({
             projection = camera.projection,
             x = cameraX, y = cameraY, z = cameraZ,
@@ -3473,7 +3535,8 @@ end
             viewportCenterX = camera.viewportCenterX,
             viewportCenterY = camera.viewportCenterY,
             targetWidth = targetWidth, targetHeight = targetHeight,
-            compositionWidth = compositionWidth, compositionHeight = compositionHeight,
+            compositionWidth = compositionWidth * rasterScale,
+            compositionHeight = compositionHeight * rasterScale,
             viewportWidth = viewportWidth, viewportHeight = viewportHeight,
         })
     end
@@ -3489,7 +3552,9 @@ end
     -- state, so it is cleared outside the push/pop boundary rather than
     -- trusted to the attribute stack.
     love.graphics.setWireframe(false)
-    love.graphics.clear(false, false, 1)
+    if not passOptions.preserveDepth then
+        love.graphics.clear(false, false, 1)
+    end
     local selectedNodes, residentVertices = 0, 0
     for _, batch in pairs(structure.surfaceBatches or {}) do
         selectedNodes = selectedNodes + #(batch.selected or {})
@@ -3508,12 +3573,17 @@ end
         dynamicSourceQuads = dynamicSourceQuads,
         profile = profile,
     }
-    require("presentation.door_transition").draw()
+    if passOptions.drawPost ~= false then
+        require("presentation.door_transition").draw()
+    end
 end
 
 function viewport_3d.draw(session, authoredCamera, inspection)
     -- `authoredCamera` is the current Scene's presentation default, never Map state.
-    return drawWorldSpace(session, authoredCamera, inspection)
+    -- Selective environment AA is a presentation composition around the existing
+    -- world draw; the ordinary path remains byte-for-byte reachable at scale 1.
+    return require("presentation.world_pass_compositor").draw(
+        session, authoredCamera, inspection, drawWorldSpace)
 end
 
 viewport_3d.getFogConfig = getFogConfig

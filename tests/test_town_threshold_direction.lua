@@ -120,4 +120,39 @@ check(math.abs(game.townTraversal.y-6.7)<.001,
     'closing the field menu returns held directions to bounded-lane walking')
 host.init(nil,{})
 
+-- Recruitment choices are player-facing offers, never forced prompts. Keep B
+-- wired at every CHOICE layer (including challenge-before-recruit branches),
+-- so new units authored by Studio cannot silently reintroduce the historical
+-- Decline/Leave row that looked cancellable but ignored B.
+local dataLoader=require('engine.data.loader')
+dataLoader.init()
+local recruitChoiceCount=0
+local function auditRecruitChoices(cmds, unitId)
+    for _,cmd in ipairs(cmds or {}) do
+        if cmd.cmd=='CHOICE' then
+            recruitChoiceCount=recruitChoiceCount+1
+            local optionCount=#(cmd.options or {})
+            check(type(cmd.cancelOption)=='number'
+                    and cmd.cancelOption==math.floor(cmd.cancelOption)
+                    and cmd.cancelOption>=1 and cmd.cancelOption<=optionCount,
+                'recruitment CHOICE for '..tostring(unitId)..' needs a valid cancelOption')
+            for _,opt in ipairs(cmd.options or {}) do
+                auditRecruitChoices(opt.commands,unitId)
+            end
+        end
+        auditRecruitChoices(cmd.commands,unitId)
+        auditRecruitChoices(cmd.onVictory,unitId)
+        auditRecruitChoices(cmd.onDefeat,unitId)
+        auditRecruitChoices(cmd['then'],unitId)
+        auditRecruitChoices(cmd['else'],unitId)
+        auditRecruitChoices(cmd.elseCommands,unitId)
+    end
+end
+for _,unit in ipairs(dataLoader.units or {}) do
+    if type(unit.recruitEvent)=='table' and #unit.recruitEvent>0 then
+        auditRecruitChoices(unit.recruitEvent,unit.id)
+    end
+end
+check(recruitChoiceCount>0,'the recruitment cancel audit exercised at least one CHOICE')
+
 require('tests.fail_fast')('test_town_threshold_direction',failed,passed)

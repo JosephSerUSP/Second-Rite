@@ -43,6 +43,11 @@
       "purpose": "Our own Blender asset library: SR_GroundCover, browsable like any remote library."
     },
     {
+      "path": "build_layered_package.py",
+      "role": "production",
+      "purpose": "Assemble a layered_2d pre-rendered environment package (plate, foreground cutout, player projection) from a rendered plate pair and the engine's camera record."
+    },
+    {
       "path": "build_registry_readability_review.py",
       "role": "study",
       "purpose": "Pair native before/after frames with isolated source-shape inspections."

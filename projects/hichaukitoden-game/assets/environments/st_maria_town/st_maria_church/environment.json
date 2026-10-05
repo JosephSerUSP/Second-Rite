@@ -1,0 +1,150 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "stub.obj",
+  "materialLibrary": "stub.mtl",
+  "textureAtlas": "atlas.png",
+  "collisionMesh": "stub.obj",
+  "bounds": [
+    -2.0,
+    3.6,
+    -0.35,
+    2.0,
+    15.4,
+    6.0
+  ],
+  "bakedLighting": true,
+  "provenance": {
+    "sourceBlend": "st_maria_church.blend",
+    "plateRecord": {
+      "baseViewportHeight": 144,
+      "baseViewportWidth": 256,
+      "contract": "thestra.world-camera-calibration",
+      "coordinateSystem": {
+        "blenderCameraForward": "-Z",
+        "blenderCameraUp": "+Y",
+        "cameraForward": "+depth",
+        "cameraRight": "+right",
+        "handedness": "right-handed",
+        "screenOrigin": "top-left",
+        "screenY": "+down",
+        "worldHorizontal": "XY",
+        "worldUp": "+Z"
+      },
+      "eye": {
+        "x": -11.737771208805668,
+        "y": 5.005059710186888,
+        "z": 0.8020670000000001
+      },
+      "farPlane": 128,
+      "fovHalfX": 0.3755021398204102,
+      "fovHalfY": 0.21121995364898075,
+      "nearPlane": 0.05,
+      "orientation": {
+        "forwardX": 0.9781476007338057,
+        "forwardY": 0.20791169081775931,
+        "pitchRadians": -0.30543261909900765,
+        "rightX": -0.20791169081775931,
+        "rightY": 0.9781476007338057
+      },
+      "projection": "perspective",
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": -58.508272,
+      "targetHeight": 240,
+      "targetWidth": 582,
+      "version": 1,
+      "viewportCenterX": 291,
+      "viewportCenterY": 7.491728000000002
+    }
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        14.5,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "id": "exit_door",
+      "position": [
+        0.0,
+        15.4,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_agnes": {
+      "id": "npc_agnes",
+      "position": [
+        0.6,
+        3.8,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "panning",
+    "imageSize": [
+      582,
+      240
+    ],
+    "slicePositions": [
+      7.5
+    ],
+    "backgrounds": [
+      "background.png"
+    ],
+    "scenes": [
+      "background.png"
+    ],
+    "foregrounds": [
+      "foreground.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 7.5,
+      "depthX": 0.0
+    },
+    "playerProjection": {
+      "centerX": 291.0,
+      "screenY": 128.7975,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 26.288012
+    }
+  }
+}

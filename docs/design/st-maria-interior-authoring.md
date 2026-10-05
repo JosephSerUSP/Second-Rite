@@ -137,6 +137,17 @@ Choose rise and bay count for the building rather than changing the camera
 to disguise a flat ceiling. An altar niche should have physical reveals and
 a recessed backing; a dark rectangle over an unbroken board has no depth.
 
+A room may also ship as a pre-rendered plate instead of a baked 3D package
+(`tools/blender/build_layered_package.py`): render the whole room, render a
+transparent cutout of whatever the player passes behind (`stage_room_model.py
+--matte <prefix>`), and let the runtime composite the cutout over the actor.
+The plate camera is the map's runtime camera at a window wide enough for the
+tracking range, resolved by `presentation.world_camera_calibration` rather than
+re-derived. Solve the lens so the player is 48 px at the MEAN of the walk, not at
+the middle of the hall; where the walk cannot run parallel to the picture plane
+the player is slightly small at one end and slightly large at the other, and
+that is intended. See `docs/reports/st-maria-church-plate-2026-10-04.md`.
+
 **Two rooms must not read as one room redressed.** The cheapest thing that
 tells two interiors apart at 256 px is not a prop — it is the colour of the
 largest surface in the frame. An adversarial review of the Padaria and the

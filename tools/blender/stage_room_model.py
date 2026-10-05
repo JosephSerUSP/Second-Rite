@@ -832,6 +832,12 @@ def main() -> None:
                              "does in Cycles. See light_fixtures.py")
     parser.add_argument("--samples", type=int, default=None,
                         help="explicit sample-count override for the selected render profile")
+    parser.add_argument("--matte", action="append", default=[], metavar="PREFIX",
+                        help="render a transparent cutout of only the mesh objects "
+                             "whose names start with PREFIX (repeatable). Every other "
+                             "mesh becomes a holdout, so it still bounces and shadows "
+                             "light but leaves no pixels: the result is the exact "
+                             "foreground layer to composite over the full plate")
     parser.add_argument("--out", type=Path, default=None, help="save a .blend")
     parser.add_argument("--render", type=Path, default=None, help="render a 426x240 PNG")
     parser.add_argument("--tolerance", type=float, default=0.5,
@@ -995,7 +1001,18 @@ def main() -> None:
         scene.render.engine = ("BLENDER_EEVEE" if args.engine == "eevee"
                                else "BLENDER_WORKBENCH" if args.engine == "workbench"
                                else "CYCLES")
-        scene.render.film_transparent = False
+        scene.render.film_transparent = bool(args.matte)
+        if args.matte:
+            keep = tuple(args.matte)
+            matched = [o for o in bpy.data.objects
+                       if o.type == "MESH" and o.name.startswith(keep)]
+            if not matched:
+                raise SystemExit(f"--matte {args.matte}: no mesh object matches")
+            for obj in bpy.data.objects:
+                if obj.type == "MESH" and not obj.name.startswith(keep):
+                    obj.is_holdout = True
+            actor.hide_render = True
+            report["matte"] = sorted(o.name for o in matched)
         report["renderQuality"] = configure_render_quality(scene, args)
         scene.view_settings.exposure = args.exposure
         report["exposureEV"] = args.exposure

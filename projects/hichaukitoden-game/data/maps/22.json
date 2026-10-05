@@ -19,7 +19,7 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/st_maria_chapel_3d/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/st_maria_church/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 3.6,
@@ -40,14 +40,14 @@
       "yawDegrees": 12,
       "pitchDegrees": -17.5,
       "eyeHeight": -1.4583333333,
-      "fovDegrees": 42.501,
+      "fovDegrees": 41.1625,
       "nearPlane": 0.05,
       "farPlane": 128,
       "projectionScale": {
         "x": 0.94079629,
         "y": 0.9116197588
       },
-      "projectionWindowOffsetY": -54.7,
+      "projectionWindowOffsetY": -58.508,
       "projectionFrame": {
         "compositionWidth": 256,
         "canonicalCenterX": 128,

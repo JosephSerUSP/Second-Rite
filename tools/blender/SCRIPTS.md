@@ -6,12 +6,13 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 
 **Run with** says how to start a file. `run.py` means it runs inside the pinned Blender: `python tools/blender/run.py tools/blender/<script> [--blend FILE] -- <args>` (never a hand-typed `blender --python` command, which exits 0 when the script raises). `python` and `node` mean an ordinary host command; `import` means the file is only imported or spawned by other tools.
 
-## Supported authoring and verification entry points (28)
+## Supported authoring and verification entry points (29)
 
 | Script | Run with | Purpose |
 |---|---|---|
 | [asset_library.py](asset_library.py) | `python` | Browse a Blender remote asset library without Blender, and without downloading an asset. |
 | [build_asset_library.py](build_asset_library.py) | `python` | Our own Blender asset library: SR_GroundCover, browsable like any remote library. |
+| [build_layered_package.py](build_layered_package.py) | `python` | Assemble a layered_2d pre-rendered environment package (plate, foreground cutout, player projection) from a rendered plate pair and the engine's camera record. |
 | [capture_environment.py](capture_environment.py) | `python` | Capture one staged environment at real runtime surfaces, including device ratios. |
 | [check_thestra_camera.py](check_thestra_camera.py) | `python` | Run the #837 runtime->Blender WorldCamera numerical parity fixture. |
 | [compile_item_blends.py](compile_item_blends.py) | `python` | Compile authoritative item ``.blend`` sources without allowing source writes. |

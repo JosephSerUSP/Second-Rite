@@ -61,11 +61,24 @@ local function newDepth(width, height)
     })
 end
 
+local function releaseTarget(target)
+    if target and target.release then target:release() end
+end
+
+local function releaseTargets()
+    if not targets then return end
+    releaseTarget(targets.envColorSS)
+    releaseTarget(targets.envDepthSS)
+    releaseTarget(targets.envDepthNative)
+    targets = nil
+end
+
 local function ensureTargets(width, height, scale)
     if targets and targets.width == width and targets.height == height
             and targets.scale == scale then
         return targets
     end
+    releaseTargets()
     local ssWidth, ssHeight = width * scale, height * scale
     local envColorSS = surface.newRasterCanvas(ssWidth, ssHeight)
     envColorSS:setFilter("nearest", "nearest")
@@ -107,8 +120,10 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
     local width, height = activeColor:getDimensions()
     local scale = compositor.resolveScale(session)
     local t = ensureTargets(width, height, scale)
+    local pushed = false
     local ok, result = xpcall(function()
         love.graphics.push("all")
+        pushed = true
         love.graphics.origin()
         love.graphics.setScissor()
 
@@ -183,6 +198,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         })
 
         love.graphics.pop()
+        pushed = false
         restoreState()
         -- Downstream map HUD / stencil consumers still expect an attached
         -- depth-stencil buffer. Keep our native attachment bound even though the
@@ -194,6 +210,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
     end, debug.traceback)
 
     if not ok then
+        if pushed then pcall(love.graphics.pop) end
         restoreState()
         love.graphics.setCanvas(activeBinding)
         error(result, 0)

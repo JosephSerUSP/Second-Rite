@@ -96,4 +96,28 @@ check(controller.isHeld('DOWN'),'consuming a press preserves physical held state
 controller.release('DOWN');controller.press('DOWN',{})
 check(presses==2,'releasing and pressing deliberately can use the return path')
 controller.reset();host.buttonpressed=originalDispatch
+
+-- Bounded-lane walking is continuous and therefore does not arrive through
+-- the map scene's directional hooks. A field menu is a modal mode *inside*
+-- that scene, so the provider must still surrender held directions while the
+-- modal owns input. This is the regression behind walking through St. Maria
+-- with the menu open.
+game.townTraversal.speed=3.4
+game.townTraversal.groundZ=0
+game.townTraversal.groundProfile=nil
+game.townTraversal.tracking={center=5,pixelsPerWorld=1,minOffsetX=0,maxOffsetX=0}
+game.townTraversal.camera={}
+game.townTraversal.y=5
+host.init('map',{})
+local mapState=host.getCurrentState()
+mapState.v.mode=1
+lane.update(game,.5,1)
+check(math.abs(game.townTraversal.y-5)<.001,
+    'a modal field menu owns held directions and freezes bounded-lane walking')
+mapState.v.mode=0
+lane.update(game,.5,1)
+check(math.abs(game.townTraversal.y-6.7)<.001,
+    'closing the field menu returns held directions to bounded-lane walking')
+host.init(nil,{})
+
 require('tests.fail_fast')('test_town_threshold_direction',failed,passed)

@@ -109,6 +109,20 @@
     "st_maria_church.blend": {
       "status": "adopted",
       "basis": "Owner chose this church over the rectangular chapel on 2026-10-04 (\"massively better\") and asked for it to be promoted onto map 22 as a pre-rendered plate with a pew foreground, in the 'vigil' grade, from the oblique runtime camera. Shipped plate and foreground are rendered from this document (tools/blender/stage_room_model.py, then build_layered_package.py). Edit the adopted source directly; never regenerate it."
+    },
+    "passage_house_stair_hall.blend": {
+      "status": "scaffold",
+      "basis": "Written by recipes/passage_house_stair_hall.py (layout doc section 5.1); no shipped package is baked from it, and no adoption is recorded.",
+      "eevee": {
+        "exposureEV": 0.0,
+        "probeCells": 4,
+        "eeveeOptions": [
+          "light_threshold=0.0002"
+        ],
+        "emissiveLights": true,
+        "fixtureLights": true,
+        "basis": "Owner decision 2026-09-30: neutral exposure; test scenes diagnose lighting, not Cycles brightness parity. Probe density and lighting shims retain the measured pilot settings."
+      }
     }
   }
 }

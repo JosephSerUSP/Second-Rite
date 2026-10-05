@@ -996,7 +996,7 @@ function viewport_3d.collectEventModelPlacements(session)
                 if pres.visual == "model" and pres.model then
                     local x, y, z = viewport_3d.eventWorldPosition(rawEv)
                     if session.townTraversal then
-                        z = require("engine.bounded_lane").groundAt(session, y) or z
+                        z = require("engine.bounded_lane").eventGroundAt(session, rawEv, y) or z
                     end
                     table.insert(placements, {
                         model = pres.model,
@@ -3346,7 +3346,7 @@ end
                     -- which can be sloped.  The old placed-model path retained
                     -- only x/y and silently rendered every model at z = 0.
                     if session.townTraversal then
-                        local floorZ = require("engine.bounded_lane").groundAt(session, worldY)
+                        local floorZ = require("engine.bounded_lane").eventGroundAt(session, rawEv, worldY)
                         if floorZ ~= nil then worldZ = floorZ end
                     end
                     modelSpec.transitionArrowGroundZ = worldZ

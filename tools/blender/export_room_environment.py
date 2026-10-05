@@ -182,12 +182,15 @@ def build_render_mesh(source, name, decimate, layout="packed", atlas_size=1024, 
 
 def build_anchors(anchors):
     holder = collection("TH_ANCHORS")
-    for name, lane_y in anchors.items():
+    for name, place in anchors.items():
+        # A bare number is a lane Y at floor level; (y, z) stands higher, which is
+        # how a door on an upper storey is published.
+        lane_y, height = place if isinstance(place, tuple) else (place, 0.0)
         empty = bpy.data.objects.new(name, None)
         empty.empty_display_type = "PLAIN_AXES"
         # Authored directly in ENGINE space: the anchors are read straight out
         # of matrix_world by the pipeline and must not be mirrored twice.
-        empty.location = Vector((ACTION_PLANE_X, lane_y, 0.0))
+        empty.location = Vector((ACTION_PLANE_X, lane_y, height))
         holder.objects.link(empty)
 
 
@@ -281,6 +284,9 @@ def main() -> None:
                         help="NAME=LANE_Y for the shopkeeper anchor")
     parser.add_argument("--npc-x", type=float, default=0,
                         help="ENGINE depth of the NPC anchor")
+    parser.add_argument("--anchor", action="append", default=[], metavar="NAME=Y[:Z]",
+                        help="publish an extra anchor at ENGINE lane Y, optionally at "
+                             "height Z (a door on an upper storey); repeatable")
     args = parser.parse_args(argv)
 
     bpy.ops.wm.open_mainfile(filepath=str(args.blend.resolve()))
@@ -295,6 +301,14 @@ def main() -> None:
     if args.npc:
         key, value = args.npc.split("=")
         anchors[key] = float(value)
+    for spec in args.anchor:
+        name, _, place = spec.partition("=")
+        lane_y, _, height = place.partition(":")
+        if not name or not lane_y:
+            raise SystemExit(f"--anchor takes NAME=Y[:Z], not {spec!r}")
+        if name in anchors:
+            raise SystemExit(f"--anchor {name!r} repeats an anchor the exporter already publishes")
+        anchors[name] = (float(lane_y), float(height or 0.0))
     build_anchors(anchors)
     if args.npc:
         bpy.data.objects[key].location.x = args.npc_x

@@ -93,7 +93,8 @@ Market↔Cortiço route are authored chords.
 | 22 | Chapel | Praça | |
 | 23 | Padaria hearth/home | Cortiço | Attached to maps 24 and 27 |
 | 24 | Padaria room upstairs | map 23 | Alicia and Laura's home |
-| 25 | Passage House (Room 3/registry) | Cortiço | Celina works here |
+| 25 | Passage House, Room 3 | Cortiço | One apartment of the Passage House |
+| 33 | Passage House Registry (Passage Office) | Praça | The same building's public front; Celina works here |
 | 27 | Alicia's Padaria | Market Row | Authored, not generator-owned |
 | 28, 29 | Padaria and smith, baked 3D | Market Row | Alternate representations, not distinct rooms |
 
@@ -159,9 +160,10 @@ Map 23 is the padaria hearth/home; Laura sleeps there with Alicia.
 **W3. Laura's separation of home and work was invisible. Resolved spatially.**
 Her occupied forge is at the Port and her home is across town in the padaria.
 
-**W4. Passage House had no building context. Partly resolved.** It now hangs
-from the Cortiço and contains Room 3/registry authority. Further rooms remain
-content scope, not a topology contradiction.
+**W4. Passage House had no building context. Partly resolved.** It is one
+building built into the slope between the Praça and the Cortiço: the Registry on
+its public (Praça) front, the apartments and Room 3 on its Cortiço face. Further
+rooms remain content scope, not a topology contradiction.
 
 **W5. The Quay's fiction contradicted its topology. Resolved.** The Port is the
 working waterfront and the Quay text no longer claims to terminate the town.
@@ -473,7 +475,8 @@ rather than decorating one.
 
 1. **Celina's bed.** She works the newest, most outsider-facing institution.
    Own home makes her a small proprietor and softens her. Living at the Passage
-   House makes her absorbed by the trade. A room in the cortiço makes her
+   House (the Registry and the Summoners' apartments are one building) makes her
+   absorbed by the trade. A room in the cortiço makes her
    labour — a local administering the new economy who goes home to the old town.
    The third is **[proposed]** and unsettled.
 2. **Thestra has no visual language, and nothing in the Project supplies one.**

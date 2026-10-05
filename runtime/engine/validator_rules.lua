@@ -1289,6 +1289,60 @@ validator.run = function(loader)
                 check(ok and button ~= nil, where .. " doorway '" .. tostring(door.anchor)
                     .. "' must resolve to an Event with a valid authored direction")
             end
+            -- Levels and links: a building's storeys. Each level is a lane of its
+            -- own, a link joins two of them, and a doorway or Event that names a
+            -- level or link must name one that exists. A stair that points
+            -- nowhere would otherwise just do nothing when pressed.
+            local traversal = map.traversal
+            local baseLevel = (traversal.lane and traversal.lane.id) or "ground"
+            local ranges = {}
+            if type(traversal.lane) == "table" then
+                ranges[baseLevel] = { minY = traversal.lane.minY, maxY = traversal.lane.maxY }
+            end
+            for id, def in pairs(traversal.levels or {}) do
+                check(type(id) == "string" and id ~= "" and id ~= baseLevel,
+                    where .. " level id '" .. tostring(id) .. "' must be a unique non-empty string")
+                local good = type(def) == "table" and type(def.minY) == "number"
+                    and type(def.maxY) == "number" and def.minY < def.maxY
+                check(good, where .. " level '" .. tostring(id) .. "' needs numeric minY < maxY")
+                if good then ranges[id] = { minY = def.minY, maxY = def.maxY } end
+            end
+            local links = {}
+            for li, link in ipairs(traversal.links or {}) do
+                local label = where .. " link #" .. li
+                check(type(link) == "table" and type(link.id) == "string" and link.id ~= ""
+                    and links[link.id] == nil, label .. " needs a unique string id")
+                if type(link) == "table" then
+                    links[link.id] = link
+                    for _, key in ipairs({ "from", "to" }) do
+                        local point = link[key]
+                        local range = type(point) == "table" and ranges[point.level] or nil
+                        check(range ~= nil, label .. " " .. key .. ".level names no level")
+                        check(range == nil or (type(point.y) == "number"
+                                and point.y >= range.minY and point.y <= range.maxY),
+                            label .. " " .. key .. ".y must lie inside its level")
+                    end
+                    check(type(link.from) ~= "table" or type(link.to) ~= "table"
+                        or link.from.level ~= link.to.level,
+                        label .. " must join two different levels")
+                end
+            end
+            for _, door in ipairs(traversal.doorways or {}) do
+                check(door.level == nil or ranges[door.level] ~= nil, where .. " doorway '"
+                    .. tostring(door.anchor) .. "' names no level '" .. tostring(door.level) .. "'")
+                if door.link ~= nil then
+                    local link = links[door.link]
+                    local at = door.level or baseLevel
+                    check(link ~= nil and type(link.from) == "table" and type(link.to) == "table"
+                        and (link.from.level == at or link.to.level == at), where .. " doorway '"
+                        .. tostring(door.anchor) .. "' names link '" .. tostring(door.link)
+                        .. "' that does not touch level '" .. at .. "'")
+                end
+            end
+            for _, ev in ipairs(map.events or {}) do
+                check(ev.level == nil or ranges[ev.level] ~= nil, where .. " event '"
+                    .. tostring(ev.instanceId or ev.id) .. "' names no level '" .. tostring(ev.level) .. "'")
+            end
         end
         -- The shared Stairs Down common event descends with
         -- `LOAD_MAP mapId: session.floor + 2`, which is only correct while a

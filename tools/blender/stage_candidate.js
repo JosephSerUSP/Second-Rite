@@ -6,6 +6,7 @@
 //       --package out/<review>/<name> --map-id 22 \
 //       [--template 28] [--npc <eventInstanceId>=<anchor>]...
 //       [--lane <minY> <maxY>] [--track <centreY> <maxOffsetPx>]
+//       [--ground-profile '<json [[engineY, z], ...] west to east>']
 //       [--camera '<json merged into the camera, e.g. {"yawDegrees":-14}>']
 //       [--exit-direction away|toward|left|right]
 //
@@ -62,7 +63,7 @@ function isExit(event) {
 
 const DIRECTIONS = ['away', 'toward', 'left', 'right'];
 
-function candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, track, camera, exitDirection}) {
+function candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, track, camera, exitDirection, groundProfile}) {
     const target = readMap(mapId);
     const template = readMap(templateId);
     const point = name => {
@@ -74,6 +75,7 @@ function candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, tra
     map.traversal = structuredClone(template.traversal);
     map.traversal.environmentPackage = packagePath;
     if (lane) Object.assign(map.traversal.lane, {minY: lane[0], maxY: lane[1]});
+    if (groundProfile) map.traversal.lane.groundProfile = structuredClone(groundProfile);
     if (track) {
         const [centre, offset] = track;
         map.traversal.camera.target.y = centre;
@@ -110,14 +112,14 @@ function candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, tra
     return {map, dropped};
 }
 
-function stage({output, packageDir, mapId, templateId = 28, npcs = [], lane, track, camera, exitDirection}) {
+function stage({output, packageDir, mapId, templateId = 28, npcs = [], lane, track, camera, exitDirection, groundProfile}) {
     output = path.resolve(output);
     if (!output.startsWith(path.join(root, 'out') + path.sep) || fs.existsSync(output))
         throw new Error('Use a new stage directory inside repository out/');
     const manifest = JSON.parse(fs.readFileSync(path.join(packageDir, 'environment.json'), 'utf8'));
     const name = path.basename(path.resolve(packageDir));
     const packagePath = `assets/environments/review/${name}/environment.json`;
-    const {map, dropped} = candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, track, camera, exitDirection});
+    const {map, dropped} = candidateMap({mapId, templateId, manifest, packagePath, npcs, lane, track, camera, exitDirection, groundProfile});
 
     const result = stageProjectGates({projectDir: project, outputDir: path.join(output, 'game')});
     fs.cpSync(packageDir, path.dirname(path.join(result.stageDir, packagePath)), {recursive: true});
@@ -149,6 +151,11 @@ function parse(argv) {
         else if (flag === '--map-id') options.mapId = Number(value);
         else if (flag === '--template') options.templateId = Number(value);
         else if (flag === '--exit-direction') options.exitDirection = value;
+        else if (flag === '--ground-profile') {
+            try { options.groundProfile = JSON.parse(value); } catch (error) { throw new Error(`--ground-profile takes JSON: ${error.message}`); }
+            if (!Array.isArray(options.groundProfile) || !options.groundProfile.every(p => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite)))
+                throw new Error('--ground-profile takes [[engineY, z], ...]');
+        }
         else if (flag === '--camera') {
             try { options.camera = JSON.parse(value); } catch (error) { throw new Error(`--camera takes JSON: ${error.message}`); }
         } else if (flag === '--lane' || flag === '--track') {

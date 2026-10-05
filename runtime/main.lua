@@ -723,6 +723,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_bounded_lane_levels",
             "test_town_threshold_direction", "test_transition_markers",
             "test_weaponsmith_dialogue",
             "test_passage_house_courtyard",
@@ -1982,6 +1983,14 @@ handleKeyPressed = function(button)
                 -- here keeps it from reaching the grid movement underneath.
                 return true
             elseif button == "UP" or button == "DOWN" then
+                -- A doorway that names a link is a stair, not a door: pressing
+                -- toward it starts the climb. It is not a transfer, so there is
+                -- no door transition; the actor walks the flight and arrives.
+                local linkDoorway = lane.nearDoorway(activeSession, button)
+                if linkDoorway and linkDoorway.link then
+                    lane.beginClimb(activeSession, linkDoorway)
+                    return true
+                end
                 local doorEvent = lane.interact(activeSession, button)
                 if doorEvent and commandsForMapEvent(doorEvent) then
                     enterDoorEvent(doorEvent, button)
@@ -2001,7 +2010,8 @@ handleKeyPressed = function(button)
                 local state = activeSession.townTraversal
                 for _, rawEv in ipairs(activeSession.currentMapData.events or {}) do
                     local p = rawEv.worldPosition
-                    if type(p) == "table" and rawEv.commands then
+                    if type(p) == "table" and rawEv.commands
+                            and lane.onLevel(activeSession, rawEv) then
                         local dx = state.x - p[1]
                         local dy = state.y - p[2]
                         if dx * dx + dy * dy <= 1.4 * 1.4 then

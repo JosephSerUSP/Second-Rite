@@ -88,3 +88,18 @@ test('arguments', () => {
                      {yawDegrees: -14});
     assert.throws(() => parse(['--camera', '{bad']), /takes JSON/);
 });
+
+test('a ground profile lands on the lane and only there', () => {
+    const profile = [[0, 2.3], [10.44, 2.3], [15.2, 0], [22, 0]];
+    const {map} = candidateMap({...base, npcs: [], groundProfile: profile});
+    assert.deepEqual(map.traversal.lane.groundProfile, profile);
+    const plain = candidateMap({...base, npcs: []}).map;
+    assert.equal(plain.traversal.lane.groundProfile, undefined, 'no profile unless asked for');
+});
+
+test('--ground-profile is parsed and validated', () => {
+    const argv = ['--output', 'out/x', '--package', '.', '--map-id', '25'];
+    assert.deepEqual(parse([...argv, '--ground-profile', '[[0,2.3],[5,0]]']).groundProfile, [[0, 2.3], [5, 0]]);
+    assert.throws(() => parse([...argv, '--ground-profile', '[[0]]']), /\[\[engineY, z\]/);
+    assert.throws(() => parse([...argv, '--ground-profile', 'nope']), /takes JSON/);
+});

@@ -700,7 +700,8 @@ function renderer.drawMap(worldPresentation)
             for _, rawEv in ipairs(renderer.session.currentMapData.events or {}) do
                 local position = rawEv.worldPosition
                 if type(position) == "table" and rawEv.commands
-                        and not doorwayEvents[rawEv.instanceId] then
+                        and not doorwayEvents[rawEv.instanceId]
+                        and lane.onLevel(renderer.session, rawEv) then
                     local dx = state.x - (tonumber(position[1]) or 0)
                     local dy = state.y - (tonumber(position[2]) or 0)
                     local distance = dx * dx + dy * dy

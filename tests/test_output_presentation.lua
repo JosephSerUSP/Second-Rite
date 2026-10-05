@@ -47,8 +47,6 @@ do
 end
 
 -- Android's device surface deliberately permits fractional nearest output.
--- The output seam must delegate that geometry too, rather than imposing the
--- desktop integer policy a second time after the branches are combined.
 do
     local touch = require("presentation.touch_gamepad")
     surface.registerProfile("test_output_device", touch.deviceSurfaceSpec(2400, 1080))
@@ -65,7 +63,7 @@ do
     surface.setProfile("wide")
 end
 
--- CRT mode is the experimental fractional fit path.
+-- CRT mode is the fractional-fit path.
 do
     local scale, x, y = output.transformForMode("crt", 1000, 600)
     local expected = 1000 / 426
@@ -79,8 +77,8 @@ do
     near(ry, 120, 1e-9, "host centre maps to render centre y")
 end
 
--- Unlike nearest's historical >=1x rule, experimental CRT may downscale so a
--- large logical surface is not cropped by a physically smaller host.
+-- Unlike nearest's historical >=1x rule, CRT may downscale so a large logical
+-- surface is not cropped by a physically smaller host.
 do
     local scale, x, y = output.transformForMode("crt", 320, 180)
     assert(scale < 1, "CRT small-host path should fit rather than crop")
@@ -88,34 +86,92 @@ do
     near(y, 0, 1e-9, "small host vertical fit")
 end
 
--- Native shader construction is part of the spike: if the current LÖVE backend
--- rejects the source, the unit suite should expose it immediately.
+-- Shipping CRT is now a two-stage reconstruction: native-resolution YIQ signal
+-- degradation followed by host-resolution drive-dependent beam reconstruction.
 do
-    local source = output.shaderSource()
-    assert(source:find("physicalOutputScale", 1, true),
+    local beamSource = output.shaderSource()
+    local signalSource = output.signalShaderSource()
+
+    assert(beamSource:find("physicalOutputScale", 1, true),
         "CRT beam calibration must consume physical output scale")
-    assert(not source:find("extern number outputScale;", 1, true),
+    assert(beamSource:find("beamWidth", 1, true),
+        "CRT reconstruction must expose a real beam-width control")
+    assert(beamSource:find("beamDriveExpansion", 1, true),
+        "CRT reconstruction must expose drive-dependent beam growth")
+    assert(beamSource:find("reconstructBeam", 1, true),
+        "CRT output must reconstruct adjacent source rows as beams")
+    assert(not beamSource:find("extern number outputScale;", 1, true),
         "CRT shader must not regress to logical-only scale calibration")
 
-    local ok, err = output.setMode("crt")
-    assert(ok, "CRT shader failed native compilation: " .. tostring(err))
+    assert(signalSource:find("rgbToYiq", 1, true),
+        "CRT signal pass must separate analogue luma/chroma")
+    assert(signalSource:find("signalSpread", 1, true),
+        "CRT signal pass must expose source-resolution bandwidth spread")
+    assert(signalSource:find("lumaBleed", 1, true),
+        "CRT signal pass must expose luma bandwidth loss")
+    assert(signalSource:find("compositeBleed", 1, true),
+        "CRT signal pass must expose chroma bandwidth loss")
+    assert(signalSource:find("chromaDelay", 1, true),
+        "CRT signal pass must expose chroma timing degradation")
 
-    -- Exercise the actual inverse seam used by touch, not only the formula.
+    local defaults = output.publicCrtDefaults()
+    assert(defaults.compositeBleed > 1 and defaults.lumaBleed > 0
+        and defaults.beamWidth > 0 and defaults.beamDriveExpansion > 0,
+        "shipping CRT defaults should be visibly signal/beam led, not a timid overlay")
+
+    local ok, err = output.setMode("crt")
+    assert(ok, "CRT pipeline failed native compilation: " .. tostring(err))
+
     output.resize(1000, 600)
     local rx, ry = output.hostToRender(500, 300)
     near(rx, 213, 1e-9, "CRT hostToRender centre x")
     near(ry, 120, 1e-9, "CRT hostToRender centre y")
 
-    -- When this API is available, also validate the exact same source as GLES.
-    -- Desktop GLES validation is evidence, not a substitute for Android.
     if love.graphics.validateShader then
-        local valid, message = love.graphics.validateShader(true, output.shaderSource())
-        assert(valid, "CRT shader failed GLES validation: " .. tostring(message))
+        local validBeam, beamMessage = love.graphics.validateShader(true, beamSource)
+        assert(validBeam, "CRT beam shader failed GLES validation: " .. tostring(beamMessage))
+        local validSignal, signalMessage = love.graphics.validateShader(true, signalSource)
+        assert(validSignal, "CRT signal shader failed GLES validation: " .. tostring(signalMessage))
     end
 end
 
--- Strong CRT experiments stay developer-only: they compile and share CRT
--- geometry, but must not become ordinary player-facing output modes.
+-- Player parameter edits serialize into the existing output-presentation
+-- preference. Deliberately extreme values remain legal: the UI is an instrument,
+-- not a safe-presets dialog.
+do
+    local custom = output.encodeCrtParameters({
+        beamStrength = 2.4,
+        beamWidth = 5.5,
+        beamDriveExpansion = 7.0,
+        signalSpread = 10.0,
+        lumaBleed = 4.0,
+        compositeBleed = 7.5,
+        chromaDelay = -9.0,
+        bloomStrength = 5.0,
+        convergencePixels = -12.0,
+        curvature = -0.5,
+        noiseStrength = 0.8,
+    })
+    assert(custom:find("^crt:"), "custom CRT settings must serialize as a CRT mode spec")
+    assert(output.isKnownMode(custom), "serialized CRT parameter mode must be restorable")
+
+    local ok, err = output.setMode(custom)
+    assert(ok, "extreme player CRT parameters should still compile: " .. tostring(err))
+    assert(output.getMode() == custom, "custom CRT mode spec must survive selection for persistence")
+
+    local p = output.crtParameters(custom)
+    near(p.beamWidth, 5.5, 1e-9, "extreme beam width round-trip")
+    near(p.compositeBleed, 7.5, 1e-9, "extreme chroma degradation round-trip")
+    near(p.chromaDelay, -9.0, 1e-9, "negative chroma delay round-trip")
+    near(p.convergencePixels, -12.0, 1e-9, "negative convergence round-trip")
+    near(p.curvature, -0.5, 1e-9, "reverse curvature round-trip")
+
+    local scale = output.transformForMode(custom, 1000, 600)
+    near(scale, 1000 / 426, 1e-9, "custom CRT uses ordinary CRT geometry")
+end
+
+-- Strong named experiments stay developer-only. They compile and share CRT
+-- geometry, but do not leak into the ordinary player output-mode list.
 do
     local publicModes = output.modeIds()
     assert(#publicModes == 2 and publicModes[1] == "nearest" and publicModes[2] == "crt",
@@ -139,7 +195,7 @@ do
             modeId .. " vertical centering")
 
         local ok, err = output.setMode(modeId)
-        assert(ok, modeId .. " shader failed native compilation: " .. tostring(err))
+        assert(ok, modeId .. " pipeline failed native compilation: " .. tostring(err))
     end
 
     local composite = output.crtLabPreset("composite")
@@ -162,26 +218,24 @@ do
     assert(output.crtLabPreset("not-a-preset") == nil,
         "unknown CRT lab preset should not resolve")
 
-    local labSource = output.crtLabShaderSource()
-    assert(labSource:find("lumaBleed", 1, true),
-        "CRT lab shader must expose luma bandwidth integration")
-    assert(labSource:find("bloomStrength", 1, true),
-        "CRT lab shader must expose neutral bright-pixel bloom")
-    assert(labSource:find("beamDriveExpansion", 1, true),
-        "CRT lab shader must expose drive-dependent beam width")
-    assert(labSource:find("halationStrength", 1, true),
-        "CRT lab shader must expose halation")
-    assert(labSource:find("grilleStrength", 1, true),
-        "CRT lab shader must expose a mask experiment")
-    assert(labSource:find("convergencePixels", 1, true),
-        "CRT lab shader must expose convergence drift")
-    assert(labSource:find("curvature", 1, true),
-        "CRT lab shader must expose curved-glass geometry")
-
-    if love.graphics.validateShader then
-        local valid, message = love.graphics.validateShader(true, labSource)
-        assert(valid, "CRT lab shader failed GLES validation: " .. tostring(message))
-    end
+    local signalSource = output.signalShaderSource()
+    local beamSource = output.crtLabShaderSource()
+    assert(signalSource:find("lumaBleed", 1, true),
+        "CRT signal shader must expose luma bandwidth integration")
+    assert(signalSource:find("compositeBleed", 1, true),
+        "CRT signal shader must expose chroma bandwidth integration")
+    assert(beamSource:find("bloomStrength", 1, true),
+        "CRT beam shader must expose neutral bright-pixel bloom")
+    assert(beamSource:find("beamDriveExpansion", 1, true),
+        "CRT beam shader must expose drive-dependent beam width")
+    assert(beamSource:find("halationStrength", 1, true),
+        "CRT beam shader must expose halation")
+    assert(beamSource:find("grilleStrength", 1, true),
+        "CRT beam shader must expose a mask experiment")
+    assert(beamSource:find("convergencePixels", 1, true),
+        "CRT beam shader must expose convergence drift")
+    assert(beamSource:find("curvature", 1, true),
+        "CRT beam shader must expose curved-glass geometry")
 end
 
 -- Unknown modes fail safely to the shipping nearest path.

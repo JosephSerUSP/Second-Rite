@@ -55,5 +55,104 @@ check(viewport.surfacePresentationPass({ presentationPass = "live", category = "
 check(viewport.surfacePresentationPass({ model = true }) == "environment",
     "unclassified placed models retain environment default")
 
+-- #1393: policy-only assertions let a compositor that returned a black world
+-- pass its suite. Exercise the actual Canvas hand-off and explicit box resolve.
+-- The callback deliberately draws in raster coordinates so this test isolates
+-- compositor ownership from WorldCamera/projection behavior.
+do
+    local previousCanvas = love.graphics.getCanvas()
+    local canvas = love.graphics.newCanvas(32, 24)
+    local ok, err = pcall(function()
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        compositor.draw(sessionWithScale(3), nil, nil,
+            function(_, _, _, options)
+                options = options or {}
+                local scale = options.rasterScale or 1
+                if options.presentationPass == "environment" then
+                    love.graphics.setColor(1, 0.25, 0.125, 1)
+                    love.graphics.rectangle("fill", 4 * scale, 4 * scale, 16 * scale, 12 * scale)
+                elseif options.presentationPass == "live" then
+                    love.graphics.setColor(0.125, 1, 0.25, 1)
+                    love.graphics.rectangle("fill", 24, 5, 4, 4)
+                end
+            end)
+        love.graphics.setCanvas()
+        local image = canvas:newImageData()
+        local er, eg, eb = image:getPixel(10, 10)
+        local lr, lg, lb = image:getPixel(25, 6)
+        check(er > 0.5 and eg > 0.05 and eb > 0.02,
+            "3x environment colour survives the supersample box resolve")
+        check(lg > 0.5 and lr < 0.5 and lb < 0.5,
+            "native live colour survives after the resolved environment")
+    end)
+    love.graphics.setCanvas(previousCanvas)
+    if canvas.release then canvas:release() end
+    check(ok, "pixel compositor path completes: " .. tostring(err))
+end
+
+-- Drive the production viewport as well. The synthetic test above distinguishes
+-- resolve failure from camera/model failure; this one catches the latter. Map 28
+-- is a shipped live-3D interior with the same calibrated town-sideview camera
+-- family used by the #1393 native staging control, including a large authored
+-- projection-window Y offset. Compare 3x occupancy against the ordinary 1x
+-- render so a Walker-sized remnant cannot certify a black environment.
+do
+    local loader = require("engine.data.loader")
+    local sessionModule = require("engine.session")
+    local exploration = require("engine.exploration")
+    local surface = require("presentation.surface")
+    loader.init()
+    local game = sessionModule.GameSession.new(loader)
+    game:initializeStartingParty()
+    exploration.loadMap(game, loader.getMapIndex(28))
+
+    local previousProfile = surface.getProfileId()
+    local psx = loader.system.dungeon.psxRendering
+    local previousScale = psx.environmentSupersample
+
+    local function nonBlackPixels(scale)
+        psx.environmentSupersample = scale
+        surface.setProfile("wide")
+        local width, height = surface.renderSize()
+        local canvas = surface.newRasterCanvas(width, height)
+        local previousCanvas = love.graphics.getCanvas()
+        local ok, result = pcall(function()
+            love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            love.graphics.setColor(1, 1, 1, 1)
+            viewport.draw(game, game.townTraversal.camera)
+            love.graphics.setCanvas()
+            local image = canvas:newImageData()
+            local count = 0
+            for y = 0, height - 1 do
+                for x = 0, width - 1 do
+                    local r, g, b = image:getPixel(x, y)
+                    if math.max(r, g, b) > 0.02 then count = count + 1 end
+                end
+            end
+            return count
+        end)
+        love.graphics.setCanvas(previousCanvas)
+        if canvas.release then canvas:release() end
+        if not ok then error(result, 0) end
+        return result
+    end
+
+    local ok, err = pcall(function()
+        local nativePixels = nonBlackPixels(1)
+        local supersampledPixels = nonBlackPixels(3)
+        print(string.format("  [INFO] selective-AA wide pixels: 1x=%d 3x=%d",
+            nativePixels, supersampledPixels))
+        check(nativePixels > 1000,
+            "live-3D fixture has a meaningful ordinary world render")
+        check(supersampledPixels > nativePixels * 0.5,
+            "3x selective AA retains the environment rather than only live remnants")
+    end)
+    psx.environmentSupersample = previousScale
+    surface.setProfile(previousProfile)
+    check(ok, "real selective-AA viewport path completes: " .. tostring(err))
+end
+
 print(string.format("WORLD PASS COMPOSITOR TESTS: %d passed, %d failed", passed, failed))
 assert(failed == 0, string.format("world pass compositor suite had %d failure(s)", failed))

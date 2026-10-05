@@ -65,6 +65,8 @@ jobs:
           python tools/blender/blender_locator.py
           echo "BLENDER_TESTS_REQUIRED=1" >> "$GITHUB_ENV"
 
+      # Same discovery as the optional host job, now with the pinned Blender
+      # required. New integration tests join CI without another handwritten list.
       - name: Full Blender suite (required integrations)
         run: xvfb-run -a python -m unittest discover -s tools/blender/tests -v
 
@@ -93,46 +95,6 @@ jobs:
           test -s "$output/ci_item_source_fixture.mtl"
           rm -f "$fixture" "$fixture"[0-9]*
           git diff --exit-code -- projects/hichaukitoden-game/assets/authoring/items
-
-      # Temporary PR #1400 fabrication bridge. The script and this hook are
-      # removed after the resulting first-save .blend documents are committed.
-      - name: Bootstrap PR 1400 consumable Blender sources
-        if: github.event_name == 'pull_request' && github.head_ref == 'agent/rework-consumables-2026-10-05'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          src=projects/hichaukitoden-game/assets/authoring/items
-          out="$RUNNER_TEMP/pr1400-consumable-source-bootstrap"
-          rm -rf "$out"
-          mkdir -p "$out/sources" "$out/runtime"
-
-          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python-exit-code 1 \
-            --python tools/blender/bootstrap_consumable_sources_pr1400.py
-
-          for item in potion hi_potion x_potion mega_potion healing_water ether; do
-            cp "$src/$item.blend" "$out/sources/$item.blend"
-            xvfb-run -a python tools/blender/compile_item_blends.py \
-              --source "$src/$item.blend" \
-              --output-dir "$out/runtime"
-          done
-
-          sha256sum "$out"/sources/*.blend "$out"/runtime/* > "$out/SHA256SUMS"
-          rm -f \
-            "$src/potion.blend" "$src/hi_potion.blend" "$src/x_potion.blend" \
-            "$src/mega_potion.blend" "$src/healing_water.blend" "$src/ether.blend"
-          rm -f \
-            "$src/potion.blend"[0-9]* "$src/hi_potion.blend"[0-9]* "$src/x_potion.blend"[0-9]* \
-            "$src/mega_potion.blend"[0-9]* "$src/healing_water.blend"[0-9]* "$src/ether.blend"[0-9]*
-          git diff --exit-code -- projects/hichaukitoden-game/assets/authoring/items
-
-      - name: Upload PR 1400 consumable source bootstrap
-        if: github.event_name == 'pull_request' && github.head_ref == 'agent/rework-consumables-2026-10-05'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr1400-consumable-source-bootstrap
-          path: ${{ runner.temp }}/pr1400-consumable-source-bootstrap
-          if-no-files-found: error
-          retention-days: 1
 
       - name: Compile committed sources read-only and compare runtime products
         shell: bash

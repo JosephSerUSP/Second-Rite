@@ -2,9 +2,9 @@
 --
 -- The environment remains live 3D. Only its colour raster is supersampled and
 -- box-resolved. A separate native-resolution environment pass reconstructs
--- pristine depth, then live actors/events render at native resolution against
--- that depth. This keeps architectural edges smooth while the pass-ownership
--- boundary stays deliberately hard.
+-- pristine depth, then live actors/events/effects render at native resolution
+-- against that depth. This keeps architectural edges smooth while the
+-- pass-ownership boundary stays deliberately hard.
 local surface = require("presentation.surface")
 
 local compositor = {}
@@ -88,13 +88,19 @@ local function restoreState()
     love.graphics.setColor(1, 1, 1, 1)
 end
 
+local function colorCanvas(binding)
+    if type(binding) == "table" then return binding[1] end
+    return binding
+end
+
 function compositor.draw(session, authoredCamera, inspection, drawWorld)
     if not compositor.isEligible(session) then
         return drawWorld(session, authoredCamera, inspection, nil)
     end
 
-    local activeColor = love.graphics.getCanvas()
-    if not activeColor then
+    local activeBinding = love.graphics.getCanvas()
+    local activeColor = colorCanvas(activeBinding)
+    if not activeColor or not activeColor.getDimensions then
         return drawWorld(session, authoredCamera, inspection, nil)
     end
 
@@ -109,6 +115,10 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         -- 1. High-resolution environment colour. Dither is intentionally off:
         -- screen-anchored PSX dither averaged through a 3x box filter is neither
         -- the native pattern nor the "expensive prerender" visual language.
+        -- World-space effects deliberately do NOT draw here: in the ordinary
+        -- renderer they resolve after live meshes against the same depth buffer.
+        -- Baking them into this colour image would make a foreground flame or
+        -- weather particle sit behind an actor regardless of world depth.
         love.graphics.setCanvas({
             t.envColorSS,
             depthstencil = t.envDepthSS,
@@ -119,7 +129,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
             rasterScale = scale,
             ditherLevels = 0,
             drawBackground = true,
-            drawWorldEffects = true,
+            drawWorldEffects = false,
             drawPost = false,
             preserveDepth = false,
         })
@@ -159,12 +169,15 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         love.graphics.setColorMask(true, true, true, true)
 
         -- 4. Native live layer. It uses the same PSX mesh shader/settings as
-        -- before, but depth-tests against the environment reconstructed above.
+        -- before, depth-tests against the environment reconstructed above, and
+        -- then draws world-space Effekseer against the resulting combined depth.
+        -- That preserves today's actor/effect ordering while keeping both sides
+        -- of that interaction on the native raster.
         drawWorld(session, authoredCamera, inspection, {
             presentationPass = "live",
             rasterScale = 1,
             drawBackground = false,
-            drawWorldEffects = false,
+            drawWorldEffects = true,
             drawPost = true,
             preserveDepth = false,
         })
@@ -172,7 +185,8 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
         love.graphics.pop()
         restoreState()
         -- Downstream map HUD / stencil consumers still expect an attached
-        -- depth-stencil buffer. Keep our native authoritative attachment bound.
+        -- depth-stencil buffer. Keep our native attachment bound even though the
+        -- live pass intentionally clears its contents before returning to 2D.
         love.graphics.setCanvas({
             activeColor,
             depthstencil = t.envDepthNative,
@@ -181,7 +195,7 @@ function compositor.draw(session, authoredCamera, inspection, drawWorld)
 
     if not ok then
         restoreState()
-        love.graphics.setCanvas(activeColor)
+        love.graphics.setCanvas(activeBinding)
         error(result, 0)
     end
     return result

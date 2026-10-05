@@ -236,7 +236,8 @@
       "vertexSnapPixels": 1,
       "cpuNearClip": false,
       "fogBands": 8,
-      "ditherLevels": 31
+      "ditherLevels": 31,
+      "environmentSupersample": 3
     }
   },
   "summoner": {

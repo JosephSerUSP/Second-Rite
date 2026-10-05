@@ -73,4 +73,21 @@ test('editor model API enumerates and serves authored OBJ files', async (t) => {
     const objText = await objResponse.text();
     assert.match(objText, /^mtllib\s|\nmtllib\s/m, 'served OBJ retains its material-library declaration');
     assert.match(objText, /^v\s/m, 'served OBJ contains geometry');
+
+    const bundleResponse = await fetch(`${base}/api/model-bundle?path=assets/models/items/lantern.obj`);
+    assert.strictEqual(bundleResponse.status, 200, 'bound source acquires its semantic Model');
+    assert.strictEqual(bundleResponse.headers.get('cache-control'), 'no-store');
+    const bundle = await bundleResponse.json();
+    assert.strictEqual(bundle.modelId, 'item.lantern');
+    assert.deepStrictEqual(bundle.materialSlots.map(slot => slot.id).sort(), ['body', 'frame']);
+    assert.ok(bundle.materialSlots.every(slot => slot.appearance.color.length === 4));
+    const byId = await fetch(`${base}/api/model-bundle?path=model:item.lantern`);
+    assert.deepStrictEqual(await byId.json(), bundle, 'Model identity and source adapter share resolved facts');
+    assert.strictEqual((await fetch(`${base}/api/model-bundle?path=model:missing`)).status, 422);
+    assert.strictEqual((await fetch(`${base}/api/model-bundle?path=${known.path}`)).status, 204,
+        'unmigrated sources remain explicit');
+    for (const name of ['contract', 'three']) {
+        const moduleResponse = await fetch(`${base}/model-bundle-${name}.js`);
+        assert.strictEqual(moduleResponse.status, 200, `shared ${name} browser module is available`);
+    }
 });

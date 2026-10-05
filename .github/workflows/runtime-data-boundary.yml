@@ -81,8 +81,11 @@ jobs:
           node-version: '24'
 
       - name: Install LOVE
+        # Canonical staging compiles registered Models with pinned tooling.
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+      - name: Install pinned staging dependencies
+        run: npm ci --ignore-scripts
       - name: Install Mesa software OpenGL
         # Version, URL and digest live in the action, not here (#725).
         uses: ./.github/actions/install-mesa

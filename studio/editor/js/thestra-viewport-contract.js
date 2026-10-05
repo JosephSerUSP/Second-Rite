@@ -51,6 +51,24 @@
 
 
     function runtimePlacementTransformToThestra(placement, coordinateSystem) {
+        if (placement && placement.modelInstance) {
+            const transform = placement.modelInstance.transform;
+            const m = transform && transform.orientation;
+            const t = transform && transform.translation;
+            const s = transform && transform.scale;
+            if (!Array.isArray(m) || m.length !== 9 || !m.every(Number.isFinite)
+                    || !Array.isArray(t) || t.length !== 3 || !t.every(Number.isFinite)
+                    || !Number.isFinite(s) || s <= 0) throw new Error('Invalid resolved Model Instance transform');
+            const translation = runtimePositionToThestra(t, coordinateSystem);
+            // Conjugate runtime XYZ by the shared XZY renderer permutation.
+            const axes = [0, 2, 1];
+            const rows = [];
+            for (const row of axes) {
+                for (const column of axes) rows.push(m[row * 3 + column] * s);
+                rows.push(translation[axes.indexOf(row)]);
+            }
+            return rows.concat([0, 0, 0, 1]);
+        }
         const transform = placement && placement.transform || {};
         const m = transform.matrix2d;
         const t = transform.translation;
@@ -69,6 +87,20 @@
 
     function runtimeNormalToThestra(value) {
         return [Number(value[0]), Number(value[2]), Number(value[1])];
+    }
+
+    function runtimeLocalModelTransformToThestra() {
+        return [1,0,0,0, 0,0,1,0, 0,1,0,0, 0,0,0,1];
+    }
+
+    function transformModelInstancePoint(instance, point, normal = false) {
+        const transform = instance.transform;
+        const m = transform.orientation;
+        const scale = normal ? 1 : transform.scale;
+        return [0, 1, 2].map(row => {
+            const value = m[row*3]*point[0] + m[row*3+1]*point[1] + m[row*3+2]*point[2];
+            return value * scale + (normal ? 0 : transform.translation[row]);
+        });
     }
 
     function eventVisualPlan(asset) {
@@ -306,6 +338,8 @@
         ORBIT_STEP_DEGREES,
         transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra, thestraPositionToRuntime,
         runtimePlacementTransformToThestra, runtimeNormalToThestra,
+        runtimeLocalModelTransformToThestra,
+        transformModelInstancePoint,
         eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
         provisionalRegion,
         cellCenter, cellCoordinate,

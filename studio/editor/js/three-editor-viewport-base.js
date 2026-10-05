@@ -7,6 +7,8 @@ import '/js/thestra-viewport-contract.js';
 import '/js/three-world-fidelity-core.js';
 import '/js/three-definition-consumer.js';
 import '/js/spatial-interaction.js';
+import '/model-bundle-contract.js';
+import '/model-bundle-three.js';
 
 const Contract = globalThis.ThestraViewportContract;
 if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
@@ -994,7 +996,7 @@ export function createThreeEditorViewport(container, options = {}) {
                 if (entry) entry.fallback.visible = true;
             });
         } else {
-            const finish = object => {
+            const finish = (object, compiled = false) => {
                 object.traverse(child => {
                     if (!child.isMesh) return;
                     const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -1020,8 +1022,8 @@ export function createThreeEditorViewport(container, options = {}) {
                     object.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0),
                         new THREE.Vector3(axis.x, 0, axis.y));
                 }
-                fitEventModel(object);
-                object.position.y = 0.01;
+                if (compiled) object.scale.multiplyScalar(event.source.modelScale || 1);
+                else { fitEventModel(object); object.position.y = 0.01; }
                 visual.add(object);
             };
             const fail = () => {
@@ -1038,13 +1040,22 @@ export function createThreeEditorViewport(container, options = {}) {
             // does not follow `mtllib` itself; resolving the companion file is
             // what makes transition arrows and ordinary event props use their
             // author-defined colour instead of an unlit anonymous fallback.
-            if (/\.obj$/i.test(plan.path)) {
+            const loadLegacy = () => { if (/\.obj$/i.test(plan.path)) {
                 const mtlPath = plan.path.replace(/\.obj$/i, '.mtl');
                 new MTLLoader().load(assetUrl(mtlPath), materials => {
                     materials.preload();
                     loadObject(materials);
                 }, undefined, () => loadObject(null));
-            } else loadObject(null);
+            } else loadObject(null); };
+            fetch('/api/model-bundle?path=' + encodeURIComponent(plan.path), { cache: 'no-store' }).then(async response => {
+                if (response.status === 204) { loadLegacy(); return; }
+                if (!response.ok) throw new Error((await response.json()).error || 'Model compilation failed');
+                const object = globalThis.ThestraModelBundleThree.toThreeObject(await response.json(), THREE);
+                // The semantic bundle is Z-up. Convert only at this renderer
+                // boundary; legacy OBJ is already in Three's native axes.
+                object.applyMatrix4(new THREE.Matrix4().set(...Contract.runtimeLocalModelTransformToThestra()));
+                finish(object, true);
+            }).catch(error => { console.error('Event Model preview failed:', error); fail(); });
         }
         // A visual asset enriches an Event; it never replaces the shared
         // authoring box.  Keeping the box visible gives sprites, props and

@@ -2,9 +2,9 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { NodeIO, Primitive } = require('@gltf-transform/core');
 const contract = require('./model-contract');
 const geometry = require('./static-geometry');
+const { compileAppearance } = require('./compile-appearance');
 
 function projectFile(projectRoot, relative, label) {
     const root = path.resolve(projectRoot);
@@ -65,6 +65,7 @@ function gltfDiagnostics(root) {
 }
 
 async function normalizeGltf({ filePath, recipe }) {
+    const { NodeIO, Primitive } = require('@gltf-transform/core');
     const io = new NodeIO();
     const document = await io.read(filePath);
     const root = document.getRoot();
@@ -139,97 +140,38 @@ async function normalizeGltf({ filePath, recipe }) {
     return { geometry: output.finish(), diagnostics: gltfDiagnostics(root) };
 }
 
-function materialAt(mesh, geometryValue, triangleOffset) {
-    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    let materialIndex = 0;
-    if (Array.isArray(geometryValue.groups) && geometryValue.groups.length > 0) {
-        const group = geometryValue.groups.find(candidate => triangleOffset >= candidate.start
-            && triangleOffset < candidate.start + candidate.count);
-        if (group) materialIndex = group.materialIndex || 0;
-    }
-    const material = materials[materialIndex];
-    return material && typeof material.name === 'string' ? material.name : '';
-}
-
-async function normalizeObj({ filePath, recipe }) {
-    const [{ OBJLoader }] = await Promise.all([
-        import('three/examples/jsm/loaders/OBJLoader.js'),
-    ]);
+async function normalizeObj({ filePath, recipe, runtimeRoot = path.resolve(__dirname, '../../runtime') }) {
     const text = fs.readFileSync(filePath, 'utf8');
-    const object = new OBJLoader().parse(text);
-    object.updateMatrixWorld(true);
-    const output = geometry.collector();
-
-    object.traverse(mesh => {
-        if (!mesh || !mesh.isMesh || !mesh.geometry) return;
-        const source = mesh.geometry;
-        const position = source.getAttribute('position');
-        if (!position) return;
-        const normal = source.getAttribute('normal');
-        const uv = source.getAttribute('uv');
-        const color = source.getAttribute('color');
-        const index = source.getIndex();
-        const count = index ? index.count : position.count;
-        if (count % 3 !== 0) throw new Error(`Model '${recipe.id}' OBJ mesh '${mesh.name || '(unnamed)'}' is not triangulated`);
-        const worldMatrix = mesh.matrixWorld.elements;
-        const determinant = geometry.determinant3(worldMatrix);
-        if (!Number.isFinite(determinant) || Math.abs(determinant) <= geometry.EPSILON) {
-            throw new Error(`Model '${recipe.id}' OBJ mesh '${mesh.name || '(unnamed)'}' has non-invertible transform`);
-        }
-        if (determinant < 0) throw new Error(`Model '${recipe.id}' OBJ mesh '${mesh.name || '(unnamed)'}' has mirrored transform`);
-
-        for (let offset = 0; offset < count; offset += 3) {
-            const sourceMaterial = materialAt(mesh, source, offset);
-            const slot = contract.materialSlotFor(recipe, sourceMaterial);
-            const corners = [];
-            for (let corner = 0; corner < 3; corner += 1) {
-                const vertexIndex = index ? index.getX(offset + corner) : offset + corner;
-                const localPosition = [position.getX(vertexIndex), position.getY(vertexIndex), position.getZ(vertexIndex)];
-                const worldPosition = geometry.transformPosition(worldMatrix, localPosition);
-                let targetNormal = null;
-                if (normal) {
-                    const localNormal = [normal.getX(vertexIndex), normal.getY(vertexIndex), normal.getZ(vertexIndex)];
-                    const worldNormal = geometry.transformNormal(worldMatrix, localNormal);
-                    targetNormal = geometry.normalize3(geometry.sourceVectorToWorld(worldNormal), 'Thestra OBJ normal');
-                }
-                corners.push({
-                    position: geometry.sourceVectorToWorld(worldPosition, recipe.sourceUnitsToMapCells),
-                    normal: targetNormal,
-                    // Wavefront UV origin is lower-left; Thestra's neutral model
-                    // contract matches the existing runtime adapter's upper-left
-                    // convention.
-                    uv: uv ? [uv.getX(vertexIndex), 1 - uv.getY(vertexIndex)] : [0, 0],
-                    color: color
-                        ? [color.getX(vertexIndex), color.getY(vertexIndex), color.getZ(vertexIndex), 1]
-                        : [1, 1, 1, 1],
-                });
-            }
-            output.appendTriangle(slot, corners);
-        }
-    });
-
-    const diagnostics = /(^|\n)\s*mtllib\s+/m.test(text)
-        ? [{
-            code: 'OBJ_MTL_APPEARANCE_NOT_IMPORTED',
-            severity: 'info',
-            detail: 'OBJ material names become stable Model materialSlots; MTL appearance remains on the legacy path until Surface projection is implemented.',
-        }]
-        : [];
-    return { geometry: output.finish(), diagnostics };
+    const parsed = require('./lua-source-host').parseObj(runtimeRoot, text);
+    const scale = recipe.sourceUnitsToMapCells;
+    const bounds = Object.fromEntries(Object.entries(parsed.bounds).map(([key, value]) => [key, value * scale]));
+    const groups = parsed.groups.map(group => ({
+        materialSlot: contract.materialSlotFor(recipe, group.material),
+        vertices: group.vertices.map(row => [row[0] * scale, row[1] * scale, row[2] * scale, ...row.slice(3)]),
+    }));
+    const diagnostics = parsed.mtllib ? [{
+        code: 'OBJ_MTL_APPEARANCE_NOT_IMPORTED', severity: 'info',
+        detail: 'OBJ material names become stable Model materialSlots; unbound slots require explicit appearance realization.',
+    }] : [];
+    return { geometry: { groups, vertexCount: parsed.vertexCount, bounds }, diagnostics };
 }
 
-async function importRecipe({ projectRoot, recipe }) {
+async function importRecipe({ projectRoot, recipe, runtimeRoot }) {
     const validated = contract.validateRecipe(recipe.id, recipe);
     const filePath = projectFile(projectRoot, validated.source.path, `Model '${validated.id}' source`);
     const bytes = fs.readFileSync(filePath);
     const normalized = validated.source.kind === 'obj'
-        ? await normalizeObj({ filePath, recipe: validated })
+        ? await normalizeObj({ filePath, recipe: validated, runtimeRoot })
         : await normalizeGltf({ filePath, recipe: validated });
+    const appearance = validated.appearance
+        ? compileAppearance(projectRoot, validated, bytes.toString('utf8'), runtimeRoot) : {};
+    if (validated.appearance) normalized.diagnostics = normalized.diagnostics.filter(d => d.code !== 'OBJ_MTL_APPEARANCE_NOT_IMPORTED');
     const bundle = contract.makeBundle({
         recipe: validated,
         sourceSha256: contract.sha256(bytes),
         geometry: normalized.geometry,
         diagnostics: normalized.diagnostics,
+        ...appearance,
     });
     return contract.validateBundle(bundle);
 }

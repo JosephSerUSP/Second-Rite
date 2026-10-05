@@ -66,6 +66,23 @@ function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     return normalX * x + tangentX * y, normalY * x + tangentY * y
 end
 
+-- Existing placement grammars resolve into one consumer-level Model Instance.
+-- Callers keep their gameplay ownership; geometry only receives resolved facts.
+function viewport_3d.resolveModelInstance(spec, id, modelId, x, y, z, axis, normalX, normalY, provenance)
+    local xx, xy, yx, yy = 1, 0, 0, 1
+    if normalX or normalY then
+        xx, xy = viewport_3d.wallModelFrame(1, 0, normalX, normalY)
+        yx, yy = viewport_3d.wallModelFrame(0, 1, normalX, normalY)
+    elseif axis == "y" then
+        xx, xy, yx, yy = 0, 1, -1, 0
+    end
+    return require("engine.geometry.model_instance").new(id, modelId, {
+        translation = { x, y, z or 0 },
+        orientation = { xx, yx, 0, xy, yy, 0, 0, 0, 1 },
+        scale = spec.modelScale or 1,
+    }, provenance, spec.bakedLighting)
+end
+
 -- Transition arrows point along local +Z after OBJ normalization. Their idle
 -- motion is a roll around that shaft, so the authored direction never wobbles
 -- and the marker remains spatially truthful while still reading as active.
@@ -956,6 +973,19 @@ function viewport_3d.resolveEventSpritePath(ev, session)
     return pres.sprite
 end
 
+function viewport_3d.eventWorldPosition(rawEv)
+    local position = rawEv.worldPosition or rawEv.position
+    if type(position) == "table" then
+        return tonumber(position[1] or position.x),
+            tonumber(position[2] or position.y), tonumber(position[3] or position.z or 0)
+    end
+    return rawEv.x + 1.5, rawEv.y + 1.5, 0
+end
+
+function viewport_3d.eventModelInstanceId(event)
+    return "event:" .. tostring(event.id)
+end
+
 function viewport_3d.collectEventModelPlacements(session)
     local placements = {}
     local mapData = session and session.currentMapData
@@ -964,10 +994,15 @@ function viewport_3d.collectEventModelPlacements(session)
             if not rawEv.wallEvent then
                 local pres = viewport_3d.resolveEventPresentation(rawEv, session)
                 if pres.visual == "model" and pres.model then
+                    local x, y, z = viewport_3d.eventWorldPosition(rawEv)
+                    if session.townTraversal then
+                        z = require("engine.bounded_lane").groundAt(session, y) or z
+                    end
                     table.insert(placements, {
                         model = pres.model,
-                        x = rawEv.x + 1.5,
-                        y = rawEv.y + 1.5,
+                        x = x, y = y, z = z,
+                        modelScale = tonumber(rawEv.modelScale) or 1,
+                        instanceId = viewport_3d.eventModelInstanceId(rawEv),
                         event = rawEv,
                         presentation = pres
                     })
@@ -2819,7 +2854,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
     end
 
     structure.modelSurfaces = structure.modelSurfaces or {}
-    local objModel = require("presentation.obj_model")
+    local modelResource = require("presentation.model_resource")
     local function ensurePlacedModel(spec, cacheKey, originX, originY, axis, normalX, normalY, originZ)
         originZ = tonumber(originZ) or 0
         if structure.modelSurfaces[cacheKey] then
@@ -2828,8 +2863,6 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         end
         buildProfiler.cache("materialize.placedModel", false)
         buildProfiler.add("materialize.uniqueSourcePlacements", 1)
-        local bakedTownEnvironment = session.townTraversal
-            and tostring(cacheKey):match("^town%-environment:") ~= nil
         -- A variant names either a hand-modelled OBJ or an image-authored
         -- geometry asset. Both compile to the same representation, so this is
         -- the only place the world renderer knows the difference.
@@ -2842,8 +2875,14 @@ local function drawWorldSpace(session, authoredCamera, inspection)
         elseif spec.geometry then
             model = require("engine.geometry").load(spec.geometry)
         else
-            model = objModel.load(spec.model)
+            model = modelResource.load(spec.model)
         end
+        local modelInstance = viewport_3d.resolveModelInstance(spec, spec.instanceId or cacheKey,
+            model.modelId or viewport_3d.meshSource(spec) or cacheKey,
+            originX, originY, originZ, axis, normalX, normalY,
+            spec.provenance or { reference = spec.model or spec.geometry })
+        local instance = require("engine.geometry.model_instance")
+        local bakedLighting = modelInstance.bakedLighting
         local placed = {}
         local transitionArrowSpin = spec.transitionArrowAxis and transitionArrowSpinAngle() or 0
         for _, modelGroup in ipairs(model.groups) do
@@ -2870,31 +2909,22 @@ local function drawWorldSpace(session, authoredCamera, inspection)
                     lx, ly, lz = arrowPoint.x - originX, arrowPoint.y - originY, arrowPoint.z - originZ
                     nx, ny, nz = nx * rightX + nz * direction.x,
                         nx * rightY + nz * direction.y, ny
-                elseif normalX or normalY then
-                    -- Wall models use a stable local frame: +X is depth out
-                    -- of the wall, +Y runs along it, and +Z is up. Mapping by
-                    -- the actual visible-face normal (not only its axis) keeps
-                    -- one-sided reliefs outside all four wall orientations.
-                    lx, ly = viewport_3d.wallModelFrame(lx, ly, normalX, normalY)
-                    nx, ny = viewport_3d.wallModelFrame(nx, ny, normalX, normalY)
-                elseif axis == "y" then
-                    lx, ly = -ly, lx
-                    nx, ny = -ny, nx
                 end
+                local wx, wy, wz
                 if not spec.transitionArrowAxis then
-                    local scale = tonumber(spec.modelScale) or 1
-                    lx, ly, lz = lx * scale, ly * scale, lz * scale
+                    wx, wy, wz = instance.position(modelInstance, lx, ly, lz)
+                    nx, ny, nz = instance.direction(modelInstance, nx, ny, nz)
+                else
+                    wx, wy, wz = originX + lx, originY + ly, originZ + lz
                 end
-                local wx, wy, wz = originX + lx, originY + ly, originZ + lz
                 minX, maxX = math.min(minX, wx), math.max(maxX, wx)
                 minY, maxY = math.min(minY, wy), math.max(maxY, wy)
-                -- The town package is already a beauty bake. Map-grid lighting
-                -- is intentionally not sampled for it: these world positions
-                -- live outside the one-cell proof Map and would otherwise
-                -- multiply the atlas by a black/empty light sample.
-                local light = bakedTownEnvironment
+                -- A baked appearance consumes its authored illumination.
+                -- Live light sampling is controlled by the resolved policy,
+                -- independently of the placement's role or cache identity.
+                local light = bakedLighting
                     and { 1, 1, 1, 1 } or colorAt(wx, wy, wz, false)
-                local directional = bakedTownEnvironment and 1 or math.max(0.35,
+                local directional = bakedLighting and 1 or math.max(0.35,
                     0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
                 vertices[#vertices + 1] = {
                     wx, wy, vertex[4], vertex[5],
@@ -2912,6 +2942,7 @@ local function drawWorldSpace(session, authoredCamera, inspection)
             gpuSpan()
             placed[#placed + 1] = {
                 mesh = mesh, model = true, vertices = vertices,
+                modelInstance = modelInstance, materialSlot = modelGroup.material,
                 texture = modelGroup.texture,
                 isHeightSurface = spec.runtimeSurface and true or false,
                 centerX = originX, centerY = originY, centerZ = originZ + 0.5,
@@ -3116,7 +3147,8 @@ end
     if session.townTraversal and session.townTraversal.environment then
         local environment = session.townTraversal.environment
         queuePlacedModels(ensurePlacedModel(
-            { model = environment.renderMesh },
+            { model = environment.renderMesh, bakedLighting = environment.bakedLighting,
+                provenance = { kind = "environment", manifestPath = environment.manifestPath } },
             "town-environment:" .. environment.manifestPath,
             0, 0, "x"))
     end
@@ -3219,15 +3251,6 @@ end
         end
     end
 
-    local function eventWorldPosition(rawEv)
-        local position = rawEv.worldPosition or rawEv.position
-        if type(position) == "table" then
-            return tonumber(position[1] or position.x),
-                tonumber(position[2] or position.y), tonumber(position[3] or position.z or 0)
-        end
-        return rawEv.x + 1.5, rawEv.y + 1.5, 0
-    end
-
     local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex, facing)
         local centerX, centerY = x, y
         z = z or 0
@@ -3264,12 +3287,14 @@ end
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
                 if presentation.visual == "model" and presentation.model
                 and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
-                    local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1 }
+                    local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1,
+                        instanceId = viewport_3d.eventModelInstanceId(rawEv),
+                        provenance = { kind = "event", id = rawEv.id } }
                     if presentation.model:match("transition_arrow") then
                         modelSpec.transitionArrowDirection = rawEv.direction
                         modelSpec.transitionArrowAxis = worldView.transitionArrowAxis(rawEv.direction)
                     end
-                    local worldX, worldY, worldZ = eventWorldPosition(rawEv)
+                    local worldX, worldY, worldZ = viewport_3d.eventWorldPosition(rawEv)
                     -- A world-positioned model belongs on the traversal floor,
                     -- which can be sloped.  The old placed-model path retained
                     -- only x/y and silently rendered every model at z = 0.
@@ -3293,7 +3318,7 @@ end
                 elseif presentation.visual == "sprite" then
                     local image = getEventSprite(rawEv, session)
                     if image then
-                        local worldX, worldY, worldZ = eventWorldPosition(rawEv)
+                        local worldX, worldY, worldZ = viewport_3d.eventWorldPosition(rawEv)
                         addBillboard(image, worldX, worldY, worldZ,
                             rawEv.worldHeight, rawEv.frameWidth, rawEv.frameHeight, rawEv.frameIndex)
                     end

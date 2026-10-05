@@ -1,9 +1,10 @@
+(function(root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('three'), require('./model-bundle-contract'));
+    else root.ThestraModelBundleThree = factory(null, root.ThestraModelBundleContract);
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(defaultThree, contract) {
 'use strict';
 
-const THREE = require('three');
-const contract = require('./model-contract');
-
-function geometryForGroup(group) {
+function geometryForGroup(group, THREE = defaultThree) {
     const positions = [];
     const uvs = [];
     const normals = [];
@@ -23,15 +24,48 @@ function geometryForGroup(group) {
     return geometry;
 }
 
-function toThreeGeometryGroups(bundle) {
+function toThreeGeometryGroups(bundle, THREE = defaultThree) {
     contract.validateBundle(bundle);
     return bundle.geometry.groups.map(group => ({
         materialSlot: group.materialSlot,
-        geometry: geometryForGroup(group),
+        geometry: geometryForGroup(group, THREE),
     }));
 }
 
-module.exports = {
+function toThreeObject(bundle, THREE = defaultThree) {
+    contract.validateBundle(bundle);
+    const object = new THREE.Group();
+    const slots = new Map(bundle.materialSlots.map(slot => [slot.id, slot]));
+    for (const group of bundle.geometry.groups) {
+        const slot = slots.get(group.materialSlot);
+        if (!slot.appearance) throw new Error(`Model '${bundle.modelId}' slot '${slot.id}' has no compiled appearance binding`);
+        if (slot.appearance.passes?.length) throw new Error(`Model '${bundle.modelId}' overlay preview requires native runtime rendering`);
+    }
+    for (const entry of toThreeGeometryGroups(bundle, THREE)) {
+        const slot = slots.get(entry.materialSlot);
+        const appearance = slot.appearance;
+        const material = new THREE.MeshPhongMaterial({ vertexColors: true, side: THREE.DoubleSide });
+        material.name = slot.id;
+        material.color.setRGB(...appearance.color.slice(0, 3));
+        material.opacity = appearance.color[3];
+        material.transparent = material.opacity < 1;
+        if (appearance.texture) {
+            material.map = new THREE.TextureLoader().load('/' + appearance.texture);
+            material.map.flipY = false;
+            material.map.magFilter = THREE.NearestFilter;
+            material.map.minFilter = THREE.NearestFilter;
+        }
+        object.add(new THREE.Mesh(entry.geometry, material));
+    }
+    object.userData.modelId = bundle.modelId;
+    object.userData.materialSlots = bundle.materialSlots;
+    return object;
+}
+
+return {
     geometryForGroup,
     toThreeGeometryGroups,
+    toThreeObject,
 };
+
+});

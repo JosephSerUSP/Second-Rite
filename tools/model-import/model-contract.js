@@ -7,7 +7,7 @@ const path = require('node:path');
 const BUNDLE_KIND = 'thestra-model-bundle';
 const BUNDLE_VERSION = 1;
 const COMPILER_ID = 'thestra-model-import';
-const COMPILER_VERSION = 1;
+const COMPILER_VERSION = 2;
 const SOURCE_KINDS = new Set(['obj', 'gltf']);
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
 const SLOT_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -74,6 +74,9 @@ function validateRecipe(id, recipe) {
         throw new Error(`Model '${id}' glTF source must end in .glb or .gltf`);
     }
     const sourceUnitsToMapCells = finitePositive(recipe.sourceUnitsToMapCells, `Model '${id}' sourceUnitsToMapCells`);
+    if (recipe.appearance !== undefined && (recipe.appearance !== 'obj-mtl' || recipe.source.kind !== 'obj')) {
+        throw new Error(`Model '${id}' appearance must be obj-mtl on an OBJ source`);
+    }
 
     const slots = recipe.materialSlots;
     if (!slots || typeof slots !== 'object' || Array.isArray(slots) || Object.keys(slots).length === 0) {
@@ -103,6 +106,7 @@ function validateRecipe(id, recipe) {
         }
         const normalized = { sourceMaterials: [...names].sort() };
         if (slot.surface !== undefined) {
+            if (recipe.appearance) throw new Error(`Model '${id}' cannot replace a semantic Surface with source MTL appearance`);
             if (typeof slot.surface !== 'string' || !slot.surface) {
                 throw new Error(`Model '${id}' materialSlot '${slotId}' surface must be a non-empty string when authored`);
             }
@@ -120,6 +124,7 @@ function validateRecipe(id, recipe) {
         id,
         source: { kind: recipe.source.kind, path: sourcePath },
         sourceUnitsToMapCells,
+        ...(recipe.appearance ? { appearance: recipe.appearance } : {}),
         materialSlots: normalizedSlots,
         ...(recipe.defaultMaterialSlot === undefined ? {} : { defaultMaterialSlot: recipe.defaultMaterialSlot }),
     };
@@ -156,7 +161,7 @@ function materialSlotFacts(recipe) {
     }));
 }
 
-function makeBundle({ recipe, sourceSha256, geometry, diagnostics = [] }) {
+function makeBundle({ recipe, sourceSha256, geometry, diagnostics = [], appearances, dependencies }) {
     const recipeCanonical = validateRecipe(recipe.id, recipe);
     return {
         kind: BUNDLE_KIND,
@@ -174,45 +179,17 @@ function makeBundle({ recipe, sourceSha256, geometry, diagnostics = [] }) {
             sourceUnitsToMapCells: recipeCanonical.sourceUnitsToMapCells,
         },
         geometry,
-        materialSlots: materialSlotFacts(recipeCanonical),
+        materialSlots: materialSlotFacts(recipeCanonical).map(slot => ({ ...slot,
+            ...(appearances ? { appearance: appearances[slot.id] } : {}) })),
         provenance: {
             recipeSha256: sha256(Buffer.from(serialize(recipeCanonical), 'utf8')),
+            ...(dependencies ? { dependencies } : {}),
         },
         diagnostics,
     };
 }
 
-function validateBundle(bundle) {
-    if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) throw new Error('Model Bundle must be an object');
-    if (bundle.kind !== BUNDLE_KIND || bundle.version !== BUNDLE_VERSION) throw new Error('unsupported Model Bundle contract');
-    if (typeof bundle.modelId !== 'string' || !ID_PATTERN.test(bundle.modelId)) throw new Error('Model Bundle has invalid modelId');
-    if (!bundle.geometry || !Array.isArray(bundle.geometry.groups) || bundle.geometry.groups.length === 0) {
-        throw new Error('Model Bundle geometry requires groups');
-    }
-    let vertexCount = 0;
-    for (const [groupIndex, group] of bundle.geometry.groups.entries()) {
-        if (!group || typeof group.materialSlot !== 'string' || !SLOT_PATTERN.test(group.materialSlot)) {
-            throw new Error(`Model Bundle group ${groupIndex} has invalid materialSlot`);
-        }
-        if (!Array.isArray(group.vertices) || group.vertices.length === 0) throw new Error(`Model Bundle group ${groupIndex} requires vertices`);
-        for (const [vertexIndex, vertex] of group.vertices.entries()) {
-            if (!Array.isArray(vertex) || vertex.length !== 12 || vertex.some(value => !Number.isFinite(value))) {
-                throw new Error(`Model Bundle group ${groupIndex} vertex ${vertexIndex} must contain 12 finite numbers`);
-            }
-            vertexCount += 1;
-        }
-    }
-    if (bundle.geometry.vertexCount !== vertexCount) throw new Error('Model Bundle vertexCount disagrees with vertex rows');
-    const bounds = bundle.geometry.bounds;
-    for (const key of ['minX', 'minY', 'minZ', 'maxX', 'maxY', 'maxZ']) {
-        if (!bounds || !Number.isFinite(bounds[key])) throw new Error(`Model Bundle bounds.${key} must be finite`);
-    }
-    const slots = new Set((bundle.materialSlots || []).map(slot => slot && slot.id));
-    for (const group of bundle.geometry.groups) {
-        if (!slots.has(group.materialSlot)) throw new Error(`Model Bundle group refers to undeclared materialSlot '${group.materialSlot}'`);
-    }
-    return bundle;
-}
+const { validateBundle } = require('./model-bundle-contract');
 
 module.exports = {
     BUNDLE_KIND,

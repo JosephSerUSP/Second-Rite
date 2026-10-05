@@ -4,12 +4,25 @@ The room the player is given, and the first interior in the game. Everything
 here comes out of the authored opening text rather than being invented:
 
     "This'll be home for both of you."
+    Two beds, a washstand, and a window that does not close properly.
+    It is paid for until spring.
     Yours has been cleaned, but not emptied of its previous lives.
     Someone has dragged a feed bowl in from the stable.
 
-So it boards a rider AND a Moa; it carries traces of whoever had it before
-(the pale rectangle where a picture hung, a coat hook set too low for an
-adult); and Saban's end has straw and a chipped feed bowl.
+So it boards a rider AND a Moa: two beds, a washstand, a window that sits a
+little open; it carries traces of whoever had it before (the pale rectangle
+where a picture hung, a coat hook set too low for an adult); and Saban's end has
+straw and a chipped feed bowl.
+
+THE AXIS SPENT is the ALCOVE. The beds are not against a flat wall: they sit in
+an *alcova*, the sleeping recess of a rented colonial room, stepped back from the
+room with a header across its mouth, so the room has a corner in its silhouette
+and the two beds read as "where you sleep" before anything else does. The rest of
+the room is the day side: the window, the washstand, the table, and Saban's end.
+
+This room belongs to the Passage House, one apartment off the gallery (layout doc
+section 5.1). Its door is the floor tongue toward the camera; the gallery lies
+beyond it.
 
 The shell, thresholds and light vocabulary live in `interior.py`. This file
 declares only what makes Room 3 itself.
@@ -41,8 +54,9 @@ ASSET_ID = "passage_house_room3"
 DEPTH = 6.4
 CEILING_Z = 3.5
 
-WINDOW = (0.6, 2.0, 1.15, 2.5)   # y0, y1, z0, z1
-EXIT_Y = -1.4
+ALCOVE = (-3.7, -0.9, 2.1)        # y0, y1, how far the wall steps back (screen right)
+WINDOW = (1.5, 2.9, 1.15, 2.5)    # y0, y1, z0, z1 -- the day side, screen left
+EXIT_Y = -0.1
 
 
 def build():
@@ -54,60 +68,72 @@ def build():
     back_x = room.back_x
 
     room.floor()
-    room.back_wall(openings=[WINDOW])
+    room.back_wall(openings=[WINDOW], alcoves=[ALCOVE])
     room.side_walls()
     room.ceiling(beams=5)
     room.window(*WINDOW)
     tab_x, tab_y = room.exit_threshold(EXIT_Y)
 
     # --- colonial Portuguese surfaces --------------------------------------
-    furn.azulejo_dado(room, height=1.0)
+    # The dado stops at the alcove's edge: the helper knows openings, not recesses,
+    # and a band across the mouth would hide the beds behind it.
+    furn.azulejo_dado(room, height=1.0, y0=ALCOVE[1])
     furn.window_dressing(room, "window", *WINDOW)
 
-    # --- the rider's end (screen right) ------------------------------------
-    furn.cabinet(room, "wardrobe", (back_x - 0.4, -3.15))
-    furn.bed(room, "bed", (back_x - 1.05, -1.85))
-    furn.chest(room, "chest", (back_x - 0.45, -0.3))
-    furn.shelf(room, "shelf", y=3.15, z=2.0, length=1.0)
-    furn.lantern(room, "lantern", y=-1.15, z=2.1)
+    # --- the alcove: two beds, heads to the far wall -------------------------
+    alcove_back = back_x + ALCOVE[2]
+    for index, y in enumerate((-3.05, -1.55)):
+        furn.bed(room, f"bed_{index}", (alcove_back - 1.0, y))
+    furn.chest(room, "chest", (alcove_back - 0.4, -2.3), length=0.7, depth=0.5, height=0.5)
+    furn.lantern(room, "lantern", y=-2.3, z=2.1)
 
     # The pale rectangle where a picture used to hang, and the nail left behind.
-    room.part("picture_ghost", (0.03, 0.95, 0.72), (back_x - 0.015, -1.9, 1.95),
-              room.crock)
-    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -1.9, 2.42),
-              room.iron)
+    room.part("picture_ghost", (0.03, 0.95, 0.72), (back_x - 0.015, 0.1, 1.95), room.crock)
+    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, 0.1, 2.42), room.iron)
 
     # The coat hook, set low enough to belong to whoever lived here before.
-    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -2.45, 0.95),
-              room.iron)
-    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -2.45, 0.90),
-              room.iron)
+    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, 0.95, 0.95), room.iron)
+    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, 0.95, 0.90), room.iron)
+
+    # --- the day side: washstand, table, shelf --------------------------------
+    washstand(room, (back_x - 0.5, 3.75))
+    furn.shelf(room, "shelf", y=0.1, z=2.0, length=1.0)
+    furn.table(room, "table", (back_x - 2.4, 0.9), length=0.95, width=0.6)
+    furn.chair(room, "chair", (back_x - 3.1, 0.9))
+    furn.jar(room, "jar_big", (back_x - 0.5, 1.0), height=0.5, radius=0.2)
 
     # --- Saban's end (screen left): straw and the feed bowl ----------------
-    furn.table(room, "table", (back_x - 2.3, 2.9), length=0.95, width=0.6)
-    furn.chair(room, "chair", (back_x - 3.05, 2.9))
-    furn.jar(room, "jar_big", (back_x - 0.5, 1.35), height=0.5, radius=0.2)
-    furn.jar(room, "jar_small", (back_x - 0.45, 1.85), height=0.31, radius=0.12)
-    for index, (sx, sy) in enumerate(((1.9, 1.7), (2.6, 1.1), (1.4, 2.2),
-                                      (2.9, 1.9), (1.0, 1.3))):
+    for index, (sx, sy) in enumerate(((1.5, 3.2), (2.2, 2.6), (1.0, 3.6),
+                                      (2.5, 3.5), (0.7, 2.7))):
         room.part(f"straw_{index}", (0.85, 0.72, 0.06), (sx, sy, 0.03),
                   room.straw, rotation=(0.0, 0.0, 0.4 * index))
-    feed_bowl(room, (1.6, 2.55, 0.0))
+    feed_bowl(room, (1.5, 3.9, 0.0))
 
-    # A near post, giving the room a foreground depth layer.
-    room.part("post_left", (0.2, 0.2, CEILING_Z),
-              (room.front_x + 0.5, half_width - 0.5, CEILING_Z / 2.0),
-              room.wood)
-
-    # --- light: the window, a lamp by the bed, the corridor beyond the door -
+    # --- light: the window, a lamp in the alcove, the gallery beyond the door -
     room.window_light((WINDOW[0] + WINDOW[1]) / 2.0,
                       (WINDOW[2] + WINDOW[3]) / 2.0)
-    room.light("light_bed_lamp", "POINT", (back_x - 1.35, -1.85, 0.95),
-               (0.0, 0.0, -1.0), 18.0, (1.0, 0.78, 0.52), radius=0.14)
+    room.light("light_alcove_lamp", "POINT", (alcove_back - 0.9, -2.3, 1.4),
+               (0.0, 0.0, -1.0), 120.0, (1.0, 0.78, 0.52), radius=0.14)
+    # The alcove is a recess: without a source of its own it is a black slot.
+    room.light("light_alcove_fill", "AREA", (back_x + 0.6, -2.3, 2.5), (0.5, 0.0, -1.0),
+               160.0, (1.0, 0.84, 0.62), size=1.8, size_y=2.4)
     room.doorway_light(tab_x, tab_y)
 
     room.finish()
     return room
+
+
+def washstand(room, at):
+    """A basin on a stand, a jug beside it and a towel rail: the "washstand" of the text."""
+    x, y = at
+    with room.piece("washstand"):
+        for index, (dx, dy) in enumerate(((-0.2, -0.28), (-0.2, 0.28), (0.2, -0.28), (0.2, 0.28))):
+            room.part(f"washstand_leg_{index}", (0.06, 0.06, 0.78), (x + dx * 0.5, y + dy, 0.39), room.wood)
+        room.part("washstand_top", (0.5, 0.74, 0.05), (x, y, 0.8), room.wood)
+        room.part("washstand_basin", (0.34, 0.4, 0.1), (x, y - 0.08, 0.88), room.crock)
+        room.part("washstand_jug", (0.14, 0.14, 0.26), (x, y + 0.24, 0.96), room.crock)
+        room.part("washstand_rail", (0.04, 0.5, 0.04), (x - 0.22, y, 1.3), room.iron)
+        room.part("washstand_towel", (0.02, 0.4, 0.34), (x - 0.24, y, 1.1), room.cloth)
 
 
 def feed_bowl(room, location):

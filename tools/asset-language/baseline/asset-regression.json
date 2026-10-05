@@ -2814,22 +2814,22 @@
     },
     {
       "path": "assets/models/items/ether.obj",
-      "vertexCount": 60,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 112,
-      "materialUseCount": 2,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 168,
+      "uvCount": 159,
+      "normalCount": 101,
+      "faceCount": 328,
+      "materialUseCount": 5,
+      "mtllib": "ether.mtl",
       "bounds": {
         "min": [
-          -0.3,
-          -1.07,
-          -0.3
+          -0.2975,
+          -0.96,
+          -0.2975
         ],
         "max": [
-          0.3,
+          0.2975,
           1.07,
-          0.3
+          0.2975
         ]
       }
     },
@@ -3339,22 +3339,22 @@
     },
     {
       "path": "assets/models/items/healing_water.obj",
-      "vertexCount": 60,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 112,
-      "materialUseCount": 2,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 320,
+      "uvCount": 331,
+      "normalCount": 232,
+      "faceCount": 600,
+      "materialUseCount": 6,
+      "mtllib": "healing_water.mtl",
       "bounds": {
         "min": [
-          -0.52,
-          -0.9,
-          -0.52
+          -0.529967,
+          -0.84,
+          -0.487464
         ],
         "max": [
-          0.52,
+          0.5,
           0.9,
-          0.52
+          0.487464
         ]
       }
     },
@@ -3444,22 +3444,22 @@
     },
     {
       "path": "assets/models/items/hi_potion.obj",
-      "vertexCount": 68,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 124,
-      "materialUseCount": 2,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 204,
+      "uvCount": 246,
+      "normalCount": 180,
+      "faceCount": 288,
+      "materialUseCount": 12,
+      "mtllib": "hi_potion.mtl",
       "bounds": {
         "min": [
-          -0.44,
-          -1.06,
-          -0.44
+          -0.435,
+          -0.92,
+          -0.435
         ],
         "max": [
-          0.44,
-          1.06,
-          0.44
+          0.435,
+          0.96,
+          0.435
         ]
       }
     },
@@ -3801,22 +3801,22 @@
     },
     {
       "path": "assets/models/items/mega_potion.obj",
-      "vertexCount": 76,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 136,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 314,
+      "uvCount": 326,
+      "normalCount": 222,
+      "faceCount": 536,
+      "materialUseCount": 11,
+      "mtllib": "mega_potion.mtl",
       "bounds": {
         "min": [
-          -0.62,
-          -1.13,
-          -0.62
+          -0.739067,
+          -0.87,
+          -0.348895
         ],
         "max": [
-          0.62,
-          1.13,
-          0.62
+          0.739067,
+          0.952502,
+          0.348895
         ]
       }
     },
@@ -4473,22 +4473,22 @@
     },
     {
       "path": "assets/models/items/potion.obj",
-      "vertexCount": 60,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 112,
-      "materialUseCount": 2,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 178,
+      "uvCount": 184,
+      "normalCount": 142,
+      "faceCount": 348,
+      "materialUseCount": 4,
+      "mtllib": "potion.mtl",
       "bounds": {
         "min": [
-          -0.46,
-          -0.855,
-          -0.46
+          -0.45,
+          -0.78,
+          -0.427975
         ],
         "max": [
-          0.46,
-          0.855,
-          0.46
+          0.45,
+          0.83,
+          0.427975
         ]
       }
     },
@@ -5964,22 +5964,22 @@
     },
     {
       "path": "assets/models/items/x_potion.obj",
-      "vertexCount": 54,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 96,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 100,
+      "uvCount": 108,
+      "normalCount": 62,
+      "faceCount": 192,
+      "materialUseCount": 4,
+      "mtllib": "x_potion.mtl",
       "bounds": {
         "min": [
-          -0.5,
-          -0.89,
-          -0.461506
+          -0.54,
+          -0.78,
+          -0.467654
         ],
         "max": [
-          0.5,
-          0.89,
-          0.461506
+          0.54,
+          0.86,
+          0.467654
         ]
       }
     },

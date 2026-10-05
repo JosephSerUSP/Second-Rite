@@ -91,6 +91,17 @@ do
     check(ok, "pixel compositor path completes: " .. tostring(err))
 end
 
+local function countNonBlack(image, width, height)
+    local count = 0
+    for y = 0, height - 1 do
+        for x = 0, width - 1 do
+            local r, g, b = image:getPixel(x, y)
+            if math.max(r, g, b) > 0.02 then count = count + 1 end
+        end
+    end
+    return count
+end
+
 -- Drive the production viewport as well. The synthetic test above distinguishes
 -- resolve failure from camera/model failure; this one catches the latter. Map 28
 -- is a shipped live-3D interior with the same calibrated town-sideview camera
@@ -117,6 +128,18 @@ do
         local width, height = surface.renderSize()
         local canvas = surface.newRasterCanvas(width, height)
         local previousCanvas = love.graphics.getCanvas()
+        local capturedSupersample = nil
+        local originalNewRasterCanvas = surface.newRasterCanvas
+        if scale > 1 then
+            surface.newRasterCanvas = function(w, h, settings)
+                local target = originalNewRasterCanvas(w, h, settings)
+                if (not settings or not settings.format)
+                        and w == width * scale and h == height * scale then
+                    capturedSupersample = target
+                end
+                return target
+            end
+        end
         local ok, result = pcall(function()
             love.graphics.setCanvas({ canvas, depth = true, stencil = true })
             love.graphics.clear(0, 0, 0, 1, true, true)
@@ -124,15 +147,15 @@ do
             viewport.draw(game, game.townTraversal.camera)
             love.graphics.setCanvas()
             local image = canvas:newImageData()
-            local count = 0
-            for y = 0, height - 1 do
-                for x = 0, width - 1 do
-                    local r, g, b = image:getPixel(x, y)
-                    if math.max(r, g, b) > 0.02 then count = count + 1 end
-                end
+            local count = countNonBlack(image, width, height)
+            local ssCount = nil
+            if capturedSupersample then
+                local ssWidth, ssHeight = capturedSupersample:getDimensions()
+                ssCount = countNonBlack(capturedSupersample:newImageData(), ssWidth, ssHeight)
             end
-            return count
+            return { native = count, supersample = ssCount }
         end)
+        surface.newRasterCanvas = originalNewRasterCanvas
         love.graphics.setCanvas(previousCanvas)
         if canvas.release then canvas:release() end
         if not ok then error(result, 0) end
@@ -140,13 +163,14 @@ do
     end
 
     local ok, err = pcall(function()
-        local nativePixels = nonBlackPixels(1)
-        local supersampledPixels = nonBlackPixels(3)
-        print(string.format("  [INFO] selective-AA wide pixels: 1x=%d 3x=%d",
-            nativePixels, supersampledPixels))
-        check(nativePixels > 1000,
+        local nativeResult = nonBlackPixels(1)
+        local supersampledResult = nonBlackPixels(3)
+        print(string.format("  [INFO] selective-AA wide pixels: 1x=%d 3x=%d envSS=%s",
+            nativeResult.native, supersampledResult.native,
+            tostring(supersampledResult.supersample)))
+        check(nativeResult.native > 1000,
             "live-3D fixture has a meaningful ordinary world render")
-        check(supersampledPixels > nativePixels * 0.5,
+        check(supersampledResult.native > nativeResult.native * 0.5,
             "3x selective AA retains the environment rather than only live remnants")
     end)
     psx.environmentSupersample = previousScale

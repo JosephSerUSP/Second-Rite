@@ -15,7 +15,7 @@ The production authority is now:
 
 `projects/hichaukitoden-game/assets/authoring/items/<item>.blend`
 
-Each source contains exactly one `item_export` root with `sr_source_authority = "blend"`. Vessel bodies, collars and stoppers are sparse editable profile meshes with live **Screw** modifiers; ribs, handles, seals and cords use Blender **Curves** where spatial gesture is the useful editing handle. The first saves were created under the repository-pinned Blender 5.2.2 and then adopted as source documents. The one-shot bootstrap that created those first saves is removed after adoption; future edits operate on the `.blend` files themselves.
+Each source contains exactly one `item_export` root with `sr_source_authority = "blend"`. Vessel bodies, collars and stoppers are sparse editable profile meshes with live **Screw** modifiers; ribs, handles, seals and cords use Blender **Curves** where spatial gesture is the useful editing handle. The first saves were created under the repository-pinned Blender 5.2.2 and then adopted as source documents. The one-shot bootstrap that created those first saves was removed after adoption; future edits operate on the `.blend` files themselves.
 
 The runtime OBJ/MTL files are compiler products from `tools/blender/compile_item_blends.py`. No item database path or ID changed.
 
@@ -31,4 +31,4 @@ The re-authored six are measured using the same 64-pixel, three-view silhouette 
 
 ## Verification
 
-Before adoption, pinned-Blender CI successfully created all six first-save `.blend` documents and compiled every source through the production compiler. The adoption lane then installs those compiler products, removes only these six legacy/no-UV baseline exemptions, runs `compile_item_blends.py --check`, and runs the full item-model corpus gate before committing the source documents.
+Pinned-Blender CI successfully created all six first-save `.blend` documents and compiled every source through the production compiler. The adoption lane installed those compiler products, removed only these six legacy/no-UV baseline exemptions, ran `compile_item_blends.py --check`, and ran the full item-model corpus gate before committing the source documents. The temporary bootstrap workflow and scripts were then deleted, leaving the committed `.blend` documents as the only production authority for these six models.

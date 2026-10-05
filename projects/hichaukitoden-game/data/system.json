@@ -237,7 +237,7 @@
       "cpuNearClip": false,
       "fogBands": 8,
       "ditherLevels": 31,
-      "environmentSupersample": 3
+      "environmentSupersample": 1
     }
   },
   "summoner": {

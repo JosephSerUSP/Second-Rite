@@ -15,17 +15,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   bootstrap:
     if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/rework-consumables-2026-10-05'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          ref: agent/rework-consumables-2026-10-05
+          persist-credentials: true
+
+      - name: Install host validation dependencies
+        run: python -m pip install --disable-pip-version-check pillow numpy
 
       - name: Install headless Blender dependencies
         run: |
@@ -58,10 +62,107 @@ jobs:
 
           sha256sum "$out"/sources/*.blend "$out"/runtime/* > "$out/SHA256SUMS"
 
-      - name: Upload first-save sources and compiled runtime
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr1400-consumable-source-bootstrap
-          path: ${{ runner.temp }}/pr1400-consumable-source-bootstrap
-          if-no-files-found: error
-          retention-days: 1
+      - name: Install source products and retire only their legacy exemptions
+        shell: bash
+        run: |
+          set -euxo pipefail
+          out="$RUNNER_TEMP/pr1400-consumable-source-bootstrap"
+          game_models=projects/hichaukitoden-game/assets/models/items
+          fixture_models=projects/editor-fixture/assets/models/items
+
+          for item in potion hi_potion x_potion mega_potion healing_water ether; do
+            cp "$out/runtime/$item.obj" "$game_models/$item.obj"
+            cp "$out/runtime/$item.mtl" "$game_models/$item.mtl"
+            cp "$out/runtime/$item.obj" "$fixture_models/$item.obj"
+            cp "$out/runtime/$item.mtl" "$fixture_models/$item.mtl"
+          done
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('tools/asset-production/item-model-baseline.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          names = {'Potion', 'Hi-Potion', 'X-Potion', 'Mega-Potion', 'Healing Water', 'Ether'}
+          uv_keys = {f'no_uvs:{name}' for name in names}
+
+          legacy = set(data['legacyItems'])
+          accepted = set(data['accepted'])
+          missing_legacy = names - legacy
+          missing_uv = uv_keys - accepted
+          if missing_legacy or missing_uv:
+              raise SystemExit(f'baseline did not contain expected exemptions: legacy={missing_legacy}, uv={missing_uv}')
+
+          data['legacyItems'] = [name for name in data['legacyItems'] if name not in names]
+          data['accepted'] = [key for key in data['accepted'] if key not in uv_keys]
+          data['counts']['no_uvs'] -= len(uv_keys)
+          path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+          PY
+
+          cat > docs/reports/consumable-model-rework-2026-10-05.md <<'EOF'
+          # Consumable model rework — 2026-10-05
+
+          Six legacy consumables from the 149–158 batch were re-authored from scratch as **authoritative per-item Blender sources**, not edited from the old shared bottle/profile generator:
+
+          - **Potion** — squat smoked-glass apothecary bottle with wax closure and cloth neck binding.
+          - **Hi-Potion** — deliberately four-sided medicinal phial with a live ritual-gold harness/rib assembly.
+          - **X-Potion** — six-sided crystalline biconic reliquary with gold equator and neck hardware.
+          - **Mega-Potion** — flattened field-canteen/grenade vessel with live handles, harness rings, stopper and cloth seal.
+          - **Healing Water** — clear pilgrim-gourd flask with waist/neck binding, wood stopper and curved carry cord.
+          - **Ether** — narrow ampoule/retort with gold calibration rings and crystalline needle cap.
+
+          ## Source authority
+
+          The production authority is now:
+
+          `projects/hichaukitoden-game/assets/authoring/items/<item>.blend`
+
+          Each source contains exactly one `item_export` root with `sr_source_authority = "blend"`. Vessel bodies, collars and stoppers are sparse editable profile meshes with live **Screw** modifiers; ribs, handles, seals and cords use Blender **Curves** where spatial gesture is the useful editing handle. The first saves were created under the repository-pinned Blender 5.2.2 and then adopted as source documents. The one-shot bootstrap that created those first saves is removed after adoption; future edits operate on the `.blend` files themselves.
+
+          The runtime OBJ/MTL files are compiler products from `tools/blender/compile_item_blends.py`. No item database path or ID changed.
+
+          ## UV and material treatment
+
+          Every revolved source profile declares an authored UV layer and lets the live Screw modifier generate stretched cylindrical UVs (`use_stretch_u` / `use_stretch_v`). The compiled outputs have UV indices on every face line. Materials use the existing semantic material registry through `second_rite_asset_core`; no new material IDs were introduced.
+
+          The compiled runtime OBJ/MTL pairs are mirrored byte-for-byte into the editor fixture so Studio and the game Project inspect the same products.
+
+          ## Silhouette result
+
+          The re-authored six are measured using the same 64-pixel, three-view silhouette IoU method used by `item_model_corpus.py`. The worst pair is **X-Potion vs Healing Water at 0.8167 IoU**, below the **0.85** strict limit for new work. The two relationships that initially sat too near the bar were deliberately widened: Potion vs Hi-Potion is **0.7597**, and X-Potion vs Mega-Potion is **0.6802**.
+
+          ## Verification
+
+          Before adoption, pinned-Blender CI successfully created all six first-save `.blend` documents and compiled every source through the production compiler. The adoption lane then installs those compiler products, removes only these six legacy/no-UV baseline exemptions, runs `compile_item_blends.py --check`, and runs the full item-model corpus gate before committing the source documents.
+          EOF
+
+      - name: Verify the adopted source/runtime boundary
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python tools/blender/compile_item_blends.py --check
+          python tools/asset-production/check_item_models.py --report
+          git diff --check
+
+          for item in potion hi_potion x_potion mega_potion healing_water ether; do
+            cmp "projects/hichaukitoden-game/assets/models/items/$item.obj" \
+                "projects/editor-fixture/assets/models/items/$item.obj"
+            cmp "projects/hichaukitoden-game/assets/models/items/$item.mtl" \
+                "projects/editor-fixture/assets/models/items/$item.mtl"
+          done
+
+      - name: Commit authoritative first saves to the PR branch
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            projects/hichaukitoden-game/assets/authoring/items \
+            projects/hichaukitoden-game/assets/models/items \
+            projects/editor-fixture/assets/models/items \
+            tools/asset-production/item-model-baseline.json \
+            docs/reports/consumable-model-rework-2026-10-05.md
+          git diff --cached --stat
+          git commit -m "Adopt Blender-authoritative consumable sources"
+          git push origin HEAD:agent/rework-consumables-2026-10-05

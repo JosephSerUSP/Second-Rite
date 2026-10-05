@@ -211,12 +211,11 @@ local function normalizeInput(x, y)
     x, y = tonumber(x) or 0, tonumber(y) or 0
     local len = math.sqrt(x * x + y * y)
     if len <= EPSILON then return 0, 0, 0 end
-    -- Preserve analog magnitude below one, but cap diagonals / oversized input
-    -- so keyboard diagonals do not move sqrt(2) times faster.
-    if len > 1 then
-        x, y, len = x / len, y / len, 1
-    end
-    return x, y, len
+    -- Direction is always unit length. Preserve analog magnitude below one,
+    -- but cap diagonals / oversized input so keyboard diagonals do not move
+    -- sqrt(2) times faster.
+    local magnitude = math.min(len, 1)
+    return x / len, y / len, magnitude
 end
 
 local function tryMicroStep(state, dx, dy)

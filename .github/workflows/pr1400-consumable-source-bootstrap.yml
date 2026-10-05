@@ -1,0 +1,66 @@
+name: PR 1400 consumable source bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/blender/bootstrap_consumable_sources_pr1400.py
+      - .github/workflows/pr1400-consumable-source-bootstrap.yml
+      - tools/blender/second_rite_asset_core.py
+      - tools/blender/compile_item_blends.py
+      - tools/blender/compile_item_blend.py
+      - tools/asset-language/**
+      - .github/actions/install-blender/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/rework-consumables-2026-10-05'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Install pinned Blender
+        uses: ./.github/actions/install-blender
+
+      - name: Build and compile first-save sources
+        shell: bash
+        run: |
+          set -euxo pipefail
+          src=projects/hichaukitoden-game/assets/authoring/items
+          out="$RUNNER_TEMP/pr1400-consumable-source-bootstrap"
+          mkdir -p "$out/sources" "$out/runtime"
+
+          xvfb-run -a "$BLENDER_EXECUTABLE" --background --python-exit-code 1 \
+            --python tools/blender/bootstrap_consumable_sources_pr1400.py
+
+          for item in potion hi_potion x_potion mega_potion healing_water ether; do
+            test -s "$src/$item.blend"
+            cp "$src/$item.blend" "$out/sources/$item.blend"
+            xvfb-run -a python tools/blender/compile_item_blends.py \
+              --source "$src/$item.blend" \
+              --output-dir "$out/runtime"
+            test -s "$out/runtime/$item.obj"
+            test -s "$out/runtime/$item.mtl"
+          done
+
+          sha256sum "$out"/sources/*.blend "$out"/runtime/* > "$out/SHA256SUMS"
+
+      - name: Upload first-save sources and compiled runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr1400-consumable-source-bootstrap
+          path: ${{ runner.temp }}/pr1400-consumable-source-bootstrap
+          if-no-files-found: error
+          retention-days: 1

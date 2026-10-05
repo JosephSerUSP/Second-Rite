@@ -51,7 +51,7 @@ local function spec(overrides)
             target = { x = 0, y = 11, z = 2.2604 },
             projectionFrame = { compositionWidth = 256, canonicalCenterX = 128, canonicalHorizonY = 66 },
             tracking = { axis = "y", center = 11, minOffsetX = -156, maxOffsetX = 156,
-                vertical = { minOffsetY = -120, maxOffsetY = 0 } },
+                vertical = { minOffsetY = 0, maxOffsetY = 120 } },
         },
     }
     for key, patch in pairs(overrides or {}) do value[key] = patch end
@@ -179,17 +179,18 @@ check(ground.worldCameraProjectionWindowOffsetY == -70.47,
     "on the reference floor the camera sits at its authored vertical offset")
 local up, upState = open()
 lane.place(up, "gallery", 6.0)
-check(up.worldCameraProjectionWindowOffsetY < -70.47 - 20,
-    "on the gallery the camera has slid up to follow (offset " .. tostring(up.worldCameraProjectionWindowOffsetY) .. ")")
-check(upState.cameraFollowOffsetY >= -120 and upState.cameraFollowOffsetY <= 0,
+check(up.worldCameraProjectionWindowOffsetY > -70.47 + 20,
+    "on the gallery the camera has climbed to follow (offset " .. tostring(up.worldCameraProjectionWindowOffsetY) .. ")")
+check(upState.cameraFollowOffsetY >= 0 and upState.cameraFollowOffsetY <= 120,
     "the follow stays inside the authored vertical bounds")
 
--- The follow keeps the actor at the same screen height: project the feet.
+-- The follow keeps the actor at the same screen height: project the feet, then
+-- let the window offset carry the world down the screen as the renderer does.
 local world_view = require("engine.generated.world-view")
 local function footScreenY(g, s)
-    local camera = world_view.resolveTownCamera(setmetatable(
-        { projectionWindowOffsetY = g.worldCameraProjectionWindowOffsetY }, { __index = s.camera }))
+    local camera = world_view.resolveTownCamera(s.camera)
     return world_view.projectPerspective(camera, 256, 240, s.depthX, s.y, s.z).y
+        + (g.worldCameraProjectionWindowOffsetY - s.baseOffsetY)
 end
 lane.place(ground, "ground", 6.0)
 local groundFeet = footScreenY(ground, ground.townTraversal)
@@ -200,11 +201,11 @@ check(math.abs(footScreenY(up, upState) - groundFeet) < 0.5,
 -- Clamped by the room that exists: a tight bound stops the camera short.
 local tight, tightState = open({ camera = (function()
     local c = spec().camera
-    c.tracking.vertical = { minOffsetY = -10, maxOffsetY = 0 }
+    c.tracking.vertical = { minOffsetY = 0, maxOffsetY = 10 }
     return c
 end)() })
 lane.place(tight, "gallery", 6.0)
-check(tightState.cameraFollowOffsetY == -10, "the follow stops at the authored room's edge")
+check(tightState.cameraFollowOffsetY == 10, "the follow stops at the authored room's edge")
 
 -- No vertical tracking declared: the camera does not move vertically at all.
 local flat, flatState = open({ camera = (function()
@@ -236,5 +237,22 @@ failsWith({ levels = { ground = { minY = 0, maxY = 1 } } },
     "unique non-empty string", "a level cannot reuse the base lane's name")
 failsWith({ levels = { gallery = { minY = 5, maxY = 1, groundZ = 3 } } },
     "minY < maxY", "a level with inverted bounds fails")
+
+-- Saving remembers the storey, and a save taken mid-climb lands on the far side.
+local savegame = require("engine.savegame")
+local function savedTraversal(g)
+    return savegame.serialize(g, loader, "town").map.traversalState
+end
+local saver, saverState = open()
+lane.place(saver, "gallery", 6.0)
+local saved = savedTraversal(saver)
+check(saved.level == "gallery" and saved.y == 6.0, "a save records the level the actor is on")
+lane.place(saver, "ground", 15.0)
+check(lane.beginClimb(saver, lane.nearDoorway(saver, "UP")), "begin a climb to save during")
+for _ = 1, 30 do lane.update(saver, 1 / 60, 0) end
+check(saverState.climb ~= nil, "still climbing")
+saved = savedTraversal(saver)
+check(saved.level == "gallery" and math.abs(saved.y - 10.4) < 1e-6,
+    "a save taken mid-climb records the landing it is climbing to")
 
 require("tests.fail_fast")("test_bounded_lane_levels", failed, passed)

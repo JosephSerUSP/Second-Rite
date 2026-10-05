@@ -34,11 +34,19 @@ function module.run(loader)
     local game = require('engine.cli_tools').makeHarnessSession(loader)
     renderer.init(game); view.init(); host.init(nil)
     local result = {}
-    for _, y in ipairs(config.positions) do
+    for _, position in ipairs(config.positions) do
+        -- A position is a lane Y, or {level=, y=} on a map with storeys.
+        local y = type(position) == 'table' and position.y or position
+        local level = type(position) == 'table' and position.level or nil
         exploration.loadMap(game, loader.getMapIndex(config.mapId))
-        assert(y >= game.townTraversal.minY and y <= game.townTraversal.maxY, 'Review position outside lane')
-        game.townTraversal.y = y
-        game.townTraversal.z = lane.groundAt(game, y)
+        if level then
+            assert(lane.place(game, level, y), 'Review level missing')
+            assert(math.abs(game.townTraversal.y - y) < 1e-6, 'Review position outside level')
+        else
+            assert(y >= game.townTraversal.minY and y <= game.townTraversal.maxY, 'Review position outside lane')
+            game.townTraversal.y = y
+            game.townTraversal.z = lane.groundAt(game, y)
+        end
         lane.update(game)
         local ctx = {session=game, loader=loader, party=game.party}
         host.goto_scene('map', ctx); host.update(1, ctx); renderer.update(1)
@@ -73,7 +81,7 @@ function module.run(loader)
             if draw == 1 then love.timer.sleep(0.2) end
         end
         local png = canvas:newImageData():encode('png')
-        result[#result+1] = {y=y, z=game.townTraversal.z, width=width, height=height,
+        result[#result+1] = {y=y, level=level, z=game.townTraversal.z, width=width, height=height,
             cameraOffsetX=game.townTraversal.cameraOffsetX, surface=surface.getProfileId(), cameraRecord=record,
             viewportVisiblePixels=viewportVisiblePixels,
             image=love.data.encode('string','base64',png)}

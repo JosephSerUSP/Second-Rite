@@ -10,17 +10,25 @@ screen, ONE continuous walk, TWO storeys.
                                                        over closed service rooms     to the
                                                        (porter's lodge, wash-house)  Registry
 
-THE PLAYER WALKS IT. The lane is a single line, but the runtime lets its floor
-height vary along it (`lane.groundProfile`, "a flight of steps ... the player
-crosses it by walking"). So the lane runs flat across the ground floor from the
-court door, CLIMBS the stair as a ramp through the tread line, and runs flat again
-along the gallery one storey up. Nothing is a transfer: you come in from the
-court, climb, and walk past the apartment doors to the Registry gate. The ground
-floor under the gallery is not part of the lane, which is how a real house works:
-those are rooms behind closed doors (a porter's lodge, a wash-house) that the
-building keeps for itself. They are visible, lit and shut.
+THE PLAYER WALKS BOTH LANES. This is a fork, not a ramp. The ground floor is a
+lane that runs the whole length of the hall, UNDER the gallery, from the court door
+to the street door in the left end wall. The gallery is a second lane one storey up.
+They overlap in Y, so the same Y is two different places. The stair is a LINK between
+them (`traversal.links`): at its foot the player presses UP and climbs; at its top
+DOWN brings them back; or they simply keep walking left along the ground floor.
+The stair stands behind the lane, so the ground path passes in front of it, and the
+actor walks in to the stair's depth, up the flight, and out onto the deck.
 
-    groundProfile, engine Y (west to east): see GROUND_PROFILE below.
+The camera follows the actor up (`camera.tracking.vertical`): a map's height is not
+limited, so a full 3.2 m storey is fine, bounded only by the room that is built.
+
+    levels  gallery: engine Y 0.9..10.0, floor 3.2 (ground is the base lane)
+    link    stair:   ground y 15.2 (foot, UP)  <->  gallery y 9.48 (top, DOWN)
+    see LEVELS / LINK below; every number is derived from the geometry here.
+
+The ground floor under the gallery has its own life: the building's service doors
+(a porter's lodge and a wash-house, shut) and, at the left end, a street door that is
+the house's second way out.
 
 WHY IT SITS TOGETHER AS A BUILDING.
   * The court door is in the same back wall as every other door: the whole back
@@ -47,8 +55,7 @@ must not also loom). `distance * tan(fov / 2)` is held at 4.667 m so the Walker
 is 48 px at the lane centre:
 
     --camera '{"distance":14,"fovDegrees":36.87,"yawDegrees":12,"projectionWindowOffsetY":-70.47,"target":{"y":11}}'
-    --lane 1.0 20.6 --track 11 156
-    --ground-profile '[[0,2.3],[10.44,2.3],[15.2,0],[22,0]]'
+    --track 11 156          (+ tracking.vertical: minOffsetY 0, maxOffsetY 100)
 
 Blender Y is screen LEFT. Exported with `--span 22`, engine lane Y is
 `11 - blender_y`: the gate end is engine Y ~1.5, the court door 20.
@@ -73,27 +80,30 @@ import interior as kit  # noqa: E402
 ASSET_ID = "passage_house_stair_hall"
 
 HALF_LENGTH = 11.0        # Blender Y -11..11 (engine 0..22)
-DEPTH = 5.0
-CEILING_Z = 4.9
+DEPTH = 5.6
+CEILING_Z = 6.5
 
-GALLERY_Z = 2.3           # the upper floor, level with the Praca
+GALLERY_Z = 3.2           # the upper floor, level with the Praca
 DECK_FRONT_X = -0.85      # the gallery's front edge; the lane (x = 0) is behind it
 DECK_THICK = 0.3
 
-COURT_Y, COURT_HALF, COURT_TOP = -9.0, 1.1, 2.9
+COURT_Y, COURT_HALF, COURT_TOP = -9.0, 1.1, 3.0
 
 STAIR_FOOT_Y = -4.2
-RISERS = 14
-STAIR_RUN = 0.34
-STAIR_TOP_Y = STAIR_FOOT_Y + RISERS * STAIR_RUN       # 0.56
-STAIR_X0, STAIR_X1 = -0.55, 1.65                      # the lane (x = 0) is on the flight
+RISERS = 19
+STAIR_RUN = 0.28
+STAIR_TOP_Y = STAIR_FOOT_Y + RISERS * STAIR_RUN       # 1.12
+STAIR_LANDING = 0.4        # deck between the top step and where the actor stands
+STAIR_X0, STAIR_X1 = 1.0, 2.6    # BEHIND the lane (x = 0): the ground path passes in front
+STAIR_X = (STAIR_X0 + STAIR_X1) / 2.0
 
 DOOR_TOP = 2.05
 DOOR_HALF = 0.55
 #            centre, is this Room 3?
 UP_DOORS = ((2.5, False), (5.0, True), (7.5, False))
-GATE_Y, GATE_TOP = 9.5, 2.2
-WINDOW = (-3.0, -1.3, 3.15, 4.5)
+GATE_Y, GATE_TOP = 9.5, 2.4
+WINDOW = (-3.0, -1.0, 4.4, 5.9)
+STREET_X0, STREET_X1, STREET_TOP = -0.7, 0.7, 2.7
 SERVICE_DOORS = (2.45, 7.45)       # ground-floor doors under the gallery, shut
 
 END_Y = HALF_LENGTH - 0.1
@@ -103,18 +113,27 @@ def engine_y(blender_y: float) -> float:
     return HALF_LENGTH - blender_y
 
 
-# The floor height the player stands at along the lane, as (engine Y, z), west
-# to east. Flat on the gallery, a ramp through the tread line, flat on the ground.
-GROUND_PROFILE = [
-    [0.0, GALLERY_Z],
-    [round(engine_y(STAIR_TOP_Y), 4), GALLERY_Z],
-    [round(engine_y(STAIR_FOOT_Y), 4), 0.0],
-    [2 * HALF_LENGTH, 0.0],
-]
+# The map's lane data, in ENGINE Y (screen right is larger). Everything is derived
+# from the geometry above so the walk can never disagree with what was built.
+LEVELS = {"gallery": {"minY": 0.9, "maxY": round(engine_y(STAIR_TOP_Y + STAIR_LANDING) + 0.4, 3),
+                      "groundZ": GALLERY_Z}}
+LINK = {"id": "stair", "x": round(STAIR_X, 3),
+        "from": {"level": "ground", "y": round(engine_y(STAIR_FOOT_Y), 3)},
+        "to": {"level": "gallery", "y": round(engine_y(STAIR_TOP_Y + STAIR_LANDING), 3)}}
+GROUND_LANE = {"minY": 0.3, "maxY": 21.0, "depthX": 0, "groundZ": 0}
+# Extra anchors the exporter must publish (`--anchor NAME=Y:Z`): name -> (engine Y, z).
+# The court door is the exporter's own `exit_door` (`--exit-y`), so it is not repeated.
+ANCHORS = {
+    "street_door": (GROUND_LANE["minY"], 0.0),
+    "stair_foot": (LINK["from"]["y"], 0.0),
+    "stair_top": (LINK["to"]["y"], GALLERY_Z),
+    "room3_door": (round(engine_y(5.0), 3), GALLERY_Z),
+    "gate_door": (round(engine_y(GATE_Y), 3), GALLERY_Z),
+}
 
 
 def stair_flight(hall):
-    """A solid masonry flight in the lane, rising toward +Y (screen left)."""
+    """A solid masonry flight BEHIND the lane, rising toward +Y (screen left)."""
     rise = GALLERY_Z / RISERS
     x_mid = (STAIR_X0 + STAIR_X1) / 2.0
     width = STAIR_X1 - STAIR_X0
@@ -153,8 +172,8 @@ def gallery(hall):
     with hall.piece("gallery_deck"):
         hall.part("deck_slab", (depth, length, DECK_THICK),
                   (x_mid, centre, GALLERY_Z - DECK_THICK / 2.0), hall.terracotta)
-        hall.part("deck_fascia", (0.18, length, 0.38),
-                  (DECK_FRONT_X + 0.09, centre, GALLERY_Z - DECK_THICK - 0.04), hall.wood)
+        hall.part("deck_fascia", (0.18, length, 0.3),
+                  (DECK_FRONT_X + 0.09, centre, GALLERY_Z - DECK_THICK / 2.0 - 0.05), hall.wood)
         count = int((length - 0.4) / 0.9)
         for index in range(count):
             hall.part(f"joist_{index}", (depth - 0.3, 0.16, 0.2),
@@ -290,7 +309,7 @@ def build():
 
     hall.floor(mat=hall.stone)
     hall.back_wall(openings=openings)
-    hall.side_walls()
+    hall.side_walls(openings={1: [(STREET_X0, STREET_X1, 0.0, STREET_TOP)]})
     hall.ceiling(beams=9, beam_span=2.3)
     hall.window(*WINDOW)
 
@@ -301,6 +320,14 @@ def build():
                     COURT_TOP, jamb=0.26)
     hall.part("court_daylight", (0.06, COURT_HALF * 2 + 1.2, COURT_TOP),
               (hall.back_x + 2.5, COURT_Y - 0.3, COURT_TOP / 2.0 - 0.1), hall.daylight)
+
+    # --- the street door: the house's second way out, in the end wall ---------------
+    _, street_wall = hall.side_doorway("street_door", 1, STREET_X0, STREET_X1, STREET_TOP,
+                                       open_back=True)
+    furn.door_frame(hall, "street_door_frame", STREET_X0, STREET_X1, STREET_TOP, wall="+y",
+                    jamb=0.22)
+    hall.part("street_daylight", (STREET_X1 - STREET_X0 + 0.8, 0.06, STREET_TOP),
+              (0.0, street_wall + 1.4, STREET_TOP / 2.0 - 0.1), hall.daylight)
 
     # --- the two storeys ---------------------------------------------------------
     stair_flight(hall)
@@ -344,7 +371,9 @@ def build():
 
     # --- light ---------------------------------------------------------------------
     hall.window_light((WINDOW[0] + WINDOW[1]) / 2.0, (WINDOW[2] + WINDOW[3]) / 2.0,
-                      energy=520.0)
+                      energy=700.0)
+    hall.light("light_street", "AREA", (0.0, street_wall - 0.3, 1.5), (0.0, -1.0, -0.3),
+               120.0, (1.0, 0.93, 0.8), size=1.2, size_y=1.8)
     hall.light("light_court", "AREA", (hall.back_x + 0.2, COURT_Y, 1.6), (-1.0, 0.0, -0.3),
                170.0, (1.0, 0.93, 0.8), size=1.6, size_y=2.0)
     hall.light("light_under_gallery", "AREA", (DECK_FRONT_X + 1.2, 5.0, GALLERY_Z - 0.35),

@@ -224,12 +224,14 @@ tests, and it is a **building**, not a row of doors: two storeys, two ways in,
 and a section that follows the slope. The **upper floor is level with the
 Praça**; the **ground floor is level with the Cortiço court**, one storey lower.
 
-**The player walks all of it in one screen.** The lane is a single line, but its
-floor height can vary along it, so the walk runs flat across the ground floor from
-the court door, climbs the stair as a ramp, and runs flat again along the gallery
-above. No stair is a transfer. The ground floor under the gallery is not part of
-the lane: those are the building's own service rooms (porter's lodge, wash-house),
-shut, lit and visible.
+**The player walks all of it in one screen, and the path forks.** The ground floor
+and the gallery are two lanes (levels) that overlap in Y. At the stair foot the
+player presses **Up** to climb to the gallery, or simply keeps walking **left** along
+the ground floor, under the gallery, to the street door. At the stair top **Down**
+brings them back. No stair is a transfer; the camera follows the climb. The ground
+floor under the gallery also has its own life: the building's service doors
+(porter's lodge, wash-house), shut, and at the left end a **street door**, the house's
+second way out.
 
 ```
  PRAÇA side (high)                                       CORTIÇO side (mid)
@@ -249,15 +251,16 @@ shut, lit and visible.
 |---|--------|-------|------|------|
 | 33 | **Registry** | Praça level | Public floor. Celina, the ledger, the Crossing Writ. Front door to the Praça. | already authored; unchanged |
 | 32 | **Arrival Court** | Cortiço level | The house's lower yard; its covered entry is the great door of the stair hall. | already authored; unchanged |
-| 34 | **Stair hall** (new) | both | One double-height room, walked end to end. Ground: the great door to the court, a post wall of lodgers' letters (some never collected), a bench, a water stand. The masonry stair is IN the lane. Gallery: a terracotta deck on a stone arcade, three apartment doors (Room 3's the only one lit, with traces of the others' tenants: boots, a coat, a strapped trunk, straw), and at the far end a **wrought-iron gate with the Registry visible through it**. | **Floor level, taken to a storey** — the stair, the deck and the balustrade carry the second level |
+| 34 | **Stair hall** (new) | both | One double-height room with two walkable lanes. Ground: the great door to the court, a post wall of lodgers' letters (some never collected), a bench, a water stand, the shut service doors, and a street door at the far end. A masonry stair stands behind the lane, linking ground to gallery. Gallery: a terracotta deck on a stone arcade, three apartment doors (Room 3's the only one lit, with traces of the others' tenants: boots, a coat, a strapped trunk, straw), and at the far end a **wrought-iron gate with the Registry visible through it**. | **Floor level, taken to a storey** — the stair, the deck and the balustrade carry the second level |
 | 25 | **Room 3** | upper | One apartment, off the gallery: two beds, washstand, window that does not close, straw and a feed bowl for Saban, the missing picture, the low coat hook. | **Alcove** — an *alcova*, the sleeping recess of a rented room, with a header across its mouth |
 
 Connections:
 
-- **The two exits.** The house has a Cortiço way in (the great door, to the
-  Arrival Court) and a Praça way in (the Registry's front door). The gate joins
-  the two halves from inside, so the building has a through-route and the player
-  can see that it does.
+- **The exits.** The stair hall has two ground-floor doors: the great door to the
+  Arrival Court and the street door at the far end. The house's Praça way in is the
+  Registry's front door, and the gate joins the two halves from inside, so the
+  building has a through-route and the player can see that it does. Where the
+  street door leads is open (the Cortiço lane is the obvious answer).
 - **Room 3 door → along the gallery → down the stair → great door → Arrival Court →
   Cortiço → Praça → Registry front door.** This is the opening's first civic loop,
   now starting inside one building.

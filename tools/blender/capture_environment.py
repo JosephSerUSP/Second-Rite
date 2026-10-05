@@ -88,7 +88,7 @@ def capture(args):
                 raise RuntimeError(f'{name}: runtime emitted no environment frames')
             validate_visible_environment(name, frames)
             # Decode the complete surface before creating its evidence folder.
-            images = [(f"{frame['y']:g}.png", base64.b64decode(frame.pop('image'), validate=True)) for frame in frames]
+            images = [(frame_name(frame), base64.b64decode(frame.pop('image'), validate=True)) for frame in frames]
             output = args.output / name
             output.mkdir(parents=True)
             for filename, data in images:
@@ -109,12 +109,23 @@ def capture(args):
     return args.output
 
 
+def position(text):
+    # A bare number is a lane Y on the current level; LEVEL:Y names a storey.
+    level, separator, y = text.rpartition(':')
+    return dict(level=level, y=float(y)) if separator else float(text)
+
+
+def frame_name(frame):
+    return f"{frame['level']}_{frame['y']:g}.png" if frame.get('level') else f"{frame['y']:g}.png"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game-root', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--map-id', type=int, required=True)
-    parser.add_argument('--positions', type=float, nargs='+', required=True)
+    parser.add_argument('--positions', type=position, nargs='+', required=True,
+        help='lane Y, or LEVEL:Y on a map with storeys (e.g. gallery:6.0)')
     parser.add_argument('--unobstructed', action='store_true')
     parser.add_argument('--device', type=int, nargs=2, default=[2100, 900], metavar=('WIDTH','HEIGHT'))
     parser.add_argument('--lovec', default=r'C:\Program Files\LOVE\lovec.exe')

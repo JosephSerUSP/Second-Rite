@@ -119,9 +119,14 @@ end
 local function serializeTraversalState(sessionObj)
     local traversal = sessionObj.townTraversal
     if not traversal or traversal.provider ~= "bounded_lane" then return nil end
+    -- A save taken mid-climb records where the climb is going: the actor is
+    -- put on the far landing, never halfway up a stair on no level.
+    local level, y = traversal.level, traversal.y
+    if traversal.climb then level, y = traversal.climb.target.level, traversal.climb.target.y end
     return {
         provider = "bounded_lane",
-        y = traversal.y,
+        y = y,
+        level = level,
         facing = traversal.facing,
     }
 end
@@ -197,6 +202,11 @@ local function restoreMap(sessionObj, data, loader)
             local savedY = tonumber(savedTraversal.y)
             if savedY and savedY == savedY
                     and savedY ~= math.huge and savedY ~= -math.huge then
+                -- The level first: its bounds and floor are what Y is clamped to.
+                -- A level the map no longer has falls back to the arrival level.
+                if type(savedTraversal.level) == "string" and state.levels[savedTraversal.level] then
+                    lane.place(sessionObj, savedTraversal.level, savedY)
+                end
                 state.y = math.max(state.minY, math.min(state.maxY, savedY))
                 state.z = lane.groundAt(sessionObj, state.y) or state.z
             end

@@ -207,8 +207,11 @@ end
 -- `camera.tracking.vertical`, the window slides up and down so the actor keeps
 -- the screen height they have on the reference floor, as far as the authored
 -- room goes (`minOffsetY`/`maxOffsetY` are the bounds of the geometry that
--- exists). The slide is whatever it takes to cancel the actor's rise in the
--- real camera, measured with the real projection, so it is exact at any camera.
+-- exists). The slide is however many pixels the actor's rise moved them up the
+-- screen, measured with the engine's own projection, so it is exact at any
+-- camera. A POSITIVE `projectionWindowOffsetY` moves the world DOWN the screen
+-- (the camera climbs), so following upward is a positive offset: the authored
+-- range is normally 0 .. the height in pixels of the room above the reference.
 local function projectZ(camera, state, z)
     return world_view.projectPerspective(camera, 256, 240, state.depthX, state.y, z).y
 end
@@ -219,7 +222,7 @@ local function verticalFollowOffset(state)
     local camera = world_view.resolveTownCamera(state.camera)
     local reference = projectZ(camera, state, vertical.referenceZ)
     local actual = projectZ(camera, state, state.z)
-    local wanted = -(reference - actual) * vertical.factor
+    local wanted = (reference - actual) * vertical.factor
     return clamp(wanted, vertical.minOffsetY, vertical.maxOffsetY)
 end
 

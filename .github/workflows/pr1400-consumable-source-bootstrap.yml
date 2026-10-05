@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - tools/blender/bootstrap_consumable_sources_pr1400.py
+      - tools/blender/bootstrap_consumable_sources_pr1400_refine.py
       - .github/workflows/pr1400-consumable-source-bootstrap.yml
       - tools/blender/second_rite_asset_core.py
       - tools/blender/compile_item_blends.py
@@ -43,7 +44,7 @@ jobs:
           mkdir -p "$out/sources" "$out/runtime"
 
           xvfb-run -a "$BLENDER_EXECUTABLE" --background --python-exit-code 1 \
-            --python tools/blender/bootstrap_consumable_sources_pr1400.py
+            --python tools/blender/bootstrap_consumable_sources_pr1400_refine.py
 
           for item in potion hi_potion x_potion mega_potion healing_water ether; do
             test -s "$src/$item.blend"

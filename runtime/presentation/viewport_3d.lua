@@ -2236,7 +2236,14 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
     -- and then scissored away.
     local targetWidth, targetHeight = surface.renderSize()
     local targetCanvas = love.graphics.getCanvas()
-    if targetCanvas then
+    -- LÖVE returns the colour Canvas directly for ordinary single-target binds,
+    -- but an attachment table when an explicit depth/stencil Canvas is bound.
+    -- The selective-AA compositor uses the latter; projection sizing still
+    -- belongs to the first colour attachment in both cases.
+    if type(targetCanvas) == "table" then
+        targetCanvas = targetCanvas[1]
+    end
+    if targetCanvas and targetCanvas.getDimensions then
         targetWidth, targetHeight = targetCanvas:getDimensions()
     end
     -- A supersampled render target is a denser raster of the SAME logical

@@ -1,0 +1,34 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -3.6364,
+    -0.75,
+    -0.35,
+    6.8667,
+    8.5166,
+    3.8
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        3.0833,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        3.9833,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "sourceBlend": "passage_house_room3.blend"
+  }
+}

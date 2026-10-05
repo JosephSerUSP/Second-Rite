@@ -1,6 +1,6 @@
 {
   "id": 1001,
-  "title": "St. Maria / Corti\u00e7o / Passage House",
+  "title": "St. Maria / Cortiço / Passage House",
   "intro": "A street of St. Maria.",
   "depth": 0,
   "safe": true,
@@ -1039,7 +1039,7 @@
     {
       "id": 100102,
       "instanceId": "core-run-court-to-praca",
-      "name": "Pra\u00e7a / Passage Office",
+      "name": "Praça / Passage Office",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -1096,7 +1096,7 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 25,
+          "mapId": 34,
           "arrival": "exit_door"
         }
       ],

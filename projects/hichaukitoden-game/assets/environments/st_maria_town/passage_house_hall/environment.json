@@ -1,0 +1,69 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -2.1333,
+    -1.43,
+    -0.35,
+    5.9967,
+    22.5,
+    6.8
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        19.1,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        20.0,
+        0.0
+      ]
+    },
+    "street_door": {
+      "position": [
+        0.0,
+        0.3,
+        0.0
+      ]
+    },
+    "stair_foot": {
+      "position": [
+        0.0,
+        15.2,
+        0.0
+      ]
+    },
+    "stair_top": {
+      "position": [
+        0.0,
+        9.48,
+        3.2
+      ]
+    },
+    "room3_door": {
+      "position": [
+        0.0,
+        6.0,
+        3.2
+      ]
+    },
+    "gate_door": {
+      "position": [
+        0.0,
+        1.5,
+        3.2
+      ]
+    }
+  },
+  "provenance": {
+    "sourceBlend": "passage_house_stair_hall.blend"
+  }
+}

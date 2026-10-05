@@ -319,7 +319,8 @@ local function doorTargets(mapId)
 end
 check(doorTargets(1005)[1001], "the praca opens on to the backstreet")
 check(doorTargets(1001)[1002], "the backstreet drops into market row")
-check(doorTargets(1001)[25] and doorTargets(25)[1001], "the court connects the backstreet to the rented room")
+check(doorTargets(1001)[34] and doorTargets(34)[1001], "the court connects the backstreet to the Passage House stair hall")
+check(doorTargets(34)[25] and doorTargets(25)[34], "the stair hall connects the gallery to the rented room")
 check(doorTargets(1005)[1009] and doorTargets(1009)[1006], "the praca stair climbs to the churchyard")
 check(doorTargets(1006)[1007] and doorTargets(1007)[2], "the churchyard holds the way into the labyrinth")
 

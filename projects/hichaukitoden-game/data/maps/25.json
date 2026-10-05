@@ -7,7 +7,7 @@
   "category": "town",
   "generation": "Fixed",
   "tileset": "town_default",
-  "ceilingStyle": "sky",
+  "ceilingStyle": "solid",
   "music": "town1",
   "layout": [
     "."
@@ -19,12 +19,12 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/lodging/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/passage_house_room3/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
-      "maxY": 10.4,
-      "depthX": 7.8,
+      "minY": 0.35,
+      "maxY": 7.4167,
+      "depthX": 0.0,
       "groundZ": 0.0,
       "speed": 3.4
     },
@@ -32,28 +32,30 @@
     "camera": {
       "profile": "town_sideview",
       "target": {
-        "x": 7.8,
-        "y": 5.2,
-        "z": 0.0
+        "x": 0.0,
+        "y": 3.8833,
+        "z": 2.2604
       },
-      "distance": 18.666666666666668,
+      "distance": 18.6667,
       "yawDegrees": 0.0,
       "pitchDegrees": -17.5,
-      "eyeHeight": 2.2604166666666665,
+      "eyeHeight": -1.4583333333,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
       "projectionScale": {
-        "x": 1.0,
-        "y": 1.0
+        "x": 0.94079629,
+        "y": 0.9116197588
       },
+      "projectionWindowOffsetY": -107.16301268,
       "projectionFrame": {
-        "canonicalCenterX": 213,
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
         "canonicalHorizonY": 66
       },
       "tracking": {
         "axis": "y",
-        "center": 5.2,
+        "center": 3.8833,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -73,12 +75,12 @@
     {
       "id": 2501,
       "instanceId": "st-maria-lodging-exit_door",
-      "name": "Out to Cortiço / Passage House",
+      "name": "Out to the gallery",
       "x": 0,
       "y": 0,
       "worldPosition": [
-        7.8,
-        10.0625,
+        0.0,
+        3.9833,
         0.0
       ],
       "trigger": "bump",
@@ -86,66 +88,17 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 1001,
-          "arrival": "door-passage-house"
+          "mapId": 34,
+          "arrival": "room3_door"
         }
       ],
       "direction": "toward"
-    },
-    {
-      "id": 2502,
-      "instanceId": "core-run-home-caretaker",
-      "name": "Passage House caretaker",
-      "sprite": "assets/character/town/npc_agnes.png",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        4.0,
-        0
-      ],
-      "trigger": "bump",
-      "direction": "away",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "Your room is ready. Registration is at the Passage Office in the Praca: leave the house, take the right-hand street, then enter the Registry."
-        },
-        {
-          "cmd": "CHOICE",
-          "options": [
-            {
-              "label": "Rest in Room 3.",
-              "commands": [
-                {
-                  "cmd": "CALL_COMMON_EVENT",
-                  "commonEventId": 46
-                },
-                {
-                  "cmd": "TEXT",
-                  "text": "You and your companions rest. HP, MP and spell charges are restored."
-                }
-              ]
-            },
-            {
-              "label": "Ask for directions.",
-              "commands": [
-                {
-                  "cmd": "TEXT",
-                  "text": "The bakery street is left of the Cortico. Follow it down to the pub and forge. The workers stair from the port brings you back here. From the Praca, take the uphill stairs toward the churchyard; the Labyrinth is beyond it."
-                }
-              ]
-            },
-            {
-              "label": "Leave.",
-              "commands": []
-            }
-          ]
-        }
-      ]
     }
   ],
   "treasures": [],
   "encounters": [],
-  "recruits": []
+  "recruits": [],
+  "fog": {
+    "minFactor": 1.0
+  }
 }

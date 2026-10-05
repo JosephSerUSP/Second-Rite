@@ -22,8 +22,8 @@ end
 load(1001, "door-passage-house")
 local entryY, entryZ = game.townTraversal.y, game.townTraversal.z
 useDoor("core-run-court-door-passage-house")
-check(game.currentMapData.id == 25, "Cortico enters Passage House directly")
-useDoor("st-maria-lodging-exit_door")
+check(game.currentMapData.id == 34, "Cortico enters the Passage House stair hall")
+useDoor("st-maria-passage-hall-exit_door")
 check(game.currentMapData.id == 1001 and math.abs(game.townTraversal.y-entryY)<1e-6
     and math.abs(game.townTraversal.z-entryZ)<1e-6, "return preserves physical doorstep and elevation")
 local state = game.townTraversal

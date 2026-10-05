@@ -1,0 +1,327 @@
+{
+  "id": 34,
+  "title": "St. Maria - Passage House, the stair hall",
+  "intro": "A great door to the court, a wall of lodgers' post, and a stone stair up to the gallery where the rooms are. Somewhere beyond the gate at its far end, Celina is working.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "solid",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/passage_house_hall/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.3,
+      "maxY": 21.0,
+      "depthX": 0,
+      "groundZ": 0,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0,
+        "y": 11,
+        "z": 2.2604
+      },
+      "distance": 14,
+      "yawDegrees": 12,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333,
+      "fovDegrees": 36.87,
+      "nearPlane": 0.05,
+      "farPlane": 128,
+      "projectionScale": {
+        "x": 0.94079629,
+        "y": 0.9116197588
+      },
+      "projectionWindowOffsetY": -70.47,
+      "projectionFrame": {
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 11,
+        "minOffsetX": -156,
+        "maxOffsetX": 156,
+        "interpolationSpeed": 12,
+        "movementInterpolationSpeed": 14,
+        "animationFps": 8,
+        "vertical": {
+          "minOffsetY": 0,
+          "maxOffsetY": 100
+        }
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-passage-hall-exit_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "street_door",
+        "eventInstanceId": "st-maria-passage-hall-street_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "stair_foot",
+        "eventInstanceId": "st-maria-passage-hall-stair_foot",
+        "radius": 0.9,
+        "link": "stair"
+      },
+      {
+        "anchor": "stair_top",
+        "eventInstanceId": "st-maria-passage-hall-stair_top",
+        "radius": 0.9,
+        "level": "gallery",
+        "link": "stair"
+      },
+      {
+        "anchor": "room3_door",
+        "eventInstanceId": "st-maria-passage-hall-room3_door",
+        "radius": 0.9,
+        "level": "gallery"
+      },
+      {
+        "anchor": "gate_door",
+        "eventInstanceId": "st-maria-passage-hall-gate_door",
+        "radius": 0.9,
+        "level": "gallery"
+      }
+    ],
+    "levels": {
+      "gallery": {
+        "minY": 0.9,
+        "maxY": 9.88,
+        "groundZ": 3.2
+      }
+    },
+    "links": [
+      {
+        "id": "stair",
+        "x": 1.8,
+        "from": {
+          "level": "ground",
+          "y": 15.2
+        },
+        "to": {
+          "level": "gallery",
+          "y": 9.48
+        }
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 3401,
+      "instanceId": "st-maria-passage-hall-exit_door",
+      "name": "Out to the Cortiço",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        20.0,
+        0.0
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1001,
+          "arrival": "door-passage-house"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 3402,
+      "instanceId": "st-maria-passage-hall-street_door",
+      "name": "Out to the street",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        0.3,
+        0.0
+      ],
+      "trigger": "bump",
+      "direction": "left",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1001,
+          "arrival": "door-passage-house"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 3403,
+      "instanceId": "st-maria-passage-hall-stair_foot",
+      "name": "Stair up",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        15.2,
+        0.0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [],
+      "model": "assets/models/st_maria/transition_arrow.obj"
+    },
+    {
+      "id": 3404,
+      "instanceId": "st-maria-passage-hall-stair_top",
+      "name": "Stair down",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        9.48,
+        3.2
+      ],
+      "trigger": "bump",
+      "direction": "toward",
+      "commands": [],
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "level": "gallery"
+    },
+    {
+      "id": 3405,
+      "instanceId": "st-maria-passage-hall-room3_door",
+      "name": "Room 3",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        6.0,
+        3.2
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 25,
+          "arrival": "exit_door"
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "level": "gallery"
+    },
+    {
+      "id": 3406,
+      "instanceId": "st-maria-passage-hall-gate_door",
+      "name": "Registry gate",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        1.5,
+        3.2
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The gate is bolted from this side. You lift the bar and go through."
+            },
+            {
+              "cmd": "LOAD_MAP",
+              "mapId": 33
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "An iron gate, padlocked. Through the bars: a lamp, a counter, a ledger. Staff only until you hold a Crossing Writ."
+            }
+          ]
+        }
+      ],
+      "model": "assets/models/st_maria/transition_arrow.obj",
+      "level": "gallery"
+    },
+    {
+      "id": 2502,
+      "instanceId": "core-run-home-caretaker",
+      "name": "Passage House caretaker",
+      "sprite": "assets/character/town/npc_agnes.png",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0,
+        17.4,
+        0
+      ],
+      "trigger": "bump",
+      "direction": "away",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Your room is ready. Registration is at the Passage Office in the Praca: leave the house, take the right-hand street, then enter the Registry."
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Rest in Room 3.",
+              "commands": [
+                {
+                  "cmd": "CALL_COMMON_EVENT",
+                  "commonEventId": 46
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "You and your companions rest. HP, MP and spell charges are restored."
+                }
+              ]
+            },
+            {
+              "label": "Ask for directions.",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The bakery street is left of the Cortico. Follow it down to the pub and forge. The workers stair from the port brings you back here. From the Praca, take the uphill stairs toward the churchyard; the Labyrinth is beyond it."
+                }
+              ]
+            },
+            {
+              "label": "Leave.",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "fog": {
+    "minFactor": 1.0
+  }
+}

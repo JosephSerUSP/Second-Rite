@@ -46,3 +46,16 @@ create an output directory and set `THESTRA_MODEL_PROOF_OUTPUT` before the unit
 run, then run `node tools/model-import/check-native-proof.js <output-directory>`.
 The retained image and JSON prove actual native/Three facts without reparsing
 the source Model. Golden references remain owner-controlled.
+
+Studio's **Tools > Model Library** edits the same Project recipes. Choose a
+source, inspect its material-slot mappings and physical scale, then Preview /
+Reimport before saving. New imports discover source names through the actual
+importer; reimport keeps authored slot identities and Surface references.
+An unmapped new source material fails compilation rather than receiving an
+invented binding. Unused mappings are reported and retained for author review.
+
+Preview is read-only. Save recompiles and rejects a changed recipe, source or
+material/buffer dependency, or a changed registry since the view loaded. A
+successful save affects only that Model record; Cancel leaves authored data
+unchanged. Geometry-only recipes are labeled explicitly and retain the existing
+source-rendering migration path until Surface realization is available.

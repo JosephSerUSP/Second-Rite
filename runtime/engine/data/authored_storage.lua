@@ -199,7 +199,7 @@ local function validateRegistryRecord(record, stem, source)
     return record.id
 end
 
-local function validateRegistry(value, stem, source)
+local function validateRegistry(value, stem, source, allowEmpty)
     if type(value) ~= "table" then error("Registry '" .. stem .. "' is not an object: " .. source) end
     local out = {}
     local count = 0
@@ -216,7 +216,7 @@ local function validateRegistry(value, stem, source)
         out[id] = record
         count = count + 1
     end
-    if count == 0 then error("Registry '" .. stem .. "' is empty: " .. source) end
+    if count == 0 and not allowEmpty then error("Registry '" .. stem .. "' is empty: " .. source) end
     return out
 end
 
@@ -225,7 +225,7 @@ function authored_storage.validateResource(stem, value, spec, source)
     source = source or ("<write " .. stem .. ">")
     validateSpec(stem, spec)
     if spec.kind == "ordered_collection" then return validateOrderedCollection(value, stem, source) end
-    if spec.kind == "keyed_registry" then return validateRegistry(value, stem, source) end
+    if spec.kind == "keyed_registry" then return validateRegistry(value, stem, source, spec.allowEmpty == true) end
     if spec.kind == "semantic_config" then
         if type(value) ~= "table" or #value > 0 then error("Semantic config '" .. stem .. "' must be an object: " .. source) end
         local expected = {}

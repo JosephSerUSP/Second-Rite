@@ -25,6 +25,7 @@
     "troops": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "iconPalettes": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "iconKeyProfiles": { "kind": "document", "representation": "monolith", "bulkEditable": true },
-    "tilesets": { "kind": "keyed_registry", "representation": "fragments", "bulkEditable": false }
+    "tilesets": { "kind": "keyed_registry", "representation": "fragments", "bulkEditable": false },
+    "models": { "kind": "keyed_registry", "representation": "monolith", "bulkEditable": false, "allowEmpty": true }
   }
 }

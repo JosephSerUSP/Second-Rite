@@ -104,8 +104,8 @@ function validateRegistryRecord(record, stem, source) {
     return record.id;
 }
 
-function validateRegistry(value, stem, source) {
-    if (!value || Array.isArray(value) || typeof value !== 'object' || Object.keys(value).length === 0) {
+function validateRegistry(value, stem, source, allowEmpty = false) {
+    if (!value || Array.isArray(value) || typeof value !== 'object' || (!allowEmpty && Object.keys(value).length === 0)) {
         throw new Error(`registry '${stem}' must be a non-empty object: ${source}`);
     }
     const out = {};
@@ -125,7 +125,7 @@ function validateRegistry(value, stem, source) {
 function validateResource(value, stem, spec, source = `<write ${stem}>`) {
     validateSpec(stem, spec);
     if (spec.kind === 'ordered_collection') return validateOrderedCollection(value, stem, source);
-    if (spec.kind === 'keyed_registry') return validateRegistry(value, stem, source);
+    if (spec.kind === 'keyed_registry') return validateRegistry(value, stem, source, spec.allowEmpty === true);
     if (spec.kind === 'semantic_config') {
         if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(`semantic config '${stem}' must be an object: ${source}`);
         const expected = new Set(spec.modules);

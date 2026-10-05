@@ -414,6 +414,16 @@ def build_steps():
                   " && document.querySelector('#model-picker-list .model-picker-row.selected[data-path=\"assets/models/items/bottle_family__basis.obj\"]')"
                   " && document.querySelector('#model-picker-canvas[data-preview-ready]')"
                   " && document.getElementById('model-picker-meta').dataset.modelReady === '1'"),
+        dict(path="model-library/lantern.png",
+             js="openModelLibrary();",
+             wait="document.querySelector('#model-library-modal button')"
+                  " && Array.from(document.querySelectorAll('#model-library-modal button')).some(b => b.textContent === 'item.lantern')",
+             after_wait="""
+                 Array.from(document.querySelectorAll('#model-library-modal button')).find(b => b.textContent === 'item.lantern').click();
+                 Array.from(document.querySelectorAll('#model-library-modal button')).find(b => b.textContent === 'Preview / Reimport').click();
+             """,
+             ready_wait="document.querySelector('#model-library-preview[data-preview-ready]')"
+                        " && !Array.from(document.querySelectorAll('#model-library-modal button')).find(b => b.textContent === 'Save reviewed Model').disabled"),
     ]
     return steps
 
@@ -426,6 +436,7 @@ new Promise(function (resolve) {
 (function () {
     if (typeof closeAssetPicker === 'function') closeAssetPicker();
     if (typeof closeModelPicker === 'function') closeModelPicker();
+    if (typeof closeModelLibrary === 'function') closeModelLibrary();
     ['icon-picker-modal', 'asset-picker-modal', 'cmd-modal', 'cmd-selector-modal',
      'damage-popup-modal', 'max-modal', 'map-properties-modal', 'event-modal',
      'tileset-studio-modal', 'campaign-gen-modal', 'export-modal', 'studio-modal', 'db-modal',

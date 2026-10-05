@@ -172,6 +172,7 @@
             this.lastX = 0;
             this.lastY = 0;
             this.alive = true;
+            this.bundleRequest = 0;
             this.frame = this.frame.bind(this);
             this.installEvents();
             this.ready = loadThree().then(dependencies => this.initialize(dependencies));
@@ -282,6 +283,46 @@
                     this.render();
                 }
             }
+        }
+
+        async setBundle(bundle) {
+            const request = ++this.bundleRequest;
+            await this.ready;
+            await import('/model-bundle-contract.js');
+            await import('/model-bundle-three.js');
+            if (!this.alive || request !== this.bundleRequest) return;
+            this.path = 'model:' + bundle.modelId;
+            this.error = '';
+            this.canvas.removeAttribute('data-preview-ready');
+            try {
+                const object = root.ThestraModelBundleThree.toThreeObject(bundle, this.THREE);
+                this.releaseOwnedBundle();
+                this.model = { object, ...parseGeometryStats(object, this.THREE) };
+                this.ownsBundle = true;
+            } catch (error) {
+                this.model = null;
+                this.error = String(error.message || error);
+                this.render();
+                throw error;
+            }
+            this.render();
+        }
+
+        releaseOwnedBundle() {
+            if (this.ownsBundle && this.model?.object) this.model.object.traverse(node => {
+                node.geometry?.dispose();
+                const materials = Array.isArray(node.material) ? node.material : [node.material];
+                materials.forEach(material => { material?.map?.dispose(); material?.dispose(); });
+            });
+            this.ownsBundle = false;
+        }
+
+        destroy() {
+            this.alive = false;
+            this.bundleRequest++;
+            this.releaseOwnedBundle();
+            this.renderer?.dispose();
+            this.message?.remove();
         }
 
         stop() {
@@ -461,6 +502,7 @@
         const overlay = ensurePickerDOM();
         activePickerCallback = callback || null;
         activePickerOptions = Object.assign({ root: 'models' }, options || {});
+        overlay.style.zIndex = activePickerOptions.zIndex || '';
         activePickerPath = normalizePath(currentPath);
         pickerFiles = [];
 
@@ -472,7 +514,7 @@
 
         try {
             const rootParam = encodeURIComponent(activePickerOptions.root || 'models');
-            const response = await fetch(`${root.API_URL || ''}/api/models?root=${rootParam}`);
+            const response = await fetch(`${root.API_URL || ''}/api/models?root=${rootParam}${activePickerOptions.includeStatic ? '&formats=static' : ''}`);
             if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
             const data = await response.json();
             if (requestId !== pickerRequestId) return;
@@ -528,7 +570,7 @@
         list.innerHTML = '';
         const files = filteredPickerFiles();
         if (!files.length) {
-            list.innerHTML = '<div style="padding:8px;color:#777">No matching OBJ models.</div>';
+            list.innerHTML = '<div style="padding:8px;color:#777">No matching models.</div>';
             return;
         }
 
@@ -547,7 +589,7 @@
 
             const name = document.createElement('span');
             name.className = 'model-picker-row-name';
-            name.textContent = row.dataset.path.split('/').pop().replace(/\.obj$/i, '');
+            name.textContent = row.dataset.path.split('/').pop().replace(/\.(obj|glb|gltf)$/i, '');
             row.appendChild(name);
 
             row.onclick = () => selectPickerRow(row);
@@ -608,7 +650,7 @@
                 ? `${Math.max(1, Math.round(size / 1024))} KB`
                 : 'unknown size';
             const dims = model.bounds.max.map((v, i) => Math.abs(v - model.bounds.min[i]));
-            const libraries = model.materialLibraries.length
+            const libraries = model.modelId ? `Model ${model.modelId}; compiled slots: ${model.materialNames.join(', ')}` : model.materialLibraries.length
                 ? model.materialLibraries.map(lib => `${lib.ok ? '✓' : '⚠'} ${lib.path}`).join('\n')
                 : '(no mtllib declaration)';
 

@@ -90,4 +90,18 @@ test('editor model API enumerates and serves authored OBJ files', async (t) => {
         const moduleResponse = await fetch(`${base}/model-bundle-${name}.js`);
         assert.strictEqual(moduleResponse.status, 200, `shared ${name} browser module is available`);
     }
+    const library=await (await fetch(`${base}/api/model-library`)).json();
+    assert.ok(library.records['item.lantern']);
+    const payload={recipe:library.records['item.lantern'],originalId:'item.lantern',version:library.version};
+    const reviewResponse=await fetch(`${base}/api/model-library/preview`,{
+        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    assert.equal(reviewResponse.status,200);
+    const review=await reviewResponse.json();
+    assert.equal(review.bundle.modelId,'item.lantern');
+    assert.equal(review.renderable,true);
+    const stale=await fetch(`${base}/api/model-library/save`,{
+        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,token:review.token,version:'stale'})
+    });
+    assert.equal(stale.status,409);
 });

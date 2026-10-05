@@ -10,18 +10,14 @@ permissions:
 
 jobs:
   apply:
-    if: ${{ !contains(github.event.head_commit.message, 'feat(#836): add selective environment AA') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/836-selective-environment-aa
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Apply bounded renderer patch
-        run: python tools/tmp_apply_836.py
+        run: python3 tools/tmp_apply_836.py
       - name: Commit feature
         shell: bash
         run: |

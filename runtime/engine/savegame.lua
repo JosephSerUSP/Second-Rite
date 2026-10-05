@@ -116,6 +116,16 @@ local function deserializeBattler(data, loader)
     return b
 end
 
+local function serializeTraversalState(sessionObj)
+    local traversal = sessionObj.townTraversal
+    if not traversal or traversal.provider ~= "bounded_lane" then return nil end
+    return {
+        provider = "bounded_lane",
+        y = traversal.y,
+        facing = traversal.facing,
+    }
+end
+
 -- Only "map" (dungeon) and "town" carry a currentMapData/mapGrid worth
 -- capturing; other scenes (battle, dialogue, menus) are mid-transition
 -- state that isn't safe to resume into, so save/load is only offered from
@@ -135,6 +145,7 @@ local function serializeMap(sessionObj)
         generatedFeatures = sessionObj.generatedFeatures,
         generatedZones = sessionObj.generatedZones,
         dungeonFloor = sessionObj.dungeonFloor,
+        traversalState = serializeTraversalState(sessionObj),
     }
 end
 
@@ -158,11 +169,44 @@ local function restoreMap(sessionObj, data, loader)
     sessionObj.playerY = data.playerY
     sessionObj.playerDir = data.playerDir
     sessionObj.dungeonFloor = data.dungeonFloor or sessionObj.dungeonFloor
+
+    local exploration = require("engine.exploration")
     local presentation = sessionObj.mapPresentationOverrides
         and sessionObj.mapPresentationOverrides[data.mapIndex]
     if presentation then
-        require("engine.exploration").applyMapPresentation(
-            sessionObj, data.mapIndex, presentation)
+        exploration.applyMapPresentation(sessionObj, data.mapIndex, presentation)
+    end
+
+    -- restoreMap historically reconstructed only the legacy grid fields. That
+    -- is insufficient for capability-backed town Maps: bounded_lane owns the
+    -- side-view camera, continuous actor position, bounds and doorway collision.
+    -- A fresh GameSession therefore loaded a valid town Map with no provider,
+    -- which made the renderer fall back to first-person dungeon presentation
+    -- and made lane collision disappear. Rebuild the same derived capability
+    -- that exploration.loadMap installs on ordinary transfers.
+    exploration.buildOverrideIndex(sessionObj)
+    local traversalSpec = mapData.traversal
+    if type(traversalSpec) == "table" and traversalSpec.provider == "bounded_lane" then
+        local environment = require("engine.environment_package").load(
+            traversalSpec.environmentPackage)
+        local lane = require("engine.bounded_lane")
+        local state = lane.initialize(sessionObj, mapData, environment, nil)
+        local savedTraversal = data.traversalState
+        if state and type(savedTraversal) == "table"
+                and savedTraversal.provider == "bounded_lane" then
+            local savedY = tonumber(savedTraversal.y)
+            if savedY and savedY == savedY
+                    and savedY ~= math.huge and savedY ~= -math.huge then
+                state.y = math.max(state.minY, math.min(state.maxY, savedY))
+                state.z = lane.groundAt(sessionObj, state.y) or state.z
+            end
+            local facing = tonumber(savedTraversal.facing)
+            if facing and facing ~= 0 then state.facing = facing < 0 and -1 or 1 end
+            -- Refresh visual roots and projection tracking from the restored
+            -- authoritative lane coordinate. Passing no dt resets walk animation
+            -- without moving the actor.
+            lane.update(sessionObj)
+        end
     end
 end
 

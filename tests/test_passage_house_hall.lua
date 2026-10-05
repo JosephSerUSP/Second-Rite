@@ -159,4 +159,23 @@ for _, event in ipairs(game.currentMapData.events) do
 end
 check(hasCaretaker, "the caretaker minds the hall")
 
+-- Doors must not overlap: where two are in reach at once the HUD can only name one
+-- of them, so the player cannot tell which an Up press will take.
+for _, mapId in ipairs({ 25, 33, HALL }) do
+    load(mapId)
+    local doorways = game.townTraversal.doorways
+    local anchors = game.townTraversal.environment.anchors
+    for i = 1, #doorways do
+        for j = i + 1, #doorways do
+            local a, b = doorways[i], doorways[j]
+            if (a.level or "ground") == (b.level or "ground") then
+                local gap = math.abs(anchors[a.anchor].position[2] - anchors[b.anchor].position[2])
+                check(gap >= (a.radius or 0.65) + (b.radius or 0.65) - 1e-6,
+                    "map " .. mapId .. " doors '" .. a.anchor .. "' and '" .. b.anchor
+                    .. "' are too close to tell apart (" .. string.format("%.2f", gap) .. ")")
+            end
+        end
+    end
+end
+
 require("tests.fail_fast")("test_passage_house_hall", failed, passed)

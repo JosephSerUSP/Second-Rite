@@ -233,6 +233,11 @@
       "purpose": "Derived mesh preparation; never alters authored mesh datablocks."
     },
     {
+      "path": "move_registry_exit.py",
+      "role": "one-shot",
+      "purpose": "Slide the Registry entrance's floor tongue and door light along the front edge as a new source revision."
+    },
+    {
       "path": "offline_blender.py",
       "role": "production",
       "purpose": "Run a Blender Python tool with Python network connections denied in this process.",

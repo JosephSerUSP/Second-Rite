@@ -107,7 +107,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [study_house_grammar.py](study_house_grammar.py) | `run.py` | Photograph the first grammar-generated building as CLAY, against the real camera. |
 | [study_town_perspective.py](study_town_perspective.py) | `run.py` | Compare level/pitched town cameras on an exterior and an interior. |
 
-## Recorded source surgery and migrations (12)
+## Recorded source surgery and migrations (13)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -117,6 +117,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [extend_registry_frontage.py](extend_registry_frontage.py) | `run.py` | Extend existing service joinery to the right wall and add a wall-backed cabinet. |
 | [finish_registry_shell.py](finish_registry_shell.py) | `run.py` | Close the retained Registry ceiling junction without regenerating the room. |
 | [fit_registry_ceiling.py](fit_registry_ceiling.py) | `run.py` | Fit the retained timber service divider to the existing ceiling and beams. |
+| [move_registry_exit.py](move_registry_exit.py) | `run.py` | Slide the Registry entrance's floor tongue and door light along the front edge as a new source revision. |
 | [open_registry_plan.py](open_registry_plan.py) | `run.py` | Remove the detached masonry frame from an existing Registry source revision. |
 | [probe_registry_shell.py](probe_registry_shell.py) | `run.py` | Read-only probe of the recorded Registry shell experiment. |
 | [reauthor_praca_spiral.py](reauthor_praca_spiral.py) | `run.py` | Re-author st_maria_praca.blend for the spiral layout. |

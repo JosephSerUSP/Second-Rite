@@ -1,1 +1,102 @@
-{}
+{
+  "battle_start": [
+    {
+      "cmd": "COMMENT",
+      "text": "Enemies come from the troop the real-time host names. No barriers or wards: those are Second Gate systems this Project does not author."
+    },
+    {
+      "cmd": "SPAWN_ENEMIES"
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "battle_start"
+    }
+  ],
+  "round_start": [
+    {
+      "cmd": "COMMENT",
+      "text": "A real-time round is ticksPerRound fixed scheduler ticks (ledger O1)."
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "round_start"
+    }
+  ],
+  "after_action": [
+    {
+      "cmd": "COMMENT",
+      "text": "The instant a blow lands: boss phase changes hook here."
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "after_action"
+    }
+  ],
+  "round_end": [
+    {
+      "cmd": "COMMENT",
+      "text": "State ticks and skill timers keep round semantics. PE is the session MP pool (ledger O3) and regenerates a little each round; the rate is a prototype value, not a verified original formula."
+    },
+    {
+      "cmd": "STATE_TICKS"
+    },
+    {
+      "cmd": "TICK_SKILL_TIMERS"
+    },
+    {
+      "cmd": "CHANGE_MP",
+      "amount": "2"
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "round_end"
+    }
+  ],
+  "victory": [
+    {
+      "cmd": "COMMENT",
+      "text": "Mutated rat rewards as reported by Day 1 guides: EXP 2, Ammo +6."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "GRANT_XP",
+          "target": "ally",
+          "amount": "2"
+        }
+      ]
+    },
+    {
+      "cmd": "CHANGE_ITEM",
+      "item": "handgun_ammo",
+      "count": 6
+    }
+  ],
+  "defeat": [
+    {
+      "cmd": "EMIT_TEXT",
+      "term": "battle.defeat",
+      "fallback": "Aya has fallen."
+    }
+  ],
+  "escaped": [
+    {
+      "cmd": "EMIT_TEXT",
+      "term": "battle.escaped",
+      "fallback": "Aya escaped."
+    }
+  ],
+  "flee_attempt": [
+    {
+      "cmd": "COMMENT",
+      "text": "Prototype: escape always succeeds, carried over from B009. The original's escape chance is unverified."
+    },
+    {
+      "cmd": "EMIT_EVENT",
+      "event": "flee_success"
+    }
+  ]
+}

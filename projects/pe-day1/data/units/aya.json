@@ -1,0 +1,21 @@
+{
+  "id": "aya",
+  "name": "Aya",
+  "level": 1,
+  "initialParty": false,
+  "skills": [
+    "handgun_shot",
+    "heal1"
+  ],
+  "flavor": "NYPD rookie at Carnegie Hall on Christmas Eve.",
+  "baseParams": {
+    "maxHp": 45,
+    "atk": 10,
+    "def": 10,
+    "mat": 10,
+    "mdf": 10,
+    "mpd": 1,
+    "asp": 10
+  },
+  "growthBands": []
+}

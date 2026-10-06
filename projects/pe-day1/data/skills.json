@@ -1,1 +1,80 @@
-{}
+{
+  "handgun_shot": {
+    "id": "handgun_shot",
+    "name": "Shoot",
+    "target": "enemy-any",
+    "scope": "battle",
+    "description": "Fire the handgun. Closer targets take more damage; beyond range the shot misses.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "max(1, 7 - floor(sqrt((a.x - b.x)^2 + (a.y - b.y)^2) / 2))"
+      }
+    ],
+    "itemCost": {
+      "item": "handgun_ammo",
+      "count": 1
+    },
+    "realtime": {
+      "delivery": "range",
+      "range": 4
+    }
+  },
+  "heal1": {
+    "id": "heal1",
+    "name": "Heal 1",
+    "target": "self",
+    "scope": "battle",
+    "description": "Parasite Energy: restore 30 HP.",
+    "effects": [
+      {
+        "type": "hp",
+        "value": 30
+      }
+    ],
+    "charges": 0,
+    "overcast": {
+      "mp": 30
+    }
+  },
+  "rat_bite": {
+    "id": "rat_bite",
+    "name": "Bite",
+    "target": "enemy-any",
+    "scope": "battle",
+    "description": "Winds up, locks the target's position, then lunges there.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "4"
+      }
+    ],
+    "realtime": {
+      "delivery": "lunge",
+      "windupTicks": 30,
+      "radius": 0.6
+    }
+  },
+  "rat_fire_tail": {
+    "id": "rat_fire_tail",
+    "name": "Fire Tail",
+    "target": "enemy-any",
+    "scope": "battle",
+    "description": "Three fire projectiles; each can hit once.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "4"
+      }
+    ],
+    "realtime": {
+      "delivery": "projectiles",
+      "windupTicks": 20,
+      "count": 3,
+      "spread": 0.35,
+      "speed": 0.08,
+      "radius": 0.45,
+      "lifeTicks": 90
+    }
+  }
+}

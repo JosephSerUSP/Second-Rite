@@ -16,10 +16,35 @@
     "goldMin": 0,
     "goldMax": 0,
     "party": {
-      "fixedMembers": []
-    }
+      "fixedMembers": [
+        {
+          "id": "aya",
+          "level": 1
+        }
+      ]
+    },
+    "bonusItems": [
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "medicine"
+    ]
   },
   "rtp": {
     "revision": "1.0"
+  },
+  "summoner": {
+    "startMp": 100
+  },
+  "realtimeBattle": {
+    "ticksPerRound": 180
   }
 }

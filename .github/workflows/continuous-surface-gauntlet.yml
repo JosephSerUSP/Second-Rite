@@ -3,6 +3,8 @@ name: continuous surface gauntlet
 on:
   pull_request:
     paths:
+      - 'runtime/main.lua'
+      - 'runtime/engine/savegame.lua'
       - 'runtime/engine/continuous_surface.lua'
       - 'runtime/engine/continuous_surface_provider.lua'
       - 'runtime/engine/traversal_host.lua'
@@ -73,7 +75,58 @@ jobs:
           & $env:LOVEC $env:GAUNTLET_STAGE validate
           if ($LASTEXITCODE -ne 0) { throw "gauntlet validate failed (exit $LASTEXITCODE)" }
 
-      - name: Continuous traversal semantic assertions
+      - name: Traversal save/load round-trip in the staged Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $main = Join-Path $env:GAUNTLET_STAGE 'main.lua'
+          @'
+          local loader = require("engine.data.loader")
+          local session = require("engine.session")
+          local exploration = require("engine.exploration")
+          local traversal = require("engine.traversal_host")
+          local savegame = require("engine.savegame")
+          local json = require("engine.data.json")
+
+          local function near(a, b)
+              return math.abs((a or 0) - (b or 0)) < 1e-9
+          end
+
+          function love.load()
+              loader.init()
+              local original = session.GameSession.new(loader)
+              exploration.loadMap(original, 1)
+              assert(traversal.isActive(original), "gauntlet traversal provider is not active")
+
+              local spawn = traversal.serialize(original)
+              traversal.update(original, 0.25, { right = true })
+              local before = traversal.serialize(original)
+              assert(before and before.provider == "continuous_surface", "provider did not serialize")
+              assert(not near(before.x, spawn.x), "test movement did not change world X")
+
+              local body = json.encode(savegame.serialize(original, loader, "map"))
+              local restored, scene = savegame.deserialize(json.decode(body), loader)
+              local after = traversal.serialize(restored)
+
+              assert(scene == "map", "saved scene did not restore")
+              assert(after and after.provider == before.provider, "provider identity did not restore")
+              assert(near(after.x, before.x) and near(after.y, before.y) and near(after.z, before.z),
+                  "world position did not round-trip")
+              assert(near(after.facingX, before.facingX) and near(after.facingY, before.facingY),
+                  "world facing did not round-trip")
+              assert(near(after.walkDistance, before.walkDistance), "walk distance did not round-trip")
+
+              print("CONTINUOUS_TRAVERSAL_SAVE_OK")
+              if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+              love.event.quit(0)
+              os.exit(0)
+          end
+          '@ | Set-Content -Path $main -Encoding utf8
+
+          & $env:LOVEC $env:GAUNTLET_STAGE
+          if ($LASTEXITCODE -ne 0) { throw "traversal save/load contract failed (exit $LASTEXITCODE)" }
+
+      - name: Continuous traversal semantic and host assertions
         shell: pwsh
         run: |
           & $env:LOVEC tools/spikes/continuous-surface --test-only

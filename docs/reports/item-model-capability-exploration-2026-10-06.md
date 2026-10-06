@@ -411,3 +411,105 @@ Agent-Signature:
   role: implementation
   task: incense and armour shoulder feedback
   base: 9e40e7e9b87622519a8cf1633f056a3b08f44027
+
+## Next food cohort: deformation, instancing and shaped sections
+
+The owner liked the preceding results and requested another batch using new
+techniques. This pass starts from `b55f09b3` and adds nine previously absent
+source documents. These are new food studies awaiting owner review, not an
+assertion that prior sources or this cohort have completed visual acceptance.
+
+The review is available as a [gameplay-angle board](item-model-food-studies-review/gameplay96.png),
+a [same-pose before/after comparison](item-model-food-studies-review/before-after96.png),
+and the [complete native sheet](item-model-food-studies-review/sheet96.png).
+Every cell is rendered by the actual LÖVE item viewer at 96px. The smaller
+board uses the first two sheet poses, at gameplay tilt. The other two poses
+are diagnostic rolls: inspecting the shader confirms local-Y rotation then
+Z-axis yaw, so their labels/comments must not be taken as proof of an elevated
+camera or a visible top surface. No engine camera change was made here.
+
+| Food | Construction and useful source handles | Resolved triangles |
+| --- | --- | ---: |
+| Coxinha | Pinched sculpt in the Basis, rounded shape-key alternative, Geometry Nodes breadcrumb instances, folded paper sleeve | 1,452 |
+| Onigiri | Rounded triangular rice volume, separate front/back/bottom nori wrap, editable rice-grain seeds and realized Geometry Nodes instances | 1,700 |
+| Moa Tamagoyaki | Rounded rectangular omelette sections and two cut slices with spiral layer relief; bamboo tray and pick | 2,736 |
+| Mooncake | Twelve-lobed pastry loft, raised six-petal Curve seal and side flutes; displayed on its edge to expose the seal in a side viewer | 2,436 |
+| Mochi | Three rice cakes with separate live 3-by-3-by-3 Lattice cages, pink/white/green materials and a bamboo skewer | 1,288 |
+| Sushi | Rice grains, a salmon Curve with a broad rectangular bevel profile, fat stripes, and a front-facing cut nori roll with cucumber/salmon cores | 2,088 |
+| Tempura | Two tapered shrimp Curves, red tail plates, live Array + Curve breadcrumb paths, additional surface-bound grain instances and folded paper | 1,732 |
+| Kimchi | Corrugated, anisotropic Curve sections with adjustable path tilt, pale leaf ribs, scallions and a hollow stoneware dish | 3,856 |
+| Mandrake Tempura | Editable branching mesh skeleton with live Skin and Subdivision modifiers, a tapered leaf crown, face and fried crumbs | 1,272 |
+
+The grain systems use authored point coordinates and a hidden UV-bearing
+prototype, then explicitly Realize Instances. Their placement is not resampled
+randomly at compile time. Kimchi and Sushi retain independent editable bevel
+profiles. Mochi keeps its live deformation cages, and the mandrake keeps its
+branch skeleton and radii. Fixed food colours use ordinary material `Kd`;
+there are no new PNGs or runtime material passes in this cohort.
+
+### Observed limits and direct source refinements
+
+- Static item export resets copied shape-key values to zero through the shared
+  variant exporter. The first Coxinha therefore looked pinched in Blender but
+  compiled as its spherical Basis. The source was edited directly so that its
+  pinched sculpture is the Basis, with the rounded version retained as a
+  zero-value alternative. [#1436](https://github.com/JosephSerUSP/Second-Rite/issues/1436)
+  records the silent mismatch and the static-item policy follow-up. This pass
+  does not change shared exporter semantics.
+- Bevel width reaching half the thickness of paper/nori produced collapsed
+  runtime faces. Thin components now have narrower bevels. Onigiri's rounded
+  thickness was materialized once and degenerate cap edges dissolved in its
+  authoritative mesh; a hidden original outline/modifier guide remains.
+- Kimchi sections were widened and rolled, and their tips folded down after
+  native review. Tempura gained larger surface-bound crumbs where its first
+  coating read too sparsely. Kimchi's small corrugations remain noisy at 96px;
+  Sushi's salmon and omelette slice layers are clearest in their front poses.
+  The boards expose those limits for owner judgment.
+- Dense relief points initially generated 10,216 triangles for Tamagoyaki and
+  8,196 for Mooncake. Reducing the already dense Curve interpolation and tube
+  sections brings them to 2,736 and 2,436, respectively, while retaining the
+  spiral and flower in the reviewed native-size images. The point controls
+  themselves remain editable.
+
+Once saved, each `.blend` was edited directly. Scaffolding and recorded surgery
+scripts stay in ignored `out/work/` and must not be rerun over these documents.
+The previous source documents, armour, garments, accessories, incense, Curry
+and Stew are unchanged. Item effects, recipes, game data and runtime code are
+unchanged in this pass.
+
+### Verification and remaining boundaries
+
+- All nine final sources pass read-only `compile_item_blends.py --check`:
+  source hashes remain unchanged and compiled OBJ/MTL match shipping bytes.
+  An earlier all-nine independent candidate re-export also matched, before the
+  two relief sampling reductions; final `--check` verifies those reductions.
+- Texture/reference check, script index and diff checks pass. Canonical
+  shipping and final candidate native 96px boards have identical RGB pixels.
+- The final strict in-memory corpus review compares all 207 models, removing
+  sourced names from the legacy set. It reports zero findings involving these
+  nine, with the 0.85 threshold applying to pairs of sourced items.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. The unit suite reports
+  seven unavailable native Effekseer world-effect assertions, not coverage of
+  those assertions. No G5/G6 run or reference recapture was performed. Linux
+  source/product byte stability remains unverified.
+- Production baseline files are unchanged. The actual corpus check remains
+  red: 67 accepted keys no longer reproduce, with five remaining duplicate
+  groups, 48 UV-less models, one shared-file group, and the inherited reduced
+  Ether Seed/Sigil Ink group reported as new. Replacing three members of the
+  old duplicate food group similarly makes its five remaining legacy members
+  a new group key; none of those members belongs to this cohort. The asset
+  contract passes, while asset regression remains red for 67 changed Model
+  records across the stack. These do not establish owner baseline approval.
+- The inherited Lantern integration failures in #1434 remain separate merge
+  blockers. This food-only pass does not alter its shipping recipe, the Model
+  server fixture, or the shared native/Three proof.
+
+Items lacking editable source fall from 92 to 83. This measures source coverage;
+it is not a count of visually accepted products.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: nine food sources with new construction techniques
+  base: b55f09b311f06b2a006742b9da3ad35d2a0d2868

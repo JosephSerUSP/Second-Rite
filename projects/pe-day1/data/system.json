@@ -41,11 +41,14 @@
   "rtp": {
     "revision": "1.0"
   },
-  "summoner": {
-    "startMp": 100
-  },
   "realtimeBattle": {
     "ticksPerRound": 180,
     "atPerTick": "a.asp / 12"
+  },
+  "battlerResources": {
+    "pe": {
+      "name": "PE",
+      "max": 100
+    }
   }
 }

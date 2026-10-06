@@ -63,8 +63,20 @@ local function warnOnce(expr, err)
 end
 
 -- Read-only battler view: the only fields formulas may see.
-function formula.battlerView(battler, session)
+function formula.battlerView(battler, session, opts)
     if not battler then return nil end
+    -- Project-declared battler resources (PE, focus...) as `a.res.<id>`.
+    -- Required lazily: battler_resources evaluates max formulas through this
+    -- module. A resource maximum is evaluated without `res` (noResources).
+    local res = nil
+    if not (opts and opts.noResources) and session and session.loader and session.loader.system
+            and session.loader.system.battlerResources then
+        local battler_resources = require("engine.battler_resources")
+        res = {}
+        for _, id in ipairs(battler_resources.ids(session)) do
+            res[id] = (battler_resources.get(battler, id, session))
+        end
+    end
     local hp = battler.hp or 0
     local maxHpParts = vitality.maxHpComponents(battler, session)
     return {
@@ -97,6 +109,7 @@ function formula.battlerView(battler, session)
         -- in a slot battle fails loudly instead of measuring from 0,0.
         x = battler.field and battler.field.x or nil,
         y = battler.field and battler.field.y or nil,
+        res = res,
         meta = battler.meta or {},
         -- Creature history, readable from data so a scene can show "3rd
         -- expedition, 11 battles" without engine changes (engine/session.lua

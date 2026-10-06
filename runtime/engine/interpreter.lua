@@ -948,6 +948,15 @@ handlers.BARRIER_SYNC = function(cmd, ctx)
     end
 end
 
+-- Signed change to a Project-declared battler resource (PE...), clamped to
+-- the battler's maximum. Not Second Gate's shared MP: see CHANGE_MP.
+handlers.CHANGE_RESOURCE = function(cmd, ctx)
+    local target = resolveRef(cmd.target, ctx)
+    if not target then return end
+    local amount = evalFormula(cmd.amount, ctx)
+    require("engine.battler_resources").change(target, cmd.resource, tonumber(amount) or 0, ctx.session)
+end
+
 handlers.CHANGE_MP = function(cmd, ctx)
     local amount = math.floor(evalFormula(cmd.amount, ctx))
     if amount < 0 then

@@ -71,6 +71,9 @@ local function serializeBattler(b)
         -- here -- they answer "what can I do this turn", not "how much is left
         -- of the day", and a save is only ever taken outside battle anyway.
         charges = b.charges,
+        -- Project-declared battler resources (PE...): creature state like
+        -- charges, absent = full.
+        resources = b.resources,
         history = b.history,
     }
 end
@@ -112,6 +115,7 @@ local function deserializeBattler(data, loader)
     -- Absent = full, which is exactly what a save written before charges
     -- existed should mean: the creature arrives rested, not mute.
     if data.charges then b.charges = data.charges end
+    if data.resources then b.resources = data.resources end
     if data.history then b.history = data.history end
     return b
 end

@@ -285,11 +285,34 @@ function validator.run(loader)
         end
     end
 
+    -- Battler resources (PE, focus...): each declaration names a pool and its
+    -- maximum, a number or a formula over the battler.
+    local declaredResources = (loader.system and loader.system.battlerResources) or {}
+    check(type(declaredResources) == "table", "system.battlerResources must be an object")
+    for id, decl in pairs(type(declaredResources) == "table" and declaredResources or {}) do
+        local where = "battler resource '" .. tostring(id) .. "'"
+        if check(type(decl) == "table", where .. " must be an object") then
+            check(type(decl.max) == "number" or nonEmptyString(decl.max),
+                where .. " needs a max (number or formula over a)")
+        end
+    end
+
     -- Skills: the reusable cost vocabulary. Item-stock cost (SPEC 1.20) must
     -- name a real item and a whole count >= 1, or the skill would be silently
     -- unusable at runtime.
     for skillId, skill in pairs(loader.skills or {}) do
         local where = "Skill '" .. tostring(skillId) .. "'"
+        if type(skill) == "table" and skill.resourceCost ~= nil then
+            local cost = skill.resourceCost
+            if check(type(cost) == "table" and cost.resource ~= nil,
+                    where .. " resourceCost must be { resource = <id>, amount = N }") then
+                check(type(declaredResources) == "table" and declaredResources[cost.resource] ~= nil,
+                    where .. " resourceCost names undeclared battler resource '"
+                    .. tostring(cost.resource) .. "' (system.battlerResources)")
+                check(type(cost.amount) == "number" and cost.amount >= 0,
+                    where .. " resourceCost.amount must be a number >= 0")
+            end
+        end
         if type(skill) == "table" and skill.itemCost ~= nil then
             local cost = skill.itemCost
             if check(type(cost) == "table" and cost.item ~= nil,

@@ -112,6 +112,26 @@ function skill_cost.canPayItem(skill, session, isEnemy)
     return session ~= nil and session:hasItem(itemId, count)
 end
 
+-- ---------------------------------------------------------------------
+-- Battler resource cost (PE, focus: a traditional per-battler pool)
+-- ---------------------------------------------------------------------
+
+--- `resourceCost = { resource = <declared id>, amount = N }`. The pool is the
+--- caster's own (engine/battler_resources.lua), never Second Gate's shared
+--- Summoner MP, which no skill may cost (SPEC 1.20).
+function skill_cost.resourceCost(skill)
+    local cost = skill and skill.resourceCost
+    if cost == nil then return nil end
+    return cost.resource, math.max(0, math.floor(tonumber(cost.amount) or 0))
+end
+
+function skill_cost.canPayResource(skill, battler, session)
+    local id, amount = skill_cost.resourceCost(skill)
+    if id == nil then return true end
+    local current = require("engine.battler_resources").get(battler, id, session)
+    return current >= amount
+end
+
 --- Can this actor pay for one casting, and how?
 -- Returns "charge", "overcast", or nil plus a reason.
 --
@@ -142,6 +162,11 @@ function skill_cost.spend(skill, battler, session, isEnemy)
     local hp = skill_cost.hpCost(skill, battler, session)
     if hp > 0 then
         battler.hp = math.max(1, (battler.hp or 1) - hp)
+    end
+
+    local resourceId, resourceAmount = skill_cost.resourceCost(skill)
+    if resourceId ~= nil and resourceAmount > 0 then
+        require("engine.battler_resources").change(battler, resourceId, -resourceAmount, session)
     end
 
     -- Item stock is independent of the charge/Overcast decision too: a gun
@@ -329,6 +354,11 @@ function skill_cost.blockedReason(skill, battler, session, isEnemy)
         return "Out of ammunition"
     end
 
+    if not skill_cost.canPayResource(skill, battler, session) then
+        local id = skill_cost.resourceCost(skill)
+        return "Not enough " .. require("engine.battler_resources").label(session, id)
+    end
+
     local how, reason = skill_cost.payment(skill, battler, session, isEnemy)
     if not how then return reason or "Unavailable" end
 
@@ -365,6 +395,12 @@ function skill_cost.displayCost(skill, battler, session, isEnemy, verbose)
     local hp = skill_cost.hpCost(skill, battler, session)
     if hp > 0 then
         table.insert(segments, { text = tostring(hp) .. "HP", color = "hp" })
+    end
+
+    local resourceId, resourceAmount = skill_cost.resourceCost(skill)
+    if resourceId ~= nil then
+        table.insert(segments, { text = tostring(resourceAmount)
+            .. require("engine.battler_resources").label(session, resourceId), color = "mp" })
     end
 
     local itemId, count = skill_cost.itemCost(skill)

@@ -103,16 +103,15 @@ decision before implementation.
   determinism depends only on the tick count.
 - **O2 Ammo: approved.** `skill_cost` gains an item-stock cost kind. Ammo is
   ordinary inventory spent as the weapon skill's cost; it is production-usable.
-- **O3 PE: decided, "PE is a renamed, slightly mechanically different MP".**
-  MP here is the session pool (SPEC §1.11) and §1.20 forbids per-skill MP
-  costs; the only skill→MP path is Overcast with `"charges": 0`. Since Aya is
-  the whole party, the session pool is her pool. **Interpretation taken
-  (overrulable):** PE skills use the existing Overcast-only shape
-  (`charges: 0`, `overcast.mp: N`); the Project's terms rename MP→PE and the
-  Overcast wording; in-battle PE regeneration is a data step in the Project's
-  `battle.round_end` flow. This needs no production change and keeps one MP
-  authority. The alternative, a per-Project opt-out of the §1.20 `mpCost` ban,
-  is a SPEC change and is not taken without the owner.
+- **O3 PE: decided, then corrected by the owner the same day.** The first
+  interpretation mapped PE onto the session MP pool through the Overcast-only
+  shape. The owner corrected it: Second Gate's MP is a Summoner expedition
+  pool, *not* a traditional MP, and PE is much closer to a traditional MP.
+  **Implemented:** a reusable, Project-declared per-battler resource
+  (`system.battlerResources`, `engine/battler_resources.lua`). Skills pay
+  through `resourceCost`, values save with the battler, formulas read
+  `a.res.<id>`, and `CHANGE_RESOURCE` regenerates it from the `round_end`
+  phase. The Summoner MP and the SPEC 1.20 ban on MP costs are untouched.
 - **O4 Dodged attacks: yes.** A dodged attack still starts its cooldown,
   through the same `skill_cost.startCooldown` that `executeTurn` uses.
 - **O5 Seam: approved.** The real-time mode drives a real `Battle` through
@@ -120,7 +119,7 @@ decision before implementation.
   a supervised file needs comes to the owner as its own patch.
 
 Ledger rows updated accordingly: #9 (O2) and #10 (O3) move from *Owner* to
-*Additive* and *Reuse* respectively; #14 (O4) is *Divergence, decided*.
+*Additive* (both); #14 (O4) is *Divergence, decided*.
 
 ## Validation coverage (added 06.10)
 

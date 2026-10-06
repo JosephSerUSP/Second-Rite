@@ -85,7 +85,9 @@ local ok, err = pcall(function()
     local rt, session, aya, rat = begin()
     check(aya.id == "aya" and rat.actorData.id == "rat", "Aya and the troop's rat are real battlers")
     check(rat.hp == 20 and aya.hp == aya:getMaxHp(session), "rat HP 20 and Aya at full HP from unit data")
-    check(session.mp == 100, "PE is the session pool, starting at 100")
+    local resources = require("engine.battler_resources")
+    local function pe(b) return (resources.get(b, "pe", session)) end
+    check(pe(aya) == 100, "PE is Aya's own declared resource, starting full at 100")
     check(session.inventory.handgun_ammo == 11 and session.inventory.medicine == 1,
         "new game grants 11 ammo and one Medicine")
 
@@ -131,14 +133,17 @@ local ok, err = pcall(function()
     check(not acted and why == "Out of ammunition" and aya.at == realtime.AT_FULL,
         "without ammunition the shot is refused and the turn kept")
 
-    -- PE Heal 1 pays 30 from the session pool through Overcast (O3).
+    -- PE Heal 1 pays 30 from Aya's own PE (O3, revised): never the shared MP.
+    local sharedMp = session.mp
     aya.hp = 10
     rt:command("skill", "heal1", aya)
-    check(aya.hp == 40 and session.mp == 70 and aya.at == 0, "Heal 1 restores 30 HP for 30 PE")
-    session.mp = 20
+    check(aya.hp == 40 and pe(aya) == 70 and aya.at == 0, "Heal 1 restores 30 HP for 30 PE")
+    check(session.mp == sharedMp, "Heal 1 never touches the shared MP pool")
+    resources.change(aya, "pe", -50, session)
     ready(aya)
     acted, why = rt:command("skill", "heal1", aya)
-    check(not acted and aya.hp == 40 and session.mp == 20, "Heal 1 is refused without 30 PE")
+    check(not acted and why == "Not enough PE" and aya.hp == 40 and pe(aya) == 20,
+        "Heal 1 is refused without 30 PE, with a readable reason")
 
     -- Medicine goes through Battle:applyItem: consumed, healing clamped.
     aya.hp = 20
@@ -208,11 +213,19 @@ local ok, err = pcall(function()
     -- whose PE regeneration proves the phase ran.
     rt, session, aya, rat = begin()
     idle(rat)
-    session.mp = 50
+    local resources2 = require("engine.battler_resources")
+    resources2.change(aya, "pe", -50, session)
     for _ = 1, loader.system.realtimeBattle.ticksPerRound - 1 do rt:step(); aya.at = 0 end
-    check(session.mp == 50, "no round boundary before ticksPerRound ticks")
+    check((resources2.get(aya, "pe", session)) == 50, "no round boundary before ticksPerRound ticks")
     rt:step()
-    check(session.mp == 52 and rt.battle.round == 2, "the round boundary runs round_end once")
+    check((resources2.get(aya, "pe", session)) == 52 and rt.battle.round == 2,
+        "the round boundary runs round_end once, regenerating PE")
+
+    -- PE is creature state: it survives a save round trip.
+    local savegame = require("engine.savegame")
+    local data = savegame.serialize(session, loader, "map")
+    local restored = savegame.deserialize(data, loader)
+    check((resources2.get(restored.party[1], "pe", restored)) == 52, "PE round-trips through a save")
 
     -- Determinism: the same seed and inputs give the same event stream.
     local function transcript(seed)

@@ -35,7 +35,7 @@
   "round_end": [
     {
       "cmd": "COMMENT",
-      "text": "State ticks and skill timers keep round semantics. PE is the session MP pool (ledger O3) and regenerates a little each round; the rate is a prototype value, not a verified original formula."
+      "text": "State ticks and skill timers keep round semantics. PE is each battler's own declared resource (system.battlerResources, ledger O3) and regenerates a little each round; the rate is a prototype value, not a verified original formula."
     },
     {
       "cmd": "STATE_TICKS"
@@ -44,8 +44,17 @@
       "cmd": "TICK_SKILL_TIMERS"
     },
     {
-      "cmd": "CHANGE_MP",
-      "amount": "2"
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "CHANGE_RESOURCE",
+          "resource": "pe",
+          "target": "ally",
+          "amount": "2"
+        }
+      ]
     },
     {
       "cmd": "RUN_TROOP_EVENTS",

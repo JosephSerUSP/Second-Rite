@@ -1634,6 +1634,17 @@ pickup and a shot change one number. Like `hpCost` it stacks with charges and
 timers; enemies have no inventory and can never pay it. G1 rejects an unknown
 item or a count below 1.
 
+**Battler resources** (06.10.2026, PE Day 1 ledger O3) are the traditional
+per-character pool that the Summoner's MP deliberately is not: Parasite Eve's
+PE, a conventional MP, focus. A Project declares them in
+`system.battlerResources` (`{ "pe": { "name": "PE", "max": 100 } }`, where max is
+a number or a formula over the battler). Skills pay through
+`resourceCost: { resource, amount }`, current values live on the battler and
+are saved with it (missing = full), formulas read `a.res.<id>`, and
+`CHANGE_RESOURCE` adjusts them from data (regeneration is a phase step). The
+"no ability costs MP" rule above is unchanged: it concerns the shared Summoner
+pool, which a battler resource never touches. G1 rejects undeclared resources.
+
 **Cooldown and warmup are battle-scoped** and never enter a save: charges answer
 "how much is left of the day", these answer "what can I do this turn". They are
 ticked by `TICK_SKILL_TIMERS` authored into `battle.round_end`, not by a branch

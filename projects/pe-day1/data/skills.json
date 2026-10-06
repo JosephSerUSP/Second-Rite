@@ -32,9 +32,9 @@
         "value": 30
       }
     ],
-    "charges": 0,
-    "overcast": {
-      "mp": 30
+    "resourceCost": {
+      "resource": "pe",
+      "amount": 30
     }
   },
   "rat_bite": {

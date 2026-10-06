@@ -28,6 +28,7 @@ local function loaderFor(opts)
         skills = opts.skills or {},
         troops = opts.troops or {},
     }
+    value.system.battlerResources = opts.resources
     value.getScene = function(id)
         for _, scene in ipairs(value.scenes) do
             if scene.id == id then return scene end
@@ -70,5 +71,14 @@ expectFail({ skills = { shot = { id = "shot", itemCost = "ammo" } } },
     "itemCost must be", "an item cost must be a table")
 expectPass({ skills = { shot = { id = "shot", itemCost = { item = "ammo", count = 2 } } } },
     "a well-formed item cost passes")
+
+local pe = { pe = { name = "PE", max = 100 } }
+expectPass({ resources = pe, skills = { heal = { id = "heal", resourceCost = { resource = "pe", amount = 30 } } } },
+    "a resource cost naming a declared resource passes")
+expectFail({ skills = { heal = { id = "heal", resourceCost = { resource = "pe", amount = 30 } } } },
+    "undeclared battler resource 'pe'", "a resource cost must name a declared resource")
+expectFail({ resources = pe, skills = { heal = { id = "heal", resourceCost = { resource = "pe", amount = -1 } } } },
+    "resourceCost%.amount must be a number", "a resource cost amount cannot be negative")
+expectFail({ resources = { pe = { name = "PE" } } }, "needs a max", "a declared resource needs a maximum")
 
 print(("=== Combat Project Validation Tests: %d passed, 0 failed ==="):format(passed))

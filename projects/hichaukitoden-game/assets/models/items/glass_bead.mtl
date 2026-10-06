@@ -1,0 +1,23 @@
+# Blender 5.2.2 LTS MTL File: 'glass_bead.blend'
+# www.blender.org
+
+newmtl glass_bead_bore_shadow
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.190000 0.380000 0.470000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl glass_bead_glass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd glass_bead_glass.png
+pass sphere add 0.13 assets/models/matcaps/glass.png

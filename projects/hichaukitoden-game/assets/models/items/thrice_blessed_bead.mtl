@@ -1,42 +1,35 @@
-# Blender 5.0.1 MTL File: 'second_rite_item_model_library_expanded.blend'
+# Blender 5.2.2 LTS MTL File: 'thrice_blessed_bead.blend'
 # www.blender.org
 
-newmtl MAT_BrightGold
-Ns 577.599976
-Ka 0.780000 0.780000 0.780000
-Kd 0.920000 0.650000 0.160000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 3
-
-newmtl MAT_ClothRed
-Ns 67.599998
+newmtl thrice_blessed_bead_glass
+Ns 202.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.450000 0.080000 0.060000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd thrice_blessed_bead_glass.png
 
-newmtl MAT_Leather
-Ns 32.400002
+pass sphere add 0.08 assets/models/matcaps/glass.png
+newmtl thrice_blessed_bead_gold
+Ns 202.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.220000 0.090000 0.045000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
+map_Kd thrice_blessed_bead_gold.png
 
-newmtl MAT_Pearl
-Ns 705.600098
-Ka 0.160000 0.160000 0.160000
-Kd 0.720000 0.780000 0.860000
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl thrice_blessed_bead_prayer_stones
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.860000 0.450000 0.370000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+pass sphere add 0.07 assets/models/matcaps/ruby.png

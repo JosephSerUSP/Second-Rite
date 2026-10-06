@@ -1,0 +1,113 @@
+name: PR 1400 Geometry Nodes stress upgrade
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/blender/pr1400_gn_stress_upgrade.py
+      - .github/workflows/pr1400-gn-stress-upgrade.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/rework-consumables-2026-10-05'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/rework-consumables-2026-10-05
+          persist-credentials: true
+
+      - name: Install host validation dependencies
+        run: python -m pip install --disable-pip-version-check pillow numpy
+
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Install pinned Blender
+        uses: ./.github/actions/install-blender
+
+      - name: Apply Geometry Nodes stress upgrade and sync portable core
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/blender/pr1400_gn_stress_upgrade.py')
+          text = path.read_text(encoding='utf-8')
+          stale = '    if collection is not None:\n        bpy.data.collections.remove(collection)\n'
+          current = '    bpy.data.collections.remove(collection)\n'
+          if text.count(stale) != 2:
+              raise SystemExit(f'expected two stale cleanup snippets, got {text.count(stale)}')
+          text = text.replace(stale, current)
+          path.write_text(text, encoding='utf-8')
+          PY
+          python tools/blender/pr1400_gn_stress_upgrade.py
+          python tools/blender/sync_asset_core.py
+          python -m py_compile \
+            tools/blender/second_rite_asset_core.py \
+            tools/blender/compile_item_blend.py \
+            tools/blender/tests/item_geometry_nodes_object_ref_blender.py \
+            tools/blender/tests/test_item_geometry_nodes_object_ref.py
+          git diff --check
+
+      - name: Require pinned Blender integrations
+        run: |
+          python tools/blender/blender_locator.py
+          echo "BLENDER_TESTS_REQUIRED=1" >> "$GITHUB_ENV"
+
+      - name: Stress nested Geometry Nodes object references
+        run: xvfb-run -a python -m unittest discover -s tools/blender/tests -p 'test_item_geometry_nodes_object_ref.py' -v
+
+      - name: Re-run collection-instance stress
+        run: xvfb-run -a python -m unittest discover -s tools/blender/tests -p 'test_item_instance_export.py' -v
+
+      - name: Re-run ordinary dependency graph stress
+        run: xvfb-run -a python -m unittest discover -s tools/blender/tests -p 'test_item_dependency_graph.py' -v
+
+      - name: Compile authoritative corpus and audit Geometry Nodes references
+        shell: bash
+        run: |
+          set -euxo pipefail
+          reports="$RUNNER_TEMP/item-gn-graph-reports"
+          xvfb-run -a python tools/blender/compile_item_blends.py --check --report-dir "$reports"
+          test "$(find "$reports" -maxdepth 1 -name '*.json' | wc -l)" -ge 38
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          reports = Path(os.environ['RUNNER_TEMP']) / 'item-gn-graph-reports'
+          records = [json.loads(path.read_text(encoding='utf-8')) for path in reports.glob('*.json')]
+          gn_edges = []
+          for record in records:
+              for edge in record.get('sourceObjectDependencies', []):
+                  if str(edge.get('owner', '')).startswith(('geometry_node:', 'geometry_socket:')):
+                      gn_edges.append((record['id'], edge))
+          print('COMMITTED GEOMETRY NODES OBJECT EDGES', len(gn_edges))
+          print('GN INTERNAL', sum(1 for _, edge in gn_edges if edge['scope'] == 'internal'))
+          print('GN EXTERNAL', sum(1 for _, edge in gn_edges if edge['scope'] == 'external'))
+          for item_id, edge in gn_edges[:40]:
+              print(item_id, edge)
+          PY
+          python tools/asset-production/check_item_models.py --report
+
+      - name: Adopt upgrade and remove one-shot probes
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm tools/blender/pr1400_gn_stress_upgrade.py
+          rm tools/blender/pr1400_gn_object_ref_probe.py
+          rm .github/workflows/pr1400-gn-object-ref-probe.yml
+          rm .github/workflows/pr1400-gn-stress-upgrade.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "Isolate Geometry Nodes item export graphs"
+          git push origin HEAD:agent/rework-consumables-2026-10-05

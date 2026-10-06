@@ -104,8 +104,88 @@ def runtime_material_passes(root) -> dict[str, list[dict]]:
     return result
 
 
+def _object_pointer_edges(root):
+    """Describe object-valued source-graph relationships for audit reports."""
+    objects = [root, *list(root.children_recursive)]
+    object_set = set(objects)
+    edges = []
+
+    def inspect(source_obj, owner, owner_kind):
+        if owner is None:
+            return
+        rna = getattr(owner, "bl_rna", None)
+        for prop in getattr(rna, "properties", ()):
+            if prop.identifier == "rna_type" or getattr(prop, "type", None) != "POINTER":
+                continue
+            try:
+                target = getattr(owner, prop.identifier)
+            except (AttributeError, RuntimeError):
+                continue
+            if not isinstance(target, bpy.types.Object):
+                continue
+            edges.append({
+                "from": source_obj.name,
+                "owner": owner_kind,
+                "property": prop.identifier,
+                "to": target.name,
+                "scope": "internal" if target in object_set else "external",
+            })
+
+        keys = getattr(owner, "keys", None)
+        if callable(keys):
+            try:
+                owner_keys = list(keys())
+            except TypeError:
+                owner_keys = []
+            for key in owner_keys:
+                try:
+                    target = owner[key]
+                except (KeyError, RuntimeError):
+                    continue
+                if not isinstance(target, bpy.types.Object):
+                    continue
+                edges.append({
+                    "from": source_obj.name,
+                    "owner": owner_kind,
+                    "property": f"idprop:{key}",
+                    "to": target.name,
+                    "scope": "internal" if target in object_set else "external",
+                })
+
+    for obj in objects:
+        inspect(obj, obj, "object")
+        inspect(obj, getattr(obj, "data", None), "data")
+        for modifier in getattr(obj, "modifiers", ()):
+            inspect(obj, modifier, f"modifier:{modifier.name}:{modifier.type}")
+        for constraint in getattr(obj, "constraints", ()):
+            inspect(obj, constraint, f"constraint:{constraint.name}:{constraint.type}")
+        # Object Info / Collection Info references stored inside a shared
+        # Geometry Nodes tree are intentionally reported but not rewritten by
+        # the scratch-duplicate layer yet. This makes that boundary visible.
+        for modifier in getattr(obj, "modifiers", ()):
+            if modifier.type != "NODES" or modifier.node_group is None:
+                continue
+            for node in modifier.node_group.nodes:
+                inspect(obj, node, f"geometry_node:{modifier.node_group.name}:{node.name}")
+                for socket in list(node.inputs) + list(node.outputs):
+                    try:
+                        value = socket.default_value
+                    except (AttributeError, RuntimeError):
+                        continue
+                    if isinstance(value, bpy.types.Object):
+                        edges.append({
+                            "from": obj.name,
+                            "owner": f"geometry_socket:{modifier.node_group.name}:{node.name}",
+                            "property": socket.name,
+                            "to": value.name,
+                            "scope": "internal" if value in object_set else "external",
+                        })
+    return edges
+
+
 def structural_summary(root, source_path: Path, output_path: Path, material_passes: dict[str, list[dict]]):
     children = list(root.children_recursive)
+    edges = _object_pointer_edges(root)
     return {
         "id": root.get("item_export_name"),
         "root": root.name,
@@ -117,6 +197,7 @@ def structural_summary(root, source_path: Path, output_path: Path, material_pass
                 "type": obj.type,
                 "hiddenFromRender": bool(obj.hide_render),
                 "modifiers": [modifier.type for modifier in getattr(obj, "modifiers", [])],
+                "constraintTypes": [constraint.type for constraint in getattr(obj, "constraints", [])],
             }
             for obj in children
         ],
@@ -125,8 +206,28 @@ def structural_summary(root, source_path: Path, output_path: Path, material_pass
             for obj in children
             for modifier in getattr(obj, "modifiers", [])
         }),
+        "constraintTypes": sorted({
+            constraint.type
+            for obj in children
+            for constraint in getattr(obj, "constraints", [])
+        }),
         "curveCount": sum(1 for obj in children if obj.type == "CURVE"),
         "meshCount": sum(1 for obj in children if obj.type == "MESH"),
+        "hiddenConstructionCount": sum(1 for obj in children if obj.hide_render),
+        "instanceSources": [
+            {
+                "name": obj.name,
+                "instanceType": obj.instance_type,
+                "collection": obj.instance_collection.name if obj.instance_collection else None,
+            }
+            for obj in children
+            if getattr(obj, "instance_type", "NONE") != "NONE"
+        ],
+        "sourceObjectDependencies": edges,
+        "sourceObjectDependencyCounts": {
+            "internal": sum(1 for edge in edges if edge["scope"] == "internal"),
+            "external": sum(1 for edge in edges if edge["scope"] == "external"),
+        },
         "runtimeMaterialPasses": material_passes,
     }
 

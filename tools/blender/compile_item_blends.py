@@ -76,7 +76,7 @@ def compare_bytes(actual: Path, expected: Path):
         )
 
 
-def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None, source_dir: Path | None = None, project: Path | None = None):
+def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, model_dir: Path | None = None, source_dir: Path | None = None, project: Path | None = None, report_dir: Path | None = None):
     if not source.is_file():
         raise RuntimeError(f"item source does not exist: {source}")
     if model_dir is None:
@@ -92,6 +92,9 @@ def compile_one(blender: str, source: Path, output_dir: Path, *, check: bool, mo
     if project is not None:
         env['SECOND_RITE_PROJECT'] = str(project)
     env["SECOND_RITE_ITEM_OUTPUT_DIR"] = str(output_dir)
+    if report_dir is not None:
+        report_dir.mkdir(parents=True, exist_ok=True)
+        env["SECOND_RITE_ITEM_COMPILE_REPORT"] = str(report_dir / f"{source.stem}.json")
     if source_dir:
         env["SECOND_RITE_ITEM_SOURCE_DIR"] = str(source_dir)
     elif len(source.parents) >= 3:
@@ -136,6 +139,11 @@ def main(argv=None):
         action="store_true",
         help="compile to a temporary directory and require products to match checked-in OBJ/MTL",
     )
+    parser.add_argument(
+        "--report-dir",
+        type=Path,
+        help="write one machine-readable structural/source-graph JSON report per compiled .blend",
+    )
     args = parser.parse_args(argv)
     if args.check and args.output_dir:
         raise SystemExit("--check and --output-dir are mutually exclusive")
@@ -145,6 +153,7 @@ def main(argv=None):
     model_dir = project_root / "assets" / "models" / "items"
 
     sources = sources_from_args(args.source, source_dir)
+    report_dir = args.report_dir.resolve() if args.report_dir else None
     if not sources:
         rel = _format_rel(source_dir)
         if args.check:
@@ -157,12 +166,12 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(prefix="second-rite-item-compile-") as temp:
             output_dir = Path(temp)
             for source in sources:
-                compile_one(blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir, project=project_root)
+                compile_one(blender, source, output_dir, check=True, model_dir=model_dir, source_dir=source_dir, project=project_root, report_dir=report_dir)
     else:
         output_dir = Path(args.output_dir).resolve() if args.output_dir else model_dir
         output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir, project=project_root)
+            compile_one(blender, source, output_dir, check=False, model_dir=model_dir, source_dir=source_dir, project=project_root, report_dir=report_dir)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

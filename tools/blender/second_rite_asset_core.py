@@ -522,9 +522,78 @@ def export_obj(filepath):
         raise RuntimeError(f"OBJ export failed for {filepath}: {result}")
 
 
+def _remap_rna_object_pointers(owner, mapping):
+    """Redirect object-valued RNA/custom properties to hierarchy duplicates.
+
+    ``Object.copy()`` deliberately keeps modifier, constraint and Curve-data
+    pointer targets. That is useful in Blender generally, but an export scratch
+    hierarchy must not keep reaching back into the authoritative source graph:
+    once the duplicate root is recentered, original cutters/profile objects are
+    in a different coordinate frame. Remap only pointers whose target is inside
+    the duplicated hierarchy; external dependencies remain untouched and are
+    surfaced by the compiler's structural report.
+    """
+    if owner is None:
+        return 0
+    changed = 0
+    rna = getattr(owner, "bl_rna", None)
+    for prop in getattr(rna, "properties", ()):
+        if prop.identifier == "rna_type" or getattr(prop, "is_readonly", False):
+            continue
+        if getattr(prop, "type", None) != "POINTER":
+            continue
+        try:
+            current = getattr(owner, prop.identifier)
+            replacement = mapping.get(current)
+        except (AttributeError, RuntimeError, TypeError):
+            continue
+        if replacement is None:
+            continue
+        try:
+            setattr(owner, prop.identifier, replacement)
+        except (AttributeError, RuntimeError, TypeError):
+            continue
+        changed += 1
+
+    # Geometry Nodes interface object inputs are commonly stored as modifier
+    # ID-properties rather than ordinary RNA pointer properties.
+    keys = getattr(owner, "keys", None)
+    if callable(keys):
+        try:
+            owner_keys = list(keys())
+        except TypeError:
+            owner_keys = []
+        for key in owner_keys:
+            try:
+                current = owner[key]
+                replacement = mapping.get(current)
+            except (KeyError, RuntimeError, TypeError):
+                continue
+            if replacement is None:
+                continue
+            try:
+                owner[key] = replacement
+            except (KeyError, RuntimeError, TypeError):
+                continue
+            changed += 1
+    return changed
+
+
+def _remap_duplicate_dependencies(mapping):
+    """Make a copied export hierarchy self-contained for object references."""
+    for duplicate in mapping.values():
+        _remap_rna_object_pointers(duplicate, mapping)
+        _remap_rna_object_pointers(getattr(duplicate, "data", None), mapping)
+        for modifier in getattr(duplicate, "modifiers", ()):
+            _remap_rna_object_pointers(modifier, mapping)
+        for constraint in getattr(duplicate, "constraints", ()):
+            _remap_rna_object_pointers(constraint, mapping)
+
+
 def duplicate_hierarchy(context, root, collection_name="__SECOND_RITE_ITEM_EXPORT_TEMP__"):
     bpy = _bpy()
     from mathutils import Matrix
+    context.view_layer.update()
     delete_collection(collection_name)
     temp = bpy.data.collections.new(collection_name)
     context.scene.collection.children.link(temp)
@@ -542,16 +611,98 @@ def duplicate_hierarchy(context, root, collection_name="__SECOND_RITE_ITEM_EXPOR
         duplicate.parent = mapping.get(source.parent)
         duplicate.matrix_parent_inverse = source.matrix_parent_inverse.copy()
         duplicate.matrix_world = world_matrices[source]
+
+    # Blender copies pointer-valued construction relationships verbatim. Make
+    # them refer to the copied cutter/profile/target objects *before* shifting
+    # the scratch hierarchy away from the authoritative source objects.
+    _remap_duplicate_dependencies(mapping)
+
     shift = Matrix.Translation(-root.matrix_world.translation)
     for source, duplicate in mapping.items():
         duplicate.matrix_world = shift @ world_matrices[source]
     return temp, mapping[root], list(mapping.values())
 
 
+def _realize_export_instances(context, objects):
+    """Realize collection-instance Empties inside the temporary export graph.
+
+    Blender's ``duplicates_make_real`` operator was deliberately not used here:
+    under the pinned Blender 5.2.2 stress fixture it produced the referenced
+    geometry but lost the instance Empty's offset/scale. Runtime export needs a
+    deterministic transform composition, not merely visible geometry.
+    """
+    bpy = _bpy()
+    from mathutils import Matrix
+
+    instancers = [
+        obj for obj in objects
+        if not obj.hide_render and getattr(obj, "instance_type", "NONE") != "NONE"
+    ]
+    unsupported = [obj for obj in instancers if obj.instance_type != "COLLECTION"]
+    if unsupported:
+        details = ", ".join(f"{obj.name}:{obj.instance_type}" for obj in unsupported)
+        raise RuntimeError(
+            "item export currently guarantees COLLECTION instances only; "
+            f"unsupported instance carriers: {details}"
+        )
+
+    realized = []
+    for instancer in instancers:
+        source_collection = instancer.instance_collection
+        if source_collection is None:
+            raise RuntimeError(f"{instancer.name} has COLLECTION instance type without a collection")
+        nested = [
+            obj for obj in source_collection.all_objects
+            if getattr(obj, "instance_type", "NONE") != "NONE"
+        ]
+        if nested:
+            details = ", ".join(f"{obj.name}:{obj.instance_type}" for obj in nested)
+            raise RuntimeError(
+                f"nested instances inside collection {source_collection.name} are not yet guaranteed: {details}"
+            )
+
+        target_collection = next(
+            (collection for collection in instancer.users_collection
+             if collection.name == "__SECOND_RITE_ITEM_EXPORT_TEMP__"),
+            None,
+        )
+        if target_collection is None:
+            raise RuntimeError(f"scratch instance {instancer.name} is not in the item export temp collection")
+
+        sources = list(source_collection.all_objects)
+        mapping = {}
+        for source in sources:
+            duplicate = source.copy()
+            if source.data is not None:
+                duplicate.data = source.data.copy()
+            duplicate.animation_data_clear()
+            target_collection.objects.link(duplicate)
+            mapping[source] = duplicate
+
+        # Collection instances are evaluated as the instance carrier transform,
+        # then the collection's negative instance offset, then each source
+        # object's collection-space world matrix.
+        instance_matrix = (
+            instancer.matrix_world
+            @ Matrix.Translation(-source_collection.instance_offset)
+        )
+        for source, duplicate in mapping.items():
+            duplicate.parent = mapping.get(source.parent)
+            duplicate.matrix_parent_inverse = source.matrix_parent_inverse.copy()
+            duplicate.matrix_world = instance_matrix @ source.matrix_world
+
+        _remap_duplicate_dependencies(mapping)
+        realized.extend(mapping.values())
+
+    return realized
+
+
 def _select_export_geometry(context, objects):
     bpy = _bpy()
+    realized = _realize_export_instances(context, objects)
+    candidates = list(objects) + realized
     bpy.ops.object.select_all(action="DESELECT")
-    geometry = [obj for obj in objects
+    geometry = [obj for obj in candidates
                 if obj.type in {"MESH", "CURVE", "SURFACE", "FONT", "META"}
                 and not obj.hide_render]
     for obj in geometry:

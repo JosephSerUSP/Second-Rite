@@ -727,24 +727,32 @@ check(ambientFarPixels > 0,
 local effekseerModule = require("presentation.effekseer")
 local originalSetWorldLocation = effekseerModule.setWorldLocation
 local followedTo = {}
+local expectedCameraY
 effekseerModule.setWorldLocation = function(handle, x, y, z)
-    followedTo[#followedTo + 1] = { x = x, y = y, z = z }
+    followedTo[#followedTo + 1] = { x = x, y = y, z = z, expectedY = expectedCameraY }
     return originalSetWorldLocation(handle, x, y, z)
 end
 for _, cellY in ipairs({ 3, 15 }) do
     ambientSession.playerY = cellY
+    expectedCameraY = cellY + 0.5
+    local previousFollows = #followedTo
     love.graphics.setCanvas({ modelCanvas, depth = true, stencil = true })
     love.graphics.clear(0, 0, 0, 1, true, true)
     viewport3d.draw(ambientSession)
     love.graphics.setCanvas(previousCanvas)
+    check(#followedTo > previousFollows,
+        "ambient weather follows the camera on each rendered cell")
 end
 effekseerModule.setWorldLocation = originalSetWorldLocation
-check(#followedTo == 2 and followedTo[1].y ~= followedTo[2].y
-        and math.abs(followedTo[2].y - followedTo[1].y - 12) < 0.001
-        and followedTo[1].z == 1.5,
+local followsCamera = true
+for _, location in ipairs(followedTo) do
+    followsCamera = followsCamera and math.abs(location.y - location.expectedY) < 0.001
+        and location.z == 1.5
+end
+check(followsCamera,
     "the ambient handle is moved to the camera cell every frame at its authored height"
         .. " (y " .. tostring(followedTo[1] and followedTo[1].y)
-        .. " -> " .. tostring(followedTo[2] and followedTo[2].y) .. ")")
+        .. " -> " .. tostring(followedTo[#followedTo] and followedTo[#followedTo].y) .. ")")
 viewport3d.invalidateStructure(ambientSession)
 viewport3d.invalidateStructure(ambientBaselineSession)
 require("presentation.effekseer").reset()

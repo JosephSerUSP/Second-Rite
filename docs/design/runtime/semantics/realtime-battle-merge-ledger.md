@@ -1,6 +1,6 @@
 # Real-time battle mode — merge ledger
 
-Status: **proposal, awaiting owner review** (2026-10-06). Issue #1424, epic #1422.
+Status: **owner-reviewed 2026-10-06; decisions O1–O5 recorded below.** Issue #1424, epic #1422.
 
 ## The condition this document exists to satisfy
 
@@ -71,7 +71,7 @@ decision before implementation.
 | 16 | Victory: EXP 2, Ammo +6 once | `battle.victory` flow, troop rewards | Rewards authored on the troop; victory flow grants them once | Reuse |
 | 17 | Defeat: fallen pose, retry | `battle.defeat` flow | Reuse; retry is a Project scene choice after the flow | Reuse |
 | 18 | Per-action phase | `battle.after_action` flow | Run unchanged after every resolved action (boss phase changes need it) | Reuse |
-| 19 | Round phases (poison ticks, cooldowns) | `battle.round_start` / `battle.round_end`, `skill_cost.tick` per round | Real-time "round" is a fixed authored interval that runs the same phases. **Divergence D4: round as a time unit** | Divergence (O1) |
+| 19 | Round phases (poison ticks, cooldowns) | `battle.round_start` / `battle.round_end`, `skill_cost.tick` per round | Real-time "round" is a fixed authored number of scheduler ticks that runs the same phases. **Divergence D4: round as a tick count** | Divergence (O1) |
 | 20 | Start of battle in the same room, no scene change | `battle.battle_start`; battle scene swaps screens | Scheduler runs `battle.battle_start` in place; the 3D presenter replaces `battle_view` for this mode | Divergence D5: presenter |
 | 21 | Damage numbers, flashes, gauges | Battle feel (SPEC §2.3): smooth gauges, flashes, bouncing numbers | The 3D presenter reads resolved events and follows §2.3 | Reuse (rules) |
 | 22 | Deterministic tests | G2 battle-log fixtures | Fixed-step clock + seeded battle RNG ⇒ byte-identical logs; real-time fixtures join `goldenBattles.json` | Additive |
@@ -89,30 +89,38 @@ decision before implementation.
   action may carry a *delivery* (instant / telegraphed contact / projectile).
   `instant` is today's behaviour; the resolver is unchanged because delivery
   only decides **whether and when** `executeTurn` runs.
-- **D4 Round as time unit.** Merge: the `realtime` scheduler emits round
-  boundaries every N seconds, so every round-scoped rule (state ticks,
+- **D4 Round as tick count.** Merge: the `realtime` scheduler emits a round
+  boundary every N fixed-step ticks, so every round-scoped rule (state ticks,
   cooldowns, warmups) keeps one meaning.
 - **D5 Presenter.** `battle_view` stays the round-mode presenter. The in-room
   3D presenter is a second consumer of the same resolved events.
 
-## Owner decisions needed before implementation
+## Owner decisions (2026-10-06)
 
-- **O1** Is a real-time round a fixed interval (proposal: authored per Project,
-  default 3 s), so poison, regen, cooldowns and warmups keep round semantics?
-- **O2** May `skill_cost` gain an **item-stock cost kind** (ammo)? It is
-  additive and production-usable (arrows, charges, reagents).
-- **O3** PE model. Proposal: a generic regenerating battler resource, declared
-  in data (`resources: [{id: "pe", max, regenPerSecond}]`) and payable through
-  `skill_cost`. It is not an MP revival, because it is a named,
-  Project-declared resource.
-- **O4** Does a dodged attack still put its skill on cooldown? Proposal: yes,
-  started by the scheduler via the existing `skill_cost.startCooldown`, the
-  same function `executeTurn` uses.
-- **O5** Approve the seam: the real-time mode drives a real `Battle` instance
-  through `executeTurn` / `applyItem` without editing `engine/battle.lua`. If
-  implementation shows that a supervised file must change (for example to
-  expose `executeTurn` cleanly or to accept a non-slot party), the change
-  comes to the owner as its own patch.
+- **O1 Rounds: decided, ticks rather than time.** A real-time round is a fixed,
+  Project-authored number of scheduler ticks, not seconds. Every round-scoped
+  rule (state ticks, `TICK_SKILL_TIMERS`, warmups) keeps one meaning, and
+  determinism depends only on the tick count.
+- **O2 Ammo: approved.** `skill_cost` gains an item-stock cost kind. Ammo is
+  ordinary inventory spent as the weapon skill's cost; it is production-usable.
+- **O3 PE: decided, "PE is a renamed, slightly mechanically different MP".**
+  MP here is the session pool (SPEC §1.11) and §1.20 forbids per-skill MP
+  costs; the only skill→MP path is Overcast with `"charges": 0`. Since Aya is
+  the whole party, the session pool is her pool. **Interpretation taken
+  (overrulable):** PE skills use the existing Overcast-only shape
+  (`charges: 0`, `overcast.mp: N`); the Project's terms rename MP→PE and the
+  Overcast wording; in-battle PE regeneration is a data step in the Project's
+  `battle.round_end` flow. This needs no production change and keeps one MP
+  authority. The alternative, a per-Project opt-out of the §1.20 `mpCost` ban,
+  is a SPEC change and is not taken without the owner.
+- **O4 Dodged attacks: yes.** A dodged attack still starts its cooldown,
+  through the same `skill_cost.startCooldown` that `executeTurn` uses.
+- **O5 Seam: approved.** The real-time mode drives a real `Battle` through
+  `executeTurn` / `applyItem` without editing `engine/battle.lua`. Any change
+  a supervised file needs comes to the owner as its own patch.
+
+Ledger rows updated accordingly: #9 (O2) and #10 (O3) move from *Owner* to
+*Additive* and *Reuse* respectively; #14 (O4) is *Divergence, decided*.
 
 ## Out of scope for M1
 

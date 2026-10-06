@@ -1,0 +1,112 @@
+{
+  "item": "mug_of_ale",
+  "nativeCell": 96,
+  "nativeShippingCandidateRGBIdentical": true,
+  "originalSourceCompiledShippingTextureBytesIdentical": true,
+  "source": {
+    "sourceHash": "01a497338b32cb8718bf1dd5ba13c7b9b63d7b9e1938953e6b9f4f6599e2f0de",
+    "objects": [
+      {
+        "name": "A_MeasuredHollowCeramic",
+        "vertices": 2114,
+        "faces": 2176,
+        "smoothFaces": 2048,
+        "nonmanifoldEdges": 0,
+        "signedVolume": 1.6798729195385742
+      },
+      {
+        "name": "B_MultiviewMeasuredHandle",
+        "vertices": 688,
+        "faces": 674,
+        "smoothFaces": 674,
+        "nonmanifoldEdges": 0,
+        "signedVolume": 0.18727269422968984
+      },
+      {
+        "name": "C_RecessedAleAndFoam",
+        "vertices": 128,
+        "faces": 66,
+        "smoothFaces": 0,
+        "nonmanifoldEdges": 0,
+        "signedVolume": 0.049592234993208514
+      }
+    ],
+    "measuredIndependentProfilesMatchSavedVertices": true,
+    "rootMetadata": {
+      "item_export": true,
+      "item_export_name": "mug_of_ale",
+      "sr_contract_version": 1,
+      "sr_asset_id": "mug_of_ale",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "calibrated_multiview_loft",
+      "sr_authoring_description": "Front/back width and side depth profiles; top rim/ale; multi-view surface projections",
+      "sr_reference_hash": "4a047b6b8fcb608b19f788435ea6effb3aa809e216229e030bab1522be46ad2b",
+      "sr_reference_limitations": "[\"Generated elevations expose the opening: they are tilted, not exact orthographic scans.\", \"Back body is wider than front near the upper wall; average unoccluded front/back radii.\", \"Top depth/width ratio 213/208 differs from side/front silhouette ratio; use side profile with a 25 percent top correction.\", \"Handle hides right body center; exposed side glaze supplies an explicitly inferred patch there.\", \"No left or underside image. Left glaze is inferred; underside is authored plain buff.\", \"Foam locations in elevations differ from top. Use top reference as surface authority for liquid.\"]",
+      "sr_profile_samples": 25,
+      "sr_depth_top_correction": 1.0363460148955093,
+      "sr_top_opening_ratio_x": 0.7836538461538461,
+      "sr_top_opening_ratio_y": 0.8262910798122066,
+      "sr_surface_view_face_counts": "{\"body:back\": 854, \"body:front\": 726, \"body:side\": 468, \"body:top\": 128, \"handle:side\": 278, \"handle:back\": 198, \"handle:front\": 198, \"liquid:top\": 66}",
+      "sr_occluded_side_corner_fallbacks": 0,
+      "sr_generation_method": "built-in image_gen; four views, original PNG unchanged",
+      "sr_review_status": "provisional; calibrated multiview pilot awaiting owner acceptance",
+      "sr_surface_refinement": "{\"lipFaces\": 256, \"handleSideFallbackFaces\": 102, \"liquidThicknessPlainFaces\": 65}",
+      "sr_uv_guard": "rim atlas correspondence inset 5 percent; alpha-inconsistent front/back handle faces use observed side glaze",
+      "sr_final_body_projection_faces": "{\"back\": 710, \"front\": 710, \"side\": 116}",
+      "sr_handle_surface_correspondence": "Continuous cylindrical wrap from observed side handle strip x938..985 y198..488; colour reference, not exact texel registration",
+      "sr_final_surface_policy": "front/back body artwork, observed side flank only; top rim/ale; inferred unobserved underside plain buff",
+      "sr_body_alpha_guard": "final horizontal correspondence inset .9506; original PNG unchanged"
+    }
+  },
+  "paintedRuntimeFacesPerReferencePanel": {
+    "back": 1620,
+    "front": 1620,
+    "right": 1716,
+    "top": 574
+  },
+  "runtimeSurfaceAudit": [
+    {
+      "item": "mug_of_ale",
+      "paintedMaterials": {
+        "Mug_multiview_glaze": {
+          "texture": "mug_of_ale_multiview.png",
+          "faces": 5530,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 5468
+        }
+      },
+      "findings": 0
+    }
+  ],
+  "sampledAlphaSupport": [
+    {
+      "item": "mug_of_ale",
+      "paintedMaterials": {
+        "Mug_multiview_glaze": {
+          "faces": 5530,
+          "samples": 71890,
+          "alphaMin": 243,
+          "below240": 0,
+          "below128": 0
+        }
+      }
+    }
+  ],
+  "unpaintedControlOBJBytesIdentical": true,
+  "changedGameplayPixels": 3742,
+  "productHash": "33beff202bd31e07709e9f3f83c4c7238cbb7b0dda8cf688992715a0b82ac3ec",
+  "materialHash": "d367e7e3fd8902465ce5eff7c6a25f93364f58440d0534703a2235cdcc5b5329",
+  "triangles": 5848,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 54,
+  "sourceRenderBoundary": "Read-only Workbench flat-light orthographic views; not runtime proof. Native captures use real item viewer."
+}

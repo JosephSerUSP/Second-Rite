@@ -1,0 +1,27 @@
+{
+  "mode": "built-in image_gen",
+  "transparentBackground": true,
+  "prompt": "Create one precise multiview reference atlas for ONE identical fantasy RPG object: a squat handmade ochre ceramic MUG OF ALE with thick hollow rim, dark amber ale and small creamy foam islands, a large C-shaped ochre ceramic handle attached on the object's RIGHT (+X), a faded cobalt-blue three-leaf barley emblem centered on its FRONT (-Y), and a visibly different BACK (+Y) with a small repaired pale crack and scattered darker glaze speckles. Rounded belly, narrower foot ring, slightly pinched upper wall. Rough unglazed buff underside. Beautiful tactile matte ceramic glaze, no metal. Chunky readable game prop, charming handmade, subtly asymmetric but consistent from every view.\n\nRender a strict 2x2 atlas, four equal panels, perfectly aligned within a 1536x1536 square. TOP LEFT: FRONT orthographic elevation, looking from -Y, handle on image right. TOP RIGHT: RIGHT SIDE orthographic elevation, looking from +X, C handle viewed end-on, depth of mug visible, NO front barley emblem pasted on this side. BOTTOM LEFT: BACK orthographic elevation from +Y, handle on image left, repaired crack visible. BOTTOM RIGHT: TOP orthographic plan looking down +Z, showing oval-to-round hollow ceramic rim, recessed amber liquid, pale irregular foam islands, handle loop extending right. Every panel shows the exact same physically coherent object, equal world scale and materials, same upper rim height and base level in the three elevation views. Each object comfortably inside its own panel with generous empty margin. Side view must be true orthographic, not a front view or perspective. Top view is true plan, no front elevation walls. No view labels or writing anywhere. Transparent background, no cast shadow, no ground, no pedestal. Broad neutral flat illumination from camera hemisphere to expose actual surface color, minimal baked highlights, no dramatic shading. Material color should be bright enough for a softly lit game renderer. The visible front/back/right surfaces and top opening must agree geometrically. This is volume AND surface reference, not four independent concept variants.\n",
+  "sourceImage": "projects/hichaukitoden-game/assets/authoring/items/_textures/mug_of_ale_multiview.png",
+  "originalFile": "exec-6b05190c-79e1-42c7-9d25-13c401380041.png",
+  "imageSize": [
+    1254,
+    1254
+  ],
+  "sha256": "4a047b6b8fcb608b19f788435ea6effb3aa809e216229e030bab1522be46ad2b",
+  "intendedViews": [
+    "front",
+    "right",
+    "back",
+    "top"
+  ],
+  "use": "Independent width/depth silhouette profiles, top opening, side/top handle thickness, front/back artwork, observed side glaze, top liquid surface.",
+  "limitations": [
+    "Generated elevations expose the opening: they are tilted, not exact orthographic scans.",
+    "Back body is wider than front near the upper wall; average unoccluded front/back radii.",
+    "Top depth/width ratio 213/208 differs from side/front silhouette ratio; use side profile with a 25 percent top correction.",
+    "Handle hides right body center; exposed side glaze supplies an explicitly inferred patch there.",
+    "No left or underside image. Left glaze is inferred; underside is authored plain buff.",
+    "Foam locations in elevations differ from top. Use top reference as surface authority for liquid."
+  ]
+}

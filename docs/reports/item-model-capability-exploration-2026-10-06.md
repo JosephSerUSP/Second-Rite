@@ -1047,3 +1047,105 @@ Agent-Signature:
   role: implementation
   task: three image-assisted items and painted silhouette tooling
   base: 3e880ea4eaf934f061c7fea3c55cebf3760e1436
+
+## Multiview volume and surface pilot: Mug of Ale
+
+The owner approved the reworked Bone Plate, then clarified that image generation
+was intended to provide **multiview volume and surface information**, not just
+front artwork. That approved source is unchanged. This new pilot uses one
+built-in image generation call for a front/right/back/top atlas of the same mug.
+The full prompt, original image hash and intended view use are recorded in
+[generation.json](item-model-multiview-review/generation.json). The unchanged
+RGBA 1254-square atlas is retained in source `_textures` and shipping products.
+
+[Reference versus actual source](item-model-multiview-review/reference-to-source.png)
+shows four real orthographic source renders beside the generated views. These
+are read-only, flat-light Workbench renders, not gameplay proof. The
+[native 96px sheet](item-model-multiview-review/native96.png),
+[cardinal yaws](item-model-multiview-review/yaw96.png) and
+[prior product comparison](item-model-multiview-review/before-after96.png)
+use the actual item viewer. Its camera is side-on; the apparent high-angle
+diagnostic poses roll the object rather than providing a true top camera.
+
+Measured construction and surface choices:
+
+- Twenty-five independent body levels per elevation. Front's unoccluded left
+  edge and back's unoccluded right edge determine averaged width; side determines
+  depth. Radius/height maxima are front .517, back .510, side .487. A declared
+  25-percent top ratio correction reconciles the measured depth discrepancy.
+  All measured scaffold rings match the saved source vertices within 1e-6.
+- Front handle centerline controls plus side/top thickness make a real handle
+  hole and .414-unit handle depth. Top outer/inner radii determine a hollow
+  rounded rim. The cavity floor is explicitly authored; recessed ale is a
+  separate solid component. Ceramic walls/handle are smooth, liquid and base
+  cut faces intentionally flat. The shell, handle and liquid each have zero
+  nonmanifold edges and positive signed volume in the actual saved source.
+- Front barley emblem, back repair, observed right flank and top foam use
+  separate original-atlas regions. The final exported painted triangles use
+  front 1620, back 1620, right 1716, top 574. Right handle glaze is wrapped
+  continuously from an observed strip to avoid disconnected projection patches;
+  this supplies surface colour, not exact per-texel registration. Unseen underside
+  is plain buff ceramic. UV-add gain .16 is a supported runtime pass; Blender
+  roughness/specular alone is not claimed as exported surface information.
+- The first projection audit found alpha-unsupported samples and collapsed UVs
+  on lip/liquid thickness faces. Direct document edits fixed correspondences,
+  assigned hidden liquid thickness plain material, inset rim/body sampling and
+  replaced fragmented handle projections. Geometry and original pixels were
+  preserved during these edits. Final painted faces have zero missing,
+  collapsed or out-of-bounds UVs. All 71890 alpha samples are at least 243;
+  this is sampled support, not exhaustive raster coverage.
+- The [ochre control](item-model-multiview-review/surface-control96.png) keeps
+  OBJ bytes identical, removes the generated colour and UV gain, and changes
+  3742 pixels across the two gameplay poses. This establishes substantial image
+  contribution, not owner acceptance or visual superiority.
+
+Generated views are not consistent scans. Elevations are tilted and disagree
+slightly in width; the top omits the belly that protrudes beyond the rim in the
+elevations. The modeled top therefore exposes that actual wider body. Foam
+positions disagree across views: the top supplies the liquid surface authority.
+The handle occludes part of the side body; no left/underside view exists.
+Hidden cavity geometry and left colour are inferred. Baked lighting and hard
+projection seams remain visible in enlarged source views. The result is a
+calibrated vessel pilot, not automatic reconstruction or a general solution
+for arbitrary concavities. Volume/surface correspondence and 96px readability
+are the review criteria; this pilot's owner acceptance remains open.
+
+The reusable import library `multiview_reference.py` measures alpha profiles,
+combines independently observed width/depth, and maps signed panel calibration
+into the unchanged full atlas. Six host tests cover unoccluded-edge selection,
+alpha preservation, clipped/missing body failures, reversed/non-square atlas
+coordinates, invalid calibrations and independent side-depth influence.
+[The guide](../../tools/blender/MULTIVIEW_REFERENCES.md) describes calibration,
+occlusion, inferred surfaces and source authority. The catalogue now classifies
+109 scripts. Compilation consumes only the saved `.blend`, never calibration
+JSON or the once-only scaffolder.
+
+Verification after final source edits:
+
+- Shipping `compile --check` and an independent temporary repeat export are
+  byte-identical, with source hashes unchanged. Original/source/compiled/shipping
+  image bytes match. Candidate/shipping native RGB matches. Actual product:
+  2930 vertices and 5848 nondegenerate triangles.
+- Strict prospective corpus review against all 207 assignments reports zero
+  findings involving this pilot. Actual corpus gate remains red: 83 accepted
+  keys no longer reproduce, 3 duplicate groups, 34 UV-less models and 1 shared
+  file group. Asset regression remains red for 96 changed Model records across
+  the stack. Baselines are unchanged; source absence is 54 of 207, coverage only.
+- Texture check, asset contract, script index, six host tests and diff check
+  pass. Fresh staged G1/G2/G3/G4, unit and save pass locally. Seven Effekseer
+  native world-effect assertions are explicitly unavailable. No G5/G6 runs or
+  recaptures; Linux byte stability remains unverified. The inherited Chrysalis
+  mismatch #1355/#1369, Lantern blockers #1434 and UV-policy gap #1431 remain
+  outside this pilot. No prior item source/product, runtime or game data changes.
+
+Calibration, source graph evidence, material/UV sampling and original provenance
+are under [the review folder](item-model-multiview-review/). Once-only scaffolds,
+direct source-edit records, throwaway controls and exact local gate logs stay in
+ignored `out/work/`. The draft stacks on the painted-item branch.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: calibrated multiview volume and surface pilot
+  base: 8c87ad189573589a3332e86ca62265796bf8921f

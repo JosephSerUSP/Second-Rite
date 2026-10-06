@@ -35,6 +35,16 @@ local drawers = {
             end)
         end)
     end,
+
+    -- Free 2D-on-3D traversal is a different gameplay capability from both the
+    -- grid Map and bounded lane. It still consumes the shared viewport/world
+    -- camera pipeline through a narrow presentation adapter, so a Project can
+    -- select this world without Second Gate or St. Maria owning the concept.
+    continuous_surface = function(ctx, worldPresentation)
+        require("presentation.vertex_shading_resolver").withComposite(ctx.session, function()
+            require("presentation.continuous_surface_world").draw(ctx.session, worldPresentation)
+        end)
+    end,
 }
 
 function world_renderer.ids()

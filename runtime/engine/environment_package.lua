@@ -4,6 +4,25 @@ local json = require("engine.data.json")
 
 local environment_package = {}
 
+-- Project asset references share one logical-path resolver. LOVE does not
+-- collapse parent segments in either package manifests or OBJ materials.
+function environment_package.resolveAssetPath(base, file)
+    local joined = (base == "" or file:sub(1, 1) == "/" or file:match("^assets/"))
+        and file or (base .. "/" .. file)
+    local parts = {}
+    for segment in joined:gmatch("[^/]+") do
+        if segment == ".." then
+            if #parts == 0 then
+                error("environment package path escapes the project: " .. joined, 0)
+            end
+            parts[#parts] = nil
+        elseif segment ~= "." then
+            parts[#parts + 1] = segment
+        end
+    end
+    return table.concat(parts, "/")
+end
+
 local function requiredString(value, label)
     if type(value) ~= "string" or value == "" then
         error("environment package " .. label .. " must be a non-empty string", 0)
@@ -43,19 +62,7 @@ function environment_package.load(path)
     -- sibling directory resolves to a path that does not exist. Normalise here
     -- rather than forbidding relative references in authored packages.
     local function resolve(file)
-        local joined = (base == "" or file:sub(1, 1) == "/") and file or (base .. "/" .. file)
-        local parts = {}
-        for segment in joined:gmatch("[^/]+") do
-            if segment == ".." then
-                if #parts == 0 then
-                    error("environment package path escapes the project: " .. joined, 0)
-                end
-                parts[#parts] = nil
-            elseif segment ~= "." then
-                parts[#parts + 1] = segment
-            end
-        end
-        return table.concat(parts, "/")
+        return environment_package.resolveAssetPath(base, file)
     end
     local function asset(name, label)
         return resolve(requiredString(manifest[name], label))

@@ -90,7 +90,7 @@
   },
   "provenance": {
     "sourceBlend": "st_maria_core.blend",
-    "sourceSHA256": "66e6c11e3cf637e06ef52704c36f50ba643f20a672a91a2fd1c93e48607fc865",
+    "sourceSHA256": "2cddc3dcb37e9d635b58267b489d84e9da424d698b49e615ef395d2c74a333a3",
     "sourceScreen": "praca",
     "plateRecord": {
       "contract": "thestra.world-camera-calibration",
@@ -147,6 +147,6 @@
       },
       "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
     },
-    "sourceRevision": "passage-house-mark-20261005"
+    "sourceRevision": "island-exteriors-20261006"
   }
 }

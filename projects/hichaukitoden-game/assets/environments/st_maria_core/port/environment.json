@@ -69,7 +69,7 @@
   },
   "provenance": {
     "sourceBlend": "st_maria_core.blend",
-    "sourceSHA256": "5182e990e8c1c81cfb3264b2eb5ed096389fd2fb4a4f3fe58f98c16468d69f44",
+    "sourceSHA256": "2cddc3dcb37e9d635b58267b489d84e9da424d698b49e615ef395d2c74a333a3",
     "sourceScreen": "port",
     "plateRecord": {
       "contract": "thestra.world-camera-calibration",
@@ -126,6 +126,6 @@
       },
       "authoringCameraDecision": "Retain the working B13 harbour camera: the 28m position intersects the quay terrain."
     },
-    "sourceRevision": "praca-approaches-20261004"
+    "sourceRevision": "island-exteriors-20261006"
   }
 }

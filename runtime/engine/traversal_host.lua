@@ -17,10 +17,18 @@ local function resolved(session)
     return id and providers[id] or nil
 end
 
+local function clearHostedState(session)
+    -- Today the registry has one provider. Keeping this cleanup in the registry
+    -- rather than exploration means leaving a hosted topology cannot leak its
+    -- actor state into the next grid/bounded-lane Map, and future providers can
+    -- extend the registry without teaching Map loading their state fields.
+    if session then session.continuousTraversal = nil end
+end
+
 function traversal_host.ensure(session)
     local provider = resolved(session)
     if not provider then
-        if session then session.continuousTraversal = nil end
+        clearHostedState(session)
         return nil
     end
     if provider.ensure then provider.ensure(session) end
@@ -33,7 +41,10 @@ end
 -- registry does not own the Map, so legacy grid/bounded-lane setup continues.
 function traversal_host.enterMap(session, arrival)
     local provider = resolved(session)
-    if not provider then return nil end
+    if not provider then
+        clearHostedState(session)
+        return nil
+    end
     if provider.enterMap then return provider.enterMap(session, arrival) end
     if provider.ensure then return provider.ensure(session) end
     return true
@@ -95,7 +106,10 @@ end
 
 function traversal_host.restore(session, saved)
     local provider = resolved(session)
-    if not provider or not provider.restore then return nil end
+    if not provider or not provider.restore then
+        clearHostedState(session)
+        return nil
+    end
     return provider.restore(session, saved)
 end
 

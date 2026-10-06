@@ -37,6 +37,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          sed -i 's/semantic_id="cloth"/semantic_id="aged_cloth"/' tools/blender/pr1400_item_source_stress_upgrade.py
           python tools/blender/pr1400_item_source_stress_upgrade.py
           python tools/blender/sync_asset_core.py
           python -m py_compile \

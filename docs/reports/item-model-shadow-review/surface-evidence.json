@@ -1,0 +1,1290 @@
+{
+  "nativeCell": 96,
+  "textureSize": 128,
+  "paintedMaterials": 7,
+  "nativeShippingCandidateRGBIdentical": true,
+  "sourceCompiledShippingTextureBytesIdentical": true,
+  "yawProbe": [
+    0,
+    90,
+    180,
+    270
+  ],
+  "yawProbeRoll": 10,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 58,
+  "items": [
+    {
+      "item": "obsidian_shard",
+      "sourceHash": "370a3ff50a8c178adbf4209f9baee98efa59b1b1a422ce4d7acb2cde5ea98e8b",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "flat shadow-cut planes with bevel rims",
+          "faces": 530,
+          "smoothFaces": 0
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.6276751160621643,
+              -0.2997609078884125,
+              -0.8816956281661987
+            ],
+            [
+              0.5576236844062805,
+              0.22969768941402435,
+              0.9721046686172485
+            ]
+          ],
+          "volume": 0.5298526436349895,
+          "triangles": 530,
+          "smoothFaces": 0,
+          "faces": 530,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.550000011920929,
+                  -0.8899999856948853
+                ],
+                [
+                  0.23000000417232513,
+                  -0.7900000214576721
+                ],
+                [
+                  0.5600000023841858,
+                  -0.1899999976158142
+                ],
+                [
+                  0.23999999463558197,
+                  0.9800000190734863
+                ],
+                [
+                  -0.10999999940395355,
+                  0.7200000286102295
+                ],
+                [
+                  -0.4300000071525574,
+                  0.05999999865889549
+                ],
+                [
+                  -0.6299999952316284,
+                  -0.1599999964237213
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.2199999988079071,
+                  -0.8899999856948853
+                ],
+                [
+                  0.23000000417232513,
+                  -0.6700000166893005
+                ],
+                [
+                  0.27000001072883606,
+                  0.07999999821186066
+                ],
+                [
+                  0.019999999552965164,
+                  0.9800000190734863
+                ],
+                [
+                  -0.30000001192092896,
+                  0.019999999552965164
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.6299999952316284,
+                  -0.07000000029802322
+                ],
+                [
+                  -0.4000000059604645,
+                  -0.30000001192092896
+                ],
+                [
+                  0.41999998688697815,
+                  -0.25999999046325684
+                ],
+                [
+                  0.5600000023841858,
+                  0.03999999910593033
+                ],
+                [
+                  0.17000000178813934,
+                  0.23000000417232513
+                ],
+                [
+                  -0.4699999988079071,
+                  0.1899999976158142
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/obsidian_shard_obsidian.png",
+          "sha256": "22a04e3440b6d482e2f88c5fcc359675341c8e7a5f61d7437f70ee22b51b4789"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "obsidian_shard_obsidian": {
+          "texture": "obsidian_shard_obsidian.png",
+          "faces": 530,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "triangles": 530,
+      "productHash": "dfa8dc02f87c10a6d2d1298ae5ad1d4a7e082fd6237218978636cb9f10c36772",
+      "materialHash": "7393b3943eee8b5576b9d3c7b7c928d5ef715fda05229d1ec18dc43bfb5e3f1d"
+    },
+    {
+      "item": "ember_bit",
+      "sourceHash": "a9c0973568be43a5961ff29b8f7cb0b9fec0ad58825f24972868665141b57c33",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "flat shadow-cut planes with bevel rims",
+          "faces": 1112,
+          "smoothFaces": 0
+        },
+        {
+          "name": "B_InsetHotCore",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth inset ember core",
+          "faces": 320,
+          "smoothFaces": 320
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.7189211845397949,
+              -0.34984689950942993,
+              -0.7665504217147827
+            ],
+            [
+              0.7078890204429626,
+              0.33975934982299805,
+              0.8941802382469177
+            ]
+          ],
+          "volume": 0.7539081313260239,
+          "triangles": 1112,
+          "smoothFaces": 0,
+          "faces": 1112,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.6600000262260437,
+                  -0.6000000238418579
+                ],
+                [
+                  -0.10000000149011612,
+                  -0.8299999833106995
+                ],
+                [
+                  0.5600000023841858,
+                  -0.5099999904632568
+                ],
+                [
+                  0.7099999785423279,
+                  0.029999999329447746
+                ],
+                [
+                  0.4699999988079071,
+                  0.6700000166893005
+                ],
+                [
+                  0.10000000149011612,
+                  0.9100000262260437
+                ],
+                [
+                  -0.4699999988079071,
+                  0.6399999856948853
+                ],
+                [
+                  -0.7200000286102295,
+                  0.019999999552965164
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.33000001311302185,
+                  -0.7699999809265137
+                ],
+                [
+                  0.3100000023841858,
+                  -0.5600000023841858
+                ],
+                [
+                  0.36000001430511475,
+                  0.3199999928474426
+                ],
+                [
+                  0.07000000029802322,
+                  0.8999999761581421
+                ],
+                [
+                  -0.3499999940395355,
+                  0.3499999940395355
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.7300000190734863,
+                  -0.07000000029802322
+                ],
+                [
+                  -0.49000000953674316,
+                  -0.3400000035762787
+                ],
+                [
+                  0.3400000035762787,
+                  -0.3499999940395355
+                ],
+                [
+                  0.7200000286102295,
+                  0.029999999329447746
+                ],
+                [
+                  0.3799999952316284,
+                  0.3400000035762787
+                ],
+                [
+                  -0.38999998569488525,
+                  0.30000001192092896
+                ]
+              ]
+            },
+            {
+              "name": "CUT_A_ShadowHull_0",
+              "plane": "front",
+              "isCut": true,
+              "outline": [
+                [
+                  -0.27000001072883606,
+                  -0.27000001072883606
+                ],
+                [
+                  0.019999999552965164,
+                  -0.3400000035762787
+                ],
+                [
+                  0.36000001430511475,
+                  0.3100000023841858
+                ],
+                [
+                  0.10000000149011612,
+                  0.4300000071525574
+                ],
+                [
+                  -0.05000000074505806,
+                  0.12999999523162842
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/ember_bit_char.png",
+          "sha256": "95d7594802f5e435dc2c0ee4a07d2773d0e21a328ea8abeaae640a8b6269729a"
+        },
+        {
+          "path": "//_textures/ember_bit_core.png",
+          "sha256": "5eca0fd6ea64476a0ca3b740bc622394db5e7e8c5a2936fb8cdce6ef093a325f"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "ember_bit_char": {
+          "texture": "ember_bit_char.png",
+          "faces": 1112,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "ember_bit_core": {
+          "texture": "ember_bit_core.png",
+          "faces": 320,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 320
+        }
+      },
+      "triangles": 1432,
+      "productHash": "97c5a9393955fecde34b3602005c314880a6f41cf8408e28cd388a543672c464",
+      "materialHash": "12e00ebc346386cd334b27e2ea62a8461645b4ba1723f923ec1d32debbe396c8"
+    },
+    {
+      "item": "cinder_ruby",
+      "sourceHash": "3d055041338586a8f01b4491c97e48c90e791c97e957203ac6b08052ebf7ba66",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "flat shadow-cut planes with bevel rims",
+          "faces": 578,
+          "smoothFaces": 0
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.6642245054244995,
+              -0.3993971645832062,
+              -0.7587155103683472
+            ],
+            [
+              0.6583240032196045,
+              0.358207643032074,
+              0.9744601249694824
+            ]
+          ],
+          "volume": 0.8771660842268959,
+          "triangles": 578,
+          "smoothFaces": 0,
+          "faces": 578,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.5099999904632568,
+                  -0.7699999809265137
+                ],
+                [
+                  0.3400000035762787,
+                  -0.8199999928474426
+                ],
+                [
+                  0.6600000262260437,
+                  -0.20999999344348907
+                ],
+                [
+                  0.550000011920929,
+                  0.4399999976158142
+                ],
+                [
+                  0.15000000596046448,
+                  1.0
+                ],
+                [
+                  -0.3499999940395355,
+                  0.6100000143051147
+                ],
+                [
+                  -0.6700000166893005,
+                  0.029999999329447746
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.3499999940395355,
+                  -0.6800000071525574
+                ],
+                [
+                  0.36000001430511475,
+                  -0.7599999904632568
+                ],
+                [
+                  0.4000000059604645,
+                  0.23000000417232513
+                ],
+                [
+                  0.009999999776482582,
+                  0.9800000190734863
+                ],
+                [
+                  -0.4000000059604645,
+                  0.3499999940395355
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.6700000166893005,
+                  -0.05999999865889549
+                ],
+                [
+                  -0.3799999952316284,
+                  -0.4000000059604645
+                ],
+                [
+                  0.3499999940395355,
+                  -0.3199999928474426
+                ],
+                [
+                  0.6700000166893005,
+                  0.07999999821186066
+                ],
+                [
+                  0.2199999988079071,
+                  0.36000001430511475
+                ],
+                [
+                  -0.41999998688697815,
+                  0.25
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/cinder_ruby_ruby.png",
+          "sha256": "c7efdacecf9a21fba928ed2b0cb339bf202e8792d7642da7da32e85581d11ef2"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "cinder_ruby_ruby": {
+          "texture": "cinder_ruby_ruby.png",
+          "faces": 578,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "triangles": 578,
+      "productHash": "c3c73c1bcafac8a8e7d204c7ba55e04d68d653b5170f45d97161fac81ca79e24",
+      "materialHash": "e5049601915cf5cd85462a7e5b25eed91c46df4df0285e1212ac619399a00968"
+    },
+    {
+      "item": "adamant_weight",
+      "sourceHash": "3d198a19278fb9846c16c482be1c1f30f71c87d6470b374b479a08573957fe02",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "flat shadow-cut planes with bevel rims",
+          "faces": 904,
+          "smoothFaces": 0
+        },
+        {
+          "name": "B_InlaidMassMark0",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "B_InlaidMassMark1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "B_InlaidMassMark2",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.7478473782539368,
+              -0.42899271845817566,
+              -0.6600000262260437
+            ],
+            [
+              0.789642870426178,
+              0.38982897996902466,
+              0.7376519441604614
+            ]
+          ],
+          "volume": 1.1645134855881296,
+          "triangles": 904,
+          "smoothFaces": 0,
+          "faces": 904,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.75,
+                  -0.6600000262260437
+                ],
+                [
+                  0.75,
+                  -0.6600000262260437
+                ],
+                [
+                  0.7900000214576721,
+                  0.2199999988079071
+                ],
+                [
+                  0.4699999988079071,
+                  0.6899999976158142
+                ],
+                [
+                  -0.4099999964237213,
+                  0.75
+                ],
+                [
+                  -0.7699999809265137,
+                  0.23999999463558197
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.4300000071525574,
+                  -0.6700000166893005
+                ],
+                [
+                  0.44999998807907104,
+                  -0.6000000238418579
+                ],
+                [
+                  0.38999998569488525,
+                  0.41999998688697815
+                ],
+                [
+                  0.10999999940395355,
+                  0.7400000095367432
+                ],
+                [
+                  -0.36000001430511475,
+                  0.5
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.75,
+                  -0.25
+                ],
+                [
+                  -0.4099999964237213,
+                  -0.4399999976158142
+                ],
+                [
+                  0.44999998807907104,
+                  -0.4000000059604645
+                ],
+                [
+                  0.7900000214576721,
+                  -0.1599999964237213
+                ],
+                [
+                  0.699999988079071,
+                  0.36000001430511475
+                ],
+                [
+                  -0.5,
+                  0.38999998569488525
+                ]
+              ]
+            },
+            {
+              "name": "CUT_A_ShadowHull_0",
+              "plane": "front",
+              "isCut": true,
+              "outline": [
+                [
+                  -0.23999999463558197,
+                  0.3400000035762787
+                ],
+                [
+                  0.20000000298023224,
+                  0.3400000035762787
+                ],
+                [
+                  0.23999999463558197,
+                  0.4300000071525574
+                ],
+                [
+                  0.20000000298023224,
+                  0.5600000023841858
+                ],
+                [
+                  -0.20000000298023224,
+                  0.5600000023841858
+                ],
+                [
+                  -0.25,
+                  0.47999998927116394
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/adamant_weight_adamant.png",
+          "sha256": "cfa648ef9d282a2fef83ef4d8b8db179bfcc028c314f2b1887cb132bdfe1a635"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "adamant_weight_adamant": {
+          "texture": "adamant_weight_adamant.png",
+          "faces": 904,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "triangles": 1036,
+      "productHash": "fe7f889df5585958bd8f383bade51c2ba9b586da355e0f4e62661ddcbe607c0f",
+      "materialHash": "499d992203935f3388c65bb1866867ea725da42402eb793587957e92d9e06039"
+    },
+    {
+      "item": "melted_wax",
+      "sourceHash": "41f7ff7d8cf0e887ae14df75c3b19fa1f27885aa4a0f747e5c2f02f0a2c8279d",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "SUBSURF",
+            "SMOOTH",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "smooth wax hull with live subdivision after shadow carving",
+          "faces": 5084,
+          "smoothFaces": 5084
+        },
+        {
+          "name": "B_BentWick",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.9263098239898682,
+              -0.4773623049259186,
+              -0.2712589502334595
+            ],
+            [
+              0.875640332698822,
+              0.4677872955799103,
+              0.6170969009399414
+            ]
+          ],
+          "volume": 0.5869274494645729,
+          "triangles": 5084,
+          "smoothFaces": 5084,
+          "faces": 5084,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "SUBSURF",
+            "SMOOTH",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.9300000071525574,
+                  -0.1899999976158142
+                ],
+                [
+                  -0.6899999976158142,
+                  -0.3100000023841858
+                ],
+                [
+                  -0.25,
+                  -0.3199999928474426
+                ],
+                [
+                  0.05999999865889549,
+                  -0.25
+                ],
+                [
+                  0.41999998688697815,
+                  -0.3199999928474426
+                ],
+                [
+                  0.8799999952316284,
+                  -0.20000000298023224
+                ],
+                [
+                  0.7300000190734863,
+                  0.029999999329447746
+                ],
+                [
+                  0.5099999904632568,
+                  0.09000000357627869
+                ],
+                [
+                  0.3700000047683716,
+                  0.33000001311302185
+                ],
+                [
+                  0.14000000059604645,
+                  0.5799999833106995
+                ],
+                [
+                  -0.09000000357627869,
+                  0.6200000047683716
+                ],
+                [
+                  -0.28999999165534973,
+                  0.4699999988079071
+                ],
+                [
+                  -0.4000000059604645,
+                  0.23000000417232513
+                ],
+                [
+                  -0.6499999761581421,
+                  0.05999999865889549
+                ],
+                [
+                  -0.8100000023841858,
+                  0.07999999821186066
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.5799999833106995,
+                  -0.17000000178813934
+                ],
+                [
+                  -0.20999999344348907,
+                  -0.28999999165534973
+                ],
+                [
+                  0.36000001430511475,
+                  -0.23000000417232513
+                ],
+                [
+                  0.5,
+                  -0.07000000029802322
+                ],
+                [
+                  0.36000001430511475,
+                  0.11999999731779099
+                ],
+                [
+                  0.23000000417232513,
+                  0.25999999046325684
+                ],
+                [
+                  0.019999999552965164,
+                  0.6299999952316284
+                ],
+                [
+                  -0.17000000178813934,
+                  0.5699999928474426
+                ],
+                [
+                  -0.3499999940395355,
+                  0.17000000178813934
+                ],
+                [
+                  -0.5699999928474426,
+                  0.019999999552965164
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.9399999976158142,
+                  -0.029999999329447746
+                ],
+                [
+                  -0.7400000095367432,
+                  -0.36000001430511475
+                ],
+                [
+                  -0.3400000035762787,
+                  -0.4399999976158142
+                ],
+                [
+                  -0.07999999821186066,
+                  -0.3499999940395355
+                ],
+                [
+                  0.3400000035762787,
+                  -0.47999998927116394
+                ],
+                [
+                  0.7599999904632568,
+                  -0.3199999928474426
+                ],
+                [
+                  0.8999999761581421,
+                  -0.029999999329447746
+                ],
+                [
+                  0.6299999952316284,
+                  0.18000000715255737
+                ],
+                [
+                  0.5600000023841858,
+                  0.36000001430511475
+                ],
+                [
+                  0.12999999523162842,
+                  0.4699999988079071
+                ],
+                [
+                  -0.1599999964237213,
+                  0.38999998569488525
+                ],
+                [
+                  -0.6200000047683716,
+                  0.4099999964237213
+                ],
+                [
+                  -0.8199999928474426,
+                  0.1899999976158142
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/melted_wax_wax.png",
+          "sha256": "75bbd3503c8dbd36b796810a6bbea6a26bf46d2b688414882c6428d46f0662fb"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "melted_wax_wax": {
+          "texture": "melted_wax_wax.png",
+          "faces": 5084,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 5084
+        }
+      },
+      "triangles": 5244,
+      "productHash": "c6ad029695ec3874445153b1f7c49d5801ff0bc75430a133f8bb9b8b26d19cf6",
+      "materialHash": "8265ef30337785ec938aac7503e6d9d6d9667b638864d949b0f88b32961c1a8d"
+    },
+    {
+      "item": "moth_scale",
+      "sourceHash": "56194e539834d1400e20e4a85cc961b8788f5112020f223cee97ded3ffd87cda",
+      "sourceObjects": [
+        {
+          "name": "A_ShadowHull",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "role": "rounded continuous shadow hull",
+          "faces": 726,
+          "smoothFaces": 726
+        },
+        {
+          "name": "B_Quill",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        }
+      ],
+      "shadowBodies": [
+        {
+          "name": "A_ShadowHull",
+          "coordinateSpace": "body local",
+          "bounds": [
+            [
+              -0.48967236280441284,
+              -0.10499999672174454,
+              -0.9195099472999573
+            ],
+            [
+              0.4996737241744995,
+              0.07000000029802322,
+              0.8597056269645691
+            ]
+          ],
+          "volume": 0.10349914724201847,
+          "triangles": 726,
+          "smoothFaces": 726,
+          "faces": 726,
+          "uvFindings": 0,
+          "modifiers": [
+            "SOLIDIFY",
+            "BOOLEAN",
+            "BOOLEAN",
+            "WELD",
+            "BEVEL",
+            "WELD",
+            "TRIANGULATE",
+            "NODES"
+          ],
+          "controls": [
+            {
+              "name": "SHADOW_A_ShadowHull_front",
+              "plane": "front",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.11999999731779099,
+                  -0.9200000166893005
+                ],
+                [
+                  0.12999999523162842,
+                  -0.7799999713897705
+                ],
+                [
+                  0.3400000035762787,
+                  -0.3400000035762787
+                ],
+                [
+                  0.3199999928474426,
+                  -0.18000000715255737
+                ],
+                [
+                  0.49000000953674316,
+                  0.15000000596046448
+                ],
+                [
+                  0.4399999976158142,
+                  0.25999999046325684
+                ],
+                [
+                  0.5,
+                  0.47999998927116394
+                ],
+                [
+                  0.20000000298023224,
+                  0.75
+                ],
+                [
+                  -0.11999999731779099,
+                  0.8600000143051147
+                ],
+                [
+                  -0.36000001430511475,
+                  0.6600000262260437
+                ],
+                [
+                  -0.49000000953674316,
+                  0.3199999928474426
+                ],
+                [
+                  -0.41999998688697815,
+                  0.17000000178813934
+                ],
+                [
+                  -0.46000000834465027,
+                  -0.07999999821186066
+                ],
+                [
+                  -0.2800000011920929,
+                  -0.3499999940395355
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_side",
+              "plane": "side",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.03999999910593033,
+                  -0.9300000071525574
+                ],
+                [
+                  0.02500000037252903,
+                  -0.5400000214576721
+                ],
+                [
+                  0.08500000089406967,
+                  -0.029999999329447746
+                ],
+                [
+                  0.0430000014603138,
+                  0.5699999928474426
+                ],
+                [
+                  0.0,
+                  0.8899999856948853
+                ],
+                [
+                  -0.07000000029802322,
+                  0.38999998569488525
+                ],
+                [
+                  -0.10999999940395355,
+                  -0.03999999910593033
+                ],
+                [
+                  -0.07999999821186066,
+                  -0.46000000834465027
+                ]
+              ]
+            },
+            {
+              "name": "SHADOW_A_ShadowHull_top",
+              "plane": "top",
+              "isCut": false,
+              "outline": [
+                [
+                  -0.5099999904632568,
+                  -0.03500000014901161
+                ],
+                [
+                  -0.20999999344348907,
+                  -0.10499999672174454
+                ],
+                [
+                  0.25999999046325684,
+                  -0.03999999910593033
+                ],
+                [
+                  0.5099999904632568,
+                  0.014999999664723873
+                ],
+                [
+                  0.3199999928474426,
+                  0.07000000029802322
+                ],
+                [
+                  -0.20000000298023224,
+                  0.03999999910593033
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/moth_scale_scale.png",
+          "sha256": "88815816f38c8b4f2406d7af666f0e258cbf36288bdcc741239becfc394b1467"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "moth_scale_scale": {
+          "texture": "moth_scale_scale.png",
+          "faces": 726,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 726
+        }
+      },
+      "triangles": 886,
+      "productHash": "181e2600b3ab9a7eb8dba33b13d2539458b9d67dcea3e20e206edcbeb961fd4d",
+      "materialHash": "828dabcc2fcdc224376233cc8998b9c407a2b2e6716b7ea37e4f26f94858c918"
+    }
+  ]
+}

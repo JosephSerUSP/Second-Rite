@@ -6,7 +6,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 
 **Run with** says how to start a file. `run.py` means it runs inside the pinned Blender: `python tools/blender/run.py tools/blender/<script> [--blend FILE] -- <args>` (never a hand-typed `blender --python` command, which exits 0 when the script raises). `python` and `node` mean an ordinary host command; `import` means the file is only imported or spawned by other tools.
 
-## Supported authoring and verification entry points (31)
+## Supported authoring and verification entry points (32)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -36,13 +36,14 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [review_room_source.py](review_room_source.py) | `run.py` | Photograph an interior source using camera records from native staged captures. |
 | [run.py](run.py) | `python` | Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit. |
 | [script_index.py](script_index.py) | `python` | Generate/check the role index for every top-level Blender Python/JS tool. |
+| [shadow_volume.py](shadow_volume.py) | `python` | Validate and preview three drawn shadows, scaffold a new editable volume source, or inspect the saved source graph. |
 | [stage_candidate.js](stage_candidate.js) | `node` | Stage a candidate 3D room package onto an existing map in a fresh out/ runtime stage, for native capture; the Project is untouched. |
 | [stage_room_model.py](stage_room_model.py) | `run.py` | Stage a generated room model against the calibrated Second Gate town camera. |
 | [sync_asset_core.py](sync_asset_core.py) | `python` | Synchronize canonical Blender contract sources into the portable toolkit. |
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (35)
+## Implementation modules and Blender workers (36)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -72,6 +73,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [render_furnishings_catalogue.py](render_furnishings_catalogue.py) | `run.py` | Pinned-Blender worker for furnishings_catalogue.py; never saves a .blend. |
 | [render_profiles.py](render_profiles.py) | `import` | Shared render quality; camera, lighting, output encoding and source files belong to callers. |
 | [second_rite_asset_core.py](second_rite_asset_core.py) | `import` | Shared Blender infrastructure for Second Rite asset pipelines. |
+| [shadow_volume_blender.py](shadow_volume_blender.py) | `run.py` | Build and inspect live three-shadow intersections with editable masks, cut stencils, export-precision cleanup and generated-face UVs. |
 | [source_dependencies.py](source_dependencies.py) | `import` | Fail before rendering when an editable source cannot resolve its dependencies. |
 | [surface_finishes.py](surface_finishes.py) | `import` | World-scale procedural finishes for authored environment studies. |
 | [thestra_camera.py](thestra_camera.py) | `import` | Blender preview helpers for serialized Thestra WorldCamera calibration records. |
@@ -100,12 +102,12 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [study_cycles_courtyard.py](study_cycles_courtyard.py) | `run.py` | Native full-geometry Cycles budget study; never saves or exports the source. |
 | [study_cycles_surface_bake.py](study_cycles_surface_bake.py) | `run.py` | Actual Cycles selected-to-active atlas study; source stays unchanged. |
 | [study_eevee_atlas.py](study_eevee_atlas.py) | `run.py` | Can an atlas be baked with EEVEE? A camera-projection bake, measured against Cycles. |
-| [study_eevee_exterior.py](study_eevee_exterior.py) | `python` | The Praça exterior: its atlas as Cycles bakes it today, and as EEVEE would by projection. |
-| [study_eevee_exterior_blender.py](study_eevee_exterior_blender.py) | `run.py` | Blender side of study_eevee_exterior.py: the Praça atlas baked by Cycles today and by EEVEE projection. |
+| [study_eevee_exterior.py](study_eevee_exterior.py) | `python` | The Praﾃｧa exterior: its atlas as Cycles bakes it today, and as EEVEE would by projection. |
+| [study_eevee_exterior_blender.py](study_eevee_exterior_blender.py) | `run.py` | Blender side of study_eevee_exterior.py: the Praﾃｧa atlas baked by Cycles today and by EEVEE projection. |
 | [study_eevee_pilot.py](study_eevee_pilot.py) | `python` | One room, plate and atlas both on EEVEE, judged next to Cycles: the Padaria pilot. |
 | [study_engine_parity.py](study_engine_parity.py) | `python` | Can EEVEE stand in for Cycles on the interior plates? A measurement, not a switch. |
 | [study_environment_receivers.py](study_environment_receivers.py) | `run.py` | Inspect receiver admission/culling and geometric source correspondence without saving. |
-| [study_ground_cover_placement.py](study_ground_cover_placement.py) | `run.py` | Where should grass grow on the adopted Praça? Candidate layouts at the plate camera (#1270). |
+| [study_ground_cover_placement.py](study_ground_cover_placement.py) | `run.py` | Where should grass grow on the adopted Praﾃｧa? Candidate layouts at the plate camera (#1270). |
 | [study_ground_cover_sheet.py](study_ground_cover_sheet.py) | `python` | Contact sheets for the ground-cover placement study (`study_ground_cover_placement.py`). |
 | [study_house_grammar.py](study_house_grammar.py) | `run.py` | Photograph the first grammar-generated building as CLAY, against the real camera. |
 | [study_town_perspective.py](study_town_perspective.py) | `run.py` | Compare level/pitched town cameras on an exterior and an interior. |

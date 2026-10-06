@@ -754,3 +754,144 @@ Agent-Signature:
   role: implementation
   task: nine arcane objects with carved forms and controlled surface evidence
   base: 5c7b82771712c457bcf9b955b13a23189a3ee50e
+
+## Shadow volumes: sculpting a solid from three drawings
+
+The owner requested an unorthodox construction technique with reusable tooling
+value. Six new sources are stacked on the arcane cohort at
+`744ee09eb01b3fa265691afa00ae33bf127c8353`. Earlier products remain comparisons;
+technical coverage does not establish visual acceptance.
+
+Each main body is the intersection of three extruded polygon drawings: front
+X/Z, side Y/Z and top X/Y. Drawn cut stencils remove actual through openings.
+The named planar controls, Boolean intersections, bevels and generated UVs
+remain live in the saved source. This is a small visual-hull authoring grammar,
+without a voxel grid or new runtime renderer. It provides shape constraints,
+not exact reconstruction of an object from its silhouettes.
+
+The [saved-controls/native board](item-model-shadow-review/shadows-to-native.png)
+plots the actual control vertices inspected from the final documents and pairs
+them with two native 96px gameplay poses. The [gameplay board](item-model-shadow-review/gameplay96.png),
+[prior/new comparison](item-model-shadow-review/before-after96.png),
+[usual four poses](item-model-shadow-review/sheet96.png) and
+[cardinal-yaw probe](item-model-shadow-review/yaw96.png) expose different aspects
+of the result. The yaw probe changes only a throwaway staged renderer to
+0/90/180/270 degrees at gameplay roll; the camera remains a side view.
+
+| Item | Construction and surface choice | Native triangles |
+| --- | --- | ---: |
+| Obsidian Shard | Three asymmetric cut profiles, crisp flat planes, fine bevel rims, dark conchoidal bands and restrained glass sphere pass | 530 |
+| Ember Bit | Charred flat-cut hull, real drawn opening, smooth recessed opaque hot core, separate char/core atlases | 1,432 |
+| Cinder Ruby | Unequal cut profiles with flat gemstone facets, warm internal bands and restrained ruby sphere pass | 578 |
+| Adamant Weight | Thick intersected forged mass, actual carry slot, flat faces, directional metal texture, pale raised face marks and restrained steel sphere pass | 1,036 |
+| Melted Wax | Pooled three-profile hull, live subdivision and relaxation, smooth faces, broad wax colour variation and plain curved wick | 5,244 |
+| Moth Scale | Thin asymmetric intersected scale, smooth faces, directional painted ridges and plain curved quill | 886 |
+
+### Durable tool and measured geometry
+
+[Shadow-volume authoring](../../tools/blender/SHADOW_VOLUMES.md) documents four
+routes: host-only spec validation, labelled three-view SVG preview, new-source
+construction through the pinned Blender launcher, and read-only inspection of
+saved sources. Outputs refuse overwrite. After first save, the `.blend` is
+authority; initial JSON drawings are not consulted by compilation. Authors
+can reuse `build_volume` and `inspect_body` independently of ignored scaffolds.
+Both entry points are registered in the authoring route and script catalogue.
+
+Nine host tests cover malformed polygons and settings, winding normalization,
+projection bounds, concave controls, preview semantics and overwrite refusal.
+One real Blender integration test exercises several independent facts:
+
+- A known 2x4x6 intersection has volume 48; moving one saved side-control edge
+  changes it to 42 without rebuilding from its initial spec.
+- A 0.4x0.6 stencil through depth 4 removes volume 0.96, leaving 47.04.
+- Valid projections with overlapping coordinate bounds can still produce an
+  empty intersection; construction rejects that evaluated case.
+- Generated faces have noncollapsed bounded UVs after live construction.
+- Exporting with the root translated to (5,7,11) retains the pierced volume
+  and remaps modifier controls into the temporary export hierarchy.
+- An asymmetric bevel fixture exports through the real OBJ/runtime validator
+  without the rounded-position degenerate triangles seen during authoring.
+
+The public example also builds, inspects and compiles successfully. Existing
+asset-core host tests (15) and item-compiler host tests (16) pass; canonical
+vendor synchronization and integrity checks pass.
+
+The shared exporter now remaps hierarchy-owned modifier object pointers when
+normalizing a translated root. At exactly zero translation it retains the
+existing dependencies: indiscriminate remapping changed an older Mirror-based
+product's rounded OBJ coordinates despite equivalent transforms. The final
+conditional behavior preserves that observed zero-shift product comparison.
+This is an exporter correction exercised by the geometry test, not a claim
+that the entire historical corpus is byte-stable.
+
+### Surface evidence and limits
+
+Seven opaque 128x128 [atlases](item-model-shadow-review/texture-atlases.png)
+provide directional metal grain, dark fractured bands, ruby colour strata,
+char and hot-core contrast, pooled wax variation and scale ridges. Main cut
+stone/forged hulls deliberately retain flat normals. The ember core, wax and
+scale surfaces use smooth normals; small plain-colour marks, wick and quill
+remain separate assemblies. Sphere overlays use the existing low-strength
+runtime vocabulary. The ember's bright inset is opaque painted geometry;
+this is not evidence of emission or transmitted light.
+
+All exported faces using the seven painted materials have zero missing,
+collapsed or outside-atlas UV findings. The live surface graph projects
+dominant face planes into current object bounds, including faces created by
+Booleans and bevels. Source, compiled and shipping PNG bytes match. The
+[surface evidence](item-model-shadow-review/surface-evidence.json) records
+source/product hashes, actual saved control polygons, evaluated bounds and
+volumes, face smoothness, triangle counts and material-level UV results without
+machine-specific absolute paths. Read-only source inspections preserve hashes.
+
+Box projection can produce pattern seams. Silhouette intersections cannot
+recover concavities hidden from every drawing; those need explicit cutters or
+further source modeling. Large control edits must also expand the working
+Solidify envelope. Weld steps around bevels, triangulation and a near-zero-area
+filter address almost coincident Boolean corners; runtime validation still
+decides whether an OBJ is valid at its six-decimal position precision.
+
+Melted Wax remains angular in silhouette at 96px despite subdivision and
+relaxation, and has the highest triangle cost in this cohort. Smooth normals
+alone cannot turn a constrained polyhedral envelope into a convincing poured
+mass. It is the clearest visual limitation of this technique here. Moth Scale
+becomes very narrow edge-on; small weight marks and fine grain remain subtle.
+The carry slot and ember opening remain readable physical cuts. These are
+review observations, not an owner acceptance claim.
+
+### Observed verification and remaining boundaries
+
+- All six sources pass read-only shipping `compile_item_blends.py --check`.
+  Separate repeat exports are byte-identical; source hashes remain unchanged.
+- Final native shipping/candidate boards have identical RGB pixels. Texture
+  reference, script catalogue (106 entries), diff and asset contract checks
+  pass. Strict prospective comparison against all 207 models reports zero
+  cohort violations under the 0.85 sourced-pair silhouette threshold.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. Seven native Effekseer
+  world-effect assertions remain explicitly unavailable. G5/G6 were not run
+  or recaptured; Linux byte stability remains unverified.
+- A prior-source corpus `--check` stops at Chrysalis Sigil's known rounded
+  normal mismatch (#1355/#1369). Isolated original/current exporter runs
+  produce identical OBJ bytes to each other and both differ from shipping at
+  that normal. The check does not establish full corpus byte stability, and
+  that earlier source/product was not rewritten.
+- Actual corpus remains red for 82 accepted keys no longer reproducing, with
+  three duplicate groups, 35 UV-less models and one shared-file group left.
+  Reduced inherited groups remain new keys. Asset regression remains red for
+  92 changed Model records across the stack. Baselines are unchanged; their
+  reconciliation and merging remain owner decisions.
+- Inherited Lantern integration blockers remain #1434; the general painted-UV
+  gate gap remains #1431; static item shape-key policy remains #1436. This pass
+  changes no runtime code, game data or earlier production documents/products.
+
+Referenced source absence falls from 64 to 58 of 207 item assignments. That
+measures coverage only. Initial six-item scaffolds, direct-edit helpers,
+source backups and verification logs remain ignored under `out/work/`; the
+general tooling and its neutral example are durable repository files.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: six shadow-sculpted items and reusable silhouette tooling
+  base: 744ee09eb01b3fa265691afa00ae33bf127c8353

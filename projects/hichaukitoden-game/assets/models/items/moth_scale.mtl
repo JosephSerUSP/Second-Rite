@@ -1,17 +1,17 @@
-# Blender 5.2.2 LTS MTL File: 'ember_bit.blend'
+# Blender 5.2.2 LTS MTL File: 'moth_scale.blend'
 # www.blender.org
 
-newmtl ember_bit_char
+newmtl moth_scale_quill
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.410000 0.240000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd ember_bit_char.png
 
-newmtl ember_bit_core
+newmtl moth_scale_scale
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -19,4 +19,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd ember_bit_core.png
+map_Kd moth_scale_scale.png

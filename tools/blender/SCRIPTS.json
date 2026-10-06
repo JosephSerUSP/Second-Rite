@@ -98,6 +98,11 @@
       "purpose": "Compile authoritative item ``.blend`` sources without allowing source writes."
     },
     {
+      "path": "compile_room_spec.py",
+      "role": "production",
+      "purpose": "Compile relational JSON scaffolds through existing Interior and furnishing builders."
+    },
+    {
       "path": "cycles_source.py",
       "role": "library",
       "purpose": "Temporary evaluated beauty batching for selected-to-active Cycles baking."
@@ -166,6 +171,11 @@
       "path": "fit_registry_ceiling.py",
       "role": "one-shot",
       "purpose": "Fit the retained timber service divider to the existing ceiling and beams."
+    },
+    {
+      "path": "furnishing_geometry.py",
+      "role": "library",
+      "purpose": "Evaluated geometry measurements shared by catalogue and scaffold placement."
     },
     {
       "path": "furnishings_catalogue.py",
@@ -279,6 +289,11 @@
       "purpose": "Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size."
     },
     {
+      "path": "placement_rules.py",
+      "role": "library",
+      "purpose": "Pure authoring support and protected-volume checks; not runtime collision."
+    },
+    {
       "path": "preview_diff_sheet.py",
       "role": "production",
       "purpose": "A before / after / difference sheet for renders that should look alike."
@@ -339,6 +354,11 @@
       "purpose": "Edit an existing Registry document into the recessed service-hatch study."
     },
     {
+      "path": "run.py",
+      "role": "production",
+      "purpose": "Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit."
+    },
+    {
       "path": "script_index.py",
       "role": "production",
       "purpose": "Generate/check the role index for every top-level Blender Python/JS tool."
@@ -349,9 +369,24 @@
       "purpose": "Shared Blender infrastructure for Second Rite asset pipelines."
     },
     {
+      "path": "shadow_volume.py",
+      "role": "production",
+      "purpose": "Validate and preview three drawn shadows, scaffold a new editable volume source, or inspect the saved source graph."
+    },
+    {
+      "path": "shadow_volume_blender.py",
+      "role": "library",
+      "purpose": "Build and inspect live three-shadow intersections with editable masks, cut stencils, export-precision cleanup and generated-face UVs."
+    },
+    {
       "path": "source_dependencies.py",
       "role": "library",
       "purpose": "Fail before rendering when an editable source cannot resolve its dependencies."
+    },
+    {
+      "path": "stage_candidate.js",
+      "role": "production",
+      "purpose": "Stage a candidate 3D room package onto an existing map in a fresh out/ runtime stage, for native capture; the Project is untouched."
     },
     {
       "path": "stage_courtyard_candidate.js",
@@ -401,12 +436,12 @@
     {
       "path": "study_eevee_exterior.py",
       "role": "study",
-      "purpose": "The Praça exterior: its atlas as Cycles bakes it today, and as EEVEE would by projection."
+      "purpose": "The Pra\uff83\uff67a exterior: its atlas as Cycles bakes it today, and as EEVEE would by projection."
     },
     {
       "path": "study_eevee_exterior_blender.py",
       "role": "study",
-      "purpose": "Blender side of study_eevee_exterior.py: the Praça atlas baked by Cycles today and by EEVEE projection."
+      "purpose": "Blender side of study_eevee_exterior.py: the Pra\uff83\uff67a atlas baked by Cycles today and by EEVEE projection."
     },
     {
       "path": "study_eevee_pilot.py",
@@ -426,7 +461,7 @@
     {
       "path": "study_ground_cover_placement.py",
       "role": "study",
-      "purpose": "Where should grass grow on the adopted Praça? Candidate layouts at the plate camera (#1270)."
+      "purpose": "Where should grass grow on the adopted Pra\uff83\uff67a? Candidate layouts at the plate camera (#1270)."
     },
     {
       "path": "study_ground_cover_sheet.py",
@@ -497,31 +532,6 @@
       "path": "wide_screen.py",
       "role": "library",
       "purpose": "Render a whole side-view location in one frame, at canon scale."
-    },
-    {
-      "path": "placement_rules.py",
-      "role": "library",
-      "purpose": "Pure authoring support and protected-volume checks; not runtime collision."
-    },
-    {
-      "path": "furnishing_geometry.py",
-      "role": "library",
-      "purpose": "Evaluated geometry measurements shared by catalogue and scaffold placement."
-    },
-    {
-      "path": "compile_room_spec.py",
-      "role": "production",
-      "purpose": "Compile relational JSON scaffolds through existing Interior and furnishing builders."
-    },
-    {
-      "path": "run.py",
-      "role": "production",
-      "purpose": "Run one Blender-side script in the pinned Blender; a Python error becomes a non-zero exit."
-    },
-    {
-      "path": "stage_candidate.js",
-      "role": "production",
-      "purpose": "Stage a candidate 3D room package onto an existing map in a fresh out/ runtime stage, for native capture; the Project is untouched."
     }
   ]
 }

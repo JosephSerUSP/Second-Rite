@@ -1,7 +1,7 @@
-# Blender 5.2.2 LTS MTL File: 'ember_bit.blend'
+# Blender 5.2.2 LTS MTL File: 'adamant_weight.blend'
 # www.blender.org
 
-newmtl ember_bit_char
+newmtl adamant_weight_adamant
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -9,14 +9,15 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd ember_bit_char.png
+map_Kd adamant_weight_adamant.png
 
-newmtl ember_bit_core
+pass sphere add 0.07 assets/models/matcaps/steel.png
+newmtl adamant_weight_weight_marks
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
+Kd 0.790000 0.830000 0.880000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd ember_bit_core.png

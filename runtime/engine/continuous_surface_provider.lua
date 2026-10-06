@@ -48,25 +48,12 @@ local function eventPosition(event)
     return x, y, z
 end
 
-function provider.isActive(session)
-    local state = session and session.continuousTraversal
-    local spec, map = specFor(session)
-    return state ~= nil and spec ~= nil and state.mapId == map.id
-end
-
--- Lazily establish the provider after ordinary Map loading. Keeping this in a
--- capability host rather than exploration.loadMap is intentional for the first
--- gauntlet lane: it proves that a Map can compose a traversal provider without
--- teaching the grid loader another topology. If the experiment survives, the
--- lifecycle seam can be promoted without changing authored Project data.
-function provider.ensure(session)
+local function initialize(session, arrival)
     local spec, map = specFor(session)
     if not spec then
         if session then session.continuousTraversal = nil end
         return nil
     end
-    local existing = session.continuousTraversal
-    if existing and existing.mapId == map.id then return existing end
 
     if type(spec.environmentPackage) ~= "string" or spec.environmentPackage == "" then
         error("continuous surface traversal requires environmentPackage", 0)
@@ -77,6 +64,13 @@ function provider.ensure(session)
 
     local environment = environment_package.load(spec.environmentPackage)
     local spawnId = spec.spawnAnchor or "spawn_player"
+    -- LOAD_MAP already owns an optional arrival string. As with bounded_lane,
+    -- an arrival that names an anchor in the destination environment selects
+    -- that anchor; unknown/empty arrivals retain the Map's normal spawn.
+    if type(arrival) == "string" and arrival ~= ""
+            and environment.anchors and environment.anchors[arrival] then
+        spawnId = arrival
+    end
     local spawn = anchorPosition(environment, spawnId)
     if not spawn then
         error("continuous surface spawn anchor missing: " .. tostring(spawnId), 0)
@@ -94,6 +88,35 @@ function provider.ensure(session)
     state.facing = 1
     session.continuousTraversal = state
     return state
+end
+
+function provider.isActive(session)
+    local state = session and session.continuousTraversal
+    local spec, map = specFor(session)
+    return state ~= nil and spec ~= nil and state.mapId == map.id
+end
+
+-- Lazily establish the provider after ordinary Map loading. Keeping this in a
+-- capability host rather than exploration.loadMap is intentional for the first
+-- gauntlet lane: it proves that a Map can compose a traversal provider without
+-- teaching the grid loader another topology. Map entry itself is now offered by
+-- traversal_host so an authored LOAD_MAP arrival can initialize the same state.
+function provider.ensure(session)
+    local spec, map = specFor(session)
+    if not spec then
+        if session then session.continuousTraversal = nil end
+        return nil
+    end
+    local existing = session.continuousTraversal
+    if existing and existing.mapId == map.id then return existing end
+    return initialize(session, nil)
+end
+
+-- Map-lifecycle entry point. Unlike ensure this deliberately replaces any
+-- prior provider state because exploration.loadMap has just established a new
+-- current Map and its authored arrival is authoritative for this entry.
+function provider.enterMap(session, arrival)
+    return initialize(session, arrival)
 end
 
 function provider.update(session, dt, held)
@@ -209,7 +232,7 @@ function provider.restore(session, saved)
     local state = semantic.restore(spec.surface, saved)
     state.mapId = map.id
     state.environment = environment
-    state.spawnAnchor = spec.spawnAnchor or "spawn_player"
+    state.spawnAnchor = saved.spawnAnchor or spec.spawnAnchor or "spawn_player"
     state.interactionRadius = finite(spec.interactionRadius or 1.15, "interactionRadius")
     if state.interactionRadius <= 0 then
         error("continuous surface provider interactionRadius must be > 0", 0)

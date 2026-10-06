@@ -56,7 +56,7 @@ decision before implementation.
 | 1 | `hp` / `maxHp` | `Battler` vitality | Aya is a party actor in `units`; HP lives on her battler | Reuse |
 | 2 | `ehp` (rat HP 20) | Troop enemy `Battler` | Rat is a unit in a troop; `Battle.new(session, troopEnemies)` | Reuse |
 | 3 | Shot damage, closer is stronger | `APPLY_EFFECT` damage formulas | Weapon attack skill whose formula reads a new **distance token** (`x.battle.distance`, actor→target in world units) | Additive |
-| 4 | Out of range: deterministic miss | Targeting / hit formulas | Hit chance as a formula over the distance token and the weapon's range. No scheduler-side gate, so the resolver stays the one authority | Additive |
+| 4 | Out of range: deterministic miss | — (production damage floors at 1 and has no hit roll) | A shot is a **delivery** like the rat's attacks (D3): `realtime.delivery = "range"` with `range`. Out of range, the scheduler publishes a resolved `miss` and pays the cost through the same `skill_cost.spend` (O4 symmetry); in range, it calls `executeTurn`. *Revised 06.10: a formula cannot express a miss, because damage floors at 1.* | Divergence D3 |
 | 5 | Range shapes (blue ground, green air) | — | Weapon data fields `range.ground` / `range.air`. Presentation reads them; the formula in #4 is the authority | Additive |
 | 6 | AT gauge fills over time; act at 100 | `buildTurnQueue` orders by speed | Scheduler-owned gauge per battler, rate from the **same speed stat** the queue uses. **Divergence D1: time model** | Divergence |
 | 7 | Command menu / aiming pause the fight | — (rounds are inherently paused) | Scheduler state; the clock does not advance while a player command is open | Divergence (scheduler-only, no merge cost) |
@@ -121,6 +121,15 @@ decision before implementation.
 
 Ledger rows updated accordingly: #9 (O2) and #10 (O3) move from *Owner* to
 *Additive* and *Reuse* respectively; #14 (O4) is *Divergence, decided*.
+
+## Validation coverage (added 06.10)
+
+Sparse Projects never ran the Second Gate fixture rules, so a Project's troops,
+skills and battle phases were not validated at all; a planted missing item
+passed `VALIDATE OK`. The reusable `project_validator_rules` now checks, for
+every Project that authors a concrete troop: the eight battle phases the hosts
+run, troop member units, and skill `itemCost` (moved there from the fixture
+rules so it has one location). Covered by `tests/test_combat_project_validation.lua`.
 
 ## Out of scope for M1
 

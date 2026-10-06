@@ -74,8 +74,8 @@
     },
     {
       "path": "vendor/second_rite_asset_core.py",
-      "bytes": 23401,
-      "sha256": "250ced208b568a27ee6e5e42128b3654cba4271034f28b8c0b35209207042564"
+      "bytes": 26383,
+      "sha256": "094c2e710d989bfae1e196a055fd084c4f828cfbd4e064e5c3397b31443726ed"
     },
     {
       "path": "vendor/contract.json",

@@ -128,12 +128,17 @@ function M.run(loader)
     local _, writ=hasWrit(); assert(not writ)
     session.mp=1
     local before=session.mp
-    local caretaker,homeExit
+    local homeExit
     for _,event in ipairs(session.currentMapData.events) do
-        if event.name=='Passage House caretaker' then caretaker=event end
         if event.instanceId=='st-maria-lodging-exit_door' then homeExit=event end
     end
-    assert(caretaker and homeExit and caretaker~=homeExit,'Room 3 caretaker replaced its exit')
+    assert(homeExit,'Room 3 lost its gallery exit')
+    door('exit_door',34)
+    local caretaker
+    for _,event in ipairs(session.currentMapData.events) do
+        if event.name=='Passage House caretaker' then caretaker=event end
+    end
+    assert(caretaker,'Passage House hall lost its caretaker')
     run(caretaker.commands, 'Leave.')
     assert(session.mp==before, 'Opening a lodging dialogue healed eagerly')
     run(caretaker.commands, 'Rest in Room 3.')
@@ -201,7 +206,8 @@ function M.run(loader)
     door('to-churchyard-stair',1009)
     door('to-praca',1005)
     door('to-court',1001)
-    door('door-passage-house',25)
+    door('door-passage-house',34)
+    door('room3_door',25)
 
     -- Save from a deliberately non-spawn lane position. Bounded-lane Maps pin
     -- legacy grid playerX/playerY to 1,1, so the provider coordinate itself is

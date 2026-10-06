@@ -27,6 +27,13 @@ function traversal_host.ensure(session)
     return provider
 end
 
+function traversal_host.isActive(session)
+    local provider = traversal_host.ensure(session)
+    if not provider then return false end
+    if provider.isActive then return provider.isActive(session) == true end
+    return true
+end
+
 function traversal_host.update(session, dt, held)
     local provider = traversal_host.ensure(session)
     if not provider or not provider.update then return false end
@@ -45,10 +52,21 @@ function traversal_host.actorRoot(session)
     return provider.actorRoot(session)
 end
 
-function traversal_host.nearestEvent(session, radius)
+function traversal_host.nearestEvent(session, radius, predicate)
     local provider = traversal_host.ensure(session)
     if not provider or not provider.nearestEvent then return nil end
-    return provider.nearestEvent(session, radius)
+    return provider.nearestEvent(session, radius, predicate)
+end
+
+-- Ask the active traversal capability for the ordinary Map Event a confirm
+-- press should address. The second return value distinguishes "no provider"
+-- from "provider owns interaction but nothing is in range", so the host never
+-- falls through into hidden grid interaction on a continuous Map.
+function traversal_host.interactionEvent(session, predicate)
+    local provider = traversal_host.ensure(session)
+    if not provider then return nil, false end
+    if not provider.nearestEvent then return nil, true end
+    return provider.nearestEvent(session, nil, predicate), true
 end
 
 function traversal_host.presentationLaneView(session)

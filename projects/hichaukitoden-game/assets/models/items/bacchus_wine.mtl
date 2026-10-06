@@ -1,0 +1,54 @@
+# Blender 5.2.2 LTS MTL File: 'bacchus_wine.blend'
+# www.blender.org
+
+newmtl bacchus_wine_cork
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.450000 0.260000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl bacchus_wine_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.200000 0.100000 0.280000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl bacchus_wine_label
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd bacchus_wine_label.png
+
+newmtl bacchus_wine_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.550000 0.100000 0.600000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl bacchus_wine_wax
+Ns 176.400024
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.080000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

@@ -1,0 +1,35 @@
+# Blender 5.2.2 LTS MTL File: 'tin_armor.blend'
+# www.blender.org
+
+newmtl tin_armor_body
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd tin_armor_body.png
+
+pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl tin_armor_shade
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Kd 0.466667 0.483137 0.505098
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl tin_armor_trim
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.450000 0.460000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.5 assets/models/matcaps/gold.png

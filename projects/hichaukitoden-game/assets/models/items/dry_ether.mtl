@@ -1,0 +1,44 @@
+# Blender 5.2.2 LTS MTL File: 'dry_ether.blend'
+# www.blender.org
+
+newmtl dry_ether_cork
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.450000 0.260000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl dry_ether_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.400000 0.360000 0.200000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl dry_ether_label
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd dry_ether_label.png
+
+newmtl dry_ether_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.980000 0.820000 0.300000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.5 assets/models/matcaps/ruby.png

@@ -1,0 +1,55 @@
+# Blender 5.2.2 LTS MTL File: 'traveler_coat.blend'
+# www.blender.org
+
+newmtl traveler_coat_clasp
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.620000 0.460000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl traveler_coat_cloth
+Ns 3.600000
+Ka 1.000000 1.000000 1.000000
+Kd 0.550000 0.380000 0.220000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass uv add 0.6 assets/models/items/traveler_coat_overlay.png
+newmtl traveler_coat_lining
+Ns 3.600000
+Ka 1.000000 1.000000 1.000000
+Kd 0.340000 0.220000 0.120000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl traveler_coat_sash
+Ns 2.500001
+Ka 1.000000 1.000000 1.000000
+Kd 0.300000 0.180000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl traveler_coat_trim
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.620000 0.460000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.5 assets/models/matcaps/gold.png

@@ -1,0 +1,24 @@
+# Blender 5.2.2 LTS MTL File: 'coral_mail.blend'
+# www.blender.org
+
+newmtl coral_mail_body
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd coral_mail_body.png
+
+pass sphere add 0.4 assets/models/matcaps/glass.png
+newmtl coral_mail_trim
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.900000 0.600000 0.550000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.5 assets/models/matcaps/gold.png

@@ -1,0 +1,55 @@
+# Blender 5.2.2 LTS MTL File: 'hero_drink.blend'
+# www.blender.org
+
+newmtl hero_drink_brass
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.600000 0.440000 0.170000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl hero_drink_cork
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.450000 0.260000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl hero_drink_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.460000 0.140000 0.120000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl hero_drink_label
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hero_drink_label.png
+
+newmtl hero_drink_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.300000 0.220000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.5 assets/models/matcaps/ruby.png

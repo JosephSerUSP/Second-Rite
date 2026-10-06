@@ -1,0 +1,45 @@
+# Blender 5.2.2 LTS MTL File: 'soma_drop.blend'
+# www.blender.org
+
+newmtl soma_drop_brass
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.600000 0.440000 0.170000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl soma_drop_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.220000 0.420000 0.620000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl soma_drop_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.800000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl soma_drop_wax
+Ns 176.400024
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.080000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

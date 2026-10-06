@@ -126,7 +126,7 @@ place: the 108 standard frames and the wide frame are still byte-identical.
 - `runtime/engine/item_model_sheet.lua`: `ITEM_SHEET_CELL` env var for larger
   inspection cells; default output is unchanged.
 
-## Open items
+## Open items at the batch-2 snapshot
 
 - `check_item_models.py` is red for two linked reasons, both by design: baselined
   violations no longer reproduce (20 after batch 2), and removing members from a
@@ -139,3 +139,88 @@ place: the 108 standard frames and the wide frame are still byte-identical.
 - 26 items of 175 are done. The remaining armours still share old meshes (the
   loft recipe carried the Mage Robe and Plate Armor and is the likely route);
   remaining foods and small accessories are the other large groups.
+
+## Batches 3 and 4: garments, armour and consumable vessels
+
+Follow-up evidence from the same worktree and pinned Blender 5.2.2. The 23
+uncommitted garment/armour documents were retained, and all 19 bottle documents
+were already present when the follow-up began, contrary to the earlier handoff's
+"never run" statement. Only four bottle runtime products had been replaced.
+The existing documents were edited directly; no committed source was regenerated.
+
+| Cohort | Items | Construction and refinement |
+|---|---|---|
+| Cloth, 10 | Black, Cotton, Silk, Sage, Ether and Wind Robes; Holy Vestment; Quarantine, Traveler and Slime Coats | UV cloth lofts, live thickness and mirrored sleeves, hoods/collars, sashes, additive overlays and distinct proportions |
+| Armour, 13 | Leather Armor, Ring Mail, Chainmail, Scale Mail, Brigandine, Tin Armor, Fortress Plate, Hero Armor, Adamant Armor, Coral Mail, Flame Mail, Dragon Mail, Cocoon Husk | UV torso lofts, sleeve/shoulder and skirt assemblies, painted materials; editable branching coral curves and flame crest plates distinguish shared family structures |
+| Vessels, 19 | Potion, Hi-Potion, X-Potion, Healing Water, Soma, Elixir, Ether, Hi-Ether, Dry Ether, Turbo Ether, Ether Drop, Ether Flask, Soma Drop, Antidote, Eye Drops, Remedy, Hero Drink, Bacchus Wine, Echo Herbs | Profile meshes, live thickness and Boolean windows onto inset liquids, painted label cards, cork/wax/crystal/cage stoppers and distinct vessel proportions |
+
+### Corrections found during verification
+
+The actual corpus report caught identical Coral Mail/Scale Mail geometry. A
+prospective strict review, with the 42 cohort names removed from the in-memory
+legacy set, exposed 26 cohort violations, including three droppers with no UVs.
+Checking against the unchanged legacy list had concealed most of the similar
+silhouettes. The final prospective review has **zero violations involving the
+42 new items**; every pair of re-authored items is held to the 0.85 threshold.
+That includes comparisons against the previously authored corpus, not only
+pairs within this cohort. The production baseline was not modified to obtain
+this result.
+
+Echo Herbs' original Exact Boolean erased its entire glass shell, leaving a
+runtime-pass material absent from the exported MTL. Reducing its thickness from
+0.05 to 0.03 retained the shell. A subsequent proportion edit exposed coincident
+cut-edge vertices and a degenerate exported triangle; a live Weld modifier at
+0.0001 resolved it. Both Boolean cutters remain editable in the source.
+
+All three droppers now have cylindrical UVs. Root proportions, coral branch
+curves, flame crest plates, and the herb jar's broad lid are direct document
+edits, preserved alongside the original authoring structures.
+
+### Observed checks and limits
+
+- All 42 documents passed `compile_item_blends.py --check` on Windows. After
+  the last two proportion edits, those two documents were recompiled and their
+  `--check` runs passed again. Source hashes are guarded by the compiler.
+- `item_textures.py --check`, `script_index.py --check` (104 scripts), and
+  `git diff --check` passed.
+- All 42 items were rendered and inspected through the real item viewer at
+  96px. [Native review board](item-model-batches3-4-review/sheet96.png).
+  Individual four-view strips: `out/review/codex-final42-96/`.
+- Staged G1, G2, G3, G4, the unit suite and save/load passed. G1 was repeated
+  against a fresh stage after the last two source edits. G2/G3, G4, unit and
+  save were run immediately before those final geometry-only proportion edits.
+- The actual item corpus gate remains red until an owner-approved baseline
+  refresh removes the replaced names from `legacyItems`, drops resolved
+  violations and records the smaller surviving legacy groups. The prospective
+  corpus contains 75 legacy violations: 8 duplicate groups, 66 no-UV items,
+  and 1 shared-file group. None involve this cohort.
+- The asset-regression baseline also needs its separate owner-approved refresh,
+  generated from a clean checkout of the authored source/product commit.
+  Proposals were prepared in `out/work/` from clean commit `8065abaa`, with
+  production references left unchanged. Checking the proposed corpus reference
+  through the ordinary gate returned `ITEM MODELS OK`; the proposed
+  asset-regression reference produced zero diagnostics. The corpus proposal
+  reduces 119 violations to 75, removes 42 names from the 141-name legacy list,
+  drops 45 resolved keys and adds the surviving Ether Seed/Sigil Ink duplicate
+  group as the smaller remainder of its old eight-item group. These are
+  proposal checks, not an owner approval or a production-gate pass.
+- No G5/G6 references were recaptured. PR #1419's hosted relative run
+  `37488502130` stopped before candidate comparison: G5 during base A's
+  surface-crop check, G6 during base B's event-modal model-preview readiness.
+  These are incomplete captures, with no candidate verdict; existing issues
+  #1223 and #1263 cover the capture reliability gaps.
+- Linux byte-stability remains unverified. The earlier item-source job stops
+  at courtyard tests before that comparison; Windows byte agreement does not
+  resolve that missing coverage.
+
+The inherited initial inventory was 175 items without editable sources. The
+first two batches added 26 and these cohorts add 42, leaving approximately 107
+from that original inventory. Remaining item groups are a follow-up; Curry and
+Stew were not touched.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: stale item models, batches 3 and 4
+  base: fd5a2646fa6e027a5f706f1f48eba912362dca1a

@@ -51,6 +51,12 @@ function controller.isHeld(button)
     return held[button] ~= nil
 end
 
+function controller.snapshot()
+    local result={}
+    for button in pairs(require("engine.input_map").getBindings()) do result[button]=controller.isHeld(button) end
+    return result
+end
+
 function controller.reset()
     held = {}
 end

@@ -3678,6 +3678,13 @@ elseif paramDef.type == "script" then
                             sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "': 'visible' must be a string expression")
                     end
 
+                    if winDef.style == "modelScene" then
+                        check(loader.engine.sceneWindowStyles and loader.engine.sceneWindowStyles.modelScene ~= nil,
+                            "modelScene style missing from engine registry")
+                        require("presentation.scene_model_view").validate(winDef.viewport,check,
+                            function(path) return love.filesystem.getInfo(path)~=nil end,
+                            function(expr) local fn=load("return ("..expr..")"); return fn~=nil end)
+                    end
                     -- content must be an array of typed blocks.
                     check(type(winDef.content) == "table",
                         sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "': missing 'content' array")
@@ -3748,6 +3755,29 @@ elseif paramDef.type == "script" then
                                     end
                                 end
                             elseif bt == "gauge" then
+                                if block.labelPlacement ~= nil then
+                                    check(block.labelPlacement == "right" or block.labelPlacement == "none",
+                                        sceneDesc .. " gauge labelPlacement must be right or none")
+                                end
+                                if block.height ~= nil then
+                                    check(type(block.height)=="number" and block.height>0,
+                                        sceneDesc .. " gauge height must be positive")
+                                end
+                                for _,key in ipairs({"color","fill"}) do
+                                    if block[key] ~= nil then
+                                        local color=block[key]
+                                        check(type(color)=="table" and (#color==3 or #color==4),sceneDesc .. " gauge "..key.." must be RGB or RGBA")
+                                        if type(color)=="table" then
+                                            for _,component in ipairs(color) do
+                                                check(type(component)=="number" or type(component)=="string",sceneDesc .. " gauge color component must be numeric or a formula")
+                                                if type(component)=="string" then
+                                                    local ok,_,ferr=pcall(formulaEngine.eval,component,mockCtx)
+                                                    check(ok and ferr==nil,sceneDesc .. " invalid gauge color formula: "..tostring(ferr))
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
                                 -- gauge block: value and max are required exprs.
                                 check(type(block.value) == "string",
                                     sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "' content[" .. bi .. "] gauge block: missing or non-string 'value'")

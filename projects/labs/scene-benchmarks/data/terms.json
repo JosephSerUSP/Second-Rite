@@ -15,7 +15,7 @@
       "B005  Lockpicking",
       "B006  Dialogue Portrait Stage",
       "B010  Falling Blocks",
-      "B009  Parasite-Eve-Like Positioning Proof",
+      "B009  Carnegie Hall - Aya vs Rat",
       "B007  Tactics Microboard",
       "C002  Splitting Pong",
       "C003  Breakout With Moving Bricks",
@@ -38,5 +38,8 @@
       "Ask about history.",
       "Conclude interview."
     ]
+  },
+  "game": {
+    "title": "Thestra Scene Benchmarks"
   }
 }

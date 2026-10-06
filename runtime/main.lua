@@ -711,6 +711,7 @@ function love.load(arg)
             "test_output_presentation",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
+            "test_b009_spatial",
             "test_scene_state_boundary",
             "test_scene_event_validation",
             "test_autorun_parallel_characterization",
@@ -771,7 +772,9 @@ function love.load(arg)
     -- E5: headless scene preview for the editor canvas, then quit.
     if cli.isPreviewSceneMode then
         loader.init()
-        cli_tools.runPreviewScene(cli.previewSceneId, loader, gameWidth, gameHeight)
+        local previewWidth, previewHeight =
+            cli_tools.resolvePreviewSurface(cli.requestedSurfaceProfile)
+        cli_tools.runPreviewScene(cli.previewSceneId, loader, previewWidth, previewHeight)
         love.event.quit(0)
         return
     end
@@ -1040,7 +1043,7 @@ function love.load(arg)
     local surfaceProfile = cli.requestedSurfaceProfile
         or require("engine.user_settings").get("renderSurfaceProfile", nil)
         or (config.ui and config.ui.renderSurfaceProfile)
-        or "classic"
+        or "wide"
     presentation_surface.setProfile(surfaceProfile)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")

@@ -1,603 +1,2209 @@
 {
   "id": "b009_positioning",
-  "terminal": {
-    "reached": "sceneState.ehp <= 0"
-  },
-  "name": "B009 — Parasite-Eve-Like Positioning Proof",
+  "name": "B009 - Carnegie Hall encounter",
   "kind": "menu",
   "draw": "windows",
+  "terminal": {
+    "reached": "sceneState.mode == 2"
+  },
   "update": {
     "mode": "fixed",
-    "step": 0.0166666666666667,
-    "maxCatchUp": 8
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
   },
   "windows": [
     {
-      "id": "title",
+      "id": "world",
       "rect": {
-        "x": 2,
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            2,
+            -7.2,
+            5.4
+          ],
+          "target": [
+            0,
+            2.6,
+            0.35
+          ],
+          "fov": 40
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "corridor",
+            "model": "assets/models/b009/corridor.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/b009/contact_shadow.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "scale": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "id": "rat_shadow",
+            "model": "assets/models/b009/contact_shadow.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "scale": [
+              1.5,
+              2.6,
+              1
+            ]
+          },
+          {
+            "id": "range_ground",
+            "model": "assets/models/b009/range_ground.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0.03
+            ],
+            "yaw": 0,
+            "visible": "sceneState.ui == 2",
+            "scale": [
+              "sceneState.range",
+              "sceneState.range",
+              1
+            ]
+          },
+          {
+            "id": "range_air",
+            "model": "assets/models/b009/range_air.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0.03
+            ],
+            "yaw": 0,
+            "visible": "sceneState.ui == 2",
+            "scale": [
+              "sceneState.range",
+              "sceneState.range",
+              1
+            ]
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/b009/aya.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.mode ~= 3 and sceneState.flash <= 0 and (sceneState.moving == 0 or sceneState.ui > 0 or sceneState.mode > 0)"
+          },
+          {
+            "id": "aya_walk_a",
+            "model": "assets/models/b009/aya_walk_a.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.mode == 0 and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0"
+          },
+          {
+            "id": "aya_walk_b",
+            "model": "assets/models/b009/aya_walk_b.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.mode == 0 and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0"
+          },
+          {
+            "id": "aya_down",
+            "model": "assets/models/b009/aya_down.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.mode == 3"
+          },
+          {
+            "id": "aya_recoil",
+            "model": "assets/models/b009/aya_recoil.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.mode ~= 3 and sceneState.flash > 0"
+          },
+          {
+            "id": "rat",
+            "model": "assets/models/b009/rat.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              0
+            ],
+            "yaw": "sceneState.ratAim",
+            "visible": "sceneState.enemyMode == 0 or sceneState.mode == 2",
+            "scale": [
+              1,
+              1,
+              "sceneState.mode == 2 and .18 or 1"
+            ],
+            "tint": [
+              1,
+              "sceneState.flash > 0 and .4 or 1",
+              "sceneState.flash > 0 and .4 or 1"
+            ]
+          },
+          {
+            "id": "rat_windup",
+            "model": "assets/models/b009/rat_windup.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              0
+            ],
+            "yaw": "sceneState.ratAim",
+            "visible": "sceneState.enemyMode == 1 and sceneState.mode ~= 2",
+            "scale": [
+              1,
+              1,
+              "sceneState.mode == 2 and .18 or 1"
+            ],
+            "tint": [
+              1,
+              "sceneState.flash > 0 and .4 or 1",
+              "sceneState.flash > 0 and .4 or 1"
+            ]
+          },
+          {
+            "id": "rat_lunge",
+            "model": "assets/models/b009/rat_lunge.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              0
+            ],
+            "yaw": "sceneState.ratAim",
+            "visible": "sceneState.enemyMode == 2 and sceneState.mode ~= 2",
+            "scale": [
+              1,
+              1,
+              "sceneState.mode == 2 and .18 or 1"
+            ],
+            "tint": [
+              1,
+              "sceneState.flash > 0 and .4 or 1",
+              "sceneState.flash > 0 and .4 or 1"
+            ]
+          },
+          {
+            "id": "target",
+            "model": "assets/models/b009/target_cursor.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              1.1
+            ],
+            "yaw": 0,
+            "visible": "sceneState.ui == 2"
+          },
+          {
+            "id": "muzzle",
+            "model": "assets/models/b009/spark.obj",
+            "position": [
+              "sceneState.px+sin(sceneState.aim)*.72",
+              "sceneState.py-cos(sceneState.aim)*.72",
+              1.47
+            ],
+            "yaw": 0,
+            "visible": "sceneState.flash > 0"
+          },
+          {
+            "id": "fire0",
+            "model": "assets/models/b009/spark.obj",
+            "position": [
+              "sceneState.fireX+sin(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT",
+              "sceneState.fireY-cos(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "sceneState.fireT < 1.8 and sceneState.hit0 == 0",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          },
+          {
+            "id": "fire1",
+            "model": "assets/models/b009/spark.obj",
+            "position": [
+              "sceneState.fireX+sin(sceneState.fireAim+(0))*4.5*sceneState.fireT",
+              "sceneState.fireY-cos(sceneState.fireAim+(0))*4.5*sceneState.fireT",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "sceneState.fireT < 1.8 and sceneState.hit1 == 0",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          },
+          {
+            "id": "fire2",
+            "model": "assets/models/b009/spark.obj",
+            "position": [
+              "sceneState.fireX+sin(sceneState.fireAim+(0.22))*4.5*sceneState.fireT",
+              "sceneState.fireY-cos(sceneState.fireAim+(0.22))*4.5*sceneState.fireT",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "sceneState.fireT < 1.8 and sceneState.hit2 == 0",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          }
+        ],
+        "labels": [
+          {
+            "value": "sceneState.damage > 0 and sceneState.damage or 'MISS'",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              "2+(.8-sceneState.damageTimer)*1.2"
+            ],
+            "visible": "sceneState.damageTimer > 0",
+            "color": [
+              1,
+              1,
+              0.88,
+              1
+            ]
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "combat_hud",
+      "rect": {
+        "x": "1.5 - surface.originX",
         "y": 1,
-        "w": 28,
-        "h": 3
-      },
-      "style": "frame",
-      "content": [
-        {
-          "type": "text",
-          "text": "B009 — Positioning Proof   State: {sceneState.stateText}"
-        }
-      ]
-    },
-    {
-      "id": "arena",
-      "rect": {
-        "x": 2,
-        "y": 4,
-        "w": 28,
-        "h": 16
-      },
-      "style": "frame",
-      "content": []
-    },
-    {
-      "id": "player",
-      "rect": {
-        "x": "2 + 1 + sceneState.px",
-        "y": "4 + 1 + sceneState.py",
-        "w": 1,
-        "h": 1
+        "w": 13,
+        "h": 4.5
       },
       "style": "panel",
-      "content": [
-        {
-          "type": "text",
-          "text": "@"
-        }
-      ]
-    },
-    {
-      "id": "enemy",
-      "rect": {
-        "x": "2 + 1 + sceneState.ex",
-        "y": "4 + 1 + sceneState.ey",
-        "w": 1,
-        "h": 1
-      },
-      "style": "panel",
-      "content": [
-        {
-          "type": "text",
-          "text": "E"
-        }
-      ]
-    },
-    {
-      "id": "target_area",
-      "rect": {
-        "x": "2 + 1 + sceneState.px - sceneState.range",
-        "y": "4 + 1 + sceneState.py - sceneState.range",
-        "w": "sceneState.range * 2 + 1",
-        "h": "sceneState.range * 2 + 1"
-      },
-      "style": "frame",
-      "content": []
-    },
-    {
-      "id": "atb_gauge",
-      "rect": {
-        "x": 2,
-        "y": 20,
-        "w": 14,
-        "h": 4
-      },
-      "style": "frame",
+      "chrome": "overlay",
       "content": [
         {
           "type": "gauge",
-          "x": 1,
-          "y": 1,
-          "width": 12,
-          "label": "ATB",
+          "x": 0.7,
+          "y": 0.65,
+          "width": 8.5,
+          "height": 0.4,
+          "labelPlacement": "right",
+          "label": "AT",
           "value": "sceneState.atb",
           "max": "100",
-          "color": [
-            0.2,
-            0.2,
-            0.2
-          ],
           "fill": [
-            0,
-            1,
-            0
+            0.08,
+            "sceneState.atb >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7",
+            0.85
+          ],
+          "color": [
+            0.04,
+            0.07,
+            0.06
+          ]
+        },
+        {
+          "type": "gauge",
+          "x": 0.7,
+          "y": 3.5,
+          "width": 8.5,
+          "height": 0.4,
+          "labelPlacement": "right",
+          "label": "PE",
+          "value": "sceneState.pe",
+          "max": "100",
+          "fill": [
+            0.02,
+            0.85,
+            0.15
+          ],
+          "color": [
+            0.04,
+            0.07,
+            0.06
           ]
         }
       ]
     },
     {
-      "id": "hp_gauge",
+      "id": "hp",
       "rect": {
-        "x": 16,
-        "y": 20,
-        "w": 14,
-        "h": 4
+        "x": "3.2 - surface.originX",
+        "y": 2.3,
+        "w": 7,
+        "h": 1.5
       },
-      "style": "frame",
+      "style": "panel",
+      "chrome": "none",
       "content": [
         {
-          "type": "gauge",
-          "x": 1,
-          "y": 1,
-          "width": 12,
-          "label": "Enemy HP",
-          "value": "sceneState.ehp",
-          "max": "100",
-          "color": [
-            0.2,
-            0.2,
-            0.2
-          ],
-          "fill": [
-            1,
-            0,
-            0
-          ]
+          "type": "text",
+          "text": "{sceneState.hp}/{sceneState.maxHp}"
         }
       ]
+    },
+    {
+      "id": "hp_label",
+      "rect": {
+        "x": "10 - surface.originX",
+        "y": 2.3,
+        "w": 3.5,
+        "h": 1.5
+      },
+      "style": "panel",
+      "chrome": "none",
+      "content": [
+        {
+          "type": "text",
+          "text": "HP"
+        }
+      ]
+    },
+    {
+      "id": "command",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 13,
+        "h": 8
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.choice == 0 and '> Attack' or '  Attack'}\n{sceneState.choice == 1 and '> P. Energy' or '  P. Energy'}\n{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"
+        }
+      ],
+      "visible": "sceneState.ui == 1"
+    },
+    {
+      "id": "target_info",
+      "rect": {
+        "x": "surface.width - surface.originX - 13",
+        "y": 13,
+        "w": 12,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "M84F\nBULLETS {sceneState.ammo}\nTARGET   1"
+        }
+      ],
+      "visible": "sceneState.ui == 2"
+    },
+    {
+      "id": "pe_menu",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 15,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "> Heal 1\nRecover 30 HP\nPE cost 30"
+        }
+      ],
+      "visible": "sceneState.ui == 3"
+    },
+    {
+      "id": "item_menu",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 16,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "> Medicine 1\nStock {sceneState.medicine}\nRecover 30 HP"
+        }
+      ],
+      "visible": "sceneState.ui == 4"
+    },
+    {
+      "id": "result",
+      "rect": {
+        "x": 6,
+        "y": 9,
+        "w": 21,
+        "h": 8
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "Battle over\nEXP 2    Ammo +6\n{sceneState.rewarded == 0 and \"> Obtain all\" or \"> Replay\"}\nEsc: return"
+        }
+      ],
+      "visible": "sceneState.mode == 2"
+    },
+    {
+      "id": "loss",
+      "rect": {
+        "x": 7,
+        "y": 10,
+        "w": 20,
+        "h": 6
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "Aya has fallen\nEnter: retry\nEsc: return"
+        }
+      ],
+      "visible": "sceneState.mode == 3"
+    },
+    {
+      "id": "escape",
+      "rect": {
+        "x": 7,
+        "y": 10,
+        "w": 20,
+        "h": 6
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "Escaped\nEnter: retry\nEsc: return"
+        }
+      ],
+      "visible": "sceneState.mode == 4"
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 27.5,
+        "w": 30,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.status}"
+        }
+      ],
+      "visible": "sceneState.mode == 0 and sceneState.status ~= \"\""
     }
   ],
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "px",
+            "value": -2
+          },
+          {
+            "name": "py",
+            "value": 1.2
+          },
+          {
+            "name": "ex",
+            "value": 2
+          },
+          {
+            "name": "ey",
+            "value": 2
+          },
+          {
+            "name": "atb",
+            "value": 0
+          },
+          {
+            "name": "hp",
+            "value": 45
+          },
+          {
+            "name": "maxHp",
+            "value": 45
+          },
+          {
+            "name": "ehp",
+            "value": 20
+          },
+          {
+            "name": "mode",
+            "value": 0
+          },
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "actionTimer",
+            "value": 0
+          },
+          {
+            "name": "enemyMode",
+            "value": 0
+          },
+          {
+            "name": "enemyTimer",
+            "value": 2
+          },
+          {
+            "name": "attackCount",
+            "value": 0
+          },
+          {
+            "name": "tx",
+            "value": 0
+          },
+          {
+            "name": "ty",
+            "value": 0
+          },
+          {
+            "name": "flash",
+            "value": 0
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 1.768
+          },
+          {
+            "name": "ratAim",
+            "value": -1.373
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "ammo",
+            "value": 11
+          },
+          {
+            "name": "pe",
+            "value": 100
+          },
+          {
+            "name": "medicine",
+            "value": 1
+          },
+          {
+            "name": "damage",
+            "value": 0
+          },
+          {
+            "name": "damageTimer",
+            "value": 0
+          },
+          {
+            "name": "rewarded",
+            "value": 0
+          },
+          {
+            "name": "exp",
+            "value": 0
+          },
+          {
+            "name": "fireT",
+            "value": 2
+          },
+          {
+            "name": "fireX",
+            "value": 0
+          },
+          {
+            "name": "fireY",
+            "value": 0
+          },
+          {
+            "name": "fireAim",
+            "value": 0
+          },
+          {
+            "name": "hit0",
+            "value": 0
+          },
+          {
+            "name": "hit1",
+            "value": 0
+          },
+          {
+            "name": "hit2",
+            "value": 0
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - backstage'"
+          }
+        ]
       }
     ],
     "on_frame": [
       {
-        "cmd": "SCRIPT",
-        "ref": "update"
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.mode == 0",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ui == 0 and sceneState.atb >= 100 and sceneState.actionTimer <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ui",
+                    "value": 1
+                  },
+                  {
+                    "name": "choice",
+                    "value": 0
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Choose a command'"
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.ui > 0",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 0
+                      },
+                      {
+                        "name": "status",
+                        "value": "''"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
-            "name": "inputX",
-            "value": 0
+            "name": "menuHeld",
+            "value": "sceneState.input.X"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 0 or sceneState.mode > 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "flash",
+                "value": "max(0,sceneState.flash-time.dt)"
+              },
+              {
+                "name": "damageTimer",
+                "value": "max(0,sceneState.damageTimer-time.dt)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.mode == 0 and sceneState.ui == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "(sceneState.input.RIGHT and 1 or 0)-(sceneState.input.LEFT and 1 or 0)"
+              },
+              {
+                "name": "dy",
+                "value": "(sceneState.input.UP and 1 or 0)-(sceneState.input.DOWN and 1 or 0)"
+              },
+              {
+                "name": "actionTimer",
+                "value": "max(0,sceneState.actionTimer-time.dt)"
+              },
+              {
+                "name": "atb",
+                "value": "min(100,sceneState.atb+30*time.dt)"
+              },
+              {
+                "name": "pe",
+                "value": "min(100,sceneState.pe+4*time.dt)"
+              },
+              {
+                "name": "gait",
+                "value": "sceneState.gait+time.dt*10"
+              }
+            ]
           },
           {
-            "name": "inputY",
-            "value": 0
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "norm",
+                "value": "max(1,sqrt(sceneState.dx^2+sceneState.dy^2))"
+              },
+              {
+                "name": "moving",
+                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and sceneState.actionTimer <= 0 and 1 or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.actionTimer <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "clamp(sceneState.px+sceneState.dx/sceneState.norm*2.5*time.dt,-2.2,2.2)"
+                  },
+                  {
+                    "name": "py",
+                    "value": "clamp(sceneState.py+sceneState.dy/sceneState.norm*2.5*time.dt,.3,4.4)"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "distance",
+                "value": "sqrt((sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2)"
+              },
+              {
+                "name": "aim",
+                "value": "sceneState.moving == 1 and atan2(sceneState.dx,-sceneState.dy) or atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
+              },
+              {
+                "name": "ratAim",
+                "value": "atan2(sceneState.px-sceneState.ex,sceneState.ey-sceneState.py)"
+              },
+              {
+                "name": "enemyTimer",
+                "value": "sceneState.enemyTimer-time.dt"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.enemyMode == 0",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.distance > 1.35",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ex",
+                        "value": "sceneState.ex+(sceneState.px-sceneState.ex)/max(.01,sceneState.distance)*1.15*time.dt"
+                      },
+                      {
+                        "name": "ey",
+                        "value": "sceneState.ey+(sceneState.py-sceneState.ey)/max(.01,sceneState.distance)*1.15*time.dt"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.enemyTimer <= 0",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "enemyMode",
+                        "value": 1
+                      },
+                      {
+                        "name": "enemyTimer",
+                        "value": 0.85
+                      },
+                      {
+                        "name": "tx",
+                        "value": "sceneState.px"
+                      },
+                      {
+                        "name": "ty",
+                        "value": "sceneState.py"
+                      },
+                      {
+                        "name": "status",
+                        "value": "''"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.enemyMode == 1",
+                "then": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.enemyTimer <= 0",
+                    "then": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.attackCount % 2 == 0",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "enemyMode",
+                                "value": 2
+                              },
+                              {
+                                "name": "enemyTimer",
+                                "value": 0.22
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "enemyMode",
+                                "value": 0
+                              },
+                              {
+                                "name": "enemyTimer",
+                                "value": 2.4
+                              },
+                              {
+                                "name": "fireT",
+                                "value": 0
+                              },
+                              {
+                                "name": "fireX",
+                                "value": "sceneState.ex"
+                              },
+                              {
+                                "name": "fireY",
+                                "value": "sceneState.ey"
+                              },
+                              {
+                                "name": "fireAim",
+                                "value": "atan2(sceneState.tx-sceneState.ex,sceneState.ey-sceneState.ty)"
+                              },
+                              {
+                                "name": "hit0",
+                                "value": 0
+                              },
+                              {
+                                "name": "hit1",
+                                "value": 0
+                              },
+                              {
+                                "name": "hit2",
+                                "value": 0
+                              },
+                              {
+                                "name": "attackCount",
+                                "value": "sceneState.attackCount+1"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ex",
+                        "value": "sceneState.ex+(sceneState.tx-sceneState.ex)*min(1,time.dt/.1)"
+                      },
+                      {
+                        "name": "ey",
+                        "value": "sceneState.ey+(sceneState.ty-sceneState.ey)*min(1,time.dt/.1)"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.enemyTimer <= 0",
+                    "then": [
+                      {
+                        "cmd": "IF",
+                        "condition": "(sceneState.px-sceneState.tx)^2+(sceneState.py-sceneState.ty)^2 < .85^2",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "hp",
+                                "value": "max(0,sceneState.hp-4)"
+                              },
+                              {
+                                "name": "pe",
+                                "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
+                              },
+                              {
+                                "name": "status",
+                                "value": "''"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "enemyMode",
+                            "value": 0
+                          },
+                          {
+                            "name": "enemyTimer",
+                            "value": 2.4
+                          },
+                          {
+                            "name": "attackCount",
+                            "value": "sceneState.attackCount+1"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "fireT",
+                "value": "min(2,sceneState.fireT+time.dt)"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.fireT < 1.8 and sceneState.hit0 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT))^2 < .45^2",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "hit0",
+                    "value": 1
+                  },
+                  {
+                    "name": "hp",
+                    "value": "max(0,sceneState.hp-4)"
+                  },
+                  {
+                    "name": "pe",
+                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.fireT < 1.8 and sceneState.hit1 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(0))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(0))*4.5*sceneState.fireT))^2 < .45^2",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "hit1",
+                    "value": 1
+                  },
+                  {
+                    "name": "hp",
+                    "value": "max(0,sceneState.hp-4)"
+                  },
+                  {
+                    "name": "pe",
+                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.fireT < 1.8 and sceneState.hit2 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(0.22))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(0.22))*4.5*sceneState.fireT))^2 < .45^2",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "hit2",
+                    "value": 1
+                  },
+                  {
+                    "name": "hp",
+                    "value": "max(0,sceneState.hp-4)"
+                  },
+                  {
+                    "name": "pe",
+                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ehp <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "mode",
+                    "value": 2
+                  },
+                  {
+                    "name": "ui",
+                    "value": 5
+                  },
+                  {
+                    "name": "atb",
+                    "value": 0
+                  },
+                  {
+                    "name": "exp",
+                    "value": 2
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Battle over'"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.hp <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "mode",
+                    "value": 3
+                  },
+                  {
+                    "name": "ui",
+                    "value": 0
+                  },
+                  {
+                    "name": "atb",
+                    "value": 0
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Aya has fallen'"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.mode >= 2",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.mode == 2 and sceneState.rewarded == 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "ammo",
+                    "value": "sceneState.ammo+6"
+                  },
+                  {
+                    "name": "rewarded",
+                    "value": 1
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Ammo +6 obtained'"
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": -2
+                  },
+                  {
+                    "name": "py",
+                    "value": 1.2
+                  },
+                  {
+                    "name": "ex",
+                    "value": 2
+                  },
+                  {
+                    "name": "ey",
+                    "value": 2
+                  },
+                  {
+                    "name": "atb",
+                    "value": 0
+                  },
+                  {
+                    "name": "hp",
+                    "value": 45
+                  },
+                  {
+                    "name": "maxHp",
+                    "value": 45
+                  },
+                  {
+                    "name": "ehp",
+                    "value": 20
+                  },
+                  {
+                    "name": "mode",
+                    "value": 0
+                  },
+                  {
+                    "name": "ui",
+                    "value": 0
+                  },
+                  {
+                    "name": "choice",
+                    "value": 0
+                  },
+                  {
+                    "name": "actionTimer",
+                    "value": 0
+                  },
+                  {
+                    "name": "enemyMode",
+                    "value": 0
+                  },
+                  {
+                    "name": "enemyTimer",
+                    "value": 2
+                  },
+                  {
+                    "name": "attackCount",
+                    "value": 0
+                  },
+                  {
+                    "name": "tx",
+                    "value": 0
+                  },
+                  {
+                    "name": "ty",
+                    "value": 0
+                  },
+                  {
+                    "name": "flash",
+                    "value": 0
+                  },
+                  {
+                    "name": "range",
+                    "value": 4
+                  },
+                  {
+                    "name": "aim",
+                    "value": 1.768
+                  },
+                  {
+                    "name": "ratAim",
+                    "value": -1.373
+                  },
+                  {
+                    "name": "menuHeld",
+                    "value": "false"
+                  },
+                  {
+                    "name": "gait",
+                    "value": 0
+                  },
+                  {
+                    "name": "moving",
+                    "value": 0
+                  },
+                  {
+                    "name": "ammo",
+                    "value": 11
+                  },
+                  {
+                    "name": "pe",
+                    "value": 100
+                  },
+                  {
+                    "name": "medicine",
+                    "value": 1
+                  },
+                  {
+                    "name": "damage",
+                    "value": 0
+                  },
+                  {
+                    "name": "damageTimer",
+                    "value": 0
+                  },
+                  {
+                    "name": "rewarded",
+                    "value": 0
+                  },
+                  {
+                    "name": "exp",
+                    "value": 0
+                  },
+                  {
+                    "name": "fireT",
+                    "value": 2
+                  },
+                  {
+                    "name": "fireX",
+                    "value": 0
+                  },
+                  {
+                    "name": "fireY",
+                    "value": 0
+                  },
+                  {
+                    "name": "fireAim",
+                    "value": 0
+                  },
+                  {
+                    "name": "hit0",
+                    "value": 0
+                  },
+                  {
+                    "name": "hit1",
+                    "value": 0
+                  },
+                  {
+                    "name": "hit2",
+                    "value": 0
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Carnegie Hall - backstage'"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ui == 0",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.atb >= 100 and sceneState.actionTimer <= 0",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 2
+                      },
+                      {
+                        "name": "aim",
+                        "value": "atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
+                      },
+                      {
+                        "name": "status",
+                        "value": "'Choose target'"
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "status",
+                        "value": "'AT charging'"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.ui == 1",
+                "then": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.choice == 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "ui",
+                            "value": 2
+                          },
+                          {
+                            "name": "aim",
+                            "value": "atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
+                          },
+                          {
+                            "name": "status",
+                            "value": "'Choose target'"
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.choice == 1",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "ui",
+                                "value": 3
+                              },
+                              {
+                                "name": "status",
+                                "value": "'Heal 1 - recover 30 HP'"
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.choice == 2",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 4
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Medicine 1 - recover 30 HP'"
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "mode",
+                                    "value": 4
+                                  },
+                                  {
+                                    "name": "ui",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Escaped'"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.ui == 2",
+                    "then": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.ammo > 0",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "distance",
+                                "value": "sqrt((sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2)"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "damage",
+                                "value": "sceneState.distance <= sceneState.range and (sceneState.distance < 2.3 and 7 or 5) or 0"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "ehp",
+                                "value": "max(0,sceneState.ehp-sceneState.damage)"
+                              },
+                              {
+                                "name": "ammo",
+                                "value": "sceneState.ammo-1"
+                              },
+                              {
+                                "name": "atb",
+                                "value": 0
+                              },
+                              {
+                                "name": "ui",
+                                "value": 0
+                              },
+                              {
+                                "name": "actionTimer",
+                                "value": 0.45
+                              },
+                              {
+                                "name": "flash",
+                                "value": 0.18
+                              },
+                              {
+                                "name": "damageTimer",
+                                "value": 0.8
+                              },
+                              {
+                                "name": "status",
+                                "value": "''"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.ehp <= 0",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "mode",
+                                    "value": 2
+                                  },
+                                  {
+                                    "name": "ui",
+                                    "value": 5
+                                  },
+                                  {
+                                    "name": "atb",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "exp",
+                                    "value": 2
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Battle over'"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.hp <= 0",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "mode",
+                                    "value": 3
+                                  },
+                                  {
+                                    "name": "ui",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "atb",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Aya has fallen'"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "ui",
+                                "value": 0
+                              },
+                              {
+                                "name": "status",
+                                "value": "'No ammunition'"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.ui == 3",
+                        "then": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.pe >= 30",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "hp",
+                                    "value": "min(sceneState.maxHp,sceneState.hp+30)"
+                                  },
+                                  {
+                                    "name": "pe",
+                                    "value": "sceneState.pe-30"
+                                  },
+                                  {
+                                    "name": "ui",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "atb",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "actionTimer",
+                                    "value": 0.65
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Heal 1'"
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "status",
+                                    "value": "'Not enough PE'"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.medicine > 0",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "hp",
+                                    "value": "min(sceneState.maxHp,sceneState.hp+30)"
+                                  },
+                                  {
+                                    "name": "medicine",
+                                    "value": "sceneState.medicine-1"
+                                  },
+                                  {
+                                    "name": "ui",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "atb",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "actionTimer",
+                                    "value": 0.5
+                                  },
+                                  {
+                                    "name": "status",
+                                    "value": "'Medicine 1'"
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "status",
+                                    "value": "'No medicine remaining'"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui > 0 and sceneState.mode == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ui",
+                "value": 0
+              },
+              {
+                "name": "status",
+                "value": "''"
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
           }
         ]
       }
     ],
     "on_up": [
       {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputY",
-        "value": -1
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+3)%4"
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_down": [
       {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputY",
-        "value": 1
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
       }
     ],
-    "on_left": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputX",
-        "value": -1
-      }
-    ],
-    "on_right": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputX",
-        "value": 1
-      }
-    ],
-    "on_select": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "action"
-      }
-    ],
-    "on_cancel": [
-      {
-        "cmd": "SCENE_EVENT",
-        "kind": "pop"
-      }
-    ]
-  },
-  "scripts": {
-    "init": "local sceneState = ctx.sceneState; sceneState.px = 10; sceneState.py = 10; sceneState.ex = 20; sceneState.ey = 5; sceneState.atb = 0; sceneState.ehp = 100; sceneState.stateText = 'Moving'; sceneState.range = 5; sceneState.speed = 10.0; sceneState.mode = 'move'; sceneState.actionTimer = 0; sceneState.inputX = 0; sceneState.inputY = 0;",
-    "update": "local sceneState = ctx.sceneState; local dt = sceneState.time.dt; if sceneState.mode == 'move' then sceneState.atb = math.min(100, sceneState.atb + 20 * dt); sceneState.px = math.max(0, math.min(25, sceneState.px + sceneState.inputX * sceneState.speed * dt)); sceneState.py = math.max(0, math.min(13, sceneState.py + sceneState.inputY * sceneState.speed * dt)); else sceneState.actionTimer = sceneState.actionTimer - dt; if sceneState.actionTimer <= 0 then sceneState.mode = 'move'; sceneState.stateText = 'Moving' end end; if sceneState.ehp <= 0 then sceneState.stateText = 'VICTORY!' end",
-    "action": "local sceneState = ctx.sceneState; if sceneState.mode == 'move' and sceneState.atb >= 100 then sceneState.mode = 'action'; sceneState.atb = 0; sceneState.actionTimer = 1.0; sceneState.stateText = 'Action Phase!'; local dist = math.abs(sceneState.px - sceneState.ex) + math.abs(sceneState.py - sceneState.ey); if dist <= sceneState.range then sceneState.ehp = math.max(0, sceneState.ehp - 30); sceneState.stateText = 'HIT!' else sceneState.stateText = 'MISSED! (Out of range)' end end"
+    "on_left": [],
+    "on_right": []
   },
   "goldenScript": [
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2}
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    },
+    {
+      "key": "return",
+      "wait": 0.01
+    }
   ]
 }

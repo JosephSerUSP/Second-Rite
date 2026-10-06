@@ -247,6 +247,18 @@
     {
       "token": "(list rows)",
       "description": "SET_LIST sprite/gaugeValue/gaugeMax evaluate against each row's fields (e.g. hp, maxHp, spriteKey)."
+    },
+    {
+      "token": "sqrt(x)",
+      "description": "Nonnegative square root, for Euclidean distance and normalized movement."
+    },
+    {
+      "token": "atan2(y,x)",
+      "description": "Angle in radians of the vector (x,y), for authored facing."
+    },
+    {
+      "token": "sin(x), cos(x)",
+      "description": "Trigonometry in radians for authored world transforms and presentation motion."
     }
   ],
   "scripting": {
@@ -2727,6 +2739,23 @@
       ],
       "interactive": false,
       "description": "Barrier lifecycle hook. battle_start clears encounter-local stacks and grants BARRIER_GRANT traits; round_start refreshes producers; round_end ages optional durations."
+    },
+    {
+      "id": "READ_INPUT",
+      "label": "Read held controls",
+      "category": "Scene",
+      "description": "Copies the canonical logical held controls into a Scene-state table. No device key names or menu repeat timing.",
+      "params": [
+        {
+          "key": "name",
+          "type": "text",
+          "default": "input"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false
     }
   ],
   "paramLabels": {
@@ -3591,5 +3620,17 @@
       "label": "Level Reached",
       "contextHelp": "Runs after one level is committed. Formula context: event.level, event.previousLevel, event.unit."
     }
-  ]
+  ],
+  "sceneWindowStyles": {
+    "modelScene": {
+      "label": "3D model Scene",
+      "description": "Perspective viewport over authored OBJ models and formula-bound transforms. Gameplay remains Scene commands.",
+      "fields": [
+        "camera",
+        "models",
+        "background",
+        "labels"
+      ]
+    }
+  }
 }

@@ -384,7 +384,7 @@
                     styleLbl.textContent = 'style';
                     styleLbl.style.width = '52px';
                     const currentStyle = isDataAuthored ? (isDataAuthored.style || 'panel') : (layout.style || 'panel');
-                    const styleSel = makeSelect(['list', 'panel', 'frame', 'confirm', 'roulette', 'partyGrid'], currentStyle, (v) => {
+                    const styleSel = makeSelect(['list', 'panel', 'frame', 'confirm', 'roulette', 'partyGrid', ...Object.keys(dbPayload.engine.sceneWindowStyles || {})], currentStyle, (v) => {
                         if (isDataAuthored) { isDataAuthored.style = v; } else { layout.style = v; }
                         setDirty(true);
                         draw();
@@ -458,6 +458,13 @@
                 if (sceneWindows && sceneWindows.length > 0) {
                     const dataWin = sceneWindows.find(x => x.id === w.id);
                     if (dataWin) {
+                        if (dataWin.style === 'modelScene') {
+                            buildEntityForm(dock, {id:dataWin.id}, {
+                                resolve:()=>dataWin,
+                                fields:[{kind:'json',key:'viewport',label:'3D viewport (camera and models)',rows:14}],
+                                onChange:setDirty
+                            });
+                        }
                         const contentBox = document.createElement('fieldset');
                         contentBox.style.cssText = 'padding: 4px; margin-top: 6px;';
                         const contentLegend = document.createElement('legend');

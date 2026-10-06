@@ -83,8 +83,13 @@ end
 local dispatch = {}
 
 function dispatch.preview_scene(request)
-    local w, h = compositionSize()
-    cliTools.runPreviewScene(request.sceneId, loader, w, h)
+    -- Restore the profile afterwards: later requests in this process (window
+    -- previews) must not inherit the scene preview's surface.
+    local previous = presentation_surface.getProfileId()
+    local w, h = cliTools.resolvePreviewSurface(nil)
+    local ok, err = pcall(cliTools.runPreviewScene, request.sceneId, loader, w, h)
+    presentation_surface.setProfile(previous)
+    if not ok then error(err, 0) end
 end
 
 function dispatch.preview_window(request)

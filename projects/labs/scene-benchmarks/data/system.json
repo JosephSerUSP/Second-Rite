@@ -3,7 +3,8 @@
     "activeFont": "monogram-extended",
     "fontSize": 16,
     "fontOffsetY": -4,
-    "fontNormalize": true
+    "fontNormalize": true,
+    "renderSurfaceProfile": "wide"
   },
   "spawn": {
     "mapId": 1,

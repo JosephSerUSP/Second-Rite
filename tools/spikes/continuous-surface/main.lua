@@ -51,6 +51,56 @@ local function openSpec()
     }
 end
 
+local function runProviderHostTests()
+    local provider = require("engine.continuous_surface_provider")
+    local host = require("engine.traversal_host")
+
+    -- Environment-package boot is an integration concern exercised by the
+    -- standalone Project lane. Here we keep one already-live provider state so
+    -- the spike can characterize only the provider/host interaction membrane.
+    local fake = {
+        currentMapData = {
+            id = 1,
+            traversal = { provider = "continuous_surface" },
+            events = {
+                { id = 1, worldPosition = { 1.0, 1.0, 0 }, interactionRadius = 1.0 },
+                { id = 2, worldPosition = { 1.1, 1.0, 0 }, interactionRadius = 1.0 },
+                { id = 3, x = 1, y = 1 },
+            },
+        },
+        continuousTraversal = {
+            provider = "continuous_surface",
+            mapId = 1,
+            x = 1.0,
+            y = 1.0,
+            z = 0,
+            interactionRadius = 1.15,
+        },
+    }
+
+    local originalEnsure = provider.ensure
+    provider.ensure = function(session) return session.continuousTraversal end
+
+    local nearest = provider.nearestEvent(fake)
+    assertTrue(nearest and nearest.id == 1,
+        "provider chooses the nearest ordinary world-space Event")
+
+    local filtered, owns = host.interactionEvent(fake, function(event)
+        return event.id == 2
+    end)
+    assertTrue(owns and filtered and filtered.id == 2,
+        "host predicate filters interaction candidates without owning geometry")
+
+    local none, stillOwns = host.interactionEvent(fake, function() return false end)
+    assertTrue(none == nil and stillOwns,
+        "provider owns an empty confirm press instead of falling through to the grid")
+
+    assertTrue(provider.buttonpressed(fake, "L") and provider.buttonpressed(fake, "R"),
+        "continuous provider consumes legacy grid-strafe edges")
+
+    provider.ensure = originalEnsure
+end
+
 local function runTests()
     testsRun = 0
 
@@ -134,6 +184,8 @@ local function runTests()
         "shared polygon containment accepts interior")
     assertTrue(traversal.containsPolygonPoint(rectangle(0, 0, 2, 2), 0, 1),
         "shared polygon containment includes walk boundary")
+
+    runProviderHostTests()
 
     print("CONTINUOUS_SURFACE_SPIKE_OK tests=" .. testsRun)
 end

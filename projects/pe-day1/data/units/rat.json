@@ -1,0 +1,20 @@
+{
+  "id": "rat",
+  "name": "Mutated Rat",
+  "level": 1,
+  "skills": [
+    "rat_bite",
+    "rat_fire_tail"
+  ],
+  "flavor": "A basement rat, transformed. Reported values: HP 20, EXP 2, Ammo +6 (Day 1 guides).",
+  "baseParams": {
+    "maxHp": 20,
+    "atk": 8,
+    "def": 6,
+    "mat": 6,
+    "mdf": 6,
+    "mpd": 1,
+    "asp": 10
+  },
+  "growthBands": []
+}

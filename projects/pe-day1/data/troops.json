@@ -1,1 +1,13 @@
-{}
+{
+  "basement_rat": {
+    "id": "basement_rat",
+    "name": "Mutated Rat",
+    "description": "Basement corridor encounter after the first Eve fight.",
+    "members": [
+      {
+        "actor": "rat",
+        "level": 1
+      }
+    ]
+  }
+}

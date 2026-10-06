@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "handgun_ammo",
+    "name": "Handgun Ammo",
+    "type": "consumable",
+    "description": "Rounds for the handgun.",
+    "effects": []
+  },
+  {
+    "id": "medicine",
+    "name": "Medicine",
+    "type": "consumable",
+    "target": "ally",
+    "description": "Restores 30 HP.",
+    "effects": [
+      {
+        "type": "hp",
+        "value": 30
+      }
+    ]
+  }
+]

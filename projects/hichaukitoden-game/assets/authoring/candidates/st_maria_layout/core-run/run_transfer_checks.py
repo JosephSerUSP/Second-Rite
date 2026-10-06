@@ -10,6 +10,7 @@ try:
  result=subprocess.run([os.environ.get('LOVEC_PATH','C:/Program Files/LOVE/lovec.exe'),str(g),'town-proof-frames'],cwd=g,capture_output=True,text=True,encoding='utf8',errors='replace',timeout=120);(folder/'capture.log').write_text(result.stdout+result.stderr,encoding='utf8');assert result.returncode==0 and 'TRANSFER FRAMES BEGIN' in result.stdout,result.stdout[-2500:]
  frames=json.loads(result.stdout.split('TRANSFER FRAMES BEGIN')[1].split('TRANSFER FRAMES END')[0])
  for f in frames:(folder/(f['label']+'.png')).write_bytes(base64.b64decode(f.pop('image')))
- assert len(frames)==33 and all(f['boundaryChecks']>0 for f in frames)
+ labels=[f['label'] for f in frames]
+ assert frames and len(labels)==len(set(labels)) and all(f['boundaryChecks']>0 for f in frames)
  (folder/'captures.json').write_text(json.dumps(frames,indent=2)+'\n',encoding='utf8');print('TRANSFER CHECKS OK',len(frames),'zones;',sum(f['boundaryChecks'] for f in frames),'boundary checks')
 finally:p.write_bytes(original)

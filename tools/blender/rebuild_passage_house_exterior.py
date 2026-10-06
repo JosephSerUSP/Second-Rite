@@ -30,14 +30,19 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / 'tools/blender'), str(ROOT / 'tools/blender/recipes')]
 import source_dependencies  # noqa: E402
 from recipes.house_grammar import emit_blender  # noqa: E402
-from recipes.house_grammar.recipe import (BuildingRecipe, Course, Opening, PierSpec, RoofSection,  # noqa: E402
-                                          Wing, build)
+import interior as kit  # noqa: E402
+import second_rite_asset_core as core  # noqa: E402
+from first_stratum.common import box  # noqa: E402
+from recipes.house_grammar.recipe import (BalconySpec, BuildingRecipe, Course, Opening, PierSpec,  # noqa: E402
+                                          RoofSection, Wing, build)
 
 COLLECTION = 'B7 / Modern buildings'
 MARK = 'Passage House mark / Passage House (Cortico) / '
 
 # Island world frame: forward +Y, screen right -X. The block spans x -16..3, y 53..61.
-BLOCK_X_CENTRE, BLOCK_X_WIDTH, FRONT_Y, FLOOR_Z, DEPTH = -6.5, 19.0, 53.0, 8.0, 8.0
+BLOCK_X_CENTRE, BLOCK_X_WIDTH, FRONT_Y, FLOOR_Z, DEPTH = -6.5, 19.0, 52.86, 8.0, 8.0
+FLANK_RECESS = 0.9
+LEAF_RECESS = 0.22
 
 REMOVE = [
     'B7 / Passage House', 'B7 / B7 / Passage House roof', 'B7 / Passage House entrance',
@@ -46,7 +51,8 @@ REMOVE = [
     'B10 / Passage House shutter', 'B10 / Passage House shutter.001',
 ]
 REMOVE_PREFIXES = ('B14 / Lodging upper window', 'B14 / Lodging upper shutter', 'B14 / Lodging window sill',
-                   'B14 / Lodging ground window')
+                   'B14 / Lodging ground window', 'B14 / Lodging entry canopy', 'B14 / Lodging entry post',
+                   'B18 / passage-house public entry')
 
 SEMANTIC = {
     'whitewash': 'B18 / passage-house weathered limewash',
@@ -55,13 +61,10 @@ SEMANTIC = {
     'dark_wood': 'B7 / Restrained warm timber',
     'roof_tile': 'sr_roof_tile.001',
     'smoked_glass': 'B10 Recessed door and window shadow',
-    'wrought_iron': 'sr_wrought_iron',
 }
 
-# World X of each opening's centre.
-GROUND_X = (-13.0, -9.0, -1.0)
-UPPER_X = (-13.0, -9.0, -5.0, -1.0)
 DOOR_X = -4.0
+PAVILION_WIDTH = 5.8
 
 
 def lane(x):
@@ -69,27 +72,56 @@ def lane(x):
     return round(-(x - BLOCK_X_CENTRE), 3)
 
 
-def recipe():
-    courses = (
-        Course('plinth', 0.4, 'rough_limestone'),
+def storeys(top_extra=0.0, frieze=False):
+    return (
+        Course('plinth', 0.5, 'rough_limestone'),
         Course('storey', 3.0, 'whitewash', return_semantic='rough_limestone'),
-        Course('band', 0.14, 'old_limestone', inset=-0.06),
-        Course('storey', 3.8, 'whitewash', return_semantic='rough_limestone'),
-        Course('cornice', 0.22, 'rough_limestone', inset=-0.10),
+        Course('band', 0.5 if frieze else 0.16, 'azulejo' if frieze else 'old_limestone', inset=-0.07),
+        Course('storey', 3.8 + top_extra, 'whitewash', return_semantic='rough_limestone'),
+        Course('cornice', 0.26, 'rough_limestone', inset=-0.12),
     )
-    wing = Wing(id='main', lane_offset=0.0, width=BLOCK_X_WIDTH, depth=DEPTH, courses=courses,
-                pier=PierSpec(width=0.30, project=0.10, splay=0.10, through='storey'))
-    roof = RoofSection(wing='main', profile='hip', ridge_axis='Y', rise=2.2, overhang=0.5, thickness=0.2)
-    openings = [Opening(id='door', kind='door', wing='main', lane_offset=lane(DOOR_X), width=1.24, height=2.2,
-                        profile='plain', panels=4, drip=False, reveal=0.16)]
-    for index, x in enumerate(GROUND_X):
-        openings.append(Opening(id=f'ground_{index}', kind='window', wing='main', lane_offset=lane(x), width=0.96,
-                                height=1.1, sill_z=1.15, grille=True, shutters=False))
-    for index, x in enumerate(UPPER_X):
-        openings.append(Opening(id=f'upper_{index}', kind='window', wing='main', lane_offset=lane(x), width=1.1,
-                                height=1.3, sill_z=4.55, shutters=True))
-    return BuildingRecipe(id='passage_house', version=1, wings=(wing,), roof=(roof,), openings=tuple(openings),
-                          baked_axes=('Y',), metadata={'register': 'island exterior'})
+
+
+def recipe():
+    """A recessed, two-storey block with a taller entrance pavilion carrying the door, a
+    blue tile frieze and a balcony: the Passage House reads as one house with a front."""
+    pier = PierSpec(width=0.42, project=0.12, splay=0.12, through='storey')
+    body = Wing(id='body', lane_offset=0.0, width=BLOCK_X_WIDTH, depth=DEPTH - FLANK_RECESS, setback=FLANK_RECESS,
+                courses=storeys(frieze=True), pier=pier)
+    pavilion = Wing(id='pavilion', lane_offset=lane(DOOR_X), width=PAVILION_WIDTH, depth=DEPTH, setback=0.0,
+                    courses=storeys(frieze=True), pier=pier)
+    roofs = (RoofSection(wing='body', profile='hip', ridge_axis='Y', rise=2.2, overhang=0.55, thickness=0.22),
+             RoofSection(wing='pavilion', profile='gable', ridge_axis='X', rise=3.2, overhang=0.5, thickness=0.2))
+    openings = [Opening(id='door', kind='door', wing='pavilion', lane_offset=lane(DOOR_X), width=1.24, height=2.2,
+                        profile='civic', panels=4, reveal=0.16)]
+    openings.append(Opening(id='gallery', kind='window', wing='pavilion', lane_offset=lane(DOOR_X), width=1.3,
+                            height=2.5, sill_z=4.6, shutters=True, pediment=True,
+                            balcony=BalconySpec(width=3.4, depth=0.85, rail_height=1.0, brackets=3)))
+    for index, x in enumerate((-13.8, -10.6, -7.8)):
+        openings.append(Opening(id=f'ground_{index}', kind='window', wing='body', lane_offset=lane(x), width=1.0,
+                                height=1.6, sill_z=1.2, grille=True, reveal=0.22))
+        openings.append(Opening(id=f'upper_{index}', kind='window', wing='body', lane_offset=lane(x), width=1.05,
+                                height=2.1, sill_z=4.5, shutters=True, pediment=index == 1, reveal=0.22,
+                                balcony=BalconySpec(width=1.7, depth=0.6, rail_height=0.95, brackets=2)))
+    openings.append(Opening(id='ground_east', kind='window', wing='body', lane_offset=lane(0.9), width=1.0,
+                            height=1.6, sill_z=1.2, grille=True, reveal=0.22))
+    openings.append(Opening(id='upper_east', kind='window', wing='body', lane_offset=lane(0.9), width=1.05,
+                            height=2.1, sill_z=4.5, shutters=True, reveal=0.22,
+                            balcony=BalconySpec(width=1.7, depth=0.6, rail_height=0.95, brackets=2)))
+    return BuildingRecipe(id='passage_house', version=2, wings=(body, pavilion), roof=roofs,
+                          openings=tuple(openings), baked_axes=('Y',), metadata={'register': 'island exterior'})
+
+
+def add_chimneys(collection, stone, cap):
+    root = bpy.data.objects.new('Passage House chimneys', None)
+    collection.objects.link(root)
+    for index, x in enumerate((-12.5, -1.5)):
+        parts = (('stack', (0.95, 0.95, 3.0), (x, 57.4, 18.0), stone), ('cap', (1.2, 1.2, 0.18), (x, 57.4, 19.58), cap))
+        for name, size, loc, material in parts:
+            obj = box(f'Passage House chimney {index} / {name}', root, size, loc, material, core)
+            for owner in list(obj.users_collection):
+                owner.objects.unlink(obj)
+            collection.objects.link(obj)
 
 
 def main():
@@ -117,16 +149,18 @@ def main():
     for obj in root.children:
         for slot in obj.material_slots:
             name = slot.material.name if slot.material else ''
-            target = bpy.data.materials.get(SEMANTIC.get(name.split('.')[0][3:], ''))
+            semantic = name.split('.')[0][3:]
+            target = bpy.data.materials.get(SEMANTIC.get(semantic, ''))
+            if name.startswith('sr_') and target is None and semantic in ('azulejo', 'wrought_iron'):
+                target = kit.material(semantic)
             if name.startswith('sr_') and target is not None:
                 slot.material = target
+    add_chimneys(bpy.data.collections[COLLECTION], kit.material('rough_limestone'), kit.material('old_limestone'))
 
-    # The wall is now a real wall 0.0 to -0.14 in front of the old decal plane: seat the mark on it.
+    # The pavilion face is the old wall plane, so the plaque and lantern stay; the leaf drops into the reveal.
     for obj in bpy.data.objects:
-        if obj.name.startswith(MARK):
-            obj.location.y += 0.14
-            if obj.name[len(MARK):].split(' ')[0] in ('leaf', 'panel', 'band', 'ring'):
-                obj.location.y += 0.14
+        if obj.name.startswith(MARK) and obj.name[len(MARK):].split(' ')[0] in ('leaf', 'panel', 'band', 'ring'):
+            obj.location.y += LEAF_RECESS
 
     bpy.ops.file.pack_all()
     source_dependencies.assert_available()

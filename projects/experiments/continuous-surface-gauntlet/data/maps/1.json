@@ -28,6 +28,19 @@
       "frameHeight": 48,
       "frameIndex": 0,
       "worldHeight": 1.75
+    },
+    {
+      "id": 102,
+      "instanceId": "gauntlet-archive-service-door",
+      "name": "Service Door",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [3.35, -2.15, 0.0],
+      "interactionRadius": 1.15,
+      "trigger": "interact",
+      "commands": [
+        { "cmd": "LOAD_MAP", "mapId": 2, "arrival": "arrival_from_archive" }
+      ]
     }
   ],
   "traversal": {

@@ -214,6 +214,15 @@ def structural_summary(root, source_path: Path, output_path: Path, material_pass
         "curveCount": sum(1 for obj in children if obj.type == "CURVE"),
         "meshCount": sum(1 for obj in children if obj.type == "MESH"),
         "hiddenConstructionCount": sum(1 for obj in children if obj.hide_render),
+        "instanceSources": [
+            {
+                "name": obj.name,
+                "instanceType": obj.instance_type,
+                "collection": obj.instance_collection.name if obj.instance_collection else None,
+            }
+            for obj in children
+            if getattr(obj, "instance_type", "NONE") != "NONE"
+        ],
         "sourceObjectDependencies": edges,
         "sourceObjectDependencyCounts": {
             "internal": sum(1 for edge in edges if edge["scope"] == "internal"),

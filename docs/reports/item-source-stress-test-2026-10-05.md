@@ -14,7 +14,7 @@ PR #1400 is being used as a **tooling probe**, not as an assertion that its six 
 | Constraint target | ordinary Blender construction relation | translated-root regression | internal target is now remapped |
 | Geometry Nodes interface object input | advertised open-ended source vocabulary | generic modifier ID-property remap + report visibility | remapped when Blender exposes the object on the modifier; node-tree-internal references remain a visible boundary |
 | Geometry Nodes node-tree object reference | advertised open-ended source vocabulary | source-graph report scans node/socket object references | **reported, not rewritten yet**; shared node groups must not be mutated silently |
-| Collection/object instances | advertised source vocabulary | not yet adversarially exercised | **next stress target**; selection/export semantics need explicit proof |
+| Collection-instance Empties | advertised source vocabulary | translated-root realization regression | **supported** by realizing scratch instances before OBJ selection; authoritative collections remain untouched |
 | External object references | previously invisible | source-graph report | retained rather than silently rewritten and marked `external` for audit |
 | Read-only source authority | established before #1400 | regression export after richer graph duplication | preserved; the source graph remains untouched |
 
@@ -33,3 +33,12 @@ The report also scans Geometry Nodes node/socket object references. Those refere
 ## What #1400 should do next
 
 The six consumables should now be treated as six adversarial authoring experiments, with each redesign chosen to force a different Blender-native construction relation rather than six variations of profile/revolve. The next useful probes are Geometry Nodes object/collection inputs, real instancing, Boolean stacks with hidden guides, anisotropic Curve/GN profiles, and mixed direct-mesh + procedural assemblies. Visual quality remains a review signal: if a supposedly broad toolset keeps producing lathed bottles, the authoring affordances are still too narrow or too opaque.
+
+
+## Instance stress follow-up
+
+The next adversarial probe confirmed a concrete contract mismatch: ordinary Blender collection instances are represented by `EMPTY` objects, while the runtime exporter selected only geometry object types. The instance carrier was therefore excluded before OBJ export, despite instances being part of the documented authoring vocabulary.
+
+The export scratch phase now makes visible Blender instances real **only on the duplicated graph**, then selects the resulting geometry. A pinned-Blender regression uses a translated item root, a scaled/offset collection-instance Empty, and a reusable collection that is not part of the root hierarchy. It verifies runtime geometry and placement, and it verifies that object/collection counts plus the authoritative instance reference and transform are unchanged after export cleanup.
+
+This deliberately does not claim universal instancing support. Geometry Nodes instances are evaluated through modifier output and remain a separate stress axis; nested collection-instance graphs and linked-library collections should receive their own probes before being described as guaranteed.

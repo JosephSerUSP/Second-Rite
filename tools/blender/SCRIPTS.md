@@ -6,7 +6,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 
 **Run with** says how to start a file. `run.py` means it runs inside the pinned Blender: `python tools/blender/run.py tools/blender/<script> [--blend FILE] -- <args>` (never a hand-typed `blender --python` command, which exits 0 when the script raises). `python` and `node` mean an ordinary host command; `import` means the file is only imported or spawned by other tools.
 
-## Supported authoring and verification entry points (32)
+## Supported authoring and verification entry points (33)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -31,6 +31,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [make_town_camera.py](make_town_camera.py) | `python` | Derive the Second Gate town side-view camera calibration record. |
 | [offline_blender.py](offline_blender.py) | `run.py` | Run a Blender Python tool with Python network connections denied in this process. |
 | [pack_environment_source.py](pack_environment_source.py) | `run.py` | Save a new self-contained source revision from a working source document. |
+| [painted_relief.py](painted_relief.py) | `python` | Read an unchanged image-alpha silhouette into new thick UV-bound scaffold geometry and report explicit depth controls. |
 | [photograph_room_package.py](photograph_room_package.py) | `run.py` | Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size. |
 | [preview_diff_sheet.py](preview_diff_sheet.py) | `python` | A before / after / difference sheet for renders that should look alike. |
 | [review_room_source.py](review_room_source.py) | `run.py` | Photograph an interior source using camera records from native staged captures. |
@@ -43,7 +44,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (36)
+## Implementation modules and Blender workers (37)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -69,6 +70,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [map_bundle_scene.py](map_bundle_scene.py) | `import` | Pure planning helpers for Thestra renderable-bundle -> Blender scene import. |
 | [material_library.py](material_library.py) | `python` | Second Gate material library: textures bound to semantic material IDs. |
 | [mesh_export_geometry.py](mesh_export_geometry.py) | `import` | Derived mesh preparation; never alters authored mesh datablocks. |
+| [painted_relief_blender.py](painted_relief_blender.py) | `import` | Bind a new painted relief mesh, with optional live boundary relaxation and decimation; saved sources remain authority. |
 | [placement_rules.py](placement_rules.py) | `import` | Pure authoring support and protected-volume checks; not runtime collision. |
 | [render_furnishings_catalogue.py](render_furnishings_catalogue.py) | `run.py` | Pinned-Blender worker for furnishings_catalogue.py; never saves a .blend. |
 | [render_profiles.py](render_profiles.py) | `import` | Shared render quality; camera, lighting, output encoding and source files belong to callers. |

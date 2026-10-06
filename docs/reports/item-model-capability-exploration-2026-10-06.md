@@ -895,3 +895,155 @@ Agent-Signature:
   role: implementation
   task: six shadow-sculpted items and reusable silhouette tooling
   base: 744ee09eb01b3fa265691afa00ae33bf127c8353
+
+## Painted silhouettes: generated surfaces, curved solids and an armour rejection
+
+The owner found the shadow-volume results underwhelming and suggested combining
+the process with image generation. This cohort adds Passage Buckler, Warding
+Charm and Bone Plate sources on `3e880ea4eaf934f061c7fea3c55cebf3760e1436`.
+The owner called the shield and charm decent and rejected the first armour.
+The final armour is a direct source rework, still awaiting visual judgment.
+No technical check or source-coverage number establishes artistic acceptance.
+
+Three separate built-in image-generation calls produced front artwork and
+alpha silhouettes. Original PNG bytes are preserved in the Project's source
+texture directory and copied unchanged through compilation into shipping.
+[Generation provenance](item-model-painted-review/generation.json) records
+the complete prompts, source-image paths, dimensions via inspection, and hashes;
+the [art board](item-model-painted-review/generated-art.png) is a review
+derivative. The images contain painted depth cues despite requests for nearly
+unlit colour; they are not measured albedo or physical depth maps.
+
+The [native gameplay board](item-model-painted-review/gameplay96.png),
+[prior/new products](item-model-painted-review/before-after96.png),
+[usual four poses](item-model-painted-review/sheet96.png) and
+[cardinal yaws](item-model-painted-review/yaw96.png) show the actual runtime
+result. Cardinal yaws are a stage-only probe at gameplay roll, with no production
+renderer change. All cameras remain side views.
+
+| Item | Final construction | Native triangles |
+| --- | --- | ---: |
+| Passage Buckler | Alpha-supported eight-sided outline, authored convex front/back and physical thickness, generated arch/patina artwork, separate rear leather grip and braces | 4,528 |
+| Warding Charm | Alpha-supported ceramic outline, authored convex depth, eye/fracture artwork, actual suspension bail and red cord, separate rear glaze seal | 4,112 |
+| Bone Plate | Five separate curved ribs, six hollow layered shoulder shells, two substantial front shoulder masses, collar/sternum pieces and actual leather rear/waist harness; generated ivory patch on selected bone faces | 6,964 |
+
+### What image binding contributes
+
+The new [painted-relief route](../../tools/blender/PAINTED_RELIEFS.md) reads
+image alpha into an initial silhouette mesh, with explicit width, height,
+thickness and convex bow. Host-side Pillow reads pixels without modifying
+the image. A mesh JSON bridge lets Blender bind it without installing Pillow
+inside Blender. The source retains editable mesh topology/UVs/materials;
+optional boundary relaxation and decimation are live modifiers. Both report
+and mesh outputs refuse overwrite. After first save, the `.blend` is authority;
+the mesh JSON is not consulted by ordinary compilation.
+
+Accepted cells require alpha support at corners, edge midpoints and centre.
+The largest edge-connected body is retained, with discarded detached cells
+reported. All three initial images discarded zero sampled cells. Separate
+local vertex fans protect closed extrusion topology at point-only contacts.
+Sampled holes remain actual openings. Original front UVs address the unchanged
+full image; backs and thickness use separate plain materials.
+
+Interpreting fine painted colour as shallow height introduced noisy geometry.
+The final shield/charm source vertices were edited directly to retain only the
+explicit convex envelope. Colour-derived displacement is zero, and the public
+tool now defaults to zero. The image supplies painted detail, while the source
+supplies its deliberately authored shape. This is not 3D reconstruction.
+Live perimeter relaxation and decimation reduced the shield from 9,564 to
+4,528 triangles and the charm from 7,804 to 4,112.
+
+All three painted materials declare one existing UV-add pass at strength 0.18
+using their own image. This adjusts native colour gain while preserving the
+original bitmap. The buckler's plain brass edge also retains a restrained
+gold sphere pass. It is a shader material choice, not regenerated texture
+colour or a new lighting model.
+
+The [paint-disabled control](item-model-painted-review/paint-controls96.png)
+has identical OBJ bytes for every item. It removes only each generated
+`map_Kd` binding and that material's UV-add gain; other materials remain.
+Changed pixels across two gameplay poses are 2,739 for the buckler, 1,454 for
+the charm and 1,251 for Bone Plate. These counts demonstrate contribution,
+not aesthetic superiority. In the armour, the contribution is a small ivory
+surface patch, not the full generated chest painting.
+
+### The armour failure and direct source rework
+
+The first Bone Plate mapped its entire generated front onto a curved thick
+envelope, with extra shoulder pieces behind it. Its front painting carried
+too much structure, and rotation exposed the slab. The owner rejected it.
+The [rejected/reworked comparison](item-model-painted-review/armor-rework96.png)
+preserves that failure beside the final open harness, without promoting the
+initial product.
+
+The original painted envelope and first assemblies remain hidden construction
+studies inside the authoritative source. They do not export. Direct source
+edits added separate curved ribs with real gaps, hollow shoulder shells that
+wrap front/top/back, broad front shoulder masses and leather straps around
+the rear and waist. Ivory bone faces sample a bounded cream patch of the
+unmodified generated image; cut rims and inner walls use plain bone material.
+The original art guides material and shape choices rather than standing in
+for a complete garment.
+
+The final surface audit caught 24 collapsed painted UV faces on the new
+shoulder masses' thickness walls. Those walls share X/Z coordinates across
+their depth and cannot use the front projection. A direct material edit made
+them plain crisp bone edges in production and the throwaway control. Geometry
+and UV coordinates stayed unchanged. The final audit reports zero findings.
+
+### Observed verification and limits
+
+- Eight host tests and one real Blender integration test pass. They cover
+  source-image byte preservation, authored dimensions/thickness, full-image
+  UV binding, closed edge topology, physical mask holes, reported detached
+  fragments, malformed inputs and overwrite refusal. Actual Blender export
+  verifies manifold geometry, positive volume, final painted UVs, runtime OBJ
+  validity and preserved source mesh/modifier state.
+- All three final sources pass shipping read-only `compile_item_blends.py
+  --check`. Independent final candidate repeats match bytes; source hashes
+  remain unchanged. Native final shipping/candidate RGB pixels match exactly.
+- Every exported painted face has zero missing, collapsed or outside-atlas
+  UV findings. Final per-face corner/edge/centre sampling gives 23,647 samples
+  for the buckler, 16,822 for the charm and 35,308 for Bone Plate. Minimum
+  alpha is 242, 243 and 252 respectively, with zero samples below 240.
+  This is sampled support, not an exhaustive test of every interior texel.
+- Original/source/compiled/shipping image bytes match for all three PNGs.
+  Source image paths are document-relative. The [surface evidence](item-model-painted-review/surface-evidence.json)
+  records hashes, smooth-face counts, modifiers, hidden rejected-study status,
+  triangle counts, UV/alpha findings and native controls without absolute
+  machine paths.
+- Strict prospective comparison against all 207 models reports zero cohort
+  violations at the 0.85 sourced-pair silhouette threshold. Texture/reference,
+  script catalogue (108 entries), diff and asset contract checks pass.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass after the final source
+  correction. Seven native Effekseer world-effect assertions remain explicitly
+  unavailable. G5/G6 were not run or recaptured; Linux byte stability remains
+  unverified. The historical Chrysalis mismatch (#1355/#1369) remains an
+  inherited corpus-verification boundary, not a newly reproduced full check.
+- Actual corpus remains red for 83 accepted keys no longer reproducing, with
+  three duplicate groups, 34 UV-less models and one shared-file group left.
+  Asset regression remains red for 95 changed Model records across the stack.
+  Baselines remain unchanged; reconciliation and merging remain owner calls.
+- Inherited Lantern integration blockers remain #1434, the general painted-UV
+  coverage gap #1431 and the static shape-key policy #1436. Runtime, game data,
+  earlier production documents/products and baseline references are unchanged.
+
+Rigid prominent faces suit this image-binding method better than a wearable
+whose structure must remain convincing from the side and back. Grid sampling
+can lose small spikes, holes or detached details; relaxation and decimation
+need native review. Generated painted highlights do not track changing lights.
+The buckler/charm sides and backs use modeled assemblies and simpler materials;
+they do not repeat the full front designs. Bone Plate's open harness is a new
+visual proposal, not an approved repair.
+
+Referenced source absence falls from 58 to 55 of 207 assignments, a coverage
+measure only. Once-only scaffolds, rejected candidates, direct-edit records,
+control documents and local logs remain ignored under `out/work/`. The general
+image-to-mesh route and its tests are durable repository tooling.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: three image-assisted items and painted silhouette tooling
+  base: 3e880ea4eaf934f061c7fea3c55cebf3760e1436

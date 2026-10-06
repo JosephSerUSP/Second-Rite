@@ -1,0 +1,619 @@
+{
+  "nativeCell": 96,
+  "yawProbe": [
+    0,
+    90,
+    180,
+    270
+  ],
+  "yawRoll": 10,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 55,
+  "originalGeneratedImagesUnchanged": true,
+  "sourceCompiledShippingTextureBytesIdentical": true,
+  "nativeShippingCandidateRGBIdentical": true,
+  "items": [
+    {
+      "item": "bone_plate",
+      "sourceHash": "49a19d468d284f21cecec1ca055c30341db14d9aaf07fbc142b2981c58f42295",
+      "sourceObjects": [
+        {
+          "name": "ActualBeltClasp",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "ActualWaistBelt",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 126,
+          "smoothFaces": 126
+        },
+        {
+          "name": "Collar_-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "Collar_1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "PauldronShell_-1_0",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "PauldronShell_-1_1",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "PauldronShell_-1_2",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "PauldronShell_1_0",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "PauldronShell_1_1",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "PauldronShell_1_2",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "smooth hollow bone shoulder shell; plain cut rim and inner wall",
+          "faces": 298,
+          "smoothFaces": 298
+        },
+        {
+          "name": "RearCrossA",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "RearCrossB",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "Rib_0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "curved bone plates with defined cut boundaries",
+          "faces": 114,
+          "smoothFaces": 114
+        },
+        {
+          "name": "Rib_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "curved bone plates with defined cut boundaries",
+          "faces": 114,
+          "smoothFaces": 114
+        },
+        {
+          "name": "Rib_2",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "curved bone plates with defined cut boundaries",
+          "faces": 114,
+          "smoothFaces": 114
+        },
+        {
+          "name": "Rib_3",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "curved bone plates with defined cut boundaries",
+          "faces": 114,
+          "smoothFaces": 114
+        },
+        {
+          "name": "Rib_4",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "curved bone plates with defined cut boundaries",
+          "faces": 114,
+          "smoothFaces": 114
+        },
+        {
+          "name": "ShoulderFrontMass_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "painted curved shoulder faces; plain crisp thickness faces",
+          "faces": 20,
+          "smoothFaces": 14
+        },
+        {
+          "name": "ShoulderFrontMass_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "painted curved shoulder faces; plain crisp thickness faces",
+          "faces": 20,
+          "smoothFaces": 14
+        },
+        {
+          "name": "ShoulderLeather_-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "ShoulderLeather_1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "Sternum_0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "Sternum_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "Sternum_2",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "Sternum_3",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "Sternum_4",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        }
+      ],
+      "initialMeshStudies": [
+        {
+          "object": "A_PaintedSilhouette",
+          "exported": false,
+          "initialMeshEvidence": {
+            "imageHash": "abac88a965bded339ae29dbea2c1fcbd84d1c1226254e2d7f59d1da91e041ae3",
+            "imageSize": [
+              1536,
+              1024
+            ],
+            "alphaThreshold": 240,
+            "alphaBoundsPixels": [
+              12,
+              10,
+              1525,
+              1018
+            ],
+            "grid": [
+              64,
+              43
+            ],
+            "acceptedCells": 1360,
+            "discardedDetachedCells": 0,
+            "depthControls": {
+              "width": 2.6,
+              "height": 1.88,
+              "depth": 0.2,
+              "bow": 0.27,
+              "luminanceRelief": 0
+            },
+            "vertices": 3004,
+            "faces": 3002,
+            "triangles": 6004,
+            "semantics": "alpha constrains silhouette; authored bow and luminance displacement; not recovered depth"
+          },
+          "currentModifiers": [
+            {
+              "name": "Relax sampled silhouette steps",
+              "type": "SMOOTH",
+              "ratio": null,
+              "iterations": 3
+            },
+            {
+              "name": "Reduce curved painted surface",
+              "type": "DECIMATE",
+              "ratio": 0.44999998807907104,
+              "iterations": null
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/bone_plate_generated.png",
+          "sha256": "abac88a965bded339ae29dbea2c1fcbd84d1c1226254e2d7f59d1da91e041ae3"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "bone_plate_generated": {
+          "texture": "bone_plate_generated.png",
+          "faces": 2716,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 2660
+        }
+      },
+      "sampledAlphaSupport": {
+        "bone_plate_generated": {
+          "faces": 2716,
+          "samples": 35308,
+          "alphaMin": 252,
+          "below240": 0,
+          "below128": 0
+        }
+      },
+      "triangles": 6964,
+      "productHash": "0c30868a0647a2ea3bb33d40737ab27b8211b4b2695fbdf0c19e75a21cec7798",
+      "materialHash": "cfb6fc670c1a1632251e0af59ae1deadbf67f5bee61f8a9ccbbc23de7ab613e7",
+      "paintedDisabledControl": {
+        "OBJBytesIdentical": true,
+        "changedGameplayPixels": 1251,
+        "changes": "generated map_Kd and its UV-add gain removed; edge materials retained"
+      }
+    },
+    {
+      "item": "passage_buckler",
+      "sourceHash": "3b2196f5315bea7fe3a545a9bd84bbda4160fca5305d09c121ec4f20b97aadf7",
+      "sourceObjects": [
+        {
+          "name": "A_PaintedSilhouette",
+          "type": "MESH",
+          "modifiers": [
+            "SMOOTH",
+            "DECIMATE"
+          ],
+          "role": "smooth authored convex face; image colour does not displace it",
+          "faces": 3245,
+          "smoothFaces": 3245
+        },
+        {
+          "name": "B_BackHandGrip",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "C_GripMount_-1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "C_GripMount_1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "D_RadialBrace_-1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "D_RadialBrace_1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 26
+        }
+      ],
+      "initialMeshStudies": [
+        {
+          "object": "A_PaintedSilhouette",
+          "exported": true,
+          "initialMeshEvidence": {
+            "imageHash": "f266cb2c2f7193e9e9aaf9c9da4bd460dcaa085867920aaa3526fff9999a39d2",
+            "imageSize": [
+              1254,
+              1254
+            ],
+            "alphaThreshold": 240,
+            "alphaBoundsPixels": [
+              9,
+              10,
+              1243,
+              1237
+            ],
+            "grid": [
+              56,
+              56
+            ],
+            "acceptedCells": 2181,
+            "discardedDetachedCells": 0,
+            "depthControls": {
+              "width": 2.05,
+              "height": 2.0383617193836168,
+              "depth": 0.2,
+              "bow": 0.27,
+              "luminanceRelief": 0
+            },
+            "vertices": 4580,
+            "faces": 4578,
+            "triangles": 9156,
+            "semantics": "alpha constrains silhouette; authored bow and luminance displacement; not recovered depth"
+          },
+          "currentModifiers": [
+            {
+              "name": "Relax sampled silhouette steps",
+              "type": "SMOOTH",
+              "ratio": null,
+              "iterations": 3
+            },
+            {
+              "name": "Reduce curved painted surface",
+              "type": "DECIMATE",
+              "ratio": 0.44999998807907104,
+              "iterations": null
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/passage_buckler_generated.png",
+          "sha256": "f266cb2c2f7193e9e9aaf9c9da4bd460dcaa085867920aaa3526fff9999a39d2"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "passage_buckler_generated": {
+          "texture": "passage_buckler_generated.png",
+          "faces": 1819,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1819
+        }
+      },
+      "sampledAlphaSupport": {
+        "passage_buckler_generated": {
+          "faces": 1819,
+          "samples": 23647,
+          "alphaMin": 242,
+          "below240": 0,
+          "below128": 0
+        }
+      },
+      "triangles": 4528,
+      "productHash": "e383640ba0d66a9bfe2b9508c7949939c384fe6c50cd302890a76b8bdd10faf3",
+      "materialHash": "14e0992f275397de4b7dec24f3d4e2e2f9dcf3aae4a06b8919682ea51d6b7433",
+      "paintedDisabledControl": {
+        "OBJBytesIdentical": true,
+        "changedGameplayPixels": 2739,
+        "changes": "generated map_Kd and its UV-add gain removed; edge materials retained"
+      }
+    },
+    {
+      "item": "warding_charm",
+      "sourceHash": "d0d0286dba28b5c68a899723076241501016c58fbf7e600d3d0147a149ffcd0e",
+      "sourceObjects": [
+        {
+          "name": "A_PaintedSilhouette",
+          "type": "MESH",
+          "modifiers": [
+            "SMOOTH",
+            "DECIMATE"
+          ],
+          "role": "smooth authored convex face; image colour does not displace it",
+          "faces": 2270,
+          "smoothFaces": 2270
+        },
+        {
+          "name": "B_ActualSuspensionBail",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "",
+          "faces": 120,
+          "smoothFaces": 0
+        },
+        {
+          "name": "C_RedSuspensionCord",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 98,
+          "smoothFaces": 98
+        },
+        {
+          "name": "D_KnotTail_-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_KnotTail_1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_RearGlazeSeal",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth cabochon",
+          "faces": 62,
+          "smoothFaces": 62
+        }
+      ],
+      "initialMeshStudies": [
+        {
+          "object": "A_PaintedSilhouette",
+          "exported": true,
+          "initialMeshEvidence": {
+            "imageHash": "4da724c512ff5a509f940e91baf70edebd50eaeb372635f152f81685725407d6",
+            "imageSize": [
+              1254,
+              1254
+            ],
+            "alphaThreshold": 240,
+            "alphaBoundsPixels": [
+              119,
+              42,
+              1133,
+              1211
+            ],
+            "grid": [
+              49,
+              56
+            ],
+            "acceptedCells": 1575,
+            "discardedDetachedCells": 0,
+            "depthControls": {
+              "width": 1.25,
+              "height": 1.441263573543929,
+              "depth": 0.16,
+              "bow": 0.17,
+              "luminanceRelief": 0
+            },
+            "vertices": 3358,
+            "faces": 3356,
+            "triangles": 6712,
+            "semantics": "alpha constrains silhouette; authored bow and luminance displacement; not recovered depth"
+          },
+          "currentModifiers": [
+            {
+              "name": "Relax sampled silhouette steps",
+              "type": "SMOOTH",
+              "ratio": null,
+              "iterations": 3
+            },
+            {
+              "name": "Reduce curved painted surface",
+              "type": "DECIMATE",
+              "ratio": 0.44999998807907104,
+              "iterations": null
+            }
+          ]
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures/warding_charm_generated.png",
+          "sha256": "4da724c512ff5a509f940e91baf70edebd50eaeb372635f152f81685725407d6"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "warding_charm_generated": {
+          "texture": "warding_charm_generated.png",
+          "faces": 1294,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1294
+        }
+      },
+      "sampledAlphaSupport": {
+        "warding_charm_generated": {
+          "faces": 1294,
+          "samples": 16822,
+          "alphaMin": 243,
+          "below240": 0,
+          "below128": 0
+        }
+      },
+      "triangles": 4112,
+      "productHash": "e09538f5469c18824656c703545a88559788a0ebc6459075f732519e9e5062f3",
+      "materialHash": "3771217489c9142f10d24607e0452ee336b44f62d7d5a30e3ecb5cafb3dcb34d",
+      "paintedDisabledControl": {
+        "OBJBytesIdentical": true,
+        "changedGameplayPixels": 1454,
+        "changes": "generated map_Kd and its UV-add gain removed; edge materials retained"
+      }
+    }
+  ]
+}

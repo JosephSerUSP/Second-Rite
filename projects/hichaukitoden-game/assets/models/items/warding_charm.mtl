@@ -1,42 +1,53 @@
-# Blender 5.0.1 MTL File: 'second_rite_item_model_library_expanded.blend'
+# Blender 5.2.2 LTS MTL File: 'warding_charm.blend'
 # www.blender.org
 
-newmtl MAT_BrightGold
-Ns 577.599976
-Ka 0.780000 0.780000 0.780000
-Kd 0.920000 0.650000 0.160000
+newmtl warding_charm_back_glaze
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.320000 0.620000 0.590000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
 
-newmtl MAT_OldGold
-Ns 384.399994
-Ka 0.720000 0.720000 0.720000
-Kd 0.560000 0.340000 0.090000
+newmtl warding_charm_bail_gold
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.840000 0.620000 0.240000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
 
-newmtl MAT_Pearl
-Ns 705.600098
-Ka 0.160000 0.160000 0.160000
-Kd 0.720000 0.780000 0.860000
+newmtl warding_charm_generated
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd warding_charm_generated.png
 
-newmtl MAT_Sapphire
-Ns 640.000000
-Ka 0.100000 0.100000 0.100000
-Kd 0.025000 0.200000 0.680000
+pass uv add 0.18 assets/models/items/warding_charm_generated.png
+newmtl warding_charm_ivory_edge
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.880000 0.760000 0.560000
 Ks 0.500000 0.500000 0.500000
-Ke 0.006000 0.084000 0.600000
+Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+
+newmtl warding_charm_knotted_cord
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.610000 0.180000 0.120000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

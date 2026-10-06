@@ -1,0 +1,41 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "stem": "passage_buckler",
+      "prompt": "Use case: stylized-concept. Asset type: orthographic albedo art and silhouette guide for an editable 3D RPG buckler. Generate ONE isolated front-facing shield face, square canvas, transparent background, complete object with generous padding. Passage Buckler: a squat eight-sided amber-bronze buckler, thick warm brass boundary, blue-green patina in recessed broad channels, a large raised-looking central bridge/door arch emblem in pale gold, six substantial dark iron rivet heads around the perimeter. Strong broad material masses and very clear silhouette, inviting hand-painted late-1990s RPG item art, restrained surface wear. FLAT ORTHOGRAPHIC front, no perspective and no side visible. Front fills about 80 percent of canvas. This image will be mapped to actual curved 3D geometry; use nearly unlit diffuse colour, only subtle painted depth cues, NO cast shadow, NO glossy hotspots, NO environmental reflections, NO black outlines, NO text or lettering, NO extra objects, NO background, NO watermark. Preserve the eight-sided perimeter as one connected opaque silhouette; do not include straps or a rear handle.",
+      "sourceImage": "projects/hichaukitoden-game/assets/authoring/items/_textures/passage_buckler_generated.png",
+      "sha256": "f266cb2c2f7193e9e9aaf9c9da4bd460dcaa085867920aaa3526fff9999a39d2",
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "imageMode": "RGBA",
+      "use": "front surface and alpha silhouette"
+    },
+    {
+      "stem": "warding_charm",
+      "prompt": "Use case: stylized-concept. Asset type: orthographic painted front surface and silhouette guide for an editable 3D RPG charm. Generate ONE isolated front-facing amulet body on a genuinely transparent background. Warding Charm: a broad ivory ceramic teardrop shield-shaped talisman, rounded wide shoulders, scalloped lower sides ending in one stout point, weathered turquoise glaze on an inset large guardian eye motif, warm dull gold border accents, two broad deliberate repaired fracture lines that make its sacrificial protective purpose visible. Single connected opaque solid body. Strong bold readable shape and material areas, restrained hand-painted RPG art with exquisite but broad ceramic detail. FLAT ORTHOGRAPHIC front, no perspective or side view. Whole body centered, fills about 75 percent of square canvas with generous padding on every side. Diffuse nearly unlit painted colour, avoid dramatic bevel highlights and cast shadows. It will be placed on actual convex thick 3D geometry. No cords, rings, chains, holes, detached fragments, letters, text, runes that resemble letters, glow, background, watermark or additional objects.",
+      "sourceImage": "projects/hichaukitoden-game/assets/authoring/items/_textures/warding_charm_generated.png",
+      "sha256": "4da724c512ff5a509f940e91baf70edebd50eaeb372635f152f81685725407d6",
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "imageMode": "RGBA",
+      "use": "front surface and alpha silhouette"
+    },
+    {
+      "stem": "bone_plate",
+      "prompt": "Use case: stylized-concept. Asset type: front albedo artwork and silhouette guide for editable 3D RPG bone armour. ONE isolated front-facing sturdy bone harness, no wearer, transparent background. Wide convincing shoulders and a compact torso: two LARGE layered ivory bone pauldrons jutting out boldly, broad collar opening, overlapping curved rib plates down the chest, a stout central sternum ridge, two visible dark reddish-brown leather cross straps and a wide leather waist belt with simple bronze clasp. Shoulder masses must be substantial and dominate the silhouette; not little nubs. Pale weathered warm ivory with dark crevices, restrained wear, warm russet leather, no gore. Hand-painted tactile RPG material design with simple broad forms, readable at thumbnail scale. FLAT ORTHOGRAPHIC front, no perspective, no character, no arms or head, no side view, complete whole item with ample transparent margin, about 75 percent canvas. Nearly diffuse unlit surface colour, no dramatic cast shadows or glossy highlights. The artwork will be bound to actual thick curved 3D pieces with separately built shoulders and back harness. No anatomy attached, no words, letters, symbols resembling text, glow, skull face, extra objects, background or watermark. Single connected armour assembly silhouette; obvious chest ribs and strong shoulder plates.",
+      "sourceImage": "projects/hichaukitoden-game/assets/authoring/items/_textures/bone_plate_generated.png",
+      "sha256": "abac88a965bded339ae29dbea2c1fcbd84d1c1226254e2d7f59d1da91e041ae3",
+      "imageSize": [
+        1536,
+        1024
+      ],
+      "imageMode": "RGBA",
+      "use": "reference and bounded ivory texture patch; first full-face armour was rejected"
+    }
+  ]
+}

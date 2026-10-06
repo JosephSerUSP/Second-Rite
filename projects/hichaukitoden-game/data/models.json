@@ -5,8 +5,12 @@
     "sourceUnitsToMapCells": 1,
     "appearance": "obj-mtl",
     "materialSlots": {
-      "frame": { "sourceMaterials": ["ritual_gold"] },
-      "body": { "sourceMaterials": ["aged_cloth"] }
+      "frame": { "sourceMaterials": ["lantern_aged_frame"] },
+      "body": { "sourceMaterials": ["lantern_ivory_wax"] },
+      "brass": { "sourceMaterials": ["lantern_brass_edges"] },
+      "wick": { "sourceMaterials": ["lantern_wick"] },
+      "flame": { "sourceMaterials": ["lantern_amber_flame"] },
+      "flame_heart": { "sourceMaterials": ["lantern_flame_heart"] }
     }
   },
   "system.placeholder_question": {

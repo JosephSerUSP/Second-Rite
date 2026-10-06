@@ -1,0 +1,35 @@
+# Blender 5.2.2 LTS MTL File: 'old_bell.blend'
+# www.blender.org
+
+newmtl old_bell_aged_brass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd old_bell_brass.png
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl old_bell_clapper
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.400000 0.500000 0.540000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
+newmtl old_bell_rubbed_lip
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.940000 0.710000 0.330000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.16 assets/models/matcaps/gold.png

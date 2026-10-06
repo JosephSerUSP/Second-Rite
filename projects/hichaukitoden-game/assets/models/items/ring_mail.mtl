@@ -1,0 +1,44 @@
+# Blender 5.2.2 LTS MTL File: 'ring_mail.blend'
+# www.blender.org
+
+newmtl ring_mail_belt
+Ns 48.400013
+Ka 1.000000 1.000000 1.000000
+Kd 0.300000 0.170000 0.090000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl ring_mail_body
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd ring_mail_body.png
+
+pass sphere add 0.15 assets/models/matcaps/steel.png
+newmtl ring_mail_tabard
+Ns 2.500001
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.513333 0.560000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl ring_mail_trim
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.500000 0.380000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.5 assets/models/matcaps/gold.png

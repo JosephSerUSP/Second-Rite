@@ -23,6 +23,7 @@ uniform float objectYaw;
 uniform float focalLength;
 uniform float aspectRatio;
 uniform vec3 materialColor;
+uniform float bakedLighting;
 vec4 position(mat4 transform_projection, vec4 vertex_position) {
     float c=cos(objectYaw), s=sin(objectYaw);
     vec3 p=VertexPosition.xyz*objectScale;
@@ -30,6 +31,9 @@ vec4 position(mat4 transform_projection, vec4 vertex_position) {
     vec3 n=VertexNormal/objectScale;
     n=normalize(vec3(n.x*c-n.y*s,n.x*s+n.y*c,n.z));
     float light=0.55+0.45*max(0.0,dot(n,normalize(vec3(-0.4,-0.6,1.0))));
+    // A baked appearance consumes its authored illumination (viewport_3d's
+    // bakedLighting contract): draw the atlas as baked, never relit.
+    light=mix(light,1.0,bakedLighting);
     worldColor=vec4(VertexColor.rgb*materialColor*light,VertexColor.a);
     vec3 d=p-cameraPosition;
     float depth=dot(d,cameraForward);
@@ -105,6 +109,7 @@ function view.validate(spec, check, exists, compile)
         for _, key in ipairs({"position","scale","tint"}) do
             validateVector(entity[key],key,false)
         end
+        check(entity.bakedLighting==nil or type(entity.bakedLighting)=="boolean","modelScene bakedLighting must be a boolean")
         for _, key in ipairs({"yaw","visible"}) do
             if type(entity[key])=="string" then check(compile(entity[key]),"modelScene invalid "..key.." expression") end
         end
@@ -166,6 +171,7 @@ function view.draw(x,y,w,h,spec,env)
             shader:send("objectScale",vector(entity.scale,env,"scale",{1,1,1}))
             shader:send("objectYaw",number(entity.yaw,env,"yaw",0))
             local tint=vector(entity.tint,env,"tint",{1,1,1})
+            shader:send("bakedLighting",entity.bakedLighting==true and 1 or 0)
             for _,group in ipairs(model.groups) do
                 local col=group.color or {1,1,1}
                 shader:send("materialColor",{col[1]*tint[1],col[2]*tint[2],col[3]*tint[3]})

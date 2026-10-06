@@ -1,106 +1,543 @@
 {
   "comment": "Authority for the PE Day 1 rough chapter (#1427). tools/build_chapter.py generates data/scenes/<id>.json and assets/models/blockout/<id>.obj from this table. Room order and beats follow the reference-pack Day 1 beat table; layouts are blockout approximations, not the original floorplans. Story text is placeholder paraphrase, not original dialogue.",
-  "start": { "room": "foyer", "x": 0, "y": 0.8 },
+  "start": {
+    "room": "foyer",
+    "x": 0,
+    "y": 0.8
+  },
   "rooms": [
     {
-      "id": "foyer", "name": "Carnegie Hall - lobby",
-      "size": [10, 6], "palette": "lobby",
-      "card": { "once": "seen_arrival", "text": "Christmas Eve, 1997.\nCarnegie Hall, New York.\n\nAya Brea, NYPD, arrives\nfor the opera." },
-      "visitCard": { "flag": "melissa_defeated", "text": "A paramedic patches you up\nand hands you spare rounds.\nHP restored. Ammo +6", "heal": true, "item": ["handgun_ammo", 6] },
+      "id": "foyer",
+      "name": "Carnegie Hall - lobby",
+      "size": [
+        10,
+        6
+      ],
+      "palette": "lobby",
+      "card": {
+        "once": "seen_arrival",
+        "text": "Christmas Eve, 1997.\nCarnegie Hall, New York.\n\nAya Brea, NYPD, arrives\nfor the opera."
+      },
+      "visitCard": {
+        "flag": "melissa_defeated",
+        "text": "A paramedic patches you up\nand hands you spare rounds.\nHP restored. Ammo +6",
+        "heal": true,
+        "item": [
+          "handgun_ammo",
+          6
+        ]
+      },
       "doors": [
-        { "id": "to_auditorium", "wall": "back", "at": 0, "to": "auditorium", "spawn": [0, 0.8], "label": "Auditorium" }
-      ]
+        {
+          "id": "to_auditorium",
+          "wall": "back",
+          "at": 0,
+          "to": "auditorium",
+          "spawn": [
+            0,
+            0.8
+          ],
+          "label": "Auditorium"
+        }
+      ],
+      "environment": "assets/models/rooms/foyer/environment.obj",
+      "camera": {
+        "position": [
+          0,
+          -2.4,
+          3.6
+        ],
+        "target": [
+          0,
+          3.6,
+          0.6
+        ],
+        "fov": 56
+      }
     },
     {
-      "id": "auditorium", "name": "Carnegie Hall - auditorium",
-      "size": [12, 8], "palette": "hall",
-      "card": { "once": "seen_combustion", "text": "On stage, the actress Melissa\nsings... and the audience\nbursts into flame.\n\nOnly you are left standing." },
+      "id": "auditorium",
+      "name": "Carnegie Hall - auditorium",
+      "size": [
+        12,
+        8
+      ],
+      "palette": "hall",
+      "card": {
+        "once": "seen_combustion",
+        "text": "On stage, the actress Melissa\nsings... and the audience\nbursts into flame.\n\nOnly you are left standing."
+      },
       "doors": [
-        { "id": "to_foyer", "wall": "front", "at": 0, "to": "foyer", "spawn": [0, 4.6], "label": "Lobby" },
-        { "id": "to_stage", "wall": "back", "at": 0, "to": "stage", "spawn": [0, 0.8], "label": "Stage" }
-      ]
+        {
+          "id": "to_foyer",
+          "wall": "front",
+          "at": 0,
+          "to": "foyer",
+          "spawn": [
+            0,
+            4.6
+          ],
+          "label": "Lobby"
+        },
+        {
+          "id": "to_stage",
+          "wall": "back",
+          "at": 0,
+          "to": "stage",
+          "spawn": [
+            0,
+            0.8
+          ],
+          "label": "Stage"
+        }
+      ],
+      "camera": {
+        "position": [
+          0,
+          -2.6,
+          4.4
+        ],
+        "target": [
+          0,
+          4.6,
+          0.6
+        ],
+        "fov": 58
+      },
+      "environment": "assets/models/rooms/auditorium/environment.obj"
     },
     {
-      "id": "stage", "name": "Carnegie Hall - stage",
-      "size": [10, 6], "palette": "stage",
-      "encounter": { "troop": "melissa", "enemy": "melissa", "at": [2, 3.5], "cleared": "melissa_defeated",
-                     "after": "Melissa's body twists into\nsomething else. She flees\nbackstage." },
+      "id": "stage",
+      "name": "Carnegie Hall - stage",
+      "size": [
+        10,
+        6
+      ],
+      "palette": "stage",
+      "encounter": {
+        "troop": "melissa",
+        "enemy": "melissa",
+        "at": [
+          2,
+          3.5
+        ],
+        "cleared": "melissa_defeated",
+        "after": "Melissa's body twists into\nsomething else. She flees\nbackstage."
+      },
       "doors": [
-        { "id": "to_auditorium", "wall": "front", "at": 0, "to": "auditorium", "spawn": [0, 6.6], "label": "Auditorium" },
-        { "id": "to_backstage", "wall": "right", "at": 3, "to": "backstage", "spawn": [-3.6, 2.5], "label": "Backstage", "needs": "melissa_defeated", "lockedText": "Not until Melissa is dealt with." }
-      ]
+        {
+          "id": "to_auditorium",
+          "wall": "front",
+          "at": 0,
+          "to": "auditorium",
+          "spawn": [
+            0,
+            6.6
+          ],
+          "label": "Auditorium"
+        },
+        {
+          "id": "to_backstage",
+          "wall": "right",
+          "at": 3,
+          "to": "backstage",
+          "spawn": [
+            -3.6,
+            2.5
+          ],
+          "label": "Backstage",
+          "needs": "melissa_defeated",
+          "lockedText": "Not until Melissa is dealt with."
+        }
+      ],
+      "camera": {
+        "position": [
+          0,
+          -3.2,
+          7.2
+        ],
+        "target": [
+          0,
+          3.0,
+          0
+        ],
+        "fov": 50
+      },
+      "environment": "assets/models/rooms/stage/environment.obj"
     },
     {
-      "id": "backstage", "name": "Carnegie Hall - backstage",
-      "size": [8, 5], "palette": "backstage",
-      "pickups": [ { "id": "backstage_medicine", "at": [3, 4], "item": ["medicine", 1], "text": "Found Medicine." } ],
-      "doors": [
-        { "id": "to_stage", "wall": "left", "at": 2.5, "to": "stage", "spawn": [4.2, 3], "label": "Stage" },
-        { "id": "to_basement", "wall": "back", "at": -2, "to": "basement_rat", "spawn": [-2, 1.2], "label": "Stairs down" },
-        { "id": "to_dressing", "wall": "right", "at": 2.5, "to": "dressing", "spawn": [-3.6, 2.5], "label": "Dressing rooms", "needs": "rat_defeated", "lockedText": "Something scratches below.\nCheck the basement first." }
-      ]
-    },
-    {
-      "id": "basement_rat", "name": "Carnegie Hall - basement",
-      "corridor": true,
-      "card": { "once": "seen_child", "text": "A small girl watches you\nfrom the dark, then is gone.\n\nA rat convulses... and grows." },
-      "encounter": { "troop": "basement_rat", "enemy": "rat", "at": [2, 2], "cleared": "rat_defeated",
-                     "after": "The thing that was a rat\nlies still." },
-      "doors": [
-        { "id": "to_backstage", "wall": "front", "at": -1.5, "to": "backstage", "spawn": [-2, 4.2], "label": "Stairs up" }
-      ]
-    },
-    {
-      "id": "dressing", "name": "Carnegie Hall - dressing rooms",
-      "size": [10, 6], "palette": "dressing",
-      "card": { "once": "seen_clown", "text": "A dying clown mutters about\nthe singer, then goes still.\nA parrot repeats his words." },
+      "id": "backstage",
+      "name": "Carnegie Hall - backstage",
+      "size": [
+        8,
+        5
+      ],
+      "palette": "backstage",
       "pickups": [
-        { "id": "rehearsal_key", "at": [-3.5, 4.5], "flag": "has_rehearsal_key", "text": "Found the Rehearsal Room key." },
-        { "id": "diary", "at": [3.5, 4.5], "text": "Melissa's diary:\n'Tonight I play the part\nalone... I can feel it.'" },
-        { "id": "dressing_ammo", "at": [0, 5], "item": ["handgun_ammo", 12], "text": "Found handgun rounds. Ammo +12" }
+        {
+          "id": "backstage_medicine",
+          "at": [
+            3,
+            4
+          ],
+          "item": [
+            "medicine",
+            1
+          ],
+          "text": "Found Medicine."
+        }
       ],
       "doors": [
-        { "id": "to_backstage", "wall": "left", "at": 2.5, "to": "backstage", "spawn": [3.6, 2.5], "label": "Backstage" },
-        { "id": "to_rehearsal", "wall": "right", "at": 3, "to": "rehearsal", "spawn": [-4.2, 3], "label": "Rehearsal Room", "needs": "has_rehearsal_key", "lockedText": "Locked. There must be a key." }
-      ]
+        {
+          "id": "to_stage",
+          "wall": "left",
+          "at": 2.5,
+          "to": "stage",
+          "spawn": [
+            4.2,
+            3
+          ],
+          "label": "Stage"
+        },
+        {
+          "id": "to_basement",
+          "wall": "back",
+          "at": -2,
+          "to": "basement_rat",
+          "spawn": [
+            -2,
+            1.2
+          ],
+          "label": "Stairs down"
+        },
+        {
+          "id": "to_dressing",
+          "wall": "right",
+          "at": 2.5,
+          "to": "dressing",
+          "spawn": [
+            -3.6,
+            2.5
+          ],
+          "label": "Dressing rooms",
+          "needs": "rat_defeated",
+          "lockedText": "Something scratches below.\nCheck the basement first."
+        }
+      ],
+      "camera": {
+        "position": [
+          0,
+          -2.6,
+          4.6
+        ],
+        "target": [
+          0,
+          2.8,
+          0.4
+        ],
+        "fov": 54
+      },
+      "environment": "assets/models/rooms/backstage/environment.obj"
     },
     {
-      "id": "rehearsal", "name": "Carnegie Hall - rehearsal room",
-      "size": [10, 6], "palette": "rehearsal",
-      "card": { "once": "seen_piano", "text": "Someone is playing the piano." },
-      "encounter": { "troop": "eve", "enemy": "eve", "at": [2, 4], "cleared": "eve_defeated",
-                     "after": "She calls herself Eve.\nShe slips away through\na hatch to the sewers." },
+      "id": "basement_rat",
+      "name": "Carnegie Hall - basement",
+      "corridor": true,
+      "card": {
+        "once": "seen_child",
+        "text": "A small girl watches you\nfrom the dark, then is gone.\n\nA rat convulses... and grows."
+      },
+      "encounter": {
+        "troop": "basement_rat",
+        "enemy": "rat",
+        "at": [
+          2,
+          2
+        ],
+        "cleared": "rat_defeated",
+        "after": "The thing that was a rat\nlies still."
+      },
       "doors": [
-        { "id": "to_dressing", "wall": "left", "at": 3, "to": "dressing", "spawn": [4.2, 3], "label": "Dressing rooms" },
-        { "id": "to_sewer", "wall": "back", "at": 3, "to": "sewer", "spawn": [-4, 0.8], "label": "Sewer hatch", "needs": "eve_defeated", "lockedText": "Not while she's here." }
+        {
+          "id": "to_backstage",
+          "wall": "front",
+          "at": -1.5,
+          "to": "backstage",
+          "spawn": [
+            -2,
+            4.2
+          ],
+          "label": "Stairs up"
+        }
       ]
     },
     {
-      "id": "sewer", "name": "Sewers",
-      "size": [12, 5], "palette": "sewer",
-      "encounter": { "troop": "sewer_rats", "enemy": "rat", "at": [3, 3], "cleared": "sewer_rats_cleared",
-                     "after": "The tunnel goes quiet." },
-      "pickups": [ { "id": "sewer_medicine", "at": [-4.5, 4], "item": ["medicine", 1], "text": "Found Medicine." } ],
+      "id": "dressing",
+      "name": "Carnegie Hall - dressing rooms",
+      "size": [
+        10,
+        6
+      ],
+      "palette": "dressing",
+      "card": {
+        "once": "seen_clown",
+        "text": "A dying clown mutters about\nthe singer, then goes still.\nA parrot repeats his words."
+      },
+      "pickups": [
+        {
+          "id": "rehearsal_key",
+          "at": [
+            -3.5,
+            4.5
+          ],
+          "flag": "has_rehearsal_key",
+          "text": "Found the Rehearsal Room key."
+        },
+        {
+          "id": "diary",
+          "at": [
+            3.5,
+            4.5
+          ],
+          "text": "Melissa's diary:\n'Tonight I play the part\nalone... I can feel it.'"
+        },
+        {
+          "id": "dressing_ammo",
+          "at": [
+            0,
+            5
+          ],
+          "item": [
+            "handgun_ammo",
+            12
+          ],
+          "text": "Found handgun rounds. Ammo +12"
+        }
+      ],
       "doors": [
-        { "id": "to_rehearsal", "wall": "front", "at": -4, "to": "rehearsal", "spawn": [3, 4.6], "label": "Hatch up" },
-        { "id": "to_sewer_deep", "wall": "right", "at": 2.5, "to": "sewer_deep", "spawn": [-4.6, 2.5], "label": "Deeper", "needs": "sewer_rats_cleared", "lockedText": "Clear the tunnel first." }
-      ]
+        {
+          "id": "to_backstage",
+          "wall": "left",
+          "at": 2.5,
+          "to": "backstage",
+          "spawn": [
+            3.6,
+            2.5
+          ],
+          "label": "Backstage"
+        },
+        {
+          "id": "to_rehearsal",
+          "wall": "right",
+          "at": 3,
+          "to": "rehearsal",
+          "spawn": [
+            -4.2,
+            3
+          ],
+          "label": "Rehearsal Room",
+          "needs": "has_rehearsal_key",
+          "lockedText": "Locked. There must be a key."
+        }
+      ],
+      "camera": {
+        "position": [
+          0,
+          -2.4,
+          4.0
+        ],
+        "target": [
+          0,
+          3.6,
+          0.6
+        ],
+        "fov": 56
+      },
+      "environment": "assets/models/rooms/dressing/environment.obj"
     },
     {
-      "id": "sewer_deep", "name": "Sewers - drainage",
-      "size": [12, 6], "palette": "sewer",
-      "card": { "once": "seen_gator", "text": "Something huge moves\nunder the water." },
-      "encounter": { "troop": "alligator", "enemy": "alligator", "at": [2, 3.5], "cleared": "alligator_defeated",
-                     "after": "The alligator sinks.\nAhead, a ladder to the street." },
+      "id": "rehearsal",
+      "name": "Carnegie Hall - rehearsal room",
+      "size": [
+        10,
+        6
+      ],
+      "palette": "rehearsal",
+      "card": {
+        "once": "seen_piano",
+        "text": "Someone is playing the piano."
+      },
+      "encounter": {
+        "troop": "eve",
+        "enemy": "eve",
+        "at": [
+          2,
+          4
+        ],
+        "cleared": "eve_defeated",
+        "after": "She calls herself Eve.\nShe slips away through\na hatch to the sewers."
+      },
       "doors": [
-        { "id": "to_sewer", "wall": "left", "at": 2.5, "to": "sewer", "spawn": [4.6, 2.5], "label": "Back" },
-        { "id": "to_exit", "wall": "right", "at": 3, "to": "street", "spawn": [0, 0.8], "label": "Ladder", "needs": "alligator_defeated", "lockedText": "It's blocking the way." }
+        {
+          "id": "to_dressing",
+          "wall": "left",
+          "at": 3,
+          "to": "dressing",
+          "spawn": [
+            4.2,
+            3
+          ],
+          "label": "Dressing rooms"
+        },
+        {
+          "id": "to_sewer",
+          "wall": "back",
+          "at": 3,
+          "to": "sewer",
+          "spawn": [
+            -4,
+            0.8
+          ],
+          "label": "Sewer hatch",
+          "needs": "eve_defeated",
+          "lockedText": "Not while she's here."
+        }
+      ],
+      "camera": {
+        "position": [
+          1.2,
+          -2.6,
+          6.4
+        ],
+        "target": [
+          0,
+          3.2,
+          0
+        ],
+        "fov": 52
+      },
+      "environment": "assets/models/rooms/rehearsal/environment.obj"
+    },
+    {
+      "id": "sewer",
+      "name": "Sewers",
+      "size": [
+        12,
+        5
+      ],
+      "palette": "sewer",
+      "encounter": {
+        "troop": "sewer_rats",
+        "enemy": "rat",
+        "at": [
+          3,
+          3
+        ],
+        "cleared": "sewer_rats_cleared",
+        "after": "The tunnel goes quiet."
+      },
+      "pickups": [
+        {
+          "id": "sewer_medicine",
+          "at": [
+            -4.5,
+            4
+          ],
+          "item": [
+            "medicine",
+            1
+          ],
+          "text": "Found Medicine."
+        }
+      ],
+      "doors": [
+        {
+          "id": "to_rehearsal",
+          "wall": "front",
+          "at": -4,
+          "to": "rehearsal",
+          "spawn": [
+            3,
+            4.6
+          ],
+          "label": "Hatch up"
+        },
+        {
+          "id": "to_sewer_deep",
+          "wall": "right",
+          "at": 2.5,
+          "to": "sewer_deep",
+          "spawn": [
+            -4.6,
+            2.5
+          ],
+          "label": "Deeper",
+          "needs": "sewer_rats_cleared",
+          "lockedText": "Clear the tunnel first."
+        }
       ]
     },
     {
-      "id": "street", "name": "Central Park West",
-      "size": [8, 5], "palette": "street",
-      "card": { "text": "Day 1 - Resonance\n\nEnd of the vertical slice.\nThanks for playing.", "then": "title" },
+      "id": "sewer_deep",
+      "name": "Sewers - drainage",
+      "size": [
+        12,
+        6
+      ],
+      "palette": "sewer",
+      "card": {
+        "once": "seen_gator",
+        "text": "Something huge moves\nunder the water."
+      },
+      "encounter": {
+        "troop": "alligator",
+        "enemy": "alligator",
+        "at": [
+          2,
+          3.5
+        ],
+        "cleared": "alligator_defeated",
+        "after": "The alligator sinks.\nAhead, a ladder to the street."
+      },
+      "doors": [
+        {
+          "id": "to_sewer",
+          "wall": "left",
+          "at": 2.5,
+          "to": "sewer",
+          "spawn": [
+            4.6,
+            2.5
+          ],
+          "label": "Back"
+        },
+        {
+          "id": "to_exit",
+          "wall": "right",
+          "at": 3,
+          "to": "street",
+          "spawn": [
+            0,
+            0.8
+          ],
+          "label": "Ladder",
+          "needs": "alligator_defeated",
+          "lockedText": "It's blocking the way."
+        }
+      ]
+    },
+    {
+      "id": "street",
+      "name": "Central Park West",
+      "size": [
+        8,
+        5
+      ],
+      "palette": "street",
+      "card": {
+        "text": "Day 1 - Resonance\n\nEnd of the vertical slice.\nThanks for playing.",
+        "then": "title"
+      },
       "doors": []
     }
   ]

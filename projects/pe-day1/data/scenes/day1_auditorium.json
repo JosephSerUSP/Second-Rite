@@ -23,15 +23,15 @@
         "camera": {
           "position": [
             0,
-            -5.9,
-            9.4
+            -2.6,
+            4.4
           ],
           "target": [
             0,
-            3.84,
-            0.4
+            4.6,
+            0.6
           ],
-          "fov": 44
+          "fov": 58
         },
         "background": [
           0.025,
@@ -41,14 +41,15 @@
         "models": [
           {
             "id": "room",
-            "model": "assets/models/blockout/auditorium.obj",
+            "model": "assets/models/rooms/auditorium/environment.obj",
             "position": [
               0,
               0,
               0
             ],
             "yaw": 0,
-            "visible": "true"
+            "visible": "true",
+            "bakedLighting": true
           },
           {
             "id": "door_to_foyer",
@@ -92,7 +93,7 @@
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
           },
           {
             "id": "aya_walk_a",

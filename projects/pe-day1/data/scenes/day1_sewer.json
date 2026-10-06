@@ -74,11 +74,16 @@
           },
           {
             "id": "pickup_sewer_medicine",
-            "model": "assets/models/blockout/pickup.obj",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
             "position": [
               -4.5,
               4,
-              0
+              0.15
             ],
             "yaw": "sceneState.gait * 0.25",
             "visible": "sceneState.f_got_sewer_medicine == 0"
@@ -103,7 +108,7 @@
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
           },
           {
             "id": "aya_walk_a",

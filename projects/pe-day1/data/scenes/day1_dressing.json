@@ -23,15 +23,15 @@
         "camera": {
           "position": [
             0,
-            -4.800000000000001,
-            7.699999999999999
+            -2.4,
+            4.0
           ],
           "target": [
             0,
-            2.88,
-            0.4
+            3.6,
+            0.6
           ],
-          "fov": 44
+          "fov": 56
         },
         "background": [
           0.025,
@@ -41,14 +41,15 @@
         "models": [
           {
             "id": "room",
-            "model": "assets/models/blockout/dressing.obj",
+            "model": "assets/models/rooms/dressing/environment.obj",
             "position": [
               0,
               0,
               0
             ],
             "yaw": 0,
-            "visible": "true"
+            "visible": "true",
+            "bakedLighting": true
           },
           {
             "id": "door_to_backstage",
@@ -74,33 +75,48 @@
           },
           {
             "id": "pickup_rehearsal_key",
-            "model": "assets/models/blockout/pickup.obj",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
             "position": [
               -3.5,
               4.5,
-              0
+              0.15
             ],
             "yaw": "sceneState.gait * 0.25",
             "visible": "sceneState.f_got_rehearsal_key == 0"
           },
           {
             "id": "pickup_diary",
-            "model": "assets/models/blockout/pickup.obj",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
             "position": [
               3.5,
               4.5,
-              0
+              0.15
             ],
             "yaw": "sceneState.gait * 0.25",
             "visible": "sceneState.f_got_diary == 0"
           },
           {
             "id": "pickup_dressing_ammo",
-            "model": "assets/models/blockout/pickup.obj",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
             "position": [
               0,
               5,
-              0
+              0.15
             ],
             "yaw": "sceneState.gait * 0.25",
             "visible": "sceneState.f_got_dressing_ammo == 0"
@@ -125,7 +141,7 @@
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
           },
           {
             "id": "aya_walk_a",

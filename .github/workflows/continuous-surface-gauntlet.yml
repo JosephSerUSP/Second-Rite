@@ -1,0 +1,77 @@
+name: continuous surface gauntlet
+
+on:
+  pull_request:
+    paths:
+      - 'runtime/engine/continuous_surface.lua'
+      - 'runtime/engine/continuous_surface_provider.lua'
+      - 'runtime/engine/traversal_host.lua'
+      - 'runtime/engine/player_controller.lua'
+      - 'runtime/presentation/continuous_surface_world.lua'
+      - 'runtime/presentation/world_renderer.lua'
+      - 'projects/experiments/continuous-surface-gauntlet/**'
+      - 'tools/spikes/continuous-surface/**'
+      - '.github/workflows/continuous-surface-gauntlet.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  standalone-project:
+    name: standalone Project (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+
+      - name: Assert Project-owned data and assets do not reference Second Gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'projects/experiments/continuous-surface-gauntlet'
+          $owned = @((Join-Path $root 'data'), (Join-Path $root 'assets'))
+          $hits = Get-ChildItem $owned -Recurse -File |
+            Select-String -SimpleMatch 'hichaukitoden-game'
+          if ($hits) {
+            $hits | ForEach-Object { Write-Host $_ }
+            throw 'standalone gauntlet Project data/assets reference Second Gate'
+          }
+
+      - name: Stage only the experiment Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP 'continuous-surface-gauntlet-stage'
+          node tools/ci/stage-project-gates.js `
+            --project projects/experiments/continuous-surface-gauntlet `
+            --output $stage
+          if ($LASTEXITCODE -ne 0) { throw "Project staging failed (exit $LASTEXITCODE)" }
+          "GAUNTLET_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          if (-not (Test-Path (Join-Path $stage 'data/project.json'))) {
+            throw 'staged Project is missing data/project.json'
+          }
+          if (-not (Test-Path (Join-Path $stage 'assets/environments/archive_antechamber/environment.json'))) {
+            throw 'staged Project is missing its own environment package'
+          }
+
+      - name: Validate the staged Project
+        shell: pwsh
+        run: |
+          & $env:LOVEC $env:GAUNTLET_STAGE validate
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet validate failed (exit $LASTEXITCODE)" }
+
+      - name: Continuous traversal semantic assertions
+        shell: pwsh
+        run: |
+          & $env:LOVEC tools/spikes/continuous-surface --test-only
+          if ($LASTEXITCODE -ne 0) { throw "continuous-surface spike failed (exit $LASTEXITCODE)" }

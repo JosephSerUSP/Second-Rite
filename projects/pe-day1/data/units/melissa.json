@@ -1,0 +1,26 @@
+{
+  "id": "melissa",
+  "name": "Melissa",
+  "level": 1,
+  "skills": [
+    "rat_bite",
+    "rat_fire_tail"
+  ],
+  "flavor": "Placeholder boss (#1427 rough chapter). HP and attacks reuse the rat kit; original values unverified.",
+  "baseParams": {
+    "maxHp": 60,
+    "atk": 8,
+    "def": 6,
+    "mat": 6,
+    "mdf": 6,
+    "mpd": 1,
+    "asp": 10
+  },
+  "growthBands": [],
+  "realtime": {
+    "approach": {
+      "speed": 0.016,
+      "stopAt": 2.0
+    }
+  }
+}

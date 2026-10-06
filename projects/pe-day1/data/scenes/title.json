@@ -75,7 +75,7 @@
           {
             "cmd": "SCENE_EVENT",
             "kind": "push",
-            "scene": "basement_rat"
+            "scene": "day1_foyer"
           }
         ]
       },

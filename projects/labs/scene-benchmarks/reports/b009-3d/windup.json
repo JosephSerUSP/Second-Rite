@@ -1,0 +1,122 @@
+{
+  "auditState": {
+    "actionTimer": 0,
+    "aim": 2.9441970937399122,
+    "atb": 66,
+    "distance": 2.6790195135927597,
+    "dx": 0,
+    "dy": 0,
+    "ehp": 100,
+    "enemyMode": 1,
+    "enemyTimer": 0.8166666666666661,
+    "ex": 0.5253989529655906,
+    "ey": 3.6269947648279484,
+    "flash": 0,
+    "gait": 26.399999999999938,
+    "hp": 100,
+    "input": {
+      "A": false,
+      "B": false,
+      "DOWN": false,
+      "L": false,
+      "LEFT": false,
+      "R": false,
+      "RIGHT": false,
+      "SELECT": false,
+      "START": false,
+      "UP": false,
+      "X": false,
+      "Y": false
+    },
+    "mode": 0,
+    "norm": 1,
+    "px": 0,
+    "py": 1,
+    "range": 4,
+    "ratAim": -0.19739555984988108,
+    "status": "WIND-UP! Leave the red ring.",
+    "tx": 0,
+    "ty": 1
+  },
+  "frameKind": "windows",
+  "gameHeight": 240,
+  "gameWidth": 256,
+  "sceneId": "b009_positioning",
+  "sceneName": "B009 - Carnegie Hall encounter",
+  "tileSize": 8,
+  "windows": [
+    {
+      "hasLayout": false,
+      "height": 22,
+      "id": "world",
+      "open": true,
+      "style": "modelScene",
+      "width": 32,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "location",
+      "open": true,
+      "style": "frame",
+      "text": "CARNEGIE HALL - CHRISTMAS EVE",
+      "width": 30,
+      "x": 1,
+      "y": 0.5
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "aya_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 0,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "rat_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 11,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "atb",
+      "open": true,
+      "style": "frame",
+      "width": 10,
+      "x": 22,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "feedback",
+      "open": true,
+      "style": "frame",
+      "text": "WIND-UP! Leave the red ring.",
+      "width": 32,
+      "x": 0,
+      "y": 25
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "controls",
+      "open": true,
+      "style": "frame",
+      "text": "Arrows move   Enter fire   Esc back",
+      "width": 32,
+      "x": 0,
+      "y": 27.5
+    }
+  ]
+}

@@ -13,6 +13,10 @@ local formula = {}
 -- harness depends on it — so never reseed here.
 local HELPERS = {
     random = math.random,
+    sin = math.sin,
+    cos = math.cos,
+    sqrt = math.sqrt,
+    atan2 = math.atan2,
     floor = math.floor,
     ceil = math.ceil,
     abs = math.abs,

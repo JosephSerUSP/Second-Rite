@@ -1,146 +1,268 @@
 {
   "id": "b009_positioning",
-  "terminal": {
-    "reached": "sceneState.ehp <= 0"
-  },
-  "name": "B009 — Parasite-Eve-Like Positioning Proof",
+  "name": "B009 - Carnegie Hall encounter",
   "kind": "menu",
   "draw": "windows",
+  "terminal": {
+    "reached": "sceneState.mode == 2"
+  },
   "update": {
     "mode": "fixed",
-    "step": 0.0166666666666667,
-    "maxCatchUp": 8
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
   },
   "windows": [
     {
-      "id": "title",
+      "id": "world",
       "rect": {
-        "x": 2,
-        "y": 1,
-        "w": 28,
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 22
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            0,
+            -8,
+            7
+          ],
+          "target": [
+            0,
+            5,
+            1
+          ],
+          "fov": 43
+        },
+        "background": [
+          0.035,
+          0.028,
+          0.035
+        ],
+        "models": [
+          {
+            "id": "hall",
+            "model": "assets/models/b009/hall.obj",
+            "position": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "range",
+            "model": "assets/models/b009/range.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              0.05
+            ],
+            "scale": [
+              "sceneState.range",
+              "sceneState.range",
+              1
+            ],
+            "visible": "sceneState.mode < 2"
+          },
+          {
+            "id": "danger",
+            "model": "assets/models/b009/danger.obj",
+            "position": [
+              "sceneState.tx",
+              "sceneState.ty",
+              0.07
+            ],
+            "scale": [
+              1.3,
+              1.3,
+              1
+            ],
+            "visible": "sceneState.enemyMode == 1 and sceneState.mode < 2"
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/b009/aya.obj",
+            "position": [
+              "sceneState.px",
+              "sceneState.py",
+              "sceneState.mode < 2 and sceneState.input and (sceneState.input.UP or sceneState.input.DOWN or sceneState.input.LEFT or sceneState.input.RIGHT) and abs(sin(sceneState.gait))*.035 or 0"
+            ],
+            "yaw": "sceneState.aim"
+          },
+          {
+            "id": "rat",
+            "model": "assets/models/b009/rat.obj",
+            "position": [
+              "sceneState.ex",
+              "sceneState.ey",
+              0
+            ],
+            "yaw": "sceneState.ratAim",
+            "scale": [
+              1.3,
+              1.3,
+              "sceneState.mode == 2 and .12 or 1.3"
+            ],
+            "tint": [
+              1,
+              "sceneState.flash > 0 and .35 or 1",
+              "sceneState.flash > 0 and .35 or 1"
+            ]
+          },
+          {
+            "id": "muzzle",
+            "model": "assets/models/b009/spark.obj",
+            "position": [
+              "sceneState.px+sin(sceneState.aim)*.72",
+              "sceneState.py-cos(sceneState.aim)*.72",
+              1.47
+            ],
+            "visible": "sceneState.flash > 0"
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "location",
+      "rect": {
+        "x": 1,
+        "y": 0.5,
+        "w": 30,
+        "h": 2.5
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "CARNEGIE HALL - CHRISTMAS EVE"
+        }
+      ]
+    },
+    {
+      "id": "aya_hp",
+      "rect": {
+        "x": 0,
+        "y": 22,
+        "w": 11,
         "h": 3
       },
       "style": "frame",
       "content": [
         {
-          "type": "text",
-          "text": "B009 — Positioning Proof   State: {sceneState.stateText}"
+          "type": "gauge",
+          "x": 0.7,
+          "y": 0.7,
+          "width": 9.6,
+          "label": "AYA HP",
+          "value": "sceneState.hp",
+          "max": "100",
+          "fill": [
+            0.2,
+            0.65,
+            0.6
+          ],
+          "color": [
+            0.05,
+            0.05,
+            0.07
+          ]
         }
       ]
     },
     {
-      "id": "arena",
+      "id": "rat_hp",
       "rect": {
-        "x": 2,
-        "y": 4,
-        "w": 28,
-        "h": 16
-      },
-      "style": "frame",
-      "content": []
-    },
-    {
-      "id": "player",
-      "rect": {
-        "x": "2 + 1 + sceneState.px",
-        "y": "4 + 1 + sceneState.py",
-        "w": 1,
-        "h": 1
-      },
-      "style": "panel",
-      "content": [
-        {
-          "type": "text",
-          "text": "@"
-        }
-      ]
-    },
-    {
-      "id": "enemy",
-      "rect": {
-        "x": "2 + 1 + sceneState.ex",
-        "y": "4 + 1 + sceneState.ey",
-        "w": 1,
-        "h": 1
-      },
-      "style": "panel",
-      "content": [
-        {
-          "type": "text",
-          "text": "E"
-        }
-      ]
-    },
-    {
-      "id": "target_area",
-      "rect": {
-        "x": "2 + 1 + sceneState.px - sceneState.range",
-        "y": "4 + 1 + sceneState.py - sceneState.range",
-        "w": "sceneState.range * 2 + 1",
-        "h": "sceneState.range * 2 + 1"
-      },
-      "style": "frame",
-      "content": []
-    },
-    {
-      "id": "atb_gauge",
-      "rect": {
-        "x": 2,
-        "y": 20,
-        "w": 14,
-        "h": 4
+        "x": 11,
+        "y": 22,
+        "w": 11,
+        "h": 3
       },
       "style": "frame",
       "content": [
         {
           "type": "gauge",
-          "x": 1,
-          "y": 1,
-          "width": 12,
+          "x": 0.7,
+          "y": 0.7,
+          "width": 9.6,
+          "label": "RAT HP",
+          "value": "sceneState.ehp",
+          "max": "100",
+          "fill": [
+            0.7,
+            0.16,
+            0.12
+          ],
+          "color": [
+            0.05,
+            0.05,
+            0.07
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atb",
+      "rect": {
+        "x": 22,
+        "y": 22,
+        "w": 10,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "gauge",
+          "x": 0.7,
+          "y": 0.7,
+          "width": 8.6,
           "label": "ATB",
           "value": "sceneState.atb",
           "max": "100",
-          "color": [
-            0.2,
-            0.2,
-            0.2
-          ],
           "fill": [
-            0,
-            1,
-            0
+            0.7,
+            0.62,
+            0.18
+          ],
+          "color": [
+            0.05,
+            0.05,
+            0.07
           ]
         }
       ]
     },
     {
-      "id": "hp_gauge",
+      "id": "feedback",
       "rect": {
-        "x": 16,
-        "y": 20,
-        "w": 14,
-        "h": 4
+        "x": 0,
+        "y": 25,
+        "w": 32,
+        "h": 2.5
       },
       "style": "frame",
       "content": [
         {
-          "type": "gauge",
-          "x": 1,
-          "y": 1,
-          "width": 12,
-          "label": "Enemy HP",
-          "value": "sceneState.ehp",
-          "max": "100",
-          "color": [
-            0.2,
-            0.2,
-            0.2
-          ],
-          "fill": [
-            1,
-            0,
-            0
-          ]
+          "type": "text",
+          "text": "{sceneState.status}"
+        }
+      ]
+    },
+    {
+      "id": "controls",
+      "rect": {
+        "x": 0,
+        "y": 27.5,
+        "w": 32,
+        "h": 2.5
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "Arrows move   Enter fire   Esc back"
         }
       ]
     }
@@ -148,61 +270,483 @@
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SCRIPT",
-        "ref": "init"
-      }
-    ],
-    "on_frame": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "update"
-      },
-      {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
-            "name": "inputX",
+            "name": "px",
             "value": 0
           },
           {
-            "name": "inputY",
+            "name": "py",
+            "value": 1
+          },
+          {
+            "name": "ex",
+            "value": 1
+          },
+          {
+            "name": "ey",
+            "value": 6
+          },
+          {
+            "name": "atb",
+            "value": 0
+          },
+          {
+            "name": "hp",
+            "value": 100
+          },
+          {
+            "name": "ehp",
+            "value": 100
+          },
+          {
+            "name": "mode",
+            "value": 0
+          },
+          {
+            "name": "actionTimer",
+            "value": 0
+          },
+          {
+            "name": "enemyMode",
+            "value": 0
+          },
+          {
+            "name": "enemyTimer",
+            "value": 2
+          },
+          {
+            "name": "tx",
+            "value": 0
+          },
+          {
+            "name": "ty",
+            "value": 0
+          },
+          {
+            "name": "flash",
+            "value": 0
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "status",
+            "value": "'Move closer. Enter fires at full ATB.'"
+          },
+          {
+            "name": "gait",
             "value": 0
           }
         ]
       }
     ],
-    "on_up": [
+    "on_frame": [
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
       {
         "cmd": "SET_SCENE_STATE",
-        "name": "inputY",
-        "value": -1
-      }
-    ],
-    "on_down": [
+        "name": "flash",
+        "value": "max(0,sceneState.flash-time.dt)"
+      },
       {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputY",
-        "value": 1
-      }
-    ],
-    "on_left": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputX",
-        "value": -1
-      }
-    ],
-    "on_right": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "inputX",
-        "value": 1
+        "cmd": "IF",
+        "condition": "sceneState.mode < 2",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "(sceneState.input.RIGHT and 1 or 0)-(sceneState.input.LEFT and 1 or 0)"
+              },
+              {
+                "name": "dy",
+                "value": "(sceneState.input.UP and 1 or 0)-(sceneState.input.DOWN and 1 or 0)"
+              },
+              {
+                "name": "actionTimer",
+                "value": "max(0,sceneState.actionTimer-time.dt)"
+              },
+              {
+                "name": "atb",
+                "value": "min(100,sceneState.atb+30*time.dt)"
+              },
+              {
+                "name": "gait",
+                "value": "sceneState.gait+time.dt*12"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "norm",
+                "value": "max(1,sqrt(sceneState.dx^2+sceneState.dy^2))"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.actionTimer <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "px",
+                    "value": "clamp(sceneState.px+sceneState.dx/sceneState.norm*3*time.dt,-2.8,2.8)"
+                  },
+                  {
+                    "name": "py",
+                    "value": "clamp(sceneState.py+sceneState.dy/sceneState.norm*3*time.dt,-1,9.5)"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "distance",
+                "value": "sqrt((sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2)"
+              },
+              {
+                "name": "aim",
+                "value": "atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
+              },
+              {
+                "name": "ratAim",
+                "value": "atan2(sceneState.px-sceneState.ex,sceneState.ey-sceneState.py)"
+              },
+              {
+                "name": "enemyTimer",
+                "value": "sceneState.enemyTimer-time.dt"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.enemyMode == 0",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.distance > 1.4",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ex",
+                        "value": "sceneState.ex+(sceneState.px-sceneState.ex)/max(.01,sceneState.distance)*1.2*time.dt"
+                      },
+                      {
+                        "name": "ey",
+                        "value": "sceneState.ey+(sceneState.py-sceneState.ey)/max(.01,sceneState.distance)*1.2*time.dt"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.enemyTimer <= 0",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "enemyMode",
+                        "value": 1
+                      },
+                      {
+                        "name": "enemyTimer",
+                        "value": 1
+                      },
+                      {
+                        "name": "tx",
+                        "value": "sceneState.px"
+                      },
+                      {
+                        "name": "ty",
+                        "value": "sceneState.py"
+                      },
+                      {
+                        "name": "status",
+                        "value": "'WIND-UP! Leave the red ring.'"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.enemyTimer <= 0",
+                "then": [
+                  {
+                    "cmd": "IF",
+                    "condition": "(sceneState.px-sceneState.tx)^2+(sceneState.py-sceneState.ty)^2 <= 1.3^2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "hp",
+                            "value": "max(0,sceneState.hp-18)"
+                          },
+                          {
+                            "name": "status",
+                            "value": "'Clawed! Move during the wind-up.'"
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "status",
+                            "value": "'Evaded. Reposition and fire.'"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "enemyMode",
+                        "value": 0
+                      },
+                      {
+                        "name": "enemyTimer",
+                        "value": 2.2
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.hp <= 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "mode",
+                    "value": 3
+                  },
+                  {
+                    "name": "atb",
+                    "value": 0
+                  },
+                  {
+                    "name": "status",
+                    "value": "'AYA DOWN. Enter retry / Esc back.'"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_select": [
       {
-        "cmd": "SCRIPT",
-        "ref": "action"
+        "cmd": "IF",
+        "condition": "sceneState.mode >= 2",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "px",
+                "value": 0
+              },
+              {
+                "name": "py",
+                "value": 1
+              },
+              {
+                "name": "ex",
+                "value": 1
+              },
+              {
+                "name": "ey",
+                "value": 6
+              },
+              {
+                "name": "atb",
+                "value": 0
+              },
+              {
+                "name": "hp",
+                "value": 100
+              },
+              {
+                "name": "ehp",
+                "value": 100
+              },
+              {
+                "name": "mode",
+                "value": 0
+              },
+              {
+                "name": "actionTimer",
+                "value": 0
+              },
+              {
+                "name": "enemyMode",
+                "value": 0
+              },
+              {
+                "name": "enemyTimer",
+                "value": 2
+              },
+              {
+                "name": "tx",
+                "value": 0
+              },
+              {
+                "name": "ty",
+                "value": 0
+              },
+              {
+                "name": "flash",
+                "value": 0
+              },
+              {
+                "name": "range",
+                "value": 4
+              },
+              {
+                "name": "aim",
+                "value": 0
+              },
+              {
+                "name": "ratAim",
+                "value": 0
+              },
+              {
+                "name": "status",
+                "value": "'Move closer. Enter fires at full ATB.'"
+              },
+              {
+                "name": "gait",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.atb >= 100 and sceneState.actionTimer <= 0",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "(sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2 <= sceneState.range^2",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ehp",
+                        "value": "max(0,sceneState.ehp-25)"
+                      },
+                      {
+                        "name": "atb",
+                        "value": 0
+                      },
+                      {
+                        "name": "actionTimer",
+                        "value": 0.35
+                      },
+                      {
+                        "name": "flash",
+                        "value": 0.2
+                      },
+                      {
+                        "name": "status",
+                        "value": "'Pistol hit - 25 damage.'"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.ehp <= 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "mode",
+                            "value": 2
+                          },
+                          {
+                            "name": "atb",
+                            "value": 0
+                          },
+                          {
+                            "name": "enemyMode",
+                            "value": 0
+                          },
+                          {
+                            "name": "status",
+                            "value": "'VICTORY! Enter replay / Esc back.'"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "status",
+                        "value": "'Out of range. Move closer; ATB kept.'"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "status",
+                    "value": "'ATB charging. Keep moving.'"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -212,392 +756,546 @@
       }
     ]
   },
-  "scripts": {
-    "init": "local sceneState = ctx.sceneState; sceneState.px = 10; sceneState.py = 10; sceneState.ex = 20; sceneState.ey = 5; sceneState.atb = 0; sceneState.ehp = 100; sceneState.stateText = 'Moving'; sceneState.range = 5; sceneState.speed = 10.0; sceneState.mode = 'move'; sceneState.actionTimer = 0; sceneState.inputX = 0; sceneState.inputY = 0;",
-    "update": "local sceneState = ctx.sceneState; local dt = sceneState.time.dt; if sceneState.mode == 'move' then sceneState.atb = math.min(100, sceneState.atb + 20 * dt); sceneState.px = math.max(0, math.min(25, sceneState.px + sceneState.inputX * sceneState.speed * dt)); sceneState.py = math.max(0, math.min(13, sceneState.py + sceneState.inputY * sceneState.speed * dt)); else sceneState.actionTimer = sceneState.actionTimer - dt; if sceneState.actionTimer <= 0 then sceneState.mode = 'move'; sceneState.stateText = 'Moving' end end; if sceneState.ehp <= 0 then sceneState.stateText = 'VICTORY!' end",
-    "action": "local sceneState = ctx.sceneState; if sceneState.mode == 'move' and sceneState.atb >= 100 then sceneState.mode = 'action'; sceneState.atb = 0; sceneState.actionTimer = 1.0; sceneState.stateText = 'Action Phase!'; local dist = math.abs(sceneState.px - sceneState.ex) + math.abs(sceneState.py - sceneState.ey); if dist <= sceneState.range then sceneState.ehp = math.max(0, sceneState.ehp - 30); sceneState.stateText = 'HIT!' else sceneState.stateText = 'MISSED! (Out of range)' end end"
-  },
   "goldenScript": [
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "right"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"key": "up"},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"wait": 0.2},
-    {"key": "return"},
-    {"wait": 1.2}
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "wait": 0.1
+    },
+    {
+      "key": "return"
+    }
   ]
 }

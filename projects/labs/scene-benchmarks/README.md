@@ -14,6 +14,7 @@ The launcher is ordinary Project-authored Scene data. Selecting a specimen pushe
 
 ## Current playable specimens
 
+- **B009 — Carnegie Hall encounter** — native perspective environment, original Aya/rat meshes, held movement, circular targeting, telegraphed attacks and terminal replay. [Visual evidence and limitations](reports/b009_report.md).
 - **A003 — Snake** — real-time grid movement, ordered collection growth/collision, timing.
 - **D002 — Sokoban as Scene** — discrete grid state, mutable collections, occupancy/push rules.
 

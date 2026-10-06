@@ -3043,6 +3043,11 @@ local function buildScriptApi(ctx)
     return api
 end
 
+handlers.READ_INPUT = function(cmd, ctx)
+    assert(ctx.sceneState,"READ_INPUT requires a Scene")
+    ctx.sceneState[cmd.name or "input"] = require("engine.player_controller").snapshot()
+end
+
 handlers.SCRIPT = function(cmd, ctx)
     local session = ctx.session
     local loader = ctx.loader or session.loader

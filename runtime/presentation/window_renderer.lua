@@ -1716,6 +1716,8 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             drawTextLines("No item selected.", env, contentX, contentY,
                 lineSpacing, w - ui.toPx(2))
         end
+    elseif style == "modelScene" then
+        require("presentation.scene_model_view").draw(x,y,w,h,layout.viewport,env)
     elseif style == "itemModel" then
         local cached = listCache[id]
         local row = cached and cached.cursor and cached.rows and cached.rows[cached.cursor]
@@ -2100,6 +2102,7 @@ function wr.drawWindowFromData(sceneData, state, ctx, opts)
         if winDef.align ~= nil then layout.align = winDef.align end
         if winDef.waitInput ~= nil then layout.waitInput = winDef.waitInput end
         if winDef.chrome ~= nil then layout.chrome = winDef.chrome end
+        layout.viewport = winDef.viewport
         -- Propagate shiftWith from winDef to layout (scenes.json overrides
         -- engine.json, so this must happen AFTER baseLayout merge).
         if winDef.shiftWith ~= nil then layout.shiftWith = winDef.shiftWith end

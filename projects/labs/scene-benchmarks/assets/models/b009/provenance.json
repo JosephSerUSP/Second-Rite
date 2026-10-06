@@ -1,0 +1,20 @@
+{
+  "source": "assets/authoring/environments/b009_encounter.blend",
+  "sourceSha256": "b6855d12fe6188f36f0419d410b7c7a88e29a8191ad217f5ef26ee0269083d65",
+  "blenderVersion": "5.2.2 LTS",
+  "basis": "Original low-poly fan-study models, not commercial asset extracts",
+  "files": {
+    "aya.mtl": "05311058e080e704e2bf6273a6525034c318ff2559334f02d77735f68500ab46",
+    "aya.obj": "a1426aab3ccffb030fac61fb26bf8dcbfd05ed4eecebb246acb16b5481681997",
+    "danger.mtl": "e2b0c5fcd9945afb8996debeb65798dc1b07c93e0f66952b5d3dad3ac5e89d75",
+    "danger.obj": "9757aa5110f049368f78519ece99240625c42f54049ddad50f1a79ee126ddae7",
+    "hall.mtl": "51452ad3084f41aeadcb25c8efbc8c9698897cb4cc4542bad63acbbb9895e1fb",
+    "hall.obj": "55579a4d4e41bcbd09d34d350e189450d3066f0e27a90b8a7a46b6801ed88a2c",
+    "range.mtl": "3fc809adb22c88cb2792a9cc24300098e9e4b81d19b7c92f1d419aa049dc7a74",
+    "range.obj": "40cf0c18559463e6b301688c093e17161df69eef2e168bf8762c1a46dab02087",
+    "rat.mtl": "cebefd36094499b0380012e36b745ade23b3fda1df063a1bbd5354a45f82e1b3",
+    "rat.obj": "53e660780c95bd2feaca7839b2e09ef7a91ecf96e364be9344ed50403b744a71",
+    "spark.mtl": "c4b9df0e735e6a17f319af6010e89e79214bcefd70f1dd8a5bb6d39eb6f251aa",
+    "spark.obj": "7657a3895f5fe62ea08ef91b04ba75227000e50a752747af854c0e1341ca29a7"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "auditState": {
+    "actionTimer": 0,
+    "aim": 0,
+    "atb": 0,
+    "ehp": 100,
+    "enemyMode": 0,
+    "enemyTimer": 2,
+    "ex": 1,
+    "ey": 6,
+    "flash": 0,
+    "gait": 0,
+    "hp": 100,
+    "mode": 0,
+    "px": 0,
+    "py": 1,
+    "range": 4,
+    "ratAim": 0,
+    "status": "Move closer. Enter fires at full ATB.",
+    "tx": 0,
+    "ty": 0
+  },
+  "frameKind": "windows",
+  "gameHeight": 240,
+  "gameWidth": 256,
+  "sceneId": "b009_positioning",
+  "sceneName": "B009 - Carnegie Hall encounter",
+  "tileSize": 8,
+  "windows": [
+    {
+      "hasLayout": false,
+      "height": 22,
+      "id": "world",
+      "open": true,
+      "style": "modelScene",
+      "width": 32,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "location",
+      "open": true,
+      "style": "frame",
+      "text": "CARNEGIE HALL - CHRISTMAS EVE",
+      "width": 30,
+      "x": 1,
+      "y": 0.5
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "aya_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 0,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "rat_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 11,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "atb",
+      "open": true,
+      "style": "frame",
+      "width": 10,
+      "x": 22,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "feedback",
+      "open": true,
+      "style": "frame",
+      "text": "Move closer. Enter fires at full ATB.",
+      "width": 32,
+      "x": 0,
+      "y": 25
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "controls",
+      "open": true,
+      "style": "frame",
+      "text": "Arrows move   Enter fire   Esc back",
+      "width": 32,
+      "x": 0,
+      "y": 27.5
+    }
+  ]
+}

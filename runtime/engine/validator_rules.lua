@@ -3678,6 +3678,13 @@ elseif paramDef.type == "script" then
                             sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "': 'visible' must be a string expression")
                     end
 
+                    if winDef.style == "modelScene" then
+                        check(loader.engine.sceneWindowStyles and loader.engine.sceneWindowStyles.modelScene ~= nil,
+                            "modelScene style missing from engine registry")
+                        require("presentation.scene_model_view").validate(winDef.viewport,check,
+                            function(path) return love.filesystem.getInfo(path)~=nil end,
+                            function(expr) local fn=load("return ("..expr..")"); return fn~=nil end)
+                    end
                     -- content must be an array of typed blocks.
                     check(type(winDef.content) == "table",
                         sceneDesc .. " windows[" .. wi .. "] '" .. tostring(winDef.id) .. "': missing 'content' array")

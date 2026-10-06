@@ -392,6 +392,22 @@ disagree about what a correction means.
   and player paths. `expand` errors on unknown specs; the validator gates
   every spec in data.
 
+Authored Scene windows may use the registry style `modelScene` with a
+`viewport` definition: a perspective camera (position, target, fov), and a
+list of Model references with formula-bound position, scale, yaw, tint and
+visibility. `presentation/scene_model_view.lua` consumes those resolved
+transforms through the shared Model acquisition and mesh-material shader
+seams. It never updates gameplay state. Studio edits the definition through
+the schema form layer; native Scene preview renders it. G1 rejects missing
+viewport definitions/assets and malformed transform expressions.
+
+`READ_INPUT` copies the canonical logical controller's held-button snapshot
+into a named Scene-state table. Real-time authored Scenes can normalize motion
+using `sqrt` and `time.dt` without depending on menu-repeat intervals or
+accessing device keys. Direction edges and held state remain one controller.
+B009 uses this seam for its independent lab encounter; production Battle is
+unchanged.
+
 ### 1.3 Project authored-data boundary (13.08.2026)
 
 - **A runnable authored game is one Project.** `data/` inside the opened Project

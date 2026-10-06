@@ -1,0 +1,122 @@
+{
+  "auditState": {
+    "actionTimer": 0.35,
+    "aim": 2.9441970937399122,
+    "atb": 0,
+    "distance": 2.119019513592764,
+    "dx": 0,
+    "dy": 0,
+    "ehp": 75,
+    "enemyMode": 0,
+    "enemyTimer": 1.7166666666666686,
+    "ex": 0.41165159458544415,
+    "ey": 3.0582579729272195,
+    "flash": 0.2,
+    "gait": 42.00000000000006,
+    "hp": 82,
+    "input": {
+      "A": false,
+      "B": false,
+      "DOWN": false,
+      "L": false,
+      "LEFT": false,
+      "R": false,
+      "RIGHT": false,
+      "SELECT": false,
+      "START": false,
+      "UP": false,
+      "X": false,
+      "Y": false
+    },
+    "mode": 0,
+    "norm": 1,
+    "px": 0,
+    "py": 1,
+    "range": 4,
+    "ratAim": -0.19739555984988089,
+    "status": "Pistol hit - 25 damage.",
+    "tx": 0,
+    "ty": 1
+  },
+  "frameKind": "windows",
+  "gameHeight": 240,
+  "gameWidth": 256,
+  "sceneId": "b009_positioning",
+  "sceneName": "B009 - Carnegie Hall encounter",
+  "tileSize": 8,
+  "windows": [
+    {
+      "hasLayout": false,
+      "height": 22,
+      "id": "world",
+      "open": true,
+      "style": "modelScene",
+      "width": 32,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "location",
+      "open": true,
+      "style": "frame",
+      "text": "CARNEGIE HALL - CHRISTMAS EVE",
+      "width": 30,
+      "x": 1,
+      "y": 0.5
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "aya_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 0,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "rat_hp",
+      "open": true,
+      "style": "frame",
+      "width": 11,
+      "x": 11,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 3,
+      "id": "atb",
+      "open": true,
+      "style": "frame",
+      "width": 10,
+      "x": 22,
+      "y": 22
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "feedback",
+      "open": true,
+      "style": "frame",
+      "text": "Pistol hit - 25 damage.",
+      "width": 32,
+      "x": 0,
+      "y": 25
+    },
+    {
+      "hasLayout": false,
+      "height": 2.5,
+      "id": "controls",
+      "open": true,
+      "style": "frame",
+      "text": "Arrows move   Enter fire   Esc back",
+      "width": 32,
+      "x": 0,
+      "y": 27.5
+    }
+  ]
+}

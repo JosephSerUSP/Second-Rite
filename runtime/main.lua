@@ -711,6 +711,7 @@ function love.load(arg)
             "test_output_presentation",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
+            "test_b009_spatial",
             "test_scene_state_boundary",
             "test_scene_event_validation",
             "test_autorun_parallel_characterization",

@@ -6,7 +6,30 @@
   "safe": true,
   "layout": ["."],
   "spawn": { "x": 0, "y": 0, "dir": "N" },
-  "events": [],
+  "events": [
+    {
+      "id": 101,
+      "instanceId": "gauntlet-archive-attendant",
+      "name": "Archive Attendant",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [1.85, 1.85, 0.0],
+      "interactionRadius": 1.0,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "speaker": "Archive Attendant",
+          "text": "The room is still here. That is the first useful fact."
+        }
+      ],
+      "sprite": "assets/character/player.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    }
+  ],
   "traversal": {
     "provider": "continuous_surface",
     "environmentPackage": "assets/environments/archive_antechamber/environment.json",

@@ -1,0 +1,54 @@
+# Blender 5.2.2 LTS MTL File: 'guard_incense.blend'
+# www.blender.org
+
+newmtl guard_incense_antique_bronze
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.630000 0.600000 0.360000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl guard_incense_ash
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.480000 0.490000 0.360000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl guard_incense_edge
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.950000 0.830000 0.510000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl guard_incense_jade_enamel
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.260000 0.750000 0.480000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl guard_incense_pressed_incense
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.540000 0.660000 0.320000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

@@ -1,0 +1,381 @@
+{
+  "id": "day1_street",
+  "name": "Central Park West",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
+  },
+  "windows": [
+    {
+      "id": "world",
+      "rect": {
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            0,
+            -4.25,
+            6.85
+          ],
+          "target": [
+            0,
+            2.4,
+            0.4
+          ],
+          "fov": 44
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "room",
+            "model": "assets/models/blockout/street.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/backstage/aya.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+          },
+          {
+            "id": "aya_walk_a",
+            "model": "assets/models/backstage/aya_walk_a.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_b",
+            "model": "assets/models/backstage/aya_walk_b.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "card",
+      "rect": {
+        "x": "4 - surface.originX",
+        "y": 7,
+        "w": "surface.width - 8",
+        "h": 14
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 27.5,
+        "w": 34,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "COMMENT",
+        "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "fight",
+            "value": 0
+          },
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "card",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Central Park West'"
+          },
+          {
+            "name": "walkX",
+            "value": "sceneState.walkX or 0"
+          },
+          {
+            "name": "walkY",
+            "value": "sceneState.walkY or 1"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "entryX",
+            "value": "sceneState.walkX"
+          },
+          {
+            "name": "entryY",
+            "value": "sceneState.walkY"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "card",
+            "value": "'Day 1 - Resonance\\n\\nEnd of the vertical slice.\\nThanks for playing.'"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": "sceneState.card ~= '' and 9 or 0"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+          },
+          {
+            "name": "dy",
+            "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "moving",
+            "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.moving == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "gait",
+                "value": "sceneState.gait + time.dt * 10"
+              },
+              {
+                "name": "aim",
+                "value": "atan2(sceneState.dx, -sceneState.dy)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "walkX",
+            "value": "max(-3.6, min(3.6, sceneState.walkX + sceneState.dx * 0.05))"
+          },
+          {
+            "name": "walkY",
+            "value": "max(0.3, min(4.6, sceneState.walkY + sceneState.dy * 0.05))"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Central Park West'"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 9",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "''"
+              },
+              {
+                "name": "ui",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+3)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_left": [],
+    "on_right": []
+  }
+}

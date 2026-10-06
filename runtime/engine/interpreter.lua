@@ -961,7 +961,11 @@ end
 handlers.REALTIME_BATTLE_START = function(cmd, ctx)
     local function points(list)
         local out = {}
-        for i, p in ipairs(list or {}) do out[i] = { tonumber(p[1]), tonumber(p[2]) } end
+        -- Coordinates are formulas, so an encounter can start where the
+        -- player is standing (sceneState.px) rather than at a fixed spot.
+        for i, p in ipairs(list or {}) do
+            out[i] = { tonumber((evalFormula(p[1], ctx))), tonumber((evalFormula(p[2], ctx))) }
+        end
         return out
     end
     ctx.session.realtimeBattle = require("engine.realtime_battle").start(ctx.session, cmd.troop, {

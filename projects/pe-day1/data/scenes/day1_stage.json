@@ -1,0 +1,1431 @@
+{
+  "id": "day1_stage",
+  "name": "Carnegie Hall - stage",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
+  },
+  "windows": [
+    {
+      "id": "world",
+      "rect": {
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            0,
+            -4.800000000000001,
+            7.699999999999999
+          ],
+          "target": [
+            0,
+            2.88,
+            0.4
+          ],
+          "fov": 44
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "room",
+            "model": "assets/models/blockout/stage.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "door_to_auditorium",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_auditorium'"
+          },
+          {
+            "id": "door_to_backstage",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              4.6,
+              3,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_backstage'"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/backstage/aya.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+          },
+          {
+            "id": "aya_walk_a",
+            "model": "assets/models/backstage/aya_walk_a.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_b",
+            "model": "assets/models/backstage/aya_walk_b.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_down",
+            "model": "assets/models/backstage/aya_down.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and (rt.outcome == 'defeat') or false)"
+          },
+          {
+            "id": "aya_recoil",
+            "model": "assets/models/backstage/aya_recoil.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and (rt.outcome ~= 'defeat' and rt.actAge < 12) or false)"
+          },
+          {
+            "id": "range_ground",
+            "model": "assets/models/backstage/range_ground.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0.03
+            ],
+            "yaw": 0,
+            "visible": "sceneState.ui == 2",
+            "scale": [
+              "sceneState.range",
+              "sceneState.range",
+              1
+            ]
+          },
+          {
+            "id": "muzzle",
+            "model": "assets/models/backstage/spark.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)+sin(sceneState.aim)*.72",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)-cos(sceneState.aim)*.72",
+              1.47
+            ],
+            "yaw": 0,
+            "visible": "(sceneState.fight == 1 and (rt.actAge < 12) or false)"
+          },
+          {
+            "id": "enemy",
+            "model": "assets/models/blockout/melissa.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.enemy.x) or 0)",
+              "(sceneState.fight == 1 and (rt.enemy.y) or 0)",
+              0
+            ],
+            "yaw": "sceneState.ratAim",
+            "visible": "(sceneState.fight == 1 and (rt.outcome ~= 'victory') or false)",
+            "scale": [
+              1,
+              1,
+              "(sceneState.fight == 1 and (rt.enemy.windup and 1.08 or 1) or 1)"
+            ],
+            "tint": [
+              1,
+              "(sceneState.fight == 1 and (rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1) or 1)",
+              "(sceneState.fight == 1 and (rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1) or 1)"
+            ]
+          },
+          {
+            "id": "target",
+            "model": "assets/models/backstage/target_cursor.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.enemy.x) or 0)",
+              "(sceneState.fight == 1 and (rt.enemy.y) or 0)",
+              1.1
+            ],
+            "yaw": 0,
+            "visible": "sceneState.ui == 2"
+          },
+          {
+            "id": "fire0",
+            "model": "assets/models/backstage/spark.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.fire[1].x) or 0)",
+              "(sceneState.fight == 1 and (rt.fire[1].y) or 0)",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "(sceneState.fight == 1 and (rt.fire[1].live) or false)",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          },
+          {
+            "id": "fire1",
+            "model": "assets/models/backstage/spark.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.fire[2].x) or 0)",
+              "(sceneState.fight == 1 and (rt.fire[2].y) or 0)",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "(sceneState.fight == 1 and (rt.fire[2].live) or false)",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          },
+          {
+            "id": "fire2",
+            "model": "assets/models/backstage/spark.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.fire[3].x) or 0)",
+              "(sceneState.fight == 1 and (rt.fire[3].y) or 0)",
+              0.35
+            ],
+            "yaw": 0,
+            "visible": "(sceneState.fight == 1 and (rt.fire[3].live) or false)",
+            "scale": [
+              1.8,
+              1.8,
+              2.8
+            ]
+          }
+        ],
+        "labels": [
+          {
+            "value": "rt.missAge < rt.hitAge and 'MISS' or rt.hitAmount",
+            "position": [
+              "(sceneState.fight == 1 and (rt.hitOnPlayer and rt.missAge >= rt.hitAge and rt.player.x or rt.enemy.x) or 0)",
+              "(sceneState.fight == 1 and (rt.hitOnPlayer and rt.missAge >= rt.hitAge and rt.player.y or rt.enemy.y) or 0)",
+              "(sceneState.fight == 1 and (1.2 + min(rt.hitAge, rt.missAge) / 60 * 1.2) or 0)"
+            ],
+            "visible": "(sceneState.fight == 1 and (min(rt.hitAge, rt.missAge) < 48) or false)",
+            "color": [
+              1,
+              1,
+              0.88,
+              1
+            ]
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "combat_hud",
+      "rect": {
+        "x": "1.5 - surface.originX",
+        "y": 1,
+        "w": 13,
+        "h": 4.5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.fight == 1",
+      "content": [
+        {
+          "type": "gauge",
+          "x": 0.7,
+          "y": 0.65,
+          "width": 8.5,
+          "height": 0.4,
+          "labelPlacement": "right",
+          "label": "AT",
+          "value": "rt.player.at",
+          "max": "100",
+          "fill": [
+            0.08,
+            "rt.player.at >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7",
+            0.85
+          ],
+          "color": [
+            0.04,
+            0.07,
+            0.06
+          ]
+        },
+        {
+          "type": "gauge",
+          "x": 0.7,
+          "y": 3.5,
+          "width": 8.5,
+          "height": 0.4,
+          "labelPlacement": "right",
+          "label": "PE",
+          "value": "rt.player.res.pe",
+          "max": "100",
+          "fill": [
+            0.02,
+            0.85,
+            0.15
+          ],
+          "color": [
+            0.04,
+            0.07,
+            0.06
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hp",
+      "rect": {
+        "x": "3.2 - surface.originX",
+        "y": 2.3,
+        "w": 7,
+        "h": 1.5
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.fight == 1",
+      "content": [
+        {
+          "type": "text",
+          "text": "{rt.player.hp}/{rt.player.maxHp}"
+        }
+      ]
+    },
+    {
+      "id": "hp_label",
+      "rect": {
+        "x": "10 - surface.originX",
+        "y": 2.3,
+        "w": 3.5,
+        "h": 1.5
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.fight == 1",
+      "content": [
+        {
+          "type": "text",
+          "text": "HP"
+        }
+      ]
+    },
+    {
+      "id": "command",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 13,
+        "h": 8
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 1",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.choice == 0 and '> Attack' or '  Attack'}\n{sceneState.choice == 1 and '> P. Energy' or '  P. Energy'}\n{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"
+        }
+      ]
+    },
+    {
+      "id": "target_info",
+      "rect": {
+        "x": "surface.width - surface.originX - 13",
+        "y": 13,
+        "w": 12,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 2",
+      "content": [
+        {
+          "type": "text",
+          "text": "M84F\nBULLETS {(rt.items.handgun_ammo or 0)}\nTARGET   1"
+        }
+      ]
+    },
+    {
+      "id": "pe_menu",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 15,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 3",
+      "content": [
+        {
+          "type": "text",
+          "text": "> Heal 1\nRecover 30 HP\nPE cost 30"
+        }
+      ]
+    },
+    {
+      "id": "item_menu",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7,
+        "w": 16,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 4",
+      "content": [
+        {
+          "type": "text",
+          "text": "> Medicine 1\nStock {(rt.items.medicine or 0)}\nRecover 30 HP"
+        }
+      ]
+    },
+    {
+      "id": "result",
+      "rect": {
+        "x": 6,
+        "y": 9,
+        "w": 21,
+        "h": 6
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "(sceneState.fight == 1 and (rt.outcome == 'victory') or false) and sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Battle over\n> Obtain all"
+        }
+      ]
+    },
+    {
+      "id": "loss",
+      "rect": {
+        "x": 7,
+        "y": 10,
+        "w": 20,
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "(sceneState.fight == 1 and (rt.outcome == 'defeat') or false)",
+      "content": [
+        {
+          "type": "text",
+          "text": "Aya has fallen\nEnter: retry"
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "rect": {
+        "x": "4 - surface.originX",
+        "y": 7,
+        "w": "surface.width - 8",
+        "h": 14
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 27.5,
+        "w": 34,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "COMMENT",
+        "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "fight",
+            "value": 0
+          },
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "card",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - stage'"
+          },
+          {
+            "name": "walkX",
+            "value": "sceneState.walkX or 0"
+          },
+          {
+            "name": "walkY",
+            "value": "sceneState.walkY or 1"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "entryX",
+            "value": "sceneState.walkX"
+          },
+          {
+            "name": "entryY",
+            "value": "sceneState.walkY"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_melissa_defeated",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:melissa_defeated",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_melissa_defeated",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:melissa_defeated",
+        "then": [],
+        "else": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "fight",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "cmd": "REALTIME_BATTLE_START",
+            "troop": "melissa",
+            "party": [
+              [
+                "sceneState.walkX",
+                "sceneState.walkY"
+              ]
+            ],
+            "enemies": [
+              [
+                2,
+                3.5
+              ]
+            ],
+            "bounds": {
+              "minX": -4.6,
+              "maxX": 4.6,
+              "minY": 0.3,
+              "maxY": 5.6
+            }
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": "sceneState.card ~= '' and 9 or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.fight == 1",
+        "then": [
+          {
+            "cmd": "REALTIME_BATTLE_PAUSE",
+            "paused": "sceneState.ui > 0"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.fight == 1",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.input.X and not sceneState.menuHeld and rt.outcome == '' and sceneState.ui ~= 9",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.ui == 0 and rt.player.at >= 100",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 1
+                      },
+                      {
+                        "name": "choice",
+                        "value": 0
+                      },
+                      {
+                        "name": "status",
+                        "value": "'Choose a command'"
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.ui > 0",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "ui",
+                            "value": 0
+                          },
+                          {
+                            "name": "status",
+                            "value": "''"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "menuHeld",
+                "value": "sceneState.input.X"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+              },
+              {
+                "name": "dy",
+                "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "moving",
+                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.moving == 1",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "gait",
+                    "value": "sceneState.gait + time.dt * 10"
+                  },
+                  {
+                    "name": "aim",
+                    "value": "atan2(sceneState.dx, -sceneState.dy)"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "moving",
+                "value": "sceneState.moving == 1 and rt.outcome == '' and 1 or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "REALTIME_BATTLE_PAUSE",
+            "paused": "sceneState.ui > 0"
+          },
+          {
+            "cmd": "REALTIME_BATTLE_STEP",
+            "dx": "sceneState.dx",
+            "dy": "sceneState.dy"
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.moving == 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "aim",
+                    "value": "atan2(rt.enemy.x - rt.player.x, rt.player.y - rt.enemy.y)"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ratAim",
+                "value": "atan2(rt.player.x - rt.enemy.x, rt.enemy.y - rt.player.y)"
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+              },
+              {
+                "name": "dy",
+                "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "moving",
+                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.moving == 1",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "gait",
+                    "value": "sceneState.gait + time.dt * 10"
+                  },
+                  {
+                    "name": "aim",
+                    "value": "atan2(sceneState.dx, -sceneState.dy)"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "walkX",
+                "value": "max(-4.6, min(4.6, sceneState.walkX + sceneState.dx * 0.05))"
+              },
+              {
+                "name": "walkY",
+                "value": "max(0.3, min(5.6, sceneState.walkY + sceneState.dy * 0.05))"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "''"
+              },
+              {
+                "name": "status",
+                "value": "'Carnegie Hall - stage'"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "((sceneState.walkX - (0))^2 + (sceneState.walkY - (0.3))^2 < 0.81)",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "near",
+                    "value": "'to_auditorium'"
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Enter: Auditorium'"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "((sceneState.walkX - (4.6))^2 + (sceneState.walkY - (3))^2 < 0.81)",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "near",
+                    "value": "'to_backstage'"
+                  },
+                  {
+                    "name": "status",
+                    "value": "'Enter: Backstage'"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 9",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "''"
+              },
+              {
+                "name": "ui",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.fight == 1",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "rt.outcome == 'victory'",
+                "then": [
+                  {
+                    "cmd": "SET_FLAG",
+                    "flag": "melissa_defeated",
+                    "value": true
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "walkX",
+                        "value": "rt.player.x"
+                      },
+                      {
+                        "name": "walkY",
+                        "value": "rt.player.y"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "REALTIME_BATTLE_END"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "fight",
+                        "value": 0
+                      },
+                      {
+                        "name": "ui",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "card",
+                        "value": "'Melissa\\'s body twists into\\nsomething else. She flees\\nbackstage.'"
+                      },
+                      {
+                        "name": "ui",
+                        "value": 9
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "rt.outcome == 'defeat'",
+                    "then": [
+                      {
+                        "cmd": "COMMENT",
+                        "text": "Rough-chapter retry: restore Aya and restart this room's fight where she entered."
+                      },
+                      {
+                        "cmd": "REALTIME_BATTLE_END"
+                      },
+                      {
+                        "cmd": "RECOVER_PARTY"
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "walkX",
+                            "value": "sceneState.entryX"
+                          },
+                          {
+                            "name": "walkY",
+                            "value": "sceneState.entryY"
+                          },
+                          {
+                            "name": "ui",
+                            "value": 0
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "REALTIME_BATTLE_START",
+                        "troop": "melissa",
+                        "party": [
+                          [
+                            "sceneState.walkX",
+                            "sceneState.walkY"
+                          ]
+                        ],
+                        "enemies": [
+                          [
+                            2,
+                            3.5
+                          ]
+                        ],
+                        "bounds": {
+                          "minX": -4.6,
+                          "maxX": 4.6,
+                          "minY": 0.3,
+                          "maxY": 5.6
+                        }
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "IF",
+                        "condition": "rt.outcome == 'escaped'",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "walkX",
+                                "value": "rt.player.x"
+                              },
+                              {
+                                "name": "walkY",
+                                "value": "rt.player.y"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "REALTIME_BATTLE_END"
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "fight",
+                                "value": 0
+                              },
+                              {
+                                "name": "ui",
+                                "value": 0
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "status",
+                                "value": "'Escaped. It is still here.'"
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.ui == 0",
+                            "then": [
+                              {
+                                "cmd": "IF",
+                                "condition": "rt.player.at >= 100",
+                                "then": [
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "ui",
+                                        "value": 2
+                                      },
+                                      {
+                                        "name": "status",
+                                        "value": "'Choose target'"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "IF",
+                                "condition": "sceneState.ui == 2",
+                                "then": [
+                                  {
+                                    "cmd": "REALTIME_BATTLE_COMMAND",
+                                    "kind": "skill",
+                                    "id": "handgun_shot",
+                                    "target": "enemy"
+                                  },
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "ui",
+                                        "value": 0
+                                      },
+                                      {
+                                        "name": "status",
+                                        "value": "''"
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "cmd": "IF",
+                                    "condition": "sceneState.ui == 1",
+                                    "then": [
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.choice == 0",
+                                        "then": [
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "ui",
+                                                "value": 2
+                                              },
+                                              {
+                                                "name": "status",
+                                                "value": "'Choose target'"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.choice == 1",
+                                        "then": [
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "ui",
+                                                "value": 3
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.choice == 2",
+                                        "then": [
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "ui",
+                                                "value": 4
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.choice == 3",
+                                        "then": [
+                                          {
+                                            "cmd": "REALTIME_BATTLE_COMMAND",
+                                            "kind": "skill",
+                                            "id": "escape",
+                                            "target": "self"
+                                          },
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "ui",
+                                                "value": 0
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.ui == 3",
+                                        "then": [
+                                          {
+                                            "cmd": "REALTIME_BATTLE_COMMAND",
+                                            "kind": "skill",
+                                            "id": "heal1",
+                                            "target": "self"
+                                          },
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "ui",
+                                                "value": 0
+                                              },
+                                              {
+                                                "name": "status",
+                                                "value": "''"
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "cmd": "IF",
+                                            "condition": "sceneState.ui == 4",
+                                            "then": [
+                                              {
+                                                "cmd": "REALTIME_BATTLE_COMMAND",
+                                                "kind": "item",
+                                                "id": "medicine",
+                                                "target": "self"
+                                              },
+                                              {
+                                                "cmd": "SET_SCENE_STATE",
+                                                "assignments": [
+                                                  {
+                                                    "name": "ui",
+                                                    "value": 0
+                                                  },
+                                                  {
+                                                    "name": "status",
+                                                    "value": "''"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.near == 'to_auditorium'",
+                "then": [
+                  {
+                    "cmd": "SCENE_EVENT",
+                    "kind": "goto",
+                    "scene": "day1_auditorium",
+                    "sceneState": [
+                      {
+                        "name": "walkX",
+                        "value": 0
+                      },
+                      {
+                        "name": "walkY",
+                        "value": 6.6
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.near == 'to_backstage'",
+                "then": [
+                  {
+                    "cmd": "IF",
+                    "condition": "flag:melissa_defeated",
+                    "then": [
+                      {
+                        "cmd": "SCENE_EVENT",
+                        "kind": "goto",
+                        "scene": "day1_backstage",
+                        "sceneState": [
+                          {
+                            "name": "walkX",
+                            "value": -3.6
+                          },
+                          {
+                            "name": "walkY",
+                            "value": 2.5
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "card",
+                            "value": "'Not until Melissa is dealt with.'"
+                          },
+                          {
+                            "name": "ui",
+                            "value": 9
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.fight == 1 and sceneState.ui > 0 and sceneState.ui < 9 and rt.outcome == ''",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ui",
+                "value": 0
+              },
+              {
+                "name": "status",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+3)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_left": [],
+    "on_right": []
+  }
+}

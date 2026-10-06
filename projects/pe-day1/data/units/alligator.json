@@ -1,0 +1,26 @@
+{
+  "id": "alligator",
+  "name": "Alligator",
+  "level": 1,
+  "skills": [
+    "rat_bite",
+    "rat_fire_tail"
+  ],
+  "flavor": "Placeholder boss (#1427 rough chapter). Head/tail phases not built; reuses the rat kit; original values unverified.",
+  "baseParams": {
+    "maxHp": 140,
+    "atk": 8,
+    "def": 6,
+    "mat": 6,
+    "mdf": 6,
+    "mpd": 1,
+    "asp": 10
+  },
+  "growthBands": [],
+  "realtime": {
+    "approach": {
+      "speed": 0.012,
+      "stopAt": 2.0
+    }
+  }
+}

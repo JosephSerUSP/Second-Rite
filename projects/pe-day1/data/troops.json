@@ -9,5 +9,49 @@
         "level": 1
       }
     ]
+  },
+  "melissa": {
+    "id": "melissa",
+    "name": "Melissa",
+    "description": "Day 1 rough chapter placeholder fight (#1427).",
+    "members": [
+      {
+        "actor": "melissa",
+        "level": 1
+      }
+    ]
+  },
+  "eve": {
+    "id": "eve",
+    "name": "Eve",
+    "description": "Day 1 rough chapter placeholder fight (#1427).",
+    "members": [
+      {
+        "actor": "eve",
+        "level": 1
+      }
+    ]
+  },
+  "alligator": {
+    "id": "alligator",
+    "name": "Alligator",
+    "description": "Day 1 rough chapter placeholder fight (#1427).",
+    "members": [
+      {
+        "actor": "alligator",
+        "level": 1
+      }
+    ]
+  },
+  "sewer_rats": {
+    "id": "sewer_rats",
+    "name": "Sewer rat",
+    "description": "Day 1 rough chapter sewer fight (#1427). One rat; the original group size is not modelled yet.",
+    "members": [
+      {
+        "actor": "rat",
+        "level": 1
+      }
+    ]
   }
 }

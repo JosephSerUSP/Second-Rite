@@ -1,0 +1,45 @@
+# Blender 5.2.2 LTS MTL File: 'x_potion.blend'
+# www.blender.org
+
+newmtl x_potion_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.140000 0.320000 0.340000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl x_potion_label
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd x_potion_label.png
+
+newmtl x_potion_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.950000 0.150000 0.250000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.5 assets/models/matcaps/ruby.png
+newmtl x_potion_stopper
+Ns 640.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.700000 0.860000 0.900000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.8 assets/models/matcaps/glass.png

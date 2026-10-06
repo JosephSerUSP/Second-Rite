@@ -1,0 +1,54 @@
+# Blender 5.2.2 LTS MTL File: 'hi_potion.blend'
+# www.blender.org
+
+newmtl hi_potion_cork
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.450000 0.260000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl hi_potion_glass
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.120000 0.340000 0.300000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.8 assets/models/matcaps/glass.png
+newmtl hi_potion_label
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hi_potion_label.png
+
+newmtl hi_potion_liquid
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.920000 0.100000 0.300000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.5 assets/models/matcaps/ruby.png
+newmtl hi_potion_wax
+Ns 176.400024
+Ka 1.000000 1.000000 1.000000
+Kd 0.620000 0.080000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

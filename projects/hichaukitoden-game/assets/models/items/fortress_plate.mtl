@@ -23,6 +23,27 @@ d 1.000000
 illum 3
 
 pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl fortress_plate_shoulder_overlap
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.289100 0.330400 0.401200
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl fortress_plate_shoulder_shell
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.490000 0.560000 0.680000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
 newmtl fortress_plate_trim
 Ns 270.399994
 Ka 0.750000 0.750000 0.750000

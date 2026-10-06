@@ -32,17 +32,27 @@ Ni 1.500000
 d 1.000000
 illum 2
 
-newmtl hero_armor_shade
-Ns 19.599997
-Ka 0.800000 0.800000 0.800000
-Kd 0.521569 0.549020 0.603922
+newmtl hero_armor_shoulder_overlap
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.495600 0.513300 0.566400
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
 
-pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl hero_armor_shoulder_shell
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.840000 0.870000 0.960000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
 newmtl hero_armor_tabard
 Ns 2.500001
 Ka 1.000000 1.000000 1.000000

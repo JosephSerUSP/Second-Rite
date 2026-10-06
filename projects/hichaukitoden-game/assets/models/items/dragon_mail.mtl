@@ -12,17 +12,27 @@ illum 3
 map_Kd dragon_mail_body.png
 
 pass sphere add 0.45 assets/models/matcaps/steel.png
-newmtl dragon_mail_shade
-Ns 19.599997
-Ka 0.800000 0.800000 0.800000
-Kd 0.164706 0.356863 0.192157
+newmtl dragon_mail_shoulder_overlap
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.153400 0.354000 0.194700
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
 
-pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl dragon_mail_shoulder_shell
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.260000 0.600000 0.330000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
 newmtl dragon_mail_trim
 Ns 270.399994
 Ka 0.750000 0.750000 0.750000

@@ -23,6 +23,27 @@ d 1.000000
 illum 3
 
 pass sphere add 0.45 assets/models/matcaps/steel.png
+newmtl adamant_armor_shoulder_overlap
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.159300 0.430700 0.377600
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl adamant_armor_shoulder_shell
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.270000 0.730000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
 newmtl adamant_armor_trim
 Ns 270.399994
 Ka 0.750000 0.750000 0.750000

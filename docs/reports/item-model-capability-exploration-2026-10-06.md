@@ -322,3 +322,92 @@ Agent-Signature:
   role: implementation
   task: stale item models, new accessories
   base: 21c90656fd59da77dfed1fe70081b4a752ab04c8
+
+## Owner feedback follow-up: incense and armour shoulders
+
+The owner liked the accessory results and flagged the earlier armour shoulders
+as weak. This pass adds four new incense sources and edits fourteen existing
+armour documents directly, including Plate Armor from the first cohorts.
+It starts at `9e40e7e9` on `codex/stale-item-models-incense-shoulders`.
+
+[Four incense models at 96px](item-model-incense-shoulders-review/incense96.png),
+[armour shoulders before/after](item-model-incense-shoulders-review/shoulders-before-after96.png),
+and [complete native board](item-model-incense-shoulders-review/sheet96.png).
+The comparison retains the same four native views at their original pixel size.
+These new incense models and shoulder revisions await owner review.
+
+| New item | Authored structure |
+|---|---|
+| Power Incense | Three vermilion sticks with ash/ember tips in a squat footed copper brazier, soot bed and ash poker. |
+| Guard Incense | Square footed censer, separate roof strips leaving actual ventilation slots, green enamel, shield clasps and a visible resin cone. |
+| Magic Incense | Violet spiral Curve on a silver fork and tripod, with an ash dish and blue ember point. |
+| Spirit Incense | Hollow turned brass bowl, open petal cage around resin grains, three linked suspension chains and a carry loop. |
+
+The incense sources mix sparse Screw profiles with declared cylindrical UVs,
+fabricated plates and frames, editable paths, and linked-looking mesh rings.
+Their game effects and data entries remain unchanged.
+
+### Shoulder revision
+
+Shoulder shells now span from the upper torso across a front/back arch and
+fall over the upper arm. This replaces the old tipped-dome caps where present
+and adds shoulder coverage where absent. The changed documents are Leather
+Armor, Ring Mail, Chainmail, Scale Mail, Brigandine, Tin Armor, Plate Armor,
+Fortress Plate, Hero Armor, Adamant Armor, Coral Mail, Flame Mail, Dragon Mail
+and Cocoon Husk.
+
+Leather and brigandine use bound folded shoulders and rivets; mail uses draped
+caps and weighted edges. Plate variants use layered shells and visible overlap
+lips, with broader layered coverage on Fortress Plate and gilded lames on Hero
+Armor. Coral has branching shoulders; Cocoon Husk has overlapping lateral
+carapace lobes. Dragon Mail received a wider stance and swept-back shell after
+its first revision collided with Scale Mail under the strict silhouette check.
+
+Old shoulder objects remain hidden construction guides. The new shells retain
+editable meshes and live Mirror symmetry. Repeat exports exposed intermittent
+UV rounding and deduplication differences in the new Solidify/Bevel geometry:
+the changed vertex positions were identical, but UV indices and last decimal
+digits were unstable. Thickness and bevel were therefore materialized once in
+the authoritative source, with dyadic per-corner UVs. Copies of the original
+outline/modifier structures remain as hidden guides. Nothing was regenerated
+from an external recipe.
+
+### Observed checks and limits
+
+- All eighteen affected documents pass Windows Blender 5.2.2 compile `--check`,
+  preserving source hashes and matching shipping OBJ/MTL bytes.
+- Brigandine and Chainmail match in four additional repeat exports each after
+  UV stabilization. This is bounded Windows evidence, not Linux byte proof.
+- Texture/reference checks, the 104-script Blender index and diff checks pass.
+- Native 96px candidate and canonical shipping boards have identical pixels;
+  the final board was inspected after UV stabilization.
+- Strict in-memory corpus comparison against all 207 models has zero findings
+  involving these eighteen. Sourced pairs face the 0.85 silhouette threshold.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. Unit still reports seven
+  unavailable native Effekseer world-effect assertions.
+- Actual corpus remains red: 63 accepted keys no longer reproduce; remaining
+  records are 5 duplicate groups, 51 UV-less items and 1 shared-file group.
+  The inherited smaller Ether Seed/Sigil Ink group remains new relative to
+  the accepted old group. Asset contract passes; asset regression remains red
+  for 58 changed model records. Production references remain unchanged.
+- Hosted #1432 results now expose two integration regressions from the new
+  Lantern: the Model server test hardcodes its old two slots, and the generic
+  native/Three proof uses the shipping item despite Three deliberately
+  refusing its overlay materials. [#1434](https://github.com/JosephSerUSP/Second-Rite/issues/1434)
+  records these failures and the controlled-fixture follow-up. They are not
+  described as unrelated failures or as passing checks here.
+- G5/G6 were not run or recaptured. Linux byte stability and acceptance of
+  the new incense/shoulder cohort remain unverified. Mail texture is still
+  busy at 96px; the board supports judging whether its new shoulder mass is
+  sufficient.
+
+Items without editable source fall from 96 to 92. That count measures source
+coverage. The accessory sources, garments, Curry and Stew are unchanged in
+this pass, as are gameplay, engine code and the Lantern recipe.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: incense and armour shoulder feedback
+  base: 9e40e7e9b87622519a8cf1633f056a3b08f44027

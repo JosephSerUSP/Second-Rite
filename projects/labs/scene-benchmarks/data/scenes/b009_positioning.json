@@ -25,14 +25,14 @@
       "viewport": {
         "camera": {
           "position": [
-            3,
-            -6,
-            3.2
+            2,
+            -7.2,
+            5.4
           ],
           "target": [
             0,
-            2.3,
-            1.05
+            2.6,
+            0.35
           ],
           "fov": 40
         },
@@ -331,8 +331,8 @@
       "rect": {
         "x": "1.5 - surface.originX",
         "y": 1,
-        "w": 8.5,
-        "h": 4
+        "w": 13,
+        "h": 4.5
       },
       "style": "panel",
       "chrome": "overlay",
@@ -341,7 +341,7 @@
           "type": "gauge",
           "x": 0.7,
           "y": 0.65,
-          "width": 5.5,
+          "width": 8.5,
           "height": 0.4,
           "labelPlacement": "right",
           "label": "AT",
@@ -361,8 +361,8 @@
         {
           "type": "gauge",
           "x": 0.7,
-          "y": 3.2,
-          "width": 5.5,
+          "y": 3.5,
+          "width": 8.5,
           "height": 0.4,
           "labelPlacement": "right",
           "label": "PE",
@@ -384,9 +384,9 @@
     {
       "id": "hp",
       "rect": {
-        "x": "3.7 - surface.originX",
-        "y": 2.35,
-        "w": 5,
+        "x": "3.2 - surface.originX",
+        "y": 2.3,
+        "w": 7,
         "h": 1.5
       },
       "style": "panel",
@@ -401,9 +401,9 @@
     {
       "id": "hp_label",
       "rect": {
-        "x": "8.1 - surface.originX",
-        "y": 2.35,
-        "w": 2,
+        "x": "10 - surface.originX",
+        "y": 2.3,
+        "w": 3.5,
         "h": 1.5
       },
       "style": "panel",

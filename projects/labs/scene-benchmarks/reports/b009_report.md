@@ -4,7 +4,7 @@ Evidence: 2026-10-06. Native runtime and behavior verification; owner playtest a
 
 ## Reworked behavior and presentation
 
-The rat encounter now uses an authored backstage corridor with red doors, masonry and worn floor grain, matching the supplied rat footage's room category and palette. The original auditorium mesh is preserved in the adopted Blender source. Aya has evening-dress proportions, authored walking/recoil/fallen poses; the rat has mottled grey fur, exposed red limbs and wind-up/lunge poses. Textures and models are original assets, not extracted commercial content.
+The rat encounter now uses an authored backstage corridor with red doors, masonry and worn floor grain, matching the supplied rat footage's room category and palette. The original auditorium mesh is preserved in the adopted Blender source. Aya has evening-dress proportions, authored walking/recoil/fallen poses; the rat follows the reference palette (crimson body, pale mottled back saddle) with wind-up/lunge poses. Textures and models are original assets, not extracted commercial content.
 
 The compact upper-left overlay presents blue AT, numeric HP and green PE. Full AT flashes using authored time. Enter opens targeting directly; X opens command selection through an event-authored edge on the canonical logical input snapshot. Menus and aiming pause domain simulation. Blue ground and green air range lines, a red target cursor, ammunition and target count appear during aiming. Confirm spends a bullet and AT; closer targets take more damage. Out-of-range shots deterministically miss, which approximates rather than reproduces the original probability model.
 

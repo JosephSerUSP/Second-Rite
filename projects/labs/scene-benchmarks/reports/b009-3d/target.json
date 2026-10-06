@@ -77,11 +77,11 @@
     },
     {
       "hasLayout": false,
-      "height": 4,
+      "height": 4.5,
       "id": "combat_hud",
       "open": true,
       "style": "panel",
-      "width": 8.5,
+      "width": 13,
       "x": -9.125,
       "y": 1
     },
@@ -92,9 +92,9 @@
       "open": true,
       "style": "panel",
       "text": "41/45",
-      "width": 5,
-      "x": -6.925,
-      "y": 2.35
+      "width": 7,
+      "x": -7.425,
+      "y": 2.3
     },
     {
       "hasLayout": false,
@@ -103,9 +103,9 @@
       "open": true,
       "style": "panel",
       "text": "HP",
-      "width": 2,
-      "x": -2.5250000000000004,
-      "y": 2.35
+      "width": 3.5,
+      "x": -0.625,
+      "y": 2.3
     },
     {
       "hasLayout": false,

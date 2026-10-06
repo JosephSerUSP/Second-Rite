@@ -1,17 +1,17 @@
-# Blender 5.2.2 LTS MTL File: 'tome_wind_blade.blend'
+# Blender 5.2.2 LTS MTL File: 'alarm_clock.blend'
 # www.blender.org
 
-newmtl tome_wind_blade_bookmark
+newmtl alarm_clock_bell_interior
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.055000 0.430000 0.440000
+Kd 0.180000 0.140000 0.075000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
 
-newmtl tome_wind_blade_continuous_leather
+newmtl alarm_clock_brass_strip
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -19,41 +19,43 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd tome_wind_blade_surface_atlas.png
+map_Kd alarm_clock_surface_atlas.png
 
-pass uv add 0.15 assets/models/items/tome_wind_blade_surface_atlas.png
-newmtl tome_wind_blade_cut_leather
+pass uv add 0.15 assets/models/items/alarm_clock_surface_atlas.png
+pass sphere add 0.055 assets/models/matcaps/gold.png
+newmtl alarm_clock_hands
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.060000 0.180000 0.310000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-
-newmtl tome_wind_blade_guards
-Ns 202.500000
-Ka 1.000000 1.000000 1.000000
-Kd 0.770000 0.600000 0.270000
+Kd 0.045000 0.055000 0.050000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
 
-pass sphere add 0.09 assets/models/matcaps/gold.png
-newmtl tome_wind_blade_hidden_pages
+newmtl alarm_clock_ivory_dial
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.840000 0.750000 0.550000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd alarm_clock_surface_atlas.png
+
+pass uv add 0.15 assets/models/items/alarm_clock_surface_atlas.png
+newmtl alarm_clock_plain_brass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.720000 0.510000 0.240000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
 
-newmtl tome_wind_blade_page_lines
+pass sphere add 0.07 assets/models/matcaps/gold.png
+newmtl alarm_clock_rear_plate
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -61,5 +63,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd tome_wind_blade_surface_atlas.png
-pass uv add 0.15 assets/models/items/tome_wind_blade_surface_atlas.png
+map_Kd alarm_clock_surface_atlas.png
+pass uv add 0.15 assets/models/items/alarm_clock_surface_atlas.png
+pass sphere add 0.055 assets/models/matcaps/gold.png

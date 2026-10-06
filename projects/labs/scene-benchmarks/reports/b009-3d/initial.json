@@ -42,7 +42,7 @@
   },
   "frameKind": "windows",
   "gameHeight": 240,
-  "gameWidth": 256,
+  "gameWidth": 426,
   "sceneId": "b009_positioning",
   "sceneName": "B009 - Carnegie Hall encounter",
   "tileSize": 8,
@@ -53,8 +53,8 @@
       "id": "world",
       "open": true,
       "style": "modelScene",
-      "width": 32,
-      "x": 0,
+      "width": 53.25,
+      "x": -10.625,
       "y": 0
     },
     {
@@ -64,7 +64,7 @@
       "open": true,
       "style": "panel",
       "width": 8.5,
-      "x": 1.5,
+      "x": -9.125,
       "y": 1
     },
     {
@@ -75,7 +75,7 @@
       "style": "panel",
       "text": "45/45",
       "width": 5,
-      "x": 3.7,
+      "x": -6.925,
       "y": 2.35
     },
     {
@@ -86,7 +86,7 @@
       "style": "panel",
       "text": "HP",
       "width": 2,
-      "x": 8.1,
+      "x": -2.5250000000000004,
       "y": 2.35
     },
     {
@@ -97,7 +97,7 @@
       "style": "panel",
       "text": "> Attack\n  P. Energy\n  Item\n  Escape",
       "width": 13,
-      "x": 1,
+      "x": -9.625,
       "y": 7
     },
     {
@@ -108,7 +108,7 @@
       "style": "panel",
       "text": "M84F\nBULLETS 11\nTARGET   1",
       "width": 12,
-      "x": 19,
+      "x": 29.625,
       "y": 13
     },
     {
@@ -119,7 +119,7 @@
       "style": "panel",
       "text": "> Heal 1\nRecover 30 HP\nPE cost 30",
       "width": 15,
-      "x": 1,
+      "x": -9.625,
       "y": 7
     },
     {
@@ -130,7 +130,7 @@
       "style": "panel",
       "text": "> Medicine 1\nStock 1\nRecover 30 HP",
       "width": 16,
-      "x": 1,
+      "x": -9.625,
       "y": 7
     },
     {
@@ -174,7 +174,7 @@
       "style": "panel",
       "text": "Carnegie Hall - backstage",
       "width": 30,
-      "x": 1,
+      "x": -9.625,
       "y": 27.5
     }
   ]

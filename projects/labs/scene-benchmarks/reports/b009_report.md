@@ -26,6 +26,6 @@ Absolute visual gates remain unreconciled. Earlier hosted Relative A/B failed du
 
 ## Remaining fidelity limits
 
-The original backgrounds have richer lighting, texture detail and composition. This model remains an approximation with mesh-pose animation, a rectangular movement area and the host's 256x240 composition rather than the original 4:3 framing. Exact regional critical-hit/miss formulas, rates/costs and escape probability are unverified. AT/recovery speeds, PE cost 30, timing and damage bands are lab tuning. Encounter sound, room transitions and full Day 1 progression remain outside this one encounter. Do not claim source-game parity.
+The original backgrounds have richer lighting, texture detail and composition. The encounter now defaults to the existing Wide surface (426x240, integer-centred 16:9 approximation), with a full-width 3D camera and HUD anchored to surface edges. Classic and 4:3 player choices still work. This model remains an approximation with mesh-pose animation and a rectangular movement area. Exact regional critical-hit/miss formulas, rates/costs and escape probability are unverified. AT/recovery speeds, PE cost 30, timing and damage bands are lab tuning. Encounter sound, room transitions and full Day 1 progression remain outside this one encounter. Do not claim source-game parity.
 
 Refs #1407, #1414 and #1415; draft implementation in PR #1413.

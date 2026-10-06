@@ -498,6 +498,11 @@ local function buildEnv(state, sceneData, ctx, listCache)
     env.sceneState = state.v or {}
     presentationStates[env] = require("engine.scene_host").presentationView(state)
     env.config = sceneData and sceneData.config or {}
+    -- Presentation geometry in the same tile units as window rectangles.
+    env.surface = { width = surface.renderWidth() / ui.tileSize,
+        height = surface.renderHeight() / ui.tileSize,
+        originX = surface.compositionOriginX() / ui.tileSize,
+        originY = surface.compositionOriginY() / ui.tileSize }
     -- The Project's terms.json, so authored text names the game through
     -- `{terms.game.title}` instead of hardcoding a display name (#288).
     local termsLoader = ctx.loader or (ctx.session and ctx.session.loader)

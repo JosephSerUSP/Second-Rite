@@ -66,6 +66,24 @@ local ok,err=pcall(function()
     ticks(5,1/60);assert(v.mode==3);near(v.hp,0)
     v=start();v.atb=100;menu();tap("DOWN");tap("DOWN");tap("DOWN");tap("A")
     assert(v.mode==4);ticks(120,1/60);near(v.hp,45);near(v.exp,0)
+    -- Expanded surfaces must reveal real room geometry and keep the HUD on
+    -- the left edge, while classic remains a usable player-selected profile.
+    local surface=require("presentation.surface")
+    local previous=surface.getProfileId()
+    local wr=require("presentation.window_renderer")
+    v=start()
+    for _,profile in ipairs({"classic","four_three","wide"}) do
+        surface.setProfile(profile)
+        local resolved=wr.resolveState(sh.getCurrentState(),specimen,ctx)
+        local byId={}
+        for _,window in ipairs(resolved.windows) do byId[window.id]=window end
+        local ox,oy=surface.compositionOrigin()
+        near(byId.world.x*8+ox,0);near(byId.world.y*8+oy,0)
+        near(byId.world.width*8,surface.renderWidth())
+        near(byId.world.height*8,surface.renderHeight())
+        near(byId.combat_hud.x*8+ox,12)
+    end
+    surface.setProfile(previous)
     local camera=require("presentation.scene_model_view")
     local r,u,forward=camera.cameraBasis({0,-8,7},{0,5,1})
     local function dot(a,b) return a[1]*b[1]+a[2]*b[2]+a[3]*b[3] end

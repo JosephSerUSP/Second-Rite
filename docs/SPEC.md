@@ -2677,3 +2677,12 @@ ZIP that has travelled to a tester. Unavailable git metadata is reported as
 unknown rather than failing the build — an export from a source drop is still a
 valid export — and the manifest carries no absolute paths, environment, or
 machine identity, which is asserted by test rather than left to reviewer care.
+
+Scene window geometry formulas can read `surface.width`, `surface.height`,
+`surface.originX` and `surface.originY` in tile units. These are read-only
+presentation projections of the active surface; a full-surface window uses
+`x=-surface.originX`, `y=-surface.originY`, `w=surface.width`, `h=surface.height`.
+Normal desktop play defaults to Wide (426x240, the existing integer-centred
+16:9 approximation) unless an explicit CLI, saved player or Project preference
+overrides it. Native Scene previews use the CLI or Project profile, defaulting
+to Wide, and do not inherit machine-specific saved preferences.

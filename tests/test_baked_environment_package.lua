@@ -33,6 +33,20 @@ local function readFile(relPath)
 end
 
 function M.run()
+    local mesh = require("presentation.mesh")
+    local package = require("engine.environment_package")
+    local siblingTexture = "assets/environments/st_maria_core/support.png"
+    local packageBase = "assets/environments/st_maria_core/court"
+    check(mesh.joined(packageBase, "../support.png") == siblingTexture,
+        "OBJ materials resolve the B18 sibling texture through the package path authority")
+    check(package.resolveAssetPath(packageBase, "../support.png") == siblingTexture,
+        "package and OBJ assets share the same normalized logical path")
+    check(mesh.joined(packageBase, siblingTexture) == siblingTexture,
+        "project-relative material references retain their own root")
+    check(not pcall(mesh.joined, "assets", "../../outside.png"),
+        "relative material references cannot escape the project")
+    check(obj_model.load(packageBase .. "/walk.obj").groups[1].texture ~= nil,
+        "the current B18 walk mesh acquires its authored sibling texture in LOVE")
     local packageDir = "exports/environments/town_slice_spike"
 
     -- 1. Read and parse manifest

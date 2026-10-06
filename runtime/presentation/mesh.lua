@@ -30,8 +30,7 @@ end
 -- Asset references inside a model may be written relative to the model file or
 -- as an ordinary project path; a leading `assets/` marks the latter.
 function mesh.joined(base, path)
-    if path:match("^assets/") then return path end
-    return base == "" and path or (base .. "/" .. path)
+    return require("engine.environment_package").resolveAssetPath(base, path)
 end
 
 -- Nearest-filtered and shared, so an atlas used by several models -- which is

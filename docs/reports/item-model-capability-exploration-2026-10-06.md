@@ -513,3 +513,123 @@ Agent-Signature:
   role: implementation
   task: nine food sources with new construction techniques
   base: b55f09b311f06b2a006742b9da3ad35d2a0d2868
+
+## Wearables: intentional normals, material separation and painted UVs
+
+The owner requested more attention to which faces should be smooth, and to
+materials and textures. This cohort starts from `8275ec85` and gives ten more
+items editable sources. Earlier source documents and their products remain
+unchanged. These wearables await owner visual review; the source inventory is
+not a visual-acceptance count.
+
+Review the [gameplay-angle board](item-model-wearables-review/gameplay96.png),
+[previous/new comparison](item-model-wearables-review/before-after96.png),
+[normal controls](item-model-wearables-review/normals96.png),
+[complete sheet](item-model-wearables-review/sheet96.png), and
+[twelve texture atlases](item-model-wearables-review/texture-atlases.png).
+The native cells are 96px. The first two poses use gameplay tilt; the later
+sheet poses retain the diagnostic roll limitation described above.
+
+| Item | Surface and construction choices |
+| --- | --- |
+| White Cape | Smooth draped grid with a scalloped hem, ivory satin weave and embroidered border; flat thickness rims, smooth piping and brass clasp |
+| Ribbon | Rose woven silk, broad folded loop sections softened by a live Subdivision modifier, a wrapped knot and two hanging tails; flat cut rims |
+| Thief Glove | Smooth rounded leather palm, curved soft fingers, stitched cuff and back seams; planar loft caps stay flat |
+| Sprint Shoes | Rounded leather uppers, canvas tongues and laces, small polished eyelets; sharp cap boundaries, flat rubber grip blocks and firmer sole edges |
+| Moa Saddle | Scooped leather seat, quilted skirt atlases, raised pommel/cantle and iron stirrups; smooth broad panels and flat cut rims |
+| Chef Hat | Smooth gathered linen crown, firm cylindrical band with a sharp cap boundary, weave and band seams |
+| Apron | Striped ecru canvas on a smooth folded bib/skirt, neck loop and waist ties, separate pocket and stitching; flat cut edges |
+| Black Belt | Dark cotton weave and stitches, substantial knot and unequal tails with embroidered rank bars; flat strap rims and knot caps |
+| Cat Bell | Smooth turned brass with wear/patina atlas, hollow interior and two actual Boolean slots, clapper, attachment loop and rose bow; flat slot-cut faces |
+| Moa Harness | Teal leather yoke, crossed braces and lower girth with stitched atlas edges; smooth broad strap faces, flat cut rims and separate brass buckles |
+
+### Normals are observed runtime evidence
+
+The OBJ exporter writes normals, and `engine/geometry/obj_source.lua` passes
+the authored corner normals into the neutral Model. The item shader uses them
+for lighting and sphere-pass sampling. Consequently, choosing smooth faces in
+the source can change the native render without changing its silhouette.
+
+The new sources retain named surface roles and authored sharp-edge boundaries.
+Rounded leather and soft cloth use smooth broad faces; loft end caps are
+explicitly flat. Strap thickness faces use their separate rim material and
+flat normals. For live Solidify cloth, a small Geometry Nodes material-selection
+step sets only the generated cut-edge faces flat. Rubber grip blocks are flat,
+while curved metal loops and piping stay smooth. Bell Boolean cut faces retain
+flat shading around the smooth outer shell.
+
+For example, read-only evaluated inspection reports Cape cloth at 144 smooth
+faces out of 180, Chef Hat's band at 24/26 and crown at 192/194, and the bell
+shell at 296/312. Each of the eight shoe grip blocks has zero smooth faces.
+Sharp-edge splitting additionally protects planar boundaries.
+
+Throwaway source copies provide a flat Mesh/Screw control for all ten items;
+Curve piping is held unchanged. The controls and candidates have identical
+triangle positions, UVs and MTL bytes. Native gameplay-pose comparisons change
+3,250 pixels for Cat Bell, 3,168 for Chef Hat and 3,009 for White Cape across
+their first two 96px cells. The committed board exposes the actual lighting
+differences. Those counts prove a visible normal change, not aesthetic approval.
+
+### Texture and material evidence
+
+Twelve opaque 128-by-128 atlases encode linen/cotton weave, satin/ribbon grain,
+canvas stripes, leather pores and stitches, saddle quilting, and brass wear.
+UVs are bounded and coherent over each broad panel/loft surface, rather than
+repeating a complete atlas on every quad. New loft caps receive a real planar
+atlas mapping; the shared scaffold's default collapsed cap coordinates would
+not support painted cap detail. Plain edge, seam, finger and grip materials
+retain controlled colours for those small components.
+
+The scoped runtime audit examines every face using `map_Kd`, by material. All
+twelve painted materials have zero missing UVs, zero collapsed UV triangles
+and zero coordinates outside the atlas. Source atlas, compiled copy and
+shipping copy bytes match for all twelve images. Every source image path is
+portable and relative to its document (`//_textures/<filename>`).
+
+Satin/ribbon sheen and metal highlights use explicit low-strength runtime
+sphere passes. The material treatment is carried by colour, image and declared
+pass data; this pass makes no claim that Blender's Principled roughness or
+metallic settings become runtime BRDF controls. The native texture filter,
+lighting cap and dithering still limit fine weave/pores at 96px. Dark glove
+and belt detail remains subtle; coloured seams, silhouette and the comparison
+boards support owner judgment.
+
+The [surface evidence](item-model-wearables-review/surface-evidence.json)
+records source hashes, evaluated smooth-face counts, texture hashes, painted
+face UV results and the ten normal controls without machine-specific absolute
+paths. The per-material audit is scoped evidence for these assets; the general
+UV-coverage gate gap remains tracked in #1431.
+
+### Observed verification and remaining boundaries
+
+- All ten final sources pass read-only `compile_item_blends.py --check`, with
+  source hashes unchanged and OBJ/MTL bytes matching shipping. A separate
+  candidate repeat export also matched all ten before the final relative-path
+  normalization; final `--check` verifies the normalized sources.
+- Texture/reference check, script index and diff checks pass. Canonical
+  shipping and final candidate native boards have identical RGB pixels.
+- Strict prospective review of all 207 models finds zero violations involving
+  these ten; sourced pairs face the 0.85 silhouette threshold.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. Seven native Effekseer
+  world-effect assertions remain explicitly unavailable. G5/G6 were not run or
+  recaptured; Linux byte stability remains unverified.
+- Actual corpus remains red for 79 accepted keys no longer reproducing, with
+  three duplicate groups, 38 UV-less models and one shared-file group left.
+  The inherited reduced Ether Seed/Sigil Ink and remaining legacy food group
+  still appear as new group keys. Asset contract passes; asset regression is
+  red for 77 changed Model records across the stack. Production baseline files
+  are unchanged, and owner baseline/merge approval is still absent.
+- Lantern's inherited integration blockers remain tracked in #1434. The static
+  item shape-key policy follow-up remains #1436. This pass changes no runtime
+  code, game data, recipes, earlier sources or baseline references.
+
+Source absence falls from 83 to 73 referenced items. Once-only scaffolds,
+recorded source surgery, normal-control documents and local verification logs
+remain ignored under `out/work/`; the saved production documents are authority.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: ten wearables with intentional normals and painted materials
+  base: 8275ec857b4567977422620c41f21e116b28ebd9

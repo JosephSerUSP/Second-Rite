@@ -1,0 +1,1106 @@
+{
+  "nativeCell": 96,
+  "textureSize": 128,
+  "paintedMaterials": 12,
+  "items": [
+    {
+      "item": "white_cape",
+      "sourceHash": "9205775b3f3674027d94c094581894ccae4dc0b4ca6a2036297dfeb59eda15ab",
+      "sourceObjects": [
+        {
+          "name": "A_DrapedCape",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 180,
+          "smoothFaces": 144
+        },
+        {
+          "name": "B_Collar",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "C_EdgeBinding-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 116,
+          "smoothFaces": 116
+        },
+        {
+          "name": "C_EdgeBinding1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 116,
+          "smoothFaces": 116
+        },
+        {
+          "name": "D_BrassClasp",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded polished clasp",
+          "faces": 80,
+          "smoothFaces": 80
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\white_cape_satin.png",
+          "sha256": "fa051e1e575c8f4b1d7554280ac19a54d6b983d69a9cce021f433c343b9ce98a"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "white_cape_satin": {
+          "texture": "white_cape_satin.png",
+          "faces": 288,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 288
+        }
+      },
+      "normalControl": {
+        "item": "white_cape",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 3009
+      }
+    },
+    {
+      "item": "ribbon",
+      "sourceHash": "450667569b79899b6c893fb8157bfcecc9cdaf20f522693220b847c30c076745",
+      "sourceObjects": [
+        {
+          "name": "A_FoldedBowLoop-1",
+          "type": "MESH",
+          "modifiers": [
+            "SUBSURF"
+          ],
+          "role": "Smooth silk loop with retained broad cross-section and softened silhouette",
+          "faces": 104,
+          "smoothFaces": 48
+        },
+        {
+          "name": "A_FoldedBowLoop1",
+          "type": "MESH",
+          "modifiers": [
+            "SUBSURF"
+          ],
+          "role": "Smooth silk loop with retained broad cross-section and softened silhouette",
+          "faces": 104,
+          "smoothFaces": 48
+        },
+        {
+          "name": "B_Tail-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "B_Tail1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "C_WrappedKnot",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 14,
+          "smoothFaces": 12
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\ribbon_ribbon.png",
+          "sha256": "267604e85d7c5fd4804d7d9e3c44dc036416f48c2600ef4eb5d5b54a06709b62"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "ribbon_ribbon": {
+          "texture": "ribbon_ribbon.png",
+          "faces": 260,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 240
+        }
+      },
+      "normalControl": {
+        "item": "ribbon",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 1216
+      }
+    },
+    {
+      "item": "thief_glove",
+      "sourceHash": "0d12ed7ebe436dbd36c6f6ef7685e7fee7c16070b22459a0bdedc8e27ed63a31",
+      "sourceObjects": [
+        {
+          "name": "A_Palm",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 34,
+          "smoothFaces": 32
+        },
+        {
+          "name": "B_Finger0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "B_Finger1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "B_Finger2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "B_Finger3",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "C_Thumb",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_TurnedCuff",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 18,
+          "smoothFaces": 16
+        },
+        {
+          "name": "E_BackStitch-0.21",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_BackStitch0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_BackStitch0.21",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_CuffSeam",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\thief_glove_leather.png",
+          "sha256": "fc8dd6afa99cbbc38f9be8652158d9acdde314559ad51a39cb1c493bdc0ae334"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "thief_glove_leather": {
+          "texture": "thief_glove_leather.png",
+          "faces": 152,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 96
+        }
+      },
+      "normalControl": {
+        "item": "thief_glove",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 841
+      }
+    },
+    {
+      "item": "sprint_shoes",
+      "sourceHash": "4141a35bed1c71f6460f5ea3fbd631ad9adb50fa354292ec424cbae3e6477f03",
+      "sourceObjects": [
+        {
+          "name": "A_ShoeUpper0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 82,
+          "smoothFaces": 80
+        },
+        {
+          "name": "A_ShoeUpper1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 82,
+          "smoothFaces": 80
+        },
+        {
+          "name": "B_CrispSole0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 22,
+          "smoothFaces": 20
+        },
+        {
+          "name": "B_CrispSole1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 22,
+          "smoothFaces": 20
+        },
+        {
+          "name": "C_CanvasTongue0",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 28,
+          "smoothFaces": 16
+        },
+        {
+          "name": "C_CanvasTongue1",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 28,
+          "smoothFaces": 16
+        },
+        {
+          "name": "D_Lace0_0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_Lace0_1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_Lace0_2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_Lace1_0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_Lace1_1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_Lace1_2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_Eyelet0_0_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet0_0_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet0_1_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet0_1_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet0_2_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet0_2_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_0_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_0_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_1_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_1_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_2_-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "E_Eyelet1_2_1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth small eyelet",
+          "faces": 40,
+          "smoothFaces": 40
+        },
+        {
+          "name": "F_Grip0_0",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip0_1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip0_2",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip0_3",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip1_0",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip1_1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip1_2",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "F_Grip1_3",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\sprint_shoes_canvas.png",
+          "sha256": "06bcfe5e47b1f6a2e14f846d40d995ecc620a0b97566dd14349360866b81a264"
+        },
+        {
+          "path": "//_textures\\sprint_shoes_leather.png",
+          "sha256": "344239e47c4c3babc32beb4a1280ed00001abdfca1f9004cae5c29938e99970d"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "sprint_shoes_leather": {
+          "texture": "sprint_shoes_leather.png",
+          "faces": 392,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 320
+        },
+        "sprint_shoes_canvas": {
+          "texture": "sprint_shoes_canvas.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 64
+        }
+      },
+      "normalControl": {
+        "item": "sprint_shoes",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 2139
+      }
+    },
+    {
+      "item": "moa_saddle",
+      "sourceHash": "2f026ce4f461c5e59d8b91c46f46e7a1871d66cda9d8c489b3ecd407d44b1e5d",
+      "sourceObjects": [
+        {
+          "name": "A_ScoopedSeat",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 128,
+          "smoothFaces": 96
+        },
+        {
+          "name": "B_QuiltedSkirt-1",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 70,
+          "smoothFaces": 48
+        },
+        {
+          "name": "B_QuiltedSkirt1",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 70,
+          "smoothFaces": 48
+        },
+        {
+          "name": "C_StirrupLeather-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "C_StirrupLeather1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "D_IronStirrup-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 90,
+          "smoothFaces": 90
+        },
+        {
+          "name": "D_IronStirrup1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 90,
+          "smoothFaces": 90
+        },
+        {
+          "name": "E_Cantle",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_Pommel",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "F_Girth",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\moa_saddle_leather.png",
+          "sha256": "910d98478faaf2064beb81cebf7ee5eede2fa982f73c63e9196a4bfa38566596"
+        },
+        {
+          "path": "//_textures\\moa_saddle_quilt.png",
+          "sha256": "3477bef407b1c74836a544d23f813f1622296ac450691d2f5f8d7463259f4065"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "moa_saddle_leather": {
+          "texture": "moa_saddle_leather.png",
+          "faces": 192,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 192
+        },
+        "moa_saddle_quilt": {
+          "texture": "moa_saddle_quilt.png",
+          "faces": 192,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 192
+        }
+      },
+      "normalControl": {
+        "item": "moa_saddle",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 587
+      }
+    },
+    {
+      "item": "chef_hat",
+      "sourceHash": "087a5558ef8289100f34fa06c5d220687b7156db240b8eaf64cfa8291ffc28ec",
+      "sourceObjects": [
+        {
+          "name": "A_StiffBand",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 26,
+          "smoothFaces": 24
+        },
+        {
+          "name": "B_SoftGatheredCrown",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 194,
+          "smoothFaces": 192
+        },
+        {
+          "name": "C_BandSeam",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth seam",
+          "faces": 120,
+          "smoothFaces": 120
+        },
+        {
+          "name": "D_BandStitch-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "D_BandStitch1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\chef_hat_linen.png",
+          "sha256": "dc6049ceb04f1e5b395c3ea5c1e49586320bbbfaefc559ff42f85a2db775f1eb"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "chef_hat_linen": {
+          "texture": "chef_hat_linen.png",
+          "faces": 568,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 432
+        }
+      },
+      "normalControl": {
+        "item": "chef_hat",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 3168
+      }
+    },
+    {
+      "item": "apron",
+      "sourceHash": "f3812f50d8fe58eb5e8af63974e3537b4edc1480ca433c76b0d7981b791fa849",
+      "sourceObjects": [
+        {
+          "name": "A_ApronBody",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "soft woven cloth with crisp cut boundary",
+          "faces": 154,
+          "smoothFaces": 120
+        },
+        {
+          "name": "B_NeckLoop",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "C_WaistTie-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "C_WaistTie1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "D_PatchPocket",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "soft cloth pocket",
+          "faces": 7,
+          "smoothFaces": 7
+        },
+        {
+          "name": "E_PocketStitch",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\apron_canvas.png",
+          "sha256": "e76573eb41073bc820af765b145a7ffee87d99bf2d47a9d1b6cd6b61f97f87aa"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "apron_canvas": {
+          "texture": "apron_canvas.png",
+          "faces": 264,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 264
+        }
+      },
+      "normalControl": {
+        "item": "apron",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 1811
+      }
+    },
+    {
+      "item": "black_belt",
+      "sourceHash": "fa941e1a585aeaf6c63796d7ab83b7c7319d9a56114d638db426c39880ec1f54",
+      "sourceObjects": [
+        {
+          "name": "A_WaistBand",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 66,
+          "smoothFaces": 32
+        },
+        {
+          "name": "B_HangingEnd-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "B_HangingEnd1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "C_EmbroideredRank-1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "C_EmbroideredRank1",
+          "type": "MESH",
+          "modifiers": [
+            "BEVEL"
+          ],
+          "role": "crisp broad planes with edge bevel",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "D_TiedKnot",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded body; sharp cap boundary",
+          "faces": 18,
+          "smoothFaces": 16
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\black_belt_cotton.png",
+          "sha256": "f413c35b82b6206fd9dc38f995bd98b1fbf18ca6836cd840fadeeee59620aa0b"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "black_belt_cotton": {
+          "texture": "black_belt_cotton.png",
+          "faces": 148,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 120
+        }
+      },
+      "normalControl": {
+        "item": "black_belt",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 784
+      }
+    },
+    {
+      "item": "cat_bell",
+      "sourceHash": "4342dfa680eaf2104c06619f9c028c888f84916ff206f12f6205cf585c851bed",
+      "sourceObjects": [
+        {
+          "name": "A_HollowBell",
+          "type": "MESH",
+          "modifiers": [
+            "SCREW",
+            "BOOLEAN",
+            "BOOLEAN"
+          ],
+          "role": "smooth turned brass",
+          "faces": 312,
+          "smoothFaces": 296
+        },
+        {
+          "name": "B_Clapper",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded clapper",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "C_AttachmentLoop",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth loop",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "D_CollarBow",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 116,
+          "smoothFaces": 116
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\cat_bell_brass.png",
+          "sha256": "5c7b05cbe5276e3ac3fc160954cd79710dece3815e0e3eff489061afe6f9b427"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "cat_bell_brass": {
+          "texture": "cat_bell_brass.png",
+          "faces": 936,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 816
+        }
+      },
+      "normalControl": {
+        "item": "cat_bell",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 3250
+      }
+    },
+    {
+      "item": "moa_harness",
+      "sourceHash": "cbb7a514ece6330be92f7e06d19a5310f65cc11d98867b3d633052ec57c32ae6",
+      "sourceObjects": [
+        {
+          "name": "A_ChestYoke-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 18,
+          "smoothFaces": 8
+        },
+        {
+          "name": "A_ChestYoke1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 18,
+          "smoothFaces": 8
+        },
+        {
+          "name": "B_CrossBrace-1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "B_CrossBrace1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 14,
+          "smoothFaces": 6
+        },
+        {
+          "name": "C_LowerGirth",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "soft strap faces with crisp thickness edges",
+          "faces": 10,
+          "smoothFaces": 4
+        },
+        {
+          "name": "D_BuckleFrame-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 72,
+          "smoothFaces": 72
+        },
+        {
+          "name": "D_BuckleFrame1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 72,
+          "smoothFaces": 72
+        },
+        {
+          "name": "D_BuckleTongue-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "D_BuckleTongue1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\moa_harness_leather.png",
+          "sha256": "87ca000fbddf783d927c62bbc032131e638917209e2d1ec9ee1676f402dac847"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "moa_harness_leather": {
+          "texture": "moa_harness_leather.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 64
+        }
+      },
+      "normalControl": {
+        "item": "moa_harness",
+        "geometryAndUVEqual": true,
+        "materialBytesEqual": true,
+        "changedGameplayPixels": 1069
+      }
+    }
+  ]
+}

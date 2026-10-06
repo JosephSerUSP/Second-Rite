@@ -117,6 +117,13 @@ local function deserializeBattler(data, loader)
 end
 
 local function serializeTraversalState(sessionObj)
+    -- Registered traversal capabilities own their durable state shape. The
+    -- savegame host stores that opaque provider payload without learning its
+    -- topology. bounded_lane predates the registry and remains the explicit
+    -- compatibility fallback until it is promoted behind the same host.
+    local providerState = require("engine.traversal_host").serialize(sessionObj)
+    if providerState then return providerState end
+
     local traversal = sessionObj.townTraversal
     if not traversal or traversal.provider ~= "bounded_lane" then return nil end
     -- A save taken mid-climb records where the climb is going: the actor is
@@ -182,21 +189,25 @@ local function restoreMap(sessionObj, data, loader)
         exploration.applyMapPresentation(sessionObj, data.mapIndex, presentation)
     end
 
-    -- restoreMap historically reconstructed only the legacy grid fields. That
-    -- is insufficient for capability-backed town Maps: bounded_lane owns the
-    -- side-view camera, continuous actor position, bounds and doorway collision.
-    -- A fresh GameSession therefore loaded a valid town Map with no provider,
-    -- which made the renderer fall back to first-person dungeon presentation
-    -- and made lane collision disappear. Rebuild the same derived capability
-    -- that exploration.loadMap installs on ordinary transfers.
+    -- Restore provider-backed traversal through the same generic host that
+    -- serialized it. The provider rebuilds its derived environment/collision
+    -- state from current Project data and consumes only its own durable payload.
+    -- bounded_lane predates that registry and stays as the legacy fallback.
     exploration.buildOverrideIndex(sessionObj)
     local traversalSpec = mapData.traversal
-    if type(traversalSpec) == "table" and traversalSpec.provider == "bounded_lane" then
+    local savedTraversal = data.traversalState
+    local restoredProvider = nil
+    if type(savedTraversal) == "table" then
+        restoredProvider = require("engine.traversal_host").restore(sessionObj, savedTraversal)
+    end
+
+    if not restoredProvider
+            and type(traversalSpec) == "table"
+            and traversalSpec.provider == "bounded_lane" then
         local environment = require("engine.environment_package").load(
             traversalSpec.environmentPackage)
         local lane = require("engine.bounded_lane")
         local state = lane.initialize(sessionObj, mapData, environment, nil)
-        local savedTraversal = data.traversalState
         if state and type(savedTraversal) == "table"
                 and savedTraversal.provider == "bounded_lane" then
             local savedY = tonumber(savedTraversal.y)

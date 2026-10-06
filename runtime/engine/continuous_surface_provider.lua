@@ -220,6 +220,7 @@ function provider.serialize(session)
     if not state then return nil end
     local value = semantic.serialize(state)
     value.mapId = state.mapId
+    value.spawnAnchor = state.spawnAnchor
     return value
 end
 

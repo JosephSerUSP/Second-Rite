@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - tools/blender/pr1400_instance_stress_upgrade.py
+      - tools/blender/pr1400_instance_realization_hotfix.py
       - .github/workflows/pr1400-instance-stress-upgrade.yml
   workflow_dispatch:
 
@@ -38,6 +39,7 @@ jobs:
         run: |
           set -euxo pipefail
           python tools/blender/pr1400_instance_stress_upgrade.py
+          python tools/blender/pr1400_instance_realization_hotfix.py
           python tools/blender/sync_asset_core.py
           python -m py_compile \
             tools/blender/second_rite_asset_core.py \
@@ -81,6 +83,7 @@ jobs:
         run: |
           set -euxo pipefail
           rm tools/blender/pr1400_instance_stress_upgrade.py
+          rm tools/blender/pr1400_instance_realization_hotfix.py
           rm .github/workflows/pr1400-instance-stress-upgrade.yml
           git diff --check
           git config user.name "github-actions[bot]"

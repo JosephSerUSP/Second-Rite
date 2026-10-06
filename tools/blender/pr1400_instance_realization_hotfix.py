@@ -88,5 +88,23 @@ def _select_export_geometry'''
 updated, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
 if count != 1:
     raise SystemExit(f"instance realization hotfix expected one replacement, got {count}")
+
+# Authoring scripts and Blender UI edits can leave child matrix_world values
+# pending until the next dependency-graph evaluation. Snapshotting a hierarchy
+# for export must therefore synchronize explicitly rather than relying on an
+# earlier redraw/save/open cycle to have happened.
+needle = '''def duplicate_hierarchy(context, root, collection_name="__SECOND_RITE_ITEM_EXPORT_TEMP__"):
+    bpy = _bpy()
+    from mathutils import Matrix
+'''
+replacement_sync = '''def duplicate_hierarchy(context, root, collection_name="__SECOND_RITE_ITEM_EXPORT_TEMP__"):
+    bpy = _bpy()
+    from mathutils import Matrix
+    context.view_layer.update()
+'''
+if updated.count(needle) != 1:
+    raise SystemExit("duplicate_hierarchy synchronization insertion point drifted")
+updated = updated.replace(needle, replacement_sync, 1)
+
 CORE.write_text(updated, encoding="utf-8")
 print("PR1400 INSTANCE REALIZATION HOTFIX PATCHED")

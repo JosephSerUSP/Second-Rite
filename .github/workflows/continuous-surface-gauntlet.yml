@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'runtime/main.lua'
+      - 'runtime/engine/exploration.lua'
       - 'runtime/engine/savegame.lua'
       - 'runtime/engine/continuous_surface.lua'
       - 'runtime/engine/continuous_surface_provider.lua'
@@ -68,6 +69,9 @@ jobs:
           if (-not (Test-Path (Join-Path $stage 'assets/environments/archive_antechamber/environment.json'))) {
             throw 'staged Project is missing its own environment package'
           }
+          if (-not (Test-Path (Join-Path $stage 'data/maps/2.json'))) {
+            throw 'staged Project is missing the service annex Map'
+          }
 
       - name: Validate the staged Project
         shell: pwsh
@@ -75,7 +79,7 @@ jobs:
           & $env:LOVEC $env:GAUNTLET_STAGE validate
           if ($LASTEXITCODE -ne 0) { throw "gauntlet validate failed (exit $LASTEXITCODE)" }
 
-      - name: Traversal save/load round-trip in the staged Project
+      - name: Authored transfer and traversal save/load round-trip
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -85,6 +89,7 @@ jobs:
           local session = require("engine.session")
           local exploration = require("engine.exploration")
           local traversal = require("engine.traversal_host")
+          local interpreter = require("engine.interpreter")
           local savegame = require("engine.savegame")
           local json = require("engine.data.json")
 
@@ -92,31 +97,78 @@ jobs:
               return math.abs((a or 0) - (b or 0)) < 1e-9
           end
 
+          local function eventById(game, id)
+              for _, event in ipairs((game.currentMapData and game.currentMapData.events) or {}) do
+                  if event.id == id then return event end
+              end
+              error("missing Event " .. tostring(id), 0)
+          end
+
+          local function runEventProgram(game, id)
+              local event = eventById(game, id)
+              interpreter.runImmediate(event.commands, {
+                  session = game,
+                  loader = loader,
+                  party = game.party or {},
+                  event = event,
+                  eventId = event.id,
+              })
+          end
+
+          local function assertAtAnchor(game, state, anchorId)
+              assert(state and state.spawnAnchor == anchorId,
+                  "expected arrival anchor " .. anchorId .. ", got " .. tostring(state and state.spawnAnchor))
+              local anchor = game.continuousTraversal.environment.anchors[anchorId]
+              assert(anchor and anchor.position, "environment is missing anchor " .. anchorId)
+              assert(near(state.x, anchor.position[1]) and near(state.y, anchor.position[2])
+                      and near(state.z, anchor.position[3]),
+                  "provider did not enter at anchor " .. anchorId)
+          end
+
           function love.load()
               loader.init()
-              local original = session.GameSession.new(loader)
-              exploration.loadMap(original, 1)
-              assert(traversal.isActive(original), "gauntlet traversal provider is not active")
+              local game = session.GameSession.new(loader)
+              exploration.loadMap(game, loader.getMapIndex(1))
+              assert(traversal.isActive(game), "gauntlet traversal provider is not active")
 
-              local spawn = traversal.serialize(original)
-              traversal.update(original, 0.25, { right = true })
-              local before = traversal.serialize(original)
+              local initial = traversal.serialize(game)
+              assertAtAnchor(game, initial, "spawn_player")
+
+              -- This is the authored Event Program, not a direct provider call.
+              runEventProgram(game, 102)
+              assert(game.currentMapData.id == 2, "Archive Service Door did not LOAD_MAP 2")
+              local serviceArrival = traversal.serialize(game)
+              assertAtAnchor(game, serviceArrival, "arrival_from_archive")
+              local serviceDefault = game.continuousTraversal.environment.anchors.service_spawn.position
+              assert(not (near(serviceArrival.x, serviceDefault[1]) and near(serviceArrival.y, serviceDefault[2])),
+                  "named arrival did not override Service Annex default spawn")
+
+              runEventProgram(game, 201)
+              assert(game.currentMapData.id == 1, "Service Archive Door did not LOAD_MAP 1")
+              local archiveArrival = traversal.serialize(game)
+              assertAtAnchor(game, archiveArrival, "arrival_from_service")
+              local archiveDefault = game.continuousTraversal.environment.anchors.spawn_player.position
+              assert(not (near(archiveArrival.x, archiveDefault[1]) and near(archiveArrival.y, archiveDefault[2])),
+                  "named arrival did not override Archive default spawn")
+
+              traversal.update(game, 0.25, { left = true })
+              local before = traversal.serialize(game)
               assert(before and before.provider == "continuous_surface", "provider did not serialize")
-              assert(not near(before.x, spawn.x), "test movement did not change world X")
 
-              local body = json.encode(savegame.serialize(original, loader, "map"))
+              local body = json.encode(savegame.serialize(game, loader, "map"))
               local restored, scene = savegame.deserialize(json.decode(body), loader)
               local after = traversal.serialize(restored)
 
               assert(scene == "map", "saved scene did not restore")
               assert(after and after.provider == before.provider, "provider identity did not restore")
+              assert(after.spawnAnchor == before.spawnAnchor, "arrival anchor identity did not restore")
               assert(near(after.x, before.x) and near(after.y, before.y) and near(after.z, before.z),
                   "world position did not round-trip")
               assert(near(after.facingX, before.facingX) and near(after.facingY, before.facingY),
                   "world facing did not round-trip")
               assert(near(after.walkDistance, before.walkDistance), "walk distance did not round-trip")
 
-              print("CONTINUOUS_TRAVERSAL_SAVE_OK")
+              print("CONTINUOUS_TRANSFER_SAVE_OK")
               if io and io.stdout and io.stdout.flush then io.stdout:flush() end
               love.event.quit(0)
               os.exit(0)
@@ -124,7 +176,7 @@ jobs:
           '@ | Set-Content -Path $main -Encoding utf8
 
           & $env:LOVEC $env:GAUNTLET_STAGE
-          if ($LASTEXITCODE -ne 0) { throw "traversal save/load contract failed (exit $LASTEXITCODE)" }
+          if ($LASTEXITCODE -ne 0) { throw "continuous transfer/save contract failed (exit $LASTEXITCODE)" }
 
       - name: Continuous traversal semantic and host assertions
         shell: pwsh

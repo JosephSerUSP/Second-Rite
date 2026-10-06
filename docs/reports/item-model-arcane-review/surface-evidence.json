@@ -1,0 +1,978 @@
+{
+  "nativeCell": 96,
+  "textureSize": 128,
+  "paintedMaterials": 14,
+  "yawProbe": [
+    0,
+    90,
+    180,
+    270
+  ],
+  "yawProbeRoll": 10,
+  "items": [
+    {
+      "item": "mystic_egg",
+      "sourceHash": "c1d271684c6464f884741d49618a17c6025a0cd052c90193933e71d8f4e76961",
+      "sourceObjects": [
+        {
+          "name": "A_LivingShell",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY",
+            "NODES"
+          ],
+          "role": "continuous egg shell",
+          "faces": 1096,
+          "smoothFaces": 1056
+        },
+        {
+          "name": "B_InsetLifeCore",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth inset life core",
+          "faces": 320,
+          "smoothFaces": 320
+        },
+        {
+          "name": "C_WindowRim-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 96,
+          "smoothFaces": 96
+        },
+        {
+          "name": "C_WindowRim1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 96,
+          "smoothFaces": 96
+        },
+        {
+          "name": "D_BranchingRidge",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\mystic_egg_enamel.png",
+          "sha256": "83cb736da1f61e8198004e21b4780a02d160aff040f1992a82d2852c367ccd87"
+        },
+        {
+          "path": "//_textures\\mystic_egg_shell.png",
+          "sha256": "081842f3a84db37fa4dfba47b1b560c733935c24845de02e9f7576010497ed47"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "mystic_egg_shell": {
+          "texture": "mystic_egg_shell.png",
+          "faces": 992,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 992
+        },
+        "mystic_egg_enamel": {
+          "texture": "mystic_egg_enamel.png",
+          "faces": 320,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 320
+        }
+      },
+      "controls": [],
+      "triangles": 3384,
+      "productHash": "8095bba08cafb24c33bc58ff978acaef2781c77225cec4e251262a96c012620f"
+    },
+    {
+      "item": "golden_egg",
+      "sourceHash": "731a9a764c01ba5475556e38570ff0c94c3e7c562a78cb90ec3468a4c96ae72e",
+      "sourceObjects": [
+        {
+          "name": "A_GildedShell",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous egg shell",
+          "faces": 800,
+          "smoothFaces": 800
+        },
+        {
+          "name": "B_ChasedPanel0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel3",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel4",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel5",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel6",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "B_ChasedPanel7",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "C_EquatorialCollar",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 200,
+          "smoothFaces": 200
+        },
+        {
+          "name": "D_DisplayCradle",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 200,
+          "smoothFaces": 200
+        },
+        {
+          "name": "E_CradleFoot0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_CradleFoot1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        },
+        {
+          "name": "E_CradleFoot2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 44,
+          "smoothFaces": 44
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\golden_egg_gold.png",
+          "sha256": "4b6ca2bfe7fad006586342594321357d34b1505bbc6dd4403a58e79b33d72607"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "golden_egg_gold": {
+          "texture": "golden_egg_gold.png",
+          "faces": 1520,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1520
+        }
+      },
+      "controls": [
+        {
+          "item": "golden_egg",
+          "control": "flat",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 2620
+        },
+        {
+          "item": "golden_egg",
+          "control": "albedo",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 4043
+        }
+      ],
+      "triangles": 3888,
+      "productHash": "ed275cb22bcd6142c96274a1917136defe0055bb35791f9db7c416803705d7b9"
+    },
+    {
+      "item": "glass_bead",
+      "sourceHash": "9864e8620d22bd2636fec02e8a973a13d810a1b79554f39c63e13811bde4e3d3",
+      "sourceObjects": [
+        {
+          "name": "A_DrilledLampworkBody",
+          "type": "MESH",
+          "modifiers": [
+            "SCREW"
+          ],
+          "role": "smooth lampwork glass",
+          "faces": 432,
+          "smoothFaces": 432
+        },
+        {
+          "name": "B_DarkBore",
+          "type": "MESH",
+          "modifiers": [
+            "SCREW"
+          ],
+          "role": "smooth recessed bore",
+          "faces": 128,
+          "smoothFaces": 128
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\glass_bead_glass.png",
+          "sha256": "1b9e940c58795719a749dd1042ab3d61107551fb551f8ded2dc1e67378b4d7a9"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "glass_bead_glass": {
+          "texture": "glass_bead_glass.png",
+          "faces": 864,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 864
+        }
+      },
+      "controls": [
+        {
+          "item": "glass_bead",
+          "control": "flat",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 3878
+        },
+        {
+          "item": "glass_bead",
+          "control": "albedo",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 2848
+        }
+      ],
+      "triangles": 1120,
+      "productHash": "69c266867e192dc5ce0dad74fb9b65abc52b53bff6fe6560f17f130762e45c4b"
+    },
+    {
+      "item": "thrice_blessed_bead",
+      "sourceHash": "8e20d2b031d2571051f451a8c9a4836bbaa6af42b94d7e8cc823c7ad70aad6d6",
+      "sourceObjects": [
+        {
+          "name": "A_OpalescentDrilledBead",
+          "type": "MESH",
+          "modifiers": [
+            "SCREW"
+          ],
+          "role": "smooth opalescent bead",
+          "faces": 252,
+          "smoothFaces": 252
+        },
+        {
+          "name": "B_LinkedPrayerLeaf0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 90,
+          "smoothFaces": 90
+        },
+        {
+          "name": "B_LinkedPrayerLeaf1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 90,
+          "smoothFaces": 90
+        },
+        {
+          "name": "B_LinkedPrayerLeaf2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 90,
+          "smoothFaces": 90
+        },
+        {
+          "name": "C_PrayerStone0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "C_PrayerStone1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        },
+        {
+          "name": "C_PrayerStone2",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 20,
+          "smoothFaces": 0
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\thrice_blessed_bead_glass.png",
+          "sha256": "eb062b94404ce6fc20fcf311878812624a9710b2295687f184b2f2ffd7a59e03"
+        },
+        {
+          "path": "//_textures\\thrice_blessed_bead_gold.png",
+          "sha256": "a9bf37e27e084ea6cd528424c941f32e189480694dd1d07ec9c5ef37669f0b24"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "thrice_blessed_bead_glass": {
+          "texture": "thrice_blessed_bead_glass.png",
+          "faces": 504,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 504
+        },
+        "thrice_blessed_bead_gold": {
+          "texture": "thrice_blessed_bead_gold.png",
+          "faces": 810,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 810
+        }
+      },
+      "controls": [],
+      "triangles": 1716,
+      "productHash": "88c5cfd14f6c12ed0b66a7ffa7dd12c0b51072ff5204aa647974f72700c24696"
+    },
+    {
+      "item": "vitality_seal_1",
+      "sourceHash": "080a1dd0fac239dcc05cd1b2e387c08c196cc49a4807760d4c3f3513813801fb",
+      "sourceObjects": [
+        {
+          "name": "A_PouredWax",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat impressed face, rounded edge bead",
+          "faces": 648,
+          "smoothFaces": 648
+        },
+        {
+          "name": "B_InsetLeaf0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "B_InsetLeaf1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "B_InsetLeaf2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "C_ParchmentTail",
+          "type": "MESH",
+          "modifiers": [
+            "SOLIDIFY"
+          ],
+          "role": "flat parchment cut",
+          "faces": 7,
+          "smoothFaces": 7
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\vitality_seal_1_wax.png",
+          "sha256": "b7365e268027ba5f22e201164bb74663fe0a6d385d4c140f9d5ea737d3e7713c"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "vitality_seal_1_wax": {
+          "texture": "vitality_seal_1_wax.png",
+          "faces": 648,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 460
+        }
+      },
+      "controls": [
+        {
+          "item": "vitality_seal_1",
+          "control": "flat",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 950
+        },
+        {
+          "item": "vitality_seal_1",
+          "control": "albedo",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 0
+        }
+      ],
+      "triangles": 1360,
+      "productHash": "74d5c90eb42011377893e549dcaffe4ec02b59e8fc64dc3d573d05c8079435be"
+    },
+    {
+      "item": "vitality_seal_2",
+      "sourceHash": "030c3cb5fed51a59ea1a9ef4bbb939c971997ef02ee70cb293f1de4c093575c7",
+      "sourceObjects": [
+        {
+          "name": "A_CarvedStoneShield",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "crisp carved stone planes",
+          "faces": 50,
+          "smoothFaces": 0
+        },
+        {
+          "name": "B_IncisedLeaf-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "B_IncisedLeaf1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "C_IvoryVein-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "C_IvoryVein1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "D_CentralVein",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 26,
+          "smoothFaces": 26
+        },
+        {
+          "name": "E_SuspensionEye",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 100,
+          "smoothFaces": 100
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\vitality_seal_2_stone.png",
+          "sha256": "a982b46c2b77ec76fd3fc0d6be32453797fb5e5e95fdb85084ad671316b5f692"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "vitality_seal_2_stone": {
+          "texture": "vitality_seal_2_stone.png",
+          "faces": 96,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "controls": [],
+      "triangles": 1456,
+      "productHash": "2e4f29d27680d4a793345de9aaeb9f1e60f68cd3fa32b1b1ad49178588c0fba8"
+    },
+    {
+      "item": "vitality_seal_3",
+      "sourceHash": "ec4d6ee25ac99c13f17d989ef7c4cf689b08e2324c5d553676bf6348d4fb77b8",
+      "sourceObjects": [
+        {
+          "name": "A_OpenOvalFrame",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 240,
+          "smoothFaces": 240
+        },
+        {
+          "name": "B_RecessedInnerFrame",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 200,
+          "smoothFaces": 200
+        },
+        {
+          "name": "C_JadeCabochon",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth jade cabochon",
+          "faces": 320,
+          "smoothFaces": 320
+        },
+        {
+          "name": "D_PiercedLeaf-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 72,
+          "smoothFaces": 72
+        },
+        {
+          "name": "D_PiercedLeaf1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 72,
+          "smoothFaces": 72
+        },
+        {
+          "name": "E_LinkedGemClaw0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "E_LinkedGemClaw1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "E_LinkedGemClaw2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 36,
+          "smoothFaces": 36
+        },
+        {
+          "name": "F_SuspensionEye",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 80,
+          "smoothFaces": 80
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\vitality_seal_3_enamel.png",
+          "sha256": "9294175ad6fa53a28b265a2381c5b8ced51e263e0d514e4062a6c53a7d96781a"
+        },
+        {
+          "path": "//_textures\\vitality_seal_3_gold.png",
+          "sha256": "ea765f89e2f2983410e0add0c0dfae9d8d695e80558bd8512d1549bbda9a6d4e"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "vitality_seal_3_gold": {
+          "texture": "vitality_seal_3_gold.png",
+          "faces": 1396,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1396
+        },
+        "vitality_seal_3_enamel": {
+          "texture": "vitality_seal_3_enamel.png",
+          "faces": 320,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 320
+        }
+      },
+      "controls": [
+        {
+          "item": "vitality_seal_3",
+          "control": "flat",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 1849
+        },
+        {
+          "item": "vitality_seal_3",
+          "control": "albedo",
+          "geometryAndUVEqual": true,
+          "materialEqualExceptDeclaredControl": true,
+          "changedGameplayPixels": 1775
+        }
+      ],
+      "triangles": 2368,
+      "productHash": "2207ac36bf1b6360700d90b7e1f3485b3203ca0c2739b606606522756512e80a"
+    },
+    {
+      "item": "mars_emblem",
+      "sourceHash": "d435ba6359a96b67b5f504144df34ee394e8f4f893f3eb4f276b9a3b73ee3b58",
+      "sourceObjects": [
+        {
+          "name": "A_ForgedSunburst",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat forged face with crisp bevels",
+          "faces": 98,
+          "smoothFaces": 0
+        },
+        {
+          "name": "B_WornRaisedRim",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "continuous rounded metal hoop",
+          "faces": 160,
+          "smoothFaces": 160
+        },
+        {
+          "name": "C_CutGarnet",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "D_FlameFork-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        },
+        {
+          "name": "D_FlameFork1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 62,
+          "smoothFaces": 62
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\mars_emblem_bronze.png",
+          "sha256": "5e03095baa23c4f50dd62a6b9214a938f91e83635a1fd3c75d7bc57c70bdb71c"
+        },
+        {
+          "path": "//_textures\\mars_emblem_enamel.png",
+          "sha256": "1a533201cd16383942ff9d28ee343fe9ba0ac8753a7ee1eee9f20a41bef9ad8c"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "mars_emblem_bronze": {
+          "texture": "mars_emblem_bronze.png",
+          "faces": 188,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "mars_emblem_enamel": {
+          "texture": "mars_emblem_enamel.png",
+          "faces": 60,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "controls": [],
+      "triangles": 1032,
+      "productHash": "919fea6d1ccf53c8a2a605032f539fbe07d2404f4473a308eda87f9044ce5db3"
+    },
+    {
+      "item": "mercury_crest",
+      "sourceHash": "081221116994c5e552d668697e4d1c0161b20893f680f9d23d57fb70f5880616",
+      "sourceObjects": [
+        {
+          "name": "A_TaperedSilverCrescent",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 324,
+          "smoothFaces": 324
+        },
+        {
+          "name": "B_BlueCabochon",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "smooth blue enamel cabochon",
+          "faces": 320,
+          "smoothFaces": 320
+        },
+        {
+          "name": "C_PiercedCurl-1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 54,
+          "smoothFaces": 54
+        },
+        {
+          "name": "C_PiercedCurl1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 54,
+          "smoothFaces": 54
+        },
+        {
+          "name": "CAP_A_TaperedSilverCrescent0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_A_TaperedSilverCrescent1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_C_PiercedCurl-10",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_C_PiercedCurl-11",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_C_PiercedCurl10",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_C_PiercedCurl11",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem00",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem01",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem10",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem11",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem20",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "CAP_D_HangingStem21",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "rounded unpainted metal end",
+          "faces": 80,
+          "smoothFaces": 80
+        },
+        {
+          "name": "D_HangingStem0",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 18,
+          "smoothFaces": 18
+        },
+        {
+          "name": "D_HangingStem1",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 18,
+          "smoothFaces": 18
+        },
+        {
+          "name": "D_HangingStem2",
+          "type": "CURVE",
+          "modifiers": [],
+          "role": "rounded piping",
+          "faces": 18,
+          "smoothFaces": 18
+        },
+        {
+          "name": "E_BlueDrop0",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "E_BlueDrop1",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 26,
+          "smoothFaces": 0
+        },
+        {
+          "name": "E_BlueDrop2",
+          "type": "MESH",
+          "modifiers": [],
+          "role": "flat gemstone cut planes",
+          "faces": 26,
+          "smoothFaces": 0
+        }
+      ],
+      "textures": [
+        {
+          "path": "//_textures\\mercury_crest_enamel.png",
+          "sha256": "7bce32240e1b891e5a51e7674664834ed2839732c85065bf646a39f548e1b973"
+        },
+        {
+          "path": "//_textures\\mercury_crest_silver.png",
+          "sha256": "7771f4a0cc5590003d39aa3aaa6877bb4e9105e2756380b20ff18839ddac91e9"
+        }
+      ],
+      "paintedRuntimeSurfaces": {
+        "mercury_crest_silver": {
+          "texture": "mercury_crest_silver.png",
+          "faces": 1458,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1458
+        },
+        "mercury_crest_enamel": {
+          "texture": "mercury_crest_enamel.png",
+          "faces": 500,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 320
+        }
+      },
+      "controls": [],
+      "triangles": 3404,
+      "productHash": "05983f87722f5c0da3088695eaf6a5512c5ed90e8f0b99703ee17f9adc2cf8a8"
+    }
+  ]
+}

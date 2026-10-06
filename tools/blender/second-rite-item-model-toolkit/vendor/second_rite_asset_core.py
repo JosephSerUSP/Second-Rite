@@ -542,6 +542,17 @@ def duplicate_hierarchy(context, root, collection_name="__SECOND_RITE_ITEM_EXPOR
         duplicate.parent = mapping.get(source.parent)
         duplicate.matrix_parent_inverse = source.matrix_parent_inverse.copy()
         duplicate.matrix_world = world_matrices[source]
+        # A shifted export root must move modifier controls with its geometry.
+        # At zero shift, retain the existing dependencies: even transform-
+        # equivalent copied Mirror frames can perturb six-decimal OBJ bytes.
+        if root.matrix_world.translation.length_squared:
+            for modifier in duplicate.modifiers:
+                for prop in modifier.bl_rna.properties:
+                    if prop.type != "POINTER" or prop.is_readonly:
+                        continue
+                    dependency = getattr(modifier, prop.identifier)
+                    if isinstance(dependency, bpy.types.Object) and dependency in mapping:
+                        setattr(modifier, prop.identifier, mapping[dependency])
     shift = Matrix.Translation(-root.matrix_world.translation)
     for source, duplicate in mapping.items():
         duplicate.matrix_world = shift @ world_matrices[source]

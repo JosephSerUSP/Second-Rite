@@ -496,5 +496,51 @@ do
         "an Overcast-only skill shows only its price, never an empty 0/0")
 end
 
+----------------------------------------------------------- item stock --
+-- Ammunition (PE Day 1 ledger O2): a skill may spend inventory stock. The
+-- stock is the session inventory itself, so pickups and spending are one
+-- number; enemies have no inventory and can never pay.
+
+do
+    local sess, gunner = rig()
+    local ammoId
+    for id in pairs(loader.items or {}) do
+        if ammoId == nil or tostring(id) < tostring(ammoId) then ammoId = id end
+    end
+    check(ammoId ~= nil, "fixture data has at least one item to stand in for ammunition")
+    local shot = { id = "shot", itemCost = { item = ammoId, count = 2 } }
+
+    sess.inventory[ammoId] = nil
+    check(skill_cost.blockedReason(shot, gunner, sess, false) == "Out of ammunition",
+        "no stock blocks the skill with a readable reason")
+
+    sess:addItem(ammoId, 3)
+    check(skill_cost.blockedReason(shot, gunner, sess, false) == nil,
+        "enough stock makes the skill usable")
+    check(skill_cost.displayCost(shot, gunner, sess, false)[1].text == "3",
+        "the cost column shows the stock remaining")
+
+    skill_cost.spend(shot, gunner, sess, false)
+    check((sess.inventory[ammoId] or 0) == 1, "one use spends exactly count from the inventory")
+    check(skill_cost.blockedReason(shot, gunner, sess, false) == "Out of ammunition",
+        "stock below count blocks again")
+
+    sess:addItem(ammoId, 5)
+    check(skill_cost.blockedReason(shot, gunner, sess, true) == "Out of ammunition",
+        "an enemy can never pay an item cost, whatever the party holds")
+    skill_cost.spend(shot, gunner, sess, true)
+    check((sess.inventory[ammoId] or 0) == 6, "an enemy spending never touches the party inventory")
+
+    local single = { id = "single", itemCost = { item = ammoId } }
+    skill_cost.spend(single, gunner, sess, false)
+    check((sess.inventory[ammoId] or 0) == 5, "count defaults to one")
+
+    local both = { id = "both", itemCost = { item = ammoId }, cooldown = 1 }
+    skill_cost.spend(both, gunner, sess, false)
+    skill_cost.startCooldown(both, gunner)
+    check(skill_cost.cooldownLeft(both, gunner) > 0 and (sess.inventory[ammoId] or 0) == 4,
+        "an item cost stacks with a cooldown")
+end
+
 print(("=== Skill Cost Tests Completed: %d passed, %d failed ==="):format(passed, failed))
 if failed > 0 then require("tests.fail_fast")("skill cost tests failed", failed) end

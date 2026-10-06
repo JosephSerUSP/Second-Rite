@@ -1627,6 +1627,13 @@ same reset. HP/MP reach the fielded party; **charges reach reserve and storage
 too**, because rest is a location, not an activity, and a bench that stayed
 spent would make swapping useless. **Promotion is a rest**; levelling is not.
 
+**Item stock** (06.10.2026, PE Day 1 ledger O2) is a third independent cost:
+`itemCost: { item, count }` spends that many of an inventory item per use
+(ammunition, arrows, reagents). The stock *is* the session inventory, so a
+pickup and a shot change one number. Like `hpCost` it stacks with charges and
+timers; enemies have no inventory and can never pay it. G1 rejects an unknown
+item or a count below 1.
+
 **Cooldown and warmup are battle-scoped** and never enter a save: charges answer
 "how much is left of the day", these answer "what can I do this turn". They are
 ticked by `TICK_SKILL_TIMERS` authored into `battle.round_end`, not by a branch

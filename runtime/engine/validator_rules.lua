@@ -1015,6 +1015,21 @@ validator.run = function(loader)
             end
         end
 
+        -- Item-stock cost (ammunition): must name a real item and a positive
+        -- whole count. Unknown items fail here rather than making the skill
+        -- silently unusable at runtime.
+        if skill.itemCost ~= nil then
+            check(type(skill.itemCost) == "table" and skill.itemCost.item ~= nil,
+                where .. " itemCost must be { item = <itemId>, count = N }")
+            if type(skill.itemCost) == "table" and skill.itemCost.item ~= nil then
+                check(loader.getItem(skill.itemCost.item) ~= nil,
+                    where .. " itemCost references missing item '" .. tostring(skill.itemCost.item) .. "'")
+                local n = skill.itemCost.count
+                check(n == nil or (type(n) == "number" and n >= 1 and n == math.floor(n)),
+                    where .. " itemCost.count must be a whole number >= 1")
+            end
+        end
+
         for _, field in ipairs({ "cooldown", "warmup" }) do
             local v = skill[field]
             if v ~= nil then

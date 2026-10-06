@@ -33,6 +33,21 @@ local function anchorPosition(environment, id)
     }
 end
 
+local function eventPosition(event)
+    if type(event) ~= "table" then return nil end
+    local position = event.worldPosition or event.position
+    if type(position) ~= "table" then return nil end
+    local x = tonumber(position[1] or position.x)
+    local y = tonumber(position[2] or position.y)
+    local z = tonumber(position[3] or position.z or 0)
+    if not x or not y or not z then return nil end
+    if x ~= x or y ~= y or z ~= z then return nil end
+    if x == math.huge or x == -math.huge
+            or y == math.huge or y == -math.huge
+            or z == math.huge or z == -math.huge then return nil end
+    return x, y, z
+end
+
 function provider.isActive(session)
     local state = session and session.continuousTraversal
     local spec, map = specFor(session)
@@ -105,6 +120,32 @@ function provider.actorRoot(session)
     local state = provider.ensure(session)
     if not state then return nil end
     return state.x, state.y, state.z
+end
+
+-- Resolve the nearest ordinary Map Event authored in world space. Event
+-- identity/program ownership stays with the Map; traversal supplies only the
+-- proximity fact. This is deliberately analogous to bounded_lane's Event
+-- proximity without making Events part of the walk-surface schema.
+function provider.nearestEvent(session, radius)
+    local state = provider.ensure(session)
+    if not state then return nil end
+    radius = tonumber(radius) or state.interactionRadius
+    if radius <= 0 then return nil end
+    local best, bestDistance2 = nil, radius * radius
+    for _, event in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
+        local x, y = eventPosition(event)
+        if x and y then
+            local eventRadius = tonumber(event.interactionRadius) or radius
+            local dx, dy = state.x - x, state.y - y
+            local distance2 = dx * dx + dy * dy
+            local threshold2 = eventRadius * eventRadius
+            if distance2 <= threshold2
+                    and (best == nil or distance2 < bestDistance2) then
+                best, bestDistance2 = event, distance2
+            end
+        end
+    end
+    return best, bestDistance2
 end
 
 -- Presentation-only compatibility record for the existing world mesh path.

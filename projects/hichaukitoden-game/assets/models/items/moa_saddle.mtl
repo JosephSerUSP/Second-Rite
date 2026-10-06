@@ -1,0 +1,43 @@
+# Blender 5.2.2 LTS MTL File: 'moa_saddle.blend'
+# www.blender.org
+
+newmtl moa_saddle_cut_edges
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.840000 0.640000 0.360000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl moa_saddle_leather
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd moa_saddle_leather.png
+
+newmtl moa_saddle_quilt
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd moa_saddle_quilt.png
+
+newmtl moa_saddle_stirrups
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.630000 0.670000 0.680000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.18 assets/models/matcaps/steel.png

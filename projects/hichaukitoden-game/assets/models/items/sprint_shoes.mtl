@@ -1,0 +1,53 @@
+# Blender 5.2.2 LTS MTL File: 'sprint_shoes.blend'
+# www.blender.org
+
+newmtl sprint_shoes_canvas
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd sprint_shoes_canvas.png
+
+newmtl sprint_shoes_eyelets
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.750000 0.650000 0.400000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl sprint_shoes_laces
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.950000 0.900000 0.750000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl sprint_shoes_leather
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd sprint_shoes_leather.png
+
+newmtl sprint_shoes_rubber
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.270000 0.250000 0.210000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

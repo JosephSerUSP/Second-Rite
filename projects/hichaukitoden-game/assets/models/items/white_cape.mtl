@@ -1,0 +1,34 @@
+# Blender 5.2.2 LTS MTL File: 'white_cape.blend'
+# www.blender.org
+
+newmtl white_cape_clasp
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.930000 0.770000 0.430000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl white_cape_cut_edges
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.830000 0.760000 0.540000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl white_cape_satin
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd white_cape_satin.png
+pass sphere add 0.055 assets/models/matcaps/glass.png

@@ -43,8 +43,8 @@
       }
     },
     "passage_house_room3.blend": {
-      "status": "scaffold",
-      "basis": "Written by recipes/passage_house_room3.py (regenerated to the Classic 256 preset at 689ccb83); no shipped package is baked from it, and no adoption is recorded.",
+      "status": "adopted",
+      "basis": "Rebuilt in 4df0e2aa1 and shipped on map 25 by c616ee976 on 2026-10-05; passage_house_room3/environment.json cites this source. Edit the shipped source directly; never regenerate it.",
       "eevee": {
         "exposureEV": 0.0,
         "probeCells": 2,
@@ -112,8 +112,8 @@
       "basis": "Owner chose this church over the rectangular chapel on 2026-10-04 (\"massively better\") and asked for it to be promoted onto map 22 as a pre-rendered plate with a pew foreground, in the 'vigil' grade, from the oblique runtime camera. Shipped plate and foreground are rendered from this document (tools/blender/stage_room_model.py, then build_layered_package.py). Edit the adopted source directly; never regenerate it."
     },
     "passage_house_stair_hall.blend": {
-      "status": "scaffold",
-      "basis": "Written by recipes/passage_house_stair_hall.py (layout doc section 5.1); no shipped package is baked from it, and no adoption is recorded.",
+      "status": "adopted",
+      "basis": "Shipped on map 34 by c616ee976 on 2026-10-05; passage_house_hall/environment.json cites this source. It replaces the Arrival Court on the live route (f6b17a447). Edit the shipped source directly; never regenerate it.",
       "eevee": {
         "exposureEV": 0.0,
         "probeCells": 4,

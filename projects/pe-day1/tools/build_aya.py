@@ -13,8 +13,11 @@ rather than stacked primitives. Each pose is posed by forward kinematics from
 one gait phase, so the walk cycle is a real cycle (contact, passing, contact)
 with the planted foot on the floor. Facing is -Y, matching the B009 models.
 
-Look: short black slip dress with thin straps, bare arms and legs, black
-heels, blonde hair tied back with a ponytail, handgun in the right hand.
+Look (measured privately against the owner-supplied original model, which is
+never copied or shipped): ankle-length black gown with a front slit, under a
+long open charcoal coat with wrist-length sleeves; platform sandals; blonde
+hair loose to the shoulders with side locks; handgun in the right hand. Field
+locomotion is a light run, not a walk.
 Original geometry; nothing extracted from the commercial game.
 """
 import hashlib
@@ -33,7 +36,7 @@ OUT = ROOT / "assets" / "models" / "aya"
 WALK_FRAMES = 8
 
 THIGH, SHIN, UPPER, FORE = 0.46, 0.46, 0.29, 0.26
-HIP_W, SHOULDER_W = 0.095, 0.185
+HIP_W, SHOULDER_W = 0.06, 0.165
 
 
 def material(name, color, rough=0.6):
@@ -51,7 +54,9 @@ MATS = {}
 
 def mats():
     MATS.update(skin=material("Aya skin", (0.88, 0.66, 0.52)),
-                dress=material("Aya dress", (0.035, 0.035, 0.045), 0.35),
+                dress=material("Aya gown", (0.02, 0.02, 0.025), 0.35),
+                coat=material("Aya coat", (0.11, 0.11, 0.12), 0.55),
+                lapel=material("Aya lapel", (0.16, 0.16, 0.17), 0.45),
                 hair=material("Aya blonde", (0.80, 0.60, 0.27)),
                 shoe=material("Aya heels", (0.02, 0.02, 0.02), 0.25),
                 eye=material("Aya eyes", (0.10, 0.12, 0.16)),
@@ -78,13 +83,14 @@ def pose(kind, phase=0.0):
     c = math.cos(phase * math.tau)
     legs, arms = {}, {}
     if kind == "walk":
-        # Hip swing +-27 deg; the knee flexes while the leg swings forward.
+        # A light run (the original's field gait): hip swing +-30 deg, the
+        # knee folds as the leg recovers, bent arms swing against the legs.
         for side, sign in (("L", 1), ("R", -1)):
-            hip = 27 * s * sign
-            knee = 6 + 42 * max(0.0, c * sign)
+            hip = 30 * s * sign
+            knee = 10 + 55 * max(0.0, c * sign)
             legs[side] = (hip, knee)
-        arm = {"L": (-20 * s, 12), "R": (8 * s, 28)}
-        lean = 4
+        arm = {"L": (-24 * s, 32), "R": (14 * s, 36)}
+        lean = 8
     elif kind == "recoil":
         legs = {"L": (10, 8), "R": (-14, 6)}
         arm = {"L": (78, 4), "R": (84, 2)}     # both hands forward, gun kicked up
@@ -184,46 +190,57 @@ def build_pose(col_name, J, kind):
             e.append((base + i, base + i + 1))
     for side in ("L", "R"):
         add([J["hip" + side], J["knee" + side], J["ankle" + side]],
-            [(0.072, 0.075), (0.045, 0.048), (0.030, 0.032)])
-        add([J["shoulder" + side], J["elbow" + side], J["wrist" + side]],
-            [(0.038, 0.038), (0.030, 0.030), (0.024, 0.022)])
-    add([J["chest"] + Vector((0, 0, 0.04)), J["neck"] + Vector((0, 0, 0.05))], [(0.042, 0.042), (0.036, 0.036)])
-    # Clavicles join the bare shoulders to the neck base.
-    top = J["chest"] + Vector((0, 0.005, 0.03))
-    add([J["shoulderL"], top, J["shoulderR"]], [(0.04, 0.036), (0.05, 0.04), (0.04, 0.036)])
-    skin_object("limbs", v, e, r, MATS["skin"], roots=roots)
-    # Dress: torso skeleton (bust, waist, hips) in black, plus an A-line skirt.
+            [(0.062, 0.064), (0.04, 0.042), (0.027, 0.029)])
+    add([J["chest"] + Vector((0, 0, 0.04)), J["neck"] + Vector((0, 0, 0.05))], [(0.04, 0.04), (0.034, 0.034)])
+    skin_object("legs_neck", v, e, r, MATS["skin"], roots=roots)
     p, w, ch = J["pelvis"], J["waist"], J["chest"]
-    # One continuous dress: hips -> waist -> bust, flaring below the hips
-    # into a short skirt that ends above the knee.
-    hem = p + Vector((0, (J["kneeL"].y + J["kneeR"].y) / 4, -0.30))
-    skin_object("dress", [hem, p + Vector((0, 0, -0.1)), p + Vector((0, 0, 0.02)), w,
-                          ch - Vector((0, 0.01, 0.04)), ch + Vector((0, 0, 0.025))],
+    coat = MATS["coat"]
+    # Coat sleeves to the wrist, hands bare.
+    v, e, r, roots = [], [], [], []
+    top = ch + Vector((0, 0.005, 0.03))
+    add([J["shoulderL"], top, J["shoulderR"]], [(0.045, 0.042), (0.05, 0.045), (0.045, 0.042)])
+    for side in ("L", "R"):
+        add([J["shoulder" + side], J["elbow" + side], J["wrist" + side]],
+            [(0.042, 0.04), (0.035, 0.034), (0.036, 0.034)])
+    skin_object("coat_sleeves", v, e, r, coat, roots=roots)
+    for side in ("L", "R"):
+        d = (J["wrist" + side] - J["elbow" + side]).normalized()
+        blob("hand" + side, J["wrist" + side] + d * 0.06, (0.028, 0.03, 0.05), MATS["skin"], 8, 5)
+    # Coat body: shoulders -> waist -> hem just above the ankles, following
+    # the legs so the long hem swings with the stride.
+    feet = (J["ankleL"] + J["ankleR"]) / 2
+    knees = (J["kneeL"] + J["kneeR"]) / 2
+    hem = Vector((0, feet.y * 0.6, 0.13))
+    skin_object("coat", [hem, Vector((0, knees.y * 0.7, knees.z)), p + Vector((0, 0, -0.02)), w,
+                         ch - Vector((0, 0, 0.03)), ch + Vector((0, 0, 0.03))],
                 [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5)],
-                [(0.215, 0.17), (0.165, 0.125), (0.135, 0.098), (0.105, 0.075), (0.128, 0.098), (0.115, 0.08)],
-                MATS["dress"])
+                [(0.19, 0.14), (0.17, 0.125), (0.155, 0.112), (0.12, 0.088), (0.14, 0.1), (0.15, 0.09)], coat, subdiv=0)
+    # The open front: the black gown shows in a V from the neckline to the
+    # waist, and down the slit to the hem.
+    dress = MATS["dress"]
+    front = lambda q, depth: q + Vector((0, -depth, 0))
+    block("gown_v", front(ch + Vector((0, 0, -0.05)), 0.09), (0.07, 0.015, 0.14), dress)
     for side, sign in (("L", -1), ("R", 1)):
-        a, b = ch + Vector((sign * 0.08, 0, 0.0)), J["shoulder" + side] + Vector((0, 0, 0.02))
-        mid = (a + b) / 2
-        block("strap" + side, mid, (0.012, 0.012, (b - a).length), MATS["dress"],
-              rot=(0, math.atan2(b.x - a.x, b.z - a.z), 0))
-    # Heels: a wedge under each ankle, toe pointing -Y.
+        block("lapel" + side, front(ch + Vector((sign * 0.05, 0, -0.03)), 0.095), (0.03, 0.015, 0.2),
+              MATS["lapel"], rot=(0, math.radians(sign * 14), 0))
+    # Platform sandals.
     for side in ("L", "R"):
         a = J["ankle" + side]
-        block("shoe" + side, a + Vector((0, -0.07, -0.045)), (0.06, 0.17, 0.04), MATS["shoe"], rot=(math.radians(-14), 0, 0))
-        block("instep" + side, a + Vector((0, -0.01, -0.01)), (0.062, 0.07, 0.05), MATS["shoe"])
-        block("spike" + side, a + Vector((0, 0.035, -0.06)), (0.018, 0.018, 0.08), MATS["shoe"])
-    # Head, face, hair (tied back with a ponytail and side fringe).
+        block("sole" + side, a + Vector((0, -0.05, -0.07)), (0.07, 0.19, 0.045), MATS["shoe"])
+        block("strap" + side, a + Vector((0, -0.08, -0.035)), (0.072, 0.05, 0.03), MATS["shoe"])
+        block("ankle_strap" + side, a + Vector((0, 0, -0.01)), (0.066, 0.066, 0.02), MATS["shoe"])
+    # Head and loose shoulder-length hair with side locks and swept bangs.
     h = J["head"]
-    blob("head", h, (0.088, 0.098, 0.115), MATS["skin"])
+    blob("head", h, (0.085, 0.095, 0.112), MATS["skin"])
     for sign in (-1, 1):
-        blob("eye", h + Vector((sign * 0.033, -0.086, 0.012)), (0.014, 0.006, 0.008), MATS["eye"], 6, 4)
-    blob("lips", h + Vector((0, -0.088, -0.05)), (0.022, 0.006, 0.008), MATS["lips"], 6, 4)
-    blob("hair_cap", h + Vector((0, 0.012, 0.03)), (0.098, 0.104, 0.11), MATS["hair"])
+        blob("eye", h + Vector((sign * 0.032, -0.084, 0.012)), (0.015, 0.006, 0.009), MATS["eye"], 6, 4)
+    blob("lips", h + Vector((0, -0.086, -0.05)), (0.02, 0.006, 0.008), MATS["lips"], 6, 4)
+    hair = MATS["hair"]
+    blob("hair_cap", h + Vector((0, 0.015, 0.035)), (0.097, 0.103, 0.105), hair)
+    blob("hair_back", h + Vector((0, 0.055, -0.08)), (0.088, 0.055, 0.15), hair)
     for sign in (-1, 1):
-        blob("fringe", h + Vector((sign * 0.07, -0.05, -0.01)), (0.03, 0.035, 0.08), MATS["hair"], 6, 5)
-    blob("bun", h + Vector((0, 0.1, 0.02)), (0.05, 0.05, 0.05), MATS["hair"], 8, 5)
-    blob("ponytail", h + Vector((0, 0.125, -0.12)), (0.04, 0.035, 0.12), MATS["hair"], 8, 5)
+        blob("lock", h + Vector((sign * 0.08, -0.01, -0.09)), (0.022, 0.03, 0.12), hair, 6, 5)
+    blob("bangs", h + Vector((0.025, -0.075, 0.065)), (0.065, 0.03, 0.035), hair, 8, 5)
     # Handgun in the right hand, aligned with the forearm.
     wr, el = J["wristR"], J["elbowR"]
     if kind == "recoil":

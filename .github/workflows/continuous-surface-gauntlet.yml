@@ -69,9 +69,6 @@ jobs:
           if (-not (Test-Path (Join-Path $stage 'assets/environments/archive_antechamber/environment.json'))) {
             throw 'staged Project is missing its own environment package'
           }
-          if (-not (Test-Path (Join-Path $stage 'data/maps/2.json'))) {
-            throw 'staged Project is missing the service annex Map'
-          }
 
       - name: Validate the staged Project
         shell: pwsh
@@ -127,8 +124,12 @@ jobs:
 
           function love.load()
               loader.init()
+              local map1 = loader.getMapIndex(1)
+              local map2 = loader.getMapIndex(2)
+              assert(map1 and map2, "compiled gauntlet must expose Maps 1 and 2")
+
               local game = session.GameSession.new(loader)
-              exploration.loadMap(game, loader.getMapIndex(1))
+              exploration.loadMap(game, map1)
               assert(traversal.isActive(game), "gauntlet traversal provider is not active")
 
               local initial = traversal.serialize(game)

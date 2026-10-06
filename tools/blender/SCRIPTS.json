@@ -279,6 +279,11 @@
       "purpose": "Re-author st_maria_praca.blend for the spiral layout."
     },
     {
+      "path": "rebuild_island_exteriors.py",
+      "role": "one-shot",
+      "purpose": "Rebuild every St. Maria island building with the house grammar (same footprints, doors and base heights) as a new island source revision."
+    },
+    {
       "path": "refine_registry_cabinet.py",
       "role": "one-shot",
       "purpose": "Edit the retained Registry: larger records press and a public-side woven runner."

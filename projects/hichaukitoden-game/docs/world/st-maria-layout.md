@@ -187,7 +187,7 @@ end of the day. She is the only person in St. Maria who commutes, and now the
 map says so.
 
 **The player's first civic loop** begins in Passage House Room 3. The player
-leaves along the gallery, walks down the stair to the Arrival Court, goes
+leaves along the gallery, walks down the stair and out the great door, goes
 out to the Cortiço, reaches the Praça, and registers at the Registry (§5.1). Only then are preparation and descent meaningful choices:
 Churchyard and the Gate are uphill; Market Row/Padaria and the Port/forge are
 below. The first trip therefore teaches a useful mental map instead of asking the
@@ -209,7 +209,7 @@ Independent of the shape above, and true under any layout:
 | 23 Laura's House (off Backstreet) | retired as a separate house; Laura sleeps in the padaria's attached home |
 | 27 Padaria (off Market) | the shop half of the same building |
 | 20 Weaponsmith | Laura's forge, re-sited to the Port |
-| 25 Passage House | **Room 3**, one apartment of the Passage House, reached through its Arrival Court on the Cortiço |
+| 25 Passage House | **Room 3**, one apartment of the Passage House, reached from the gallery of the stair hall, whose great door opens on the Cortiço |
 | 33 Passage Office | the **Registry** floor of the same Passage House, entered from the Praça |
 | Registrar previously copied into Room 3 | removed; registration belongs only to the Registry floor (map 33) |
 
@@ -240,8 +240,8 @@ second way out.
                                           │
  upper floor        gallery: Room 2 · ROOM 3 · Room 4 ──┘                 <──┐
  (Praça level)             ^ stair (walked, one storey)                        │
- ground floor    service rooms (shut)   post wall · stair foot · great door ─> [32 Arrival Court]
- (Cortiço level)                                                           ─> street [26 Cortiço]
+ ground floor    service rooms (shut)   post wall · stair foot · great door ─> street [1001 Cortiço]
+ (Cortiço level)                                                           street door ─> same street, 3 m along
 
                   [34 Stair hall] is the whole of this, one screen, one continuous walk
                   [25 Room 3]  is entered from its gallery door
@@ -250,18 +250,18 @@ second way out.
 | # | Screen | Floor | Role | Axis spent (interior brief §4b) |
 |---|--------|-------|------|------|
 | 33 | **Registry** | Praça level | Public floor. Celina, the ledger, the Crossing Writ. Front door to the Praça. | already authored; unchanged |
-| 32 | **Arrival Court** | Cortiço level | The house's lower yard; its covered entry is the great door of the stair hall. | already authored; unchanged |
 | 34 | **Stair hall** (new) | both | One double-height room with two walkable lanes. Ground: the great door to the court, a post wall of lodgers' letters (some never collected), a bench, a water stand, the shut service doors, and a street door at the far end. A masonry stair stands behind the lane, linking ground to gallery. Gallery: a terracotta deck on a stone arcade, three apartment doors (Room 3's the only one lit, with traces of the others' tenants: boots, a coat, a strapped trunk, straw), and at the far end a **wrought-iron gate with the Registry visible through it**. | **Floor level, taken to a storey** — the stair, the deck and the balustrade carry the second level |
 | 25 | **Room 3** | upper | One apartment, off the gallery: two beds, washstand, window that does not close, straw and a feed bowl for Saban, the missing picture, the low coat hook. | **Alcove** — an *alcova*, the sleeping recess of a rented room, with a header across its mouth |
 
 Connections:
 
-- **The exits.** The stair hall has two ground-floor doors: the great door to the
-  Arrival Court and the street door at the far end. The house's Praça way in is the
+- **The exits.** The stair hall has two ground-floor doors, both onto the Cortiço
+  street: the great door (the Passage House doorstep) and the street door at the
+  far end, which lets out about 3 m along the street from it. The old Arrival Court
+  (map 32) is retired. The house's Praça way in is the
   Registry's front door, and the gate joins the two halves from inside, so the
-  building has a through-route and the player can see that it does. Where the
-  street door leads is open (the Cortiço lane is the obvious answer).
-- **Room 3 door → along the gallery → down the stair → great door → Arrival Court →
+  building has a through-route and the player can see that it does.
+- **Room 3 door → along the gallery → down the stair → great door →
   Cortiço → Praça → Registry front door.** This is the opening's first civic loop,
   now starting inside one building.
 - **The gate** (far end of the gallery, a few steps from Celina on the other side

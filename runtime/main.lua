@@ -726,7 +726,7 @@ function love.load(arg)
             "test_bounded_lane_levels",
             "test_town_threshold_direction", "test_transition_markers",
             "test_weaponsmith_dialogue",
-            "test_passage_house_courtyard",
+            "test_cortico_doorstep",
             "test_passage_house_hall",
             "test_presentation_contract",
         }) do

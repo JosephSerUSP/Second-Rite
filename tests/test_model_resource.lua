@@ -89,7 +89,8 @@ check(baked.bakedLighting, "ordinary Model can explicitly consume baked appearan
 local loader = require("engine.data.loader")
 local session = require("engine.session").GameSession.new(loader)
 session:initializeStartingParty()
-require("engine.exploration").loadMap(session, 30)
+-- A plain grid map chosen by id: array positions shift whenever a map is added or retired.
+require("engine.exploration").loadMap(session, loader.getMapIndex(30))
 session.currentMapData = json.decode(json.encode(session.currentMapData))
 session.mapGrid = { {"#","#","#","#","#"}, {"#",".",".",".","#"}, {"#",".",".",".","#"}, {"#",".",".",".","#"}, {"#","#","#","#","#"} }
 session.playerX, session.playerY, session.playerDir = 3, 4, "N"

@@ -70,7 +70,14 @@ check(state.level == "ground" and state.z == 0, "the walk along the ground floor
 check(math.abs(state.y - state.minY) < 1e-6, "the ground floor runs to its far end")
 local streetEdge = lane.edgeDoorway(game, -1)
 check(streetEdge ~= nil and streetEdge.anchor == "street_door", "the ground floor's far end is the street door")
-check(destinationOf(lane.eventFor(game, streetEdge)) == CORTICO, "the street door leads back out to the Cortico")
+local streetMap, streetArrival = destinationOf(lane.eventFor(game, streetEdge))
+check(streetMap == CORTICO and streetArrival == nil, "the street door leads out to the Cortico, by the default spawn")
+load(CORTICO)
+check(math.abs(game.townTraversal.y - 23.0) < 0.001, "the street door lands along the street, apart from the main doorstep")
+check(math.abs(game.townTraversal.y - 26.297) > 2.0, "and not on the Passage House doorstep")
+load(HALL, "exit_door")
+state = game.townTraversal
+walkUntil(-1, function() return state.y <= state.minY + 1e-6 end)
 check(lane.nearDoorway(game, "UP") == nil or lane.nearDoorway(game, "UP").anchor ~= "room3_door",
     "Room 3's door above is out of reach from the ground floor")
 

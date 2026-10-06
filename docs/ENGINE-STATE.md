@@ -86,7 +86,7 @@ The registry below is the closed semantic trigger vocabulary exposed by Studio.
 - item-creation disciplines across the roster: alchemyx15, blacksmithingx15, cookingx18, tinkeringx17
 - items: **207** (consumablex66, equipmentx124, questx17)
 - skills: **47**, passives: **41**, states: **14**, roles: **13**, elements: **5**
-- maps: **41**, common events: **23**, shops: **8**, quests: **5**, lore entries: **3**
+- maps: **40**, common events: **23**, shops: **8**, quests: **5**, lore entries: **3**
 - animations: **29**, tilesets: **15**
 
 ## Notes for agents

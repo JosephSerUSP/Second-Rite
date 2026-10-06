@@ -75,8 +75,8 @@
       }
     },
     "passage_house_courtyard.blend": {
-      "status": "scaffold",
-      "basis": "Revision 18 visually approved by owner and promoted on 2026-10-01. Scaffold recipe retained; source profile authority is data/maps/32.json. Shipping source geometry and atlas match the approved study; further foreground refinement remains issue 1308.",
+      "status": "superseded",
+      "basis": "Retired 2026-10-05. The Arrival Court (map 32) left the live route when the Cortico door began entering the Passage House stair hall (map 34) directly; its map and shipped package were removed. Kept as the reference for the court's masonry and window assemblies; do not write it.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,
@@ -84,7 +84,8 @@
         "emissiveLights": false,
         "fixtureLights": false,
         "basis": "EEVEE at neutral exposure with authored dusk sun, sky and lamps attached to visible lantern fixtures; automatic lighting shims disabled."
-      }
+      },
+      "supersededBy": "passage_house_stair_hall.blend"
     },
     "passage_office.blend": {
       "status": "adopted",

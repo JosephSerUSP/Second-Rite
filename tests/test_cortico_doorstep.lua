@@ -1,4 +1,5 @@
--- Shipping Passage House transfers/profile through the actual runtime unit harness.
+-- The Cortico doorstep: the Passage House door enters the stair hall and the hall's great
+-- door returns to the same doorstep at the same elevation; the graded street is continuous.
 local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -8,7 +9,7 @@ local game = session.GameSession.new(loader)
 game:initializeStartingParty()
 local passed, failed = 0, 0
 local function check(condition, label)
-    if condition then passed = passed + 1 else failed = failed + 1; print("COURTYARD FAIL: " .. label) end
+    if condition then passed = passed + 1 else failed = failed + 1; print("CORTICO DOORSTEP FAIL: " .. label) end
 end
 local function load(id, arrival)
     exploration.loadMap(game, loader.getMapIndex(id), {arrival = arrival})
@@ -40,4 +41,4 @@ for _, direction in ipairs({1,-1}) do
 end
 load(25,nil)
 check(game.currentMapData.id==25,"introduction can still arrive directly in lodging")
-require("tests.fail_fast")("passage_house_courtyard",failed,passed)
+require("tests.fail_fast")("cortico_doorstep",failed,passed)

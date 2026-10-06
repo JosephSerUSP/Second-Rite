@@ -22,7 +22,7 @@ movement.
 ![Full town screenshot required: current image lacks UI](images/st-maria-gameplay.png)
 
 > **Player commentary:** St. Maria made more sense once the first errand made me
-> physically learn it. I left my room through the Passage House court, came out
+> physically learn it. I left my room, went down the stair hall and out, came out
 > into the Cortiço, and reached the Praça to register. After Celina told me the
 > gate was uphill and the shops downhill, those stopped being abstract menu
 > destinations and became directions I could reuse.
@@ -30,7 +30,7 @@ movement.
 ## Complete route
 
 1. Meet the already-contracted **Saban** in Room 3 and leave through its door.
-2. Cross the **Passage House Arrival Court** and exit to **the Cortiço**.
+2. Walk the gallery, go down the stair and leave by the great door onto **the Cortiço**.
 3. Follow the upper route to **the Praça** and enter the **Passage Office**.
 4. Register with **Registrar Celina** and receive **Crossing Writ** (item 198).
 5. Decide whether to prepare before descending:

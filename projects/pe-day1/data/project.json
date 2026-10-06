@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Parasite Eve Day 1",
+  "identity": "pe-day1",
+  "productName": "Parasite Eve Day 1 (fan recreation)",
+  "executableName": "pe-day1",
+  "buildSlug": "pe-day1",
+  "windowTitle": "Parasite Eve Day 1 (fan recreation)",
+  "productVersion": "0.0.0-dev"
+}

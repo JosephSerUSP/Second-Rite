@@ -4,8 +4,23 @@ local session=require("engine.session").GameSession.new(loader)
 local sh=require("engine.scene_host")
 local pc=require("engine.player_controller")
 local root=assert(os.getenv("THESTRA_REPOSITORY_ROOT"),"B009 test requires repository root")
-local f=assert(io.open(root.."/projects/labs/scene-benchmarks/data/scenes/b009_positioning.json","r"))
-local specimen=json.decode(f:read("*a"));f:close()
+local function readScene(path)
+    local f=assert(io.open(root..path,"r"))
+    local text=f:read("*a");f:close()
+    return text,json.decode(text)
+end
+-- The PE Day 1 Project (#1423) carries a port of B009. Until M1 replaces its
+-- combat, both copies must behave identically: same assertions, and the
+-- texts may differ only in id, display name and model directory.
+local labText,labScene=readScene("/projects/labs/scene-benchmarks/data/scenes/b009_positioning.json")
+local portText,portScene=readScene("/projects/pe-day1/data/scenes/basement_rat.json")
+local function normalize(text,id,name,dir)
+    return (text:gsub(id,"ID",1):gsub(name,"NAME",1):gsub(dir,"MODELS"))
+end
+assert(normalize(labText,'"b009_positioning"','"B009 %- Carnegie Hall encounter"',"assets/models/b009/")
+    ==normalize(portText,'"basement_rat"','"Carnegie Hall basement %- mutated rat"',"assets/models/backstage/"),
+    "PE Day 1 basement_rat diverged from B009 beyond id/name/model paths")
+local specimen
 local original=loader.scenes
 local ctx={session=session,loader=loader,party=session.party,events={}}
 local function start()
@@ -19,7 +34,7 @@ local function tap(button) pc.press(button,ctx);pc.release(button) end
 local function menu() pc.press("X",ctx);ticks(1,1/60);pc.release("X");ticks(1,1/60) end
 local function shoot() tap("A");tap("A") end
 local function near(a,b) assert(math.abs(a-b)<1e-7,tostring(a).." ~= "..tostring(b)) end
-local ok,err=pcall(function()
+local function suite()
     loader.scenes={specimen}
     local v=start();v.enemyTimer=100
     pc.press("RIGHT",ctx);ticks(60,1/60);near(v.px,.5)
@@ -97,6 +112,9 @@ local ok,err=pcall(function()
         if not valid then errors[#errors+1]=message end
     end,function() return false end,function() return false end)
     assert(#errors>=4,"Malformed viewport must fail validation without crashing")
+end
+local ok,err=pcall(function()
+    for _,scene in ipairs({labScene,portScene}) do specimen=scene;suite() end
 end)
 loader.scenes=original;pc.reset();sh.init(nil)
 assert(ok,err)

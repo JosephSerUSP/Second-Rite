@@ -62,3 +62,39 @@ Agent-Signature:
   model: Sonnet 5.5
   role: implementation
   task: "#1270 adoption evidence"
+
+
+## EEVEE candidate after the alpha correction (#1270)
+
+Built from main at `3acc8c1e` with the current exporter, after #1292. The owner authorized a candidate on a copy; the adopted source and shipping package remain unchanged. The copied source is under `out/praca-grass-candidate/source/st_maria_praca_modelled.blend`; its relative asset references were remapped while making the copy, and unused authored datablocks were retained. Layout E_mixed, seed 1, budget 375.
+
+| Measurement | Current shipping | Candidate |
+|---|---:|---:|
+| triangles | 5,842 | 7,342 |
+| vertices | 4,979 | 7,979 |
+| atlas dimensions | 2048 square | 2048 square |
+| tufts | 0 | 375 |
+| grass triangles | 0 | 1,500 |
+| grass island texels | 0 | 87,903 |
+| transparent grass texels (alpha below 0.1) | 0 | 48,557 |
+
+All 375 tufts are inside the source plate frame: 238 above the menu band, 137 inside it. None are inside the walkable lane or under buildings. Every existing render-mesh vertex is retained, with exactly 3,000 added vertices. The grass has lit green texels and cutout gaps; it is subtle at native size. The recipe is idempotent and remains surgical, as checked by the existing adoption suite.
+
+![Source plate before above and candidate below, authored 906x240 camera](praca-grass-candidate-2026-09-30/plate-comparison.png)
+
+![Baked package baseline left and candidate right, lanes 4, 12 and 20](praca-grass-candidate-2026-09-30/lane-comparison.png)
+
+![Lane 12 detail at 3x nearest-neighbour, baseline above and candidate below](praca-grass-candidate-2026-09-30/grass-zoom.png)
+
+Both package views use neutral-EV EEVEE atlases and the same nearest-sampled unlit camera. The source plate uses the existing placement-study preparation and authored camera; it is a source illustration, not the shipping 2D plate. Atlas repacking changes some baseline texels, so the complete image difference is not solely added grass.
+
+The raw regenerated manifest carries source anchors that differ from the shipping anchors, and its collision differs as well. `out/praca-grass-candidate/review-package` therefore combines only candidate render artifacts, bounds/stats and bake provenance with shipping metadata, collision and material. That review package was installed only in an isolated canonical Project stage: G1 passed and the full staged unit suite passed. Fourteen ground-cover/adoption tests passed, including idempotency and unchanged source hash. The adopted Blend SHA-256 is unchanged. Seven native Effekseer world-effect assertions remain unexercised locally. No runtime visual/owner PLAYED acceptance or golden recapture is claimed.
+
+Placement/alpha metrics and artifact hashes are beside the images. The candidate Blend and full packages remain local under `out/praca-grass-candidate`; this draft PR records evidence only and does not adopt or ship them. Per #1270, the next step is owner visual sign-off before source adoption.
+
+Agent-Signature:
+  platform: Codex desktop
+  model: platform-selected/unknown
+  role: implementation
+  task: "#1270 EEVEE grass candidate on a copy"
+  base: 3acc8c1e

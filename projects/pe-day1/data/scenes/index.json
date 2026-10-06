@@ -2,6 +2,16 @@
   "files": [
     "title.json",
     "map.json",
-    "basement_rat.json"
+    "basement_rat.json",
+    "day1_foyer.json",
+    "day1_auditorium.json",
+    "day1_stage.json",
+    "day1_backstage.json",
+    "day1_basement_rat.json",
+    "day1_dressing.json",
+    "day1_rehearsal.json",
+    "day1_sewer.json",
+    "day1_sewer_deep.json",
+    "day1_street.json"
   ]
 }

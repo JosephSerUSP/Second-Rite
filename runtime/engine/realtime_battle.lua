@@ -40,6 +40,9 @@ local function conf(loader)
     if type(c.atPerTick) ~= "string" and type(c.atPerTick) ~= "number" then
         error("system.realtimeBattle.atPerTick must be a formula over the battler (a)", 2)
     end
+    if type(c.moveSpeed) ~= "number" or c.moveSpeed <= 0 then
+        error("system.realtimeBattle.moveSpeed must be a positive number (floor units per tick)", 2)
+    end
     return c
 end
 
@@ -80,6 +83,13 @@ function realtime.start(session, troopId, opts)
     self.projectiles = {}
     self.events = {}
     append(self.events, startEvents)
+    -- Facts the presenter reads through realtime.view. Recorded here, where
+    -- the transitions happen, so presentation never reconstructs them.
+    self.lastHit = nil        -- { target, amount, tick }
+    self.lastMiss = nil       -- { actor, tick }
+    self.lastRefusal = nil    -- { reason, tick }
+    self.lastAction = nil     -- { actor, tick }
+    self.strikeTick = nil     -- tick of the last enemy delivery
 
     local positions = opts.positions or {}
     local function place(list, spots, side)
@@ -130,7 +140,14 @@ end
 function RT:resolve(actor, skill, target, item)
     local before = #self.events
     self.battle:executeTurn({ actor = actor, skill = skill, item = item, target = target }, self.events)
-    for i = before + 1, #self.events do self.events[i].tick = self.tick end
+    for i = before + 1, #self.events do
+        local ev = self.events[i]
+        ev.tick = self.tick
+        if ev.type == "damage" then
+            self.lastHit = { target = ev.target, amount = ev.value, tick = self.tick }
+        end
+    end
+    self.lastAction = { actor = actor, tick = self.tick }
     self:checkOutcome()
 end
 
@@ -141,6 +158,8 @@ function RT:miss(actor, skill, target)
     skill_cost.startCooldown(skill, actor)
     self.events[#self.events + 1] = { type = "miss", actor = actor, skill = skill,
         target = target, tick = self.tick }
+    self.lastMiss = { actor = actor, tick = self.tick }
+    self.lastAction = { actor = actor, tick = self.tick }
 end
 
 function RT:checkOutcome()
@@ -165,6 +184,12 @@ end
 --- Player command. kind = "skill" | "item"; needs a full AT gauge.
 --- Returns false plus a reason when the command cannot be taken.
 function RT:command(kind, id, target)
+    local ok, reason = self:commandInner(kind, id, target)
+    if not ok then self.lastRefusal = { reason = reason, tick = self.tick } end
+    return ok, reason
+end
+
+function RT:commandInner(kind, id, target)
     if self.outcome then return false, "battle over" end
     local actor = self:player()
     if (actor.at or 0) < AT_FULL then return false, "not ready" end
@@ -227,6 +252,7 @@ end
 
 function RT:deliver(p)
     local actor, skill, target, rt = p.actor, p.skill, p.target, p.rt
+    self.strikeTick = self.tick
     if p.delivery == "lunge" then
         actor.field.x, actor.field.y = p.lockX, p.lockY
         if distance(target.field.x, target.field.y, p.lockX, p.lockY) <= rt.radius then
@@ -273,8 +299,12 @@ function RT:step(input)
     if self.outcome or self.paused then return end
     self.tick = self.tick + 1
     local player = self:player()
-    if input and (input.dx ~= 0 or input.dy ~= 0) and not player:isDead() then
-        self:move(player, input.dx or 0, input.dy or 0)
+    -- Input is a direction; speed is the Project's rule, so diagonal
+    -- movement is never faster than straight movement.
+    local dx, dy = input and input.dx or 0, input and input.dy or 0
+    if (dx ~= 0 or dy ~= 0) and not player:isDead() then
+        local len = math.max(1, math.sqrt(dx * dx + dy * dy))
+        self:move(player, dx / len * self.conf.moveSpeed, dy / len * self.conf.moveSpeed)
     end
 
     for _, b in pairs(self.session.party) do
@@ -289,6 +319,19 @@ function RT:step(input)
     for _, pr in ipairs(self.projectiles) do busy[pr.actor] = true end
     for _, e in ipairs(self:livingEnemies()) do
         if e.at >= AT_FULL and not busy[e] and not self.outcome then self:beginEnemyAction(e) end
+    end
+
+    -- Idle enemies close in, per their unit's `realtime.approach`
+    -- { speed = units/tick, stopAt = distance }. Busy ones hold position.
+    for _, e in ipairs(self:livingEnemies()) do
+        local approach = e.actorData and e.actorData.realtime and e.actorData.realtime.approach
+        if approach and not busy[e] and not player:isDead() then
+            local d = distance(e.field.x, e.field.y, player.field.x, player.field.y)
+            if d > approach.stopAt then
+                local stepLen = math.min(approach.speed, d - approach.stopAt)
+                self:move(e, (player.field.x - e.field.x) / d * stepLen, (player.field.y - e.field.y) / d * stepLen)
+            end
+        end
     end
 
     local still = {}
@@ -318,6 +361,58 @@ function RT:drainEvents()
     local out = self.events
     self.events = {}
     return out
+end
+
+--- Read-only formula view of the active real-time battle (`rt.*`), shared by
+--- scene logic and rendering so both read the same resolved facts. nil when
+--- no real-time battle is active.
+function realtime.view(session)
+    local self = session and session.realtimeBattle
+    if not self then return nil end
+    local resources = require("engine.battler_resources")
+    local function age(fact) return fact and (self.tick - fact.tick) or 1e9 end
+    local function battlerFacts(b)
+        if not b then return nil end
+        local res = {}
+        for _, id in ipairs(resources.ids(self.session)) do
+            local current, max = resources.get(b, id, self.session)
+            res[id] = current
+            res[id .. "Max"] = max
+        end
+        return { x = b.field.x, y = b.field.y, hp = b.hp, maxHp = b:getMaxHp(self.session),
+            at = b.at or 0, dead = b:isDead(), res = res }
+    end
+    local player = self:player()
+    local enemy = self.battle.enemies[1]
+    local enemyView = battlerFacts(enemy)
+    if enemyView then
+        local pend
+        for _, p in ipairs(self.pending) do if p.actor == enemy then pend = p end end
+        enemyView.windup = pend ~= nil
+        enemyView.lockX = pend and pend.lockX or enemy.field.x
+        enemyView.lockY = pend and pend.lockY or enemy.field.y
+        enemyView.strikeAge = self.strikeTick and (self.tick - self.strikeTick) or 1e9
+    end
+    local fire = {}
+    for i = 1, 3 do fire[i] = { x = 0, y = 0, live = false } end
+    for _, pr in ipairs(self.projectiles) do
+        if pr.index and pr.index <= 3 then fire[pr.index] = { x = pr.x, y = pr.y, live = true } end
+    end
+    local hit = self.lastHit
+    local items = {}
+    for id, qty in pairs(self.session.inventory or {}) do items[id] = qty end
+    return {
+        items = items,
+        tick = self.tick, round = self.battle.round, paused = self.paused,
+        outcome = self.outcome or "",
+        player = battlerFacts(player), enemy = enemyView, fire = fire,
+        hitAge = age(hit), hitAmount = hit and hit.amount or 0,
+        hitOnPlayer = hit ~= nil and hit.target == player,
+        missAge = age(self.lastMiss),
+        actAge = (self.lastAction and self.lastAction.actor == player) and age(self.lastAction) or 1e9,
+        refusal = self.lastRefusal and self.lastRefusal.reason or "",
+        refusalAge = age(self.lastRefusal),
+    }
 end
 
 realtime.AT_FULL = AT_FULL

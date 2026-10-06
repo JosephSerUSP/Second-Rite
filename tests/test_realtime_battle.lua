@@ -2,50 +2,11 @@
 -- Project's own combat data. Every hit, heal, cost, reward and outcome below
 -- is resolved by production Battle; these assertions prove the scheduler
 -- hands it the right actions at the right ticks.
-local json = require("engine.data.json")
 local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local realtime = require("engine.realtime_battle")
 
-local root = assert(os.getenv("THESTRA_REPOSITORY_ROOT"), "real-time battle test requires repository root")
-local DATA = root .. "/projects/pe-day1/data/"
-local function read(rel)
-    local f = assert(io.open(DATA .. rel, "r"), "missing " .. rel)
-    local value = json.decode(f:read("*a"))
-    f:close()
-    return value
-end
-
--- The loader is pinned to one Project per process, so the PE Day 1 combat
--- tables are swapped in for this suite and restored afterwards.
-local saved = {}
-local SWAPPED = { "skills", "units", "unitsById", "items", "itemsById", "troops", "system" }
-for _, k in ipairs(SWAPPED) do saved[k] = loader[k] end
-local savedBattleFlows = loader.flows.battle
-
-local function install()
-    loader.skills = read("skills.json")
-    loader.items = read("items.json")
-    loader.itemsById = {}
-    for _, item in ipairs(loader.items) do loader.itemsById[item.id] = item end
-    loader.units, loader.unitsById = {}, {}
-    for _, name in ipairs({ "aya", "rat" }) do
-        local unit = read("units/" .. name .. ".json")
-        loader.units[#loader.units + 1] = unit
-        loader.unitsById[unit.id] = unit
-    end
-    loader.troops = read("troops.json")
-    local system = {}
-    for k, v in pairs(saved.system) do system[k] = v end
-    for k, v in pairs(read("system.json")) do system[k] = v end
-    loader.system = system
-    loader.flows.battle = read("flows/battle.json")
-end
-
-local function restore()
-    for _, k in ipairs(SWAPPED) do loader[k] = saved[k] end
-    loader.flows.battle = savedBattleFlows
-end
+local restore
 
 local passed = 0
 local function check(cond, msg)
@@ -79,7 +40,7 @@ local function force(rt, skillId, target)
 end
 
 local ok, err = pcall(function()
-    install()
+    restore = require("tests.pe_day1_fixture")(loader)
 
     -- Start: the troop spawns through the production battle_start phase.
     local rt, session, aya, rat = begin()
@@ -105,6 +66,20 @@ local ok, err = pcall(function()
     rt:step({ dx = 1, dy = 0 })
     check(rt.tick == frozen and aya.field.x == -2, "pause freezes the clock and movement")
     rt.paused = false
+
+    -- Input is a direction; the Project's moveSpeed sets the distance, and a
+    -- diagonal is never faster than a straight line.
+    local speed = loader.system.realtimeBattle.moveSpeed
+    local x0, y0 = aya.field.x, aya.field.y
+    rt:step({ dx = 1, dy = 1 })
+    check(math.abs(math.sqrt((aya.field.x - x0)^2 + (aya.field.y - y0)^2) - speed) < 1e-9,
+        "diagonal movement covers exactly moveSpeed per tick")
+    aya.field.x, aya.field.y = x0, y0
+
+    -- The idle rat has been closing in (unit realtime.approach); pin it so
+    -- the distance-sensitive shots below measure from a known spot.
+    check(rat.field.x < 2, "an idle rat approaches Aya")
+    rat.field.x, rat.field.y = 2, 1.2
 
     -- In range: damage comes from the skill's distance formula, the ammo
     -- from the item-stock cost, both resolved by production Battle.
@@ -168,7 +143,7 @@ local ok, err = pcall(function()
     force(rt, "rat_bite", aya)
     idle(rat); ready(rat)
     rt:step()
-    for _ = 1, 20 do rt:step({ dx = 0, dy = 0.1 }) end
+    for _ = 1, 20 do rt:step({ dx = 0, dy = 1 }) end
     hp = aya.hp
     rat.at = -1e9
     for _ = 1, 20 do rt:step() end
@@ -218,14 +193,14 @@ local ok, err = pcall(function()
     for _ = 1, loader.system.realtimeBattle.ticksPerRound - 1 do rt:step(); aya.at = 0 end
     check((resources2.get(aya, "pe", session)) == 50, "no round boundary before ticksPerRound ticks")
     rt:step()
-    check((resources2.get(aya, "pe", session)) == 52 and rt.battle.round == 2,
+    check((resources2.get(aya, "pe", session)) == 54 and rt.battle.round == 2,
         "the round boundary runs round_end once, regenerating PE")
 
     -- PE is creature state: it survives a save round trip.
     local savegame = require("engine.savegame")
     local data = savegame.serialize(session, loader, "map")
     local restored = savegame.deserialize(data, loader)
-    check((resources2.get(restored.party[1], "pe", restored)) == 52, "PE round-trips through a save")
+    check((resources2.get(restored.party[1], "pe", restored)) == 54, "PE round-trips through a save")
 
     -- Determinism: the same seed and inputs give the same event stream.
     local function transcript(seed)
@@ -241,6 +216,6 @@ local ok, err = pcall(function()
     end
     check(transcript(7) == transcript(7), "identical seeds and inputs replay identically")
 end)
-restore()
+if restore then restore() end
 assert(ok, err)
 print(("=== Real-time Battle Tests: %d passed, 0 failed ==="):format(passed))

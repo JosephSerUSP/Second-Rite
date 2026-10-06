@@ -1,0 +1,660 @@
+{
+  "id": "day1_backstage",
+  "name": "Carnegie Hall - backstage",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
+  },
+  "windows": [
+    {
+      "id": "world",
+      "rect": {
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            0,
+            -4.25,
+            6.85
+          ],
+          "target": [
+            0,
+            2.4,
+            0.4
+          ],
+          "fov": 44
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "room",
+            "model": "assets/models/blockout/backstage.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "door_to_stage",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              -3.6,
+              2.5,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_stage'"
+          },
+          {
+            "id": "door_to_basement",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              -2,
+              4.6,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_basement'"
+          },
+          {
+            "id": "door_to_dressing",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              3.6,
+              2.5,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_dressing'"
+          },
+          {
+            "id": "pickup_backstage_medicine",
+            "model": "assets/models/blockout/pickup.obj",
+            "position": [
+              3,
+              4,
+              0
+            ],
+            "yaw": "sceneState.gait * 0.25",
+            "visible": "sceneState.f_got_backstage_medicine == 0"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true"
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/backstage/aya.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not sceneState.moving == 1 or sceneState.ui > 0))"
+          },
+          {
+            "id": "aya_walk_a",
+            "model": "assets/models/backstage/aya_walk_a.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_b",
+            "model": "assets/models/backstage/aya_walk_b.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "card",
+      "rect": {
+        "x": "4 - surface.originX",
+        "y": 7,
+        "w": "surface.width - 8",
+        "h": 14
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 27.5,
+        "w": 34,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "COMMENT",
+        "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "fight",
+            "value": 0
+          },
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "card",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - backstage'"
+          },
+          {
+            "name": "walkX",
+            "value": "sceneState.walkX or 0"
+          },
+          {
+            "name": "walkY",
+            "value": "sceneState.walkY or 1"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "entryX",
+            "value": "sceneState.walkX"
+          },
+          {
+            "name": "entryY",
+            "value": "sceneState.walkY"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_got_backstage_medicine",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:got_backstage_medicine",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_got_backstage_medicine",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_rat_defeated",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:rat_defeated",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_rat_defeated",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": "sceneState.card ~= '' and 9 or 0"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+          },
+          {
+            "name": "dy",
+            "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "moving",
+            "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.moving == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "gait",
+                "value": "sceneState.gait + time.dt * 10"
+              },
+              {
+                "name": "aim",
+                "value": "atan2(sceneState.dx, -sceneState.dy)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "walkX",
+            "value": "max(-3.6, min(3.6, sceneState.walkX + sceneState.dx * 0.05))"
+          },
+          {
+            "name": "walkY",
+            "value": "max(0.3, min(4.6, sceneState.walkY + sceneState.dy * 0.05))"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - backstage'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "((sceneState.walkX - (-3.6))^2 + (sceneState.walkY - (2.5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_stage'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Stage'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "((sceneState.walkX - (-2))^2 + (sceneState.walkY - (4.6))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_basement'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Stairs down'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "((sceneState.walkX - (3.6))^2 + (sceneState.walkY - (2.5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_dressing'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Dressing rooms'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.f_got_backstage_medicine == 0 and ((sceneState.walkX - (3))^2 + (sceneState.walkY - (4))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'p:backstage_medicine'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: examine'"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 9",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "''"
+              },
+              {
+                "name": "ui",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'to_stage'",
+            "then": [
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "goto",
+                "scene": "day1_stage",
+                "sceneState": [
+                  {
+                    "name": "walkX",
+                    "value": 4.2
+                  },
+                  {
+                    "name": "walkY",
+                    "value": 3
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'to_basement'",
+            "then": [
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "goto",
+                "scene": "day1_basement_rat",
+                "sceneState": [
+                  {
+                    "name": "walkX",
+                    "value": -2
+                  },
+                  {
+                    "name": "walkY",
+                    "value": 1.2
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'to_dressing'",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "flag:rat_defeated",
+                "then": [
+                  {
+                    "cmd": "SCENE_EVENT",
+                    "kind": "goto",
+                    "scene": "day1_dressing",
+                    "sceneState": [
+                      {
+                        "name": "walkX",
+                        "value": -3.6
+                      },
+                      {
+                        "name": "walkY",
+                        "value": 2.5
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "card",
+                        "value": "'Something scratches below.\\nCheck the basement first.'"
+                      },
+                      {
+                        "name": "ui",
+                        "value": 9
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'p:backstage_medicine'",
+            "then": [
+              {
+                "cmd": "SET_FLAG",
+                "flag": "got_backstage_medicine",
+                "value": true
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "f_got_backstage_medicine",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "cmd": "CHANGE_ITEM",
+                "item": "medicine",
+                "count": 1
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "card",
+                    "value": "'Found Medicine.'"
+                  },
+                  {
+                    "name": "ui",
+                    "value": 9
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+3)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_left": [],
+    "on_right": []
+  }
+}

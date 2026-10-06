@@ -42,8 +42,9 @@
     "revision": "1.0"
   },
   "realtimeBattle": {
-    "ticksPerRound": 180,
-    "atPerTick": "a.asp / 12"
+    "ticksPerRound": 60,
+    "atPerTick": "a.asp / 20",
+    "moveSpeed": 0.041667
   },
   "battlerResources": {
     "pe": {

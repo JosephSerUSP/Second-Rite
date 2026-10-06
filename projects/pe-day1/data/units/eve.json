@@ -1,0 +1,26 @@
+{
+  "id": "eve",
+  "name": "Eve",
+  "level": 1,
+  "skills": [
+    "rat_bite",
+    "rat_fire_tail"
+  ],
+  "flavor": "Placeholder boss (#1427 rough chapter). Reuses the rat kit; original values unverified.",
+  "baseParams": {
+    "maxHp": 90,
+    "atk": 8,
+    "def": 6,
+    "mat": 6,
+    "mdf": 6,
+    "mpd": 1,
+    "asp": 10
+  },
+  "growthBands": [],
+  "realtime": {
+    "approach": {
+      "speed": 0.018,
+      "stopAt": 2.0
+    }
+  }
+}

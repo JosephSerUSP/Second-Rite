@@ -9,17 +9,10 @@ local function readScene(path)
     local text=f:read("*a");f:close()
     return text,json.decode(text)
 end
--- The PE Day 1 Project (#1423) carries a port of B009. Until M1 replaces its
--- combat, both copies must behave identically: same assertions, and the
--- texts may differ only in id, display name and model directory.
+-- The PE Day 1 port (#1423) diverged deliberately in M1 (#1424): its combat
+-- now runs on engine/realtime_battle.lua and is covered by
+-- tests/test_realtime_battle.lua. This suite covers the B009 lab specimen.
 local labText,labScene=readScene("/projects/labs/scene-benchmarks/data/scenes/b009_positioning.json")
-local portText,portScene=readScene("/projects/pe-day1/data/scenes/basement_rat.json")
-local function normalize(text,id,name,dir)
-    return (text:gsub(id,"ID",1):gsub(name,"NAME",1):gsub(dir,"MODELS"))
-end
-assert(normalize(labText,'"b009_positioning"','"B009 %- Carnegie Hall encounter"',"assets/models/b009/")
-    ==normalize(portText,'"basement_rat"','"Carnegie Hall basement %- mutated rat"',"assets/models/backstage/"),
-    "PE Day 1 basement_rat diverged from B009 beyond id/name/model paths")
 local specimen
 local original=loader.scenes
 local ctx={session=session,loader=loader,party=session.party,events={}}
@@ -114,7 +107,7 @@ local function suite()
     assert(#errors>=4,"Malformed viewport must fail validation without crashing")
 end
 local ok,err=pcall(function()
-    for _,scene in ipairs({labScene,portScene}) do specimen=scene;suite() end
+    specimen=labScene;suite()
 end)
 loader.scenes=original;pc.reset();sh.init(nil)
 assert(ok,err)

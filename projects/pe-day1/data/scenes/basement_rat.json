@@ -4,7 +4,7 @@
   "kind": "menu",
   "draw": "windows",
   "terminal": {
-    "reached": "sceneState.mode == 2"
+    "reached": "rt.outcome == 'victory'"
   },
   "update": {
     "mode": "fixed",
@@ -57,8 +57,8 @@
             "id": "aya_shadow",
             "model": "assets/models/backstage/contact_shadow.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": 0,
@@ -73,8 +73,8 @@
             "id": "rat_shadow",
             "model": "assets/models/backstage/contact_shadow.obj",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
+              "rt.enemy.x",
+              "rt.enemy.y",
               0
             ],
             "yaw": 0,
@@ -89,8 +89,8 @@
             "id": "range_ground",
             "model": "assets/models/backstage/range_ground.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0.03
             ],
             "yaw": 0,
@@ -105,8 +105,8 @@
             "id": "range_air",
             "model": "assets/models/backstage/range_air.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0.03
             ],
             "yaw": 0,
@@ -121,126 +121,126 @@
             "id": "aya",
             "model": "assets/models/backstage/aya.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.mode ~= 3 and sceneState.flash <= 0 and (sceneState.moving == 0 or sceneState.ui > 0 or sceneState.mode > 0)"
+            "visible": "rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')"
           },
           {
             "id": "aya_walk_a",
             "model": "assets/models/backstage/aya_walk_a.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.mode == 0 and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0"
+            "visible": "rt.outcome == '' and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0"
           },
           {
             "id": "aya_walk_b",
             "model": "assets/models/backstage/aya_walk_b.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.mode == 0 and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0"
+            "visible": "rt.outcome == '' and sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0"
           },
           {
             "id": "aya_down",
             "model": "assets/models/backstage/aya_down.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.mode == 3"
+            "visible": "rt.outcome == 'defeat'"
           },
           {
             "id": "aya_recoil",
             "model": "assets/models/backstage/aya_recoil.obj",
             "position": [
-              "sceneState.px",
-              "sceneState.py",
+              "rt.player.x",
+              "rt.player.y",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.mode ~= 3 and sceneState.flash > 0"
+            "visible": "rt.outcome ~= 'defeat' and rt.actAge < 12"
           },
           {
             "id": "rat",
             "model": "assets/models/backstage/rat.obj",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
+              "rt.enemy.x",
+              "rt.enemy.y",
               0
             ],
             "yaw": "sceneState.ratAim",
-            "visible": "sceneState.enemyMode == 0 or sceneState.mode == 2",
+            "visible": "(not rt.enemy.windup and rt.enemy.strikeAge >= 20) or rt.outcome == 'victory'",
             "scale": [
               1,
               1,
-              "sceneState.mode == 2 and .18 or 1"
+              "rt.outcome == 'victory' and .18 or 1"
             ],
             "tint": [
               1,
-              "sceneState.flash > 0 and .4 or 1",
-              "sceneState.flash > 0 and .4 or 1"
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1",
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1"
             ]
           },
           {
             "id": "rat_windup",
             "model": "assets/models/backstage/rat_windup.obj",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
+              "rt.enemy.x",
+              "rt.enemy.y",
               0
             ],
             "yaw": "sceneState.ratAim",
-            "visible": "sceneState.enemyMode == 1 and sceneState.mode ~= 2",
+            "visible": "rt.enemy.windup and rt.outcome ~= 'victory'",
             "scale": [
               1,
               1,
-              "sceneState.mode == 2 and .18 or 1"
+              "rt.outcome == 'victory' and .18 or 1"
             ],
             "tint": [
               1,
-              "sceneState.flash > 0 and .4 or 1",
-              "sceneState.flash > 0 and .4 or 1"
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1",
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1"
             ]
           },
           {
             "id": "rat_lunge",
             "model": "assets/models/backstage/rat_lunge.obj",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
+              "rt.enemy.x",
+              "rt.enemy.y",
               0
             ],
             "yaw": "sceneState.ratAim",
-            "visible": "sceneState.enemyMode == 2 and sceneState.mode ~= 2",
+            "visible": "(not rt.enemy.windup and rt.enemy.strikeAge < 20) and rt.outcome ~= 'victory'",
             "scale": [
               1,
               1,
-              "sceneState.mode == 2 and .18 or 1"
+              "rt.outcome == 'victory' and .18 or 1"
             ],
             "tint": [
               1,
-              "sceneState.flash > 0 and .4 or 1",
-              "sceneState.flash > 0 and .4 or 1"
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1",
+              "rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1"
             ]
           },
           {
             "id": "target",
             "model": "assets/models/backstage/target_cursor.obj",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
+              "rt.enemy.x",
+              "rt.enemy.y",
               1.1
             ],
             "yaw": 0,
@@ -250,23 +250,23 @@
             "id": "muzzle",
             "model": "assets/models/backstage/spark.obj",
             "position": [
-              "sceneState.px+sin(sceneState.aim)*.72",
-              "sceneState.py-cos(sceneState.aim)*.72",
+              "rt.player.x+sin(sceneState.aim)*.72",
+              "rt.player.y-cos(sceneState.aim)*.72",
               1.47
             ],
             "yaw": 0,
-            "visible": "sceneState.flash > 0"
+            "visible": "rt.actAge < 12"
           },
           {
             "id": "fire0",
             "model": "assets/models/backstage/spark.obj",
             "position": [
-              "sceneState.fireX+sin(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT",
-              "sceneState.fireY-cos(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT",
+              "rt.fire[1].x",
+              "rt.fire[1].y",
               0.35
             ],
             "yaw": 0,
-            "visible": "sceneState.fireT < 1.8 and sceneState.hit0 == 0",
+            "visible": "rt.fire[1].live",
             "scale": [
               1.8,
               1.8,
@@ -277,12 +277,12 @@
             "id": "fire1",
             "model": "assets/models/backstage/spark.obj",
             "position": [
-              "sceneState.fireX+sin(sceneState.fireAim+(0))*4.5*sceneState.fireT",
-              "sceneState.fireY-cos(sceneState.fireAim+(0))*4.5*sceneState.fireT",
+              "rt.fire[2].x",
+              "rt.fire[2].y",
               0.35
             ],
             "yaw": 0,
-            "visible": "sceneState.fireT < 1.8 and sceneState.hit1 == 0",
+            "visible": "rt.fire[2].live",
             "scale": [
               1.8,
               1.8,
@@ -293,12 +293,12 @@
             "id": "fire2",
             "model": "assets/models/backstage/spark.obj",
             "position": [
-              "sceneState.fireX+sin(sceneState.fireAim+(0.22))*4.5*sceneState.fireT",
-              "sceneState.fireY-cos(sceneState.fireAim+(0.22))*4.5*sceneState.fireT",
+              "rt.fire[3].x",
+              "rt.fire[3].y",
               0.35
             ],
             "yaw": 0,
-            "visible": "sceneState.fireT < 1.8 and sceneState.hit2 == 0",
+            "visible": "rt.fire[3].live",
             "scale": [
               1.8,
               1.8,
@@ -308,13 +308,13 @@
         ],
         "labels": [
           {
-            "value": "sceneState.damage > 0 and sceneState.damage or 'MISS'",
+            "value": "rt.missAge < rt.hitAge and 'MISS' or rt.hitAmount",
             "position": [
-              "sceneState.ex",
-              "sceneState.ey",
-              "2+(.8-sceneState.damageTimer)*1.2"
+              "rt.hitOnPlayer and rt.missAge >= rt.hitAge and rt.player.x or rt.enemy.x",
+              "rt.hitOnPlayer and rt.missAge >= rt.hitAge and rt.player.y or rt.enemy.y",
+              "1.2 + min(rt.hitAge, rt.missAge) / 60 * 1.2"
             ],
-            "visible": "sceneState.damageTimer > 0",
+            "visible": "min(rt.hitAge, rt.missAge) < 48",
             "color": [
               1,
               1,
@@ -345,11 +345,11 @@
           "height": 0.4,
           "labelPlacement": "right",
           "label": "AT",
-          "value": "sceneState.atb",
+          "value": "rt.player.at",
           "max": "100",
           "fill": [
             0.08,
-            "sceneState.atb >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7",
+            "rt.player.at >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7",
             0.85
           ],
           "color": [
@@ -366,7 +366,7 @@
           "height": 0.4,
           "labelPlacement": "right",
           "label": "PE",
-          "value": "sceneState.pe",
+          "value": "rt.player.res.pe",
           "max": "100",
           "fill": [
             0.02,
@@ -394,7 +394,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.hp}/{sceneState.maxHp}"
+          "text": "{rt.player.hp}/{rt.player.maxHp}"
         }
       ]
     },
@@ -446,7 +446,7 @@
       "content": [
         {
           "type": "text",
-          "text": "M84F\nBULLETS {sceneState.ammo}\nTARGET   1"
+          "text": "M84F\nBULLETS {(rt.items.handgun_ammo or 0)}\nTARGET   1"
         }
       ],
       "visible": "sceneState.ui == 2"
@@ -482,7 +482,7 @@
       "content": [
         {
           "type": "text",
-          "text": "> Medicine 1\nStock {sceneState.medicine}\nRecover 30 HP"
+          "text": "> Medicine 1\nStock {(rt.items.medicine or 0)}\nRecover 30 HP"
         }
       ],
       "visible": "sceneState.ui == 4"
@@ -503,7 +503,7 @@
           "text": "Battle over\nEXP 2    Ammo +6\n{sceneState.rewarded == 0 and \"> Obtain all\" or \"> Replay\"}\nEsc: return"
         }
       ],
-      "visible": "sceneState.mode == 2"
+      "visible": "rt.outcome == 'victory'"
     },
     {
       "id": "loss",
@@ -521,7 +521,7 @@
           "text": "Aya has fallen\nEnter: retry\nEsc: return"
         }
       ],
-      "visible": "sceneState.mode == 3"
+      "visible": "rt.outcome == 'defeat'"
     },
     {
       "id": "escape",
@@ -539,7 +539,7 @@
           "text": "Escaped\nEnter: retry\nEsc: return"
         }
       ],
-      "visible": "sceneState.mode == 4"
+      "visible": "rt.outcome == 'escaped'"
     },
     {
       "id": "feedback",
@@ -554,53 +554,21 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.status}"
+          "text": "{rt.refusalAge < 90 and rt.refusal or sceneState.status}"
         }
       ],
-      "visible": "sceneState.mode == 0 and sceneState.status ~= \"\""
+      "visible": "rt.outcome == '' and (sceneState.status ~= '' or rt.refusalAge < 90)"
     }
   ],
   "hooks": {
     "on_enter": [
       {
+        "cmd": "COMMENT",
+        "text": "Combat is the real-time battle scheduler over production Battle (#1424). This scene owns only input, menus and presentation; every domain fact is read from rt.*."
+      },
+      {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
-          {
-            "name": "px",
-            "value": -2
-          },
-          {
-            "name": "py",
-            "value": 1.2
-          },
-          {
-            "name": "ex",
-            "value": 2
-          },
-          {
-            "name": "ey",
-            "value": 2
-          },
-          {
-            "name": "atb",
-            "value": 0
-          },
-          {
-            "name": "hp",
-            "value": 45
-          },
-          {
-            "name": "maxHp",
-            "value": 45
-          },
-          {
-            "name": "ehp",
-            "value": 20
-          },
-          {
-            "name": "mode",
-            "value": 0
-          },
           {
             "name": "ui",
             "value": 0
@@ -610,31 +578,27 @@
             "value": 0
           },
           {
-            "name": "actionTimer",
+            "name": "rewarded",
             "value": 0
           },
           {
-            "name": "enemyMode",
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
             "value": 0
           },
           {
-            "name": "enemyTimer",
-            "value": 2
-          },
-          {
-            "name": "attackCount",
+            "name": "moving",
             "value": 0
           },
           {
-            "name": "tx",
+            "name": "dx",
             "value": 0
           },
           {
-            "name": "ty",
-            "value": 0
-          },
-          {
-            "name": "flash",
+            "name": "dy",
             "value": 0
           },
           {
@@ -650,78 +614,32 @@
             "value": -1.373
           },
           {
-            "name": "menuHeld",
-            "value": "false"
-          },
-          {
-            "name": "gait",
-            "value": 0
-          },
-          {
-            "name": "moving",
-            "value": 0
-          },
-          {
-            "name": "ammo",
-            "value": 11
-          },
-          {
-            "name": "pe",
-            "value": 100
-          },
-          {
-            "name": "medicine",
-            "value": 1
-          },
-          {
-            "name": "damage",
-            "value": 0
-          },
-          {
-            "name": "damageTimer",
-            "value": 0
-          },
-          {
-            "name": "rewarded",
-            "value": 0
-          },
-          {
-            "name": "exp",
-            "value": 0
-          },
-          {
-            "name": "fireT",
-            "value": 2
-          },
-          {
-            "name": "fireX",
-            "value": 0
-          },
-          {
-            "name": "fireY",
-            "value": 0
-          },
-          {
-            "name": "fireAim",
-            "value": 0
-          },
-          {
-            "name": "hit0",
-            "value": 0
-          },
-          {
-            "name": "hit1",
-            "value": 0
-          },
-          {
-            "name": "hit2",
-            "value": 0
-          },
-          {
             "name": "status",
             "value": "'Carnegie Hall - backstage'"
           }
         ]
+      },
+      {
+        "cmd": "REALTIME_BATTLE_START",
+        "troop": "basement_rat",
+        "party": [
+          [
+            -2,
+            1.2
+          ]
+        ],
+        "enemies": [
+          [
+            2,
+            2
+          ]
+        ],
+        "bounds": {
+          "minX": -2.2,
+          "maxX": 2.2,
+          "minY": 0.3,
+          "maxY": 4.4
+        }
       }
     ],
     "on_frame": [
@@ -731,11 +649,11 @@
       },
       {
         "cmd": "IF",
-        "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.mode == 0",
+        "condition": "sceneState.input.X and not sceneState.menuHeld and rt.outcome == ''",
         "then": [
           {
             "cmd": "IF",
-            "condition": "sceneState.ui == 0 and sceneState.atb >= 100 and sceneState.actionTimer <= 0",
+            "condition": "sceneState.ui == 0 and rt.player.at >= 100",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
@@ -789,442 +707,61 @@
         ]
       },
       {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+          },
+          {
+            "name": "dy",
+            "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "moving",
+            "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and rt.outcome == '' and 1 or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "REALTIME_BATTLE_PAUSE",
+        "paused": "sceneState.ui > 0"
+      },
+      {
+        "cmd": "REALTIME_BATTLE_STEP",
+        "dx": "sceneState.dx",
+        "dy": "sceneState.dy"
+      },
+      {
         "cmd": "IF",
-        "condition": "sceneState.ui == 0 or sceneState.mode > 0",
+        "condition": "sceneState.moving == 1",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
-                "name": "flash",
-                "value": "max(0,sceneState.flash-time.dt)"
-              },
-              {
-                "name": "damageTimer",
-                "value": "max(0,sceneState.damageTimer-time.dt)"
+                "name": "gait",
+                "value": "sceneState.gait + time.dt * 10"
               }
             ]
           }
         ]
       },
       {
-        "cmd": "IF",
-        "condition": "sceneState.mode == 0 and sceneState.ui == 0",
-        "then": [
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
           {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "dx",
-                "value": "(sceneState.input.RIGHT and 1 or 0)-(sceneState.input.LEFT and 1 or 0)"
-              },
-              {
-                "name": "dy",
-                "value": "(sceneState.input.UP and 1 or 0)-(sceneState.input.DOWN and 1 or 0)"
-              },
-              {
-                "name": "actionTimer",
-                "value": "max(0,sceneState.actionTimer-time.dt)"
-              },
-              {
-                "name": "atb",
-                "value": "min(100,sceneState.atb+30*time.dt)"
-              },
-              {
-                "name": "pe",
-                "value": "min(100,sceneState.pe+4*time.dt)"
-              },
-              {
-                "name": "gait",
-                "value": "sceneState.gait+time.dt*10"
-              }
-            ]
+            "name": "aim",
+            "value": "sceneState.moving == 1 and atan2(sceneState.dx, -sceneState.dy) or atan2(rt.enemy.x - rt.player.x, rt.player.y - rt.enemy.y)"
           },
           {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "norm",
-                "value": "max(1,sqrt(sceneState.dx^2+sceneState.dy^2))"
-              },
-              {
-                "name": "moving",
-                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and sceneState.actionTimer <= 0 and 1 or 0"
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.actionTimer <= 0",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "px",
-                    "value": "clamp(sceneState.px+sceneState.dx/sceneState.norm*2.5*time.dt,-2.2,2.2)"
-                  },
-                  {
-                    "name": "py",
-                    "value": "clamp(sceneState.py+sceneState.dy/sceneState.norm*2.5*time.dt,.3,4.4)"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "distance",
-                "value": "sqrt((sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2)"
-              },
-              {
-                "name": "aim",
-                "value": "sceneState.moving == 1 and atan2(sceneState.dx,-sceneState.dy) or atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
-              },
-              {
-                "name": "ratAim",
-                "value": "atan2(sceneState.px-sceneState.ex,sceneState.ey-sceneState.py)"
-              },
-              {
-                "name": "enemyTimer",
-                "value": "sceneState.enemyTimer-time.dt"
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.enemyMode == 0",
-            "then": [
-              {
-                "cmd": "IF",
-                "condition": "sceneState.distance > 1.35",
-                "then": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "ex",
-                        "value": "sceneState.ex+(sceneState.px-sceneState.ex)/max(.01,sceneState.distance)*1.15*time.dt"
-                      },
-                      {
-                        "name": "ey",
-                        "value": "sceneState.ey+(sceneState.py-sceneState.ey)/max(.01,sceneState.distance)*1.15*time.dt"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "cmd": "IF",
-                "condition": "sceneState.enemyTimer <= 0",
-                "then": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "enemyMode",
-                        "value": 1
-                      },
-                      {
-                        "name": "enemyTimer",
-                        "value": 0.85
-                      },
-                      {
-                        "name": "tx",
-                        "value": "sceneState.px"
-                      },
-                      {
-                        "name": "ty",
-                        "value": "sceneState.py"
-                      },
-                      {
-                        "name": "status",
-                        "value": "''"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "else": [
-              {
-                "cmd": "IF",
-                "condition": "sceneState.enemyMode == 1",
-                "then": [
-                  {
-                    "cmd": "IF",
-                    "condition": "sceneState.enemyTimer <= 0",
-                    "then": [
-                      {
-                        "cmd": "IF",
-                        "condition": "sceneState.attackCount % 2 == 0",
-                        "then": [
-                          {
-                            "cmd": "SET_SCENE_STATE",
-                            "assignments": [
-                              {
-                                "name": "enemyMode",
-                                "value": 2
-                              },
-                              {
-                                "name": "enemyTimer",
-                                "value": 0.22
-                              }
-                            ]
-                          }
-                        ],
-                        "else": [
-                          {
-                            "cmd": "SET_SCENE_STATE",
-                            "assignments": [
-                              {
-                                "name": "enemyMode",
-                                "value": 0
-                              },
-                              {
-                                "name": "enemyTimer",
-                                "value": 2.4
-                              },
-                              {
-                                "name": "fireT",
-                                "value": 0
-                              },
-                              {
-                                "name": "fireX",
-                                "value": "sceneState.ex"
-                              },
-                              {
-                                "name": "fireY",
-                                "value": "sceneState.ey"
-                              },
-                              {
-                                "name": "fireAim",
-                                "value": "atan2(sceneState.tx-sceneState.ex,sceneState.ey-sceneState.ty)"
-                              },
-                              {
-                                "name": "hit0",
-                                "value": 0
-                              },
-                              {
-                                "name": "hit1",
-                                "value": 0
-                              },
-                              {
-                                "name": "hit2",
-                                "value": 0
-                              },
-                              {
-                                "name": "attackCount",
-                                "value": "sceneState.attackCount+1"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ],
-                "else": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "ex",
-                        "value": "sceneState.ex+(sceneState.tx-sceneState.ex)*min(1,time.dt/.1)"
-                      },
-                      {
-                        "name": "ey",
-                        "value": "sceneState.ey+(sceneState.ty-sceneState.ey)*min(1,time.dt/.1)"
-                      }
-                    ]
-                  },
-                  {
-                    "cmd": "IF",
-                    "condition": "sceneState.enemyTimer <= 0",
-                    "then": [
-                      {
-                        "cmd": "IF",
-                        "condition": "(sceneState.px-sceneState.tx)^2+(sceneState.py-sceneState.ty)^2 < .85^2",
-                        "then": [
-                          {
-                            "cmd": "SET_SCENE_STATE",
-                            "assignments": [
-                              {
-                                "name": "hp",
-                                "value": "max(0,sceneState.hp-4)"
-                              },
-                              {
-                                "name": "pe",
-                                "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
-                              },
-                              {
-                                "name": "status",
-                                "value": "''"
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "assignments": [
-                          {
-                            "name": "enemyMode",
-                            "value": 0
-                          },
-                          {
-                            "name": "enemyTimer",
-                            "value": 2.4
-                          },
-                          {
-                            "name": "attackCount",
-                            "value": "sceneState.attackCount+1"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "fireT",
-                "value": "min(2,sceneState.fireT+time.dt)"
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.fireT < 1.8 and sceneState.hit0 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(-0.22))*4.5*sceneState.fireT))^2 < .45^2",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "hit0",
-                    "value": 1
-                  },
-                  {
-                    "name": "hp",
-                    "value": "max(0,sceneState.hp-4)"
-                  },
-                  {
-                    "name": "pe",
-                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.fireT < 1.8 and sceneState.hit1 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(0))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(0))*4.5*sceneState.fireT))^2 < .45^2",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "hit1",
-                    "value": 1
-                  },
-                  {
-                    "name": "hp",
-                    "value": "max(0,sceneState.hp-4)"
-                  },
-                  {
-                    "name": "pe",
-                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.fireT < 1.8 and sceneState.hit2 == 0 and (sceneState.px-(sceneState.fireX+sin(sceneState.fireAim+(0.22))*4.5*sceneState.fireT))^2+(sceneState.py-(sceneState.fireY-cos(sceneState.fireAim+(0.22))*4.5*sceneState.fireT))^2 < .45^2",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "hit2",
-                    "value": 1
-                  },
-                  {
-                    "name": "hp",
-                    "value": "max(0,sceneState.hp-4)"
-                  },
-                  {
-                    "name": "pe",
-                    "value": "sceneState.pe >= 100 and 92 or sceneState.pe"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.ehp <= 0",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "mode",
-                    "value": 2
-                  },
-                  {
-                    "name": "ui",
-                    "value": 5
-                  },
-                  {
-                    "name": "atb",
-                    "value": 0
-                  },
-                  {
-                    "name": "exp",
-                    "value": 2
-                  },
-                  {
-                    "name": "status",
-                    "value": "'Battle over'"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.hp <= 0",
-            "then": [
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "mode",
-                    "value": 3
-                  },
-                  {
-                    "name": "ui",
-                    "value": 0
-                  },
-                  {
-                    "name": "atb",
-                    "value": 0
-                  },
-                  {
-                    "name": "status",
-                    "value": "'Aya has fallen'"
-                  }
-                ]
-              }
-            ]
+            "name": "ratAim",
+            "value": "atan2(rt.player.x - rt.enemy.x, rt.enemy.y - rt.player.y)"
           }
         ]
       }
@@ -1232,70 +769,40 @@
     "on_select": [
       {
         "cmd": "IF",
-        "condition": "sceneState.mode >= 2",
+        "condition": "rt.outcome ~= ''",
         "then": [
           {
             "cmd": "IF",
-            "condition": "sceneState.mode == 2 and sceneState.rewarded == 0",
+            "condition": "rt.outcome == 'victory' and sceneState.rewarded == 0",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
-                  {
-                    "name": "ammo",
-                    "value": "sceneState.ammo+6"
-                  },
                   {
                     "name": "rewarded",
                     "value": 1
                   },
                   {
                     "name": "status",
-                    "value": "'Ammo +6 obtained'"
+                    "value": "''"
                   }
                 ]
               }
             ],
             "else": [
               {
+                "cmd": "COMMENT",
+                "text": "Replay the lab encounter from a fresh session."
+              },
+              {
+                "cmd": "REALTIME_BATTLE_END"
+              },
+              {
+                "cmd": "RESET_SESSION"
+              },
+              {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
-                  {
-                    "name": "px",
-                    "value": -2
-                  },
-                  {
-                    "name": "py",
-                    "value": 1.2
-                  },
-                  {
-                    "name": "ex",
-                    "value": 2
-                  },
-                  {
-                    "name": "ey",
-                    "value": 2
-                  },
-                  {
-                    "name": "atb",
-                    "value": 0
-                  },
-                  {
-                    "name": "hp",
-                    "value": 45
-                  },
-                  {
-                    "name": "maxHp",
-                    "value": 45
-                  },
-                  {
-                    "name": "ehp",
-                    "value": 20
-                  },
-                  {
-                    "name": "mode",
-                    "value": 0
-                  },
                   {
                     "name": "ui",
                     "value": 0
@@ -1305,31 +812,27 @@
                     "value": 0
                   },
                   {
-                    "name": "actionTimer",
+                    "name": "rewarded",
                     "value": 0
                   },
                   {
-                    "name": "enemyMode",
+                    "name": "menuHeld",
+                    "value": "false"
+                  },
+                  {
+                    "name": "gait",
                     "value": 0
                   },
                   {
-                    "name": "enemyTimer",
-                    "value": 2
-                  },
-                  {
-                    "name": "attackCount",
+                    "name": "moving",
                     "value": 0
                   },
                   {
-                    "name": "tx",
+                    "name": "dx",
                     "value": 0
                   },
                   {
-                    "name": "ty",
-                    "value": 0
-                  },
-                  {
-                    "name": "flash",
+                    "name": "dy",
                     "value": 0
                   },
                   {
@@ -1345,78 +848,32 @@
                     "value": -1.373
                   },
                   {
-                    "name": "menuHeld",
-                    "value": "false"
-                  },
-                  {
-                    "name": "gait",
-                    "value": 0
-                  },
-                  {
-                    "name": "moving",
-                    "value": 0
-                  },
-                  {
-                    "name": "ammo",
-                    "value": 11
-                  },
-                  {
-                    "name": "pe",
-                    "value": 100
-                  },
-                  {
-                    "name": "medicine",
-                    "value": 1
-                  },
-                  {
-                    "name": "damage",
-                    "value": 0
-                  },
-                  {
-                    "name": "damageTimer",
-                    "value": 0
-                  },
-                  {
-                    "name": "rewarded",
-                    "value": 0
-                  },
-                  {
-                    "name": "exp",
-                    "value": 0
-                  },
-                  {
-                    "name": "fireT",
-                    "value": 2
-                  },
-                  {
-                    "name": "fireX",
-                    "value": 0
-                  },
-                  {
-                    "name": "fireY",
-                    "value": 0
-                  },
-                  {
-                    "name": "fireAim",
-                    "value": 0
-                  },
-                  {
-                    "name": "hit0",
-                    "value": 0
-                  },
-                  {
-                    "name": "hit1",
-                    "value": 0
-                  },
-                  {
-                    "name": "hit2",
-                    "value": 0
-                  },
-                  {
                     "name": "status",
                     "value": "'Carnegie Hall - backstage'"
                   }
                 ]
+              },
+              {
+                "cmd": "REALTIME_BATTLE_START",
+                "troop": "basement_rat",
+                "party": [
+                  [
+                    -2,
+                    1.2
+                  ]
+                ],
+                "enemies": [
+                  [
+                    2,
+                    2
+                  ]
+                ],
+                "bounds": {
+                  "minX": -2.2,
+                  "maxX": 2.2,
+                  "minY": 0.3,
+                  "maxY": 4.4
+                }
               }
             ]
           }
@@ -1428,7 +885,7 @@
             "then": [
               {
                 "cmd": "IF",
-                "condition": "sceneState.atb >= 100 and sceneState.actionTimer <= 0",
+                "condition": "rt.outcome == '' and rt.player.at >= 100",
                 "then": [
                   {
                     "cmd": "SET_SCENE_STATE",
@@ -1438,23 +895,8 @@
                         "value": 2
                       },
                       {
-                        "name": "aim",
-                        "value": "atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
-                      },
-                      {
                         "name": "status",
                         "value": "'Choose target'"
-                      }
-                    ]
-                  }
-                ],
-                "else": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "status",
-                        "value": "'AT charging'"
                       }
                     ]
                   }
@@ -1464,31 +906,52 @@
             "else": [
               {
                 "cmd": "IF",
-                "condition": "sceneState.ui == 1",
+                "condition": "sceneState.ui == 2",
                 "then": [
                   {
+                    "cmd": "REALTIME_BATTLE_COMMAND",
+                    "kind": "skill",
+                    "id": "handgun_shot",
+                    "target": "enemy"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 0
+                      },
+                      {
+                        "name": "status",
+                        "value": "''"
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
                     "cmd": "IF",
-                    "condition": "sceneState.choice == 0",
+                    "condition": "sceneState.ui == 1",
                     "then": [
                       {
-                        "cmd": "SET_SCENE_STATE",
-                        "assignments": [
+                        "cmd": "IF",
+                        "condition": "sceneState.choice == 0",
+                        "then": [
                           {
-                            "name": "ui",
-                            "value": 2
-                          },
-                          {
-                            "name": "aim",
-                            "value": "atan2(sceneState.ex-sceneState.px,sceneState.py-sceneState.ey)"
-                          },
-                          {
-                            "name": "status",
-                            "value": "'Choose target'"
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "ui",
+                                "value": 2
+                              },
+                              {
+                                "name": "status",
+                                "value": "'Choose target'"
+                              }
+                            ]
                           }
                         ]
-                      }
-                    ],
-                    "else": [
+                      },
                       {
                         "cmd": "IF",
                         "condition": "sceneState.choice == 1",
@@ -1499,192 +962,42 @@
                               {
                                 "name": "ui",
                                 "value": 3
-                              },
-                              {
-                                "name": "status",
-                                "value": "'Heal 1 - recover 30 HP'"
-                              }
-                            ]
-                          }
-                        ],
-                        "else": [
-                          {
-                            "cmd": "IF",
-                            "condition": "sceneState.choice == 2",
-                            "then": [
-                              {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "ui",
-                                    "value": 4
-                                  },
-                                  {
-                                    "name": "status",
-                                    "value": "'Medicine 1 - recover 30 HP'"
-                                  }
-                                ]
-                              }
-                            ],
-                            "else": [
-                              {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "mode",
-                                    "value": 4
-                                  },
-                                  {
-                                    "name": "ui",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "status",
-                                    "value": "'Escaped'"
-                                  }
-                                ]
                               }
                             ]
                           }
                         ]
-                      }
-                    ]
-                  }
-                ],
-                "else": [
-                  {
-                    "cmd": "IF",
-                    "condition": "sceneState.ui == 2",
-                    "then": [
+                      },
                       {
                         "cmd": "IF",
-                        "condition": "sceneState.ammo > 0",
+                        "condition": "sceneState.choice == 2",
                         "then": [
                           {
                             "cmd": "SET_SCENE_STATE",
                             "assignments": [
                               {
-                                "name": "distance",
-                                "value": "sqrt((sceneState.px-sceneState.ex)^2+(sceneState.py-sceneState.ey)^2)"
-                              }
-                            ]
-                          },
-                          {
-                            "cmd": "SET_SCENE_STATE",
-                            "assignments": [
-                              {
-                                "name": "damage",
-                                "value": "sceneState.distance <= sceneState.range and (sceneState.distance < 2.3 and 7 or 5) or 0"
-                              }
-                            ]
-                          },
-                          {
-                            "cmd": "SET_SCENE_STATE",
-                            "assignments": [
-                              {
-                                "name": "ehp",
-                                "value": "max(0,sceneState.ehp-sceneState.damage)"
-                              },
-                              {
-                                "name": "ammo",
-                                "value": "sceneState.ammo-1"
-                              },
-                              {
-                                "name": "atb",
-                                "value": 0
-                              },
-                              {
                                 "name": "ui",
-                                "value": 0
-                              },
-                              {
-                                "name": "actionTimer",
-                                "value": 0.45
-                              },
-                              {
-                                "name": "flash",
-                                "value": 0.18
-                              },
-                              {
-                                "name": "damageTimer",
-                                "value": 0.8
-                              },
-                              {
-                                "name": "status",
-                                "value": "''"
-                              }
-                            ]
-                          },
-                          {
-                            "cmd": "IF",
-                            "condition": "sceneState.ehp <= 0",
-                            "then": [
-                              {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "mode",
-                                    "value": 2
-                                  },
-                                  {
-                                    "name": "ui",
-                                    "value": 5
-                                  },
-                                  {
-                                    "name": "atb",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "exp",
-                                    "value": 2
-                                  },
-                                  {
-                                    "name": "status",
-                                    "value": "'Battle over'"
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "cmd": "IF",
-                            "condition": "sceneState.hp <= 0",
-                            "then": [
-                              {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "mode",
-                                    "value": 3
-                                  },
-                                  {
-                                    "name": "ui",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "atb",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "status",
-                                    "value": "'Aya has fallen'"
-                                  }
-                                ]
+                                "value": 4
                               }
                             ]
                           }
-                        ],
-                        "else": [
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.choice == 3",
+                        "then": [
+                          {
+                            "cmd": "REALTIME_BATTLE_COMMAND",
+                            "kind": "skill",
+                            "id": "escape",
+                            "target": "self"
+                          },
                           {
                             "cmd": "SET_SCENE_STATE",
                             "assignments": [
                               {
                                 "name": "ui",
                                 "value": 0
-                              },
-                              {
-                                "name": "status",
-                                "value": "'No ammunition'"
                               }
                             ]
                           }
@@ -1697,48 +1010,21 @@
                         "condition": "sceneState.ui == 3",
                         "then": [
                           {
-                            "cmd": "IF",
-                            "condition": "sceneState.pe >= 30",
-                            "then": [
+                            "cmd": "REALTIME_BATTLE_COMMAND",
+                            "kind": "skill",
+                            "id": "heal1",
+                            "target": "self"
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
                               {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "hp",
-                                    "value": "min(sceneState.maxHp,sceneState.hp+30)"
-                                  },
-                                  {
-                                    "name": "pe",
-                                    "value": "sceneState.pe-30"
-                                  },
-                                  {
-                                    "name": "ui",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "atb",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "actionTimer",
-                                    "value": 0.65
-                                  },
-                                  {
-                                    "name": "status",
-                                    "value": "'Heal 1'"
-                                  }
-                                ]
-                              }
-                            ],
-                            "else": [
+                                "name": "ui",
+                                "value": 0
+                              },
                               {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "status",
-                                    "value": "'Not enough PE'"
-                                  }
-                                ]
+                                "name": "status",
+                                "value": "''"
                               }
                             ]
                           }
@@ -1746,45 +1032,24 @@
                         "else": [
                           {
                             "cmd": "IF",
-                            "condition": "sceneState.medicine > 0",
+                            "condition": "sceneState.ui == 4",
                             "then": [
+                              {
+                                "cmd": "REALTIME_BATTLE_COMMAND",
+                                "kind": "item",
+                                "id": "medicine",
+                                "target": "self"
+                              },
                               {
                                 "cmd": "SET_SCENE_STATE",
                                 "assignments": [
-                                  {
-                                    "name": "hp",
-                                    "value": "min(sceneState.maxHp,sceneState.hp+30)"
-                                  },
-                                  {
-                                    "name": "medicine",
-                                    "value": "sceneState.medicine-1"
-                                  },
                                   {
                                     "name": "ui",
                                     "value": 0
                                   },
                                   {
-                                    "name": "atb",
-                                    "value": 0
-                                  },
-                                  {
-                                    "name": "actionTimer",
-                                    "value": 0.5
-                                  },
-                                  {
                                     "name": "status",
-                                    "value": "'Medicine 1'"
-                                  }
-                                ]
-                              }
-                            ],
-                            "else": [
-                              {
-                                "cmd": "SET_SCENE_STATE",
-                                "assignments": [
-                                  {
-                                    "name": "status",
-                                    "value": "'No medicine remaining'"
+                                    "value": "''"
                                   }
                                 ]
                               }
@@ -1804,7 +1069,7 @@
     "on_cancel": [
       {
         "cmd": "IF",
-        "condition": "sceneState.ui > 0 and sceneState.mode == 0",
+        "condition": "sceneState.ui > 0 and rt.outcome == ''",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
@@ -1821,6 +1086,9 @@
           }
         ],
         "else": [
+          {
+            "cmd": "REALTIME_BATTLE_END"
+          },
           {
             "cmd": "SCENE_EVENT",
             "kind": "pop"
@@ -1867,343 +1135,804 @@
   },
   "goldenScript": [
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "wait": 0.1
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
     },
     {
-      "key": "return",
-      "wait": 0.01
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
+    },
+    {
+      "wait": 0.1,
+      "key": "return"
     }
   ]
 }

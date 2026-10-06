@@ -130,6 +130,24 @@ every Project that authors a concrete troop: the eight battle phases the hosts
 run, troop member units, and skill `itemCost` (moved there from the fixture
 rules so it has one location). Covered by `tests/test_combat_project_validation.lua`.
 
+## Scene host surface (added 06.10)
+
+Scenes drive the mode with five `scene`-context commands:
+`REALTIME_BATTLE_START` (troop, floor positions, bounds; runs `battle_start`),
+`REALTIME_BATTLE_STEP` (one fixed tick; input is a direction and
+`system.realtimeBattle.moveSpeed` is the speed), `REALTIME_BATTLE_PAUSE`,
+`REALTIME_BATTLE_COMMAND` (skill/item, target enemy/self) and
+`REALTIME_BATTLE_END`. Scene logic and windows read one read-only view,
+`rt.*` (`realtime.view`): positions, HP, AT, resources, inventory counts,
+wind-up/strike, projectiles, and last hit, miss or refusal with their age in
+ticks. The view is the presenter seam (D5): it publishes facts the scheduler
+recorded and never reconstructs a transition. An idle enemy's approach is unit
+data (`realtime.approach { speed, stopAt }`).
+
+Merge note: for the round host these commands have no equivalent and need
+none. The view is the real-time counterpart of `battle_view`'s resolved-event
+queue, and both read the same resolved facts.
+
 ## Out of scope for M1
 
 Weapon customisation, bonus points, levelling curves (M3); bosses and

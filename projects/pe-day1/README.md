@@ -11,15 +11,16 @@ ignored `out/parasite-eve-day1-reference-pack`.
 
 ## Status
 
-**M0 (#1423):** this Project exists and carries a port of the B009 lab encounter
-(`projects/labs/scene-benchmarks`, PR #1413) as `basement_rat`. Until M1
-replaces the scene-local combat, `tests/test_b009_spatial.lua` runs the same
-assertions against both copies. It also fails if the two scene files differ in
-anything but id, display name and model directory.
+**M1 (#1424):** `basement_rat` runs on the real-time battle scheduler
+(`engine/realtime_battle.lua`), a second scheduler over production Battle:
+every hit, cost, heal, reward and outcome is resolved by `Battle:executeTurn`.
+The scene owns only input, menus and presentation and reads domain facts from
+`rt.*`. Design and owner decisions:
+`docs/design/runtime/semantics/realtime-battle-merge-ledger.md`. Tests:
+`tests/test_realtime_battle.lua`, `tests/test_pe_day1_scene.lua`.
 
-The real-time AT battle mode (M1, #1424) is being built beside production
-Battle. The owner made this conditional: it must be designed to merge into
-production Battle later.
+PE is Aya's own declared battler resource (`system.battlerResources.pe`);
+ammunition is inventory spent through the skill's `itemCost`.
 
 ## Walkthrough
 
@@ -33,7 +34,9 @@ production Battle later.
    again to replay; **Escape** returns to the title.
 
 Combat values and timings are prototype approximations carried over from B009;
-the original formulas are not yet verified.
+only rat HP 20, EXP 2 and Ammo +6 come from Day 1 guides. The original
+formulas are not yet verified. After victory, Enter acknowledges the rewards
+(already granted by the victory phase) and Enter again replays.
 
 ## Sources of authority
 
@@ -41,5 +44,5 @@ the original formulas are not yet verified.
   (copied byte-identical from `b009_encounter.blend`). Export with
   `tools/build_backstage_models.py --export-only`; never regenerate it.
   `assets/models/backstage/provenance.json` records the hashes.
-- Visual walkthrough evidence currently lives with the lab encounter:
+- Visual walkthrough evidence: `reports/basement-rat/index.html` (this Project). The original lab encounter keeps its own:
   `projects/labs/scene-benchmarks/reports/b009-3d/index.html`.

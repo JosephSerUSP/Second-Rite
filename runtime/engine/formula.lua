@@ -328,6 +328,10 @@ function formula.makeContext(opts, session)
         ctx.combat = sys and sys.combat or nil
     end
     ctx.battle = opts.battle
+    -- Active real-time battle facts (engine/realtime_battle.lua view).
+    if session and session.realtimeBattle then
+        ctx.rt = require("engine.realtime_battle").view(session)
+    end
     ctx.locals = opts.locals
     ctx.sceneState = opts.sceneState
     ctx.event = opts.event or (opts.locals and opts.locals.event)

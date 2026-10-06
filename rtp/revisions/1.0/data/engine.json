@@ -69,6 +69,10 @@
       "description": "Current values of the Project's declared battler resources by id, e.g. a.res.pe (also on b/target/enemy/ally)."
     },
     {
+      "token": "rt",
+      "description": "Active real-time battle facts: rt.tick, rt.round, rt.outcome, rt.player / rt.enemy {x, y, hp, maxHp, at, dead, res}, rt.enemy {windup, lockX, lockY, strikeAge}, rt.fire[1..3] {x, y, live}, rt.hitAge / hitAmount / hitOnPlayer, rt.missAge, rt.actAge, rt.refusal / refusalAge. Absent when no real-time battle is active."
+    },
+    {
       "token": "a.x",
       "description": "Floor X position in a real-time battle; absent (an error to read) in slot battles (also on b/target/enemy/ally)."
     },
@@ -1271,6 +1275,105 @@
       ],
       "interactive": false,
       "description": "Removes a state through the status pipeline."
+    },
+    {
+      "id": "REALTIME_BATTLE_START",
+      "category": "Battle",
+      "label": "Start Real-time Battle",
+      "params": [
+        {
+          "key": "troop",
+          "type": "troopId"
+        },
+        {
+          "key": "party",
+          "type": "list"
+        },
+        {
+          "key": "enemies",
+          "type": "list"
+        },
+        {
+          "key": "bounds",
+          "type": "object"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Starts a real-time battle with a troop through the battle_start phase. party/enemies are [x, y] floor positions per slot; bounds is {minX, maxX, minY, maxY}. Its facts are readable as rt.*."
+    },
+    {
+      "id": "REALTIME_BATTLE_STEP",
+      "category": "Battle",
+      "label": "Advance Real-time Battle",
+      "params": [
+        {
+          "key": "dx",
+          "type": "formula"
+        },
+        {
+          "key": "dy",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Advances the active real-time battle by one fixed tick; dx/dy are the player's input direction (speed is system.realtimeBattle.moveSpeed)."
+    },
+    {
+      "id": "REALTIME_BATTLE_PAUSE",
+      "category": "Battle",
+      "label": "Pause Real-time Battle",
+      "params": [
+        {
+          "key": "paused",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Pauses (truthy) or resumes the active real-time battle clock, e.g. while a command menu is open."
+    },
+    {
+      "id": "REALTIME_BATTLE_COMMAND",
+      "category": "Battle",
+      "label": "Real-time Battle Command",
+      "params": [
+        {
+          "key": "kind",
+          "type": "text"
+        },
+        {
+          "key": "id",
+          "type": "text"
+        },
+        {
+          "key": "target",
+          "type": "text"
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Player action when AT is full: kind 'skill' or 'item', the skill/item id, and target 'enemy' or 'self'. Resolved by production Battle; a refusal is published as rt.refusal."
+    },
+    {
+      "id": "REALTIME_BATTLE_END",
+      "category": "Battle",
+      "label": "End Real-time Battle",
+      "params": [],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Discards the active real-time battle. Outcome phases have already run when the battle ended."
     },
     {
       "id": "CHANGE_RESOURCE",

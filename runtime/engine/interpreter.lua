@@ -950,6 +950,51 @@ end
 
 -- Signed change to a Project-declared battler resource (PE...), clamped to
 -- the battler's maximum. Not Second Gate's shared MP: see CHANGE_MP.
+-- Real-time battle host commands (engine/realtime_battle.lua). The active
+-- battle lives on the session as process state; it is never saved.
+local function activeRealtime(ctx, cmdName)
+    local rt = ctx.session and ctx.session.realtimeBattle
+    if not rt then error(cmdName .. ": no real-time battle is active", 0) end
+    return rt
+end
+
+handlers.REALTIME_BATTLE_START = function(cmd, ctx)
+    local function points(list)
+        local out = {}
+        for i, p in ipairs(list or {}) do out[i] = { tonumber(p[1]), tonumber(p[2]) } end
+        return out
+    end
+    ctx.session.realtimeBattle = require("engine.realtime_battle").start(ctx.session, cmd.troop, {
+        positions = { party = points(cmd.party), enemies = points(cmd.enemies) },
+        bounds = cmd.bounds,
+    })
+end
+
+handlers.REALTIME_BATTLE_STEP = function(cmd, ctx)
+    local rt = activeRealtime(ctx, "REALTIME_BATTLE_STEP")
+    rt:step({ dx = tonumber((evalFormula(cmd.dx or 0, ctx))) or 0,
+              dy = tonumber((evalFormula(cmd.dy or 0, ctx))) or 0 })
+end
+
+handlers.REALTIME_BATTLE_PAUSE = function(cmd, ctx)
+    local rt = activeRealtime(ctx, "REALTIME_BATTLE_PAUSE")
+    local value = evalFormula(cmd.paused, ctx)
+    rt.paused = value ~= nil and value ~= false and value ~= 0
+end
+
+handlers.REALTIME_BATTLE_COMMAND = function(cmd, ctx)
+    local rt = activeRealtime(ctx, "REALTIME_BATTLE_COMMAND")
+    local target
+    if cmd.target == "enemy" then target = rt:livingEnemies()[1]
+    elseif cmd.target == "self" then target = rt:player()
+    else error("REALTIME_BATTLE_COMMAND target must be 'enemy' or 'self'", 0) end
+    rt:command(cmd.kind, cmd.id, target)
+end
+
+handlers.REALTIME_BATTLE_END = function(cmd, ctx)
+    if ctx.session then ctx.session.realtimeBattle = nil end
+end
+
 handlers.CHANGE_RESOURCE = function(cmd, ctx)
     local target = resolveRef(cmd.target, ctx)
     if not target then return end

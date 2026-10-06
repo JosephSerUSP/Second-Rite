@@ -16,5 +16,11 @@
     "mpd": 1,
     "asp": 10
   },
-  "growthBands": []
+  "growthBands": [],
+  "realtime": {
+    "approach": {
+      "speed": 0.019167,
+      "stopAt": 2.0
+    }
+  }
 }

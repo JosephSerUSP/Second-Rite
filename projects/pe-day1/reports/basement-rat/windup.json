@@ -1,0 +1,151 @@
+{
+  "auditState": {
+    "ammo": 11,
+    "at": 100,
+    "ehp": 20,
+    "hp": 45,
+    "medicine": 1,
+    "outcome": "",
+    "pe": 100,
+    "tick": 200,
+    "ui": 0
+  },
+  "frameKind": "windows",
+  "gameHeight": 240,
+  "gameWidth": 426,
+  "sceneId": "basement_rat",
+  "sceneName": "Carnegie Hall basement - mutated rat",
+  "tileSize": 8,
+  "windows": [
+    {
+      "hasLayout": false,
+      "height": 30,
+      "id": "world",
+      "open": true,
+      "style": "modelScene",
+      "width": 53.25,
+      "x": -10.625,
+      "y": 0
+    },
+    {
+      "hasLayout": false,
+      "height": 4.5,
+      "id": "combat_hud",
+      "open": true,
+      "style": "panel",
+      "width": 13,
+      "x": -9.125,
+      "y": 1
+    },
+    {
+      "hasLayout": false,
+      "height": 1.5,
+      "id": "hp",
+      "open": true,
+      "style": "panel",
+      "text": "45/45",
+      "width": 7,
+      "x": -7.425,
+      "y": 2.3
+    },
+    {
+      "hasLayout": false,
+      "height": 1.5,
+      "id": "hp_label",
+      "open": true,
+      "style": "panel",
+      "text": "HP",
+      "width": 3.5,
+      "x": -0.625,
+      "y": 2.3
+    },
+    {
+      "hasLayout": false,
+      "height": 8,
+      "id": "command",
+      "open": false,
+      "style": "panel",
+      "text": "> Attack\n  P. Energy\n  Item\n  Escape",
+      "width": 13,
+      "x": -9.625,
+      "y": 7
+    },
+    {
+      "hasLayout": false,
+      "height": 5,
+      "id": "target_info",
+      "open": false,
+      "style": "panel",
+      "text": "M84F\nBULLETS 11\nTARGET   1",
+      "width": 12,
+      "x": 29.625,
+      "y": 13
+    },
+    {
+      "hasLayout": false,
+      "height": 5,
+      "id": "pe_menu",
+      "open": false,
+      "style": "panel",
+      "text": "> Heal 1\nRecover 30 HP\nPE cost 30",
+      "width": 15,
+      "x": -9.625,
+      "y": 7
+    },
+    {
+      "hasLayout": false,
+      "height": 5,
+      "id": "item_menu",
+      "open": false,
+      "style": "panel",
+      "text": "> Medicine 1\nStock 1\nRecover 30 HP",
+      "width": 16,
+      "x": -9.625,
+      "y": 7
+    },
+    {
+      "hasLayout": false,
+      "height": 8,
+      "id": "result",
+      "open": false,
+      "style": "panel",
+      "text": "Battle over\nEXP 2    Ammo +6\n> Obtain all\nEsc: return",
+      "width": 21,
+      "x": 6,
+      "y": 9
+    },
+    {
+      "hasLayout": false,
+      "height": 6,
+      "id": "loss",
+      "open": false,
+      "style": "panel",
+      "text": "Aya has fallen\nEnter: retry\nEsc: return",
+      "width": 20,
+      "x": 7,
+      "y": 10
+    },
+    {
+      "hasLayout": false,
+      "height": 6,
+      "id": "escape",
+      "open": false,
+      "style": "panel",
+      "text": "Escaped\nEnter: retry\nEsc: return",
+      "width": 20,
+      "x": 7,
+      "y": 10
+    },
+    {
+      "hasLayout": false,
+      "height": 2,
+      "id": "feedback",
+      "open": true,
+      "style": "panel",
+      "text": "Carnegie Hall - backstage",
+      "width": 30,
+      "x": -9.625,
+      "y": 27.5
+    }
+  ]
+}

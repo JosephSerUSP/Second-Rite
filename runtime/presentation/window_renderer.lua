@@ -510,6 +510,10 @@ local function buildEnv(state, sceneData, ctx, listCache)
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
         env.party = formula.groupView(ctx.session.party or {}, ctx.session)
+        -- Same view scene logic reads, so a window never disagrees with it.
+        if ctx.session.realtimeBattle then
+            env.rt = require("engine.realtime_battle").view(ctx.session)
+        end
     end
     -- sel("window_id") -> the selected row of that window's list (or nil).
     env.sel = function(winId)

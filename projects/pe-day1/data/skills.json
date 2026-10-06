@@ -71,10 +71,10 @@
       "delivery": "projectiles",
       "windupTicks": 20,
       "count": 3,
-      "spread": 0.35,
-      "speed": 0.08,
+      "spread": 0.22,
+      "speed": 0.075,
       "radius": 0.45,
-      "lifeTicks": 90
+      "lifeTicks": 108
     }
   },
   "escape": {

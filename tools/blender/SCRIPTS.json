@@ -208,9 +208,24 @@
       "purpose": "Install a baked room export as a runtime town environment package."
     },
     {
+      "path": "item_kit.py",
+      "role": "library",
+      "purpose": "Scaffold helpers for authoring a NEW item .blend source inside Blender: export root and metadata, semantic/textured materials, revolve, superelliptic and polygon lofts, live-modifier and Geometry Nodes helpers, refuse-to-overwrite save."
+    },
+    {
       "path": "item_mtl_runtime.py",
       "role": "library",
       "purpose": "Finalize Blender-exported item MTL files with Second Rite runtime passes."
+    },
+    {
+      "path": "item_preview.py",
+      "role": "production",
+      "purpose": "Quick Blender workbench render of an item source from four angles, for debugging live modifiers, cutters and Geometry Nodes without the OBJ compile or the LOVE round trip."
+    },
+    {
+      "path": "item_textures.py",
+      "role": "production",
+      "purpose": "Check (or sync) that authored item textures match their promoted copies and that every map_Kd and overlay-pass path in an item MTL resolves, since the compile check covers only OBJ and MTL bytes."
     },
     {
       "path": "light_fixtures.py",

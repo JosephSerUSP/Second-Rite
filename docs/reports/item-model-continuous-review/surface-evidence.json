@@ -1,0 +1,511 @@
+{
+  "nativeCell": 96,
+  "nativeShippingCandidateRGBIdentical": true,
+  "originalSourceCompiledShippingAtlasBytesIdentical": true,
+  "independentRepeatProductBytesIdentical": true,
+  "compileCheckAgainstShippingPassed": true,
+  "sourceInspectionAndCompileReadOnly": true,
+  "items": [
+    {
+      "item": "alarm_clock",
+      "source": {
+        "item": "alarm_clock",
+        "sourceHash": "a4308c0b08490ed90289a7881bb3b8658a6734c161c3e5fe9d3c96ce9915cbd3",
+        "objects": [
+          {
+            "name": "A_MeasuredBrassCase",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 194,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 3.4951865114678786
+          },
+          {
+            "name": "B_FlatEnamelDial",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY"
+            ],
+            "faces": 192,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05712836426465425
+          },
+          {
+            "name": "C_RearAccessPlate",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY"
+            ],
+            "faces": 192,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06068845497918172
+          },
+          {
+            "name": "D_HollowBell_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 768,
+            "smoothFaces": 704,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.07579952878559697
+          },
+          {
+            "name": "D_HollowBell_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 768,
+            "smoothFaces": 704,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.07579952878559697
+          },
+          {
+            "name": "E_AngledFoot_-1",
+            "type": "CURVE",
+            "modifiers": [],
+            "faces": 44,
+            "smoothFaces": 44,
+            "rawNonmanifoldEdges": 24,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.004632998109377854
+          },
+          {
+            "name": "E_AngledFoot_1",
+            "type": "CURVE",
+            "modifiers": [],
+            "faces": 44,
+            "smoothFaces": 44,
+            "rawNonmanifoldEdges": 24,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.004632997901319309
+          },
+          {
+            "name": "F_FootPad_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 80,
+            "smoothFaces": 80,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 3.6587120868689595
+          },
+          {
+            "name": "F_FootPad_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 80,
+            "smoothFaces": 80,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 3.6587120868689595
+          },
+          {
+            "name": "G_RearCarryHandle",
+            "type": "CURVE",
+            "modifiers": [],
+            "faces": 80,
+            "smoothFaces": 80,
+            "rawNonmanifoldEdges": 24,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.013448377056882083
+          },
+          {
+            "name": "H_HammerStem",
+            "type": "CURVE",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 26,
+            "rawNonmanifoldEdges": 24,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0006607428881046597
+          },
+          {
+            "name": "I_Hammer",
+            "type": "MESH",
+            "modifiers": [
+              "BEVEL"
+            ],
+            "faces": 26,
+            "smoothFaces": 26,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0023795039900107373
+          },
+          {
+            "name": "J_RaisedHand_hour",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY"
+            ],
+            "faces": 7,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.001446436296804259
+          },
+          {
+            "name": "J_RaisedHand_minute",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY"
+            ],
+            "faces": 7,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0012218926796885177
+          },
+          {
+            "name": "K_HandHub",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0003721811456752264
+          },
+          {
+            "name": "L_RealWindingShaft",
+            "type": "CURVE",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 26,
+            "rawNonmanifoldEdges": 24,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0006752918673919535
+          },
+          {
+            "name": "M_WindingKeyHole_-0.065",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0008075001422906937
+          },
+          {
+            "name": "M_WindingKeyHole_0.105",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0008075001422906937
+          },
+          {
+            "name": "N_KeyBridge",
+            "type": "MESH",
+            "modifiers": [
+              "BEVEL"
+            ],
+            "faces": 26,
+            "smoothFaces": 26,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005334459767015575
+          }
+        ],
+        "boundsMin": [
+          -1.0576026439666748,
+          -0.6358892917633057,
+          -1.2549999952316284
+        ],
+        "boundsMax": [
+          1.0576026439666748,
+          0.7593681216239929,
+          1.6976313591003418
+        ],
+        "outerCoverUVContinuity": null,
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "alarm_clock",
+          "sr_contract_version": 1,
+          "sr_asset_id": "alarm_clock",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "multiview_fabricated_clock",
+          "sr_authoring_description": "Deep brass barrel, hollow twin bells, real hands and winding key; flat generated sleeve",
+          "sr_multiview_measurements": "{\"bodyHeightPixels\": 455, \"frontBodySpan\": [93, 557], \"sideBodySpan\": [837, 1079], \"modelBodyHeight\": 2, \"width\": 2.0395604395604394, \"depth\": 1.0637362637362637, \"frontBodyCenter\": [329, 391], \"bodyLipBase\": [166, 621], \"limitations\": [\"Side case depth is about half its diameter, wider than the requested 35 percent. Measured view wins.\", \"Top hardware overlaps the case; use unoccluded side for case depth, front for bell/handle layout.\", \"Bell tilt and internal wall thickness are authored from the references; hidden interiors are inferred.\"], \"textureSize\": [1536, 1024], \"textureHash\": \"6c129f7705992304b35da9652f9a6c830710ad3e1857be0341e8f752abb0bfff\", \"stripSeamColor\": {\"samples\": 96, \"meanAbsoluteRGBDelta\": 15.07986111111111, \"maxChannelDelta\": 62, \"boundary\": \"Raw original strip end colours; grain can differ. Not a visual acceptance claim.\"}}",
+          "sr_generation_method": "built-in image_gen multiview + reference-derived flat surface atlas; both originals unchanged",
+          "sr_review_status": "provisional; native review does not imply owner acceptance",
+          "sr_measurement_datum": "Case dimensions measured from views; rolled case radius adds 1.5 percent around the measured datum.",
+          "sr_normal_policy": "Dome exterior/interior and foot pads smooth; dial/back plates and cut caps flat; rim cuts flat"
+        }
+      },
+      "unpaintedControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 4138,
+      "productHash": "224d92b29a29ac2b0bac4b749c18c8330963c0c1af2504de354dd10b50ba40ff",
+      "materialHash": "a56a59d9643ace7b2584ce7d52b3f7a0da2079832cc97dac29c0d05896ea675a",
+      "vertices": 2980,
+      "triangles": 5636
+    },
+    {
+      "item": "tome_wind_blade",
+      "source": {
+        "item": "tome_wind_blade",
+        "sourceHash": "6e1bb0b72d0eae208f8ad52310ebfc3e0062b22b4ce0783ea18c61961f780d47",
+        "objects": [
+          {
+            "name": "A_ContinuousCoverAndCurvedSpine",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 478,
+            "smoothFaces": 384,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.36567904690483516
+          },
+          {
+            "name": "B_MeasuredPageBlock",
+            "type": "MESH",
+            "modifiers": [
+              "BEVEL"
+            ],
+            "faces": 26,
+            "smoothFaces": 26,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 1.3157429099810525
+          },
+          {
+            "name": "C_ActualCornerGuard_-1_-1",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY",
+              "BEVEL"
+            ],
+            "faces": 80,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005368090563136699
+          },
+          {
+            "name": "C_ActualCornerGuard_-1_1",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY",
+              "BEVEL"
+            ],
+            "faces": 80,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005368090563136699
+          },
+          {
+            "name": "C_ActualCornerGuard_1_-1",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY",
+              "BEVEL"
+            ],
+            "faces": 80,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005368090563136699
+          },
+          {
+            "name": "C_ActualCornerGuard_1_1",
+            "type": "MESH",
+            "modifiers": [
+              "SOLIDIFY",
+              "BEVEL"
+            ],
+            "faces": 80,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005368090563136699
+          },
+          {
+            "name": "D_ClothBookmark",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 14,
+            "smoothFaces": 14,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005113189153380892
+          },
+          {
+            "name": "E_FoldedSignaturesAtSpine",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 29,
+            "smoothFaces": 27,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.2194596427040304
+          }
+        ],
+        "boundsMin": [
+          -0.8471454977989197,
+          -0.3336546719074249,
+          -1.317177176475525
+        ],
+        "boundsMax": [
+          0.8521454930305481,
+          0.3336546719074249,
+          1.0
+        ],
+        "outerCoverUVContinuity": {
+          "sharedSourceEdges": 127,
+          "maxUVDeltaAcrossSharedEdge": 0.0,
+          "boundary": "Continuous saved outer cover, including spine joins; cut-rim material seams are intentional."
+        },
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "tome_wind_blade",
+          "sr_contract_version": 1,
+          "sr_asset_id": "tome_wind_blade",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "multiview_continuous_cover",
+          "sr_authoring_description": "Measured book depth, one continuous back-spine-front leather surface, real page volume and guards",
+          "sr_multiview_measurements": "{\"bodyHeightPixels\": 543, \"frontSpan\": [128, 588], \"backSpan\": [119, 579], \"sideSpan\": [897, 1071], \"topDepthSpan\": [846, 1011], \"height\": 2, \"width\": 1.6942909760589318, \"depth\": 0.6243093922651933, \"spineBulge\": 0.283609576427256, \"limitations\": [\"Top width is larger than the front/back; front/back govern cover width, side/top average governs thickness.\", \"Bookmark curl differs between views; source uses front placement and an authored three-dimensional curl.\", \"Cover wall thickness, hidden spine interior and page attachment are authored; not photogrammetric recovery.\"], \"textureSize\": [1536, 1024], \"textureHash\": \"e61949516dad7a2b089c4d39b5f76e2c3b74bd7a9fdec2e7daf75afdadb37593\"}",
+          "sr_generation_method": "built-in image_gen multiview + reference-derived flat surface atlas; both originals unchanged",
+          "sr_review_status": "provisional; native review does not imply owner acceptance",
+          "sr_inferred_binding": "Closed curved folded-signature volume fills the hidden spine interior; top/bottom paper stack follows Y.",
+          "sr_page_uv_policy": "Top/bottom block and curved binding share world-X / stack-Y atlas coordinates; fore-edge rotates U along Z.",
+          "sr_finish_stability": "Materialized only this source cover SOLIDIFY+BEVEL; evaluated vertex positions unchanged. UVs rounded to six-decimal source precision to avoid unstable native UV alias indexing."
+        }
+      },
+      "unpaintedControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 5005,
+      "productHash": "a20ccbcc76c8390c74fdc40e50ead122c8e51aa8001074f415da581c402113eb",
+      "materialHash": "53cd0834175757f5ee3ac509de8d2bf9e2da234102fce5a8c81fe43321684f6a",
+      "vertices": 910,
+      "triangles": 1788
+    }
+  ],
+  "runtimeSurfaceAudit": [
+    {
+      "item": "alarm_clock",
+      "paintedMaterials": {
+        "alarm_clock_brass_strip": {
+          "texture": "alarm_clock_surface_atlas.png",
+          "faces": 1536,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1536
+        },
+        "alarm_clock_ivory_dial": {
+          "texture": "alarm_clock_surface_atlas.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "alarm_clock_rear_plate": {
+          "texture": "alarm_clock_surface_atlas.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "tome_wind_blade",
+      "paintedMaterials": {
+        "tome_wind_blade_continuous_leather": {
+          "texture": "tome_wind_blade_surface_atlas.png",
+          "faces": 156,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 144
+        },
+        "tome_wind_blade_page_lines": {
+          "texture": "tome_wind_blade_surface_atlas.png",
+          "faces": 58,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    }
+  ],
+  "sampledAlphaSupport": [
+    {
+      "item": "alarm_clock",
+      "paintedMaterials": {
+        "alarm_clock_brass_strip": {
+          "faces": 1536,
+          "samples": 19968,
+          "alphaMin": 255,
+          "below240": 0,
+          "below128": 0
+        },
+        "alarm_clock_ivory_dial": {
+          "faces": 64,
+          "samples": 832,
+          "alphaMin": 255,
+          "below240": 0,
+          "below128": 0
+        },
+        "alarm_clock_rear_plate": {
+          "faces": 64,
+          "samples": 832,
+          "alphaMin": 255,
+          "below240": 0,
+          "below128": 0
+        }
+      }
+    },
+    {
+      "item": "tome_wind_blade",
+      "paintedMaterials": {
+        "tome_wind_blade_continuous_leather": {
+          "faces": 156,
+          "samples": 2028,
+          "alphaMin": 255,
+          "below240": 0,
+          "below128": 0
+        },
+        "tome_wind_blade_page_lines": {
+          "faces": 58,
+          "samples": 754,
+          "alphaMin": 255,
+          "below240": 0,
+          "below128": 0
+        }
+      }
+    }
+  ],
+  "fullAtlasOpacity": "Both production atlases are RGB; every pixel is opaque.",
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 52,
+  "sourceRenderBoundary": "Read-only Workbench texture/flat-light orthographic views. Native 96px captures use the actual item viewer.",
+  "controlBoundary": "Plain controls remove generated map_Kd and its UV gain, preserve OBJ bytes and other material passes; changed pixels measure contribution, not quality."
+}

@@ -27,6 +27,18 @@ function traversal_host.ensure(session)
     return provider
 end
 
+-- Called by the Map lifecycle after a destination Map has become current.
+-- `arrival` is the existing LOAD_MAP arrival string; providers may interpret
+-- it using their own authored environment topology. Returning nil means this
+-- registry does not own the Map, so legacy grid/bounded-lane setup continues.
+function traversal_host.enterMap(session, arrival)
+    local provider = resolved(session)
+    if not provider then return nil end
+    if provider.enterMap then return provider.enterMap(session, arrival) end
+    if provider.ensure then return provider.ensure(session) end
+    return true
+end
+
 function traversal_host.isActive(session)
     local provider = traversal_host.ensure(session)
     if not provider then return false end

@@ -1,0 +1,33 @@
+# Blender 5.2.2 LTS MTL File: 'cat_bell.blend'
+# www.blender.org
+
+newmtl cat_bell_brass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd cat_bell_brass.png
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl cat_bell_collar
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.700000 0.230000 0.310000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl cat_bell_cut_brass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.530000 0.420000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

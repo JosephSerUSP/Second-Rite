@@ -32,14 +32,18 @@ test('candidate profile uses real Studio move, split, undo and redo commands',()
 const {audit}=require('../../towngen/audit_geography');
 test('town geography extraction preserves doorway identity and nested transfer provenance',()=>{
  const graph=audit();
- const lodging=graph.edges.find(edge=>edge.from===1001&&edge.to===25);
- assert.equal(lodging.event,'core-run-court-door-passage-house');
- assert.equal(lodging.arrival,'exit_door');
- assert.ok(graph.edges.some(edge=>edge.from===25&&edge.to===1001));
- assert.ok(Array.isArray(lodging.arrivalPosition));
+ const hall=graph.edges.find(edge=>edge.from===1001&&edge.to===34);
+ assert.equal(hall.event,'core-run-court-door-passage-house');
+ assert.equal(hall.arrival,'exit_door');
+ assert.ok(graph.edges.some(edge=>edge.from===34&&edge.to===1001));
+ assert.ok(Array.isArray(hall.arrivalPosition));
+ const roomDoor=graph.edges.find(edge=>edge.from===34&&edge.to===25);
+ assert.equal(roomDoor.event,'st-maria-passage-hall-room3_door');
+ assert.equal(roomDoor.arrival,'exit_door');
+ assert.ok(graph.edges.some(edge=>edge.from===25&&edge.to===34));
  const room=graph.maps.find(map=>map.id===25);
  assert.equal(room.spawnAnchor,'spawn_player');
- assert.ok(room.environmentAnchors.spawn_player.position); 
+ assert.ok(room.environmentAnchors.spawn_player.position);
  assert.ok(graph.edges.some(edge=>edge.location.includes('/common:')));
  assert.ok(graph.maps.find(map=>map.id===1001).lane.groundProfile.length>2);
 });

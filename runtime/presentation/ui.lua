@@ -392,6 +392,19 @@ function ui.buttonRole(selected)
     return selected and "button_highlight" or "button"
 end
 
+-- Compact translucent information overlays; ordinary menus retain their skin.
+function ui.drawOverlayPanel(x, y, w, h)
+    love.graphics.push("all")
+    for row=0,math.max(0,math.ceil(h)-1) do
+        local t=row/math.max(1,h-1)
+        love.graphics.setColor(.14-.10*t,.15-.11*t,.15-.10*t,.78)
+        love.graphics.rectangle("fill",x,y+row,w,1)
+    end
+    love.graphics.setColor(.55,.58,.56,.6)
+    love.graphics.rectangle("line",x+.5,y+.5,w-1,h-1)
+    love.graphics.pop()
+end
+
 function ui.drawPanel(x, y, w, h, title, role)
     -- Snap to whole pixels before anything is measured from the rect.
     --

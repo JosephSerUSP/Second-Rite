@@ -401,6 +401,15 @@ seams. It never updates gameplay state. Studio edits the definition through
 the schema form layer; native Scene preview renders it. G1 rejects missing
 viewport definitions/assets and malformed transform expressions.
 
+The optional `labels` list projects formula-bound world positions through the
+same camera basis, displaying resolved values such as damage without mutating
+the encounter. Scene windows can use `chrome: "overlay"` for a compact
+translucent gradient shell. Gauge blocks support `labelPlacement: "right"`
+or `"none"` and an authored tile-unit `height`; existing gauges retain their
+standard label-above-bar geometry.
+Gauge color components may be formulas, allowing authored full-AT flashing
+without changing the resolved gauge value or introducing another clock.
+
 `READ_INPUT` copies the canonical logical controller's held-button snapshot
 into a named Scene-state table. Real-time authored Scenes can normalize motion
 using `sqrt` and `time.dt` without depending on menu-repeat intervals or

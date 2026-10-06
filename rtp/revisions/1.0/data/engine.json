@@ -3628,7 +3628,8 @@
       "fields": [
         "camera",
         "models",
-        "background"
+        "background",
+        "labels"
       ]
     }
   }

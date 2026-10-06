@@ -67,6 +67,17 @@ function view.cameraBasis(position,target)
     return r,u,f
 end
 
+-- One CPU projection helper for world-anchored labels and inspection tools.
+function view.projectPoint(point,cam,w,h)
+    local r,u,f=view.cameraBasis(cam.position,cam.target)
+    local d={point[1]-cam.position[1],point[2]-cam.position[2],point[3]-cam.position[3]}
+    local function dot(a,b) return a[1]*b[1]+a[2]*b[2]+a[3]*b[3] end
+    local depth=dot(d,f)
+    if depth<=.1 then return nil end
+    local focal=1/math.tan(math.rad(cam.fov)/2)
+    return w/2+dot(d,r)*focal*h/(2*depth),h/2-dot(d,u)*focal*h/(2*depth)
+end
+
 function view.validate(spec, check, exists, compile)
     check(type(spec)=="table","modelScene requires a viewport definition")
     if type(spec)~="table" then return end
@@ -97,6 +108,14 @@ function view.validate(spec, check, exists, compile)
         for _, key in ipairs({"yaw","visible"}) do
             if type(entity[key])=="string" then check(compile(entity[key]),"modelScene invalid "..key.." expression") end
         end
+    end
+    if spec.labels ~= nil then check(type(spec.labels)=="table","modelScene labels must be a list") end
+    for _, label in ipairs(type(spec.labels)=="table" and spec.labels or {}) do
+        check(type(label)=="table","modelScene label must be a table")
+        if type(label)~="table" then return end
+        validateVector(label.position,"label position",true)
+        check(type(label.value)=="string" and compile(label.value),"modelScene label requires a value expression")
+        if label.visible then check(compile(label.visible),"modelScene invalid label visibility") end
     end
 end
 
@@ -157,7 +176,26 @@ function view.draw(x,y,w,h,spec,env)
             end
         end
     end
-    love.graphics.setShader();love.graphics.setDepthMode();love.graphics.setCanvas(previous)
+    love.graphics.setShader();love.graphics.setDepthMode()
+    for _, label in ipairs(spec.labels or {}) do
+        local visible,err=true,nil
+        if label.visible then visible,err=formula.eval(label.visible,env) end
+        assert(not err,"3D Scene label visibility: "..tostring(err))
+        if visible then
+            local lx,ly=view.projectPoint(vector(label.position,env,"label position",{0,0,0}),
+                {position=position,target=target,fov=number(cam.fov,env,"fov",45)},w,h)
+            local value,valueErr=formula.eval(label.value,env)
+            assert(not valueErr,"3D Scene label value: "..tostring(valueErr))
+            if lx then
+                local ui=require("presentation.ui")
+                local text=tostring(value)
+                local tx=lx-ui.measureText(text)/2
+                ui.drawString(text,tx+1,ly+1,{0,0,0,1})
+                ui.drawString(text,tx,ly,label.color or {1,1,1,1})
+            end
+        end
+    end
+    love.graphics.setCanvas(previous)
     love.graphics.pop()
     love.graphics.push("all");love.graphics.setColor(1,1,1,1);love.graphics.draw(buffers.color,x,y);love.graphics.pop()
 end

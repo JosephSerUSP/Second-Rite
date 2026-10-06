@@ -630,6 +630,18 @@ end
 -- scene-specific renderer.  Labels support the same {formula} interpolation
 -- as ordinary window text; values and maxima are formula expressions.
 local function drawLayoutGauges(gauges, env, x, y)
+    local function gaugeColor(color)
+        local result={}
+        for i,value in ipairs(color) do
+            if type(value)=="string" then
+                local resolved,err=formula.eval(value,env)
+                assert(not err and type(resolved)=="number","Invalid gauge color: "..tostring(err or value))
+                value=resolved
+            end
+            result[i]=value
+        end
+        return result
+    end
     for _, gauge in ipairs(gauges or {}) do
         local gx = x + ui.toPx(gauge.x or 1)
         local gy = y + ui.toPx(gauge.y or 1)
@@ -640,9 +652,14 @@ local function drawLayoutGauges(gauges, env, x, y)
         local value = tonumber((formula.eval(gauge.value or "0", env))) or 0
         local maximum = tonumber((formula.eval(gauge.max or "1", env))) or 1
         local preview = buildGaugePreview(gauge.previewCost, gauge.previewGain, gauge.previewLabel, env)
-        ui.drawString(interpolate(gauge.label or "", env), gx, gy, COLOR_NORMAL)
-        ui.drawBar(gx, ui.gaugeYBelowText(gy), ui.toPx(gauge.width or 18), ui.gaugeHeight,
-            value, maximum, gauge.color or { 0.5, 0, 0 }, gauge.fill or { 1, 0.3, 0.3 }, preview)
+        local compact = gauge.labelPlacement == "right" or gauge.labelPlacement == "none"
+        if gauge.labelPlacement == "right" then
+            ui.drawString(interpolate(gauge.label or "", env), gx + ui.toPx(gauge.width or 18) + 3, gy - 2, COLOR_NORMAL)
+        elseif not compact then
+            ui.drawString(interpolate(gauge.label or "", env), gx, gy, COLOR_NORMAL)
+        end
+        ui.drawBar(gx, compact and gy or ui.gaugeYBelowText(gy), ui.toPx(gauge.width or 18), gauge.height and ui.toPx(gauge.height) or ui.gaugeHeight,
+            value, maximum, gaugeColor(gauge.color or { 0.5, 0, 0 }), gaugeColor(gauge.fill or { 1, 0.3, 0.3 }), preview)
     end
 end
 
@@ -1801,7 +1818,10 @@ end
 -- took the title with it -- `dock_item_info` lost its "Effects / Traits"
 -- header that way. The title belongs to the window, not to its background.
 local function drawPanelOrTitle(layout, style, title, x, y, w, h)
-    if drawsOuterPanel(layout, style) then
+    if layout.chrome == "overlay" then
+        ui.drawOverlayPanel(x, y, w, h)
+        if title then ui.drawPanelTitle(title, x, y) end
+    elseif drawsOuterPanel(layout, style) then
         ui.drawPanel(x, y, w, h, title)
     elseif title and layout.chrome == "none" and not NO_OUTER_PANEL_STYLES[style] then
         -- Only when the panel was suppressed by `chrome`. A NO_OUTER_PANEL

@@ -131,15 +131,30 @@ def build():
         bpy.context.object.data.materials.append(col);move_new(c,before)
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE))
 def export():
-    for name in ("hall","aya","rat","range","danger","spark"):
+    names=["hall","aya","rat","range","danger","spark"]
+    names += [name for name in ("corridor","aya_walk_a","aya_walk_b","aya_recoil","aya_down",
+        "rat_windup","rat_lunge","range_ground","range_air","target_cursor","contact_shadow") if name in bpy.data.collections]
+    for name in names:
         if name not in bpy.data.collections:
             raise RuntimeError("Source collection missing: "+name)
         bpy.ops.object.select_all(action="DESELECT")
         for ob in bpy.data.collections[name].objects: ob.select_set(True)
         bpy.ops.wm.obj_export(filepath=str(OUT/(name+".obj")),export_selected_objects=True,
-            forward_axis="NEGATIVE_Z",up_axis="Y",export_materials=True,export_triangulated_mesh=True)
+            forward_axis="NEGATIVE_Z",up_axis="Y",export_materials=True,export_triangulated_mesh=True,path_mode="STRIP")
+        # Blender omits Kd when Base Color comes from an image. Preserve the
+        # authored diffuse tint as well as the packed, neutral grain texture.
+        mtl=OUT/(name+".mtl")
+        import re
+        blocks=re.split(r"(?=^newmtl )",mtl.read_text(encoding="utf-8"),flags=re.M)
+        for i,block in enumerate(blocks):
+            if block.startswith("newmtl ") and not re.search(r"^Kd ",block,re.M):
+                exported_name=block.splitlines()[0][7:]
+                material=next(m for m in bpy.data.materials if m.name.replace(" ","_")==exported_name)
+                tint=material.diffuse_color
+                blocks[i]=block.rstrip()+"\nKd %.6f %.6f %.6f\n\n"%(tint[0],tint[1],tint[2])
+        mtl.write_bytes(("".join(blocks).rstrip()+"\n").encode("utf-8"))
     import hashlib, json
-    files={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(OUT.glob("*")) if p.suffix in (".obj",".mtl")}
+    files={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(OUT.glob("*")) if p.suffix in (".obj",".mtl",".png")}
     (OUT/"provenance.json").write_text(json.dumps({"source":"assets/authoring/environments/b009_encounter.blend",
         "sourceSha256":hashlib.sha256(SOURCE.read_bytes()).hexdigest(),"blenderVersion":bpy.app.version_string,
         "basis":"Original low-poly fan-study models, not commercial asset extracts","files":files},indent=2)+"\n")

@@ -1,27 +1,31 @@
-# B009 — Carnegie Hall 3D encounter
+# B009 — reference-led Carnegie Hall rat encounter
 
-Evidence date: 2026-10-06. Machine validated prototype; owner playtest and canonical visual acceptance remain open.
+Evidence: 2026-10-06. Native runtime and behavior verification; owner playtest and canonical visual acceptance remain open.
 
-## Observed implementation
+## Reworked behavior and presentation
 
-The scene renders an original low-poly Carnegie Hall fan-study environment, Aya and a mutated rat as native perspective meshes. Camera and formula-bound model transforms are authored on an inline `modelScene` window. Geometry source is the adopted `assets/authoring/environments/b009_encounter.blend`; exports and hashes are under `assets/models/b009/`.
+The rat encounter now uses an authored backstage corridor with red doors, masonry and worn floor grain, matching the supplied rat footage's room category and palette. The original auditorium mesh is preserved in the adopted Blender source. Aya has evening-dress proportions, authored walking/recoil/fallen poses; the rat has mottled grey fur, exposed red limbs and wind-up/lunge poses. Textures and models are original assets, not extracted commercial content.
 
-Held logical input is read by the reusable `READ_INPUT` event command. The fixed-tick event program normalizes diagonal movement, builds ATB, checks inclusive Euclidean range, applies pistol damage and resolves the rat's telegraphed target-area attack. Victory and defeat freeze gameplay; replay reinitializes state. The scene has zero SCRIPT commands and does not modify the production Battle owner.
+The compact upper-left overlay presents blue AT, numeric HP and green PE. Full AT flashes using authored time. Enter opens targeting directly; X opens command selection through an event-authored edge on the canonical logical input snapshot. Menus and aiming pause domain simulation. Blue ground and green air range lines, a red target cursor, ammunition and target count appear during aiming. Confirm spends a bullet and AT; closer targets take more damage. Out-of-range shots deterministically miss, which approximates rather than reproduces the original probability model.
 
-The Studio Scene editor renders the native encounter preview and exposes camera/model JSON through the shared schema form. The benchmark now supplies ordinary Project identity metadata, which its Studio loading route requires.
+The rat alternates a locked-position bite/lunge and three fire-tail projectiles. Each projectile can damage Aya only once. Heal 1 recovers 30 HP, consumes lab-tuned PE and AT; Medicine 1 consumes stock and AT. Victory offers EXP 2 and one-time Ammo +6 collection before replay. Defeat renders Aya's fallen pose. Terminal gameplay stops while visual flash/damage timers finish. All domain behavior remains a zero-SCRIPT Scene event program; production Battle owners are untouched.
 
-## Visual walkthrough
+Reusable presentation additions are a translucent gradient overlay shell, compact gauge geometry and formula-bound gauge colors, plus world-anchored model-Scene labels sharing the camera basis. G1 validates the new authored gauge fields and viewport labels.
 
-[Open the runtime walkthrough](b009-3d/index.html): initial view, movement, wind-up, pistol hit, victory, defeat, and two clearly labeled asset inspection cameras. JSON beside each frame preserves its resolved scene state. Captures were driven through real Scene/input updates in a disposable staged Project; these are renderer evidence, not owner-performed gameplay.
+## Visual and source evidence
 
-## Verification
+[Native walkthrough](b009-3d/index.html) includes before/after, movement, wind-up/lunge/fire, command/aiming, impact, PE/healing/item, outcome/rewards/defeat, and isolated asset cameras. Resolved-state JSON accompanies every capture. Its manifest records image and source hashes. These captures use real Scene/controller updates in a disposable stage, not owner-performed gameplay.
 
-Production G1, G2, G3, G4 and full staged unit suite passed. B009 tests exercise held/released input, diagonal speed, frame partition invariance, exact circular range, rejected out-of-range shots, damage/evade, terminal outcomes and replay. Lab validation, source-authority checks and JavaScript syntax checks passed.
+[Rat reference footage at 17:15](https://www.youtube.com/watch?v=4JGJC04CcLI&t=1035s) grounds camera/backdrop/silhouette; [original manual](https://impzone.club/pdf/parasiteeve.pdf), printed pp. 14–17, grounds movement, pause, range, bullets, healing and loot. The private reference pack remains outside game assets. Adopted geometry source: `assets/authoring/environments/b009_encounter.blend`; packed source textures and OBJ/MTL/PNG hashes are retained in `assets/models/b009/provenance.json`.
 
-Absolute G5 was red (including an unsuccessful surface-crop run); G6 matched 34 of 47 frames, with 12 mismatches and one missing reference. References were not recaptured. Existing reference issues do not establish that every difference is baseline. Native Effekseer assertions were unavailable in this worktree. Owner playtest is pending.
+## Verification boundary
 
-## Remaining quality limits
+Production G1/G2/G3/G4, staged units and lab validation are verified locally. B009 tests exercise held/released input, normalized movement and frame partitions, command pause, aiming, exact range, misses/no ammo, PE/item resource consumption, evasion/projectile de-duplication, terminal freeze, visual-timer completion, reward/replay, escape and projection/validation. Native play-scene reaches victory through its authored input sequence.
 
-The characters have simple transform motion, not skeletal locomotion or authored recoil/attack animation. Movement uses an aisle rectangle rather than collision against chairs or mesh navigation. Carnegie Hall geometry is a recognizable fan-study auditorium, not a measured architectural reconstruction. Encounter sound and richer lighting/presentation remain follow-up work. Do not describe this prototype as a finished Parasite Eve recreation.
+Absolute visual gates remain unreconciled. Earlier hosted Relative A/B failed during base A capture: G5 surface-crop timeout and G6 initial-workspace readiness; neither established a candidate verdict. Hosted lab-wide preview failed at D002 Sokoban's function-valued Scene state (existing #1244), before reaching B009. Native Effekseer assertions are unavailable and owner playtest is pending. Canonical references were preserved.
 
-Refs #1407 for the original behavioral and visual audit findings.
+## Remaining fidelity limits
+
+The original backgrounds have richer lighting, texture detail and composition. This model remains an approximation with mesh-pose animation, a rectangular movement area and the host's 256x240 composition rather than the original 4:3 framing. Exact regional critical-hit/miss formulas, rates/costs and escape probability are unverified. AT/recovery speeds, PE cost 30, timing and damage bands are lab tuning. Encounter sound, room transitions and full Day 1 progression remain outside this one encounter. Do not claim source-game parity.
+
+Refs #1407, #1414 and #1415; draft implementation in PR #1413.

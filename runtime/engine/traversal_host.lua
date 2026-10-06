@@ -45,6 +45,12 @@ function traversal_host.actorRoot(session)
     return provider.actorRoot(session)
 end
 
+function traversal_host.nearestEvent(session, radius)
+    local provider = traversal_host.ensure(session)
+    if not provider or not provider.nearestEvent then return nil end
+    return provider.nearestEvent(session, radius)
+end
+
 function traversal_host.presentationLaneView(session)
     local provider = traversal_host.ensure(session)
     if not provider or not provider.presentationLaneView then return nil end

@@ -1,0 +1,57 @@
+# Blender 5.2.2 LTS MTL File: 'plate_armor.blend'
+# www.blender.org
+
+newmtl plate_brass
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.620000 0.460000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl plate_leather
+Ns 48.400013
+Ka 1.000000 1.000000 1.000000
+Kd 0.340000 0.190000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl plate_steel
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Kd 0.360000 0.380000 0.430000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.8 assets/models/matcaps/steel.png
+newmtl plate_steel_engraved
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Kd 0.360000 0.380000 0.430000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.8 assets/models/matcaps/steel.png
+pass uv multiply 0.85 assets/models/items/plate_armor_engrave.png
+newmtl plate_steel_shade
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Kd 0.160000 0.170000 0.210000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.8 assets/models/matcaps/steel.png

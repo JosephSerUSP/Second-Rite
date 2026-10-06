@@ -772,10 +772,8 @@ function love.load(arg)
     -- E5: headless scene preview for the editor canvas, then quit.
     if cli.isPreviewSceneMode then
         loader.init()
-        local previewProfile = cli.requestedSurfaceProfile
-            or (config.ui and config.ui.renderSurfaceProfile) or "wide"
-        presentation_surface.setProfile(previewProfile)
-        local previewWidth, previewHeight = presentation_surface.renderSize()
+        local previewWidth, previewHeight =
+            cli_tools.resolvePreviewSurface(cli.requestedSurfaceProfile)
         cli_tools.runPreviewScene(cli.previewSceneId, loader, previewWidth, previewHeight)
         love.event.quit(0)
         return

@@ -19,6 +19,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | `battle` | battle | windows | - | 10 | 8 |
 | `cinematic` | menu | windows | - | 0 | 2 |
 | `controls` | menu | windows | - | 2 | 6 |
+| `crt_options` | menu | windows | - | 3 | 7 |
 | `datalog` | menu | windows | - | 3 | 4 |
 | `developer_3d` | menu | windows | - | 3 | 5 |
 | `developer_geometry_export` | menu | windows | - | 2 | 3 |

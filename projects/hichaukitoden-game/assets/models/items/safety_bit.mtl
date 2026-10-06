@@ -1,0 +1,45 @@
+# Blender 5.2.2 LTS MTL File: 'safety_bit.blend'
+# www.blender.org
+
+newmtl safety_bit_enamel
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.200000 0.340000 0.390000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl safety_bit_garnet
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.170000 0.250000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.24 assets/models/matcaps/glass.png
+newmtl safety_bit_lock
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.890000 0.670000 0.300000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl safety_bit_silver_guard
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.790000 0.850000 0.850000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+pass sphere add 0.18 assets/models/matcaps/steel.png

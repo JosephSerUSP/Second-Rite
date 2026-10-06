@@ -1,0 +1,55 @@
+# Blender 5.2.2 LTS MTL File: 'sniper_eye.blend'
+# www.blender.org
+
+newmtl sniper_eye_eyecup
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.180000 0.230000 0.240000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl sniper_eye_focus_collar
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.780000 0.570000 0.270000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.16 assets/models/matcaps/gold.png
+newmtl sniper_eye_housing
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.480000 0.570000 0.610000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.18 assets/models/matcaps/steel.png
+newmtl sniper_eye_leather
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.370000 0.240000 0.150000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+newmtl sniper_eye_reticle_lens
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd sniper_eye_graticule.png
+pass sphere add 0.24 assets/models/matcaps/glass.png

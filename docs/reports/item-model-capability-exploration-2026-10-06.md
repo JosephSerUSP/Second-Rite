@@ -6,6 +6,11 @@ what the item pipeline and the item viewer can and cannot express. Counts and
 observations belong to this snapshot (Blender 5.2.2, branch
 `claude/stale-item-models-3d`).
 
+Source coverage and gate results do not establish aesthetic success. The owner
+has asked that the earlier items remain provisional and that new work improve
+on them. The accessory review below follows that direction; none of the batch
+counts in this report is an acceptance count.
+
 ## Selection (batch 1)
 
 "Stale" = an item whose model has no source in `assets/authoring/items/` (175 of
@@ -136,7 +141,7 @@ place: the 108 standard frames and the wide frame are still byte-identical.
   shrink-only baseline rewrite an owner-signed action, so it was **not** rewritten.
 - `tools/blender/tests`: `test_bake_receivers` and `test_courtyard_recipe` fail
   identically on an untouched `main`; unrelated to this work.
-- 26 items of 175 are done. The remaining armours still share old meshes (the
+- 26 items of 175 have editable sources in the PR. The remaining armours still share old meshes (the
   loft recipe carried the Mage Robe and Plate Armor and is the likely route);
   remaining foods and small accessories are the other large groups.
 
@@ -224,3 +229,96 @@ Agent-Signature:
   role: implementation
   task: stale item models, batches 3 and 4
   base: fd5a2646fa6e027a5f706f1f48eba912362dca1a
+
+## New accessories: eleven provisional sources
+
+Authoring continued from `21c90656` on `codex/stale-item-models-accessories`.
+The owner directed this pass toward new items and cautioned against treating
+previous batches as successes. This selection replaces ten box placeholders
+and the old bell, with construction chosen for each object's function. Previous
+documents were left untouched.
+
+[Native 96px review board](item-model-accessories-review/sheet96.png) and
+[previous runtime products](item-model-accessories-review/before96.png).
+Each row contains four views from the actual LÖVE item viewer. The board is
+review evidence, not an owner-approved golden.
+
+| Item | Source handles and visible intent |
+|---|---|
+| Lantern | Open four-post cage, candle and flame, pitched roof and editable carry-handle Curve. Its contents remain visible through open geometry. |
+| Sniper Eye | Sparse live Screw barrel profile, focus-ring knurls, recessed painted reticle and leather strap tabs. |
+| Safety Bit | Mirrored plate guards around a faceted garnet, locking crossbar, suspension ring and rear brooch pin. |
+| Golem Shard | Irregular fractured mesh, independently tilted cut faces, bevel and broken turquoise conduit Curves following the front surface. |
+| Copper Coin | Thick square-pierced flan, raised rim, eight relief petals and rubbed copper/patina paint. |
+| Earplugs | Two turned cork plugs with blue flanges and an editable looping safety cord. |
+| Iron Nail | Broad battered head and square shank with a bent, tapered point and rust paint. |
+| Provoke Badge | Thick sunburst backing and raised scarlet mask with separate eyes, brows, mouth, fangs and rear pin. |
+| Rock | Asymmetric faceted mesh with a flattened resting side and a narrow quartz seam. |
+| Slime Core | Asymmetric wet rind, editable Boolean opening onto a solid amber seed, soft lobes and a small droplet. |
+| Old Bell | Sparse closed wall profile with live Screw, hollow mouth, rolled lip, visible clapper, handle Curve and broad oxidation paint. |
+
+### What native review changed
+
+The first coin and badge exports exposed collapsed bevel faces. Their thin
+reliefs now use bevel widths below half the plate thickness, and the runtime
+validator passes. No validator tolerance was loosened.
+
+The first shard looked too regular. Direct edits chipped its perimeter and
+tilted its fracture planes; its small conduit was repositioned to follow those
+surfaces. The rune remains subtle at 96px. Earplug tips and the rock's quartz
+seam are also small at that size; they are refinement candidates, not evidence
+that the work has been accepted.
+
+The bell's missing paint exposed absent UVs on its turned body despite the
+coarse whole-item UV check passing. Sparse Screw profiles now declare a UV
+layer before evaluation in all four new sources using that modifier. The
+evaluated bell body and clapper span both UV axes from 0 to 1. A stale packed
+paint copy and a broken optical image path were corrected in the source;
+painted PNGs were verified separately from OBJ/MTL recompilation.
+The broader mixed-mesh painted-UV verification gap is tracked in
+[#1431](https://github.com/JosephSerUSP/Second-Rite/issues/1431).
+
+Lantern is already a registered Model, so previewing a replacement OBJ alone
+initially displayed the old compiled bundle. Its authored recipe now binds
+each new material appearance to a separate slot, retaining `frame` and `body`.
+The canonical stage exporter regenerates its compiled bundle. The final
+candidate and canonical shipping preview boards have identical RGB pixels.
+
+### Observed verification and remaining limits
+
+- All eleven sources pass Windows Blender 5.2.2 `compile_item_blends.py --check`;
+  the compiler requires unchanged source hashes and matching OBJ/MTL bytes.
+- `item_textures.py --check`, `script_index.py --check` and `git diff --check`
+  pass. The four authored PNGs have byte-identical promoted copies.
+- All eleven were inspected in the real viewer at 96px. A strict in-memory
+  corpus review compares them against all 207 referenced models, removing all
+  currently sourced names from the legacy exemption. No violation involves
+  these eleven; pairs of sourced items face the 0.85 silhouette threshold.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. Unit includes 29
+  `test_model_resource` checks of Lantern's OBJ/compiled Model uploads,
+  bounds, item rendering at multiple dimensions/angles, world rendering and
+  instance transport. The suite reports seven unrelated world-effect
+  assertions unavailable because this stage has no native Effekseer shim.
+- The actual corpus gate remains red: 58 accepted keys no longer reproduce.
+  Current records comprise 6 duplicate groups, 55 UV-less items and 1 shared
+  file group. The smaller Ether Seed/Sigil Ink legacy group is still new
+  relative to the old accepted group. No corpus reference was rewritten.
+- Asset contract passes; asset regression remains red for 53 changed model
+  records, including the 42 inherited products and these eleven replacements.
+  Its reference remains unchanged. Earlier `out/work/` baseline proposals
+  describe the parent cohort and are stale for this branch.
+- No G5/G6 references were recaptured. Those gates were not run for this
+  accessory pass. Linux source/product byte stability and owner visual
+  acceptance remain unverified.
+
+Source absence falls from 107 to 96 items in the original stale inventory.
+That is a coverage measurement, not a quality verdict. Sources carry explicit
+provisional review metadata. Curry, Stew and all earlier source documents
+remain unchanged.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: stale item models, new accessories
+  base: 21c90656fd59da77dfed1fe70081b4a752ab04c8

@@ -41,29 +41,13 @@ jobs:
           from pathlib import Path
           path = Path('tools/blender/pr1400_item_source_stress_upgrade.py')
           text = path.read_text(encoding='utf-8').replace('semantic_id="cloth"', 'semantic_id="aged_cloth"')
-          old = '''    keys = getattr(owner, "keys", None)
-              if callable(keys):
-                  for key in list(keys()):'''.replace('              ', '')
-          new = '''    keys = getattr(owner, "keys", None)
-              if callable(keys):
-                  try:
-                      owner_keys = list(keys())
-                  except TypeError:
-                      owner_keys = []
-                  for key in owner_keys:'''.replace('              ', '')
+          old = '    keys = getattr(owner, "keys", None)\n    if callable(keys):\n        for key in list(keys()):'
+          new = '    keys = getattr(owner, "keys", None)\n    if callable(keys):\n        try:\n            owner_keys = list(keys())\n        except TypeError:\n            owner_keys = []\n        for key in owner_keys:'
           if old not in text:
               raise SystemExit('core ID-property loop pattern missing')
           text = text.replace(old, new, 1)
-          old = '''        keys = getattr(owner, "keys", None)
-                  if callable(keys):
-                      for key in list(keys()):'''.replace('                  ', '')
-          new = '''        keys = getattr(owner, "keys", None)
-                  if callable(keys):
-                      try:
-                          owner_keys = list(keys())
-                      except TypeError:
-                          owner_keys = []
-                      for key in owner_keys:'''.replace('                  ', '')
+          old = '        keys = getattr(owner, "keys", None)\n        if callable(keys):\n            for key in list(keys()):'
+          new = '        keys = getattr(owner, "keys", None)\n        if callable(keys):\n            try:\n                owner_keys = list(keys())\n            except TypeError:\n                owner_keys = []\n            for key in owner_keys:'
           if old not in text:
               raise SystemExit('report ID-property loop pattern missing')
           text = text.replace(old, new, 1)

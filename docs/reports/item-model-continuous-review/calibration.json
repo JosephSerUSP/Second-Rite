@@ -1,0 +1,73 @@
+{
+  "alarm_clock": {
+    "bodyHeightPixels": 455,
+    "frontBodySpan": [
+      93,
+      557
+    ],
+    "sideBodySpan": [
+      837,
+      1079
+    ],
+    "modelBodyHeight": 2,
+    "width": 2.0395604395604394,
+    "depth": 1.0637362637362637,
+    "frontBodyCenter": [
+      329,
+      391
+    ],
+    "bodyLipBase": [
+      166,
+      621
+    ],
+    "limitations": [
+      "Side case depth is about half its diameter, wider than the requested 35 percent. Measured view wins.",
+      "Top hardware overlaps the case; use unoccluded side for case depth, front for bell/handle layout.",
+      "Bell tilt and internal wall thickness are authored from the references; hidden interiors are inferred."
+    ],
+    "textureSize": [
+      1536,
+      1024
+    ],
+    "textureHash": "6c129f7705992304b35da9652f9a6c830710ad3e1857be0341e8f752abb0bfff",
+    "stripSeamColor": {
+      "samples": 96,
+      "meanAbsoluteRGBDelta": 15.07986111111111,
+      "maxChannelDelta": 62,
+      "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+    }
+  },
+  "tome_wind_blade": {
+    "bodyHeightPixels": 543,
+    "frontSpan": [
+      128,
+      588
+    ],
+    "backSpan": [
+      119,
+      579
+    ],
+    "sideSpan": [
+      897,
+      1071
+    ],
+    "topDepthSpan": [
+      846,
+      1011
+    ],
+    "height": 2,
+    "width": 1.6942909760589318,
+    "depth": 0.6243093922651933,
+    "spineBulge": 0.283609576427256,
+    "limitations": [
+      "Top width is larger than the front/back; front/back govern cover width, side/top average governs thickness.",
+      "Bookmark curl differs between views; source uses front placement and an authored three-dimensional curl.",
+      "Cover wall thickness, hidden spine interior and page attachment are authored; not photogrammetric recovery."
+    ],
+    "textureSize": [
+      1536,
+      1024
+    ],
+    "textureHash": "e61949516dad7a2b089c4d39b5f76e2c3b74bd7a9fdec2e7daf75afdadb37593"
+  }
+}

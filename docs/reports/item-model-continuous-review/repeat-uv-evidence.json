@@ -1,0 +1,22 @@
+{
+  "item": "tome_wind_blade",
+  "sourceHashBeforeFix": "5ca40f5e590645f3289d07fa76358c193a8b99f19ad2d9d09c2ad94e256dc1f8",
+  "OBJBytesEqual": false,
+  "decodedOrderedFacesAndMaterialAndAttributesEqual": true,
+  "changedRecordKinds": {
+    "vtRemoved": 9,
+    "vtAdded": 9,
+    "fRemoved": 663,
+    "fAdded": 663
+  },
+  "exportHashes": [
+    "ca075014032d1dc524fea22394323834dab18c2b2f28fb0a1624fa9a41b1a9a8",
+    "40a511debe3cb21611007d92932c09fc02fc6fd375f870b857a0e84c0fc97f3b"
+  ],
+  "scope": "Native UV alias ordering after live cover bevel; no vertex or normal record changes. Shared compiler not changed.",
+  "postFix": {
+    "sourceHash": "6e1bb0b72d0eae208f8ad52310ebfc3e0062b22b4ce0783ea18c61961f780d47",
+    "independentRepeatedExportBytesEqual": true,
+    "fix": "Directly materialized this new saved cover SOLIDIFY/BEVEL, verified evaluated vertex positions at seven-decimal precision, rounded source UV coordinates to six decimals. Shared compiler unchanged."
+  }
+}

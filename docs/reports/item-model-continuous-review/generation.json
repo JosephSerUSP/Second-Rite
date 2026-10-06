@@ -1,0 +1,80 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "purpose": "clockReference",
+      "originalFile": "exec-43305485-16d1-482e-b259-cb634b59d589.png",
+      "retainedFile": "docs/reports/item-model-continuous-review/alarm-clock-reference.png",
+      "prompt": "Use case: stylized-concept. Asset: matched multiview modeling reference for one fantasy RPG Alarm Clock.\nOne identical chunky round mechanical twin-bell alarm clock, antique warm brass case with restrained olive patina at physical seams, two large domed bells with a real gap between them and an upright hammer, sturdy angled feet, curved carry handle behind bells. Ivory dial with bold black twelve hour tick marks, dark hands pointing about 7:10, no digits or lettering. Small winding key and a circular access plate on BACK. Clear cream/brass/dark hierarchy readable at 96px. Case is genuinely deep: depth 35 percent of dial diameter. Cast brass bells thick, subtle hammered finish, broad smooth domes and crisp rolled edges.\nProduce a strict 2x2 equal-panel atlas of the SAME object. Top left FRONT (-Y); top right RIGHT SIDE (+X); bottom left BACK (+Y); bottom right TOP (+Z). TRUE ORTHOGRAPHIC AXIS VIEWS: front/back/side camera at body midheight, horizontal eye line, no rim seen from above in elevations, NO perspective. Top sees protruding bells, actual depth, rear handle and rear key consistently. Same world scale in every panel, front/back heights aligned. No labels, divider lines, environment, ground, cast shadows, contact shadow or pedestal. Transparent background. Object fits each panel with 12 percent margin. Broad diffuse uniform light, nearly flat albedo illumination, no hot specular reflection or dark vignette. Same wear features/material colors in all views. Match volumes and parts exactly across views; do not invent different clocks. Distinct BACK and deep SIDE are essential, not repeated front art. Square high-resolution reference sheet.\n",
+      "transparentBackground": true,
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "255c0ea33896f188d21c42755e9b490f7c1b76ac78dc65b92c970bffb0eff93e",
+      "inputs": []
+    },
+    {
+      "purpose": "bookReference",
+      "originalFile": "exec-c3711db6-5476-44d7-85f8-fd67521f7a88.png",
+      "retainedFile": "docs/reports/item-model-continuous-review/tome-reference.png",
+      "prompt": "Use case: stylized-concept. Asset: matched multiview 3D reference, one small fantasy RPG spellbook Tome: Wind Blade.\nONE identical thick closed handbound book, sapphire-blue worn leather covers, curved rounded spine on LEFT (-X), slightly uneven warm ivory page block visible on RIGHT (+X), gilded corner guards and two narrow raised spine ribs. FRONT cover (-Y) has a single large silver curved wind-blade emblem (an elegant sweeping crescent blade with three wind trails), no letters. BACK (+Y) has a small silver spiral seal and quiet tooled border, not repeated front artwork. One short teal cloth bookmark emerges at bottom and curls slightly. Closed volume, real thickness 22 percent of cover height, covers overhang the page block, slightly bevelled corners. No extra straps, clasps, chains or props. Strong simple graphic hierarchy for a 96px game icon, restrained fine leather texture and visible paper edges.\nStrict 2x2 atlas, SAME object in matched orthographic axis views, same world scale. TOP LEFT FRONT from -Y (broad cover face); TOP RIGHT RIGHT SIDE from +X (narrow fore-edge showing actual stack thickness, both blue covers as front/back strips); BOTTOM LEFT BACK from +Y (spine appears on opposite image edge); BOTTOM RIGHT TOP from +Z (narrow actual cover-to-cover thickness, left curved spine, page edges, two cover strips). Front/back upright and camera at midheight; no perspective, no quarter view, no top visible in front/back. Book height and thickness must agree across every view. Keep 12 percent empty margin in each square panel. Transparent background, no cast shadows, no floor, no pedestal. No labels or divider lines. Broad uniform diffuse illumination approaching flat surface albedo, no cinematic light, no broad specular stripes, no dark gradient. All views share identical material colors and structural details. Square high-resolution sheet.\n",
+      "transparentBackground": true,
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "a549d5bfa66e1ac401e5747f05ee8e3de8d56c8cc73f48d6a08e1922b5b9dfa2",
+      "inputs": []
+    },
+    {
+      "purpose": "clockAtlas",
+      "originalFile": "exec-242cad6d-50af-4065-bb4d-8fbac6946a6f.png",
+      "retainedFile": "projects/hichaukitoden-game/assets/authoring/items/_textures/alarm_clock_surface_atlas.png",
+      "prompt": "Use case: stylized-concept. Asset: FLAT ALBEDO UV atlas for the same brass alarm clock in image 1. Image 2 is the exact UV layout, preserve its region positions and proportions. Make a NEW opaque 1536x1024 texture image, not another view sheet or object render.\nTOP LEFT: an ivory clock DIAL circle in the guide circle, center x24.7% y34.5%, radius about19.4% of image width /29.1% height. Twelve bold black hour ticks only, strongest marks at 12/3/6/9. Absolutely NO HANDS, NO hub, NO numbers, NO lettering; hands will be actual geometry. Ivory mildly fibrous enamel color, calm uniform brightness, no glass glare or 3D rim. Fill its surrounding square with matching ivory.\nTOP RIGHT: a flat circular rear brass cover in the guide circle (center75% width,35.6% height); subdued circular access-plate engraving and four tiny screw marks, NO WINDING KEY, key will be geometry. Same brass tone as bottom strip. Keep all colored brass regions fully opaque.\nBOTTOM STRIP: continuous warm brass hammered ALBEDO, inside the guide's rectangle x2%-98%, y75.2%-97.7%. One quiet fine irregular hammered grain, sparse olive patina flecks, no band boundaries, no highlights, no bevels, no object shading or directional gradients. Left and right edges of this strip match in brightness and grain for a cylindrical wrap. No hardware, no dial features in this strip.\nFill unused areas with same brass base color, no black gutters. Flatten the multiview reference's lighting: material color only, no specular highlights, ambient occlusion, shadows, reflection, perspective or photographed curved surfaces. Preserve warm brass/ivory palette and wear character. Every pixel opaque. No labels, captions, text, watermark or UV wireframe. This will be wrapped around genuine curved geometry which supplies its own lighting. Exact layout is more important than decorative extra details.\n",
+      "transparentBackground": false,
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "6c129f7705992304b35da9652f9a6c830710ad3e1857be0341e8f752abb0bfff",
+      "inputs": [
+        {
+          "path": "docs/reports/item-model-continuous-review/alarm-clock-reference.png",
+          "sha256": "255c0ea33896f188d21c42755e9b490f7c1b76ac78dc65b92c970bffb0eff93e"
+        },
+        {
+          "path": "docs/reports/item-model-continuous-review/clock-layout.png",
+          "sha256": "aa1a5495515d1a882039d365df572ce86027586ac16e6ad339fac6dc2a57bc63"
+        }
+      ]
+    },
+    {
+      "purpose": "bookAtlas",
+      "originalFile": "exec-61759c0f-92c8-4d89-8fbd-6ee0ecaf2572.png",
+      "retainedFile": "projects/hichaukitoden-game/assets/authoring/items/_textures/tome_wind_blade_surface_atlas.png",
+      "prompt": "Use case: stylized-concept. Asset: FLAT ALBEDO continuous book-cover UV wrap. Image 1 is the blue wind-blade spellbook multiview reference. Image 2 is the exact horizontal UV-layout guide. Make a NEW opaque 1536x1024 texture, not a render of a book.\nUPPER BAND y2%-78.5%: one continuous sapphire-blue leather cover, laid completely flat. LEFT x0%-39% is BACK cover: quiet silver spiral seal centered, restrained tooled border. MIDDLE x39%-61% is SPINE: same leather color/grain, two slender horizontal gold tooled ribs near y22% and y60%, no writing. RIGHT x61%-100% is FRONT cover: ONE large silver sweeping crescent wind-blade emblem with three wind trails matching reference, centered in that region; elegant broad graphic readable at 96px, no lettering. Leather grain and diffuse brightness must flow smoothly through BACK-to-SPINE-to-FRONT joins without shading stripes or outlined panel breaks. Borders belong INSIDE broad front/back cover regions; keep a small blue margin at the joins. NO corner guard artwork; those are physical geometry. Do not add a dust jacket border around the entire image. Do not shade the spine or pretend it is curved.\nLOWER STRIP x2%-98%, y84.5%-97.7%: warm ivory PAPER EDGE albedo, fine irregular horizontal parallel page lines running across its full width, all nearly uniform brightness. The geometry/UVs will orient these strokes properly on different page edges. No perspective, deep gaps, blue borders inside the strip or three-dimensional paper block.\nUnused pixels matching blue leather, every pixel opaque. Nearly flat surface color only, no cast shadows, AO, highlights, metallic reflections, bevel shading or broad gradients. Silver emblem is light diffuse silver ink, not embossed 3D chrome. Match the reference's worn blue/ivory palette, keep wear subdued so the emblem dominates. Exact guide-region placement is mandatory. No text, numbers, labels, watermark, wireframe or object silhouettes.\n",
+      "transparentBackground": false,
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "e61949516dad7a2b089c4d39b5f76e2c3b74bd7a9fdec2e7daf75afdadb37593",
+      "inputs": [
+        {
+          "path": "docs/reports/item-model-continuous-review/tome-reference.png",
+          "sha256": "a549d5bfa66e1ac401e5747f05ee8e3de8d56c8cc73f48d6a08e1922b5b9dfa2"
+        },
+        {
+          "path": "docs/reports/item-model-continuous-review/book-layout.png",
+          "sha256": "60b4bcd06422c0956c2c21e82c2a92964728f09fe8ee050ac029df4ac1815004"
+        }
+      ]
+    }
+  ],
+  "boundary": "All generated original pixels unchanged. Guides are code-native layout diagrams; review crops are derived illustrations only."
+}

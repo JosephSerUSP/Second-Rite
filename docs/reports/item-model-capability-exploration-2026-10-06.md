@@ -1149,3 +1149,115 @@ Agent-Signature:
   role: implementation
   task: calibrated multiview volume and surface pilot
   base: 8c87ad189573589a3332e86ca62265796bf8921f
+
+### Follow-on: continuous surfaces from multiview references
+
+The next two new sources are Alarm Clock and Tome: Wind Blade. The approved
+Bone Plate and previous mug remain untouched. These new items have not received
+owner acceptance. [Native 96px review](item-model-continuous-review/native96.png),
+[before/after](item-model-continuous-review/before-after96.png),
+[plain controls](item-model-continuous-review/surface-control96.png) and
+[cardinal yaws](item-model-continuous-review/yaw96.png) show the actual viewer.
+Its camera remains side-on; diagnostic poses roll the object.
+
+Each item used two built-in image-generation calls. First, front/right/back/top
+references supply volume and material intent. Second, the original reference
+and a deterministic layout diagram guide a flat surface atlas. All four
+generated originals are unchanged, and both production atlases are opaque RGB.
+Full prompts, input hashes and retained original paths are in
+[generation provenance](item-model-continuous-review/generation.json). The saved
+source documents and original `_textures` atlases are production authority;
+compilation never reads the ignored scaffolding or measurement recipe.
+
+The clock's front case span is 464 pixels over a 455-pixel body-height datum;
+the unoccluded side depth is 242 pixels. At model body height 2 this yields
+width 2.03956 and depth 1.06374. Measured depth overrides the prompt's thinner
+requested case. The rolled radial lip expands the datum by 1.5 percent.
+Nineteen evaluated components include a real deep case, hollow double-wall bell
+domes, raised hands/hub, hammer, rear carry arch, feet and winding key holes.
+Domes/case/pads are smooth; dial/rear plates are flat. Dial ticks and rear
+engraving come from separate atlas regions; quiet original brass wraps the
+case and domes, with deliberate underside/local sleeve seams. Final product:
+2980 vertices and 5636 nondegenerate triangles.
+
+The tome's matching 460-pixel front/back widths and 543-pixel height determine
+width 1.69429 at height 2. The 174-pixel side and 165-pixel top thicknesses are
+averaged to depth .62431; measured spine bulge is .28361. The inconsistent larger
+generated top width is not imposed on the cover. One connected surface spans
+back, curved spine and front with 127 shared painted edges at exactly zero UV
+coordinate delta. Covers/paper planes are flat; rounded spine, folded binding
+and bookmark are smooth. Paper top/bottom and binding share world-X/stack-Y
+coordinates; fore-edge U follows Z. A real binding volume closes the previously
+visible interior gap. Four L guards and a curled bookmark are actual geometry.
+Final product: 910 vertices and 1788 nondegenerate triangles.
+
+All evaluated components have positive signed volume and no geometric openings
+after an audit-only positional weld. Raw topology is also recorded because
+curve conversion duplicates cap vertices for normal boundaries. No audit weld
+repairs production. Painted runtime faces have zero missing/collapsed/outside
+UVs; flat dial/rear/paper faces have constant corner normals. RGB opacity is
+exhaustive, while UV opacity sampling records 21632 clock and 2782 tome samples.
+Independent plain-material controls preserve OBJ bytes and remove generated
+`map_Kd` plus its UV gain: 4138 clock and 5005 tome gameplay pixels change.
+That establishes image contribution, not visual quality.
+
+The front tick/hand hierarchy and wind-blade emblem remain readable at 96px;
+the bell gap and page thickness help distinguish the silhouettes. Guard shapes
+simplify the reference's ornate metal corners. Native brass/leather grain can
+still be busy. Generated engraving, embossing and spine shading remain partly
+baked into colour. The brass strip endpoints differ (mean absolute channel
+delta 15.08; max 62), despite a deliberately hidden body seam. Continuous UV
+coordinates cannot make art seamless. The generated views disagree in case
+depth, top width and bookmark curl; wall thickness and hidden attachment geometry
+are authored. [Calibration](item-model-continuous-review/calibration.json) names
+those choices. [Clock](item-model-continuous-review/alarm_clock-reference-to-source.png)
+and [tome](item-model-continuous-review/tome_wind_blade-reference-to-source.png)
+correspondence boards use read-only orthographic Workbench source views, not
+runtime lighting. This is calibrated manual modeling rather than reconstruction.
+
+A repeated pinned-host export initially found different tome UV alias and face
+indices: 9 removed/added `vt` records and 663 removed/added `f` records, with no
+changed vertex/normal records. Decoded ordered attributes/materials were exactly
+equal. Directly materializing only this new saved cover's SOLIDIFY/BEVEL,
+asserting evaluated positions match at seven-decimal precision, and quantizing source UVs to six
+decimals restored byte-stable repeats. The shared compiler and earlier sources
+were unchanged. [Issue #1447](https://github.com/JosephSerUSP/Second-Rite/issues/1447)
+preserves the narrower same-host investigation with
+[pre-fix evidence](item-model-continuous-review/repeat-uv-evidence.json) and a
+[read-only source fixture](item-model-continuous-review/repro/). This does not
+resolve #1355 or establish Windows/Linux equality under #1369.
+
+The reusable `surface_atlas.py` import library supplies path-distance coordinates,
+bounded atlas mapping, local cyclic seams/poles and read-only endpoint-colour
+diagnostics. Four host tests cover distance density, local seam/pole support,
+invalid mapping bounds and original-image preservation. The
+[guide](../../tools/blender/CONTINUOUS_SURFACES.md) records source authority,
+coordinate-versus-image continuity, flat/smooth decisions and native review.
+Script catalogue: 110 classified scripts.
+
+Final verification: shipping `compile --check`, independent repeated bytes,
+source-hash preservation, original/source/compiled/shipping atlas identity and
+candidate/shipping native RGB identity pass. Texture/asset contract/script index,
+four host tests and diff check pass. Fresh staged G1/G2/G3/G4, unit and save pass
+locally; seven native Effekseer world-effect assertions were unavailable.
+Strict prospective review of all 207 assignments finds no violations involving
+these items. Actual corpus gate remains red: 85 stale accepted keys, 2 duplicate
+groups, 33 UV-less models and 1 shared-file group. The reduced Ether Seed/Sigil
+Ink and remaining five-food groups are inherited and marked new relative to
+the old keys. Asset regression remains red for 98 changed Model records across
+the stack. Baselines are unchanged; missing editable sources are 52/207, coverage
+only. No G5/G6 runs or recaptures and no Linux byte claim. Full-corpus compile
+was not rerun; inherited #1355/#1369, #1434, #1431 and #1436 remain outside this
+batch. Runtime and game data were unchanged.
+
+Complete review/provenance/source evidence lives in
+[the review folder](item-model-continuous-review/). Exact local logs, once-only
+scaffolds and direct-edit records remain in ignored `out/work/`. This draft
+stacks on the multiview pilot branch, #1446.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: multiview volume with continuous generated surfaces
+  base: 8b7b4a64631b3eef9227ef9b2360c6db1b38aa73

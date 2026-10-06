@@ -165,6 +165,13 @@
                 return result;
             },
 
+            setTownCameraField(field, value) {
+                const result = window.SecondRiteEditorCommands.setTownCameraField(
+                    dbPayload, currentMapIndex, field, value);
+                if (result.changed) markMapDirty();
+                return result;
+            },
+
             createGroundProfile() {
                 const result = window.SecondRiteEditorCommands.createGroundProfile(dbPayload, currentMapIndex);
                 if (result.changed) markMapDirty();

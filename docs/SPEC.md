@@ -2211,6 +2211,14 @@ leaf compiled into both browser JavaScript and runtime Lua. Dragging updates the
 local Event object immediately and writes the same Map `worldPosition` field;
 double-click opens the existing Event editor.
 
+The Plate Calibration panel separates Map-owned pitch/FOV from the package's
+baked player anchor. Its center-X and foot-line edits use the same manifest
+storage authority and version token as the Plate Composition inspector, while
+preserving unrelated manifest bytes. An unsaved inspector override blocks a
+calibration save until those edits are saved or cancelled. The panel shows
+loaded image dimensions, slice calibration, ground-profile ownership, anchors
+and transfer markers without changing those facts.
+
 Fully 3D Maps retain their interactive 3D viewport and initially use the exact
 runtime camera frame. Screen-plane pan changes the projection window while
 wheel zoom changes optical scale; neither operation moves the camera eye.

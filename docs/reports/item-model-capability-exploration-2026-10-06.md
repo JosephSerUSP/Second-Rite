@@ -184,7 +184,8 @@ edits, preserved alongside the original authoring structures.
 - `item_textures.py --check`, `script_index.py --check` (104 scripts), and
   `git diff --check` passed.
 - All 42 items were rendered and inspected through the real item viewer at
-  96px. Review output: `out/review/codex-final42-96/`.
+  96px. [Native review board](item-model-batches3-4-review/sheet96.png).
+  Individual four-view strips: `out/review/codex-final42-96/`.
 - Staged G1, G2, G3, G4, the unit suite and save/load passed. G1 was repeated
   against a fresh stage after the last two source edits. G2/G3, G4, unit and
   save were run immediately before those final geometry-only proportion edits.
@@ -195,6 +196,14 @@ edits, preserved alongside the original authoring structures.
   and 1 shared-file group. None involve this cohort.
 - The asset-regression baseline also needs its separate owner-approved refresh,
   generated from a clean checkout of the authored source/product commit.
+  Proposals were prepared in `out/work/` from clean commit `8065abaa`, with
+  production references left unchanged. Checking the proposed corpus reference
+  through the ordinary gate returned `ITEM MODELS OK`; the proposed
+  asset-regression reference produced zero diagnostics. The corpus proposal
+  reduces 119 violations to 75, removes 42 names from the 141-name legacy list,
+  drops 45 resolved keys and adds the surviving Ether Seed/Sigil Ink duplicate
+  group as the smaller remainder of its old eight-item group. These are
+  proposal checks, not an owner approval or a production-gate pass.
 - No G5/G6 references were recaptured. PR #1419's hosted relative run
   `37488502130` stopped before candidate comparison: G5 during base A's
   surface-crop check, G6 during base B's event-modal model-preview readiness.

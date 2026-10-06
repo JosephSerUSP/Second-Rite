@@ -90,7 +90,7 @@
   },
   "provenance": {
     "sourceBlend": "st_maria_core.blend",
-    "sourceSHA256": "5182e990e8c1c81cfb3264b2eb5ed096389fd2fb4a4f3fe58f98c16468d69f44",
+    "sourceSHA256": "66e6c11e3cf637e06ef52704c36f50ba643f20a672a91a2fd1c93e48607fc865",
     "sourceScreen": "praca",
     "plateRecord": {
       "contract": "thestra.world-camera-calibration",
@@ -147,6 +147,6 @@
       },
       "authoringCameraDecision": "28m standoff and measured narrower optical field; actor height and foot line retained."
     },
-    "sourceRevision": "praca-approaches-20261004"
+    "sourceRevision": "passage-house-mark-20261005"
   }
 }

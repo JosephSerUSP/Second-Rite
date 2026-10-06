@@ -3,6 +3,11 @@
   "scope": "Top-level Python and JavaScript files; preserved paths, no inferred disposal.",
   "scripts": [
     {
+      "path": "add_passage_house_mark.py",
+      "role": "one-shot",
+      "purpose": "Give the Passage House one mark (leaf, azulejo plaque, lantern) on both its Praca and Cortico faces as a new island source revision."
+    },
+    {
       "path": "add_registry_gate.py",
       "role": "one-shot",
       "purpose": "Cut the Passage House gate into the Registry's public back wall as a new source revision."

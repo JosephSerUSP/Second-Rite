@@ -76,5 +76,17 @@
       "radius": 0.45,
       "lifeTicks": 90
     }
+  },
+  "escape": {
+    "id": "escape",
+    "name": "Escape",
+    "target": "self",
+    "scope": "battle",
+    "description": "Run from the fight.",
+    "effects": [
+      {
+        "type": "escape"
+      }
+    ]
   }
 }

@@ -92,6 +92,11 @@ function formula.battlerView(battler, session)
         -- exposed so formulas/conditions can read it ("front" until a
         -- battle assigns rows by slot).
         row = battler.row or "front",
+        -- Battle-scoped floor position, present only in real-time battles
+        -- (ledger D2). Absent elsewhere on purpose: a distance formula used
+        -- in a slot battle fails loudly instead of measuring from 0,0.
+        x = battler.field and battler.field.x or nil,
+        y = battler.field and battler.field.y or nil,
         meta = battler.meta or {},
         -- Creature history, readable from data so a scene can show "3rd
         -- expedition, 11 battles" without engine changes (engine/session.lua

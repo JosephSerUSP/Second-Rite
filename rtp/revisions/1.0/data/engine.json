@@ -65,6 +65,14 @@
       "description": "Current HP divided by effective Max HP without clamping; an Overhealed battler reports above 1 (also on b/target/enemy/ally)."
     },
     {
+      "token": "a.x",
+      "description": "Floor X position in a real-time battle; absent (an error to read) in slot battles (also on b/target/enemy/ally)."
+    },
+    {
+      "token": "a.y",
+      "description": "Floor Y position in a real-time battle; absent (an error to read) in slot battles (also on b/target/enemy/ally)."
+    },
+    {
       "token": "a.overheal",
       "description": "Current HP above effective Max HP, or 0 when not Overhealed (also on b/target/enemy/ally)."
     },

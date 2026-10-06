@@ -5,7 +5,8 @@
   "initialParty": false,
   "skills": [
     "handgun_shot",
-    "heal1"
+    "heal1",
+    "escape"
   ],
   "flavor": "NYPD rookie at Carnegie Hall on Christmas Eve.",
   "baseParams": {

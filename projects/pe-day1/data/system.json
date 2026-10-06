@@ -45,6 +45,7 @@
     "startMp": 100
   },
   "realtimeBattle": {
-    "ticksPerRound": 180
+    "ticksPerRound": 180,
+    "atPerTick": "a.asp / 12"
   }
 }

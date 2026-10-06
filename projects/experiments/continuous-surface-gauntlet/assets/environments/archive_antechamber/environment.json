@@ -1,0 +1,13 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "bounds": [-4.0, -3.0, 0.0, 4.0, 3.0, 3.2],
+  "anchors": {
+    "spawn_player": { "position": [-2.6, 0.0, 0.0] },
+    "far_door": { "position": [3.35, -2.15, 0.0] },
+    "console": { "position": [1.85, 1.85, 0.0] }
+  },
+  "provenance": { "source": "original gauntlet fixture; hand-authored V0" }
+}

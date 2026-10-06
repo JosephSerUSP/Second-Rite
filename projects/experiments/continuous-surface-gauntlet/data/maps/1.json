@@ -1,0 +1,27 @@
+{
+  "id": 1,
+  "title": "Archive Antechamber",
+  "category": "experiment",
+  "depth": 0,
+  "safe": true,
+  "layout": ["."],
+  "spawn": { "x": 0, "y": 0, "dir": "N" },
+  "events": [],
+  "traversal": {
+    "provider": "continuous_surface",
+    "environmentPackage": "assets/environments/archive_antechamber/environment.json",
+    "spawnAnchor": "spawn_player",
+    "interactionRadius": 1.15,
+    "surface": {
+      "speed": 2.65,
+      "maxStep": 0.08,
+      "groundZ": 0,
+      "regions": [
+        { "points": [[-3.65,-2.65],[3.65,-2.65],[3.65,2.65],[1.4,2.65],[1.4,2.15],[-1.8,2.15],[-1.8,2.65],[-3.65,2.65]] }
+      ],
+      "obstacles": [
+        { "points": [[-0.65,-0.7],[0.65,-0.7],[0.65,0.7],[-0.65,0.7]] }
+      ]
+    }
+  }
+}

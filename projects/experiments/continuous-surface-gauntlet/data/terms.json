@@ -1,0 +1,5 @@
+{
+  "project": { "title": "Continuous Surface Gauntlet" },
+  "title": { "options": ["Enter Room", "Exit"] },
+  "log": { "wall_blocks": "The boundary blocks the way." }
+}

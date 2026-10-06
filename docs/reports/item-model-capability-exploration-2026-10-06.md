@@ -633,3 +633,124 @@ Agent-Signature:
   role: implementation
   task: ten wearables with intentional normals and painted materials
   base: 8275ec857b4567977422620c41f21e116b28ebd9
+
+## Arcane objects: carved forms, material contrast and orientation evidence
+
+This cohort adds nine editable sources, stacked on the wearable work at
+`5c7b82771712c457bcf9b955b13a23189a3ee50e`. Earlier products are comparisons;
+source coverage and technical passes do not establish artistic acceptance.
+The owner requested deliberate smoothing and more attention to materials and
+textures. These objects remain provisional pending owner visual judgment.
+
+The [native gameplay board](item-model-arcane-review/gameplay96.png) shows two
+96px gameplay poses per object. The [prior/new comparison](item-model-arcane-review/before-after96.png)
+and [full sheet](item-model-arcane-review/sheet96.png) retain the usual four
+viewer poses. The [cardinal-yaw board](item-model-arcane-review/yaw96.png) uses
+0, 90, 180 and 270 degrees, all at the gameplay 10-degree roll. This is a
+stage-only native probe; production rendering code is unchanged. It is not
+evidence from an elevated or below-object camera.
+
+| Item | Authored construction | Native triangles |
+| --- | --- | ---: |
+| Mystic Egg | Smooth organic shell, two rounded physical apertures, inset jade core, Curve aperture lips and branching ridge; live shell thickness and selected flat cut rims | 3,384 |
+| Golden Egg | Smooth gilded egg, eight curved chasing lines, equatorial collar and three-foot cradle | 3,888 |
+| Glass Bead | Live off-axis closed Screw profile with an actual drilled bore and recessed dark throat | 1,120 |
+| Thrice-Blessed Bead | Drilled opalescent bead, three linked Curve leaf bezels and three separate flat-cut prayer stones | 1,716 |
+| Vitality Seal 1 | Uneven poured wax, actual recessed leaf impression and parchment tail; repaired resolved impression mesh with hidden cutter evidence | 1,360 |
+| Vitality Seal 2 | Chipped polygonal stone shield, crisp bevel planes, dark incised leaf treatment and twin ivory vein inlays | 1,456 |
+| Vitality Seal 3 | Pierced oval metalwork, paired leaf tracery, linked gem claws and smooth jade cabochon | 2,368 |
+| Mars Emblem | Thick forged sunburst, raised rim/flame forks and flat-cut garnet | 1,032 |
+| Mercury Crest | Editable tapered open crescent, pierced curls, smooth blue cabochon and three faceted hanging drops | 3,404 |
+
+The seal tiers progress through wax, carved stone and pierced metalwork rather
+than relying on palette alone. Openings and raised relief are actual geometry.
+Smooth shell/glass/cabochon surfaces contrast with flat cut stone, forged faces,
+gem facets and stamped planes. The Mystic Egg's generated window walls use a
+material-selection Geometry Nodes step to remain flat while both shell
+surfaces stay smooth. Sharp boundaries protect the wax face/rounded edge.
+
+### Surface construction and measured controls
+
+Fourteen opaque 128x128 [atlases](item-model-arcane-review/texture-atlases.png)
+provide restrained shell veining, warm chased gold, clouded lampwork glass,
+radial wax pooling, stone veins, patinated bronze, brushed silver and enamel.
+Broad variation and edge bands carry more weight than random fine noise.
+Shell UVs follow the surface rings; torus UVs unwrap both major and minor
+circles; carved stone/bronze planes use bounded object-wide projections.
+Existing materials use plain colours for small unpainted cut faces and tips.
+
+The every-painted-face audit reports zero missing, collapsed or outside-atlas
+UV findings for all fourteen painted materials. Source, compiled and shipping
+PNG bytes match for every atlas. Source references use `//_textures/<filename>`.
+Painted open Curve endpoints meet other geometry; exposed Mercury tips have
+plain rounded endcaps. This avoids pretending the Curve generator's collapsed
+cap UVs can support painted detail. The general UV gate gap remains #1431.
+
+The [normal comparison](item-model-arcane-review/normals96.png) holds geometry,
+UVs and MTL bytes identical for Glass Bead, Golden Egg and Vitality Seals 1/3.
+Only Mesh/Screw smoothing changes; Curve normals remain unchanged. At the two
+gameplay poses, changed pixel counts are 3,878, 2,620, 950 and 1,849 respectively.
+All controls render the full nine-item list, preserving cell backgrounds and
+draw order. Counts demonstrate visible effects, not aesthetic superiority.
+
+The [material comparison](item-model-arcane-review/materials96.png) removes
+only declared runtime overlays for the same four objects. Geometry and UVs
+remain identical, and MTL differences consist only of removed `pass` lines.
+Changed gameplay pixels are 2,848 for Glass Bead, 4,043 for Golden Egg and
+1,775 for Seal 3. The wax seal is an unchanged zero-pixel control because it
+uses no overlays. Appearance uses the supported opaque colour/texture and
+low-strength sphere-pass vocabulary; this does not demonstrate transparency,
+refraction, anisotropic shading or Blender Principled BRDF parity.
+
+The [surface evidence](item-model-arcane-review/surface-evidence.json) records
+source/product hashes, texture hashes, evaluated smooth-face counts, UV results,
+triangle counts and controls without machine-specific absolute paths.
+
+### Authoring corrections and visual limits
+
+The first wax Boolean impression exported a degenerate collinear triangle.
+The authoritative source was edited directly: the evaluated impression was
+materialized once, merged/dissolved, triangulated and checked, with hidden
+cutters retained as construction evidence. It is not a live Boolean result in
+the final source. Stone/emblem thickness and bevels were also materialized
+once to give generated faces usable UVs; hidden outlines remain available.
+Golden Egg's chasing curves were simplified from 12,144 to 3,888 triangles.
+The egg apertures were rounded and their lips aligned to the real boundaries.
+
+At 96px, silhouettes, apertures and material masses read more strongly than
+fine grain. The flat seals and emblems intentionally become narrow edge-on;
+their backs do not repeat every front motif. The yaw board exposes that limit.
+Glass remains an opaque stylization. Small prayer stones and shallow chasing
+remain subtle. Native evidence supports assessment, not a claim of acceptance.
+
+### Observed verification and remaining boundaries
+
+- All nine final sources pass read-only shipping `compile_item_blends.py
+  --check`; source hashes remain unchanged and OBJ/MTL bytes match. An
+  independent repeat also matched all nine final candidate products.
+- Texture/reference check, script index, asset contract and diff checks pass.
+  Native shipping/candidate board RGB pixels match exactly.
+- Strict prospective comparison against all 207 item models finds zero cohort
+  violations, with the 0.85 silhouette threshold for sourced pairs.
+- Fresh staged G1, G2, G3, G4, unit and save/load pass. Seven native Effekseer
+  world-effect assertions remain explicitly unavailable. G5/G6 were not run
+  or recaptured, and Linux byte stability remains unverified.
+- Actual corpus remains red for 80 accepted keys no longer reproducing;
+  three duplicate groups, 37 UV-less models and one shared-file group remain.
+  Asset regression remains red for 86 changed Model records across the stack.
+  Baseline files remain unchanged; reconciliation and merging are owner calls.
+- Inherited Lantern integration blockers remain #1434; static item shape-key
+  policy remains #1436. This cohort changes no runtime code, game data, recipes
+  or previously authored source documents/products.
+
+Referenced source absence falls from 73 to 64 of 207 item assignments. This
+counts coverage only. Once-only scaffolds, recorded direct edits, throwaway
+controls and logs remain ignored under `out/work/`. Production `.blend` files
+and their source images are authority; control products must never be promoted.
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: nine arcane objects with carved forms and controlled surface evidence
+  base: 5c7b82771712c457bcf9b955b13a23189a3ee50e

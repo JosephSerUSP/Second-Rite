@@ -5,6 +5,7 @@
   "initialParty": false,
   "skills": [
     "handgun_shot",
+    "baton_strike",
     "heal1",
     "escape"
   ],

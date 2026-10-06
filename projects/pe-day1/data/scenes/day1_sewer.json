@@ -160,8 +160,8 @@
             "yaw": 0,
             "visible": "sceneState.ui == 2",
             "scale": [
-              "sceneState.range",
-              "sceneState.range",
+              "((variables.weapon or 'handgun') == 'baton' and 1.5 or 4)",
+              "((variables.weapon or 'handgun') == 'baton' and 1.5 or 4)",
               1
             ]
           },
@@ -444,7 +444,7 @@
       "content": [
         {
           "type": "text",
-          "text": "M84F\nBULLETS {(rt.items.handgun_ammo or 0)}\nTARGET   1"
+          "text": "{(variables.weapon or 'handgun') == 'baton' and 'BATON' or 'M84F'}\n{(variables.weapon or 'handgun') == 'baton' and 'NO AMMO' or 'BULLETS ' .. (rt.items.handgun_ammo or 0)}\nTARGET   1"
         }
       ]
     },
@@ -471,7 +471,7 @@
       "rect": {
         "x": "1 - surface.originX",
         "y": 7,
-        "w": 16,
+        "w": 17,
         "h": 5
       },
       "style": "panel",
@@ -480,7 +480,7 @@
       "content": [
         {
           "type": "text",
-          "text": "> Medicine 1\nStock {(rt.items.medicine or 0)}\nRecover 30 HP"
+          "text": "{sceneState.choice == 0 and '>' or ' '} Medicine x{(rt.items.medicine or 0)}\n{sceneState.choice == 1 and '>' or ' '} Equip {((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton') == 'baton' and 'Baton' or 'Handgun'}"
         }
       ]
     },
@@ -535,6 +535,24 @@
         {
           "type": "text",
           "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "weapon",
+      "rect": {
+        "x": "surface.width - surface.originX - 15",
+        "y": 1,
+        "w": 14,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(variables.weapon or 'handgun') == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"
         }
       ]
     },
@@ -959,6 +977,26 @@
             ]
           },
           {
+            "cmd": "IF",
+            "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0",
+            "then": [
+              {
+                "cmd": "SET_GAME_VARIABLE",
+                "name": "weapon",
+                "value": "((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton')"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "menuHeld",
+                "value": "sceneState.input.X"
+              }
+            ]
+          },
+          {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
@@ -1237,10 +1275,24 @@
                                 "condition": "sceneState.ui == 2",
                                 "then": [
                                   {
-                                    "cmd": "REALTIME_BATTLE_COMMAND",
-                                    "kind": "skill",
-                                    "id": "handgun_shot",
-                                    "target": "enemy"
+                                    "cmd": "IF",
+                                    "condition": "(variables.weapon or 'handgun') == 'baton'",
+                                    "then": [
+                                      {
+                                        "cmd": "REALTIME_BATTLE_COMMAND",
+                                        "kind": "skill",
+                                        "id": "baton_strike",
+                                        "target": "enemy"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "cmd": "REALTIME_BATTLE_COMMAND",
+                                        "kind": "skill",
+                                        "id": "handgun_shot",
+                                        "target": "enemy"
+                                      }
+                                    ]
                                   },
                                   {
                                     "cmd": "SET_SCENE_STATE",
@@ -1305,6 +1357,10 @@
                                               {
                                                 "name": "ui",
                                                 "value": 4
+                                              },
+                                              {
+                                                "name": "choice",
+                                                "value": 0
                                               }
                                             ]
                                           }
@@ -1363,10 +1419,23 @@
                                             "condition": "sceneState.ui == 4",
                                             "then": [
                                               {
-                                                "cmd": "REALTIME_BATTLE_COMMAND",
-                                                "kind": "item",
-                                                "id": "medicine",
-                                                "target": "self"
+                                                "cmd": "IF",
+                                                "condition": "sceneState.choice == 0",
+                                                "then": [
+                                                  {
+                                                    "cmd": "REALTIME_BATTLE_COMMAND",
+                                                    "kind": "item",
+                                                    "id": "medicine",
+                                                    "target": "self"
+                                                  }
+                                                ],
+                                                "else": [
+                                                  {
+                                                    "cmd": "SET_GAME_VARIABLE",
+                                                    "name": "weapon",
+                                                    "value": "((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton')"
+                                                  }
+                                                ]
                                               },
                                               {
                                                 "cmd": "SET_SCENE_STATE",
@@ -1541,6 +1610,21 @@
             ]
           }
         ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_down": [
@@ -1554,6 +1638,21 @@
               {
                 "name": "choice",
                 "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
               }
             ]
           }

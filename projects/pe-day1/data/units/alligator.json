@@ -6,9 +6,9 @@
     "rat_bite",
     "rat_fire_tail"
   ],
-  "flavor": "Placeholder boss (#1427 rough chapter). Head/tail phases not built; reuses the rat kit; original values unverified.",
+  "flavor": "Placeholder: the 1999 guide reports separate head (120) and tail (80) HP; phases are not built, so this is one 200 HP body reusing the rat kit.",
   "baseParams": {
-    "maxHp": 140,
+    "maxHp": 200,
     "atk": 8,
     "def": 6,
     "mat": 6,

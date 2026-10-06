@@ -6,9 +6,9 @@
     "rat_bite",
     "rat_fire_tail"
   ],
-  "flavor": "Placeholder boss (#1427 rough chapter). HP and attacks reuse the rat kit; original values unverified.",
+  "flavor": "First Eve fight on stage. HP 40 per the 1999 GameFAQs walkthrough (taerm); attacks are placeholders reusing the rat kit.",
   "baseParams": {
-    "maxHp": 60,
+    "maxHp": 40,
     "atk": 8,
     "def": 6,
     "mat": 6,

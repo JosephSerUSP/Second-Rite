@@ -88,5 +88,22 @@
         "type": "escape"
       }
     ]
+  },
+  "baton_strike": {
+    "id": "baton_strike",
+    "name": "Baton",
+    "target": "enemy-any",
+    "scope": "battle",
+    "description": "Police baton. Unlimited swings, but only at close quarters; beyond reach the swing misses. Damage is a prototype value, not a verified original formula.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "3"
+      }
+    ],
+    "realtime": {
+      "delivery": "range",
+      "range": 1.5
+    }
   }
 }

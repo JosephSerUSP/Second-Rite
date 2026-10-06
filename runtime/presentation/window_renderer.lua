@@ -510,6 +510,8 @@ local function buildEnv(state, sceneData, ctx, listCache)
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
         env.party = formula.groupView(ctx.session.party or {}, ctx.session)
+        -- Same read-only Variables snapshot scene logic reads (formula.lua).
+        env.variables = require("engine.game_variables").snapshot(ctx.session)
         -- Same view scene logic reads, so a window never disagrees with it.
         if ctx.session.realtimeBattle then
             env.rt = require("engine.realtime_battle").view(ctx.session)

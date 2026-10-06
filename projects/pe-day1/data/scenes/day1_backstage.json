@@ -161,6 +161,24 @@
       ]
     },
     {
+      "id": "weapon",
+      "rect": {
+        "x": "surface.width - surface.originX - 15",
+        "y": 1,
+        "w": 14,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(variables.weapon or 'handgun') == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"
+        }
+      ]
+    },
+    {
       "id": "feedback",
       "rect": {
         "x": "1 - surface.originX",
@@ -381,6 +399,26 @@
           {
             "name": "walkY",
             "value": "max(0.3, min(4.6, sceneState.walkY + sceneState.dy * 0.05))"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0",
+        "then": [
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "weapon",
+            "value": "((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton')"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "menuHeld",
+            "value": "sceneState.input.X"
           }
         ]
       },
@@ -635,6 +673,21 @@
             ]
           }
         ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_down": [
@@ -648,6 +701,21 @@
               {
                 "name": "choice",
                 "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
               }
             ]
           }

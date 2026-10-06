@@ -20,6 +20,9 @@ local function frames(n)
     for _ = 1, n do sh.update(1 / 60, ctx) end
 end
 local function tap(button) pc.press(button, ctx); pc.release(button); frames(1) end
+-- X is polled by on_frame (READ_INPUT), so it must be held across a frame.
+local function tapX() pc.press("X", ctx); frames(1); pc.release("X"); frames(1) end
+local resources = require("engine.battler_resources")
 local function state() return sh.getCurrentState() end
 local function v() return state().v end
 local function rt() return ctx.session.realtimeBattle end
@@ -70,6 +73,53 @@ local function win()
     dismissCard()
 end
 
+-- An honest fight: no HP edits, no free ammo. Close in, swing at full AT,
+-- heal with PE when low. Returns the outcome and how many swings it took.
+local function fightWithBaton()
+    local aya, swings, guard = ctx.session.party[1], 0, 0
+    -- Held input is re-pressed every frame, as test_pe_day1_scene does.
+    local function step(dirs)
+        for b, on in pairs(dirs) do if on then pc.press(b, ctx) end end
+        frames(1)
+        for b, on in pairs(dirs) do if on then pc.release(b) end end
+    end
+    while rt().outcome ~= "victory" do
+        ctx.session:addItem("handgun_ammo", 1)
+        while ctx.session.party[1].at < 100 do frames(1); guard = guard + 1; assert(guard < 20000, "never won") end
+        tap("A"); tap("A"); frames(30)
+    end
+    tap("A")
+    check(rt() == nil and v().fight == 0, state().id .. ": Obtain-all ends the fight and returns to exploring")
+    dismissCard()
+end
+
+-- An honest fight: no HP edits, no free ammo. Close in, swing at full AT,
+-- heal with PE when low. Returns the outcome and how many swings it took.
+local function fightWithBaton()
+    local aya, swings, guard = ctx.session.party[1], 0, 0
+    -- Held input is re-pressed every frame, as test_pe_day1_scene does.
+    local function step(dirs)
+        for b, on in pairs(dirs) do if on then pc.press(b, ctx) end end
+        frames(1)
+        for b, on in pairs(dirs) do if on then pc.release(b) end end
+    end
+    while rt().outcome == nil do
+        guard = guard + 1; assert(guard < 60 * 600, "fight did not end within ten minutes")
+        local e = rt().battle.enemies[1]
+        local dx, dy = e.field.x - aya.field.x, e.field.y - aya.field.y
+        local far = dx * dx + dy * dy > 1.1 * 1.1
+        step({ RIGHT = far and dx > 0.2, LEFT = far and dx < -0.2, UP = far and dy > 0.2, DOWN = far and dy < -0.2 })
+        if aya.at >= 100 and rt().outcome == nil then
+            if aya.hp < 18 and resources.get(aya, "pe", ctx.session) >= 30 then
+                tapX(); tap("DOWN"); tap("A"); tap("A")
+            elseif not far then
+                tap("A"); tap("A"); swings = swings + 1
+            end
+        end
+    end
+    return rt().outcome, swings
+end
+
 local ok, err = pcall(function()
     local scenes = { "title" }
     local index = json.decode(assert(io.open(os.getenv("THESTRA_REPOSITORY_ROOT")
@@ -115,6 +165,36 @@ local ok, err = pcall(function()
 
     -- A cleared room stays cleared on return.
     check(ctx.session.flags.melissa_defeated and ctx.session.flags.alligator_defeated, "every boss flag is set")
+
+    -- Exploring, X swaps the equipped weapon and it persists across rooms.
+    pc.reset(); sh.init(nil)
+    session = sessionModule.GameSession.new(loader)
+    session:initializeStartingParty()
+    ctx = { session = session, loader = loader, party = session.party, events = {} }
+    sh.push("day1_backstage", ctx)
+    tapX()
+    check(require("engine.game_variables").get(session, "weapon") == "baton", "X while exploring equips the Baton")
+    tapX()
+    check(require("engine.game_variables").get(session, "weapon") == "handgun", "X again equips the handgun")
+
+    -- With no ammunition at all, the Baton still wins the Melissa and Eve
+    -- fights honestly (no HP edits), which is why the original never dead-ends.
+    for _, room in ipairs({ "day1_stage", "day1_rehearsal" }) do
+        math.randomseed(11)
+        pc.reset(); sh.init(nil)
+        session = sessionModule.GameSession.new(loader)
+        session:initializeStartingParty()
+        session:addItem("handgun_ammo", -session.inventory.handgun_ammo)
+        ctx = { session = session, loader = loader, party = session.party, events = {} }
+        sh.push(room, ctx)
+        if v().ui == 9 then tap("A") end
+        while session.party[1].at < 100 do frames(1) end
+        tapX(); tap("DOWN"); tap("DOWN"); tap("A"); tap("DOWN"); tap("A")
+        check(require("engine.game_variables").get(session, "weapon") == "baton", room .. ": the battle Item menu equips the Baton")
+        local outcome, swings = fightWithBaton()
+        print(("    %s: %s after %d baton swings, Aya HP %d"):format(room, outcome, swings, session.party[1].hp))
+        check(outcome == "victory", room .. ": winnable with zero ammo on the Baton alone")
+    end
 end)
 pc.reset(); sh.init(nil)
 if restore then restore() end

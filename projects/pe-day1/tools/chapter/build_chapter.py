@@ -159,6 +159,13 @@ def build_shared_objs(mats):
 # --- scene --------------------------------------------------------------------
 
 FIGHT = "sceneState.fight == 1"
+# The equipped weapon is a persistent playthrough Variable, so it survives
+# room changes. The Baton never runs out, which keeps every fight winnable
+# once ammunition is gone, as in the original.
+WEAPON = "(variables.weapon or 'handgun')"
+OTHER = "(%s == 'baton' and 'handgun' or 'baton')" % WEAPON
+SWAP = {"cmd": "SET_GAME_VARIABLE", "name": "weapon", "value": OTHER}
+REACH = "(%s == 'baton' and 1.5 or 4)" % WEAPON   # mirrors the skills' realtime.range
 
 
 def in_fight(expr, default):
@@ -194,6 +201,11 @@ def scene_models(room, room_model):
     models = []
     if room.get("corridor"):
         models.append({"id": "room", "model": BACKSTAGE + "corridor.obj", "position": [0, 0, 0], "yaw": 0, "visible": "true"})
+    elif room.get("environment"):
+        # A Second Gate baked environment package: its atlas already carries the
+        # room's lighting, so it is drawn as baked (bakedLighting), never relit.
+        models.append({"id": "room", "model": room["environment"], "position": [0, 0, 0], "yaw": 0,
+                       "visible": "true", "bakedLighting": True})
     else:
         models.append({"id": "room", "model": room_model, "position": [0, 0, 0], "yaw": 0, "visible": "true"})
     for door in room["doors"]:
@@ -224,7 +236,7 @@ def scene_models(room, room_model):
             {"id": "aya_recoil", "model": BACKSTAGE + "aya_recoil.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
              "visible": in_fight("rt.outcome ~= 'defeat' and rt.actAge < 12", "false")},
             {"id": "range_ground", "model": BACKSTAGE + "range_ground.obj", "position": [PX, PY, 0.03], "yaw": 0,
-             "visible": "sceneState.ui == 2", "scale": ["sceneState.range", "sceneState.range", 1]},
+             "visible": "sceneState.ui == 2", "scale": [REACH, REACH, 1]},
             {"id": "muzzle", "model": BACKSTAGE + "spark.obj",
              "position": [PX + "+sin(sceneState.aim)*.72", PY + "-cos(sceneState.aim)*.72", 1.47], "yaw": 0,
              "visible": in_fight("rt.actAge < 12", "false")},
@@ -303,11 +315,14 @@ def windows(room, room_model):
                 "{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"}]},
             {"id": "target_info", "rect": {"x": "surface.width - surface.originX - 13", "y": 13, "w": 12, "h": 5}, "style": "panel",
              "chrome": "overlay", "visible": "sceneState.ui == 2",
-             "content": [{"type": "text", "text": "M84F\nBULLETS {(rt.items.handgun_ammo or 0)}\nTARGET   1"}]},
+             "content": [{"type": "text", "text": "{" + WEAPON + " == 'baton' and 'BATON' or 'M84F'}\n"
+                          "{" + WEAPON + " == 'baton' and 'NO AMMO' or 'BULLETS ' .. (rt.items.handgun_ammo or 0)}\nTARGET   1"}]},
             {"id": "pe_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 15, "h": 5}, "style": "panel", "chrome": "overlay",
              "visible": "sceneState.ui == 3", "content": [{"type": "text", "text": "> Heal 1\nRecover 30 HP\nPE cost 30"}]},
-            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 16, "h": 5}, "style": "panel", "chrome": "overlay",
-             "visible": "sceneState.ui == 4", "content": [{"type": "text", "text": "> Medicine 1\nStock {(rt.items.medicine or 0)}\nRecover 30 HP"}]},
+            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 17, "h": 5}, "style": "panel", "chrome": "overlay",
+             "visible": "sceneState.ui == 4", "content": [{"type": "text", "text":
+                "{sceneState.choice == 0 and '>' or ' '} Medicine x{(rt.items.medicine or 0)}\n"
+                "{sceneState.choice == 1 and '>' or ' '} Equip {" + OTHER + " == 'baton' and 'Baton' or 'Handgun'}"}]},
             {"id": "result", "rect": {"x": 6, "y": 9, "w": 21, "h": 6}, "style": "panel", "chrome": "overlay",
              "visible": in_fight("rt.outcome == 'victory'", "false") + " and sceneState.ui ~= 9",
              "content": [{"type": "text", "text": "Battle over\n> Obtain all"}]},
@@ -317,6 +332,9 @@ def windows(room, room_model):
     out += [
         {"id": "card", "rect": {"x": "4 - surface.originX", "y": 7, "w": "surface.width - 8", "h": 14}, "style": "panel",
          "chrome": "overlay", "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
+        {"id": "weapon", "rect": {"x": "surface.width - surface.originX - 15", "y": 1, "w": 14, "h": 2}, "style": "panel",
+         "chrome": "none", "visible": "sceneState.ui ~= 9",
+         "content": [{"type": "text", "text": "{" + WEAPON + " == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"}]},
         {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": 27.5, "w": 34, "h": 2}, "style": "panel", "chrome": "none",
          "visible": "sceneState.ui ~= 9",
          "content": [{"type": "text", "text": "{%s}" % in_fight("rt.refusalAge < 90 and rt.refusal or sceneState.status", "sceneState.status")}]},
@@ -372,6 +390,8 @@ def on_frame(room):
     explore = move + [
         setv(walkX="max(%s, min(%s, sceneState.walkX + sceneState.dx * %s))" % (b["minX"], b["maxX"], WALK_SPEED),
              walkY="max(%s, min(%s, sceneState.walkY + sceneState.dy * %s))" % (b["minY"], b["maxY"], WALK_SPEED)),
+        iff("sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0", [SWAP]),
+        setv(menuHeld="sceneState.input.X"),
         setv(near="''", status=q(room["name"])),
     ]
     dist = "((sceneState.walkX - (%s))^2 + (sceneState.walkY - (%s))^2 < %s)"
@@ -405,15 +425,20 @@ def fight_select(room):
     menu = iff("sceneState.ui == 0", [
         iff("rt.player.at >= 100", [setv(ui=2, status="'Choose target'")])], [
         iff("sceneState.ui == 2", [
-            {"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "handgun_shot", "target": "enemy"}, setv(ui=0, status="''")], [
+            iff(WEAPON + " == 'baton'",
+                [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "baton_strike", "target": "enemy"}],
+                [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "handgun_shot", "target": "enemy"}]),
+            setv(ui=0, status="''")], [
             iff("sceneState.ui == 1", [
                 iff("sceneState.choice == 0", [setv(ui=2, status="'Choose target'")]),
                 iff("sceneState.choice == 1", [setv(ui=3)]),
-                iff("sceneState.choice == 2", [setv(ui=4)]),
+                iff("sceneState.choice == 2", [setv(ui=4, choice=0)]),
                 iff("sceneState.choice == 3", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "escape", "target": "self"}, setv(ui=0)]),
             ], [
                 iff("sceneState.ui == 3", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "heal1", "target": "self"}, setv(ui=0, status="''")], [
-                    iff("sceneState.ui == 4", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "item", "id": "medicine", "target": "self"}, setv(ui=0, status="''")])])])])])
+                    iff("sceneState.ui == 4", [iff("sceneState.choice == 0",
+                        [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "item", "id": "medicine", "target": "self"}],
+                        [SWAP]), setv(ui=0, status="''")])])])])])
     leave = [setv(walkX="rt.player.x", walkY="rt.player.y"), {"cmd": "REALTIME_BATTLE_END"}, setv(fight=0, ui=0)]
     return iff("rt.outcome == 'victory'", [
         {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + [setv(card=q(enc["after"]), ui=9)], [
@@ -458,7 +483,8 @@ def on_cancel(room):
 
 
 def scene(room, room_model, spawn):
-    menu_move = lambda step: [iff("sceneState.ui == 1", [setv(choice="(sceneState.choice+%d)%%4" % step)])]
+    menu_move = lambda step: [iff("sceneState.ui == 1", [setv(choice="(sceneState.choice+%d)%%4" % step)]),
+                              iff("sceneState.ui == 4", [setv(choice="(sceneState.choice+1)%2")])]
     return {
         "id": "day1_" + room["id"], "name": room["name"], "kind": "menu", "draw": "windows",
         "update": {"mode": "fixed", "step": 1 / 60, "maxCatchUp": 60},

@@ -6,9 +6,9 @@
     "rat_bite",
     "rat_fire_tail"
   ],
-  "flavor": "Placeholder boss (#1427 rough chapter). Reuses the rat kit; original values unverified.",
+  "flavor": "Piano-room Eve. HP 92 per the 1999 GameFAQs walkthrough (taerm); attacks are placeholders reusing the rat kit.",
   "baseParams": {
-    "maxHp": 90,
+    "maxHp": 92,
     "atk": 8,
     "def": 6,
     "mat": 6,

@@ -284,6 +284,16 @@
       "purpose": "Save a new self-contained source revision from a working source document."
     },
     {
+      "path": "painted_relief.py",
+      "role": "production",
+      "purpose": "Read an unchanged image-alpha silhouette into new thick UV-bound scaffold geometry and report explicit depth controls."
+    },
+    {
+      "path": "painted_relief_blender.py",
+      "role": "library",
+      "purpose": "Bind a new painted relief mesh, with optional live boundary relaxation and decimation; saved sources remain authority."
+    },
+    {
       "path": "photograph_room_package.py",
       "role": "production",
       "purpose": "Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size."

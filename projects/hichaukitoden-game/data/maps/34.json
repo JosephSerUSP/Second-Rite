@@ -229,7 +229,7 @@
     {
       "id": 3406,
       "instanceId": "st-maria-passage-hall-gate_door",
-      "name": "Registry gate",
+      "name": "Passage to the Registry",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -246,7 +246,7 @@
           "commands": [
             {
               "cmd": "TEXT",
-              "text": "The gate is bolted from this side. You lift the bar and go through."
+              "text": "The gate is bolted from this side. You lift the bar and go down into the passage that runs under the Praça."
             },
             {
               "cmd": "LOAD_MAP",
@@ -257,7 +257,7 @@
           "elseCommands": [
             {
               "cmd": "TEXT",
-              "text": "An iron gate, padlocked. Through the bars: a lamp, a counter, a ledger. Staff only until you hold a Crossing Writ."
+              "text": "An iron gate, padlocked. Through the bars a level passage runs away under the square, lit from far off. Staff only until you hold a Crossing Writ."
             }
           ]
         }

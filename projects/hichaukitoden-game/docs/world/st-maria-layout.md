@@ -236,12 +236,13 @@ second way out.
 ```
  PRAÇA side (high)                                       CORTIÇO side (mid)
 
- street ──> [33 Registry] ── iron gate ──┐   (locked until the Crossing Writ)
-                                          │
- upper floor        gallery: Room 2 · ROOM 3 · Room 4 ──┘                 <──┐
- (Praça level)             ^ stair (walked, one storey)                        │
+ Praça (z 14.07) ──> [33 Registry] ── back-door stair down ──┐
+                       (cellar, z 11.3)                         │ the PASSAGE: level, under the
+                                                                │ Praça terrace, ~10 m
+ gallery level (z 11.3)    gallery: Room 2 · ROOM 3 · Room 4 ───┘ (iron gate, locked until the Crossing Writ)
+ (one storey above the street)  ^ stair (walked, one storey)                   <──┐
  ground floor    service rooms (shut)   post wall · stair foot · great door ─> street [1001 Cortiço]
- (Cortiço level)                                                           street door ─> same street, 3 m along
+ (Cortiço street, z 8.1)                                                    street door ─> same street, 3 m along
 
                   [34 Stair hall] is the whole of this, one screen, one continuous walk
                   [25 Room 3]  is entered from its gallery door
@@ -259,14 +260,20 @@ Connections:
   street: the great door (the Passage House doorstep) and the street door at the
   far end, which lets out about 3 m along the street from it. The old Arrival Court
   (map 32) is retired. The house's Praça way in is the
-  Registry's front door, and the gate joins the two halves from inside, so the
-  building has a through-route and the player can see that it does.
+  Registry's front door. The two halves are one building because of the
+  **Passage**: a level corridor under the Praça terrace that joins the end of the
+  gallery to the Registry's cellar, whose stair comes up at the Registry's back
+  door. The numbers close: the gallery floor is 3.2 m above the Cortiço street
+  (z 11.3); the Praça terrace is 6 m above it (z 14.07) and the Registry's floor is
+  on the terrace; one storey under the Registry floor is also z 11.3. So the
+  passage never climbs or crosses the Praça lane; it runs beneath the retaining
+  wall and the strip, and nothing about it needs a plate to show it.
 - **Room 3 door → along the gallery → down the stair → great door →
   Cortiço → Praça → Registry front door.** This is the opening's first civic loop,
   now starting inside one building.
-- **The gate** (far end of the gallery, a few steps from Celina on the other side
-  of the wall) is locked on the first visit and opens after the player holds a
-  Crossing Writ. After that the return loop is faster: Praça → Registry → gate →
+- **The gate** (far end of the gallery) opens onto the Passage and is locked on the
+  first visit; it opens after the player holds a Crossing Writ, so the first walk
+  to the Praça is still the long way, over the street. After that the return loop is faster: Praça → Registry → gate →
   gallery → Room 3.
 - **The other apartment doors** are closed, with traces of tenants who are out in
   the Labyrinth. They are set dressing, not screens.
@@ -274,8 +281,14 @@ Connections:
   floor and the camera is yawed so it recedes; a tall window lights the stair;
   Room 3's lamp is the one warm door.
 
-The only new screen is 34. The Registry keeps its adopted room; the gate on its rear
-wall is an edit to that adopted source, never a regeneration. Room 3's contents come
+The only new screen is 34; the Passage itself is not a screen, it is the
+transfer between the gallery gate and the Registry's back door. The Registry
+keeps its adopted room; the door on its back wall is an edit to that adopted
+source, never a regeneration. Why not relocate a building instead: the Praça
+lane runs between the two blocks, so any single mass would have to cross it
+(an arch would hide the player behind a wall; a bridge sits above what either
+plate frames), and moving the Registry or the apartments gives up the opening's
+first walk or the Praça's civic role. Room 3's contents come
 from its authored text (missing picture, chipped feed bowl, low coat hook, straw):
 they are what make it that room and not another rented room.
 

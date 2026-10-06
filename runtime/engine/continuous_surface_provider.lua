@@ -111,9 +111,12 @@ end
 -- Continuous movement is sampled from held logical buttons every frame. The
 -- directional press edge therefore has no grid-step meaning and must stop at
 -- the traversal membrane instead of falling through to main.lua's grid host.
+-- L/R are also consumed here: they are grid strafes in the legacy host and
+-- must not mutate a hidden grid position underneath a continuous Map.
 function provider.buttonpressed(session, button)
     if not provider.ensure(session) then return false end
     return button == "UP" or button == "DOWN" or button == "LEFT" or button == "RIGHT"
+        or button == "L" or button == "R"
 end
 
 function provider.actorRoot(session)
@@ -124,24 +127,26 @@ end
 
 -- Resolve the nearest ordinary Map Event authored in world space. Event
 -- identity/program ownership stays with the Map; traversal supplies only the
--- proximity fact. This is deliberately analogous to bounded_lane's Event
--- proximity without making Events part of the walk-surface schema.
-function provider.nearestEvent(session, radius)
+-- proximity fact. The optional predicate belongs to the host, so page/trigger
+-- semantics can filter candidates without being duplicated in traversal.
+function provider.nearestEvent(session, radius, predicate)
     local state = provider.ensure(session)
     if not state then return nil end
     radius = tonumber(radius) or state.interactionRadius
     if radius <= 0 then return nil end
     local best, bestDistance2 = nil, radius * radius
     for _, event in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
-        local x, y = eventPosition(event)
-        if x and y then
-            local eventRadius = tonumber(event.interactionRadius) or radius
-            local dx, dy = state.x - x, state.y - y
-            local distance2 = dx * dx + dy * dy
-            local threshold2 = eventRadius * eventRadius
-            if distance2 <= threshold2
-                    and (best == nil or distance2 < bestDistance2) then
-                best, bestDistance2 = event, distance2
+        if not predicate or predicate(event) then
+            local x, y = eventPosition(event)
+            if x and y then
+                local eventRadius = tonumber(event.interactionRadius) or radius
+                local dx, dy = state.x - x, state.y - y
+                local distance2 = dx * dx + dy * dy
+                local threshold2 = eventRadius * eventRadius
+                if distance2 <= threshold2
+                        and (best == nil or distance2 < bestDistance2) then
+                    best, bestDistance2 = event, distance2
+                end
             end
         end
     end
@@ -206,6 +211,9 @@ function provider.restore(session, saved)
     state.environment = environment
     state.spawnAnchor = spec.spawnAnchor or "spawn_player"
     state.interactionRadius = finite(spec.interactionRadius or 1.15, "interactionRadius")
+    if state.interactionRadius <= 0 then
+        error("continuous surface provider interactionRadius must be > 0", 0)
+    end
     state.walkFrameIndex = math.floor((state.walkDistance or 0) / 0.42) % 6
     state.facing = (state.facingX or 0) < 0 and -1 or 1
     session.continuousTraversal = state

@@ -1,0 +1,90 @@
+name: PR 1400 item source stress upgrade
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/blender/pr1400_item_source_stress_upgrade.py
+      - .github/workflows/pr1400-item-source-stress-upgrade.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/rework-consumables-2026-10-05'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/rework-consumables-2026-10-05
+          persist-credentials: true
+
+      - name: Install host validation dependencies
+        run: python -m pip install --disable-pip-version-check pillow numpy
+
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Install pinned Blender
+        uses: ./.github/actions/install-blender
+
+      - name: Apply stress-test tooling upgrade and sync portable core
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python tools/blender/pr1400_item_source_stress_upgrade.py
+          python tools/blender/sync_asset_core.py
+          python -m py_compile \
+            tools/blender/second_rite_asset_core.py \
+            tools/blender/compile_item_blend.py \
+            tools/blender/compile_item_blends.py \
+            tools/blender/tests/item_dependency_graph_blender.py \
+            tools/blender/tests/test_item_dependency_graph.py
+          git diff --check
+
+      - name: Require pinned Blender integrations
+        run: |
+          python tools/blender/blender_locator.py
+          echo "BLENDER_TESTS_REQUIRED=1" >> "$GITHUB_ENV"
+
+      - name: Stress internal Blender dependency graph
+        run: xvfb-run -a python -m unittest discover -s tools/blender/tests -p 'test_item_dependency_graph.py' -v
+
+      - name: Compile every committed item source and emit graph reports
+        shell: bash
+        run: |
+          set -euxo pipefail
+          reports="$RUNNER_TEMP/item-source-graph-reports"
+          xvfb-run -a python tools/blender/compile_item_blends.py --check --report-dir "$reports"
+          test "$(find "$reports" -maxdepth 1 -name '*.json' | wc -l)" -ge 38
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import os
+          reports = Path(os.environ['RUNNER_TEMP']) / 'item-source-graph-reports'
+          records = [json.loads(path.read_text(encoding='utf-8')) for path in reports.glob('*.json')]
+          print('ITEM SOURCE GRAPH REPORTS', len(records))
+          print('INTERNAL DEPENDENCY EDGES', sum(r['sourceObjectDependencyCounts']['internal'] for r in records))
+          print('EXTERNAL DEPENDENCY EDGES', sum(r['sourceObjectDependencyCounts']['external'] for r in records))
+          print('MODIFIER VOCABULARY', sorted({m for r in records for m in r['modifierTypes']}))
+          PY
+          python tools/asset-production/check_item_models.py --report
+
+      - name: Adopt upgrade and remove one-shot bootstrap
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm tools/blender/pr1400_item_source_stress_upgrade.py
+          rm .github/workflows/pr1400-item-source-stress-upgrade.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "Stress-test Blender item source dependency graph"
+          git push origin HEAD:agent/rework-consumables-2026-10-05

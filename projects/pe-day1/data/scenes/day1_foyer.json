@@ -71,11 +71,16 @@
               0
             ],
             "yaw": 0,
-            "visible": "true"
+            "visible": "true",
+            "scale": [
+              0.55,
+              0.55,
+              1
+            ]
           },
           {
             "id": "aya",
-            "model": "assets/models/backstage/aya.obj",
+            "model": "assets/models/aya/aya_idle.obj",
             "position": [
               "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
               "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
@@ -85,26 +90,92 @@
             "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
           },
           {
-            "id": "aya_walk_a",
-            "model": "assets/models/backstage/aya_walk_a.obj",
+            "id": "aya_walk_0",
+            "model": "assets/models/aya/aya_walk_0.obj",
             "position": [
               "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
               "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')"
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 0 and (sceneState.fight == 0 or rt.outcome == '')"
           },
           {
-            "id": "aya_walk_b",
-            "model": "assets/models/backstage/aya_walk_b.obj",
+            "id": "aya_walk_1",
+            "model": "assets/models/aya/aya_walk_1.obj",
             "position": [
               "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
               "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
               0
             ],
             "yaw": "sceneState.aim",
-            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')"
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 1 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_2",
+            "model": "assets/models/aya/aya_walk_2.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 2 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_3",
+            "model": "assets/models/aya/aya_walk_3.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 3 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_4",
+            "model": "assets/models/aya/aya_walk_4.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 4 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_5",
+            "model": "assets/models/aya/aya_walk_5.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 5 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_6",
+            "model": "assets/models/aya/aya_walk_6.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 6 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_7",
+            "model": "assets/models/aya/aya_walk_7.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 7 and (sceneState.fight == 0 or rt.outcome == '')"
           }
         ]
       },

@@ -4,6 +4,30 @@
     "backstage_rat.blend": {
       "status": "adopted",
       "basis": "Copied 2026-10-06 from scene-benchmarks b009_encounter.blend (identical bytes at copy). Original B009 backstage corridor, textured Aya/rat and pose variants. Editable source authority; export existing document, do not regenerate."
+    },
+    "pe_foyer.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_auditorium.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_stage.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_backstage.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_dressing.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_rehearsal.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
     }
   }
 }

@@ -20,6 +20,7 @@ PROJECT = os.path.normpath(os.path.join(HERE, "..", ".."))
 SCENES = os.path.join(PROJECT, "data", "scenes")
 BLOCKOUT = os.path.join(PROJECT, "assets", "models", "blockout")
 BACKSTAGE = "assets/models/backstage/"
+AYA = "assets/models/aya/"
 
 WALK_SPEED = 0.05          # world units per fixed tick while exploring
 NEAR = 0.9                 # interaction radius for doors and pickups
@@ -249,22 +250,24 @@ def scene_models(room, room_model):
                        "visible": "sceneState.%s == 0" % sv("got_" + p["id"])})
     walking = "sceneState.moving == 1"
     models += [
-        {"id": "aya_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": [PX, PY, 0], "yaw": 0, "visible": "true"},
-        {"id": "aya", "model": BACKSTAGE + "aya.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+        {"id": "aya_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": [PX, PY, 0], "yaw": 0, "visible": "true", "scale": [0.55, 0.55, 1]},
+        {"id": "aya", "model": AYA + "aya_idle.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
          "visible": "(%s and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))" % FIGHT},
-        {"id": "aya_walk_a", "model": BACKSTAGE + "aya_walk_a.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
-         "visible": "sceneState.ui == 0 and %s and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')" % walking},
-        {"id": "aya_walk_b", "model": BACKSTAGE + "aya_walk_b.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
-         "visible": "sceneState.ui == 0 and %s and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')" % walking},
     ]
+    # Eight-frame walk cycle (tools/build_aya.py); gait advances 10 rad/s.
+    for k in range(8):
+        models.append({"id": "aya_walk_%d" % k, "model": AYA + "aya_walk_%d.obj" % k, "position": [PX, PY, 0],
+                       "yaw": "sceneState.aim",
+                       "visible": "sceneState.ui == 0 and %s and floor(sceneState.gait / 6.283185 * 8) %% 8 == %d"
+                                  " and (sceneState.fight == 0 or rt.outcome == '')" % (walking, k)})
     if "encounter" in room:
         enemy = room["encounter"]["enemy"]
         ex, ey = "rt.enemy.x", "rt.enemy.y"
         tint = in_fight("rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1", 1)
         models += [
-            {"id": "aya_down", "model": BACKSTAGE + "aya_down.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+            {"id": "aya_down", "model": AYA + "aya_down.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
              "visible": in_fight("rt.outcome == 'defeat'", "false")},
-            {"id": "aya_recoil", "model": BACKSTAGE + "aya_recoil.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+            {"id": "aya_recoil", "model": AYA + "aya_recoil.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
              "visible": in_fight("rt.outcome ~= 'defeat' and rt.actAge < 12", "false")},
             {"id": "range_ground", "model": BACKSTAGE + "range_ground.obj", "position": [PX, PY, 0.03], "yaw": 0,
              "visible": "sceneState.ui == 2", "scale": [REACH, REACH, 1]},

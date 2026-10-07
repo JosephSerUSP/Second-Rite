@@ -1,0 +1,103 @@
+{
+  "imageSize": [
+    1536,
+    1024
+  ],
+  "insetPixels": 4,
+  "regions": {
+    "coin_front": {
+      "pixels": [
+        48,
+        48,
+        560,
+        560
+      ],
+      "users": [
+        "verdigris_coin"
+      ],
+      "role": "front sun/waves stamp"
+    },
+    "coin_back": {
+      "pixels": [
+        592,
+        48,
+        1104,
+        560
+      ],
+      "users": [
+        "verdigris_coin"
+      ],
+      "role": "back compass stamp"
+    },
+    "signet_face": {
+      "pixels": [
+        1160,
+        48,
+        1480,
+        368
+      ],
+      "users": [
+        "untarnished_signet"
+      ],
+      "role": "unmarked flat seal table"
+    },
+    "gold": {
+      "pixels": [
+        48,
+        608,
+        1488,
+        762
+      ],
+      "users": [
+        "untarnished_signet",
+        "verdigris_coin"
+      ],
+      "role": "shared calm exposed gold"
+    },
+    "bronze": {
+      "pixels": [
+        48,
+        795,
+        1488,
+        970
+      ],
+      "users": [
+        "verdigris_coin"
+      ],
+      "role": "quiet patinated bronze sleeve"
+    }
+  },
+  "requestedRegions": {
+    "coin_front": [
+      48,
+      48,
+      560,
+      560
+    ],
+    "coin_back": [
+      592,
+      48,
+      1104,
+      560
+    ],
+    "signet_face": [
+      1160,
+      48,
+      1480,
+      368
+    ],
+    "gold": [
+      48,
+      640,
+      1488,
+      784
+    ],
+    "bronze": [
+      48,
+      832,
+      1488,
+      976
+    ]
+  },
+  "boundary": "Actual generated rectangles measured from original pixels; 4px sampling inset. Gold/bronze moved vertically relative to guide; no image edits."
+}

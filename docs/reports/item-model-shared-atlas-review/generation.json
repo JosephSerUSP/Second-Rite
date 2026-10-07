@@ -1,0 +1,41 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "Use case: stylized-concept\nAsset type: one shared two-item multiview modeling reference sheet for a small retro RPG.\nPrimary request: two distinct objects, each shown in four matched orthographic views: FRONT, RIGHT, BACK, TOP. Top row: an UNTARNISHED SIGNET. Bottom row: a VERDIGRIS COIN. Eight objects total in an orderly two-row four-column sheet, evenly separated; no text labels.\nSignet: a heavy solid gold signet ring with a thick D-section band, an actual open finger hole, broad angular shoulders transitioning into a raised beveled octagonal blank seal table. The seal table is UNMARKED, no emblem, no stone, no writing. Warm pale gold, subtle polished hammer-work. Upright ring with circular finger hole facing the front camera; seal table sits at the top of the ring. The front view sees the band hole and thick shoulders, the right view sees the band width and raised seal table, the top view sees the blank octagonal gold seal. Do not tilt cameras.\nCoin: a thick circular old bronze coin with quiet turquoise-green patina in recesses and warm exposed gold-bronze on edges. Raised real rim, mildly irregular reeded edge. Front stamp: one strong abstract rising sun above three broad wave strokes. Back stamp: a simple large four-point compass star inside an inset ring. No lettering or numerals. Low-relief worn stamp, distinct front and back.\nStyle: clean restrained hand-painted old-console 3D prop, readable at 96 pixels, large calm material areas, no tiny grain noise or excessive chips.\nComposition: landscape canvas about 2048x1536; same scale across all views of a given object. Front looks along negative Y to positive Y, right along positive X, back along positive Y, top along positive Z. Reference objects alone on fully transparent background.\nLighting: diffuse neutral even light, weak contact shading only. No dramatic highlights, cast shadows, perspective, stylized false thickness, floating parts, scene, hands, pedestal or typography. Hidden physical surfaces inferred consistently.",
+  "atlas": "Use case: stylized-concept\nAsset type: ONE opaque shared UV surface atlas for TWO different 3D game items, 1536x1024 landscape.\nInput images: Image 1 is a reference of gold signet and verdigris coin for material/style identity. Image 2 is a CODE-NATIVE atlas allocation guide, not finished art. Preserve its layout precisely; replace only its colored swatches and outlines with painted material art. This is a flat texture, NOT a new object-view sheet.\nPrimary request: interpret BOTH reference items into a single material atlas. Calm restrained hand-painted retro RPG albedo, high readability at 96px. No rendered object thickness, perspective, lighting gradient, cast shadows, baked bright highlights, lettering, watermark, labels, outlines or separator frames inside painted regions.\nExact regions in 1536x1024 pixel coordinates, top-left origin:\n1. (48,48) through (560,560): coin FRONT. A perfectly centred circular design within a square; aged muted green-blue bronze face, one strong golden rising sun with large rays above three broad flowing wave strokes; quiet surrounding patina. Motif looks like worn color in a low-relief stamp, not aggressively shaded 3D. The full square is green-blue bronze so UVs can safely sample outside the circular motif.\n2. (592,48) through (1104,560): coin BACK. Same palette, centred large golden four-point compass star in a thin bronze ring, restrained patina. Full square green-blue bronze.\n3. (1160,48) through (1480,368): signet blank face. Entire square is UNMARKED pale warm gold, very subtle hammer-work, no emblem, stone, writing, octagonal outline or dark edge. Actual octagonal boundary and bevel will be geometry.\n4. (48,640) through (1488,784): one continuous calm pale warm gold strip shared by signet band, shoulders and coin exposed metal edges. No borders, black seams, motifs or huge scratches. Keep both strip endpoints extremely similar in color and quiet texture. No alternating reed pattern; reeds will be actual geometry.\n5. (48,832) through (1488,976): a continuous quiet patinated bronze strip, muted green-blue with sparse warm exposed bronze. No borders, alternating stripes, decorative stamp or dark shadows. Keep both ends similar.\nLeave all gutters dark neutral as in guide, with no text. Fill every allocated rectangle edge-to-edge. Do not rearrange or resize the rectangles. These two items must retain distinct identities while sharing original metal pixels. Fully opaque RGB surface art, no transparency.",
+  "outputs": [
+    {
+      "role": "multiview reference",
+      "original": "exec-01f87c79-6b2b-48b0-8a50-0ed58dc12029.png",
+      "sha256": "d87b994b93f31ccd0513f7c8726d5982eced9dcc43c1793403b87b26e3b56ce6",
+      "size": [
+        1448,
+        1086
+      ],
+      "mode": "RGBA",
+      "pixels": "unchanged original"
+    },
+    {
+      "role": "one atlas for two items",
+      "original": "exec-7c49bffc-3637-4c4e-b2ad-07b9cf616f17.png",
+      "sha256": "7f47837bc36f618a5e3b79c9f1b4867581c0cc4981e0778f7af8e2b6e5255885",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "pixels": "unchanged original"
+    }
+  ],
+  "inputs": {
+    "atlas": [
+      "reference.png",
+      "layout.png"
+    ]
+  },
+  "generationCalls": {
+    "references": 1,
+    "surfaceAtlases": 1,
+    "items": 2,
+    "boundary": "Call count only. No inference about token, latency or monetary savings."
+  }
+}

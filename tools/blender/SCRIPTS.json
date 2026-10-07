@@ -299,6 +299,11 @@
       "purpose": "Bind a new painted relief mesh, with optional live boundary relaxation and decimation; saved sources remain authority."
     },
     {
+      "path": "path_sweep.py",
+      "role": "library",
+      "purpose": "Minimum-rotation tube frames and distance UVs for new curved item scaffolds; saved meshes remain authoritative."
+    },
+    {
       "path": "photograph_room_package.py",
       "role": "production",
       "purpose": "Photograph a baked room package the way the game draws it: unlit, nearest-sampled, native size."

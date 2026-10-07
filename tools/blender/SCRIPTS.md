@@ -44,7 +44,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (39)
+## Implementation modules and Blender workers (40)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -72,6 +72,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [mesh_export_geometry.py](mesh_export_geometry.py) | `import` | Derived mesh preparation; never alters authored mesh datablocks. |
 | [multiview_reference.py](multiview_reference.py) | `import` | Read calibrated independent multiview silhouettes and project unchanged atlas surfaces; explicit reference disagreement and occlusion boundaries. |
 | [painted_relief_blender.py](painted_relief_blender.py) | `import` | Bind a new painted relief mesh, with optional live boundary relaxation and decimation; saved sources remain authority. |
+| [path_sweep.py](path_sweep.py) | `import` | Minimum-rotation tube frames and distance UVs for new curved item scaffolds; saved meshes remain authoritative. |
 | [placement_rules.py](placement_rules.py) | `import` | Pure authoring support and protected-volume checks; not runtime collision. |
 | [render_furnishings_catalogue.py](render_furnishings_catalogue.py) | `run.py` | Pinned-Blender worker for furnishings_catalogue.py; never saves a .blend. |
 | [render_profiles.py](render_profiles.py) | `import` | Shared render quality; camera, lighting, output encoding and source files belong to callers. |

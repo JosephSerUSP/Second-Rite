@@ -98,3 +98,33 @@ More items trade generation calls against detail pixels, layout drift and
 coupled edits: replacing a shared region can alter every consuming source.
 After adoption, edit saved sources directly and review all consumers of a
 changed shared image. Baseline/golden approval boundaries remain unchanged.
+
+## Curved assemblies and asymmetric blades
+
+The complex-weapon follow-on combines a four-rib crown around a faceted crystal
+with a separate hooked polearm. Both consume one original atlas, sharing silver
+and leather allocations. A material region is not a component: one curved rib
+can have blackened sides and engraved silver faces with separate bounded UVs.
+
+`path_sweep.sweep_tube(points, radius_pairs, segments=8)` builds a new closed
+elliptical tube using minimum-rotation transported frames. It returns vertices,
+faces, per-corner normalized UVs and smooth flags. V follows cumulative path
+distance, U follows section angle with an explicit seam; cap fans use radial
+patches and flat normals. Exact reversals, coincident points and nonpositive
+radii fail. This avoids pinching from a fixed global cross-section axis, but
+does not prove self-intersection clearance or consistent seam colors.
+
+Use separate named components for ribs, horns, lacing, sockets and rivets.
+Inspect actual cage gaps and the crystal from the side as well as the front.
+Thin decorative ridges may sit inside a thicker elliptical section even when
+their centerline looks correct; source and native review must expose that.
+For a concave blade, construct closed thickness and cutting bevel planes,
+then assign broad front/back art by world coordinates. A painted etching is
+surface decoration, not recovered relief. Materialize construction modifiers
+before the first save where evaluated UV alias stability matters.
+
+The saved mesh remains editable source authority; the sweep library is a new
+source scaffold, never a regeneration route for adopted documents. The
+[retained weapon review](../../docs/reports/item-model-weapons-atlas-review/README.md)
+records generated-reference discrepancies, direct source refinements, assigned
+regions, flat/smooth normals, actual source views and native 96px comparisons.

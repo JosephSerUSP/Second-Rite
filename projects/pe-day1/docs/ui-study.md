@@ -84,9 +84,20 @@ Three-pass plan, as requested by the owner on 2026-10-07:
 - Engine: `session.items.<id>` and `<battler>.equip.<slot>` formula views;
   the Actor Change snapshot no longer counts equipment as development.
 
-## Pass 3 — fine-tuning
+## Pass 3 — fine-tuning (first round landed)
 
-Check every screen against the decompilation's menu and HUD code (exact
-positions, sizes, colours, gauge styles) and `ART/Menu.png` once the drive
-is online; add the PE page, an inventory slot limit and the play-time clock;
-tune colour, borders, fonts, spacing.
+From the decompilation:
+- Gauges: AT is the original's cyan on its dark green track (#1D3E32),
+  brightening when full; HP and PE use the HUD's green and pink-red
+  gradients (which gauge each belongs to is inferred, not verified).
+- Menu help panel carries the play-time clock at its right edge
+  (`Menu_ContextHelpFlow`); play time is a persistent game variable
+  advanced by every room's fixed tick.
+- Status panel groups name and stats, then the equipped weapon and armor
+  rows (`Menu_DrawStatusPanel`).
+- PE page in the field menu: Heal 1 restores 30 HP for 30 PE.
+
+Still open: exact pixel positions and the original's fonts/frames (needs
+the decomp's draw primitives decoded further and `ART/Menu.png`); the
+inventory slot limit; gradients instead of flat gauge fills (the gauge
+widget draws one colour).

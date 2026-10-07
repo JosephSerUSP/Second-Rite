@@ -211,8 +211,19 @@ local ok, err = pcall(function()
     tap("UP"); tap("A")
     check(require("engine.game_variables").get(session, "weapon") == "baton", "the Equip page changes the weapon")
     tap("A")
+    tap("B"); tap("DOWN"); tap("A")
+    check(v().ui == 23, "P. Energy opens the PE page")
+    local resources = require("engine.battler_resources")
+    aya.hp = 10
+    local pe0 = resources.get(aya, "pe", session)
+    tap("A")
+    check(aya.hp == 40 and resources.get(aya, "pe", session) == pe0 - 30, "Heal 1 in the field restores 30 HP for 30 PE")
     tap("B"); tap("B")
     check(v().ui == 0, "B backs out of the menu page by page")
+    local t0 = require("engine.game_variables").get(session, "playSeconds") or 0
+    frames(60)
+    local t1 = require("engine.game_variables").get(session, "playSeconds") or 0
+    check(math.abs((t1 - t0) - 1) < 0.05, "the play clock advances one second per second")
 
     -- Movement is screen-relative. Backstage's low view (x < 0) looks down
     -- the corridor toward -x, so UP walks Aya away from it, toward -x.

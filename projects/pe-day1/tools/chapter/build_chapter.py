@@ -329,12 +329,12 @@ def windows(room, room_model):
             {"id": "combat_hud", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "overlay",
              "visible": hud, "content": [
                 {"type": "gauge", "x": 3.2, "y": 1.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.at", "max": "100", "fill": [0.08, "rt.player.at >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7", 0.85],
-                 "color": [0.04, 0.07, 0.06]},
+                 "value": "rt.player.at", "max": "100", "fill": ["rt.player.at >= 100 and .62+.3*abs(sin(sceneState.gait)) or .31", "rt.player.at >= 100 and 1 or .64", "rt.player.at >= 100 and .98 or .74"],
+                 "color": [0.11, 0.24, 0.20]},
                 {"type": "gauge", "x": 3.2, "y": 3.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.hp", "max": "rt.player.maxHp", "fill": [0.85, 0.75, 0.2], "color": [0.07, 0.06, 0.03]},
+                 "value": "rt.player.hp", "max": "rt.player.maxHp", "fill": [0.15, 0.75, 0.23], "color": [0.11, 0.24, 0.20]},
                 {"type": "gauge", "x": 3.2, "y": 5.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.25, 0.55, 0.95], "color": [0.03, 0.05, 0.08]}]},
+                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.76, 0.16, 0.26], "color": [0.11, 0.24, 0.20]}]},
             {"id": "hud_labels", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "none",
              "visible": hud, "content": [{"type": "text", "text": "AT\n\nHP\n\nPE\n\n{" + WEAPON + " == 'baton' and 'BATON' or 'M84F'}"}]},
             {"id": "hud_values", "rect": {"x": "12 - surface.originX", "y": 1, "w": 8, "h": 9}, "style": "panel", "chrome": "none",
@@ -364,10 +364,13 @@ def windows(room, room_model):
     out += [
         # Field menu (B): a page column on the left, Aya's status on the right,
         # a help line at the bottom.
-        {"id": "menu_root", "rect": {"x": "1 - surface.originX", "y": 1, "w": 14, "h": 6}, "style": "panel", "chrome": "overlay",
+        {"id": "menu_root", "rect": {"x": "1 - surface.originX", "y": 1, "w": 14, "h": 7}, "style": "panel", "chrome": "overlay",
          "visible": "sceneState.ui == 20", "content": [{"type": "text", "text":
             "MENU\n{sceneState.choice == 0 and '> ' or '  '}Item\n"
-            "{sceneState.choice == 1 and '> ' or '  '}Equip\n{sceneState.choice == 2 and '> ' or '  '}Close"}]},
+            "{sceneState.choice == 1 and '> ' or '  '}Equip\n{sceneState.choice == 2 and '> ' or '  '}P. Energy\n"
+            "{sceneState.choice == 3 and '> ' or '  '}Close"}]},
+        {"id": "menu_pe", "rect": {"x": "1 - surface.originX", "y": 1, "w": 20, "h": 4}, "style": "panel", "chrome": "overlay",
+         "visible": "sceneState.ui == 23", "content": [{"type": "text", "text": "P. ENERGY\n> Heal 1       PE 30"}]},
         {"id": "menu_items", "rect": {"x": "1 - surface.originX", "y": 1, "w": 20, "h": 5}, "style": "panel", "chrome": "overlay",
          "visible": "sceneState.ui == 21", "content": [{"type": "text", "text":
             "ITEM\n{sceneState.choice == 0 and '> ' or '  '}Medicine    x{session.items.medicine}\n"
@@ -376,12 +379,14 @@ def windows(room, room_model):
          "visible": "sceneState.ui == 22", "content": [{"type": "text", "text":
             "EQUIP\n{sceneState.choice == 0 and '> ' or '  '}Weapon  {" + WEAPON + " == 'baton' and 'Baton' or 'M84F'}\n"
             "{sceneState.choice == 1 and '> ' or '  '}Armor   {" + ARMOR_NAME + "}"}]},
-        {"id": "menu_status", "rect": {"x": "surface.width - surface.originX - 21", "y": 1, "w": 20, "h": 8}, "style": "panel",
+        {"id": "menu_status", "rect": {"x": "surface.width - surface.originX - 21", "y": 1, "w": 20, "h": 9}, "style": "panel",
          "chrome": "overlay", "visible": MENU_OPEN, "content": [{"type": "text", "text":
-            "AYA BREA\nHP  {sceneState.mHp}/{sceneState.mMax}\nPE  {sceneState.mPe}\nDEF {sceneState.mDef}\n"
+            "AYA BREA\nHP  {sceneState.mHp}/{sceneState.mMax}\nPE  {sceneState.mPe}\nDEF {sceneState.mDef}\n\n"
             "WPN {" + WEAPON + " == 'baton' and 'Baton' or 'M84F'}\nARM {" + ARMOR_NAME + "}"}]},
         {"id": "menu_help", "rect": {"x": "1 - surface.originX", "y": "surface.height - surface.originY - 4", "w": "surface.width - 2", "h": 3},
          "style": "panel", "chrome": "overlay", "visible": MENU_OPEN, "content": [{"type": "text", "text": "{" + MENU_HELP + "}"}]},
+        {"id": "menu_clock", "rect": {"x": "surface.width - surface.originX - 13", "y": "surface.height - surface.originY - 4", "w": 12, "h": 3},
+         "style": "panel", "chrome": "none", "visible": MENU_OPEN, "content": [{"type": "text", "text": "TIME " + CLOCK}]},
         # Bottom message box, sized to its text.
         {"id": "card", "rect": {"x": "4 - surface.originX", "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
                                 "w": "surface.width - 8", "h": "3 + sceneState.cardLines"}, "style": "panel",
@@ -397,14 +402,19 @@ def windows(room, room_model):
 ARMOR_NAME = ("(sceneState.mArmor == 'kevlar_vest' and 'Kevlar Vest' or "
               "(sceneState.mArmor == 'police_vest' and 'Police Vest' or 'None'))")
 # Field menu states: 20 root, 21 items, 22 equipment.
-MENU_OPEN = "sceneState.ui >= 20 and sceneState.ui <= 22"
+MENU_OPEN = "sceneState.ui >= 20 and sceneState.ui <= 23"
+PLAY = "(variables.playSeconds or 0)"
+CLOCK = ("{floor(%(t)s / 3600)}:{floor(%(t)s / 60) %% 60 < 10 and '0' or ''}{floor(%(t)s / 60) %% 60}"
+         ":{floor(%(t)s) %% 60 < 10 and '0' or ''}{floor(%(t)s) %% 60}") % {"t": PLAY}
 MENU_HELP = ("sceneState.menuNote ~= '' and sceneState.menuNote or ("
              "sceneState.ui == 20 and (sceneState.choice == 0 and 'Use or inspect items.' or "
-             "(sceneState.choice == 1 and 'Change weapon and armor.' or 'Back to the game.')) or ("
+             "(sceneState.choice == 1 and 'Change weapon and armor.' or "
+             "(sceneState.choice == 2 and 'Use Parasite Energy.' or 'Back to the game.'))) or ("
              "sceneState.ui == 21 and (sceneState.choice == 0 and 'Restores 30 HP.' or "
              "'Ammunition for the M84F. The Baton needs none.') or ("
+             "sceneState.ui == 23 and 'Heal 1: restores 30 HP for 30 PE.' or ("
              "sceneState.choice == 0 and 'M84F: range 4, uses rounds.  Baton: range 1.5, unlimited.' or "
-             "(sceneState.mArmor == 'kevlar_vest' and 'Kevlar Vest: DEF +6.' or 'Police Vest: DEF +2.'))))")
+             "(sceneState.mArmor == 'kevlar_vest' and 'Kevlar Vest: DEF +6.' or 'Police Vest: DEF +2.')))))")
 
 
 def snapshot():
@@ -433,13 +443,21 @@ def menu_select():
     change_armor = iff("session.items.kevlar_vest + session.items.police_vest > 0", [
         {"cmd": "EQUIP_ITEM", "slot": 2, "target": 1, "itemIndex": 2}, snapshot(), note("Armor changed.")],
         [note("No other armor to wear.")])
+    heal_pe = iff("sceneState.mPe >= 30", [
+        iff("sceneState.mHp >= sceneState.mMax", [note("HP is already full.")], [
+            {"cmd": "FOR_EACH", "scope": "party", "as": "aya", "do": [
+                {"cmd": "CHANGE_RESOURCE", "target": "aya", "resource": "pe", "amount": -30},
+                {"cmd": "HEAL", "target": "aya", "amount": 30}]},
+            snapshot(), note("Heal 1. HP restored.")])], [note("Not enough PE.")])
     return iff("sceneState.ui == 20", [
         iff("sceneState.choice == 0", [setv(ui=21, choice=0, menuNote="''")]),
         iff("sceneState.choice == 1", [setv(ui=22, choice=0, menuNote="''")]),
-        iff("sceneState.choice == 2", [setv(ui=0, menuNote="''")])], [
+        iff("sceneState.choice == 2", [setv(ui=23, choice=0, menuNote="''")]),
+        iff("sceneState.choice == 3", [setv(ui=0, menuNote="''")])], [
+        iff("sceneState.ui == 23", [heal_pe], [
         iff("sceneState.ui == 21", [
             iff("sceneState.choice == 0", [use_medicine], [note("Rounds load into the M84F as it fires.")])], [
-            iff("sceneState.choice == 0", [SWAP, note("Weapon changed.")], [change_armor])])])
+            iff("sceneState.choice == 0", [SWAP, note("Weapon changed.")], [change_armor])])])])
 
 
 def message(text, **more):
@@ -502,6 +520,7 @@ def view_yaw(room):
 
 def on_frame(room):
     b = bounds_of(room)
+    tick = {"cmd": "SET_GAME_VARIABLE", "name": "playSeconds", "value": PLAY + " + time.dt"}
     # Screen-relative movement: the stick is read against the camera heading
     # latched when a direction is first pressed, and that heading is kept
     # until every direction is released, so a camera cut mid-walk never
@@ -534,7 +553,7 @@ def on_frame(room):
                            [setv(near=q("p:" + p["id"]), status=q("Enter: examine"))]))
     hooks = [{"cmd": "READ_INPUT", "name": "input"}]
     if "encounter" not in room:
-        return hooks + explore
+        return [tick] + hooks + explore
     fight = [
         iff("sceneState.input.X and not sceneState.menuHeld and rt.outcome == '' and sceneState.ui ~= 9", [
             iff("sceneState.ui == 0 and rt.player.at >= 100",
@@ -548,7 +567,7 @@ def on_frame(room):
         iff("sceneState.moving == 0", [setv(aim="atan2(rt.enemy.x - rt.player.x, rt.player.y - rt.enemy.y)")]),
         setv(ratAim="atan2(rt.player.x - rt.enemy.x, rt.enemy.y - rt.player.y)"),
     ]
-    return hooks + [iff(FIGHT, fight, explore)]
+    return [tick] + hooks + [iff(FIGHT, fight, explore)]
 
 
 def fight_select(room):
@@ -611,7 +630,7 @@ def on_cancel(room):
     # B opens the field menu while exploring and backs out of it page by page.
     field = iff("sceneState.ui == 0", [snapshot(), setv(ui=20, choice=0, menuNote="''")], [
         iff("sceneState.ui == 20", [setv(ui=0)], [
-            iff("sceneState.ui == 21 or sceneState.ui == 22", [setv(choice="sceneState.ui - 21"), setv(ui=20, menuNote="''")])])])
+            iff("sceneState.ui >= 21 and sceneState.ui <= 23", [setv(choice="sceneState.ui - 21"), setv(ui=20, menuNote="''")])])])
     if "encounter" not in room:
         return [field]
     return [iff(FIGHT, [iff("sceneState.ui > 0 and sceneState.ui < 9 and rt.outcome == ''", [setv(ui=0, status="''")])], [field])]
@@ -619,7 +638,7 @@ def on_cancel(room):
 
 def scene(room, room_model, spawn):
     menu_move = lambda step: [iff("sceneState.ui == 1", [setv(choice="(sceneState.choice+%d)%%5" % (4 if step == 3 else 1))]),
-                              iff("sceneState.ui == 20", [setv(choice="(sceneState.choice+%d)%%3" % (2 if step == 3 else 1), menuNote="''")]),
+                              iff("sceneState.ui == 20", [setv(choice="(sceneState.choice+%d)%%4" % (3 if step == 3 else 1), menuNote="''")]),
                               iff("sceneState.ui == 21 or sceneState.ui == 22", [setv(choice="(sceneState.choice+1)%2", menuNote="''")])]
     return {
         "id": "day1_" + room["id"], "name": room["name"], "kind": "menu", "draw": "windows",

@@ -19,7 +19,8 @@ local function makeHarnessSession(loader)
             vSession:addItem(item.id, 3)
         end
     end
-    vSession:addItem(1, 5) -- HP Tonic
+    -- The canonical UI fixture uses item 1; external Projects need not own it.
+    if loader.getItem(1) then vSession:addItem(1, 5) end
     return vSession
 end
 cli.makeHarnessSession = makeHarnessSession

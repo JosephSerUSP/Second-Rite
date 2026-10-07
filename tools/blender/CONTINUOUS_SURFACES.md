@@ -128,3 +128,29 @@ source scaffold, never a regeneration route for adopted documents. The
 [retained weapon review](../../docs/reports/item-model-weapons-atlas-review/README.md)
 records generated-reference discrepancies, direct source refinements, assigned
 regions, flat/smooth normals, actual source views and native 96px comparisons.
+
+## Direction across a larger family
+
+Choose the family grammar before generating surface art: head shapes, supporting
+shoulders, focal marks, material palette and the intended flat/smooth boundaries.
+Give each item a different macro construction. For six casting tools, a
+hexagonal instrument, hooked timber, forked tablet, double crescent, iron mace
+and ceramic halo stay distinct under identical-geometry plain material controls.
+Quiet shared regions supply colour variation while a prominent tablet face
+gets its own graphic allocation. Texture contrast is not a substitute for mass.
+
+A direction lineup and several bounded multiview sheets can guide one shared
+atlas. Record actual output dimensions and allocations: requested image sizes
+and pixel rectangles are not guaranteed. Measure side proportions independently
+and label inferred thickness/hidden joints; top images can disagree in scale.
+Keep raw references unchanged, and distinguish agent-selected study direction
+from owner approval. Review every consumer of a shared material edit.
+
+Use `item_kit.report` after positioning: it updates the view layer so child and
+parent transforms are current before measuring bounds. Raw geometry checks can
+miss collapsed bevel-tip triangles after OBJ coordinate rounding; inspect at
+export precision and repair the saved source directly. Do not loosen export
+validation or rerun a scaffold to repair an adopted document. The
+[six-item review](../../docs/reports/item-model-staff-family-review/README.md)
+retains actual source cardinal views, native controls, measured allocations and
+direct refinement records.

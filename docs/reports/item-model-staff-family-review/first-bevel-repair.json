@@ -1,0 +1,10 @@
+{
+  "item": "ether_staff",
+  "object": "E_OuterCrescentWithBrassDepth",
+  "beforeSHA256": "51b80032f47ccb0cd6b74fc8135dd8838fc952cf8c310e232eb3109f90c510a1",
+  "afterSHA256": "bd2be42b37c25e798f4a0ef0efe70831bcdfb25113fa70ef4bcffa85077d93f2",
+  "verticesBefore": 240,
+  "verticesAfter": 238,
+  "maxRemainingVertexDisplacement": 0.0,
+  "boundary": "Direct saved-source local weld of zero-area bevel tip. Original source retained in ignored out/work for diagnosis; no compiler repair or old-source regeneration."
+}

@@ -1,0 +1,75 @@
+[
+  {
+    "item": "silver_rod",
+    "beforeSHA256": "f84c44fda432eedf32acee24b244dc9d0f131642613ec873afdaaae43fd556c1",
+    "afterSHA256": "11ff70598b39fddf78a6d6bb7aeee462007890209af35111be80045060ad836b",
+    "worldYFactor": 1.4744318673937509,
+    "targetDepth": 0.9436363740400835,
+    "height": 5.190000057220459,
+    "frontXZPreserved": true,
+    "tipRepairs": []
+  },
+  {
+    "item": "mage_staff",
+    "beforeSHA256": "92f69c9554ccc48a5a6c94c6968f073a8ab15f0540f92cffd2fdb92056ee118b",
+    "afterSHA256": "80b1134d92b25353d146120af42c26ee339199a447811a8fc780eeb628b75a8c",
+    "worldYFactor": 1.4856944308619562,
+    "targetDepth": 0.9810919029227758,
+    "height": 5.861713647842407,
+    "frontXZPreserved": true,
+    "tipRepairs": []
+  },
+  {
+    "item": "sage_staff",
+    "beforeSHA256": "21180b0eef0c1303a95929fd45fc584d8acc278973079c0cd0beeeaa424b8e92",
+    "afterSHA256": "ea9a486b44929d68fd9cd6208b3ec95c06d41ff6e6273fa03a32b4f20ed93d89",
+    "worldYFactor": 1.1068480128007607,
+    "targetDepth": 0.6419718289519221,
+    "height": 6.019999980926514,
+    "frontXZPreserved": true,
+    "tipRepairs": []
+  },
+  {
+    "item": "ether_staff",
+    "beforeSHA256": "bd2be42b37c25e798f4a0ef0efe70831bcdfb25113fa70ef4bcffa85077d93f2",
+    "afterSHA256": "dba198be400a5c932e0e2e205d7a87228eb1c07abe6fec05fb6724b28b35d16c",
+    "worldYFactor": 0.9513298234522616,
+    "targetDepth": 0.5707979167528274,
+    "height": 6.02630877494812,
+    "frontXZPreserved": true,
+    "tipRepairs": [
+      {
+        "object": "E_OuterCrescentWithBrassDepth",
+        "verticesBefore": 238,
+        "verticesAfter": 236,
+        "maxRemainingVertexDisplacement": 0.0
+      },
+      {
+        "object": "F_InnerOpposingCrescent",
+        "verticesBefore": 240,
+        "verticesAfter": 236,
+        "maxRemainingVertexDisplacement": 0.0
+      }
+    ]
+  },
+  {
+    "item": "war_staff",
+    "beforeSHA256": "38078cd0869c4aa9d60b20936339b0edda802fc04474567adbffea91354b6ce7",
+    "afterSHA256": "52e8d71881118acd4f8ad3806a7a0c3c99527cbc1f91ecddd821204237d90394",
+    "worldYFactor": 0.973176936639691,
+    "targetDepth": 1.4792289251304533,
+    "height": 5.960000038146973,
+    "frontXZPreserved": true,
+    "tipRepairs": []
+  },
+  {
+    "item": "healing_staff",
+    "beforeSHA256": "36f9feb6ecb9743b675404992593864cb7301cb9992cbe40aeb7818050152db9",
+    "afterSHA256": "0ee5e14f5350a9f26289c2dc1e3110e170d472c80b26c2e26b4536b7c4b1a3b7",
+    "worldYFactor": 1.5297071290409647,
+    "targetDepth": 0.9331213705976245,
+    "height": 6.309677839279175,
+    "frontXZPreserved": true,
+    "tipRepairs": []
+  }
+]

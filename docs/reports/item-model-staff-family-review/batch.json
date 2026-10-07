@@ -1,0 +1,29 @@
+{
+  "stems": [
+    "silver_rod",
+    "mage_staff",
+    "sage_staff",
+    "ether_staff",
+    "war_staff",
+    "healing_staff"
+  ],
+  "names": [
+    "Silver Rod",
+    "Mage Staff",
+    "Sage Staff",
+    "Ether Staff",
+    "War Staff",
+    "Healing Staff"
+  ],
+  "atlas": "ritual_staff_family_atlas.png",
+  "direction": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+  "nativeCriteria": [
+    "Unique outline before texture",
+    "Head width and shoulders readable at96px",
+    "Negative gaps visible",
+    "Plain control retains identity",
+    "Smooth shafts / flat cut faces",
+    "Hero motif gets its own pixel region"
+  ],
+  "boundary": "Interpretation of sparse authored item descriptions, not new canonical lore. Current sources do not exist; scaffold once only."
+}

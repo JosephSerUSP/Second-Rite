@@ -1,0 +1,368 @@
+{
+  "imageSize": [
+    1254,
+    1254
+  ],
+  "insetPixels": 5,
+  "regions": {
+    "sapphire": {
+      "pixels": [
+        29,
+        29,
+        375,
+        343
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff"
+      ]
+    },
+    "sage_front": {
+      "pixels": [
+        402,
+        29,
+        830,
+        343
+      ],
+      "users": [
+        "sage_staff"
+      ]
+    },
+    "sage_back": {
+      "pixels": [
+        855,
+        29,
+        1225,
+        343
+      ],
+      "users": [
+        "sage_staff"
+      ]
+    },
+    "amethyst": {
+      "pixels": [
+        29,
+        372,
+        375,
+        635
+      ],
+      "users": [
+        "ether_staff"
+      ]
+    },
+    "jade": {
+      "pixels": [
+        402,
+        372,
+        735,
+        635
+      ],
+      "users": [
+        "healing_staff"
+      ]
+    },
+    "ivory": {
+      "pixels": [
+        763,
+        372,
+        1225,
+        635
+      ],
+      "users": [
+        "sage_staff",
+        "healing_staff"
+      ]
+    },
+    "silver": {
+      "pixels": [
+        29,
+        663,
+        613,
+        761
+      ],
+      "users": [
+        "silver_rod",
+        "ether_staff"
+      ]
+    },
+    "brass": {
+      "pixels": [
+        642,
+        664,
+        1225,
+        761
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff",
+        "sage_staff",
+        "ether_staff",
+        "healing_staff"
+      ]
+    },
+    "iron": {
+      "pixels": [
+        29,
+        791,
+        402,
+        891
+      ],
+      "users": [
+        "war_staff"
+      ]
+    },
+    "dark_wood": {
+      "pixels": [
+        432,
+        791,
+        803,
+        891
+      ],
+      "users": [
+        "mage_staff"
+      ]
+    },
+    "ash_wood": {
+      "pixels": [
+        833,
+        791,
+        1225,
+        891
+      ],
+      "users": [
+        "sage_staff",
+        "war_staff",
+        "healing_staff"
+      ]
+    },
+    "indigo": {
+      "pixels": [
+        29,
+        919,
+        402,
+        1047
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff",
+        "sage_staff"
+      ]
+    },
+    "plum": {
+      "pixels": [
+        432,
+        919,
+        804,
+        1047
+      ],
+      "users": [
+        "ether_staff"
+      ]
+    },
+    "brown": {
+      "pixels": [
+        834,
+        919,
+        1225,
+        1047
+      ],
+      "users": [
+        "war_staff"
+      ]
+    },
+    "green_cloth": {
+      "pixels": [
+        29,
+        1076,
+        613,
+        1224
+      ],
+      "users": [
+        "healing_staff"
+      ]
+    }
+  },
+  "requestedImageSize": [
+    2048,
+    2048
+  ],
+  "requestedRegions": {
+    "sapphire": {
+      "pixels": [
+        48,
+        48,
+        608,
+        560
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff"
+      ]
+    },
+    "sage_front": {
+      "pixels": [
+        656,
+        48,
+        1280,
+        560
+      ],
+      "users": [
+        "sage_staff"
+      ]
+    },
+    "sage_back": {
+      "pixels": [
+        1328,
+        48,
+        2000,
+        560
+      ],
+      "users": [
+        "sage_staff"
+      ]
+    },
+    "amethyst": {
+      "pixels": [
+        48,
+        608,
+        608,
+        1040
+      ],
+      "users": [
+        "ether_staff"
+      ]
+    },
+    "jade": {
+      "pixels": [
+        656,
+        608,
+        1200,
+        1040
+      ],
+      "users": [
+        "healing_staff"
+      ]
+    },
+    "ivory": {
+      "pixels": [
+        1248,
+        608,
+        2000,
+        1040
+      ],
+      "users": [
+        "sage_staff",
+        "healing_staff"
+      ]
+    },
+    "silver": {
+      "pixels": [
+        48,
+        1088,
+        1000,
+        1248
+      ],
+      "users": [
+        "silver_rod",
+        "ether_staff"
+      ]
+    },
+    "brass": {
+      "pixels": [
+        1048,
+        1088,
+        2000,
+        1248
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff",
+        "sage_staff",
+        "ether_staff",
+        "healing_staff"
+      ]
+    },
+    "iron": {
+      "pixels": [
+        48,
+        1296,
+        656,
+        1456
+      ],
+      "users": [
+        "war_staff"
+      ]
+    },
+    "dark_wood": {
+      "pixels": [
+        704,
+        1296,
+        1312,
+        1456
+      ],
+      "users": [
+        "mage_staff"
+      ]
+    },
+    "ash_wood": {
+      "pixels": [
+        1360,
+        1296,
+        2000,
+        1456
+      ],
+      "users": [
+        "sage_staff",
+        "war_staff",
+        "healing_staff"
+      ]
+    },
+    "indigo": {
+      "pixels": [
+        48,
+        1504,
+        656,
+        1712
+      ],
+      "users": [
+        "silver_rod",
+        "mage_staff",
+        "sage_staff"
+      ]
+    },
+    "plum": {
+      "pixels": [
+        704,
+        1504,
+        1312,
+        1712
+      ],
+      "users": [
+        "ether_staff"
+      ]
+    },
+    "brown": {
+      "pixels": [
+        1360,
+        1504,
+        2000,
+        1712
+      ],
+      "users": [
+        "war_staff"
+      ]
+    },
+    "green_cloth": {
+      "pixels": [
+        48,
+        1760,
+        1000,
+        2000
+      ],
+      "users": [
+        "healing_staff"
+      ]
+    }
+  },
+  "boundary": "Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim."
+}

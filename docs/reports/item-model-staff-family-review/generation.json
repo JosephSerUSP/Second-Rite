@@ -1,0 +1,69 @@
+{
+  "tool": "built-in image_gen",
+  "calls": 4,
+  "prompts": {
+    "direction": "Use case: stylized-concept\nAsset type: art direction lineup for SIX distinct RPG inventory casting weapons, designed for real 96px readability.\nPrimary request: a coherent family of crafted ritual tools, with BOLD DISTINCT HEAD SHAPES, clear construction and restrained worn materials. Full objects, one upright front view each, side by side on truly transparent background. Six weapons in this exact left-to-right order, equal vertical floor, entire silhouettes separated, no labels/text, no scenery or ground shadows.\n1 SILVER ROD: compact silver alchemical instrument, thick fluted octagonal body, large faceted hexagonal head with a sapphire inset framed by an actual broad silver rim, blunt chisel pommel, cobalt grip, strong clean straight profile. No staff with a floating orb.\n2 MAGE STAFF: crooked warm dark wood with a BIG asymmetric shepherd-hook head opening around a suspended deep blue faceted stone. Wood crook substantial, copper binding collars, broad indigo cloth grip. Visible negative gap between gem and crook. Head roughly one third of total height.\n3 SAGE STAFF: pale ash staff supporting a broad HORIZONTAL stepped ivory stone tablet in an open brass fork, short angular side lugs, quiet large carved blue central mark, two tassels clearly separate from shaft. Thick square tablet, actual not a book, scholarly architectural rather than antlers. Head wide and geometrically stepped.\n4 ETHER STAFF: elegant blackened silver stem supporting a wide tilted double-crescent lens, open ellipse with two substantial interleaved curves and an opaque elongated amethyst prism suspended at an angle in the center. Open windows and pale metal edges, no tiny spikes/cage/antler crown. Lens horizontally wide, asymmetry from lean, tapering silver shaft and plum grip.\n5 WAR STAFF: stout low-magic fighting implement: broad iron mace-like head with FOUR thick square hammer flanges around a tall heavy faceted core, leather wrapped ashwood, utilitarian bolted collars, short tapering iron butt. Broad dark mass with plane breaks, no glowing stones. Iron steel and warm brown rather than ornamental silver.\n6 HEALING STAFF: light warm wood topped by a broad open ivory CERAMIC circular halo with SIX chunky petal plates; round green jade medallion held low in the halo, actual open air above it. Warm brass clips, sage-green cloth wrapping, gentle branching shoulders holding halo. Geometric petal edges flat, round wood smooth.\nVisual direction: painterly retro 3D crafted objects; material color blocks and silhouette first, readable mass hierarchy: large heads / strong shoulders / substantial grips. Rounded wood and metal ribs smooth, flat tablet/crystal/mace plates crisp. Quiet broad wear, NO all-over micro engraving, no busy chips, no spindly poles or tiny filigree. Rich but limited ivory, warm ash, copper/brass, indigo, jade/amethyst. Soft neutral side illumination, small restrained highlight bands, no blackening everything. Similar quality and design language, SIX genuinely different constructions.",
+    "references": {
+      "a": "Use case: stylized-concept. Asset type: measured MULTIVIEW construction reference. Image1 is the approved-for-study direction lineup: use its design language and specified objects, not its lighting/background. Make a genuinely transparent-background 1536x2048 PORTRAIT sheet: THREE rows, FOUR columns front / right / back / top. Whole object in each view; no labels/text/ground shadows. Orthographic front camera from negative Y with Z upright, right from positive X, back from positive Y, top from positive Z. Front/right/back of each object must have exactly the same vertical scale, shaft length, head size, attachments. Top is clearly top-down and shows physical thickness, not a tilted front picture. A consistent object per row; empty space is okay. Bright neutral matte studio illumination, no dark backgrounds, NO floating unrelated detached pieces. Keep strong material masses and ample negative gaps; do not add fine engraved noise. Construction planes crisp, round timber/rounded metal smooth. Strong thick joins/shoulders, adequate real grip thickness.\nRows in this exact order:\nTOP: SILVER ROD from far-left in lineup. Compact thick fluted octagonal SILVER instrument; big hexagonal head with sapphire inset and a thick silver/brass framing rim, cobalt wrapped grip, blunt faceted pommel. Sapphire is inset opaque faceted volume in an actual closed metal head, not a printed gem photograph. Silver fluted ridges large and real. No horn, dangling ribbon or floating orb. Head about28% of length and 28% of width; rod proportion substantially stouter than a walking stick.\nMIDDLE: MAGE STAFF second in lineup. Asymmetrical bent brown wood shepherd-hook, large sweeping crook with open gap around suspended sapphire lantern stone, copper bindings, indigo cloth wrap with ONE broad trailing strip. Show independent side depth of curved timber and gemstone. Stone supported by a short ring/chain and a cap. Natural wood crook has one large outer carved ridge, not all-over bark furrows. Head width about40% of total height. Shift stone to right of shaft as reference.\nBOTTOM: SAGE STAFF third in lineup. Warm pale ash shaft, substantial gold brass FORK shoulders supporting a HORIZONTAL stepped ivory tablet. Large midnight-blue moon/drop emblem painted in the tablet front; back contains a quieter simple vertical line. Real stepped tablet thickness, face planes crisp. Two heavy blue tassels hang independently on side lugs. Tablet width about40% of total height; short horizontal top cap with stepped shoulders, not a narrow antler crown.",
+      "b": "Use case: stylized-concept. Asset type: measured MULTIVIEW construction reference. Image1 is the approved-for-study direction lineup: use its design language and specified objects, not its lighting/background. Make a genuinely transparent-background 1536x2048 PORTRAIT sheet: THREE rows, FOUR columns front / right / back / top. Whole object in each view; no labels/text/ground shadows. Orthographic front camera from negative Y with Z upright, right from positive X, back from positive Y, top from positive Z. Front/right/back of each object must have exactly the same vertical scale, shaft length, head size, attachments. Top is clearly top-down and shows physical thickness, not a tilted front picture. A consistent object per row; empty space is okay. Bright neutral matte studio illumination, no dark backgrounds, NO floating unrelated detached pieces. Keep strong material masses and ample negative gaps; do not add fine engraved noise. Construction planes crisp, round timber/rounded metal smooth. Strong thick joins/shoulders, adequate real grip thickness.\nRows in this exact order:\nTOP: ETHER STAFF fourth in lineup. Wide horizontally spreading tilted double-crescent LENS made of silver with brass undersides, open center around one large elongated AMETHYST prism leaning diagonally. Upper/outside curve left, inner curve right, broad clean crescent blade-like faces and thick depth. Visible air gap around prism, short real caps and mounts attach its ends. Tapered silver stem, plum grip, ONE broad silver spiral ribbon around grip, pointed ferrule. Lens width about45% of total height; stem thick enough to read at96px. No spindly 4-talon crown, no extra spikes.\nMIDDLE: WAR STAFF fifth in lineup. Stout heavy utilitarian fighting implement, substantial iron quadrangular hammer/mace head with FOUR square-ended thick flanges around tall faceted central core, warm ashwood, brown diagonal leather wrap, two large bolted iron collars, blunt iron butt. Head mass about35% of whole height, width about30%. No gemstones, glowing areas, fine filigree, or blade-thin flanges. Side/back views must reveal four plates, not just repeat two front wings.\nBOTTOM: HEALING STAFF last in lineup. Honey ashwood branching shoulders support broad open IVORY ceramic halo, SIX chunky pentagonal petal segments held by warm brass clips. Open circular window above lower green jade medallion; jade held by visible lower branch/cup, not floating. Sage-green cloth grip and one trailing strip, gently bulbous carved wooden butt capped in brass. Halo width about43% of total height, thickness clearly shown in side/top. Ceramic petals have broad flat planes and beveled edges, no flower illustration printed on a disk."
+    },
+    "atlas": "Use case: stylized-concept. Asset type: ONE shared flat color UV atlas for SIX staff models. Make a 2048x2048 SQUARE opaque image with exactly the rectangular panel layout in Image3.\nImage1 and Image2: multiview design reference for palette and the Sage tablet symbol ONLY. Image3: exact color-allocation guide. NOT object-render editing.\nThis is FLAT MATERIAL COLOR ART, not an illustration of staves or pieces. Never draw full staff/gem/object shapes, bevels, cylinders, highlights, shadows, fake ambient occlusion, labels, lettering, borders or watermarks. Fill every panel EDGE TO EDGE with its material. Outside panels dark gray. Follow these top-left pixel rectangles exactly; generous gutters must stay empty gray.\nsapphire x48..608 y48..560: medium royal blue color with a few soft quiet cobalt cloud streaks, NO faceted gem photograph or polygon highlights.\nsage_front x656..1280 y48..560: warm ivory stone panel, ONE LARGE simple midnight-blue crescent-and-drop emblem centered with a vertical thin blue line; based on tablet reference. Clean graphic flat-color symbol, no raised outlines/bevel/shadows. No tablet shape, no frame.\nsage_back x1328..2000 y48..560: same warm ivory, one simple shorter blue vertical line with a small round dot, calmer than front; no crescent.\namethyst x48..608 y608..1040: medium warm lavender/violet color, soft subtle cloudy marbling, no gem silhouette/facet polygons/highlight beams.\njade x656..1200 y608..1040: deep warm emerald jade, very subtle soft cloud mottling, NO white circular shine or fake sphere.\nivory x1248..2000 y608..1040: calm warm off-white ceramic/stone with tiny quiet tonal variation, no cracks, no pattern, no bevels.\nsilver x48..1000 y1088..1248: even light cool-gray silver strip, ONE faint restrained lengthwise brush mark. No engravings, no polished 3D shading.\nbrass x1048..2000 y1088..1248: even warm antique brass strip, a few quiet light warm brush marks, no curls, filigree, rivets or shading.\niron x48..656 y1296..1456: medium graphite-gray iron strip, broad muted color, small soft brown wear patches, not noisy rusty flakes.\ndark_wood x704..1312 y1296..1456: warm walnut colored panel with FOUR soft vertical grain lines, no bark or deep furrows.\nash_wood x1360..2000 y1296..1456: honey pale ashwood panel with FOUR soft vertical grain lines, no knots or cracks.\nindigo x48..656 y1504..1712: medium rich cobalt-indigo dyed cloth, gently varied flat color, no painted folds/lacing/diamonds.\nplum x704..1312 y1504..1712: muted plum cloth, softly varied flat color, no folds/straps.\nbrown x1360..2000 y1504..1712: warm tobacco-brown leather softly varied, no lacing or straps, no thick grain.\ngreen_cloth x48..1000 y1760..2000: quiet sage-green dyed cloth with gentle color variation, no folds or rope pattern.\nArt direction: crafted ritual tools, clean material color masses, calm painterly surfaces. All geometry, cut planes, physical wraps and light response are supplied by the 3D models. Texture should be MUCH QUIETER than the reference illustrations. Keep all-over texture contrast extremely low, no microdetail, no photoreal noisy granite. Large symbol is the only decorative pattern."
+  },
+  "originals": {
+    "direction": "exec-5d3daa7d-0e72-4a7e-86cb-0f0bc04ba30a.png",
+    "referenceA": "exec-5a6469b0-f4fd-436a-9ca2-64b4b1904af1.png",
+    "referenceB": "exec-f1e4dd21-c69b-4d80-8b75-87f49f7aec72.png",
+    "atlas": "exec-3794c6d7-8c07-46d4-8536-abbd536fab61.png"
+  },
+  "referenceInputs": [
+    "direction.png"
+  ],
+  "atlasInputs": [
+    "reference-a.png",
+    "reference-b.png",
+    "layout.png"
+  ],
+  "boundary": "Agent-selected direction for review, not owner visual approval. Four calls for six items is call count only, not cost or performance proof.",
+  "images": {
+    "direction": {
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "3eb520f60d16715efe12284655a312d52783705989f09f7f70c03bdf2e2cb939"
+    },
+    "referenceA": {
+      "size": [
+        1086,
+        1448
+      ],
+      "mode": "RGBA",
+      "sha256": "27e8f9463b22ca09371e4f62e0df6276e1f7cde510da4c606ef744cd5533ac8c"
+    },
+    "referenceB": {
+      "size": [
+        1086,
+        1448
+      ],
+      "mode": "RGBA",
+      "sha256": "d012b874f34c167436b265cabd27c381937d69328be746710b12cbdcb5ccf2ed"
+    },
+    "atlas": {
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "sha256": "edbae1b42d75107a8970baf6a79ed1ca7487f21a8845488446904c2e5ffb4047"
+    },
+    "layout": {
+      "size": [
+        2048,
+        2048
+      ],
+      "mode": "RGB",
+      "sha256": "cd3e0d9309cc86119b9c31e3f3823335fb899268615be3ddebbfb585b511a4f3"
+    }
+  }
+}

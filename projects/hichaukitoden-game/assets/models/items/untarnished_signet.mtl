@@ -1,22 +1,26 @@
-# Blender 5.0.1 MTL File: 'second_rite_item_model_library_expanded.blend'
+# Blender 5.2.2 LTS MTL File: 'untarnished_signet.blend'
 # www.blender.org
 
-newmtl MAT_BrightGold
-Ns 577.599976
-Ka 0.780000 0.780000 0.780000
-Kd 0.920000 0.650000 0.160000
+newmtl untarnished_signet_gold
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
 
-newmtl MAT_Ruby
-Ns 577.599976
-Ka 0.120000 0.120000 0.120000
-Kd 0.620000 0.035000 0.025000
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+pass sphere add 0.075 assets/models/matcaps/gold.png
+newmtl untarnished_signet_signet_face
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
-Ke 0.600000 0.012000 0.006000
+Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+pass sphere add 0.075 assets/models/matcaps/gold.png

@@ -1,0 +1,95 @@
+{
+  "geometryAndBakedTrianglePositionsMatch": true,
+  "featuresAndBakedOnlyTextureBindingsDiffer": true,
+  "uvFindings": [],
+  "bakedUVMinTriangleArea": 2.1361099999999867e-07,
+  "bakedUVArea": 0.5667347350569999,
+  "atlasInteriorCoverageFraction": 0.5666626824273003,
+  "atlasInteriorOverlappingTexels": 0,
+  "overlapTest": "1536x1536 texel centres strictly inside triangles; shared edges excluded. Does not prove absence of subtexel overlaps.",
+  "unchangedOriginalSources": [
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_conform.blend",
+      "sha256": "244996c14e14894bae015f6fef05ecfcac3ed074dc2b7dbe45d718f03a4a90da"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_hull.blend",
+      "sha256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_sdf.blend",
+      "sha256": "8960e67c6f238298ee898f50d16c53499d4edbaf82896ed8f3930fd905abc34a"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_conform.blend",
+      "sha256": "53d5e41d2a30ddcee7a2a28cc46cdb997b2787900aea6a0ea24ada41a05f2c89"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_hull.blend",
+      "sha256": "1886bbe82599287a13ac03423f628ca0f5b3aec8b03e123e5b4e0654e9527d6e"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_sdf.blend",
+      "sha256": "ea71eff1a1dafcd94348a96cce9bcaac2827850eee3e6ec9f29d5edbb4d6a38d"
+    }
+  ],
+  "unchangedOriginalGeneratedImages": true,
+  "productHashes": [
+    {
+      "file": "carved_baked.png",
+      "sha256": "9f83a9f30ce7084ca956b679af72ea728f4a6ca62ab1e8a6b3772855c2858c01"
+    },
+    {
+      "file": "carved_capsule_baked.mtl",
+      "sha256": "42f0390c55875d137a8dcb6987f74c11bfa8250811e5695d5a9b663dddaf7c9c"
+    },
+    {
+      "file": "carved_capsule_baked.obj",
+      "sha256": "b22cc90090e20bdec9a9502017644a1d002b6280b6d1d825aaea4eb8c815269a"
+    },
+    {
+      "file": "carved_capsule_features.mtl",
+      "sha256": "221cfb86e685e74c1911c86752e343fb31a9e55b3bf85c5dc08d3edc4bb7f2d4"
+    },
+    {
+      "file": "carved_capsule_features.obj",
+      "sha256": "4ec8ec8f98a5daa3423677be835db6728a49e65f679f1127e441b2331d39d5b9"
+    },
+    {
+      "file": "carved_capsule_geometry.mtl",
+      "sha256": "40db181608597595d06e07434f79d8dc8846c360b6802c1983f8a69def0391a2"
+    },
+    {
+      "file": "carved_capsule_geometry.obj",
+      "sha256": "0ccd0d2dc4ea738aeb563b4d4e8a315f52ebf6b2af822cc8d494e0a57728664b"
+    },
+    {
+      "file": "carved_features.png",
+      "sha256": "32a29caa9829c744f4d18e1d3e388896a64f8d866d0a74e2fe870e1bb1720224"
+    },
+    {
+      "file": "hybrid_surface_atlas.png",
+      "sha256": "63130c56ed7d568aa2e05016d4dc426fb94d52c3648b3f25e623a315ea5580ac"
+    }
+  ],
+  "bakeRuntimeDelta": {
+    "carved-baked96": {
+      "differentPixels": 2889,
+      "meanAbsoluteChannelDeltaAllPixels": 0.6641981336805556,
+      "brightenedChannels": 0,
+      "darkenedChannels": 5874
+    },
+    "carved-baked192": {
+      "differentPixels": 11427,
+      "meanAbsoluteChannelDeltaAllPixels": 0.6661196108217593,
+      "brightenedChannels": 0,
+      "darkenedChannels": 23426
+    },
+    "carved-cardinal96": {
+      "differentPixels": 3571,
+      "meanAbsoluteChannelDeltaAllPixels": 0.7833387586805556,
+      "brightenedChannels": 0,
+      "darkenedChannels": 7288
+    }
+  }
+}

@@ -1,0 +1,391 @@
+[
+  {
+    "item": "carved_capsule_baked",
+    "sourceHash": "b8c64d34233a0b5b8da50cea4e78f3bbdad1d0e21452523c9271e89bd41c8663",
+    "objects": [
+      {
+        "name": "BakedAssembly",
+        "faces": 12991,
+        "smoothFaces": 12655,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 5.44733868710896,
+        "modifiers": []
+      }
+    ],
+    "boundsMin": [
+      -1.2685768604278564,
+      -0.7624551057815552,
+      -1.7879509925842285
+    ],
+    "boundsMax": [
+      1.2551343441009521,
+      0.604458749294281,
+      1.802618145942688
+    ],
+    "dimensions": [
+      2.5237112045288086,
+      1.3669137954711914,
+      3.590569019317627
+    ],
+    "images": [
+      "//_textures\\carved_baked.png",
+      "//_textures\\carved_features.png",
+      "//_textures\\"
+    ],
+    "rootScale": [
+      0.8173953890800476,
+      0.6980423331260681,
+      0.9596229195594788
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "carved_capsule_baked",
+      "sr_contract_version": 1,
+      "sr_asset_id": "carved_capsule_baked",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_hull",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, hull construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "hull",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "owner review open; no technical pass establishes art approval",
+      "sr_source_refinement": "Direct saved-source edits: smooth loft walls, plain conformed cut rims, redundant empty hull modifier removed",
+      "sr_revision_parent": "D:\\Antigravity\\Hichaukitoden\\.claude\\worktrees\\stale-item-models\\docs\\reports\\item-model-hybrid-study\\source-project\\assets\\authoring\\items\\hybrid_carved_hull.blend",
+      "sr_revision_parent_sha256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+      "sr_owner_feedback": "Weak geometry relative to reference; featureless/quiet texture, not overly loud. Need meaningful surface structure and baked shading.",
+      "sr_geometry_revision": "[\"HULL_left: deeper 3D envelope, convex crown and rounder cut edges\", \"HULL_right: deeper 3D envelope, convex crown and rounder cut edges\", \"CORE_OrganicVolume: shorter, rounder saved loft with subdivision\", \"Removed four invented screw-like fasteners from bone assembly\", \"Upper crest carries an actual shallow carved channel\", \"Raised cloth selvages and 16 physical edge stitches\"]",
+      "sr_geometry_control_sha256": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06",
+      "sr_rounding_revision": "Voxelized saved cheek meshes at 0.025, 14 relaxation steps, 18 percent decimation; original silhouettes retained as historical study.",
+      "sr_baked_surface_revision": "1536 unique UVs, material-specific pores/veins/grain/dye; Cycles EMIT albedo plus directionless contact AO. Final mesh editable; old graphs retained in original study.",
+      "sr_bake_distance": 0.34,
+      "sr_bake_occlusion_floor": 0.32,
+      "sr_control_material_boundary": "Nonrendering historical mask/cutter controls have no export material slots; procedural bake node graphs retained as fake-user material recipes.",
+      "sr_cross_section_rounding": "Saved cheek cross-sections contracted smoothly toward outline edges, 0.24-unit round-over radius, 0.22 edge depth floor.",
+      "sr_bake_recipe_components": "[{\"vertices\": 42, \"faces\": 48, \"role\": \"spine\", \"votes\": {\"spine\": 48}}, {\"vertices\": 722, \"faces\": 720, \"role\": \"core\", \"votes\": {\"core\": 720}}, {\"vertices\": 4968, \"faces\": 6607, \"role\": \"outer\", \"votes\": {\"outer\": 6607}}, {\"vertices\": 3904, \"faces\": 4968, \"role\": \"outer\", \"votes\": {\"outer\": 4968}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"spine\", \"votes\": {\"spine\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}]"
+    }
+  },
+  {
+    "item": "carved_capsule_geometry",
+    "sourceHash": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_Selvage_A",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.004597279066866023,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_Selvage_B",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0045129762370412895,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 720,
+        "smoothFaces": 720,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.1505187656472975,
+        "modifiers": []
+      },
+      {
+        "name": "HULL_left",
+        "faces": 6607,
+        "smoothFaces": 6607,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 1.5606973155548098,
+        "modifiers": []
+      },
+      {
+        "name": "HULL_right",
+        "faces": 4968,
+        "smoothFaces": 4968,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 1.1125820790673195,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_0_0.22_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367120710770445e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_0_0.22_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.3671177319553595e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_0_0.65_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.3671145073015914e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_0_0.65_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367117731955346e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_1_0.22_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367109957426655e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_1_0.22_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367105959379664e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_1_0.65_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367111757603592e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_1_0.65_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367114237676337e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_2_0.22_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367106845608905e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_2_0.22_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367106732673624e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_2_0.65_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367114640030302e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_2_0.65_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367113063190479e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_3_0.22_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.3671194641560075e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_3_0.22_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.36711831144754e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_3_0.65_-1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.367124019509796e-05,
+        "modifiers": []
+      },
+      {
+        "name": "STITCH_3_0.65_1",
+        "faces": 18,
+        "smoothFaces": 6,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 3.3671183702286594e-05,
+        "modifiers": []
+      }
+    ],
+    "boundsMin": [
+      -1.2685768604278564,
+      -0.7624551057815552,
+      -1.7879509925842285
+    ],
+    "boundsMax": [
+      1.2551343441009521,
+      0.604458749294281,
+      1.802618145942688
+    ],
+    "dimensions": [
+      2.5237112045288086,
+      1.3669137954711914,
+      3.590569019317627
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.8173953890800476,
+      0.6980423331260681,
+      0.9596229195594788
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "carved_capsule_geometry",
+      "sr_contract_version": 1,
+      "sr_asset_id": "carved_capsule_geometry",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_hull",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, hull construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "hull",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "owner review open; no technical pass establishes art approval",
+      "sr_source_refinement": "Direct saved-source edits: smooth loft walls, plain conformed cut rims, redundant empty hull modifier removed",
+      "sr_revision_parent": "D:\\Antigravity\\Hichaukitoden\\.claude\\worktrees\\stale-item-models\\docs\\reports\\item-model-hybrid-study\\source-project\\assets\\authoring\\items\\hybrid_carved_hull.blend",
+      "sr_revision_parent_sha256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+      "sr_owner_feedback": "Weak geometry relative to reference; featureless/quiet texture, not overly loud. Need meaningful surface structure and baked shading.",
+      "sr_geometry_revision": "[\"HULL_left: deeper 3D envelope, convex crown and rounder cut edges\", \"HULL_right: deeper 3D envelope, convex crown and rounder cut edges\", \"CORE_OrganicVolume: shorter, rounder saved loft with subdivision\", \"Removed four invented screw-like fasteners from bone assembly\", \"Upper crest carries an actual shallow carved channel\", \"Raised cloth selvages and 16 physical edge stitches\"]",
+      "sr_rounding_revision": "Voxelized saved cheek meshes at 0.025, 14 relaxation steps, 18 percent decimation; original silhouettes retained as historical study.",
+      "sr_cross_section_rounding": "Saved cheek cross-sections contracted smoothly toward outline edges, 0.24-unit round-over radius, 0.22 edge depth floor."
+    }
+  }
+]

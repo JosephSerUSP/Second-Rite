@@ -1,0 +1,2 @@
+REVISION PRODUCT AUDIT OK: matched geometry, material-only controls, unique UVs, upstream hashes unchanged
+{"carved-baked96": {"differentPixels": 2889, "meanAbsoluteChannelDeltaAllPixels": 0.6641981336805556, "brightenedChannels": 0, "darkenedChannels": 5874}, "carved-baked192": {"differentPixels": 11427, "meanAbsoluteChannelDeltaAllPixels": 0.6661196108217593, "brightenedChannels": 0, "darkenedChannels": 23426}, "carved-cardinal96": {"differentPixels": 3571, "meanAbsoluteChannelDeltaAllPixels": 0.7833387586805556, "brightenedChannels": 0, "darkenedChannels": 7288}}

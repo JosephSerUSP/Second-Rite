@@ -1,0 +1,8 @@
+00:02.532  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_geometry.blend"
+00:03.032  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend"
+Info: Saved as "carved_capsule_geometry.blend"
+Info: Saved as "carved_capsule_baked.blend"
+SAVED CROSS SECTION EDITS
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit

@@ -1,0 +1,270 @@
+{
+  "geometrySourceSHA256": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06",
+  "sourceSHA256": "b8c64d34233a0b5b8da50cea4e78f3bbdad1d0e21452523c9271e89bd41c8663",
+  "atlasSize": 1536,
+  "dilationTexels": 4,
+  "faces": 12991,
+  "vertices": 10172,
+  "uvCharts": 232,
+  "surfaceRoles": [
+    "spine",
+    "core",
+    "outer",
+    "binding",
+    "thread"
+  ],
+  "bakes": [
+    {
+      "name": "carved_features",
+      "sha256": "32a29caa9829c744f4d18e1d3e388896a64f8d866d0a74e2fe870e1bb1720224"
+    },
+    {
+      "name": "carved_baked",
+      "sha256": "9f83a9f30ce7084ca956b679af72ea728f4a6ca62ab1e8a6b3772855c2858c01"
+    }
+  ],
+  "method": "Cycles EMIT, CPU, 32 samples. Feature albedo and feature albedo multiplied by 0.32+0.68*AO(distance 0.34). No directional key light baked.",
+  "components": [
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "spine",
+      "votes": {
+        "spine": 48
+      }
+    },
+    {
+      "vertices": 722,
+      "faces": 720,
+      "role": "core",
+      "votes": {
+        "core": 720
+      }
+    },
+    {
+      "vertices": 4968,
+      "faces": 6607,
+      "role": "outer",
+      "votes": {
+        "outer": 6607
+      }
+    },
+    {
+      "vertices": 3904,
+      "faces": 4968,
+      "role": "outer",
+      "votes": {
+        "outer": 4968
+      }
+    },
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "spine",
+      "votes": {
+        "spine": 48
+      }
+    },
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "binding",
+      "votes": {
+        "binding": 48
+      }
+    },
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "binding",
+      "votes": {
+        "binding": 48
+      }
+    },
+    {
+      "vertices": 34,
+      "faces": 40,
+      "role": "binding",
+      "votes": {
+        "binding": 40
+      }
+    },
+    {
+      "vertices": 34,
+      "faces": 40,
+      "role": "binding",
+      "votes": {
+        "binding": 40
+      }
+    },
+    {
+      "vertices": 34,
+      "faces": 40,
+      "role": "binding",
+      "votes": {
+        "binding": 40
+      }
+    },
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "binding",
+      "votes": {
+        "binding": 48
+      }
+    },
+    {
+      "vertices": 42,
+      "faces": 48,
+      "role": "binding",
+      "votes": {
+        "binding": 48
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    },
+    {
+      "vertices": 14,
+      "faces": 18,
+      "role": "core",
+      "votes": {
+        "core": 2,
+        "binding": 2
+      }
+    }
+  ],
+  "requestedPackingGutterTexels": 8
+}

@@ -1,0 +1,12 @@
+00:03.000  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend"
+D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved_surface_bake.py:34: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat.use_nodes=True;nodes=mat.node_tree.nodes;links=mat.node_tree.links
+Info: Baking map saved to internal image, save it externally or pack it
+BAKED carved_features
+Info: Baking map saved to internal image, save it externally or pack it
+BAKED carved_baked
+Info: Saved as "carved_capsule_baked.blend"
+SURFACE REVISION SAVED
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit

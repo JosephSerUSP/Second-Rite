@@ -1,0 +1,17 @@
+00:02.641  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend"
+D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved_audit.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if mat.use_nodes:
+00:03.812  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_baked-front.png'
+00:03.844  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_baked-right.png'
+00:03.891  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_baked-back.png'
+00:03.922  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_baked-top.png'
+00:03.937  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_geometry.blend"
+00:04.641  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_geometry-front.png'
+00:04.687  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_geometry-right.png'
+00:04.734  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_geometry-back.png'
+00:04.781  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-source-views\carved_capsule_geometry-top.png'
+SOURCE AUDIT carved_capsule_baked [2.5237112045288086, 1.3669137954711914, 3.590569019317627] []
+SOURCE AUDIT carved_capsule_geometry [2.5237112045288086, 1.3669137954711914, 3.590569019317627] []
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit

@@ -1,0 +1,23 @@
+00:02.547  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend"
+Info: File exported successfully
+RUNTIME OBJ OK D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_baked.obj: vertices=10172 faces=20232 triangles=20232
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend -> out\work\carved-products\carved_capsule_baked.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_baked.obj
+OBJ export of 'carved_capsule_baked.obj' took 40.63 ms
+
+Blender quit
+00:02.406  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_geometry.blend"
+Info: File exported successfully
+RUNTIME OBJ OK D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_geometry.obj: vertices=10172 faces=20232 triangles=20232
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_geometry.blend -> out\work\carved-products\carved_capsule_geometry.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_geometry.obj
+OBJ export of 'carved_capsule_geometry.obj' took 30.88 ms
+
+Blender quit
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_baked.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_baked.obj: vertices=10172 faces=20232 triangles=20232
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\carved\source-project\assets\authoring\items\carved_capsule_geometry.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\carved-products\carved_capsule_geometry.obj: vertices=10172 faces=20232 triangles=20232
+ITEM BLEND COMPILE OK: 2 source(s)

@@ -1,0 +1,47 @@
+# Blender 5.2.2 LTS MTL File: 'mage_staff.blend'
+# www.blender.org
+
+newmtl mage_staff_brass
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ritual_staff_family_atlas.png
+
+pass uv add 0.16 assets/models/items/ritual_staff_family_atlas.png
+pass sphere add 0.1 assets/models/matcaps/gold.png
+newmtl mage_staff_dark_wood
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ritual_staff_family_atlas.png
+
+pass uv add 0.16 assets/models/items/ritual_staff_family_atlas.png
+newmtl mage_staff_indigo
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ritual_staff_family_atlas.png
+
+pass uv add 0.16 assets/models/items/ritual_staff_family_atlas.png
+newmtl mage_staff_sapphire
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ritual_staff_family_atlas.png
+pass uv add 0.16 assets/models/items/ritual_staff_family_atlas.png

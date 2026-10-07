@@ -62,3 +62,39 @@ never rerun its scaffold or read an atlas-layout recipe as production authority.
 The original generated atlas is retained unchanged under source `_textures`
 and in the derived shipping product. Runtime passes must use the existing
 bounded material contract. Baseline refreshes and goldens remain owner decisions.
+
+## Several items in one generated atlas
+
+Allocate unique face regions and explicitly shared material strips before
+generation. A two-item pilot uses one combined multiview reference and one
+flat atlas for Untarnished Signet and Verdigris Coin. Both independent sources
+reference the same original `relic_pair_surface_atlas.png`; their gold regions
+overlap intentionally, while coin front/back and blank signet table are separate.
+This saves generation calls in that pilot, not a measured GPU or monetary cost.
+
+Keep a layout guide and requested allocations, then measure the actual output.
+The pilot's generated metal strips moved vertically despite the guide. Correct
+the UV correspondence to the original pixels, preserving both requested and
+actual rectangles. Do not assume image generation obeys pixel coordinates.
+
+`pixel_rectangle_uv((x0, y0, x1, y1), (width, height), inset=4)` converts
+top-left image **pixel edges** to bottom-left OBJ UV bounds without cropping.
+The inset reserves sampling clearance inside the measured allocation; it does
+not create new gutter pixels. Validate every painted material against its own
+region and permitted item users. A model-wide 0..1 check cannot catch sampling
+an adjacent item's face. Keep the shared filename intact through compilation,
+promotion and texture checks; per-item copies would defeat the shared asset.
+
+Budget pixels by native prominence: the pilot has two 512px coin faces, a 320px
+blank seal table and wide metal strips in a 1536x1024 atlas before insets.
+Distinct construction still supplies the ring hole, shoulders, raised table,
+coin thickness and edge reeds. A shared texture must not turn different items
+into color variants of one mesh. Compare native 96px output and plain-material
+controls with identical OBJ bytes. The retained
+[pilot evidence](../../docs/reports/item-model-shared-atlas-review/README.md)
+includes allocations, full prompts and actual source views.
+
+More items trade generation calls against detail pixels, layout drift and
+coupled edits: replacing a shared region can alter every consuming source.
+After adoption, edit saved sources directly and review all consumers of a
+changed shared image. Baseline/golden approval boundaries remain unchanged.

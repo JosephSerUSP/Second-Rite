@@ -2,10 +2,20 @@ import unittest,sys
 from pathlib import Path
 from PIL import Image
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from surface_atlas import path_parameters, rectangle_uv, cyclic_face_parameters, seam_color_report
+from surface_atlas import path_parameters, rectangle_uv, cyclic_face_parameters, seam_color_report, pixel_rectangle_uv
 
 
 class SurfaceAtlasTests(unittest.TestCase):
+    def test_pixel_allocation_preserves_orientation_and_sampling_clearance(self):
+        bounds = pixel_rectangle_uv((20, 10, 100, 50), (200, 100), inset=2)
+        self.assertEqual(bounds, (.11, .52, .49, .88))
+        self.assertEqual(rectangle_uv(0, 1, bounds), (.11, .88))
+        for box, size, inset in [((0, 0, 10, 10), (20, 20), 5),
+                                 ((0, 0, 21, 10), (20, 20), 0),
+                                 ((0, 0, 10, 10), (0, 20), 0),
+                                 ((0, 0, 10, 10), (20, 20), -1)]:
+            with self.assertRaises(ValueError):pixel_rectangle_uv(box, size, inset=inset)
+
     def test_distance_controls_uv_density_and_shared_join(self):
         p=path_parameters([(0,0),(3,0),(3,1),(6,1)])
         self.assertEqual(p,[0,3/7,4/7,1])

@@ -275,21 +275,41 @@ def scene_models(room, room_model):
 
 
 def camera_of(room):
-    """A room may list several fixed "views", as the original's rooms do: each
-    has a "when" condition on Aya's x/y (the last is the fallback), and the
-    camera hard-cuts to the first view whose condition holds."""
+    """A room lists one or more fixed "views", composed from the original's
+    shots. Each view has a "when" condition on Aya's x/y (the last is the
+    fallback) and the camera hard-cuts between them. A view can also scroll,
+    as the original's oversized backgrounds do:
+      "track": {"axis": "y", "range": [a, b]} with position/target given as
+          {"from": [...], "to": [...]} glides between two framings as Aya
+          walks from a to b (the tall-background tilt along a room's depth);
+      "pan": k slides camera and target sideways by k * Aya's x (the
+          wide-background pan)."""
     if room.get("views"):
         views = room["views"]
         fov = views[0]["fov"]
         assert all(v["fov"] == fov for v in views), room["id"] + ": views share one fov"
+        coord = {"x": PX, "y": PY}
 
         def cond(text):
             return "(" + re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, text)) + ")"
 
+        def component(v, key, axis):
+            spec = v[key]
+            if isinstance(spec, dict):
+                a, b = v["track"]["range"]
+                t = "clamp((%s - %g) / %g, 0, 1)" % (coord[v["track"]["axis"]], a, b - a)
+                lo, hi = spec["from"][axis], spec["to"][axis]
+                expr = "(%g + %g * %s)" % (lo, hi - lo, t) if hi != lo else "%g" % lo
+            else:
+                expr = "%g" % spec[axis]
+            if axis == 0 and v.get("pan"):
+                expr = "(%s + %g * %s)" % (expr, v["pan"], PX)
+            return expr
+
         def pick(key, axis):
-            expr = "%g" % views[-1][key][axis]
+            expr = component(views[-1], key, axis)
             for v in reversed(views[:-1]):
-                expr = "(%s and %g or %s)" % (cond(v["when"]), v[key][axis], expr)
+                expr = "(%s and %s or %s)" % (cond(v["when"]), component(v, key, axis), expr)
             return expr
         return {"position": [pick("position", i) for i in range(3)],
                 "target": [pick("target", i) for i in range(3)], "fov": fov}

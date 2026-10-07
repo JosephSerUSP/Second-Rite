@@ -22,16 +22,16 @@
       "viewport": {
         "camera": {
           "position": [
-            0,
-            -4.800000000000001,
-            7.699999999999999
+            "(0 + 0.6 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX))",
+            "-3",
+            "2.8"
           ],
           "target": [
-            0,
-            2.88,
-            0.4
+            "(0 + 0.6 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX))",
+            "4",
+            "1.2"
           ],
-          "fov": 44
+          "fov": 54
         },
         "background": [
           0.025,

@@ -43,31 +43,40 @@
       "environment": "assets/models/rooms/foyer/environment.obj",
       "views": [
         {
-          "when": "y < 3",
-          "position": [
-            0,
-            -2.4,
-            3.6
-          ],
-          "target": [
-            0,
-            3.6,
-            0.6
-          ],
-          "fov": 56
-        },
-        {
-          "position": [
-            -3.9,
-            5.6,
-            3.3
-          ],
-          "target": [
-            1.5,
-            1.2,
-            0.5
-          ],
-          "fov": 56
+          "shot": "orig bg 3 (aisle, vertical scroll)",
+          "track": {
+            "axis": "y",
+            "range": [
+              0.5,
+              5
+            ]
+          },
+          "position": {
+            "from": [
+              0,
+              -2.6,
+              5.4
+            ],
+            "to": [
+              0,
+              -1.6,
+              6.6
+            ]
+          },
+          "target": {
+            "from": [
+              0,
+              2.4,
+              0.2
+            ],
+            "to": [
+              0,
+              5.4,
+              0.2
+            ]
+          },
+          "pan": 0.25,
+          "fov": 50
         }
       ]
     },
@@ -110,31 +119,55 @@
       "environment": "assets/models/rooms/auditorium/environment.obj",
       "views": [
         {
-          "when": "y < 4",
-          "position": [
-            0,
-            -2.6,
-            4.4
-          ],
-          "target": [
-            0,
-            4.6,
-            0.6
-          ],
-          "fov": 58
+          "shot": "orig bg 3 (house aisle, vertical scroll)",
+          "when": "y < 5",
+          "track": {
+            "axis": "y",
+            "range": [
+              0.5,
+              5
+            ]
+          },
+          "position": {
+            "from": [
+              0,
+              -2.6,
+              4.4
+            ],
+            "to": [
+              0,
+              -1.6,
+              4.8
+            ]
+          },
+          "target": {
+            "from": [
+              0,
+              2.8,
+              0.5
+            ],
+            "to": [
+              0,
+              6.6,
+              0.6
+            ]
+          },
+          "pan": 0.25,
+          "fov": 54
         },
         {
+          "shot": "orig bg 2 (from the stage back over the seats)",
           "position": [
-            5.2,
-            7.5,
+            0,
+            7.6,
             4.2
           ],
           "target": [
-            -1.5,
-            2.5,
-            0.4
+            0,
+            2.0,
+            0.6
           ],
-          "fov": 58
+          "fov": 54
         }
       ]
     },
@@ -182,20 +215,45 @@
           "lockedText": "Not until Melissa is dealt with."
         }
       ],
-      "camera": {
-        "position": [
-          0,
-          -3.2,
-          7.2
-        ],
-        "target": [
-          0,
-          3.0,
-          0
-        ],
-        "fov": 50
-      },
-      "environment": "assets/models/rooms/stage/environment.obj"
+      "environment": "assets/models/rooms/stage/environment.obj",
+      "views": [
+        {
+          "shot": "orig bg 4 (stage, vertical scroll)",
+          "track": {
+            "axis": "y",
+            "range": [
+              0.5,
+              5
+            ]
+          },
+          "position": {
+            "from": [
+              0,
+              -3.4,
+              3.0
+            ],
+            "to": [
+              0,
+              -3.0,
+              4.2
+            ]
+          },
+          "target": {
+            "from": [
+              0,
+              2.0,
+              0.6
+            ],
+            "to": [
+              0,
+              4.2,
+              1.8
+            ]
+          },
+          "pan": 0.35,
+          "fov": 50
+        }
+      ]
     },
     {
       "id": "backstage",
@@ -259,30 +317,33 @@
       "environment": "assets/models/rooms/backstage/environment.obj",
       "views": [
         {
+          "shot": "orig bg 13 (low, toward the stage and basement doors)",
           "when": "x < 0",
           "position": [
-            3.4,
-            -1.8,
-            3.4
+            3.6,
+            0.6,
+            1.9
           ],
           "target": [
-            -1.8,
-            3.0,
-            0.5
+            -3.5,
+            2.8,
+            1.0
           ],
           "fov": 54
         },
         {
+          "shot": "orig bg 12 (overhead, horizontal scroll)",
           "position": [
-            -3.4,
-            -1.8,
-            3.4
+            0,
+            -0.6,
+            6.5
           ],
           "target": [
-            1.8,
-            3.0,
-            0.5
+            0,
+            2.4,
+            0
           ],
+          "pan": 0.6,
           "fov": 54
         }
       ]
@@ -391,31 +452,33 @@
       "environment": "assets/models/rooms/dressing/environment.obj",
       "views": [
         {
+          "shot": "orig bg 14/18 (high cut-away corner)",
           "when": "x < 0",
           "position": [
-            4.4,
-            -1.6,
-            3.6
+            4.5,
+            -3.5,
+            6.5
           ],
           "target": [
-            -2.4,
-            3.6,
-            0.5
+            -2,
+            3,
+            0
           ],
-          "fov": 56
+          "fov": 52
         },
         {
+          "shot": "orig bg 15/19 (eye level along the vanities)",
           "position": [
-            -4.4,
-            -1.6,
-            3.6
+            -4.6,
+            0.4,
+            1.8
           ],
           "target": [
-            2.4,
+            3,
             3.6,
-            0.5
+            1.0
           ],
-          "fov": 56
+          "fov": 52
         }
       ]
     },
@@ -467,20 +530,24 @@
           "lockedText": "Not while she's here."
         }
       ],
-      "camera": {
-        "position": [
-          1.2,
-          -2.6,
-          6.4
-        ],
-        "target": [
-          0,
-          3.2,
-          0
-        ],
-        "fov": 52
-      },
-      "environment": "assets/models/rooms/rehearsal/environment.obj"
+      "environment": "assets/models/rooms/rehearsal/environment.obj",
+      "views": [
+        {
+          "shot": "orig bg 21 (long low view, horizontal scroll)",
+          "position": [
+            0,
+            -2.6,
+            3.0
+          ],
+          "target": [
+            0,
+            4,
+            1.0
+          ],
+          "pan": 0.5,
+          "fov": 52
+        }
+      ]
     },
     {
       "id": "sewer",
@@ -543,30 +610,33 @@
       "environment": "assets/models/rooms/sewer/environment.obj",
       "views": [
         {
-          "when": "x < 0",
+          "shot": "orig bg 24 (one-point down the tunnel toward the hatch)",
+          "when": "x < -1.5",
           "position": [
-            5.4,
-            0.8,
-            2.6
+            5.6,
+            2.6,
+            2.8
           ],
           "target": [
-            -3,
-            3.2,
-            0.4
+            -5,
+            2.2,
+            0.5
           ],
           "fov": 52
         },
         {
+          "shot": "orig bg 28/29 (side-on, horizontal scroll)",
           "position": [
-            -5.4,
-            0.8,
+            0,
+            -2.8,
             2.6
           ],
           "target": [
-            3,
-            3.2,
-            0.4
+            0,
+            3.0,
+            0.8
           ],
+          "pan": 0.8,
           "fov": 52
         }
       ]
@@ -619,7 +689,24 @@
           "lockedText": "It's blocking the way."
         }
       ],
-      "environment": "assets/models/rooms/sewer_deep/environment.obj"
+      "environment": "assets/models/rooms/sewer_deep/environment.obj",
+      "views": [
+        {
+          "shot": "orig bg 28 (outfall chamber, horizontal scroll)",
+          "position": [
+            0,
+            -3.0,
+            2.8
+          ],
+          "target": [
+            0,
+            4.0,
+            1.2
+          ],
+          "pan": 0.6,
+          "fov": 54
+        }
+      ]
     },
     {
       "id": "street",
@@ -634,7 +721,23 @@
         "then": "title"
       },
       "doors": [],
-      "environment": "assets/models/rooms/street/environment.obj"
+      "environment": "assets/models/rooms/street/environment.obj",
+      "views": [
+        {
+          "shot": "orig bg 1 (frontal on the facade)",
+          "position": [
+            0,
+            -3.0,
+            4.5
+          ],
+          "target": [
+            0,
+            4,
+            1.0
+          ],
+          "fov": 52
+        }
+      ]
     }
   ]
 }

@@ -21,9 +21,9 @@
       1024,
       1024
     ],
-    "pngSizeBytes": 1072723,
-    "renderMeshSizeBytes": 266082,
-    "packageSizeBytes": 1338934
+    "pngSizeBytes": 994424,
+    "renderMeshSizeBytes": 266177,
+    "packageSizeBytes": 1260730
   },
   "anchors": {
     "spawn": {
@@ -76,21 +76,21 @@
       "batchedSourceObjects": 89,
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 2.278595000039786,
+        "seconds": 2.938007399905473,
         "filteredCharts": 58,
         "preservedSmallCharts": 476,
-        "filteredTexels": 796237,
+        "filteredTexels": 766136,
         "alphaUnchanged": true
       },
       "texelAlignment": {
         "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 269,
-        "preservedUnsafeCharts": 265,
+        "alignedCharts": 289,
+        "preservedUnsafeCharts": 245,
         "existingSharedTexelPairs": 0,
         "newSharedTexelPairs": 0,
         "atlasSize": 1024
       }
     },
-    "exportSeconds": 8.29392939992249
+    "exportSeconds": 11.447809900040738
   }
 }

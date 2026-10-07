@@ -22,14 +22,14 @@
       "viewport": {
         "camera": {
           "position": [
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 3.4 or -3.4)",
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and -1.8 or -1.8)",
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 3.4 or 3.4)"
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 3.6 or (0 + 0.6 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX)))",
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 0.6 or -0.6)",
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 1.9 or 6.5)"
           ],
           "target": [
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and -1.8 or 1.8)",
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 3 or 3)",
-            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 0.5 or 0.5)"
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and -3.5 or (0 + 0.6 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX)))",
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 2.8 or 2.4)",
+            "(((sceneState.fight == 1 and rt.player.x or sceneState.walkX) < 0) and 1 or 0)"
           ],
           "fov": 54
         },

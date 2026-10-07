@@ -247,8 +247,10 @@ def room_foyer(S, room):
     for sx in (-1, 1):
         for py in (1.2, d - 1.2):
             cyl(S, "column_%d_%.0f" % (sx, py), (sx * (w / 2 - 0.5), py, WALL_H / 2), 0.28, WALL_H, col, 16)
-    chandelier(S, "chand_a", 0, d * 0.3, 2.9)
-    chandelier(S, "chand_b", 0, d * 0.75, 2.9)
+    # Flanking the carpet, as in the original aisle shot, so the overhead
+    # scrolling camera always sees Aya on the carpet between them.
+    chandelier(S, "chand_a", -w * 0.3, d * 0.7, 2.9)
+    chandelier(S, "chand_b", w * 0.3, d * 0.7, 2.9)
     for sx in (-1, 1):
         light(S, "sconce_%d" % sx, "POINT", (sx * (w / 2 - 0.3), d * 0.5, 2.0), 60, WARM, 0.2)
 

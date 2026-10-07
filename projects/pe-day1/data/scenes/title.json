@@ -75,7 +75,7 @@
           {
             "cmd": "SCENE_EVENT",
             "kind": "push",
-            "scene": "day1_foyer"
+            "scene": "day1_entrance"
           }
         ]
       },

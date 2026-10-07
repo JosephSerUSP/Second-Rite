@@ -5,6 +5,7 @@
   "initialParty": false,
   "skills": [
     "handgun_shot",
+    "baton_strike",
     "heal1",
     "escape"
   ],
@@ -16,7 +17,14 @@
     "mat": 10,
     "mdf": 10,
     "mpd": 1,
-    "asp": 10
+    "asp": 10,
+    "offense": 1,
+    "defense": 1,
+    "penergy": 1,
+    "srecover": 1,
+    "act": 1,
+    "cap": 1
   },
-  "growthBands": []
+  "growthBands": [],
+  "statTracks": "Original's status screen tracks (manual p.10/13): offense, defense, penergy, srecover rise with level; act (Active Time) and cap (Item Capacity) only through Bonus Points."
 }

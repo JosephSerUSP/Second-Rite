@@ -52,6 +52,7 @@ function validator.run(loader)
         if not ok then problems[#problems + 1] = message end
         return ok
     end
+    require("engine.window_layout_rules").validate(loader, check)
 
     check(type(loader.system) == "table", "system.json must contain an object")
     if type(loader.system) == "table" and loader.system.rtp ~= nil then

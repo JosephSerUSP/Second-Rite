@@ -23,6 +23,8 @@ uniform float objectYaw;
 uniform float focalLength;
 uniform float aspectRatio;
 uniform vec3 materialColor;
+uniform float bakedLighting;
+uniform vec4 frameWindow;
 vec4 position(mat4 transform_projection, vec4 vertex_position) {
     float c=cos(objectYaw), s=sin(objectYaw);
     vec3 p=VertexPosition.xyz*objectScale;
@@ -30,14 +32,19 @@ vec4 position(mat4 transform_projection, vec4 vertex_position) {
     vec3 n=VertexNormal/objectScale;
     n=normalize(vec3(n.x*c-n.y*s,n.x*s+n.y*c,n.z));
     float light=0.55+0.45*max(0.0,dot(n,normalize(vec3(-0.4,-0.6,1.0))));
+    // A baked appearance consumes its authored illumination (viewport_3d's
+    // bakedLighting contract): draw the atlas as baked, never relit.
+    light=mix(light,1.0,bakedLighting);
     worldColor=vec4(VertexColor.rgb*materialColor*light,VertexColor.a);
     vec3 d=p-cameraPosition;
     float depth=dot(d,cameraForward);
     float clipZ=1.002002*depth-0.2002002;
     worldUV=VertexTexCoord.xy; affineScale=1.0;
     sheenUV=vec2(n.x*.5+.5,.5-n.z*.5);
-    return vec4(dot(d,cameraRight)*focalLength/aspectRatio,
-        -dot(d,cameraUp)*focalLength,clipZ,depth);
+    // frameWindow maps the camera's whole pre-rendered-style plate to the
+    // visible window: scale (xy) and shift (zw), in clip units.
+    return vec4((dot(d,cameraRight)*focalLength/aspectRatio)*frameWindow.x+frameWindow.z*depth,
+        (-dot(d,cameraUp)*focalLength)*frameWindow.y+frameWindow.w*depth,clipZ,depth);
 }
 #endif
 ]]
@@ -67,15 +74,51 @@ function view.cameraBasis(position,target)
     return r,u,f
 end
 
+local function dot(a,b) return a[1]*b[1]+a[2]*b[2]+a[3]*b[3] end
+
+-- A camera may own a plate larger than the window, the way the original's
+-- pre-rendered backgrounds (and Second Gate's town plates) are larger than
+-- the screen. The camera never moves; the WINDOW slides across its plate to
+-- follow a point and stops at the plate's edges. frame.size is the plate in
+-- windows ([1,1] = no plate); fov describes the whole plate.
+--
+-- Returns {kx,ky,sx,sy}: plate-to-window scale and shift in clip units.
+function view.frameWindow(cam,w,h,follow)
+    local size=cam.frame and cam.frame.size or {1,1}
+    local kx,ky=math.max(1,size[1] or 1),math.max(1,size[2] or 1)
+    local cx,cy=0,0
+    if follow and (kx>1 or ky>1) then
+        local r,u,f=view.cameraBasis(cam.position,cam.target)
+        local d={follow[1]-cam.position[1],follow[2]-cam.position[2],follow[3]-cam.position[3]}
+        local depth=dot(d,f)
+        if depth>.1 then
+            local focal=1/math.tan(math.rad(cam.fov)/2)
+            cx=dot(d,r)*focal/((w/h)*kx/ky)/depth
+            cy=-dot(d,u)*focal/depth
+        end
+    end
+    local function window(c,k,pixels)
+        local edge=1-1/k
+        c=math.max(-edge,math.min(edge,c))
+        -- whole pixels, as a scrolled plate would be, so nothing shimmers
+        local shift=-c*k
+        return math.floor(shift*pixels/2+.5)/(pixels/2)
+    end
+    return {kx,ky,window(cx,kx,w),window(cy,ky,h)}
+end
+
 -- One CPU projection helper for world-anchored labels and inspection tools.
-function view.projectPoint(point,cam,w,h)
+function view.projectPoint(point,cam,w,h,frame)
+    frame=frame or {1,1,0,0}
     local r,u,f=view.cameraBasis(cam.position,cam.target)
     local d={point[1]-cam.position[1],point[2]-cam.position[2],point[3]-cam.position[3]}
-    local function dot(a,b) return a[1]*b[1]+a[2]*b[2]+a[3]*b[3] end
     local depth=dot(d,f)
     if depth<=.1 then return nil end
     local focal=1/math.tan(math.rad(cam.fov)/2)
-    return w/2+dot(d,r)*focal*h/(2*depth),h/2-dot(d,u)*focal*h/(2*depth)
+    local aspect=(w/h)*frame[1]/frame[2]
+    local nx=dot(d,r)*focal/aspect/depth*frame[1]+frame[3]
+    local ny=-dot(d,u)*focal/depth*frame[2]+frame[4]
+    return w/2+nx*w/2,h/2+ny*h/2
 end
 
 function view.validate(spec, check, exists, compile)
@@ -97,6 +140,14 @@ function view.validate(spec, check, exists, compile)
         validateVector(spec.camera.target,"camera target",true)
         local fov=spec.camera.fov
         check(type(fov)=="number" and fov>0 and fov<180,"modelScene fov must be between 0 and 180")
+        local frame=spec.camera.frame
+        if frame~=nil then
+            check(type(frame)=="table","modelScene camera frame must be a table")
+            local size=type(frame)=="table" and frame.size
+            check(type(size)=="table" and type(size[1])=="number" and type(size[2])=="number"
+                and size[1]>=1 and size[2]>=1,"modelScene camera frame.size must be two numbers >= 1")
+            if type(frame)=="table" then validateVector(frame.follow,"camera frame follow",false) end
+        end
     end
     for _, entity in ipairs(type(spec.models)=="table" and spec.models or {}) do
         check(type(entity)=="table","modelScene model entry must be a table")
@@ -105,6 +156,7 @@ function view.validate(spec, check, exists, compile)
         for _, key in ipairs({"position","scale","tint"}) do
             validateVector(entity[key],key,false)
         end
+        check(entity.bakedLighting==nil or type(entity.bakedLighting)=="boolean","modelScene bakedLighting must be a boolean")
         for _, key in ipairs({"yaw","visible"}) do
             if type(entity[key])=="string" then check(compile(entity[key]),"modelScene invalid "..key.." expression") end
         end
@@ -138,6 +190,10 @@ function view.draw(x,y,w,h,spec,env)
     local position=vector(cam.position,env,"camera position",{10,-12,12})
     local target=vector(cam.target,env,"camera target",{0,4,0})
     local right,up,forward=view.cameraBasis(position,target)
+    local fov=number(cam.fov,env,"fov",45)
+    local resolved={position=position,target=target,fov=fov,frame=cam.frame}
+    local frame=view.frameWindow(resolved,w,h,
+        cam.frame and cam.frame.follow and vector(cam.frame.follow,env,"camera frame follow",{0,0,0}))
     local previous=love.graphics.getCanvas()
     love.graphics.push("all")
     love.graphics.setCanvas({buffers.color,depthstencil=buffers.depth})
@@ -150,8 +206,9 @@ function view.draw(x,y,w,h,spec,env)
     love.graphics.setShader(shader)
     shader:send("cameraPosition",position)
     shader:send("cameraRight",right);shader:send("cameraUp",up);shader:send("cameraForward",forward)
-    shader:send("focalLength",1/math.tan(math.rad(number(cam.fov,env,"fov",45))/2))
-    shader:send("aspectRatio",w/h);shader:send("ditherLevels",32)
+    shader:send("focalLength",1/math.tan(math.rad(fov)/2))
+    shader:send("aspectRatio",(w/h)*frame[1]/frame[2]);shader:send("frameWindow",frame)
+    shader:send("ditherLevels",32)
     shader:send("passCount",0)
     for _, entity in ipairs(spec.models) do
         local visible=true
@@ -166,6 +223,7 @@ function view.draw(x,y,w,h,spec,env)
             shader:send("objectScale",vector(entity.scale,env,"scale",{1,1,1}))
             shader:send("objectYaw",number(entity.yaw,env,"yaw",0))
             local tint=vector(entity.tint,env,"tint",{1,1,1})
+            shader:send("bakedLighting",entity.bakedLighting==true and 1 or 0)
             for _,group in ipairs(model.groups) do
                 local col=group.color or {1,1,1}
                 shader:send("materialColor",{col[1]*tint[1],col[2]*tint[2],col[3]*tint[3]})
@@ -183,7 +241,7 @@ function view.draw(x,y,w,h,spec,env)
         assert(not err,"3D Scene label visibility: "..tostring(err))
         if visible then
             local lx,ly=view.projectPoint(vector(label.position,env,"label position",{0,0,0}),
-                {position=position,target=target,fov=number(cam.fov,env,"fov",45)},w,h)
+                resolved,w,h,frame)
             local value,valueErr=formula.eval(label.value,env)
             assert(not valueErr,"3D Scene label value: "..tostring(valueErr))
             if lx then

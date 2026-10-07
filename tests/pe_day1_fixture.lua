@@ -37,6 +37,12 @@ return function(loader, opts)
     for k, v in pairs(read("system.json")) do system[k] = v end
     loader.system = system
     loader.flows.battle = read("flows/battle.json")
+    -- The EXP curve is a file the progression module reads from the pinned
+    -- Project; route its queries to pe-day1's curve for this suite.
+    local progression = require("engine.progression")
+    local savedNextLevelExp = progression.nextLevelExp
+    local peCurve = read("progression.json")
+    progression.nextLevelExp = function(level, spec) return savedNextLevelExp(level, spec or peCurve) end
     if opts.scenes then
         loader.scenes = {}
         for _, id in ipairs(opts.scenes) do loader.scenes[#loader.scenes + 1] = read("scenes/" .. id .. ".json") end
@@ -45,5 +51,6 @@ return function(loader, opts)
     return function()
         for _, k in ipairs(SWAPPED) do loader[k] = saved[k] end
         loader.flows.battle = savedBattleFlows
+        progression.nextLevelExp = savedNextLevelExp
     end
 end

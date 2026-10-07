@@ -1,0 +1,96 @@
+{
+  "contractVersion": 1,
+  "environmentId": "pe_sewer",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": null,
+  "bounds": [
+    -6.3,
+    -3.3,
+    -0.1,
+    6.3,
+    5.35,
+    3.4
+  ],
+  "stats": {
+    "triangleCount": 676,
+    "vertexCount": 444,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "pngSizeBytes": 707465,
+    "renderMeshSizeBytes": 63087,
+    "packageSizeBytes": 770681
+  },
+  "anchors": {
+    "spawn": {
+      "id": "spawn",
+      "position": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "pe_sewer.blend",
+    "bake": {
+      "backend": "cycles",
+      "device": "GPU",
+      "samples": 64,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 64,
+        "supersample": 1,
+        "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "GPU",
+        "computeBackend": "OPTIX",
+        "devices": [
+          "NVIDIA GeForce GTX 1650"
+        ]
+      },
+      "batchedSourceObjects": 53,
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 1.4296742000151426,
+        "filteredCharts": 98,
+        "preservedSmallCharts": 216,
+        "filteredTexels": 723967,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 309,
+        "preservedUnsafeCharts": 7,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 1024
+      }
+    },
+    "exportSeconds": 5.946532699977979
+  }
+}

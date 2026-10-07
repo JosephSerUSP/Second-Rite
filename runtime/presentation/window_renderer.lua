@@ -424,7 +424,12 @@ end
 local function resolveRows(win, state, sceneData, ctx, env)
     local src = win.listId or ""
     local rows
-    if src == "inventory" then
+    if src == "carried_items" then
+        rows = require("engine.inventory").carriedRows(ctx.session)
+        for _, row in ipairs(rows) do
+            item_presentation.enrich(row, ctx.session.loader.getItem(row.id), ctx.session.loader)
+        end
+    elseif src == "inventory" then
         rows = inventoryRows(ctx.session, env, win)
     elseif src == "party" then
         rows = partyRows(ctx.session)
@@ -510,6 +515,8 @@ local function buildEnv(state, sceneData, ctx, listCache)
     if ctx.session then
         env.session = formula.sessionView(ctx.session)
         env.party = formula.groupView(ctx.session.party or {}, ctx.session)
+        -- Same read-only Variables snapshot scene logic reads (formula.lua).
+        env.variables = require("engine.game_variables").snapshot(ctx.session)
         -- Same view scene logic reads, so a window never disagrees with it.
         if ctx.session.realtimeBattle then
             env.rt = require("engine.realtime_battle").view(ctx.session)
@@ -939,16 +946,21 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
     if layout.rowPitch then rowPitch = ui.toPx(layout.rowPitch) end
 
     local visible = layout.visibleRows or math.max(1, math.floor((h - ui.toPx(2)) / rowPitch))
+    local columns = math.max(1, layout.gridColumns or 1)
+    local perColumn = visible
+    local cellWidth = w / columns
+    visible = visible * columns
     if #rows == 0 then
         local emptyText = layout.emptyText or "No entries."
         ui.drawString(emptyText, contentX, contentY, COLOR_DIM)
         return
     end
     local startOffset = math.max(1, math.min(cursor - 3, #rows - visible + 1))
+    if columns > 1 then startOffset = math.floor((cursor - 1) / visible) * visible + 1 end
     local endOffset = math.min(#rows, startOffset + visible - 1)
     local format = win.format or "{name}"
     -- Smooth cursor interpolation
-    local targetCursorY = contentY + (cursor - startOffset) * rowPitch
+    local targetCursorY = contentY + ((cursor - startOffset) % perColumn) * rowPitch
     if type(win) == "table" then
         if not win._cursorY then
             win._cursorY = targetCursorY
@@ -975,7 +987,16 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
             local hv = formula.eval(win.highlight, rEnv)
             if hv == true then color = COLOR_HIGHLIGHT end
         end
-        local rowY = contentY + (i - startOffset) * rowPitch
+        local column = math.floor((i - startOffset) / perColumn)
+        local rowX = x + column * cellWidth
+        local rowY = contentY + ((i - startOffset) % perColumn) * rowPitch
+        if layout.gridColumns and not spriteField then
+            local marked = win.highlight and formula.eval(win.highlight, rEnv) == true
+            if isSel or marked then
+                ui.drawPanel(rowX + 2, rowY - 1, cellWidth - 4, rowPitch - 1, nil,
+                    marked and "button_highlight" or "button")
+            end
+        end
 
         -- A sprite-bearing row is a battler status cell: give it its own
         -- windowskin card, same treatment the battle/map HUD gives each
@@ -985,15 +1006,15 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
             -- A sprite row's card is a button too, so it opens the same way:
             -- rebuilt at the opening size, never scaled.
             local cx0, cy0, cw0, ch0 = ui.rescaleRect(
-                x + cardPad, rowY - cardPad, w - cardPad * 2, rowPitch - cardPad, animP or 1)
+                rowX + cardPad, rowY - cardPad, cellWidth - cardPad * 2, rowPitch - cardPad, animP or 1)
             ui.drawPanel(cx0, cy0, cw0, ch0, nil, ui.buttonRole(isSel))
         end
 
-        local textX = contentX + ui.toPx(0.5)
+        local textX = contentX + column * cellWidth + ui.toPx(0.5)
         if spriteField then
             local key = row[spriteField]
-            if key and key ~= "" and small_battlers.draw(key, x + ui.toPx(1), rowY - 2, spriteSize, row.dead, row.battlerRef, session) then
-            textX = contentX + ui.toPx(0.5) + spriteSize + 3
+            if key and key ~= "" and small_battlers.draw(key, rowX + ui.toPx(1), rowY - 2, spriteSize, row.dead, row.battlerRef, session) then
+            textX = contentX + column * cellWidth + ui.toPx(0.5) + spriteSize + 3
             end
         end
         -- win.labelField (e.g. equip_slots' slot name "WPN"/"AMR"/"ACC")
@@ -1011,8 +1032,8 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
         -- where an untruncated "HP Tonic x5 [1 pending]" ran straight out of
         -- the panel and across the party status beside it.
         local scrollPad = 6
-        local rightEdge = spriteField and (x + w - cardPad * 2 - scrollPad)
-            or (x + w - ui.toPx(0.5) - scrollPad)
+        local rightEdge = spriteField and (rowX + cellWidth - cardPad * 2 - scrollPad)
+            or (rowX + cellWidth - ui.toPx(0.5) - scrollPad)
 
         -- A right-hand column (qty, price) owns its width; the label gets what
         -- is left. Strip \c[N] colour codes before measuring, since drawString
@@ -1079,7 +1100,7 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
             local barX = textX - 2
             -- Stay inside the row's own card (not the whole window) when
             -- one is drawn, so the bar never bleeds past its border.
-            local rightEdge = spriteField and (x + w - cardPad * 2 - scrollPad) or (x + w - ui.toPx(1) - scrollPad)
+            local rightEdge = spriteField and (rowX + cellWidth - cardPad * 2 - scrollPad) or (rowX + cellWidth - ui.toPx(1) - scrollPad)
             local barW = math.max(8, rightEdge - barX)
             local preview = isSel
                 and buildGaugePreview(win.gaugePreviewCost, win.gaugePreviewGain, win.gaugePreviewLabel, rEnv)
@@ -1091,11 +1112,11 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
     end
 
     -- Single smooth-moving cursor drawn at interpolated position
-    sprite_sheet.draw("Cursor", contentX - 6, drawCursorY, 8)
+    sprite_sheet.draw("Cursor", contentX + math.floor((cursor - startOffset) / perColumn) * cellWidth - 6, drawCursorY, 8)
 
     -- Render lean windowskin scrollbar if total rows exceed visible capacity
     if #rows > visible then
-        local listH = visible * rowPitch
+        local listH = perColumn * rowPitch
         ui.drawScrollbar(x, contentY, w, listH, #rows, visible, startOffset)
     end
 end
@@ -1781,8 +1802,22 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
                 local ok, secs = pcall(formula.eval, win.reveal, env)
                 if ok then revealElapsed = tonumber(secs) end
             end
-            drawTextLines(text, env, contentX, contentY, lineSpacing, w - 2 * padX,
-                align, revealElapsed)
+            -- Scale the authored text independently of its shell. Wrap in
+            -- local coordinates so large readouts retain the same bounds.
+            local textScale = layout.textScale or 1
+            assert(type(textScale) == "number" and textScale > 0 and textScale < math.huge,
+                "Window textScale must be a positive finite number")
+            if textScale == 1 then
+                drawTextLines(text, env, contentX, contentY, lineSpacing, w - 2 * padX,
+                    align, revealElapsed)
+            else
+                love.graphics.push()
+                love.graphics.translate(contentX, contentY)
+                love.graphics.scale(textScale, textScale)
+                drawTextLines(text, env, 0, 0, lineSpacing, (w - 2 * padX) / textScale,
+                    align, revealElapsed)
+                love.graphics.pop()
+            end
         end
     end
 
@@ -1830,8 +1865,11 @@ local function drawPanelOrTitle(layout, style, title, x, y, w, h)
     if layout.chrome == "overlay" then
         ui.drawOverlayPanel(x, y, w, h)
         if title then ui.drawPanelTitle(title, x, y) end
+    elseif layout.chrome == "label_tab" then
+        ui.drawLabelTab(x, y, w, h)
+        if title then ui.drawPanelTitle(title, x, y) end
     elseif drawsOuterPanel(layout, style) then
-        ui.drawPanel(x, y, w, h, title)
+        ui.drawPanel(x, y, w, h, title, layout.chrome == "button" and "button" or nil)
     elseif title and layout.chrome == "none" and not NO_OUTER_PANEL_STYLES[style] then
         -- Only when the panel was suppressed by `chrome`. A NO_OUTER_PANEL
         -- style draws its own panel, title included (drawLevelUpStatsWindow
@@ -1874,6 +1912,14 @@ local function drawWindow(id, win, layout, state, sceneData, ctx, env, listCache
     -- alpha-black overlay and keeps every confirm surface consistent.
     if style == "confirm" then
         subtractive_fade.draw(0.4)
+    end
+    -- Any window may darken what was drawn before it the same way: the
+    -- PS1 subtractive dim behind a field menu, a pause screen, a dialogue.
+    -- `dimBehind` is an amount 0..1 or a formula (so it can fade in).
+    if layout.dimBehind ~= nil then
+        local amount = layout.dimBehind
+        if type(amount) == "string" then amount = tonumber((formula.eval(amount, env))) or 0 end
+        subtractive_fade.draw(amount, false, true)
     end
 
     local animOpen = layout.anim and layout.anim.open
@@ -2127,10 +2173,14 @@ function wr.drawWindowFromData(sceneData, state, ctx, opts)
         if winDef.title ~= nil then layout.title = winDef.title end
         if winDef.emptyText ~= nil then layout.emptyText = winDef.emptyText end
         if winDef.lineSpacing ~= nil then layout.lineSpacing = winDef.lineSpacing end
+        if winDef.textScale ~= nil then layout.textScale = winDef.textScale end
         if winDef.visibleRows ~= nil then layout.visibleRows = winDef.visibleRows end
+        if winDef.gridColumns ~= nil then layout.gridColumns = winDef.gridColumns end
+        if winDef.rowPitch ~= nil then layout.rowPitch = winDef.rowPitch end
         if winDef.align ~= nil then layout.align = winDef.align end
         if winDef.waitInput ~= nil then layout.waitInput = winDef.waitInput end
         if winDef.chrome ~= nil then layout.chrome = winDef.chrome end
+        if winDef.dimBehind ~= nil then layout.dimBehind = winDef.dimBehind end
         layout.viewport = winDef.viewport
         -- Propagate shiftWith from winDef to layout (scenes.json overrides
         -- engine.json, so this must happen AFTER baseLayout merge).
@@ -2293,7 +2343,7 @@ function wr.drawWindowFromData(sceneData, state, ctx, opts)
                 -- (h - toPx(3)) / rowPitch), or the shrunk window would
                 -- clip rows it was sized for.
                 local pitch = layout.rowPitch and ui.toPx(layout.rowPitch) or ui.lineHeight
-                local fitPx = rowCount * pitch + ui.toPx(3)
+                local fitPx = math.ceil(rowCount / (layout.gridColumns or 1)) * pitch + ui.toPx(3)
                 local maxPx = ui.toPx(layout.height)
                 if fitPx < maxPx then
                     local shrinkTiles = (maxPx - fitPx) / ui.toPx(1)

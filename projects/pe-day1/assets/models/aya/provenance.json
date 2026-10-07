@@ -1,0 +1,30 @@
+{
+  "source": "assets/authoring/characters/aya.blend",
+  "sourceSha256": "9f4540ed414a15847ebfe0241b508288e7439be151d8df891210e01d39d0bc9f",
+  "blenderVersion": "5.2.2 LTS",
+  "basis": "Original low-poly character study; no commercial asset extracts",
+  "files": {
+    "aya_down.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_down.obj": "97b3c5eee23c3337651bf7a7d73d9133cedd56cb8a5eede81a53d4e39bb0607d",
+    "aya_idle.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_idle.obj": "e9e1a7c6e4281dc7a84feb7361bbf9972de9ab657d711afba0424a3b995ea354",
+    "aya_recoil.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_recoil.obj": "9effba493c33d752fb6764dca4c39378eaef56fb6cd26d71150376076efc8cde",
+    "aya_walk_0.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_0.obj": "912dd9a89cc45899b3d747dc01f2e7511b5f5b0334a3565e2e8c60fbe51673f0",
+    "aya_walk_1.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_1.obj": "963ef1661344a5c74b835f1a3f7cce0d78167fa8ce517334fdf6c2444d5c3704",
+    "aya_walk_2.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_2.obj": "30da573b5289cfd2107dc958598c3b580b8837a6e020dfc4b4fd3d95c9a8fb6c",
+    "aya_walk_3.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_3.obj": "7865dfe7a06dd8a39932f1cc5875cdf963dbc7a1db4d1def38fa970a4e82f6ac",
+    "aya_walk_4.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_4.obj": "d9d9f815cb6c03383533af475bd3fed6b8a17043097250779e131fd1a1f5fb11",
+    "aya_walk_5.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_5.obj": "b0d3957b4310b86ed6c630e2e21f6b911126b0f012656d9dee95f4bf7c1ab4e3",
+    "aya_walk_6.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_6.obj": "e34c99d6122f7207712c9a2e829c3df4f663150e3ed062fff45f27a82a6dec88",
+    "aya_walk_7.mtl": "adae53d7add255e3732e289ee0dabe19143446c3a0a69be6e1dd35ac211da703",
+    "aya_walk_7.obj": "3e6e88b37e846a4b8449a7c9d6424650d66b2e5f647ed603031fb2690705fe1d"
+  }
+}

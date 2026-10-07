@@ -33,10 +33,10 @@
         // window even when the scene omits rect entirely.
         const SCENE_OVERRIDES_ALWAYS = ['x', 'y', 'width', 'height'];
         // These are only overridden when the scene's entry actually sets them.
-        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'visibleRows'];
+        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'textScale', 'visibleRows', 'gridColumns', 'rowPitch', 'dimBehind'];
 
-        // Everything else (contentX/contentY, gridColumns, portrait*, gauges,
-        // pages/pageFormula, anim, vertical, hideMp, rowPitch, ...) has no
+        // Everything else (contentX/contentY, portrait*, gauges,
+        // pages/pageFormula, anim, vertical, hideMp, ...) has no
         // scene-side path at all and is read only from windowLayout — so those
         // fields stay live and editable here even for a shadowed window.
         function computeSceneShadow(id) {
@@ -513,9 +513,12 @@
             numField('width', 'width'); numField('height', 'height');
             numField('contentX', 'contentX'); numField('contentY', 'contentY');
             numField('lineSpacing', 'lineSpacing'); numField('visibleRows', 'visibleRows');
+            numField('textScale', 'textScale');
             numField('rowPitch', 'rowPitch'); numField('spriteSize', 'spriteSize');
             numField('gaugeHeight', 'gaugeHeight'); numField('gridColumns', 'gridColumns');
             numField('portraitX', 'portraitX'); numField('portraitY', 'portraitY');
+            // PS1 subtractive dim of everything drawn behind this window, 0..1.
+            numField('dimBehind', 'dimBehind');
             propBox.appendChild(grid);
 
             const styleRow = document.createElement('div');
@@ -685,7 +688,7 @@
 
                     const grid = document.createElement('div');
                     grid.style.cssText = 'display: grid; grid-template-columns: 70px 70px 70px 70px; gap: 4px; align-items: center; margin-top: 4px;';
-                    ['contentX', 'contentY', 'lineSpacing'].forEach(key => {
+                    ['contentX', 'contentY', 'lineSpacing', 'textScale'].forEach(key => {
                         const lbl = document.createElement('span'); lbl.textContent = key;
                         const inp = document.createElement('input');
                         inp.type = 'number'; inp.step = '0.5'; inp.className = 'win98-input';

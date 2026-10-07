@@ -4,6 +4,7 @@
     "fontSize": 16,
     "fontOffsetY": -4,
     "fontNormalize": true,
+    "windowskinMode": "overlay",
     "renderSurfaceProfile": "wide"
   },
   "spawn": {
@@ -43,7 +44,7 @@
   },
   "realtimeBattle": {
     "ticksPerRound": 60,
-    "atPerTick": "a.asp / 20",
+    "atPerTick": "a.asp / 20 * (0.9 + 0.1 * a.stat.act)",
     "moveSpeed": 0.041667
   },
   "battlerResources": {

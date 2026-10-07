@@ -52,7 +52,7 @@
           "cmd": "CHANGE_RESOURCE",
           "resource": "pe",
           "target": "ally",
-          "amount": "4"
+          "amount": "3 + ally.stat.penergy"
         }
       ]
     },

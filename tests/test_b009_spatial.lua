@@ -100,6 +100,18 @@ local function suite()
     local sx,sy=camera.projectPoint({0,5,1},{position={0,-8,7},target={0,5,1},fov=43},256,240)
     near(sx,128);near(sy,120)
     assert(camera.projectPoint({0,-10,7},{position={0,-8,7},target={0,5,1},fov=43},256,240)==nil)
+    -- Pre-rendered-style plate: the camera stays put and the window slides
+    -- across its plate to keep the followed point centred, stopping at the
+    -- plate's edges. A [1,1] frame is the plain projection.
+    local cam={position={0,-8,7},target={0,5,1},fov=60,frame={size={2,2}}}
+    local identity=camera.frameWindow({position=cam.position,target=cam.target,fov=60},256,240,{3,4,0})
+    near(identity[1],1);near(identity[2],1);near(identity[3],0);near(identity[4],0)
+    local follow={1.2,6,0.5}
+    local frame=camera.frameWindow(cam,256,240,follow)
+    local fx,fy=camera.projectPoint(follow,cam,256,240,frame)
+    assert(math.abs(fx-128)<=1 and math.abs(fy-120)<=1,"plate window must centre the followed point")
+    local far=camera.frameWindow(cam,256,240,{400,6,0.5})
+    near(far[3],-1)   -- clamped: the window rests on the plate's right edge
     local errors={}
     camera.validate({camera={},models="invalid"},function(valid,message)
         if not valid then errors[#errors+1]=message end

@@ -265,6 +265,7 @@ function savegame.serialize(sessionObj, loader, sceneName)
         scene = sceneName,
         gold = sessionObj.gold,
         inventory = sessionObj.inventory,
+        carriedItemOrder = sessionObj.carriedItemOrder,
         flags = sessionObj.flags,
         -- #407 authored Game Variables are playthrough state. Snapshotting
         -- here enforces a copy/value boundary before JSON ever sees the tree.
@@ -339,6 +340,8 @@ function savegame.deserialize(data, loader)
     -- without a nil guard, so the previous contract -- these are always tables
     -- after load -- is kept here rather than relied on not to matter.
     sess.inventory = restoreNumericKeys(data.inventory or {})
+    assert(type(data.carriedItemOrder) == "table", "save is missing carriedItemOrder")
+    sess.carriedItemOrder = data.carriedItemOrder
     -- session.flags and session.unlockedLore are string-keyed by construction
     -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}

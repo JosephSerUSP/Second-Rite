@@ -33,7 +33,10 @@ if not ui._subtractiveModalPanelWrapped then
     end
 end
 
-function subtractive_fade.draw(amount, marksModal)
+-- `fullSurface` darkens the whole render surface even from inside a
+-- composition block (a window dimming the world behind it): the rectangle is
+-- moved back by the composition origin, so widescreen sides darken too.
+function subtractive_fade.draw(amount, marksModal, fullSurface)
     amount = util.clamp01(tonumber(amount) or 0)
     if amount <= 0 then return end
 
@@ -44,18 +47,21 @@ function subtractive_fade.draw(amount, marksModal)
     love.graphics.push("all")
     love.graphics.setBlendMode("subtract", "alphamultiply")
     love.graphics.setColor(1, 1, 1, amount)
-    local width, height
+    local x, y, width, height = 0, 0, nil, nil
     -- A world fade (marksModal == false) covers the whole render surface --
     -- unless it is being drawn from inside a composition block, where the
     -- transform is already translated by the origin and "everything" means the
     -- frame. door_transition.draw() is reached both ways: from viewport_3d in
     -- render space, and from location_renderer inside the composition (#199).
-    if marksModal == false and not surface.isComposing() then
+    if fullSurface and surface.isComposing() then
+        width, height = surface.renderSize()
+        x, y = -surface.compositionOriginX(), -surface.compositionOriginY()
+    elseif marksModal == false and not surface.isComposing() then
         width, height = surface.renderSize()
     else
         width, height = surface.compositionSize()
     end
-    love.graphics.rectangle("fill", 0, 0, width, height)
+    love.graphics.rectangle("fill", x, y, width, height)
     love.graphics.pop()
 end
 

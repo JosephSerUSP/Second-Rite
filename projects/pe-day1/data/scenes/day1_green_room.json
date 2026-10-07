@@ -1,0 +1,3296 @@
+{
+  "id": "day1_green_room",
+  "name": "Carnegie Hall - green room",
+  "kind": "menu",
+  "draw": "windows",
+  "config": {
+    "actorChangeReports": false,
+    "menuEntries": [
+      {
+        "name": "IT",
+        "icon": 1
+      },
+      {
+        "name": "PE",
+        "icon": 2
+      },
+      {
+        "name": "WP",
+        "icon": 3
+      },
+      {
+        "name": "AR",
+        "icon": 5
+      },
+      {
+        "name": "BP",
+        "icon": 9
+      }
+    ]
+  },
+  "update": {
+    "mode": "fixed",
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
+  },
+  "windows": [
+    {
+      "id": "world",
+      "rect": {
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            "-3.4",
+            "-2.6",
+            "5.6"
+          ],
+          "target": [
+            "1.6",
+            "3.2",
+            "0"
+          ],
+          "fov": 54
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "room",
+            "model": "assets/models/rooms/green_room/environment.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "bakedLighting": true
+          },
+          {
+            "id": "door_to_corridor_b",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              3.6,
+              2.5,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_corridor_b'"
+          },
+          {
+            "id": "pickup_dressing_ammo",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
+            "position": [
+              0,
+              5,
+              0.15
+            ],
+            "yaw": "sceneState.gait * 0.25",
+            "visible": "sceneState.f_got_dressing_ammo == 0"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "scale": [
+              0.55,
+              0.55,
+              1
+            ]
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/aya/aya_idle.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
+          },
+          {
+            "id": "aya_walk_0",
+            "model": "assets/models/aya/aya_walk_0.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_1",
+            "model": "assets/models/aya/aya_walk_1.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 1 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_2",
+            "model": "assets/models/aya/aya_walk_2.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 2 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_3",
+            "model": "assets/models/aya/aya_walk_3.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 3 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_4",
+            "model": "assets/models/aya/aya_walk_4.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 4 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_5",
+            "model": "assets/models/aya/aya_walk_5.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 5 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_6",
+            "model": "assets/models/aya/aya_walk_6.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 6 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_7",
+            "model": "assets/models/aya/aya_walk_7.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 7 and (sceneState.fight == 0 or rt.outcome == '')"
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "card",
+      "rect": {
+        "x": "4 - surface.originX",
+        "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
+        "w": "surface.width - 8",
+        "h": "3 + sceneState.cardLines"
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": "surface.height - surface.originY - 2.5",
+        "w": 34,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or '')}"
+        }
+      ]
+    },
+    {
+      "id": "menu_title_frame",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 0",
+        "y": 0.5,
+        "w": 40,
+        "h": 3
+      },
+      "style": "panel",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [],
+      "dimBehind": 0.22
+    },
+    {
+      "id": "menu_title",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 0",
+        "y": 0.5,
+        "w": 31,
+        "h": 3
+      },
+      "style": "panel",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.menuNote ~= '' and sceneState.menuNote or ((sceneState.ui == 20) and ((sceneState.mcol == 0) and 'Use or inspect items.' or ((sceneState.mcol == 1) and 'Use Parasite Energy.' or ((sceneState.mcol == 2) and 'Change weapons.' or ((sceneState.mcol == 3) and 'Change armor.' or ((sceneState.mcol == 4) and 'Distribute Bonus Points.' or ''))))) or ((sceneState.ui == 21 or sceneState.ui >= 26) and (session.carriedItems[sceneState.mi] and session.carriedItems[sceneState.mi].description or '') or ((sceneState.ui == 22) and ((sceneState.wi == 0) and 'M84F: handgun. Fires rounds from the Ammo Crate.' or 'Club: melee. Unlimited swings at close range.') or ((sceneState.ui == 23) and 'Heal 1: restores 30 HP for 30 PE.' or ((sceneState.ui == 24) and ((sceneState.ai == 0) and 'N Vest: DEF +2.' or ((sceneState.ai == 1) and 'N Protector: DEF +6.' or '')) or ((sceneState.bi == 0) and 'Active Time: the AT gauge fills faster. 100 BP per level.' or 'Item Capacity: one more item slot. 100 BP per level.')))))))}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_clock",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 31",
+        "y": 0.5,
+        "w": 9,
+        "h": 3
+      },
+      "style": "panel",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [
+        {
+          "type": "text",
+          "text": "{floor((variables.playSeconds or 0) / 3600)}:{floor((variables.playSeconds or 0) / 60) % 60 < 10 and '0' or ''}{floor((variables.playSeconds or 0) / 60) % 60}:{floor((variables.playSeconds or 0)) % 60 < 10 and '0' or ''}{floor((variables.playSeconds or 0)) % 60}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_panel",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 34,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": []
+    },
+    {
+      "id": "menu_hp",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 27",
+        "y": 22,
+        "w": 13,
+        "h": 4
+      },
+      "style": "panel",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mHp}/{sceneState.mMax} HP"
+        }
+      ]
+    },
+    {
+      "id": "menu_pe_bar",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 27",
+        "y": 22,
+        "w": 13,
+        "h": 4
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 2.4,
+          "width": 9,
+          "height": 0.45,
+          "labelPlacement": "right",
+          "label": "PE",
+          "value": "sceneState.mPe",
+          "max": "100",
+          "fill": [
+            0.15,
+            0.75,
+            0.23
+          ],
+          "color": [
+            0.11,
+            0.24,
+            0.2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu_status_left",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 17,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "Aya\n\n\n\n\n\n\n\n\nEQUIPMENT\n\n {((variables.weapon or 'handgun') == 'baton' and 'Club' or 'M84F')}  {(variables.weapon or 'handgun') == 'baton' and '--' or session.items.handgun_ammo}\n\n {((sceneState.mArmor == 'n_vest') and 'N Vest' or ((sceneState.mArmor == 'n_protector') and 'N Protector' or '--'))}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_status_right",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 22",
+        "y": 4,
+        "w": 18,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": ""
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_items",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 34,
+        "h": 14
+      },
+      "style": "list",
+      "chrome": "none",
+      "visible": "sceneState.ui == 21 or sceneState.ui >= 26",
+      "gridColumns": 2,
+      "visibleRows": 6,
+      "rowPitch": 2,
+      "content": [
+        {
+          "type": "list",
+          "listId": "carried_items",
+          "format": "{name} {qty}",
+          "cursor": "sceneState.mi",
+          "highlight": "equipped or id == ((variables.weapon or 'handgun') == 'baton' and 'club' or 'm84f')"
+        }
+      ]
+    },
+    {
+      "id": "menu_items_total",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 25",
+        "y": 17,
+        "w": 15,
+        "h": 3
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 21 or sceneState.ui >= 26",
+      "content": [
+        {
+          "type": "text",
+          "text": "Total  {sceneState.mUsed}/{sceneState.mCap}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_item_action",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 17",
+        "y": 10,
+        "w": 13,
+        "h": 8
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 26",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.ma == 0 and '> ' or '  '}Use\n\n{sceneState.ma == 1 and '> ' or '  '}Move\n\n{sceneState.ma == 2 and '> ' or '  '}Discard"
+        }
+      ],
+      "chrome": "overlay"
+    },
+    {
+      "id": "menu_weapon_stats",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 18,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 22",
+      "content": [
+        {
+          "type": "text",
+          "text": "{((sceneState.wi == 0) and 'M84F' .. '\\n\\nATTACK   7\\nRANGE    4.0\\nROUNDS   ' .. session.items.handgun_ammo or 'Club\\n\\nATTACK   3\\nRANGE    1.5\\nROUNDS   --')}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_weapon_list",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 24",
+        "y": 4,
+        "w": 16,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 22",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.wi == 0 and '> ' or '  '}M84F{(variables.weapon or 'handgun') == 'handgun' and ' E' or ''}\n{sceneState.wi == 1 and '> ' or '  '}Club{(variables.weapon or 'handgun') == 'baton' and ' E' or ''}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_pe",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 34,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 23",
+      "content": [
+        {
+          "type": "text",
+          "text": "> Heal 1       PE 30"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_armor_stats",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 18,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 24",
+      "content": [
+        {
+          "type": "text",
+          "text": "{((sceneState.ai == 0) and 'N Vest\\n\\nDEFENSE  +2' or ((sceneState.ai == 1) and 'N Protector\\n\\nDEFENSE  +6' or ''))}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_armor_list",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 24",
+        "y": 4,
+        "w": 16,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 24",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.ai == 0 and '> ' or '  '}{(session.items.n_vest > 0 or sceneState.mArmor == 'n_vest') and 'N Vest' or '--'}{sceneState.mArmor == 'n_vest' and ' E' or ''}\n{sceneState.ai == 1 and '> ' or '  '}{(session.items.n_protector > 0 or sceneState.mArmor == 'n_protector') and 'N Protector' or '--'}{sceneState.mArmor == 'n_protector' and ' E' or ''}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_bp",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 6",
+        "y": 4,
+        "w": 34,
+        "h": 17
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 25",
+      "content": [
+        {
+          "type": "text",
+          "text": "BONUS POINT  {variables.bp or 0}\n\n{sceneState.bi == 0 and '> ' or '  '}ACTIVE TIME    {sceneState.mAct}\n{sceneState.bi == 1 and '> ' or '  '}ITEM CAPACITY  {sceneState.mCapLv}\n\n100 BP raise one level."
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_level",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 7",
+        "y": 7,
+        "w": 10,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]LEVEL"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_level",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 17",
+        "y": 7,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mLv}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_next",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 7",
+        "y": 10,
+        "w": 10,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]NEXT LEVEL"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_next",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 17",
+        "y": 10,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mNext}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_bp",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 5,
+        "w": 12,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]BONUS POINT"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_bp",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 35",
+        "y": 5,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{variables.bp or 0}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_off",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 8,
+        "w": 12,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]OFFENSE"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_off",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 35",
+        "y": 8,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mOff}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_def",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 10,
+        "w": 12,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]DEFENSE"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_def",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 35",
+        "y": 10,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mDef}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_pen",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 12,
+        "w": 12,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]PENERGY"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_pen",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 35",
+        "y": 12,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mPen}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_srec",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 14,
+        "w": 13,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]STATUS RECOVER"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_srec",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 36",
+        "y": 14,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mSrec}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_act",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 17,
+        "w": 12,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]ACTIVE TIME"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_act",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 35",
+        "y": 17,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mAct}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_tab_cap",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 23",
+        "y": 19,
+        "w": 13,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "\\c[6]ITEM CAPACITY"
+        }
+      ],
+      "chrome": "label_tab"
+    },
+    {
+      "id": "menu_value_cap",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 36",
+        "y": 19,
+        "w": 4,
+        "h": 1.6
+      },
+      "style": "panel",
+      "visible": "sceneState.ui == 20",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.mCapLv}"
+        }
+      ],
+      "chrome": "none"
+    },
+    {
+      "id": "menu_column",
+      "rect": {
+        "x": "(surface.width - 40) / 2 - surface.originX + 0",
+        "y": 4,
+        "w": 6,
+        "h": 17
+      },
+      "style": "list",
+      "visible": "sceneState.ui >= 20 and sceneState.ui <= 27",
+      "content": [
+        {
+          "type": "list",
+          "listId": "config:menuEntries",
+          "format": "{name}",
+          "cursor": "sceneState.mcol + 1"
+        }
+      ],
+      "gridColumns": 1,
+      "rowPitch": 3
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "COMMENT",
+        "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "name": "ix",
+            "value": 0
+          },
+          {
+            "name": "iy",
+            "value": 0
+          },
+          {
+            "name": "held",
+            "value": 0
+          },
+          {
+            "name": "camYaw",
+            "value": 0
+          },
+          {
+            "name": "ilen",
+            "value": 1
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "fight",
+            "value": 0
+          },
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "card",
+            "value": "''"
+          },
+          {
+            "name": "cardLines",
+            "value": 1
+          },
+          {
+            "name": "status",
+            "value": "''"
+          },
+          {
+            "name": "hits",
+            "value": 0
+          },
+          {
+            "name": "lastHitAge",
+            "value": 1000000000.0
+          },
+          {
+            "name": "bpGain",
+            "value": 0
+          },
+          {
+            "name": "gained",
+            "value": 0
+          },
+          {
+            "name": "lvl0",
+            "value": 1
+          },
+          {
+            "name": "walkX",
+            "value": "sceneState.walkX or 0"
+          },
+          {
+            "name": "walkY",
+            "value": "sceneState.walkY or 1"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "entryX",
+            "value": "sceneState.walkX"
+          },
+          {
+            "name": "entryY",
+            "value": "sceneState.walkY"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "mcol",
+            "value": 0
+          },
+          {
+            "name": "mi",
+            "value": 1
+          },
+          {
+            "name": "ma",
+            "value": 0
+          },
+          {
+            "name": "moveFrom",
+            "value": 1
+          },
+          {
+            "name": "wi",
+            "value": 0
+          },
+          {
+            "name": "ai",
+            "value": 0
+          },
+          {
+            "name": "bi",
+            "value": 0
+          },
+          {
+            "name": "menuNote",
+            "value": "''"
+          },
+          {
+            "name": "mHp",
+            "value": 0
+          },
+          {
+            "name": "mMax",
+            "value": 1
+          },
+          {
+            "name": "mPe",
+            "value": 0
+          },
+          {
+            "name": "mLv",
+            "value": 1
+          },
+          {
+            "name": "mNext",
+            "value": 0
+          },
+          {
+            "name": "mOff",
+            "value": 1
+          },
+          {
+            "name": "mDef",
+            "value": 1
+          },
+          {
+            "name": "mPen",
+            "value": 1
+          },
+          {
+            "name": "mSrec",
+            "value": 1
+          },
+          {
+            "name": "mAct",
+            "value": 1
+          },
+          {
+            "name": "mCapLv",
+            "value": 1
+          },
+          {
+            "name": "mCap",
+            "value": 10
+          },
+          {
+            "name": "mUsed",
+            "value": 0
+          },
+          {
+            "name": "mArmor",
+            "value": "''"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:kit_issued",
+        "then": [],
+        "else": [
+          {
+            "cmd": "SET_FLAG",
+            "flag": "kit_issued",
+            "value": true
+          },
+          {
+            "cmd": "CHANGE_ITEM",
+            "item": "m84f",
+            "count": 1
+          },
+          {
+            "cmd": "CHANGE_ITEM",
+            "item": "club",
+            "count": 1
+          },
+          {
+            "cmd": "CHANGE_ITEM",
+            "item": "n_vest",
+            "count": 1
+          },
+          {
+            "cmd": "EQUIP_ITEM",
+            "slot": 2,
+            "target": 1,
+            "itemIndex": 2
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_got_dressing_ammo",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:got_dressing_ammo",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_got_dressing_ammo",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": "sceneState.card ~= '' and 9 or 0"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "SET_GAME_VARIABLE",
+        "name": "playSeconds",
+        "value": "(variables.playSeconds or 0) + time.dt"
+      },
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ix",
+            "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+          },
+          {
+            "name": "iy",
+            "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.held == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "camYaw",
+                "value": "0.711459"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "held",
+            "value": "(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0"
+          },
+          {
+            "name": "ilen",
+            "value": "max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen"
+          },
+          {
+            "name": "dy",
+            "value": "(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "moving",
+            "value": "sceneState.held"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.moving == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "gait",
+                "value": "sceneState.gait + time.dt * 10"
+              },
+              {
+                "name": "aim",
+                "value": "atan2(sceneState.dx, -sceneState.dy)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "walkX",
+            "value": "max(-3.6, min(3.6, sceneState.walkX + sceneState.dx * 0.05))"
+          },
+          {
+            "name": "walkY",
+            "value": "max(0.3, min(5.6, sceneState.walkY + sceneState.dy * 0.05))"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0",
+        "then": [
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "weapon",
+            "value": "((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton')"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "menuHeld",
+            "value": "sceneState.input.X"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "''"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "((sceneState.walkX - (3.6))^2 + (sceneState.walkY - (2.5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_corridor_b'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Corridor'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.f_got_dressing_ammo == 0 and ((sceneState.walkX - (0))^2 + (sceneState.walkY - (5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'p:dressing_ammo'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: examine'"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 9",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "''"
+              },
+              {
+                "name": "ui",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ui >= 20 and sceneState.ui <= 27",
+            "then": [
+              {
+                "cmd": "FOR_EACH",
+                "scope": "party",
+                "as": "aya",
+                "do": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "mHp",
+                        "value": "aya.hp"
+                      },
+                      {
+                        "name": "mMax",
+                        "value": "aya.maxHp"
+                      },
+                      {
+                        "name": "mPe",
+                        "value": "aya.res.pe"
+                      },
+                      {
+                        "name": "mLv",
+                        "value": "aya.level"
+                      },
+                      {
+                        "name": "mNext",
+                        "value": "aya.progress.toNext"
+                      },
+                      {
+                        "name": "mOff",
+                        "value": "aya.stat.offense"
+                      },
+                      {
+                        "name": "mDef",
+                        "value": "aya.stat.defense"
+                      },
+                      {
+                        "name": "mPen",
+                        "value": "aya.stat.penergy"
+                      },
+                      {
+                        "name": "mSrec",
+                        "value": "aya.stat.srecover"
+                      },
+                      {
+                        "name": "mAct",
+                        "value": "aya.stat.act"
+                      },
+                      {
+                        "name": "mCapLv",
+                        "value": "aya.stat.cap"
+                      },
+                      {
+                        "name": "mCap",
+                        "value": "9 + aya.stat.cap"
+                      },
+                      {
+                        "name": "mArmor",
+                        "value": "aya.equip.armor"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "mUsed",
+                    "value": "#session.carriedItems"
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.ui == 27",
+                "then": [
+                  {
+                    "cmd": "MOVE_CARRIED_ITEM",
+                    "from": "sceneState.moveFrom",
+                    "to": "sceneState.mi"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 21
+                      },
+                      {
+                        "name": "menuNote",
+                        "value": "'Moved the item.'"
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.ui == 26",
+                    "then": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.ma == 0",
+                        "then": [
+                          {
+                            "cmd": "USE_ITEM",
+                            "itemIndex": "sceneState.mi",
+                            "target": 1,
+                            "carried": true
+                          },
+                          {
+                            "cmd": "FOR_EACH",
+                            "scope": "party",
+                            "as": "aya",
+                            "do": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "mHp",
+                                    "value": "aya.hp"
+                                  },
+                                  {
+                                    "name": "mMax",
+                                    "value": "aya.maxHp"
+                                  },
+                                  {
+                                    "name": "mPe",
+                                    "value": "aya.res.pe"
+                                  },
+                                  {
+                                    "name": "mLv",
+                                    "value": "aya.level"
+                                  },
+                                  {
+                                    "name": "mNext",
+                                    "value": "aya.progress.toNext"
+                                  },
+                                  {
+                                    "name": "mOff",
+                                    "value": "aya.stat.offense"
+                                  },
+                                  {
+                                    "name": "mDef",
+                                    "value": "aya.stat.defense"
+                                  },
+                                  {
+                                    "name": "mPen",
+                                    "value": "aya.stat.penergy"
+                                  },
+                                  {
+                                    "name": "mSrec",
+                                    "value": "aya.stat.srecover"
+                                  },
+                                  {
+                                    "name": "mAct",
+                                    "value": "aya.stat.act"
+                                  },
+                                  {
+                                    "name": "mCapLv",
+                                    "value": "aya.stat.cap"
+                                  },
+                                  {
+                                    "name": "mCap",
+                                    "value": "9 + aya.stat.cap"
+                                  },
+                                  {
+                                    "name": "mArmor",
+                                    "value": "aya.equip.armor"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "mUsed",
+                                "value": "#session.carriedItems"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "menuNote",
+                                "value": "sceneState.lastItemResult and (sceneState.lastItemResult.success and ('Used ' .. sceneState.lastItemResult.itemName .. '.') or sceneState.popupText) or ''"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "ui",
+                                "value": 21
+                              },
+                              {
+                                "name": "mi",
+                                "value": "max(1, min(#session.carriedItems, sceneState.mi))"
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.ma == 1",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 27
+                                  },
+                                  {
+                                    "name": "moveFrom",
+                                    "value": "sceneState.mi"
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "'Choose a destination slot.'"
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "IF",
+                                "condition": "(session.carriedItems[sceneState.mi].equipped or session.carriedItems[sceneState.mi].id == ((variables.weapon or 'handgun') == 'baton' and 'club' or 'm84f')) or session.carriedItems[sceneState.mi].type == 'key' or session.carriedItems[sceneState.mi].type == 'quest'",
+                                "then": [
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "menuNote",
+                                        "value": "'Cannot discard worn equipment or a key.'"
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "cmd": "DISCARD_CARRIED_ITEM",
+                                    "itemIndex": "sceneState.mi"
+                                  },
+                                  {
+                                    "cmd": "FOR_EACH",
+                                    "scope": "party",
+                                    "as": "aya",
+                                    "do": [
+                                      {
+                                        "cmd": "SET_SCENE_STATE",
+                                        "assignments": [
+                                          {
+                                            "name": "mHp",
+                                            "value": "aya.hp"
+                                          },
+                                          {
+                                            "name": "mMax",
+                                            "value": "aya.maxHp"
+                                          },
+                                          {
+                                            "name": "mPe",
+                                            "value": "aya.res.pe"
+                                          },
+                                          {
+                                            "name": "mLv",
+                                            "value": "aya.level"
+                                          },
+                                          {
+                                            "name": "mNext",
+                                            "value": "aya.progress.toNext"
+                                          },
+                                          {
+                                            "name": "mOff",
+                                            "value": "aya.stat.offense"
+                                          },
+                                          {
+                                            "name": "mDef",
+                                            "value": "aya.stat.defense"
+                                          },
+                                          {
+                                            "name": "mPen",
+                                            "value": "aya.stat.penergy"
+                                          },
+                                          {
+                                            "name": "mSrec",
+                                            "value": "aya.stat.srecover"
+                                          },
+                                          {
+                                            "name": "mAct",
+                                            "value": "aya.stat.act"
+                                          },
+                                          {
+                                            "name": "mCapLv",
+                                            "value": "aya.stat.cap"
+                                          },
+                                          {
+                                            "name": "mCap",
+                                            "value": "9 + aya.stat.cap"
+                                          },
+                                          {
+                                            "name": "mArmor",
+                                            "value": "aya.equip.armor"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "mUsed",
+                                        "value": "#session.carriedItems"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "ui",
+                                        "value": 21
+                                      },
+                                      {
+                                        "name": "mi",
+                                        "value": "max(1, min(#session.carriedItems, sceneState.mi))"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "menuNote",
+                                        "value": "'Discarded the selected slot.'"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.ui == 20",
+                        "then": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.mcol == 0",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 21
+                                  },
+                                  {
+                                    "name": "mi",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "ai",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "bi",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "''"
+                                  },
+                                  {
+                                    "name": "wi",
+                                    "value": "(variables.weapon or 'handgun') == 'baton' and 1 or 0"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.mcol == 1",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 23
+                                  },
+                                  {
+                                    "name": "mi",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "ai",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "bi",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "''"
+                                  },
+                                  {
+                                    "name": "wi",
+                                    "value": "(variables.weapon or 'handgun') == 'baton' and 1 or 0"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.mcol == 2",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 22
+                                  },
+                                  {
+                                    "name": "mi",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "ai",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "bi",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "''"
+                                  },
+                                  {
+                                    "name": "wi",
+                                    "value": "(variables.weapon or 'handgun') == 'baton' and 1 or 0"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.mcol == 3",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 24
+                                  },
+                                  {
+                                    "name": "mi",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "ai",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "bi",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "''"
+                                  },
+                                  {
+                                    "name": "wi",
+                                    "value": "(variables.weapon or 'handgun') == 'baton' and 1 or 0"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.mcol == 4",
+                            "then": [
+                              {
+                                "cmd": "SET_SCENE_STATE",
+                                "assignments": [
+                                  {
+                                    "name": "ui",
+                                    "value": 25
+                                  },
+                                  {
+                                    "name": "mi",
+                                    "value": 1
+                                  },
+                                  {
+                                    "name": "ai",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "bi",
+                                    "value": 0
+                                  },
+                                  {
+                                    "name": "menuNote",
+                                    "value": "''"
+                                  },
+                                  {
+                                    "name": "wi",
+                                    "value": "(variables.weapon or 'handgun') == 'baton' and 1 or 0"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "else": [
+                          {
+                            "cmd": "IF",
+                            "condition": "sceneState.ui == 21",
+                            "then": [
+                              {
+                                "cmd": "IF",
+                                "condition": "#session.carriedItems > 0",
+                                "then": [
+                                  {
+                                    "cmd": "SET_SCENE_STATE",
+                                    "assignments": [
+                                      {
+                                        "name": "ui",
+                                        "value": 26
+                                      },
+                                      {
+                                        "name": "ma",
+                                        "value": 0
+                                      },
+                                      {
+                                        "name": "menuNote",
+                                        "value": "''"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ],
+                            "else": [
+                              {
+                                "cmd": "IF",
+                                "condition": "sceneState.ui == 22",
+                                "then": [
+                                  {
+                                    "cmd": "IF",
+                                    "condition": "sceneState.wi == 0",
+                                    "then": [
+                                      {
+                                        "cmd": "SET_GAME_VARIABLE",
+                                        "name": "weapon",
+                                        "value": "'handgun'"
+                                      },
+                                      {
+                                        "cmd": "SET_SCENE_STATE",
+                                        "assignments": [
+                                          {
+                                            "name": "menuNote",
+                                            "value": "'Equipped the M84F.'"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "cmd": "SET_GAME_VARIABLE",
+                                        "name": "weapon",
+                                        "value": "'baton'"
+                                      },
+                                      {
+                                        "cmd": "SET_SCENE_STATE",
+                                        "assignments": [
+                                          {
+                                            "name": "menuNote",
+                                            "value": "'Equipped the Club.'"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "cmd": "IF",
+                                    "condition": "sceneState.ui == 23",
+                                    "then": [
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.mPe >= 30",
+                                        "then": [
+                                          {
+                                            "cmd": "IF",
+                                            "condition": "sceneState.mHp >= sceneState.mMax",
+                                            "then": [
+                                              {
+                                                "cmd": "SET_SCENE_STATE",
+                                                "assignments": [
+                                                  {
+                                                    "name": "menuNote",
+                                                    "value": "'HP is already full.'"
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "else": [
+                                              {
+                                                "cmd": "FOR_EACH",
+                                                "scope": "party",
+                                                "as": "aya",
+                                                "do": [
+                                                  {
+                                                    "cmd": "CHANGE_RESOURCE",
+                                                    "target": "aya",
+                                                    "resource": "pe",
+                                                    "amount": -30
+                                                  },
+                                                  {
+                                                    "cmd": "HEAL",
+                                                    "target": "aya",
+                                                    "amount": 30
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "cmd": "FOR_EACH",
+                                                "scope": "party",
+                                                "as": "aya",
+                                                "do": [
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "mHp",
+                                                        "value": "aya.hp"
+                                                      },
+                                                      {
+                                                        "name": "mMax",
+                                                        "value": "aya.maxHp"
+                                                      },
+                                                      {
+                                                        "name": "mPe",
+                                                        "value": "aya.res.pe"
+                                                      },
+                                                      {
+                                                        "name": "mLv",
+                                                        "value": "aya.level"
+                                                      },
+                                                      {
+                                                        "name": "mNext",
+                                                        "value": "aya.progress.toNext"
+                                                      },
+                                                      {
+                                                        "name": "mOff",
+                                                        "value": "aya.stat.offense"
+                                                      },
+                                                      {
+                                                        "name": "mDef",
+                                                        "value": "aya.stat.defense"
+                                                      },
+                                                      {
+                                                        "name": "mPen",
+                                                        "value": "aya.stat.penergy"
+                                                      },
+                                                      {
+                                                        "name": "mSrec",
+                                                        "value": "aya.stat.srecover"
+                                                      },
+                                                      {
+                                                        "name": "mAct",
+                                                        "value": "aya.stat.act"
+                                                      },
+                                                      {
+                                                        "name": "mCapLv",
+                                                        "value": "aya.stat.cap"
+                                                      },
+                                                      {
+                                                        "name": "mCap",
+                                                        "value": "9 + aya.stat.cap"
+                                                      },
+                                                      {
+                                                        "name": "mArmor",
+                                                        "value": "aya.equip.armor"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "cmd": "SET_SCENE_STATE",
+                                                "assignments": [
+                                                  {
+                                                    "name": "mUsed",
+                                                    "value": "#session.carriedItems"
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "cmd": "SET_SCENE_STATE",
+                                                "assignments": [
+                                                  {
+                                                    "name": "menuNote",
+                                                    "value": "'Heal 1. HP restored.'"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "cmd": "SET_SCENE_STATE",
+                                            "assignments": [
+                                              {
+                                                "name": "menuNote",
+                                                "value": "'Not enough PE.'"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "cmd": "IF",
+                                        "condition": "sceneState.ui == 24",
+                                        "then": [
+                                          {
+                                            "cmd": "IF",
+                                            "condition": "sceneState.ai == 0",
+                                            "then": [
+                                              {
+                                                "cmd": "IF",
+                                                "condition": "sceneState.mArmor == 'n_vest'",
+                                                "then": [
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "menuNote",
+                                                        "value": "'Already wearing the N Vest.'"
+                                                      }
+                                                    ]
+                                                  }
+                                                ],
+                                                "else": [
+                                                  {
+                                                    "cmd": "IF",
+                                                    "condition": "session.items.n_vest > 0",
+                                                    "then": [
+                                                      {
+                                                        "cmd": "EQUIP_ITEM",
+                                                        "slot": 2,
+                                                        "target": 1,
+                                                        "itemIndex": 2
+                                                      },
+                                                      {
+                                                        "cmd": "FOR_EACH",
+                                                        "scope": "party",
+                                                        "as": "aya",
+                                                        "do": [
+                                                          {
+                                                            "cmd": "SET_SCENE_STATE",
+                                                            "assignments": [
+                                                              {
+                                                                "name": "mHp",
+                                                                "value": "aya.hp"
+                                                              },
+                                                              {
+                                                                "name": "mMax",
+                                                                "value": "aya.maxHp"
+                                                              },
+                                                              {
+                                                                "name": "mPe",
+                                                                "value": "aya.res.pe"
+                                                              },
+                                                              {
+                                                                "name": "mLv",
+                                                                "value": "aya.level"
+                                                              },
+                                                              {
+                                                                "name": "mNext",
+                                                                "value": "aya.progress.toNext"
+                                                              },
+                                                              {
+                                                                "name": "mOff",
+                                                                "value": "aya.stat.offense"
+                                                              },
+                                                              {
+                                                                "name": "mDef",
+                                                                "value": "aya.stat.defense"
+                                                              },
+                                                              {
+                                                                "name": "mPen",
+                                                                "value": "aya.stat.penergy"
+                                                              },
+                                                              {
+                                                                "name": "mSrec",
+                                                                "value": "aya.stat.srecover"
+                                                              },
+                                                              {
+                                                                "name": "mAct",
+                                                                "value": "aya.stat.act"
+                                                              },
+                                                              {
+                                                                "name": "mCapLv",
+                                                                "value": "aya.stat.cap"
+                                                              },
+                                                              {
+                                                                "name": "mCap",
+                                                                "value": "9 + aya.stat.cap"
+                                                              },
+                                                              {
+                                                                "name": "mArmor",
+                                                                "value": "aya.equip.armor"
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "mUsed",
+                                                            "value": "#session.carriedItems"
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "menuNote",
+                                                            "value": "'Now wearing the N Vest.'"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ],
+                                                    "else": [
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "menuNote",
+                                                            "value": "'Aya does not have the N Vest.'"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "cmd": "IF",
+                                            "condition": "sceneState.ai == 1",
+                                            "then": [
+                                              {
+                                                "cmd": "IF",
+                                                "condition": "sceneState.mArmor == 'n_protector'",
+                                                "then": [
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "menuNote",
+                                                        "value": "'Already wearing the N Protector.'"
+                                                      }
+                                                    ]
+                                                  }
+                                                ],
+                                                "else": [
+                                                  {
+                                                    "cmd": "IF",
+                                                    "condition": "session.items.n_protector > 0",
+                                                    "then": [
+                                                      {
+                                                        "cmd": "EQUIP_ITEM",
+                                                        "slot": 2,
+                                                        "target": 1,
+                                                        "itemIndex": 2
+                                                      },
+                                                      {
+                                                        "cmd": "FOR_EACH",
+                                                        "scope": "party",
+                                                        "as": "aya",
+                                                        "do": [
+                                                          {
+                                                            "cmd": "SET_SCENE_STATE",
+                                                            "assignments": [
+                                                              {
+                                                                "name": "mHp",
+                                                                "value": "aya.hp"
+                                                              },
+                                                              {
+                                                                "name": "mMax",
+                                                                "value": "aya.maxHp"
+                                                              },
+                                                              {
+                                                                "name": "mPe",
+                                                                "value": "aya.res.pe"
+                                                              },
+                                                              {
+                                                                "name": "mLv",
+                                                                "value": "aya.level"
+                                                              },
+                                                              {
+                                                                "name": "mNext",
+                                                                "value": "aya.progress.toNext"
+                                                              },
+                                                              {
+                                                                "name": "mOff",
+                                                                "value": "aya.stat.offense"
+                                                              },
+                                                              {
+                                                                "name": "mDef",
+                                                                "value": "aya.stat.defense"
+                                                              },
+                                                              {
+                                                                "name": "mPen",
+                                                                "value": "aya.stat.penergy"
+                                                              },
+                                                              {
+                                                                "name": "mSrec",
+                                                                "value": "aya.stat.srecover"
+                                                              },
+                                                              {
+                                                                "name": "mAct",
+                                                                "value": "aya.stat.act"
+                                                              },
+                                                              {
+                                                                "name": "mCapLv",
+                                                                "value": "aya.stat.cap"
+                                                              },
+                                                              {
+                                                                "name": "mCap",
+                                                                "value": "9 + aya.stat.cap"
+                                                              },
+                                                              {
+                                                                "name": "mArmor",
+                                                                "value": "aya.equip.armor"
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "mUsed",
+                                                            "value": "#session.carriedItems"
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "menuNote",
+                                                            "value": "'Now wearing the N Protector.'"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ],
+                                                    "else": [
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "menuNote",
+                                                            "value": "'Aya does not have the N Protector.'"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "cmd": "IF",
+                                            "condition": "(variables.bp or 0) >= 100",
+                                            "then": [
+                                              {
+                                                "cmd": "IF",
+                                                "condition": "sceneState.bi == 0",
+                                                "then": [
+                                                  {
+                                                    "cmd": "SET_GAME_VARIABLE",
+                                                    "name": "bp",
+                                                    "value": "(variables.bp or 0) - 100"
+                                                  },
+                                                  {
+                                                    "cmd": "FOR_EACH",
+                                                    "scope": "party",
+                                                    "as": "aya",
+                                                    "do": [
+                                                      {
+                                                        "cmd": "ADD_PARAM",
+                                                        "target": "aya",
+                                                        "param": "act",
+                                                        "amount": 1
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "FOR_EACH",
+                                                    "scope": "party",
+                                                    "as": "aya",
+                                                    "do": [
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "mHp",
+                                                            "value": "aya.hp"
+                                                          },
+                                                          {
+                                                            "name": "mMax",
+                                                            "value": "aya.maxHp"
+                                                          },
+                                                          {
+                                                            "name": "mPe",
+                                                            "value": "aya.res.pe"
+                                                          },
+                                                          {
+                                                            "name": "mLv",
+                                                            "value": "aya.level"
+                                                          },
+                                                          {
+                                                            "name": "mNext",
+                                                            "value": "aya.progress.toNext"
+                                                          },
+                                                          {
+                                                            "name": "mOff",
+                                                            "value": "aya.stat.offense"
+                                                          },
+                                                          {
+                                                            "name": "mDef",
+                                                            "value": "aya.stat.defense"
+                                                          },
+                                                          {
+                                                            "name": "mPen",
+                                                            "value": "aya.stat.penergy"
+                                                          },
+                                                          {
+                                                            "name": "mSrec",
+                                                            "value": "aya.stat.srecover"
+                                                          },
+                                                          {
+                                                            "name": "mAct",
+                                                            "value": "aya.stat.act"
+                                                          },
+                                                          {
+                                                            "name": "mCapLv",
+                                                            "value": "aya.stat.cap"
+                                                          },
+                                                          {
+                                                            "name": "mCap",
+                                                            "value": "9 + aya.stat.cap"
+                                                          },
+                                                          {
+                                                            "name": "mArmor",
+                                                            "value": "aya.equip.armor"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "mUsed",
+                                                        "value": "#session.carriedItems"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "menuNote",
+                                                        "value": "'Active Time rose by one level.'"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "cmd": "IF",
+                                                "condition": "sceneState.bi == 1",
+                                                "then": [
+                                                  {
+                                                    "cmd": "SET_GAME_VARIABLE",
+                                                    "name": "bp",
+                                                    "value": "(variables.bp or 0) - 100"
+                                                  },
+                                                  {
+                                                    "cmd": "FOR_EACH",
+                                                    "scope": "party",
+                                                    "as": "aya",
+                                                    "do": [
+                                                      {
+                                                        "cmd": "ADD_PARAM",
+                                                        "target": "aya",
+                                                        "param": "cap",
+                                                        "amount": 1
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "FOR_EACH",
+                                                    "scope": "party",
+                                                    "as": "aya",
+                                                    "do": [
+                                                      {
+                                                        "cmd": "SET_SCENE_STATE",
+                                                        "assignments": [
+                                                          {
+                                                            "name": "mHp",
+                                                            "value": "aya.hp"
+                                                          },
+                                                          {
+                                                            "name": "mMax",
+                                                            "value": "aya.maxHp"
+                                                          },
+                                                          {
+                                                            "name": "mPe",
+                                                            "value": "aya.res.pe"
+                                                          },
+                                                          {
+                                                            "name": "mLv",
+                                                            "value": "aya.level"
+                                                          },
+                                                          {
+                                                            "name": "mNext",
+                                                            "value": "aya.progress.toNext"
+                                                          },
+                                                          {
+                                                            "name": "mOff",
+                                                            "value": "aya.stat.offense"
+                                                          },
+                                                          {
+                                                            "name": "mDef",
+                                                            "value": "aya.stat.defense"
+                                                          },
+                                                          {
+                                                            "name": "mPen",
+                                                            "value": "aya.stat.penergy"
+                                                          },
+                                                          {
+                                                            "name": "mSrec",
+                                                            "value": "aya.stat.srecover"
+                                                          },
+                                                          {
+                                                            "name": "mAct",
+                                                            "value": "aya.stat.act"
+                                                          },
+                                                          {
+                                                            "name": "mCapLv",
+                                                            "value": "aya.stat.cap"
+                                                          },
+                                                          {
+                                                            "name": "mCap",
+                                                            "value": "9 + aya.stat.cap"
+                                                          },
+                                                          {
+                                                            "name": "mArmor",
+                                                            "value": "aya.equip.armor"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "mUsed",
+                                                        "value": "#session.carriedItems"
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "cmd": "SET_SCENE_STATE",
+                                                    "assignments": [
+                                                      {
+                                                        "name": "menuNote",
+                                                        "value": "'Item Capacity rose by one level.'"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "else": [
+                                              {
+                                                "cmd": "SET_SCENE_STATE",
+                                                "assignments": [
+                                                  {
+                                                    "name": "menuNote",
+                                                    "value": "'100 BP are needed for one level.'"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.near == 'to_corridor_b'",
+                "then": [
+                  {
+                    "cmd": "SCENE_EVENT",
+                    "kind": "goto",
+                    "scene": "day1_corridor_b",
+                    "sceneState": [
+                      {
+                        "name": "walkX",
+                        "value": -4.8
+                      },
+                      {
+                        "name": "walkY",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.near == 'p:dressing_ammo'",
+                "then": [
+                  {
+                    "cmd": "FOR_EACH",
+                    "scope": "party",
+                    "as": "aya",
+                    "do": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "mHp",
+                            "value": "aya.hp"
+                          },
+                          {
+                            "name": "mMax",
+                            "value": "aya.maxHp"
+                          },
+                          {
+                            "name": "mPe",
+                            "value": "aya.res.pe"
+                          },
+                          {
+                            "name": "mLv",
+                            "value": "aya.level"
+                          },
+                          {
+                            "name": "mNext",
+                            "value": "aya.progress.toNext"
+                          },
+                          {
+                            "name": "mOff",
+                            "value": "aya.stat.offense"
+                          },
+                          {
+                            "name": "mDef",
+                            "value": "aya.stat.defense"
+                          },
+                          {
+                            "name": "mPen",
+                            "value": "aya.stat.penergy"
+                          },
+                          {
+                            "name": "mSrec",
+                            "value": "aya.stat.srecover"
+                          },
+                          {
+                            "name": "mAct",
+                            "value": "aya.stat.act"
+                          },
+                          {
+                            "name": "mCapLv",
+                            "value": "aya.stat.cap"
+                          },
+                          {
+                            "name": "mCap",
+                            "value": "9 + aya.stat.cap"
+                          },
+                          {
+                            "name": "mArmor",
+                            "value": "aya.equip.armor"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "mUsed",
+                        "value": "#session.carriedItems"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "session.items.handgun_ammo == 0 and sceneState.mUsed >= sceneState.mCap",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "card",
+                            "value": "'No room. Item Capacity is full.'"
+                          },
+                          {
+                            "name": "cardLines",
+                            "value": 1
+                          },
+                          {
+                            "name": "ui",
+                            "value": 9
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_FLAG",
+                        "flag": "got_dressing_ammo",
+                        "value": true
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "f_got_dressing_ammo",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "CHANGE_ITEM",
+                        "item": "handgun_ammo",
+                        "count": 12
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "card",
+                            "value": "'Found handgun rounds. Ammo +12'"
+                          },
+                          {
+                            "name": "cardLines",
+                            "value": 1
+                          },
+                          {
+                            "name": "ui",
+                            "value": 9
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 0",
+        "then": [
+          {
+            "cmd": "FOR_EACH",
+            "scope": "party",
+            "as": "aya",
+            "do": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "mHp",
+                    "value": "aya.hp"
+                  },
+                  {
+                    "name": "mMax",
+                    "value": "aya.maxHp"
+                  },
+                  {
+                    "name": "mPe",
+                    "value": "aya.res.pe"
+                  },
+                  {
+                    "name": "mLv",
+                    "value": "aya.level"
+                  },
+                  {
+                    "name": "mNext",
+                    "value": "aya.progress.toNext"
+                  },
+                  {
+                    "name": "mOff",
+                    "value": "aya.stat.offense"
+                  },
+                  {
+                    "name": "mDef",
+                    "value": "aya.stat.defense"
+                  },
+                  {
+                    "name": "mPen",
+                    "value": "aya.stat.penergy"
+                  },
+                  {
+                    "name": "mSrec",
+                    "value": "aya.stat.srecover"
+                  },
+                  {
+                    "name": "mAct",
+                    "value": "aya.stat.act"
+                  },
+                  {
+                    "name": "mCapLv",
+                    "value": "aya.stat.cap"
+                  },
+                  {
+                    "name": "mCap",
+                    "value": "9 + aya.stat.cap"
+                  },
+                  {
+                    "name": "mArmor",
+                    "value": "aya.equip.armor"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mUsed",
+                "value": "#session.carriedItems"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ui",
+                "value": 20
+              },
+              {
+                "name": "mcol",
+                "value": 0
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.ui >= 20 and sceneState.ui <= 27",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.ui == 20",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "ui",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.ui >= 26",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "ui",
+                            "value": 21
+                          },
+                          {
+                            "name": "menuNote",
+                            "value": "''"
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "ui",
+                            "value": 20
+                          },
+                          {
+                            "name": "menuNote",
+                            "value": "''"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+4)%5"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 20",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mcol",
+                "value": "(sceneState.mcol + 4) % 5"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 21 or sceneState.ui == 27",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mi",
+                "value": "max(1, min(#session.carriedItems, sceneState.mi - 1))"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 26",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ma",
+                "value": "(sceneState.ma + 2) % 3"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 22",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "wi",
+                "value": "(sceneState.wi + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 24",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ai",
+                "value": "(sceneState.ai + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 25",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "bi",
+                "value": "(sceneState.bi + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%5"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 20",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mcol",
+                "value": "(sceneState.mcol + 1) % 5"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 21 or sceneState.ui == 27",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mi",
+                "value": "max(1, min(#session.carriedItems, sceneState.mi + 1))"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 26",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ma",
+                "value": "(sceneState.ma + 1) % 3"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 22",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "wi",
+                "value": "(sceneState.wi + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 24",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ai",
+                "value": "(sceneState.ai + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 25",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "bi",
+                "value": "(sceneState.bi + 1) % 2"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 21 or sceneState.ui == 27",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mi",
+                "value": "max(1, min(#session.carriedItems, sceneState.mi + -6))"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 21 or sceneState.ui == 27",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "mi",
+                "value": "max(1, min(#session.carriedItems, sceneState.mi + 6))"
+              },
+              {
+                "name": "menuNote",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

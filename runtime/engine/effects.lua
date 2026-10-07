@@ -674,6 +674,14 @@ local function applyMature(effectData, a, b, session, context)
         local param = effectData.param
         local gain = math.floor(effectData.value or 0)
         b.paramPlus = b.paramPlus or {}
+        -- Any parameter the unit declares in baseParams can carry a permanent
+        -- bonus, not only the five growth stats (a Project's own stat tracks:
+        -- PE Day 1's Active Time and Item Capacity). Undeclared names are
+        -- still refused so a typo cannot invent a stat.
+        local declared = b.actorData and b.actorData.baseParams
+        if param ~= nil and b.paramPlus[param] == nil and declared and declared[param] ~= nil then
+            b.paramPlus[param] = 0
+        end
         if param == nil or b.paramPlus[param] == nil then
             table.insert(events, {
                 type = "text",

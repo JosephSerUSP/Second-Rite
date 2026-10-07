@@ -12,6 +12,11 @@ runs, every domain fact is read from rt.* exactly as basement_rat does; the
 walk position is copied back from rt only when the fight ends.
 """
 import json
+import re
+import types
+
+import menu
+import math
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +24,8 @@ PROJECT = os.path.normpath(os.path.join(HERE, "..", ".."))
 SCENES = os.path.join(PROJECT, "data", "scenes")
 BLOCKOUT = os.path.join(PROJECT, "assets", "models", "blockout")
 BACKSTAGE = "assets/models/backstage/"
+AYA = "assets/models/aya/"
+BOSSES = "assets/models/bosses/"
 
 WALK_SPEED = 0.05          # world units per fixed tick while exploring
 NEAR = 0.9                 # interaction radius for doors and pickups
@@ -34,12 +41,6 @@ PALETTES = {  # floor, wall, trim (blockout colours, not art)
     "rehearsal": ([0.38, 0.27, 0.17], [0.50, 0.46, 0.40], [0.75, 0.70, 0.58]),
     "sewer":     ([0.16, 0.20, 0.16], [0.30, 0.31, 0.27], [0.22, 0.26, 0.22]),
     "street":    ([0.30, 0.30, 0.32], [0.20, 0.22, 0.30], [0.85, 0.85, 0.90]),
-}
-ENEMY_BOXES = {  # blockout bosses: list of (cx, cy, cz, sx, sy, sz) boxes, colour
-    "melissa":   ([(0, 0, 0.95, 0.55, 0.45, 1.9), (0, 0, 2.05, 0.3, 0.3, 0.3)], [0.55, 0.12, 0.45]),
-    "eve":       ([(0, 0, 0.9, 0.5, 0.4, 1.8), (0, 0, 1.95, 0.28, 0.28, 0.3)], [0.70, 0.06, 0.08]),
-    "alligator": ([(0, 0, 0.35, 0.9, 2.6, 0.7), (0, -1.6, 0.3, 0.6, 0.9, 0.45),
-                   (0, 1.8, 0.2, 0.3, 1.2, 0.3)], [0.22, 0.36, 0.16]),
 }
 
 
@@ -148,17 +149,18 @@ def build_shared_objs(mats):
     o = Obj("blockout.mtl")
     o.box("door_marker", 0, 0, 0.02, 0.9, 0.9, 0.04)
     o.write(os.path.join(BLOCKOUT, "door_marker.obj"))
-    for enemy, (boxes, kd) in ENEMY_BOXES.items():
-        mats["enemy_" + enemy] = kd
-        o = Obj("blockout.mtl")
-        for b in boxes:
-            o.box("enemy_" + enemy, *b)
-        o.write(os.path.join(BLOCKOUT, enemy + ".obj"))
 
 
 # --- scene --------------------------------------------------------------------
 
 FIGHT = "sceneState.fight == 1"
+# The equipped weapon is a persistent playthrough Variable, so it survives
+# room changes. The Baton never runs out, which keeps every fight winnable
+# once ammunition is gone, as in the original.
+WEAPON = "(variables.weapon or 'handgun')"
+OTHER = "(%s == 'baton' and 'handgun' or 'baton')" % WEAPON
+SWAP = {"cmd": "SET_GAME_VARIABLE", "name": "weapon", "value": OTHER}
+REACH = "(%s == 'baton' and 1.5 or 4)" % WEAPON   # mirrors the skills' realtime.range
 
 
 def in_fight(expr, default):
@@ -194,6 +196,11 @@ def scene_models(room, room_model):
     models = []
     if room.get("corridor"):
         models.append({"id": "room", "model": BACKSTAGE + "corridor.obj", "position": [0, 0, 0], "yaw": 0, "visible": "true"})
+    elif room.get("environment"):
+        # A Second Gate baked environment package: its atlas already carries the
+        # room's lighting, so it is drawn as baked (bakedLighting), never relit.
+        models.append({"id": "room", "model": room["environment"], "position": [0, 0, 0], "yaw": 0,
+                       "visible": "true", "bakedLighting": True})
     else:
         models.append({"id": "room", "model": room_model, "position": [0, 0, 0], "yaw": 0, "visible": "true"})
     for door in room["doors"]:
@@ -201,30 +208,32 @@ def scene_models(room, room_model):
         models.append({"id": "door_" + door["id"], "model": "assets/models/blockout/door_marker.obj",
                        "position": [x, y, 0], "yaw": 0, "visible": "sceneState.near == %s" % q(door["id"])})
     for p in room.get("pickups", []):
-        models.append({"id": "pickup_" + p["id"], "model": "assets/models/blockout/pickup.obj",
-                       "position": [p["at"][0], p["at"][1], 0], "yaw": "sceneState.gait * 0 + time_spin",
+        models.append({"id": "pickup_" + p["id"], "model": BACKSTAGE + "spark.obj", "scale": [0.35, 0.35, 0.35],
+                       "position": [p["at"][0], p["at"][1], 0.15], "yaw": "sceneState.gait * 0 + time_spin",
                        "visible": "sceneState.%s == 0" % sv("got_" + p["id"])})
     walking = "sceneState.moving == 1"
     models += [
-        {"id": "aya_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": [PX, PY, 0], "yaw": 0, "visible": "true"},
-        {"id": "aya", "model": BACKSTAGE + "aya.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
-         "visible": "(%s and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (not %s or sceneState.ui > 0))" % (FIGHT, walking)},
-        {"id": "aya_walk_a", "model": BACKSTAGE + "aya_walk_a.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
-         "visible": "sceneState.ui == 0 and %s and sin(sceneState.gait) >= 0 and (sceneState.fight == 0 or rt.outcome == '')" % walking},
-        {"id": "aya_walk_b", "model": BACKSTAGE + "aya_walk_b.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
-         "visible": "sceneState.ui == 0 and %s and sin(sceneState.gait) < 0 and (sceneState.fight == 0 or rt.outcome == '')" % walking},
+        {"id": "aya_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": [PX, PY, 0], "yaw": 0, "visible": "true", "scale": [0.55, 0.55, 1]},
+        {"id": "aya", "model": AYA + "aya_idle.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+         "visible": "(%s and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))" % FIGHT},
     ]
+    # Eight-frame walk cycle (tools/build_aya.py); gait advances 10 rad/s.
+    for k in range(8):
+        models.append({"id": "aya_walk_%d" % k, "model": AYA + "aya_walk_%d.obj" % k, "position": [PX, PY, 0],
+                       "yaw": "sceneState.aim",
+                       "visible": "sceneState.ui == 0 and %s and floor(sceneState.gait / 6.283185 * 8) %% 8 == %d"
+                                  " and (sceneState.fight == 0 or rt.outcome == '')" % (walking, k)})
     if "encounter" in room:
         enemy = room["encounter"]["enemy"]
         ex, ey = "rt.enemy.x", "rt.enemy.y"
         tint = in_fight("rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1", 1)
         models += [
-            {"id": "aya_down", "model": BACKSTAGE + "aya_down.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+            {"id": "aya_down", "model": AYA + "aya_down.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
              "visible": in_fight("rt.outcome == 'defeat'", "false")},
-            {"id": "aya_recoil", "model": BACKSTAGE + "aya_recoil.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
+            {"id": "aya_recoil", "model": AYA + "aya_recoil.obj", "position": [PX, PY, 0], "yaw": "sceneState.aim",
              "visible": in_fight("rt.outcome ~= 'defeat' and rt.actAge < 12", "false")},
             {"id": "range_ground", "model": BACKSTAGE + "range_ground.obj", "position": [PX, PY, 0.03], "yaw": 0,
-             "visible": "sceneState.ui == 2", "scale": ["sceneState.range", "sceneState.range", 1]},
+             "visible": "sceneState.ui == 2", "scale": [REACH, REACH, 1]},
             {"id": "muzzle", "model": BACKSTAGE + "spark.obj",
              "position": [PX + "+sin(sceneState.aim)*.72", PY + "-cos(sceneState.aim)*.72", 1.47], "yaw": 0,
              "visible": in_fight("rt.actAge < 12", "false")},
@@ -243,10 +252,16 @@ def scene_models(room, room_model):
                  "visible": in_fight("(not rt.enemy.windup and rt.enemy.strikeAge < 20) and " + live, "false"), "tint": [1, tint, tint]},
             ]
         else:
-            lunge = in_fight("rt.enemy.windup and 1.08 or 1", 1)
-            models.append({"id": "enemy", "model": "assets/models/blockout/%s.obj" % enemy, "position": epos,
-                           "yaw": "sceneState.ratAim", "visible": in_fight(live, "false"),
-                           "scale": [1, 1, lunge], "tint": [1, tint, tint]})
+            # Authored boss poses (tools/build_bosses.py): idle, and the wind-up
+            # telegraph swapped in while the attack charges.
+            models += [
+                {"id": "enemy_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": epos, "yaw": 0,
+                 "visible": in_fight(live, "false"), "scale": [1.6, 1.6, 1]},
+                {"id": "enemy", "model": BOSSES + enemy + "_idle.obj", "position": epos, "yaw": "sceneState.ratAim",
+                 "visible": in_fight("not rt.enemy.windup and " + live, "false"), "tint": [1, tint, tint]},
+                {"id": "enemy_windup", "model": BOSSES + enemy + "_windup.obj", "position": epos, "yaw": "sceneState.ratAim",
+                 "visible": in_fight("rt.enemy.windup and " + live, "false"), "tint": [1, tint, tint]},
+            ]
         models += [
             {"id": "target", "model": BACKSTAGE + "target_cursor.obj", "position": [epos[0], epos[1], 1.1], "yaw": 0,
              "visible": "sceneState.ui == 2"},
@@ -263,6 +278,32 @@ def scene_models(room, room_model):
 
 
 def camera_of(room):
+    """A room lists one or more fixed "views", each composed from a named
+    original shot. A view has a "when" condition on Aya's x/y (the last is
+    the fallback) and the camera hard-cuts between them. Cameras never move:
+    a room with a "plate" renders each view onto a plate larger than the
+    screen (plate.size in screens, like the original's 320x512 and 512x240
+    backgrounds), and the visible window scrolls across it following Aya."""
+    if room.get("views"):
+        views = room["views"]
+        fov = views[0]["fov"]
+        assert all(v["fov"] == fov for v in views), room["id"] + ": views share one fov"
+
+        def cond(text):
+            return "(" + re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, text)) + ")"
+
+        def pick(key, axis):
+            expr = "%g" % views[-1][key][axis]
+            for v in reversed(views[:-1]):
+                expr = "(%s and %g or %s)" % (cond(v["when"]), v[key][axis], expr)
+            return expr
+        camera = {"position": [pick("position", i) for i in range(3)],
+                  "target": [pick("target", i) for i in range(3)], "fov": fov}
+        if room.get("plate"):
+            camera["frame"] = {"size": room["plate"]["size"], "follow": [PX, PY, 1.0]}
+        return camera
+    if room.get("camera"):
+        return dict(room["camera"])
     if room.get("corridor"):
         return dict(CORRIDOR_CAMERA)
     w, d = room_dims(room)
@@ -286,28 +327,37 @@ def windows(room, room_model):
     if "encounter" in room:
         hud = FIGHT
         out += [
-            {"id": "combat_hud", "rect": {"x": "1.5 - surface.originX", "y": 1, "w": 13, "h": 4.5}, "style": "panel", "chrome": "overlay",
+            # Original status silhouette: long cyan AT, large HP digits,
+            # green PE; labels sit beyond the bars' right edge.
+            {"id": "combat_hud", "rect": {"x": "1 - surface.originX", "y": 1, "w": 18, "h": 7}, "style": "panel", "chrome": "overlay",
              "visible": hud, "content": [
-                {"type": "gauge", "x": 0.7, "y": 0.65, "width": 8.5, "height": 0.4, "labelPlacement": "right", "label": "AT",
-                 "value": "rt.player.at", "max": "100", "fill": [0.08, "rt.player.at >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7", 0.85],
-                 "color": [0.04, 0.07, 0.06]},
-                {"type": "gauge", "x": 0.7, "y": 3.5, "width": 8.5, "height": 0.4, "labelPlacement": "right", "label": "PE",
-                 "value": "rt.player.res.pe", "max": "100", "fill": [0.02, 0.85, 0.15], "color": [0.04, 0.07, 0.06]}]},
-            {"id": "hp", "rect": {"x": "3.2 - surface.originX", "y": 2.3, "w": 7, "h": 1.5}, "style": "panel", "chrome": "none",
-             "visible": hud, "content": [{"type": "text", "text": "{rt.player.hp}/{rt.player.maxHp}"}]},
-            {"id": "hp_label", "rect": {"x": "10 - surface.originX", "y": 2.3, "w": 3.5, "h": 1.5}, "style": "panel", "chrome": "none",
-             "visible": hud, "content": [{"type": "text", "text": "HP"}]},
-            {"id": "command", "rect": {"x": "1 - surface.originX", "y": 7, "w": 13, "h": 8}, "style": "panel", "chrome": "overlay",
+                {"type": "gauge", "x": 1, "y": 1, "width": 13, "height": 0.55, "labelPlacement": "none",
+                 "value": "rt.player.at", "max": "100", "fill": ["rt.player.at >= 100 and .35+.3*abs(sin(sceneState.gait)) or .12", .85, 1],
+                 "color": [0.06, 0.20, 0.22]},
+                {"type": "gauge", "x": 1, "y": 5, "width": 13, "height": 0.55, "labelPlacement": "none",
+                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.12, 0.85, 0.20], "color": [0.06, 0.20, 0.10]}]},
+            {"id": "hud_labels", "rect": {"x": "14.5 - surface.originX", "y": 1, "w": 4.5, "h": 7}, "style": "panel", "chrome": "none",
+             "visible": hud, "content": [{"type": "text", "text": "AT\n\nHP\n\nPE"}]},
+            {"id": "hud_hp", "rect": {"x": "1 - surface.originX", "y": 2.2, "w": 14, "h": 3.5}, "style": "panel", "chrome": "none",
+             "textScale": 2, "align": "right", "visible": hud,
+             "content": [{"type": "text", "text": "{rt.player.hp}/{rt.player.maxHp}"}]},
+            {"id": "hud_weapon", "rect": {"x": "1 - surface.originX", "y": 7.5, "w": 18, "h": 2.5}, "style": "panel", "chrome": "none",
+             "visible": hud, "content": [{"type": "text", "text":
+                "{" + WEAPON + " == 'baton' and 'CLUB' or 'M84F'}   {" + WEAPON + " == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"}]},
+            # Battle menus: one column under the status panel, one width, a title row.
+            {"id": "command", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 8}, "style": "panel", "chrome": "overlay",
              "visible": "sceneState.ui == 1", "content": [{"type": "text", "text":
-                "{sceneState.choice == 0 and '> Attack' or '  Attack'}\n{sceneState.choice == 1 and '> P. Energy' or '  P. Energy'}\n"
-                "{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"}]},
-            {"id": "target_info", "rect": {"x": "surface.width - surface.originX - 13", "y": 13, "w": 12, "h": 5}, "style": "panel",
+                "COMMAND\n{sceneState.choice == 0 and '> ' or '  '}Attack\n{sceneState.choice == 1 and '> ' or '  '}P. Energy\n"
+                "{sceneState.choice == 2 and '> ' or '  '}Item\n{sceneState.choice == 3 and '> ' or '  '}Change\n{sceneState.choice == 4 and '> ' or '  '}Escape"}]},
+            {"id": "target_info", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel",
              "chrome": "overlay", "visible": "sceneState.ui == 2",
-             "content": [{"type": "text", "text": "M84F\nBULLETS {(rt.items.handgun_ammo or 0)}\nTARGET   1"}]},
-            {"id": "pe_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 15, "h": 5}, "style": "panel", "chrome": "overlay",
-             "visible": "sceneState.ui == 3", "content": [{"type": "text", "text": "> Heal 1\nRecover 30 HP\nPE cost 30"}]},
-            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 16, "h": 5}, "style": "panel", "chrome": "overlay",
-             "visible": "sceneState.ui == 4", "content": [{"type": "text", "text": "> Medicine 1\nStock {(rt.items.medicine or 0)}\nRecover 30 HP"}]},
+             "content": [{"type": "text", "text": "TARGET\n{" + WEAPON + " == 'baton' and 'Club   range 1.5' or 'M84F   range 4'}\n"
+                          "A: fire   B: back"}]},
+            {"id": "pe_menu", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel", "chrome": "overlay",
+             "visible": "sceneState.ui == 3", "content": [{"type": "text", "text": "P. ENERGY\n> Heal 1     PE 30\n  Recover 30 HP"}]},
+            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel", "chrome": "overlay",
+             "visible": "sceneState.ui == 4", "content": [{"type": "text", "text":
+                "ITEM\n> Medicine   x{(rt.items.medicine or 0)}"}]},
             {"id": "result", "rect": {"x": 6, "y": 9, "w": 21, "h": 6}, "style": "panel", "chrome": "overlay",
              "visible": in_fight("rt.outcome == 'victory'", "false") + " and sceneState.ui ~= 9",
              "content": [{"type": "text", "text": "Battle over\n> Obtain all"}]},
@@ -315,29 +365,42 @@ def windows(room, room_model):
              "visible": in_fight("rt.outcome == 'defeat'", "false"), "content": [{"type": "text", "text": "Aya has fallen\nEnter: retry"}]},
         ]
     out += [
-        {"id": "card", "rect": {"x": "4 - surface.originX", "y": 7, "w": "surface.width - 8", "h": 14}, "style": "panel",
-         "chrome": "overlay", "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
-        {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": 27.5, "w": 34, "h": 2}, "style": "panel", "chrome": "none",
-         "visible": "sceneState.ui ~= 9",
-         "content": [{"type": "text", "text": "{%s}" % in_fight("rt.refusalAge < 90 and rt.refusal or sceneState.status", "sceneState.status")}]},
-    ]
+        # Bottom message box, sized to its text.
+        {"id": "card", "rect": {"x": "4 - surface.originX", "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
+                                "w": "surface.width - 8", "h": "3 + sceneState.cardLines"}, "style": "panel",
+         "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
+        # Battle-only feedback line (refusals, prompts); the field stays clean.
+        {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": "surface.height - surface.originY - 2.5", "w": 34, "h": 2},
+         "style": "panel", "chrome": "none", "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",
+         "content": [{"type": "text", "text": "{%s}" % in_fight("rt.refusalAge < 90 and rt.refusal or sceneState.status", "''")}]},
+    ] + MENU.windows()
     return out
+
+
+def message(text, **more):
+    """Show a message box; it is sized to the text's line count."""
+    return setv(card=q(text), cardLines=text.count("\n") + 1, **more)
+
+
+MENU = None   # bound in main(), once every helper below exists
 
 
 def on_enter(room, spawn):
     hooks = [
         {"cmd": "COMMENT", "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."},
-        setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, range=4, aim=0, ratAim=0,
-             fight=0, near="''", card="''", status=q(room["name"]),
+        setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, ix=0, iy=0, held=0, camYaw=0, ilen=1, range=4, aim=0, ratAim=0,
+             fight=0, near="''", card="''", cardLines=1, status="''", hits=0, lastHitAge=1e9, bpGain=0, gained=0, lvl0=1,
              walkX="sceneState.walkX or %s" % spawn[0], walkY="sceneState.walkY or %s" % spawn[1]),
         setv(entryX="sceneState.walkX", entryY="sceneState.walkY"),
+        setv(**MENU.initial()),
+        MENU.issue_kit(),
     ]
     for flag in flags_used(room):
         hooks.append(setv(**{sv(flag): 0}))
         hooks.append(iff("flag:" + flag, [setv(**{sv(flag): 1})]))
     card = room.get("card")
     if card:
-        show = [setv(card=q(card["text"]))]
+        show = [message(card["text"])]
         if card.get("once"):
             hooks.append(iff("flag:" + card["once"], [], [{"cmd": "SET_FLAG", "flag": card["once"], "value": True}] + show))
         else:
@@ -345,7 +408,7 @@ def on_enter(room, spawn):
     visit = room.get("visitCard")
     if visit:
         seen = "visited_" + room["id"] + "_" + visit["flag"]
-        grant = [{"cmd": "SET_FLAG", "flag": seen, "value": True}, setv(card=q(visit["text"]))]
+        grant = [{"cmd": "SET_FLAG", "flag": seen, "value": True}, message(visit["text"])]
         if visit.get("heal"):
             grant.append({"cmd": "RECOVER_PARTY"})
         if visit.get("item"):
@@ -360,19 +423,47 @@ def on_enter(room, spawn):
     return hooks
 
 
+def view_yaw(room):
+    """Heading of the active view's camera on the floor plane (0 = looking
+    along +y), selected by the same conditions as camera_of."""
+    def yaw(pos, tgt):
+        return math.atan2(tgt[0] - pos[0], tgt[1] - pos[1])
+    views = room.get("views")
+    if not views:
+        cam = camera_of(room)
+        return "%g" % yaw(cam["position"], cam["target"])
+    expr = "%g" % yaw(views[-1]["position"], views[-1]["target"])
+    for v in reversed(views[:-1]):
+        cond = re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, v["when"]))
+        expr = "((%s) and %g or %s)" % (cond, yaw(v["position"], v["target"]), expr)
+    return expr
+
+
 def on_frame(room):
     b = bounds_of(room)
+    tick = {"cmd": "SET_GAME_VARIABLE", "name": "playSeconds", "value": menu.PLAY + " + time.dt"}
+    # Screen-relative movement: the stick is read against the camera heading
+    # latched when a direction is first pressed, and that heading is kept
+    # until every direction is released, so a camera cut mid-walk never
+    # turns Aya around. Diagonals are normalised.
     move = [
-        setv(dx="sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0",
-             dy="sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"),
-        setv(moving="(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"),
+        setv(ix="sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0",
+             iy="sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"),
+        iff("sceneState.held == 0", [setv(camYaw=view_yaw(room))]),
+        setv(held="(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0",
+             ilen="max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"),
+        setv(dx="(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen",
+             dy="(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"),
+        setv(moving="sceneState.held"),
         iff("sceneState.moving == 1", [setv(gait="sceneState.gait + time.dt * 10",
                                             aim="atan2(sceneState.dx, -sceneState.dy)")]),
     ]
     explore = move + [
         setv(walkX="max(%s, min(%s, sceneState.walkX + sceneState.dx * %s))" % (b["minX"], b["maxX"], WALK_SPEED),
              walkY="max(%s, min(%s, sceneState.walkY + sceneState.dy * %s))" % (b["minY"], b["maxY"], WALK_SPEED)),
-        setv(near="''", status=q(room["name"])),
+        iff("sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0", [SWAP]),
+        setv(menuHeld="sceneState.input.X"),
+        setv(near="''", status="''"),
     ]
     dist = "((sceneState.walkX - (%s))^2 + (sceneState.walkY - (%s))^2 < %s)"
     for door in room["doors"]:
@@ -383,7 +474,7 @@ def on_frame(room):
                            [setv(near=q("p:" + p["id"]), status=q("Enter: examine"))]))
     hooks = [{"cmd": "READ_INPUT", "name": "input"}]
     if "encounter" not in room:
-        return hooks + explore
+        return [tick] + hooks + explore
     fight = [
         iff("sceneState.input.X and not sceneState.menuHeld and rt.outcome == '' and sceneState.ui ~= 9", [
             iff("sceneState.ui == 0 and rt.player.at >= 100",
@@ -394,10 +485,32 @@ def on_frame(room):
         setv(moving="sceneState.moving == 1 and rt.outcome == '' and 1 or 0"),
         {"cmd": "REALTIME_BATTLE_PAUSE", "paused": "sceneState.ui > 0"},
         {"cmd": "REALTIME_BATTLE_STEP", "dx": "sceneState.dx", "dy": "sceneState.dy"},
+        iff("rt.hitOnPlayer and rt.hitAge < sceneState.lastHitAge", [setv(hits="sceneState.hits + 1")]),
+        setv(lastHitAge="rt.hitOnPlayer and rt.hitAge or 1e9"),
         iff("sceneState.moving == 0", [setv(aim="atan2(rt.enemy.x - rt.player.x, rt.player.y - rt.enemy.y)")]),
         setv(ratAim="atan2(rt.player.x - rt.enemy.x, rt.enemy.y - rt.player.y)"),
     ]
-    return hooks + [iff(FIGHT, fight, explore)]
+    return [tick] + hooks + [iff(FIGHT, fight, explore)]
+
+
+def rewards(enc):
+    """EXP and Bonus Points after a won fight, as in the original: BP shrink
+    by 10% per hit Aya took (to half at most); each level gained raises
+    Offense, Defense, PEnergy, Status Recover and max HP."""
+    bp = "floor(%d * max(0.5, 1 - 0.1 * sceneState.hits))" % enc["bp"]
+    aya = lambda *cmds: {"cmd": "FOR_EACH", "scope": "party", "as": "aya", "do": list(cmds)}
+    grow = [{"cmd": "ADD_PARAM", "target": "aya", "param": p, "amount": "sceneState.gained"}
+            for p in ("offense", "defense", "penergy", "srecover")]
+    grow.append({"cmd": "ADD_PARAM", "target": "aya", "param": "maxHp", "amount": "8 * sceneState.gained"})
+    text = q(enc["after"] + "\n\n") + " .. 'EXP +%d   BP +' .. sceneState.bpGain .. (sceneState.gained > 0 and '   LEVEL UP!' or '')" % enc["exp"]
+    return [
+        setv(bpGain=bp),
+        aya(setv(lvl0="aya.level"), {"cmd": "GRANT_XP", "target": "aya", "amount": enc["exp"]}),
+        aya(setv(gained="aya.level - sceneState.lvl0")),
+        iff("sceneState.gained > 0", [aya(*grow)]),
+        {"cmd": "SET_GAME_VARIABLE", "name": "bp", "value": "(variables.bp or 0) + sceneState.bpGain"},
+        setv(card=text, cardLines=enc["after"].count("\n") + 3, ui=9),
+    ]
 
 
 def fight_select(room):
@@ -405,22 +518,27 @@ def fight_select(room):
     menu = iff("sceneState.ui == 0", [
         iff("rt.player.at >= 100", [setv(ui=2, status="'Choose target'")])], [
         iff("sceneState.ui == 2", [
-            {"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "handgun_shot", "target": "enemy"}, setv(ui=0, status="''")], [
+            iff(WEAPON + " == 'baton'",
+                [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "baton_strike", "target": "enemy"}],
+                [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "handgun_shot", "target": "enemy"}]),
+            setv(ui=0, status="''")], [
             iff("sceneState.ui == 1", [
                 iff("sceneState.choice == 0", [setv(ui=2, status="'Choose target'")]),
                 iff("sceneState.choice == 1", [setv(ui=3)]),
-                iff("sceneState.choice == 2", [setv(ui=4)]),
-                iff("sceneState.choice == 3", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "escape", "target": "self"}, setv(ui=0)]),
+                iff("sceneState.choice == 2", [setv(ui=4, choice=0)]),
+                iff("sceneState.choice == 3", [SWAP, setv(ui=0, status="''")]),
+                iff("sceneState.choice == 4", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "escape", "target": "self"}, setv(ui=0)]),
             ], [
                 iff("sceneState.ui == 3", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "skill", "id": "heal1", "target": "self"}, setv(ui=0, status="''")], [
-                    iff("sceneState.ui == 4", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "item", "id": "medicine", "target": "self"}, setv(ui=0, status="''")])])])])])
+                    iff("sceneState.ui == 4", [{"cmd": "REALTIME_BATTLE_COMMAND", "kind": "item", "id": "medicine", "target": "self"},
+                                               setv(ui=0, status="''")])])])])])
     leave = [setv(walkX="rt.player.x", walkY="rt.player.y"), {"cmd": "REALTIME_BATTLE_END"}, setv(fight=0, ui=0)]
     return iff("rt.outcome == 'victory'", [
-        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + [setv(card=q(enc["after"]), ui=9)], [
+        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + rewards(enc), [
         iff("rt.outcome == 'defeat'", [
             {"cmd": "COMMENT", "text": "Rough-chapter retry: restore Aya and restart this room's fight where she entered."},
             {"cmd": "REALTIME_BATTLE_END"}, {"cmd": "RECOVER_PARTY"},
-            setv(walkX="sceneState.entryX", walkY="sceneState.entryY", ui=0), battle_start(room)], [
+            setv(walkX="sceneState.entryX", walkY="sceneState.entryY", ui=0, hits=0, lastHitAge=1e9), battle_start(room)], [
             iff("rt.outcome == 'escaped'", leave + [setv(status="'Escaped. It is still here.'")], [menu])])])
 
 
@@ -435,7 +553,7 @@ def on_select(room):
         go = [{"cmd": "SCENE_EVENT", "kind": "goto", "scene": "day1_" + door["to"],
                "sceneState": [{"name": "walkX", "value": door["spawn"][0]}, {"name": "walkY", "value": door["spawn"][1]}]}]
         if door.get("needs"):
-            go = [iff("flag:" + door["needs"], go, [setv(card=q(door["lockedText"]), ui=9)])]
+            go = [iff("flag:" + door["needs"], go, [message(door["lockedText"], ui=9)])]
         explore.append(iff("sceneState.near == %s" % q(door["id"]), go))
     for p in room.get("pickups", []):
         got = [{"cmd": "SET_FLAG", "flag": "got_" + p["id"], "value": True}, setv(**{sv("got_" + p["id"]): 1})]
@@ -443,32 +561,42 @@ def on_select(room):
             got.append({"cmd": "CHANGE_ITEM", "item": p["item"][0], "count": p["item"][1]})
         if p.get("flag"):
             got.append({"cmd": "SET_FLAG", "flag": p["flag"], "value": True})
-        got.append(setv(card=q(p["text"]), ui=9))
+        got.append(message(p["text"], ui=9))
+        got = MENU.room_for(p["item"][0] if p.get("item") else None, got)
         explore.append(iff("sceneState.near == %s" % q("p:" + p["id"]), got))
     body = explore
     if "encounter" in room:
         body = [iff(FIGHT, [fight_select(room)], explore)]
-    return [iff("sceneState.ui == 9", dismiss, body)]
+    return [iff("sceneState.ui == 9", dismiss, [iff(menu.OPEN, MENU.snapshot() + [MENU.select()], body)])]
 
 
 def on_cancel(room):
+    # B opens the field menu while exploring and backs out of it page by page.
+    field = iff("sceneState.ui == 0", MENU.open(), [iff(menu.OPEN, [MENU.cancel()])])
     if "encounter" not in room:
-        return []
-    return [iff(FIGHT + " and sceneState.ui > 0 and sceneState.ui < 9 and rt.outcome == ''", [setv(ui=0, status="''")])]
+        return [field]
+    return [iff(FIGHT, [iff("sceneState.ui > 0 and sceneState.ui < 9 and rt.outcome == ''", [setv(ui=0, status="''")])], [field])]
 
 
 def scene(room, room_model, spawn):
-    menu_move = lambda step: [iff("sceneState.ui == 1", [setv(choice="(sceneState.choice+%d)%%4" % step)])]
+    menu_move = lambda step: [iff("sceneState.ui == 1", [setv(choice="(sceneState.choice+%d)%%5" % (4 if step < 0 else 1))])] \
+        + MENU.move(step)
     return {
         "id": "day1_" + room["id"], "name": room["name"], "kind": "menu", "draw": "windows",
+        # Level-ups are reported in the victory message, not the engine's generic Actor Change modal.
+        "config": {"actorChangeReports": False, "menuEntries": [
+            {"name": label, "icon": icon} for label, icon in [("IT", 1), ("PE", 2), ("WP", 3), ("AR", 5), ("BP", 9)]]},
         "update": {"mode": "fixed", "step": 1 / 60, "maxCatchUp": 60},
         "windows": windows(room, room_model),
         "hooks": {"on_enter": on_enter(room, spawn), "on_frame": on_frame(room), "on_select": on_select(room),
-                  "on_cancel": on_cancel(room), "on_up": menu_move(3), "on_down": menu_move(1), "on_left": [], "on_right": []},
+                  "on_cancel": on_cancel(room), "on_up": menu_move(-1), "on_down": menu_move(1),
+                  "on_left": MENU.horizontal(-1), "on_right": MENU.horizontal(1)},
     }
 
 
 def main():
+    global MENU
+    MENU = menu.Menu(types.SimpleNamespace(setv=setv, iff=iff, message=message, WEAPON=WEAPON))
     table = json.load(open(os.path.join(HERE, "rooms.json"), encoding="utf-8"))
     os.makedirs(BLOCKOUT, exist_ok=True)
     mats = {}

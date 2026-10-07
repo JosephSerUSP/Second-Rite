@@ -715,6 +715,16 @@ end
 -- Applies one deterministic, permanent growth packet without changing the
 -- Unit's level. The command owns no level-up policy: authored hosts decide
 -- when to invoke it, and growth.apply owns the seeded mutation semantics.
+-- Permanent bonus to one parameter (the param_plus effect as a command):
+-- Bonus Point allocation, training, stat items authored as events.
+handlers.ADD_PARAM = function(cmd, ctx)
+    local target = resolveRef(cmd.target, ctx)
+    if not target then return end
+    local amount = evalFormula(cmd.amount, ctx)
+    emitAll(ctx, effects.apply({ type = "param_plus", param = cmd.param, value = tonumber(amount) or 0 },
+        target, target, ctx.session))
+end
+
 handlers.APPLY_GROWTH = function(cmd, ctx)
     local target = resolveRef(cmd.target, ctx)
     if not target then return end
@@ -1185,6 +1195,18 @@ end
 
 local compareIds = require("engine.inventory").compareIds
 
+handlers.MOVE_CARRIED_ITEM = function(cmd, ctx)
+    require("engine.inventory").moveCarried(ctx.session,
+        math.floor(evalFormula(cmd.from, ctx)), math.floor(evalFormula(cmd.to, ctx)))
+end
+
+handlers.DISCARD_CARRIED_ITEM = function(cmd, ctx)
+    local rows = require("engine.inventory").carriedRows(ctx.session)
+    local row = assert(rows[math.floor(evalFormula(cmd.itemIndex, ctx))], "Carried item index out of range")
+    assert(not row.equipped, "Cannot discard equipped item")
+    ctx.session:addItem(row.id, -row.qty)
+end
+
 -- Field item use as data (items-scene promotion): applies an item's
 -- data-defined effects through the same effects pipeline field and battle
 -- use share, then consumes one. itemIndex is 1-based into the non-empty
@@ -1217,6 +1239,10 @@ handlers.USE_ITEM = function(cmd, ctx)
     end
     table.sort(stacks, compareIds)
     local item = stacks[idx] and loader.getItem(stacks[idx])
+    if cmd.carried == true then
+        local row = require("engine.inventory").carriedRows(ctx.session)[idx]
+        item = row and not row.equipped and loader.getItem(row.id) or nil
+    end
     if not item then
         if ctx.sceneState then
             ctx.sceneState.lastItemResult = { success = false, reason = "No item found" }
@@ -2151,6 +2177,9 @@ handlers.RESET_SESSION = function(cmd, ctx)
     fresh:initializeStartingParty()
     _G.activeSession = fresh
     ctx.session = fresh
+    -- Re-point the party with the session, as LOAD_GAME does; a stale
+    -- ctx.party made every later FOR_EACH party act on the old run's Unit.
+    ctx.party = fresh.party
     present("clearStringPictures")
     present("disableEventSkip")
     present("rebindSession", fresh)

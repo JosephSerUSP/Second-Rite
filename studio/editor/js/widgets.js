@@ -1379,6 +1379,8 @@
         const CONFIG_SCHEMA = {
             'windowLayout.headerSpacing': { label: 'Header Spacing (px)', type: 'number', step: 1 },
             'ui.fontOffsetY':              { label: 'Font Vertical Offset (px)', type: 'number', step: 1 },
+            'ui.windowskinMode':           { label: 'Regular Window Style', widget: 'select',
+                                            options: ['skin', 'overlay'] },
             'ui.menuSlideDuration':        { label: 'Menu Slide Duration (s)', step: 0.05, min: 0 },
             'ui.moveTransitionDuration':   { label: 'Move Transition (s)', step: 0.05, min: 0 },
             'ui.inputCooldown':            { label: 'Input Cooldown (s)', step: 0.05, min: 0 },

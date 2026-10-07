@@ -409,6 +409,16 @@ or `"none"` and an authored tile-unit `height`; existing gauges retain their
 standard label-above-bar geometry.
 Gauge color components may be formulas, allowing authored full-AT flashing
 without changing the resolved gauge value or introducing another clock.
+`system.ui.windowskinMode` selects the regular window shell Project-wide:
+`skin` (the default) or `overlay`. The shared panel renderer applies it to
+regular shells everywhere, including title, message and menu windows; button
+and highlight roles retain their authored skins. Explicit custom chrome and
+damage labels retain their own rendering. Studio exposes the setting; both
+G1 validation paths reject unknown modes.
+Panel text can declare a positive `textScale` (default 1) in the window or
+its shared layout. It scales only text and wraps against the available width
+in local coordinates; shell and gauge geometry keep their authored size.
+The Windows tab exposes this field, and G1 rejects invalid scales.
 
 `READ_INPUT` copies the canonical logical controller's held-button snapshot
 into a named Scene-state table. Real-time authored Scenes can normalize motion
@@ -2041,6 +2051,20 @@ This applies to the editor too: form fields come from the schema layer
 (`studio/editor/js/entity-forms.js`, `CONFIG_SCHEMA`), not hand-written DOM.
 
 ### 2.2 UI aesthetics
+
+Carried-slot menus use the engine inventory projection `carried_items` and
+`session.carriedItems`. Each unstacked unit occupies a row, `meta.carriedStack`
+keeps a whole stack in one row, and worn party equipment remains visible.
+`USE_ITEM carried=true`, `DISCARD_CARRIED_ITEM` and `MOVE_CARRIED_ITEM` resolve
+the same 1-based slot order. Discard rejects worn equipment; authored events
+apply additional game policies, such as protecting keys. Move swaps slots;
+`carriedItemOrder` is session state and a required save payload field.
+
+List windows may declare `gridColumns` and `rowPitch` inline, using the same
+Studio layout fields. Columns fill vertically and overflow pages follow the
+cursor. Grid cells use the shared button skins for selection and authored row
+highlights. `chrome: "label_tab"` draws a slanted vertical-gradient label,
+and `chrome: "button"` uses the shared raised button skin for popups.
 
 - Rich vertical gradients for major menus — never flat dark overlays.
 - Micro-animations: panels slide in/out via timer states.

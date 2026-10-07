@@ -226,8 +226,53 @@ local ok, err = pcall(function()
     check(v().ui == 21 and v().mi == 1, "Item opens the inventory")
     tap("DOWN"); tap("DOWN"); tap("DOWN")      -- club, Ammo Crate, M84F, Medicine
     tap("A")
+    check(v().ui == 26, "an item opens Use / Move / Discard before changing inventory")
+    tap("B")
+    check(v().ui == 21 and aya.hp == 10, "cancel from the item popup does not use it")
+    tap("A"); tap("A")
     check(aya.hp == 40 and (session.inventory.medicine or 0) == meds - 1 and v().mHp == 40,
         "Medicine used from the item list heals 30")
+    local carried = require("engine.inventory")
+    local rows = carried.carriedRows(session)
+    check(#rows == v().mUsed, "the grid and capacity share one carried-slot count")
+    local worn, medicineRows = 0, 0
+    for _, row in ipairs(rows) do
+        if row.equipped then worn = worn + 1 end
+        if row.id == "medicine" then medicineRows = medicineRows + 1; check(row.qty == 1, "each Medicine occupies one slot") end
+    end
+    check(worn == 1 and medicineRows == (session.inventory.medicine or 0), "worn armor and all Medicine units are in the grid")
+    local interpreter = require("engine.interpreter")
+    local wornIndex
+    for i, row in ipairs(rows) do if row.equipped then wornIndex = i end end
+    local okDiscard, discardError = pcall(function()
+        interpreter.runImmediate({{cmd="DISCARD_CARRIED_ITEM", itemIndex=wornIndex}}, ctx)
+    end)
+    check(not okDiscard and tostring(discardError):find("Cannot discard equipped item")
+        and aya.equipment[2].id == "n_vest", "the discard command itself rejects worn gear")
+    local okMove, moveError = pcall(function() carried.moveCarried(session, 1, #rows + 1) end)
+    check(not okMove and tostring(moveError):find("index out of range"), "moving outside the carried list fails loudly")
+    local first = rows[1].key
+    v().mi = 1
+    tap("A"); tap("DOWN"); tap("A")
+    check(v().ui == 27, "Move asks for a destination")
+    tap("DOWN"); tap("A")
+    check(v().ui == 21 and carried.carriedRows(session)[2].key == first, "Move swaps the selected slots")
+    local savegame = require("engine.savegame")
+    local saved = savegame.serialize(session, loader, state().id)
+    local loaded = savegame.deserialize(saved, loader)
+    check(carried.carriedRows(loaded)[2].key == first, "carried slot order survives save/load")
+    -- Discard one unit out of a repeated Medicine stack, never another row.
+    session:addItem("medicine", 2)
+    rows = carried.carriedRows(session)
+    for i, row in ipairs(rows) do if row.id == "medicine" then v().mi = i; break end end
+    local beforeDiscard = session.inventory.medicine
+    tap("A"); tap("DOWN"); tap("DOWN"); tap("A")
+    check(session.inventory.medicine == beforeDiscard - 1 and v().ui == 21, "Discard consumes exactly one Medicine slot")
+    rows = carried.carriedRows(session)
+    for i, row in ipairs(rows) do if row.equipped then v().mi = i; break end end
+    tap("A"); tap("DOWN"); tap("DOWN"); tap("A")
+    check(aya.equipment[2].id == "n_vest" and v().menuNote:find("Cannot discard"), "Discard protects worn equipment")
+    tap("B") -- dismiss the protected item's popup
     -- Armor: the N Protector replaces the N Vest and raises DEF.
     tap("B"); tap("DOWN"); tap("DOWN"); tap("DOWN"); tap("A")
     check(v().ui == 24, "Armor opens the armor page")

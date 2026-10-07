@@ -4,7 +4,11 @@
     "name": "Ammo Crate",
     "type": "ammo",
     "description": "Rounds for the M84F. Takes one slot however full.",
-    "effects": []
+    "effects": [],
+    "icon": 7,
+    "meta": {
+      "carriedStack": true
+    }
   },
   {
     "id": "medicine",
@@ -17,19 +21,22 @@
         "type": "hp",
         "value": 30
       }
-    ]
+    ],
+    "icon": 6
   },
   {
     "id": "m84f",
     "name": "M84F",
     "type": "weapon",
-    "description": "Aya's service handgun. Fires rounds from the Ammo Crate."
+    "description": "Aya's service handgun. Fires rounds from the Ammo Crate.",
+    "icon": 3
   },
   {
     "id": "club",
     "name": "Club",
     "type": "weapon",
-    "description": "A police club. Melee, unlimited swings."
+    "description": "A police club. Melee, unlimited swings.",
+    "icon": 4
   },
   {
     "id": "n_vest",
@@ -43,7 +50,8 @@
         "dataId": "def",
         "value": 2
       }
-    ]
+    ],
+    "icon": 5
   },
   {
     "id": "n_protector",
@@ -57,12 +65,14 @@
         "dataId": "def",
         "value": 6
       }
-    ]
+    ],
+    "icon": 5
   },
   {
     "id": "rehearse_key",
     "name": "Rehearse Key",
     "type": "key",
-    "description": "Opens the Rehearsal Room."
+    "description": "Opens the Rehearsal Room.",
+    "icon": 8
   }
 ]

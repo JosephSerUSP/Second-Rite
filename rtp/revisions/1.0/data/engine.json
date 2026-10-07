@@ -275,6 +275,10 @@
     {
       "token": "sin(x), cos(x)",
       "description": "Trigonometry in radians for authored world transforms and presentation motion."
+    },
+    {
+      "token": "session.carriedItems",
+      "description": "Ordered carried_items slot records (id, name, icon, qty, type, description, equipped); unstacked quantities expand per unit, meta.carriedStack=true occupies one slot, and worn equipment is included. #session.carriedItems is the carried slot total."
     }
   ],
   "scripting": {
@@ -307,11 +311,11 @@
     },
     {
       "token": "ctx.rawSession",
-      "description": "Real session object — only present when scripting.allowRawAccess is true."
+      "description": "Real session object \u2014 only present when scripting.allowRawAccess is true."
     },
     {
       "token": "ctx.rawLoader",
-      "description": "Real data loader — only present when scripting.allowRawAccess is true."
+      "description": "Real data loader \u2014 only present when scripting.allowRawAccess is true."
     },
     {
       "token": "api.damage(target, n)",
@@ -367,7 +371,7 @@
     },
     {
       "token": "random(m, n)",
-      "description": "The seeded math.random — deterministic under the golden harness."
+      "description": "The seeded math.random \u2014 deterministic under the golden harness."
     },
     {
       "token": "api.setTransitionArrowsVisible(val) / api.getTransitionArrowsVisible()",
@@ -1533,6 +1537,10 @@
         {
           "key": "target",
           "type": "formula"
+        },
+        {
+          "key": "carried",
+          "type": "boolean"
         }
       ],
       "contexts": [
@@ -1541,7 +1549,7 @@
         "common"
       ],
       "interactive": false,
-      "description": "Applies an item's data-defined effects and consumes one. itemIndex is 1-based into the id-sorted inventory (the window renderer's 'inventory' list order); items with target 'party' hit every member, otherwise target is a party index."
+      "description": "Applies an item's data-defined effects and consumes one. itemIndex is 1-based into the id-sorted inventory (the window renderer's 'inventory' list order); items with target 'party' hit every member, otherwise target is a party index. carried=true resolves itemIndex against carried_items slots, including repeated units; worn items cannot be used."
     },
     {
       "id": "EQUIP_ITEM",
@@ -2924,6 +2932,46 @@
         "scene"
       ],
       "interactive": false
+    },
+    {
+      "id": "DISCARD_CARRIED_ITEM",
+      "category": "Progression",
+      "label": "Discard Carried Item",
+      "params": [
+        {
+          "key": "itemIndex",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "scene",
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Removes the selected carried_items slot: one unstacked unit or the entire authored carriedStack. Rejects worn equipment and invalid indices."
+    },
+    {
+      "id": "MOVE_CARRIED_ITEM",
+      "category": "Progression",
+      "label": "Move Carried Item",
+      "params": [
+        {
+          "key": "from",
+          "type": "formula"
+        },
+        {
+          "key": "to",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "scene",
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Swaps two carried_items slots and persists their order through save/load. Both indices are 1-based formulas."
     }
   ],
   "paramLabels": {

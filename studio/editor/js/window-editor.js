@@ -33,10 +33,10 @@
         // window even when the scene omits rect entirely.
         const SCENE_OVERRIDES_ALWAYS = ['x', 'y', 'width', 'height'];
         // These are only overridden when the scene's entry actually sets them.
-        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'visibleRows', 'dimBehind'];
+        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'visibleRows', 'gridColumns', 'rowPitch', 'dimBehind'];
 
-        // Everything else (contentX/contentY, gridColumns, portrait*, gauges,
-        // pages/pageFormula, anim, vertical, hideMp, rowPitch, ...) has no
+        // Everything else (contentX/contentY, portrait*, gauges,
+        // pages/pageFormula, anim, vertical, hideMp, ...) has no
         // scene-side path at all and is read only from windowLayout — so those
         // fields stay live and editable here even for a shadowed window.
         function computeSceneShadow(id) {

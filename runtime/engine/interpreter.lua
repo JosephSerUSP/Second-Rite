@@ -1195,6 +1195,18 @@ end
 
 local compareIds = require("engine.inventory").compareIds
 
+handlers.MOVE_CARRIED_ITEM = function(cmd, ctx)
+    require("engine.inventory").moveCarried(ctx.session,
+        math.floor(evalFormula(cmd.from, ctx)), math.floor(evalFormula(cmd.to, ctx)))
+end
+
+handlers.DISCARD_CARRIED_ITEM = function(cmd, ctx)
+    local rows = require("engine.inventory").carriedRows(ctx.session)
+    local row = assert(rows[math.floor(evalFormula(cmd.itemIndex, ctx))], "Carried item index out of range")
+    assert(not row.equipped, "Cannot discard equipped item")
+    ctx.session:addItem(row.id, -row.qty)
+end
+
 -- Field item use as data (items-scene promotion): applies an item's
 -- data-defined effects through the same effects pipeline field and battle
 -- use share, then consumes one. itemIndex is 1-based into the non-empty
@@ -1227,6 +1239,10 @@ handlers.USE_ITEM = function(cmd, ctx)
     end
     table.sort(stacks, compareIds)
     local item = stacks[idx] and loader.getItem(stacks[idx])
+    if cmd.carried == true then
+        local row = require("engine.inventory").carriedRows(ctx.session)[idx]
+        item = row and not row.equipped and loader.getItem(row.id) or nil
+    end
     if not item then
         if ctx.sceneState then
             ctx.sceneState.lastItemResult = { success = false, reason = "No item found" }

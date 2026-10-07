@@ -12,16 +12,14 @@ has no import cycle with the generator run as __main__.
 
 COLUMN = ["Item", "PE", "Weapon", "Armor", "BP"]
 PAGE_UI = [21, 23, 22, 24, 25]          # page state for each column entry
-OPEN = "sceneState.ui >= 20 and sceneState.ui <= 25"
+OPEN = "sceneState.ui >= 20 and sceneState.ui <= 27"
 PLAY = "(variables.playSeconds or 0)"
 CLOCK = ("{floor(%(t)s / 3600)}:{floor(%(t)s / 60) %% 60 < 10 and '0' or ''}{floor(%(t)s / 60) %% 60}"
          ":{floor(%(t)s) %% 60 < 10 and '0' or ''}{floor(%(t)s) %% 60}") % {"t": PLAY}
 ARMORS = [("n_vest", "N Vest", 2), ("n_protector", "N Protector", 6)]
 # Slots in use: every carried thing takes one, the Ammo Crate one in all,
 # the worn armor included (the engine moves worn armor out of the inventory).
-USED = ("(session.items.m84f + session.items.club + session.items.n_vest + session.items.n_protector"
-        " + session.items.medicine + session.items.rehearse_key + (session.items.handgun_ammo > 0 and 1 or 0)"
-        " + (sceneState.mArmor ~= '' and 1 or 0))")
+USED = "#session.carriedItems"
 N = "\n"
 
 
@@ -29,7 +27,7 @@ def chain(pairs, default):
     """Lua conditional chain without hand-counted parentheses."""
     expr = default
     for cond, value in reversed(pairs):
-        expr = "(%s and %s or %s)" % (cond, value, expr)
+        expr = "((%s) and %s or %s)" % (cond, value, expr)
     return expr
 
 
@@ -59,7 +57,7 @@ class Menu:
                 h.setv(mUsed=USED)]
 
     def initial(self):
-        return dict(mcol=0, mi=1, wi=0, ai=0, bi=0, menuNote="''", mHp=0, mMax=1, mPe=0, mLv=1, mNext=0,
+        return dict(mcol=0, mi=1, ma=0, moveFrom=1, wi=0, ai=0, bi=0, menuNote="''", mHp=0, mMax=1, mPe=0, mLv=1, mNext=0,
                     mOff=1, mDef=1, mPen=1, mSrec=1, mAct=1, mCapLv=1, mCap=10, mUsed=0, mArmor="''")
 
     def issue_kit(self):
@@ -89,7 +87,8 @@ class Menu:
 
     def cancel(self):
         h = self.h
-        return h.iff("sceneState.ui == 20", [h.setv(ui=0)], [h.setv(ui=20, menuNote="''")])
+        return h.iff("sceneState.ui == 20", [h.setv(ui=0)], [
+            h.iff("sceneState.ui >= 26", [h.setv(ui=21, menuNote="''")], [h.setv(ui=20, menuNote="''")])])
 
     def move(self, step):
         h = self.h
@@ -97,12 +96,17 @@ class Menu:
         wrap = lambda var, n: h.setv(**{var: "(sceneState.%s + %d) %% %d" % (var, n - 1 if up else 1, n), "menuNote": "''"})
         return [
             h.iff("sceneState.ui == 20", [wrap("mcol", len(COLUMN))]),
-            h.iff("sceneState.ui == 21", [h.setv(
-                mi="max(1, min(session.itemCount, sceneState.mi %s 1))" % ("-" if up else "+"), menuNote="''")]),
+            h.iff("sceneState.ui == 21 or sceneState.ui == 27", [h.setv(
+                mi="max(1, min(#session.carriedItems, sceneState.mi %s 1))" % ("-" if up else "+"), menuNote="''")]),
+            h.iff("sceneState.ui == 26", [wrap("ma", 3)]),
             h.iff("sceneState.ui == 22", [wrap("wi", 2)]),
             h.iff("sceneState.ui == 24", [wrap("ai", len(ARMORS))]),
             h.iff("sceneState.ui == 25", [wrap("bi", 2)]),
         ]
+
+    def horizontal(self, step):
+        return [self.h.iff("sceneState.ui == 21 or sceneState.ui == 27", [self.h.setv(
+            mi="max(1, min(#session.carriedItems, sceneState.mi + %d))" % (step * 6), menuNote="''")])]
 
     def select(self):
         h = self.h
@@ -110,10 +114,21 @@ class Menu:
         enter = [h.iff("sceneState.mcol == %d" % k, [h.setv(ui=PAGE_UI[k], mi=1, ai=0, bi=0, menuNote="''",
                                                           wi="%s == 'baton' and 1 or 0" % h.WEAPON)])
                  for k in range(len(COLUMN))]
-        use_item = [{"cmd": "USE_ITEM", "itemIndex": "sceneState.mi", "target": 1}] + self.snapshot() + [
+        use_item = [{"cmd": "USE_ITEM", "itemIndex": "sceneState.mi", "target": 1, "carried": True}] + self.snapshot() + [
             h.setv(menuNote="sceneState.lastItemResult and (sceneState.lastItemResult.success and "
                             "('Used ' .. sceneState.lastItemResult.itemName .. '.') or sceneState.popupText) or ''"),
-            h.setv(mi="max(1, min(session.itemCount, sceneState.mi))")]
+            h.setv(ui=21, mi="max(1, min(#session.carriedItems, sceneState.mi))")]
+        row = "session.carriedItems[sceneState.mi]"
+        worn = "(%s.equipped or %s.id == (%s == 'baton' and 'club' or 'm84f'))" % (row, row, h.WEAPON)
+        protected = "%s.type == 'key' or %s.type == 'quest'" % (row, row)
+        discard = [h.iff(worn + " or " + protected, [note("Cannot discard worn equipment or a key.")],
+                        [{"cmd": "DISCARD_CARRIED_ITEM", "itemIndex": "sceneState.mi"}]
+                        + self.snapshot() + [h.setv(ui=21, mi="max(1, min(#session.carriedItems, sceneState.mi))"),
+                                            note("Discarded the selected slot.")])]
+        item_action = [h.iff("sceneState.ma == 0", use_item, [
+            h.iff("sceneState.ma == 1", [h.setv(ui=27, moveFrom="sceneState.mi", menuNote=lit("Choose a destination slot."))], discard)])]
+        move_item = [{"cmd": "MOVE_CARRIED_ITEM", "from": "sceneState.moveFrom", "to": "sceneState.mi"},
+                     h.setv(ui=21, menuNote=lit("Moved the item."))]
         equip_weapon = [h.iff("sceneState.wi == 0",
                               [{"cmd": "SET_GAME_VARIABLE", "name": "weapon", "value": "'handgun'"}, note("Equipped the M84F.")],
                               [{"cmd": "SET_GAME_VARIABLE", "name": "weapon", "value": "'baton'"}, note("Equipped the Club.")])]
@@ -139,11 +154,12 @@ class Menu:
                     {"cmd": "ADD_PARAM", "target": "aya", "param": param, "amount": 1}]}] + self.snapshot()
                 + [note("%s rose by one level." % label)]))
         bp = [h.iff("(variables.bp or 0) >= 100", spend, [note("100 BP are needed for one level.")])]
-        return h.iff("sceneState.ui == 20", enter, [
-            h.iff("sceneState.ui == 21", use_item, [
+        return h.iff("sceneState.ui == 27", move_item, [h.iff("sceneState.ui == 26", item_action, [
+            h.iff("sceneState.ui == 20", enter, [
+            h.iff("sceneState.ui == 21", [h.iff("#session.carriedItems > 0", [h.setv(ui=26, ma=0, menuNote="''")])], [
                 h.iff("sceneState.ui == 22", equip_weapon, [
                     h.iff("sceneState.ui == 23", heal_pe, [
-                        h.iff("sceneState.ui == 24", equip_armor, bp)])])])])
+                        h.iff("sceneState.ui == 24", equip_armor, bp)])])])])])])
 
     # --- windows -------------------------------------------------------------------
     def help_text(self):
@@ -151,13 +167,13 @@ class Menu:
         column = chain([("sceneState.mcol == %d" % k, lit(t)) for k, t in enumerate(
             ["Use or inspect items.", "Use Parasite Energy.", "Change weapons.", "Change armor.",
              "Distribute Bonus Points."])], "''")
-        item = "(sel('menu_items') and sel('menu_items').description or '')"
+        item = "(session.carriedItems[sceneState.mi] and session.carriedItems[sceneState.mi].description or '')"
         weapon = chain([("sceneState.wi == 0", lit("M84F: handgun. Fires rounds from the Ammo Crate."))],
                        lit("Club: melee. Unlimited swings at close range."))
         armor = chain([("sceneState.ai == %d" % k, lit("%s: DEF +%d." % (n, d))) for k, (_, n, d) in enumerate(ARMORS)], "''")
         bp = chain([("sceneState.bi == 0", lit("Active Time: the AT gauge fills faster. 100 BP per level."))],
                    lit("Item Capacity: one more item slot. 100 BP per level."))
-        page = chain([("sceneState.ui == 20", column), ("sceneState.ui == 21", item), ("sceneState.ui == 22", weapon),
+        page = chain([("sceneState.ui == 20", column), ("sceneState.ui == 21 or sceneState.ui >= 26", item), ("sceneState.ui == 22", weapon),
                       ("sceneState.ui == 23", lit("Heal 1: restores 30 HP for 30 PE.")), ("sceneState.ui == 24", armor)], bp)
         return "(sceneState.menuNote ~= '' and sceneState.menuNote or %s)" % page
 
@@ -178,8 +194,10 @@ class Menu:
             dict(W("menu_title_frame", 0, 0.5, 40, 3, None, chrome="skin"), dimBehind=0.22),   # PS1 darken behind the menu
             W("menu_title", 0, 0.5, 31, 3, "{" + self.help_text() + "}"),
             W("menu_clock", 31, 0.5, 9, 3, CLOCK),
-            W("menu_column", 0, 4, 6, 17, (N + N).join(mark(k) + name.upper()[:4] for k, name in enumerate(COLUMN)),
-              chrome="skin"),
+            dict(W("menu_column", 0, 4, 6, 17, None, chrome="skin"), gridColumns=1, rowPitch=3,
+                 style="list",
+                 content=[{"type": "list", "listId": "config:menuEntries", "format": "{name}",
+                           "cursor": "sceneState.mcol + 1"}]),
             W("menu_panel", 6, 4, 34, 17, None, chrome="skin"),
             W("menu_hp", 27, 22, 13, 4, "{sceneState.mHp}/{sceneState.mMax} HP", chrome="skin"),
             {"id": "menu_pe_bar", "rect": {"x": fx(27), "y": 22, "w": 13, "h": 4}, "style": "panel", "chrome": "none",
@@ -188,20 +206,21 @@ class Menu:
                                            "max": "100", "fill": [0.15, 0.75, 0.23], "color": [0.11, 0.24, 0.20]}]},
             # status screen (the default view)
             W("menu_status_left", 6, 4, 17, 17,
-              "Aya" + N + N + "LEVEL       {sceneState.mLv}" + N + N + "NEXT LEVEL  {sceneState.mNext}" + N + N + N
+              "Aya" + N + N + N + N + N + N + N + N + N
               + "EQUIPMENT" + N + N + " {" + self.weapon_name + "}  " + rounds + N + N + " {" + self.armor_name + "}",
               visible="sceneState.ui == 20"),
             W("menu_status_right", 22, 4, 18, 17,
-              "BONUS POINT  {variables.bp or 0}" + N + N + N + "OFFENSE         {sceneState.mOff}" + N + N
-              + "DEFENSE         {sceneState.mDef}" + N + N + "PENERGY         {sceneState.mPen}" + N + N
-              + "STATUS RECOVER  {sceneState.mSrec}" + N + N + N + "ACTIVE TIME     {sceneState.mAct}" + N + N
-              + "ITEM CAPACITY   {sceneState.mCapLv}", visible="sceneState.ui == 20"),
+              "", visible="sceneState.ui == 20"),
             # item page: the real inventory, and the slot total
             {"id": "menu_items", "rect": {"x": fx(6), "y": 4, "w": 34, "h": 14}, "style": "list", "chrome": "none",
-             "visible": "sceneState.ui == 21",
-             "content": [{"type": "list", "listId": "inventory", "format": "{name}  {qty}", "cursor": "sceneState.mi"}]},
-            W("menu_items_worn", 6, 17, 16, 3, "Worn: {" + self.armor_name + "}", visible="sceneState.ui == 21"),
-            W("menu_items_total", 25, 17, 15, 3, "Total  {sceneState.mUsed}/{sceneState.mCap}", visible="sceneState.ui == 21"),
+             "visible": "sceneState.ui == 21 or sceneState.ui >= 26", "gridColumns": 2, "visibleRows": 6, "rowPitch": 2,
+             "content": [{"type": "list", "listId": "carried_items", "format": "{name} {qty}", "cursor": "sceneState.mi",
+                          "highlight": "equipped or id == (%s == 'baton' and 'club' or 'm84f')" % h.WEAPON}]},
+            W("menu_items_total", 25, 17, 15, 3, "Total  {sceneState.mUsed}/{sceneState.mCap}",
+              visible="sceneState.ui == 21 or sceneState.ui >= 26"),
+            W("menu_item_action", 17, 10, 13, 8,
+              (N + N).join(cur("ma", k) + text for k, text in enumerate(["Use", "Move", "Discard"])),
+              visible="sceneState.ui == 26", chrome="button"),
             # weapon page: the highlighted weapon's real numbers; carried weapons
             W("menu_weapon_stats", 6, 4, 18, 17, chain(
                 [("sceneState.wi == 0", "'M84F' .. '\\n\\nATTACK   7\\nRANGE    4.0\\nROUNDS   ' .. session.items.handgun_ammo")],
@@ -225,4 +244,23 @@ class Menu:
               + cur("bi", 1) + "ITEM CAPACITY  {sceneState.mCapLv}" + N + N + "100 BP raise one level.",
               visible="sceneState.ui == 25"),
         ]
+        for key, x, y, width, label, value in [
+            ("level", 7, 7, 10, "LEVEL", "sceneState.mLv"),
+            ("next", 7, 10, 10, "NEXT LEVEL", "sceneState.mNext"),
+            ("bp", 23, 5, 12, "BONUS POINT", "variables.bp or 0"),
+            ("off", 23, 8, 12, "OFFENSE", "sceneState.mOff"),
+            ("def", 23, 10, 12, "DEFENSE", "sceneState.mDef"),
+            ("pen", 23, 12, 12, "PENERGY", "sceneState.mPen"),
+            ("srec", 23, 14, 13, "STATUS RECOVER", "sceneState.mSrec"),
+            ("act", 23, 17, 12, "ACTIVE TIME", "sceneState.mAct"),
+            ("cap", 23, 19, 13, "ITEM CAPACITY", "sceneState.mCapLv"),
+        ]:
+            out.append(W("menu_tab_" + key, x, y, width, 1.6, "\\c[6]" + label,
+                         visible="sceneState.ui == 20", chrome="label_tab"))
+            out.append(W("menu_value_" + key, x + width, y, 4, 1.6, "{" + value + "}",
+                         visible="sceneState.ui == 20"))
+        # Keep the page selector above page content, like the original's rail.
+        column = next(w for w in out if w["id"] == "menu_column")
+        out.remove(column)
+        out.append(column)
         return out

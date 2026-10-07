@@ -584,11 +584,13 @@ def scene(room, room_model, spawn):
     return {
         "id": "day1_" + room["id"], "name": room["name"], "kind": "menu", "draw": "windows",
         # Level-ups are reported in the victory message, not the engine's generic Actor Change modal.
-        "config": {"actorChangeReports": False},
+        "config": {"actorChangeReports": False, "menuEntries": [
+            {"name": label, "icon": icon} for label, icon in [("IT", 1), ("PE", 2), ("WP", 3), ("AR", 5), ("BP", 9)]]},
         "update": {"mode": "fixed", "step": 1 / 60, "maxCatchUp": 60},
         "windows": windows(room, room_model),
         "hooks": {"on_enter": on_enter(room, spawn), "on_frame": on_frame(room), "on_select": on_select(room),
-                  "on_cancel": on_cancel(room), "on_up": menu_move(-1), "on_down": menu_move(1), "on_left": [], "on_right": []},
+                  "on_cancel": on_cancel(room), "on_up": menu_move(-1), "on_down": menu_move(1),
+                  "on_left": MENU.horizontal(-1), "on_right": MENU.horizontal(1)},
     }
 
 

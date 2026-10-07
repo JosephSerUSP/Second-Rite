@@ -393,6 +393,17 @@ function ui.buttonRole(selected)
 end
 
 -- Compact translucent information overlays; ordinary menus retain their skin.
+function ui.drawLabelTab(x, y, w, h)
+    love.graphics.push("all")
+    for row = 0, math.ceil(h) - 1 do
+        local t = row / math.max(1, h - 1)
+        local inset = math.floor(t * math.min(h, w / 4))
+        love.graphics.setColor(.18 - .13*t, .31 - .23*t, .49 - .34*t, .88)
+        love.graphics.rectangle("fill", x + inset, y + row, math.max(0, w - inset), 1)
+    end
+    love.graphics.pop()
+end
+
 function ui.drawOverlayPanel(x, y, w, h)
     love.graphics.push("all")
     for row=0,math.max(0,math.ceil(h)-1) do

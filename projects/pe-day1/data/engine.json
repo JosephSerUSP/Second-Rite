@@ -1,0 +1,10 @@
+{
+  "metaKeys": [
+    {
+      "key": "carriedStack",
+      "type": "boolean",
+      "appliesTo": ["items"],
+      "description": "When true, this inventory stack occupies one carried_items slot; otherwise each unit occupies its own slot."
+    }
+  ]
+}

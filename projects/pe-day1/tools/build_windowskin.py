@@ -65,7 +65,7 @@ def main():
     # panels: no fill at all; the darkened room is the background
     skin(None, grey_l, grey_d, edge).save(OUT / "windowskin_back.png")
     # buttons: raised tiles with a faint fill so they read as solid
-    skin((70, 72, 78, 120), (196, 198, 202, 220), (70, 72, 78, 220), edge).save(OUT / "windowskin_button.png")
+    skin((70, 72, 78, 230), (196, 198, 202, 220), (70, 72, 78, 220), edge).save(OUT / "windowskin_button.png")
     # the selected row: the original's blue band
     skin((36, 72, 200, 210), (120, 150, 240, 230), (20, 40, 120, 230), edge).save(OUT / "windowskin_button_highlight.png")
     print("wrote", OUT)

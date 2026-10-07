@@ -270,6 +270,7 @@ function formula.sessionView(session, v)
             or 0.10,
         -- Distinct non-empty inventory stacks — lets scene hooks bound an
         -- inventory-list cursor (session.itemCount) without SCRIPT.
+        carriedItems = require("engine.inventory").carriedRows(session),
         itemCount = (function()
             local tab = (v and tonumber(v.tab)) or 1
             local loader = session.loader

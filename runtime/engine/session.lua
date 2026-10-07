@@ -265,6 +265,7 @@ function GameSession.new(loader)
     self.developerMode = session.developerMode
     self.gold = 0
     self.inventory = {}
+    self.carriedItemOrder = {}
     self.flags = {}
     -- #407 persistent author-authored playthrough state. Process locals,
     -- domain state and Event-local self state deliberately live elsewhere.

@@ -3726,7 +3726,7 @@ elseif paramDef.type == "script" then
                                 end
                                 -- Verify known list sources resolve syntactically.
                                 local src = block.listId or ""
-                                local knownSources = { inventory = true, party = true, reserve = true,
+                                local knownSources = { inventory = true, carried_items = true, party = true, reserve = true,
                                     equipSlots = true, equipment = true, memberSkills = true, memberPassives = true }
                                 if not knownSources[src] and not src:find("^config:") and not src:find("^sceneState:") and not src:find("^v:")
                                     and not src:find("^static:") and not src:find("^term:") then

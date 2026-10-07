@@ -2042,6 +2042,20 @@ This applies to the editor too: form fields come from the schema layer
 
 ### 2.2 UI aesthetics
 
+Carried-slot menus use the engine inventory projection `carried_items` and
+`session.carriedItems`. Each unstacked unit occupies a row, `meta.carriedStack`
+keeps a whole stack in one row, and worn party equipment remains visible.
+`USE_ITEM carried=true`, `DISCARD_CARRIED_ITEM` and `MOVE_CARRIED_ITEM` resolve
+the same 1-based slot order. Discard rejects worn equipment; authored events
+apply additional game policies, such as protecting keys. Move swaps slots;
+`carriedItemOrder` is session state and a required save payload field.
+
+List windows may declare `gridColumns` and `rowPitch` inline, using the same
+Studio layout fields. Columns fill vertically and overflow pages follow the
+cursor. Grid cells use the shared button skins for selection and authored row
+highlights. `chrome: "label_tab"` draws a slanted vertical-gradient label,
+and `chrome: "button"` uses the shared raised button skin for popups.
+
 - Rich vertical gradients for major menus — never flat dark overlays.
 - Micro-animations: panels slide in/out via timer states.
 - Elements render as colored orb bullets from the system iconset

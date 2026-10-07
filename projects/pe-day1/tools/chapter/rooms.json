@@ -43,42 +43,26 @@
       "environment": "assets/models/rooms/foyer/environment.obj",
       "views": [
         {
-          "shot": "orig bg 3 (aisle, vertical scroll)",
-          "track": {
-            "axis": "y",
-            "range": [
-              0.5,
-              5
-            ]
-          },
-          "position": {
-            "from": [
-              0,
-              -2.6,
-              5.4
-            ],
-            "to": [
-              0,
-              -1.6,
-              6.6
-            ]
-          },
-          "target": {
-            "from": [
-              0,
-              2.4,
-              0.2
-            ],
-            "to": [
-              0,
-              5.4,
-              0.2
-            ]
-          },
-          "pan": 0.25,
-          "fov": 50
+          "shot": "orig bg 3 (aisle; tall plate)",
+          "position": [
+            0,
+            -2.2,
+            5.6
+          ],
+          "target": [
+            0,
+            3.2,
+            0.3
+          ],
+          "fov": 78
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1,
+          2.1
+        ]
+      }
     },
     {
       "id": "auditorium",
@@ -119,57 +103,41 @@
       "environment": "assets/models/rooms/auditorium/environment.obj",
       "views": [
         {
-          "shot": "orig bg 3 (house aisle, vertical scroll)",
+          "shot": "orig bg 3 (house aisle; tall plate)",
           "when": "y < 5",
-          "track": {
-            "axis": "y",
-            "range": [
-              0.5,
-              5
-            ]
-          },
-          "position": {
-            "from": [
-              0,
-              -2.6,
-              4.4
-            ],
-            "to": [
-              0,
-              -1.6,
-              4.8
-            ]
-          },
-          "target": {
-            "from": [
-              0,
-              2.8,
-              0.5
-            ],
-            "to": [
-              0,
-              6.6,
-              0.6
-            ]
-          },
-          "pan": 0.25,
-          "fov": 54
-        },
-        {
-          "shot": "orig bg 2 (from the stage back over the seats)",
           "position": [
             0,
-            7.6,
-            4.2
+            -2.4,
+            5.4
           ],
           "target": [
             0,
-            2.0,
-            0.6
+            4.0,
+            0.3
           ],
-          "fov": 54
+          "fov": 78
+        },
+        {
+          "shot": "orig bg 2 (from the stage back over the seats; tall plate)",
+          "position": [
+            0,
+            7.7,
+            6.8
+          ],
+          "target": [
+            0,
+            2.2,
+            0.2
+          ],
+          "fov": 78
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1,
+          2.1
+        ]
+      }
     },
     {
       "id": "stage",
@@ -218,42 +186,26 @@
       "environment": "assets/models/rooms/stage/environment.obj",
       "views": [
         {
-          "shot": "orig bg 4 (stage, vertical scroll)",
-          "track": {
-            "axis": "y",
-            "range": [
-              0.5,
-              5
-            ]
-          },
-          "position": {
-            "from": [
-              0,
-              -3.4,
-              3.0
-            ],
-            "to": [
-              0,
-              -3.0,
-              4.2
-            ]
-          },
-          "target": {
-            "from": [
-              0,
-              2.0,
-              0.6
-            ],
-            "to": [
-              0,
-              4.2,
-              1.8
-            ]
-          },
-          "pan": 0.35,
-          "fov": 50
+          "shot": "orig bg 4 (from the stalls up to the proscenium; tall plate)",
+          "position": [
+            0,
+            -3.6,
+            2.6
+          ],
+          "target": [
+            0,
+            3.0,
+            1.6
+          ],
+          "fov": 80
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1,
+          2.1
+        ]
+      }
     },
     {
       "id": "backstage",
@@ -317,7 +269,7 @@
       "environment": "assets/models/rooms/backstage/environment.obj",
       "views": [
         {
-          "shot": "orig bg 13 (low, toward the stage and basement doors)",
+          "shot": "orig bg 13 (low, toward the stage and basement doors; wide plate)",
           "when": "x < 0",
           "position": [
             3.6,
@@ -332,21 +284,26 @@
           "fov": 54
         },
         {
-          "shot": "orig bg 12 (overhead, horizontal scroll)",
+          "shot": "orig bg 12/14 (overhead; wide plate)",
           "position": [
             0,
-            -0.6,
-            6.5
+            -3.5,
+            5.5
           ],
           "target": [
             0,
-            2.4,
-            0
+            2.6,
+            0.4
           ],
-          "pan": 0.6,
           "fov": 54
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1.6,
+          1
+        ]
+      }
     },
     {
       "id": "basement_rat",
@@ -533,7 +490,7 @@
       "environment": "assets/models/rooms/rehearsal/environment.obj",
       "views": [
         {
-          "shot": "orig bg 21 (long low view, horizontal scroll)",
+          "shot": "orig bg 21 (long low view; wide plate)",
           "position": [
             0,
             -2.6,
@@ -544,10 +501,15 @@
             4,
             1.0
           ],
-          "pan": 0.5,
           "fov": 52
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1.6,
+          1
+        ]
+      }
     },
     {
       "id": "sewer",
@@ -610,7 +572,7 @@
       "environment": "assets/models/rooms/sewer/environment.obj",
       "views": [
         {
-          "shot": "orig bg 24 (one-point down the tunnel toward the hatch)",
+          "shot": "orig bg 24 (one-point down the tunnel toward the hatch; wide plate)",
           "when": "x < -1.5",
           "position": [
             5.6,
@@ -625,7 +587,7 @@
           "fov": 52
         },
         {
-          "shot": "orig bg 28/29 (side-on, horizontal scroll)",
+          "shot": "orig bg 28/29 (side-on; wide plate)",
           "position": [
             0,
             -2.8,
@@ -636,10 +598,15 @@
             3.0,
             0.8
           ],
-          "pan": 0.8,
           "fov": 52
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1.6,
+          1
+        ]
+      }
     },
     {
       "id": "sewer_deep",
@@ -692,7 +659,7 @@
       "environment": "assets/models/rooms/sewer_deep/environment.obj",
       "views": [
         {
-          "shot": "orig bg 28 (outfall chamber, horizontal scroll)",
+          "shot": "orig bg 28 (outfall chamber; wide plate)",
           "position": [
             0,
             -3.0,
@@ -703,10 +670,15 @@
             4.0,
             1.2
           ],
-          "pan": 0.6,
           "fov": 54
         }
-      ]
+      ],
+      "plate": {
+        "size": [
+          1.6,
+          1
+        ]
+      }
     },
     {
       "id": "street",

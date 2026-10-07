@@ -662,6 +662,26 @@
             "value": 0
           },
           {
+            "name": "ix",
+            "value": 0
+          },
+          {
+            "name": "iy",
+            "value": 0
+          },
+          {
+            "name": "held",
+            "value": 0
+          },
+          {
+            "name": "camYaw",
+            "value": 0
+          },
+          {
+            "name": "ilen",
+            "value": 1
+          },
+          {
             "name": "range",
             "value": 4
           },
@@ -863,12 +883,53 @@
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
-                "name": "dx",
+                "name": "ix",
                 "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
               },
               {
-                "name": "dy",
+                "name": "iy",
                 "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.held == 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "camYaw",
+                    "value": "-0.201317"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "held",
+                "value": "(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0"
+              },
+              {
+                "name": "ilen",
+                "value": "max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen"
+              },
+              {
+                "name": "dy",
+                "value": "(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"
               }
             ]
           },
@@ -877,7 +938,7 @@
             "assignments": [
               {
                 "name": "moving",
-                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+                "value": "sceneState.held"
               }
             ]
           },
@@ -948,12 +1009,53 @@
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
-                "name": "dx",
+                "name": "ix",
                 "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
               },
               {
-                "name": "dy",
+                "name": "iy",
                 "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.held == 0",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "camYaw",
+                    "value": "-0.201317"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "held",
+                "value": "(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0"
+              },
+              {
+                "name": "ilen",
+                "value": "max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "dx",
+                "value": "(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen"
+              },
+              {
+                "name": "dy",
+                "value": "(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"
               }
             ]
           },
@@ -962,7 +1064,7 @@
             "assignments": [
               {
                 "name": "moving",
-                "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+                "value": "sceneState.held"
               }
             ]
           },

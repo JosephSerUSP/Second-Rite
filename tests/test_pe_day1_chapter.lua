@@ -83,26 +83,6 @@ local function fightWithBaton()
         frames(1)
         for b, on in pairs(dirs) do if on then pc.release(b) end end
     end
-    while rt().outcome ~= "victory" do
-        ctx.session:addItem("handgun_ammo", 1)
-        while ctx.session.party[1].at < 100 do frames(1); guard = guard + 1; assert(guard < 20000, "never won") end
-        tap("A"); tap("A"); frames(30)
-    end
-    tap("A")
-    check(rt() == nil and v().fight == 0, state().id .. ": Obtain-all ends the fight and returns to exploring")
-    dismissCard()
-end
-
--- An honest fight: no HP edits, no free ammo. Close in, swing at full AT,
--- heal with PE when low. Returns the outcome and how many swings it took.
-local function fightWithBaton()
-    local aya, swings, guard = ctx.session.party[1], 0, 0
-    -- Held input is re-pressed every frame, as test_pe_day1_scene does.
-    local function step(dirs)
-        for b, on in pairs(dirs) do if on then pc.press(b, ctx) end end
-        frames(1)
-        for b, on in pairs(dirs) do if on then pc.release(b) end end
-    end
     while rt().outcome == nil do
         guard = guard + 1; assert(guard < 60 * 600, "fight did not end within ten minutes")
         local e = rt().battle.enemies[1]
@@ -176,6 +156,24 @@ local ok, err = pcall(function()
     check(require("engine.game_variables").get(session, "weapon") == "baton", "X while exploring equips the Baton")
     tapX()
     check(require("engine.game_variables").get(session, "weapon") == "handgun", "X again equips the handgun")
+
+    -- Movement is screen-relative. Backstage's low view (x < 0) looks down
+    -- the corridor toward -x, so UP walks Aya away from it, toward -x.
+    local function hold(button, n)
+        for _ = 1, n do pc.press(button, ctx); frames(1); pc.release(button) end
+    end
+    v().walkX, v().walkY = -1, 2.5; frames(1)
+    hold("UP", 30)
+    check(v().walkX < -2 and math.abs(v().walkY - 2.5) < 0.8, "UP walks away from the camera in a side-on view")
+    -- Holding a direction keeps its heading across a camera cut: DOWN in the
+    -- low view walks toward +x, and keeps doing so after crossing into the
+    -- overhead view, where a fresh DOWN would mean -y.
+    v().walkX, v().walkY = -0.3, 2.5; frames(2)
+    hold("DOWN", 40)
+    check(v().walkX > 1 and math.abs(v().walkY - 2.5) < 0.8, "a held direction survives the camera cut")
+    frames(2)
+    hold("DOWN", 10)
+    check(v().walkY < 2.2, "after release, DOWN follows the new view")
 
     -- With no ammunition at all, the Baton still wins the Melissa and Eve
     -- fights honestly (no HP edits), which is why the original never dead-ends.

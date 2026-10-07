@@ -22,16 +22,27 @@
       "viewport": {
         "camera": {
           "position": [
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (0 + 0.25 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX)) or 0)",
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (-2.6 + 1 * clamp(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) - 0.5) / 4.5, 0, 1)) or 7.6)",
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (4.4 + 0.4 * clamp(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) - 0.5) / 4.5, 0, 1)) or 4.2)"
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 0 or 0)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and -2.4 or 7.7)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 5.4 or 6.8)"
           ],
           "target": [
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (0 + 0.25 * (sceneState.fight == 1 and rt.player.x or sceneState.walkX)) or 0)",
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (2.8 + 3.8 * clamp(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) - 0.5) / 4.5, 0, 1)) or 2)",
-            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and (0.5 + 0.1 * clamp(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) - 0.5) / 4.5, 0, 1)) or 0.6)"
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 0 or 0)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 4 or 2.2)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 0.3 or 0.2)"
           ],
-          "fov": 54
+          "fov": 78,
+          "frame": {
+            "size": [
+              1,
+              2.1
+            ],
+            "follow": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              1.0
+            ]
+          }
         },
         "background": [
           0.025,
@@ -285,6 +296,26 @@
             "value": 0
           },
           {
+            "name": "ix",
+            "value": 0
+          },
+          {
+            "name": "iy",
+            "value": 0
+          },
+          {
+            "name": "held",
+            "value": 0
+          },
+          {
+            "name": "camYaw",
+            "value": 0
+          },
+          {
+            "name": "ilen",
+            "value": 1
+          },
+          {
             "name": "range",
             "value": 4
           },
@@ -375,12 +406,53 @@
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
-            "name": "dx",
+            "name": "ix",
             "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
           },
           {
-            "name": "dy",
+            "name": "iy",
             "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.held == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "camYaw",
+                "value": "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 5) and 0 or 3.14159)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "held",
+            "value": "(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0"
+          },
+          {
+            "name": "ilen",
+            "value": "max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen"
+          },
+          {
+            "name": "dy",
+            "value": "(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"
           }
         ]
       },
@@ -389,7 +461,7 @@
         "assignments": [
           {
             "name": "moving",
-            "value": "(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"
+            "value": "sceneState.held"
           }
         ]
       },

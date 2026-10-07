@@ -275,44 +275,30 @@ def scene_models(room, room_model):
 
 
 def camera_of(room):
-    """A room lists one or more fixed "views", composed from the original's
-    shots. Each view has a "when" condition on Aya's x/y (the last is the
-    fallback) and the camera hard-cuts between them. A view can also scroll,
-    as the original's oversized backgrounds do:
-      "track": {"axis": "y", "range": [a, b]} with position/target given as
-          {"from": [...], "to": [...]} glides between two framings as Aya
-          walks from a to b (the tall-background tilt along a room's depth);
-      "pan": k slides camera and target sideways by k * Aya's x (the
-          wide-background pan)."""
+    """A room lists one or more fixed "views", each composed from a named
+    original shot. A view has a "when" condition on Aya's x/y (the last is
+    the fallback) and the camera hard-cuts between them. Cameras never move:
+    a room with a "plate" renders each view onto a plate larger than the
+    screen (plate.size in screens, like the original's 320x512 and 512x240
+    backgrounds), and the visible window scrolls across it following Aya."""
     if room.get("views"):
         views = room["views"]
         fov = views[0]["fov"]
         assert all(v["fov"] == fov for v in views), room["id"] + ": views share one fov"
-        coord = {"x": PX, "y": PY}
 
         def cond(text):
             return "(" + re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, text)) + ")"
 
-        def component(v, key, axis):
-            spec = v[key]
-            if isinstance(spec, dict):
-                a, b = v["track"]["range"]
-                t = "clamp((%s - %g) / %g, 0, 1)" % (coord[v["track"]["axis"]], a, b - a)
-                lo, hi = spec["from"][axis], spec["to"][axis]
-                expr = "(%g + %g * %s)" % (lo, hi - lo, t) if hi != lo else "%g" % lo
-            else:
-                expr = "%g" % spec[axis]
-            if axis == 0 and v.get("pan"):
-                expr = "(%s + %g * %s)" % (expr, v["pan"], PX)
-            return expr
-
         def pick(key, axis):
-            expr = component(views[-1], key, axis)
+            expr = "%g" % views[-1][key][axis]
             for v in reversed(views[:-1]):
-                expr = "(%s and %s or %s)" % (cond(v["when"]), component(v, key, axis), expr)
+                expr = "(%s and %g or %s)" % (cond(v["when"]), v[key][axis], expr)
             return expr
-        return {"position": [pick("position", i) for i in range(3)],
-                "target": [pick("target", i) for i in range(3)], "fov": fov}
+        camera = {"position": [pick("position", i) for i in range(3)],
+                  "target": [pick("target", i) for i in range(3)], "fov": fov}
+        if room.get("plate"):
+            camera["frame"] = {"size": room["plate"]["size"], "follow": [PX, PY, 1.0]}
+        return camera
     if room.get("camera"):
         return dict(room["camera"])
     if room.get("corridor"):
@@ -385,7 +371,7 @@ def windows(room, room_model):
 def on_enter(room, spawn):
     hooks = [
         {"cmd": "COMMENT", "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."},
-        setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, range=4, aim=0, ratAim=0,
+        setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, ix=0, iy=0, held=0, camYaw=0, ilen=1, range=4, aim=0, ratAim=0,
              fight=0, near="''", card="''", status=q(room["name"]),
              walkX="sceneState.walkX or %s" % spawn[0], walkY="sceneState.walkY or %s" % spawn[1]),
         setv(entryX="sceneState.walkX", entryY="sceneState.walkY"),
@@ -418,12 +404,37 @@ def on_enter(room, spawn):
     return hooks
 
 
+def view_yaw(room):
+    """Heading of the active view's camera on the floor plane (0 = looking
+    along +y), selected by the same conditions as camera_of."""
+    def yaw(pos, tgt):
+        return math.atan2(tgt[0] - pos[0], tgt[1] - pos[1])
+    views = room.get("views")
+    if not views:
+        cam = camera_of(room)
+        return "%g" % yaw(cam["position"], cam["target"])
+    expr = "%g" % yaw(views[-1]["position"], views[-1]["target"])
+    for v in reversed(views[:-1]):
+        cond = re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, v["when"]))
+        expr = "((%s) and %g or %s)" % (cond, yaw(v["position"], v["target"]), expr)
+    return expr
+
+
 def on_frame(room):
     b = bounds_of(room)
+    # Screen-relative movement: the stick is read against the camera heading
+    # latched when a direction is first pressed, and that heading is kept
+    # until every direction is released, so a camera cut mid-walk never
+    # turns Aya around. Diagonals are normalised.
     move = [
-        setv(dx="sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0",
-             dy="sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"),
-        setv(moving="(sceneState.dx ~= 0 or sceneState.dy ~= 0) and 1 or 0"),
+        setv(ix="sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0",
+             iy="sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"),
+        iff("sceneState.held == 0", [setv(camYaw=view_yaw(room))]),
+        setv(held="(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0",
+             ilen="max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"),
+        setv(dx="(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen",
+             dy="(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"),
+        setv(moving="sceneState.held"),
         iff("sceneState.moving == 1", [setv(gait="sceneState.gait + time.dt * 10",
                                             aim="atan2(sceneState.dx, -sceneState.dy)")]),
     ]

@@ -1,18 +1,7 @@
-# Blender 5.2.2 LTS MTL File: 'dark_scepter_lucille.blend'
+# Blender 5.2.2 LTS MTL File: 'hook_spear.blend'
 # www.blender.org
 
-newmtl dark_scepter_lucille_crystal
-Ns 202.500000
-Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
-map_Kd complex_weapons_surface_atlas.png
-
-pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
-newmtl dark_scepter_lucille_dark
+newmtl hook_spear_blade_back
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -24,7 +13,7 @@ map_Kd complex_weapons_surface_atlas.png
 
 pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
 pass sphere add 0.12 assets/models/matcaps/steel.png
-newmtl dark_scepter_lucille_leather
+newmtl hook_spear_blade_front
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -35,7 +24,31 @@ illum 2
 map_Kd complex_weapons_surface_atlas.png
 
 pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
-newmtl dark_scepter_lucille_silver
+pass sphere add 0.12 assets/models/matcaps/steel.png
+newmtl hook_spear_leather
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd complex_weapons_surface_atlas.png
+
+pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
+newmtl hook_spear_silver
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd complex_weapons_surface_atlas.png
+
+pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
+pass sphere add 0.12 assets/models/matcaps/steel.png
+newmtl hook_spear_wood
 Ns 202.500000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -45,4 +58,3 @@ d 1.000000
 illum 2
 map_Kd complex_weapons_surface_atlas.png
 pass uv add 0.2 assets/models/items/complex_weapons_surface_atlas.png
-pass sphere add 0.12 assets/models/matcaps/steel.png

@@ -175,7 +175,7 @@ class Menu:
         rounds = "{%s == 'baton' and '--' or session.items.handgun_ammo}" % h.WEAPON
         out = [
             # frame: title bar (help + clock), icon column, content panel, HP block
-            dict(W("menu_title_frame", 0, 0.5, 40, 3, None, chrome="skin"), dimBehind=0.45),   # PS1 darken behind the menu
+            dict(W("menu_title_frame", 0, 0.5, 40, 3, None, chrome="skin"), dimBehind=0.22),   # PS1 darken behind the menu
             W("menu_title", 0, 0.5, 31, 3, "{" + self.help_text() + "}"),
             W("menu_clock", 31, 0.5, 9, 3, CLOCK),
             W("menu_column", 0, 4, 6, 17, (N + N).join(mark(k) + name.upper()[:4] for k, name in enumerate(COLUMN)),

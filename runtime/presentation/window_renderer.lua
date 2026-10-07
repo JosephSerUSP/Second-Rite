@@ -1883,7 +1883,7 @@ local function drawWindow(id, win, layout, state, sceneData, ctx, env, listCache
     if layout.dimBehind ~= nil then
         local amount = layout.dimBehind
         if type(amount) == "string" then amount = tonumber((formula.eval(amount, env))) or 0 end
-        subtractive_fade.draw(amount, false)
+        subtractive_fade.draw(amount, false, true)
     end
 
     local animOpen = layout.anim and layout.anim.open

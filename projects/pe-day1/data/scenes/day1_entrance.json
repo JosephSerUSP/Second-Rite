@@ -241,7 +241,7 @@
       "style": "panel",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": [],
-      "dimBehind": 0.45
+      "dimBehind": 0.22
     },
     {
       "id": "menu_title",

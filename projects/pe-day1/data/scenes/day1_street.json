@@ -41,14 +41,15 @@
         "models": [
           {
             "id": "room",
-            "model": "assets/models/blockout/street.obj",
+            "model": "assets/models/rooms/street/environment.obj",
             "position": [
               0,
               0,
               0
             ],
             "yaw": 0,
-            "visible": "true"
+            "visible": "true",
+            "bakedLighting": true
           },
           {
             "id": "aya_shadow",

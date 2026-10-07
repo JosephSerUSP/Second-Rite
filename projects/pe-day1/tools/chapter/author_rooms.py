@@ -394,8 +394,107 @@ def room_rehearsal(S, room):
     light(S, "room_fill", "POINT", (2.0, d * 0.5, 3.0), 90, WARM, 0.8)
 
 
+COLD = (0.62, 0.78, 1.0)
+
+
+def vault(S, name, w, d, wall_m, rib_m, spacing=2.0):
+    """A barrel vault running along X: brick ribs arching from the back wall
+    over the walkway, so the tunnel reads as a tunnel from the front camera."""
+    for k, x in enumerate([i * spacing - w / 2 + spacing / 2 for i in range(int(w / spacing))]):
+        for j in range(6):
+            t = j / 10                                  # back wall up to the crown; the camera sees under it
+            box(S, "%s_rib%d_%d" % (name, k, j), (x, d - t * t * d * 0.9, WALL_H * (0.55 + 0.5 * math.sin(t * math.pi / 2))),
+                (0.35, d * 0.14, 0.22), rib_m)
+
+
+def water(S, w, y0, y1, depth=0.25):
+    dark = mat("sewer_water", (0.02, 0.035, 0.03), 0.05)
+    lip = patterned("channel_stone", (0.20, 0.21, 0.18), (0.12, 0.13, 0.11), "noise", 4.0, 0.9)
+    box(S, "water", (0, (y0 + y1) / 2, 0.005), (w + 0.6, y1 - y0, 0.02), dark)
+    box(S, "lip_near", (0, y0 - 0.06, 0.04), (w + 0.6, 0.12, 0.08), lip)
+    box(S, "lip_far", (0, y1 + 0.06, 0.04), (w + 0.6, 0.12, 0.08), lip)
+
+
+def room_sewer(S, room):
+    w, d = room["size"]
+    floor = patterned("wet_stone", (0.10, 0.11, 0.10), (0.17, 0.18, 0.16), "noise", 3.0, 0.35)
+    wall = patterned("sewer_brick", (0.20, 0.17, 0.13), (0.09, 0.08, 0.07), "brick", 1.6, 0.7)
+    shell(S, room, floor, wall, mat("slime_base", (0.08, 0.11, 0.07), 0.4),
+          mat("hatch_iron", (0.13, 0.12, 0.11), 0.5, 0.7), mat("hatch_frame", (0.22, 0.20, 0.17), 0.6, 0.5))
+    vault(S, "vault", w, d, wall, patterned("rib_brick", (0.24, 0.20, 0.15), (0.12, 0.10, 0.08), "brick", 2.2, 0.75))
+    water(S, w, d * 0.55, d * 0.85)
+    pipe = mat("rust_pipe", (0.24, 0.13, 0.07), 0.6, 0.6)
+    cyl(S, "pipe_a", (0, d - 0.1, 2.3), 0.12, w, pipe, 10, rot=(0, math.radians(90), 0))
+    cyl(S, "pipe_b", (0, d - 0.12, 1.9), 0.07, w, pipe, 8, rot=(0, math.radians(90), 0))
+    cage = mat("cage_glow", (0.8, 0.9, 1.0), 0.3, emit=COLD, strength=6)
+    for i, x in enumerate((-w * 0.3, w * 0.28)):
+        box(S, "lamp_%d" % i, (x, d - 0.12, 2.7), (0.25, 0.12, 0.18), cage)
+        light(S, "lamp_light_%d" % i, "SPOT", (x, d - 0.4, 2.8), 700, COLD, 0.2,
+              rot=(math.radians(35), 0, 0), spot=120)
+    light(S, "fill", "POINT", (0, d * 0.4, 2.4), 90, (0.5, 0.6, 0.55), 1.5)
+
+
+def room_sewer_deep(S, room):
+    w, d = room["size"]
+    floor = patterned("wet_stone", (0.09, 0.10, 0.09), (0.16, 0.17, 0.15), "noise", 3.0, 0.3)
+    wall = patterned("sewer_brick", (0.19, 0.16, 0.12), (0.08, 0.07, 0.06), "brick", 1.6, 0.7)
+    shell(S, room, floor, wall, mat("slime_base", (0.08, 0.11, 0.07), 0.4),
+          mat("hatch_iron", (0.13, 0.12, 0.11), 0.5, 0.7), mat("hatch_frame", (0.22, 0.20, 0.17), 0.6, 0.5))
+    vault(S, "vault", w, d, wall, patterned("rib_brick", (0.24, 0.20, 0.15), (0.12, 0.10, 0.08), "brick", 2.2, 0.75), 3.0)
+    water(S, w, d * 0.2, d * 0.45)
+    # The great outfall: a ring of voussoirs round a black mouth, lit from inside.
+    rim = patterned("outfall_stone", (0.30, 0.28, 0.24), (0.16, 0.15, 0.13), "noise", 2.0, 0.8)
+    mouth = mat("outfall_dark", (0.0, 0.0, 0.0), 1.0)
+    cx, cz, R = 0.0, 1.6, 1.4
+    cyl(S, "outfall_mouth", (cx, d - 0.02, cz), R, 0.05, mouth, 24, rot=(math.radians(90), 0, 0))
+    for i in range(20):
+        a = i / 20 * math.tau
+        box(S, "voussoir_%d" % i, (cx + math.cos(a) * (R + 0.15), d - 0.08, cz + math.sin(a) * (R + 0.15)),
+            (0.42, 0.18, 0.28), rim, rot_z=0)
+        bpy.context.active_object.rotation_euler[1] = -a
+    light(S, "outfall_glow", "SPOT", (cx, d - 0.3, cz + 0.4), 900, COLD, 0.3,
+          rot=(math.radians(55), 0, 0), spot=100)
+    grate = mat("grate_iron", (0.12, 0.12, 0.12), 0.5, 0.8)
+    for i in range(7):
+        box(S, "grate_%d" % i, (cx - 1.05 + i * 0.35, d - 0.1, cz), (0.05, 0.05, 2.4), grate)
+    ladder = mat("ladder_iron", (0.2, 0.18, 0.15), 0.5, 0.8)
+    for side in (-0.25, 0.25):
+        box(S, "ladder_rail%s" % side, (w / 2 - 0.08, 3.0 + side, 1.6), (0.05, 0.05, 3.2), ladder)
+    for k in range(9):
+        box(S, "ladder_rung_%d" % k, (w / 2 - 0.08, 3.0, 0.3 + k * 0.33), (0.04, 0.5, 0.04), ladder)
+    light(S, "ladder_light", "SPOT", (w / 2 - 0.4, 3.0, 3.2), 160, (0.8, 0.85, 1.0), 0.3, spot=60)
+    light(S, "fill", "POINT", (0, d * 0.4, 2.2), 110, (0.5, 0.6, 0.55), 1.5)
+
+
+def room_street(S, room):
+    w, d = room["size"]
+    snow = patterned("snowy_pavement", (0.45, 0.47, 0.52), (0.30, 0.32, 0.36), "noise", 2.5, 0.8)
+    facade = patterned("brownstone", (0.30, 0.20, 0.14), (0.20, 0.13, 0.09), "brick", 1.0, 0.8)
+    shell(S, room, snow, facade, mat("kerb", (0.35, 0.35, 0.36), 0.7),
+          mat("door_wood", (0.25, 0.12, 0.06), 0.5), mat("frame_stone", (0.55, 0.50, 0.42), 0.7))
+    glow = mat("window_glow", (1, 0.8, 0.5), 0.4, emit=WARM, strength=5)
+    for i in range(4):
+        x = -w / 2 + 1.0 + i * (w - 2.0) / 3
+        box(S, "window_%d" % i, (x, d - 0.01, 2.2), (0.8, 0.04, 1.1), glow)
+    marquee = mat("marquee_bulbs", (1, 0.9, 0.7), 0.3, emit=(1, 0.85, 0.55), strength=9)
+    box(S, "marquee", (0, d - 0.2, 3.0), (w * 0.6, 0.4, 0.3), mat("marquee_body", (0.12, 0.08, 0.05), 0.5))
+    box(S, "marquee_bulbs", (0, d - 0.42, 2.88), (w * 0.6, 0.04, 0.06), marquee)
+    light(S, "marquee_light", "AREA", (0, d - 0.6, 2.8), 90, WARM, 3.0, rot=(math.radians(-30), 0, 0))
+    iron = mat("lamp_iron", (0.05, 0.05, 0.05), 0.4, 0.8)
+    bulb = mat("streetlamp_glow", (1, 0.95, 0.8), 0.3, emit=(1, 0.9, 0.7), strength=12)
+    for i, x in enumerate((-w / 2 + 0.6, w / 2 - 0.6)):
+        cyl(S, "lamp_post_%d" % i, (x, 0.6, 1.5), 0.06, 3.0, iron, 8)
+        sphere(S, "lamp_globe_%d" % i, (x, 0.6, 3.1), 0.18, bulb)
+        light(S, "lamp_light_%d" % i, "POINT", (x, 0.6, 3.0), 70, (1.0, 0.88, 0.7), 0.3)
+    for i in range(10):
+        x = -w / 2 + 0.4 + (i * 0.83) % (w - 0.8)
+        box(S, "snowbank_%d" % i, (x, d - 0.35 - (i % 3) * 0.08, 0.08), (0.7, 0.4, 0.16 + (i % 2) * 0.08), snow)
+    light(S, "moon", "SUN", (0, 0, 10), 0.15, (0.6, 0.7, 1.0), rot=(math.radians(40), 0, math.radians(20)))
+
+
 BUILDERS = {"foyer": room_foyer, "auditorium": room_auditorium, "stage": room_stage,
-            "backstage": room_backstage, "dressing": room_dressing, "rehearsal": room_rehearsal}
+            "backstage": room_backstage, "dressing": room_dressing, "rehearsal": room_rehearsal,
+            "sewer": room_sewer, "sewer_deep": room_sewer_deep, "street": room_street}
 
 
 def build(room_id, force):

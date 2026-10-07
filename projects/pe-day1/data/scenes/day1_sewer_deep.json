@@ -41,14 +41,15 @@
         "models": [
           {
             "id": "room",
-            "model": "assets/models/blockout/sewer_deep.obj",
+            "model": "assets/models/rooms/sewer_deep/environment.obj",
             "position": [
               0,
               0,
               0
             ],
             "yaw": 0,
-            "visible": "true"
+            "visible": "true",
+            "bakedLighting": true
           },
           {
             "id": "door_to_sewer",

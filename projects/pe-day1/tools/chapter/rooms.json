@@ -475,7 +475,8 @@
           "needs": "sewer_rats_cleared",
           "lockedText": "Clear the tunnel first."
         }
-      ]
+      ],
+      "environment": "assets/models/rooms/sewer/environment.obj"
     },
     {
       "id": "sewer_deep",
@@ -524,7 +525,8 @@
           "needs": "alligator_defeated",
           "lockedText": "It's blocking the way."
         }
-      ]
+      ],
+      "environment": "assets/models/rooms/sewer_deep/environment.obj"
     },
     {
       "id": "street",
@@ -538,7 +540,8 @@
         "text": "Day 1 - Resonance\n\nEnd of the vertical slice.\nThanks for playing.",
         "then": "title"
       },
-      "doors": []
+      "doors": [],
+      "environment": "assets/models/rooms/street/environment.obj"
     }
   ]
 }

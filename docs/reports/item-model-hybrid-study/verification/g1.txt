@@ -1,0 +1,14 @@
+--------------------------------------------------
+SECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)
+--------------------------------------------------
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[formula] error in 'os.time()': [string "formula:os.time()"]:1: attempt to index global 'os' (a nil value)
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+VALIDATE OK
+powershell : AL lib: (EE) alc_cleanup: 1 device not closed
+No D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\verify_hybrid.ps1:20 caractere:2
++  powershell -NoProfile -ExecutionPolicy Bypass -File $gate.Script -Ga ...
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (AL lib: (EE) al...vice not closed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError

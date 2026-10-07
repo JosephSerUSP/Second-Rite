@@ -1,0 +1,54 @@
+[
+  {
+    "item": "hybrid_carved_conform",
+    "beforeSHA256": "881213b9c404661cefa2c111946e079143345258cbba30e54e7a35c27b1385cf",
+    "afterSHA256": "7e0cbe29e726b4834e0ea55a4a46890643af993bc030bdac3ba02f7e8e26c33e",
+    "changes": [
+      "CORE_OrganicVolume: smooth loft walls, flat cap planes",
+      "PANEL_left: plain back/rim colour from spine allocation mean times 1.16, no UV texture",
+      "PANEL_right: plain back/rim colour from spine allocation mean times 1.16, no UV texture"
+    ]
+  },
+  {
+    "item": "hybrid_carved_hull",
+    "beforeSHA256": "468dd77ce2d726597aea6a9b9372fa1be70c6363853107e0afd03dfa1011f32d",
+    "afterSHA256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+    "changes": [
+      "CORE_OrganicVolume: smooth loft walls, flat cap planes",
+      "HULL_left: removed redundant empty projection modifier",
+      "HULL_right: removed redundant empty projection modifier"
+    ]
+  },
+  {
+    "item": "hybrid_carved_sdf",
+    "beforeSHA256": "ca88d170020151e06acc0acdf93785e7ebdcfa137594f6429d52ec3617ee1e57",
+    "afterSHA256": "8960e67c6f238298ee898f50d16c53499d4edbaf82896ed8f3930fd905abc34a",
+    "changes": []
+  },
+  {
+    "item": "hybrid_salvage_conform",
+    "beforeSHA256": "2388a90be822888d8e111b7cbbe7b9926109004bb118516859e7482b2d0671c8",
+    "afterSHA256": "824cd072d56d787af9e7a08d1f90ab99f0719d3867352ae405e868f01c84f735",
+    "changes": [
+      "CORE_OrganicVolume: smooth loft walls, flat cap planes",
+      "PANEL_left: plain back/rim colour from spine allocation mean times 1.16, no UV texture",
+      "PANEL_right: plain back/rim colour from spine allocation mean times 1.16, no UV texture"
+    ]
+  },
+  {
+    "item": "hybrid_salvage_hull",
+    "beforeSHA256": "3e2bfa6654a1c9db3622e4ca361612950104b5e1b289e6b09ed5f4042bd4e6d6",
+    "afterSHA256": "1886bbe82599287a13ac03423f628ca0f5b3aec8b03e123e5b4e0654e9527d6e",
+    "changes": [
+      "CORE_OrganicVolume: smooth loft walls, flat cap planes",
+      "HULL_left: removed redundant empty projection modifier",
+      "HULL_right: removed redundant empty projection modifier"
+    ]
+  },
+  {
+    "item": "hybrid_salvage_sdf",
+    "beforeSHA256": "fb82b54899764609f81af2b1bc8511a2b61aac19bd8d78f13fb3b1d77ae128ad",
+    "afterSHA256": "ea71eff1a1dafcd94348a96cce9bcaac2827850eee3e6ec9f29d5edbb4d6a38d",
+    "changes": []
+  }
+]

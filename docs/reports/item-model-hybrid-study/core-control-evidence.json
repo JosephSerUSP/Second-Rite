@@ -1,0 +1,30 @@
+[
+  {
+    "item": "hybrid_carved_sdf",
+    "originalSHA256": "8960e67c6f238298ee898f50d16c53499d4edbaf82896ed8f3930fd905abc34a",
+    "controlSHA256": "de69b2dbeae2d18bfd72e3b029d9f60e719d5958cb495f8121f8c525f649a2e6",
+    "otherEvaluatedGeometryIdentical": true,
+    "boundary": "Core changes include geometry and its UV chart, not only triangle count. Source loft side normals deliberately smooth.",
+    "controlTriangles": 1712,
+    "controlledOBJBoundsIdentical": true,
+    "changedPixelsFirstTwoViews": 820,
+    "retainedControlSource": "controls/core/assets/authoring/items/hybrid_carved_sdf.blend",
+    "retainedControlOBJ": "controls/core/assets/models/items/hybrid_carved_sdf.obj",
+    "controlObjSHA256": "557e69889562fd753531293ade016e9b8d447a2e8abeae2ddf05e0dd8a996a3d",
+    "controlMtlSHA256": "0679272179e7e4386a9f1357fa4e91fb67f185b8a457910d9a98ed2219cc8baa"
+  },
+  {
+    "item": "hybrid_salvage_sdf",
+    "originalSHA256": "ea71eff1a1dafcd94348a96cce9bcaac2827850eee3e6ec9f29d5edbb4d6a38d",
+    "controlSHA256": "cb817219332465d3a8fdbdc0209fe56a6941df679afbaeef65e2df6b955b3b71",
+    "otherEvaluatedGeometryIdentical": true,
+    "boundary": "Core changes include geometry and its UV chart, not only triangle count. Source loft side normals deliberately smooth.",
+    "controlTriangles": 1480,
+    "controlledOBJBoundsIdentical": true,
+    "changedPixelsFirstTwoViews": 1005,
+    "retainedControlSource": "controls/core/assets/authoring/items/hybrid_salvage_sdf.blend",
+    "retainedControlOBJ": "controls/core/assets/models/items/hybrid_salvage_sdf.obj",
+    "controlObjSHA256": "cf054c0b426baee5e58136a1e916630ab23a69d13e654573cb63ac389986b3e8",
+    "controlMtlSHA256": "8a0886373b84ad82a52768efa1dc62628199675631333dab3fb410717234ec14"
+  }
+]

@@ -1,0 +1,102 @@
+{
+  "items": [
+    {
+      "item": "hybrid_carved_hull",
+      "sourceSHA256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+      "objSHA256": "0efe05deff91bb0f8053d965d63720bc594cd0c57c0f9e45d9070e949faa2826",
+      "mtlSHA256": "71357e47014a9f13362ed90d475817b085870dea33fb7f03a75032bb71ae0969",
+      "vertices": 1174,
+      "triangles": 2292,
+      "dimensions": [
+        2.5237114429473877,
+        1.386030673980713,
+        3.6000001430511475
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 3320
+    },
+    {
+      "item": "hybrid_carved_sdf",
+      "sourceSHA256": "8960e67c6f238298ee898f50d16c53499d4edbaf82896ed8f3930fd905abc34a",
+      "objSHA256": "416989c9d1b8650f5446432844716cce8a1cc577d2ea70b460ba7ddd01bd63d6",
+      "mtlSHA256": "0679272179e7e4386a9f1357fa4e91fb67f185b8a457910d9a98ed2219cc8baa",
+      "vertices": 3910,
+      "triangles": 7764,
+      "dimensions": [
+        2.5237114429473877,
+        1.386030673980713,
+        3.5999999046325684
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 3190
+    },
+    {
+      "item": "hybrid_carved_conform",
+      "sourceSHA256": "244996c14e14894bae015f6fef05ecfcac3ed074dc2b7dbe45d718f03a4a90da",
+      "objSHA256": "9cb34ba6b296bcf31536bc031e02ab7f6d1efc30a2cfcce119bd1c1f571d5837",
+      "mtlSHA256": "052e779f3b02c7d1db0618b0f1cc9a98d56afbf99cf3113798af3390d5785828",
+      "vertices": 1090,
+      "triangles": 2124,
+      "dimensions": [
+        2.5237112045288086,
+        1.386030673980713,
+        3.5999999046325684
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 2725
+    },
+    {
+      "item": "hybrid_salvage_hull",
+      "sourceSHA256": "1886bbe82599287a13ac03423f628ca0f5b3aec8b03e123e5b4e0654e9527d6e",
+      "objSHA256": "9e66e2b4ce7a581feee824943572885c19224a6ea30a1461d34f00d09c0ab6a9",
+      "mtlSHA256": "04c4965880d0d07d2644c5603e5814decdfb56ef6022ccaaaaabc0bf476bfccd",
+      "vertices": 1341,
+      "triangles": 2626,
+      "dimensions": [
+        3.0625901222229004,
+        1.5706806182861328,
+        3.5999999046325684
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 3930
+    },
+    {
+      "item": "hybrid_salvage_sdf",
+      "sourceSHA256": "ea71eff1a1dafcd94348a96cce9bcaac2827850eee3e6ec9f29d5edbb4d6a38d",
+      "objSHA256": "ad57e215d2766caa0ef8edad3a2dc0a41c9ff365372932451a3ba1de20a65cc2",
+      "mtlSHA256": "8a0886373b84ad82a52768efa1dc62628199675631333dab3fb410717234ec14",
+      "vertices": 3794,
+      "triangles": 7532,
+      "dimensions": [
+        3.0625901222229004,
+        1.5706806182861328,
+        3.5999999046325684
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 3774
+    },
+    {
+      "item": "hybrid_salvage_conform",
+      "sourceSHA256": "53d5e41d2a30ddcee7a2a28cc46cdb997b2787900aea6a0ea24ada41a05f2c89",
+      "objSHA256": "ff1735ff1f17ddfcc4f734651021419eaf36df2bcadd48fed5e73bc8719f099e",
+      "mtlSHA256": "cd4f978d7ebc47b6986c8b030d8b04320e5c58a359d50304bab903e4cd377e64",
+      "vertices": 1180,
+      "triangles": 2304,
+      "dimensions": [
+        3.0625901222229004,
+        1.5706806182861328,
+        3.5999999046325684
+      ],
+      "plainOBJBytesIdentical": true,
+      "changedPixelsPlainFirstTwoViews": 3175
+    }
+  ],
+  "evaluatedVisibleComponents": 84,
+  "allRawClosedPositiveVolume": true,
+  "assignedPaintedRegionFindings": 0,
+  "sourceAtlasAndCompiledAtlasBytesIdentical": true,
+  "readOnlyCompileCheckPassed": true,
+  "nativeCell": 96,
+  "diagnosticCell": 192,
+  "boundary": "Whole route comparison, not one-factor causality: plate construction, smoothing and core vary. Same direction reference, overall dimensions, atlas, view poses and pre-fit assembly controls. Root fitting can change assembly proportions. Core ablation independently keeps noncore evaluated geometry and bounds identical. Closed components do not prove no intersections or projection misses. Native review is not owner aesthetic acceptance; no shipping item assets changed."
+}

@@ -1,0 +1,17 @@
+test_bad_controls_fail (test_painted_relief.PaintedReliefTests) ... ok
+test_clip_selects_second_component_and_preserves_full_image_uvs (test_painted_relief.PaintedReliefTests) ... ok
+test_disconnected_marks_are_reported_and_excluded (test_painted_relief.PaintedReliefTests) ... ok
+test_existing_outputs_are_not_overwritten (test_painted_relief.PaintedReliefTests) ... ok
+test_hole_remains_a_physical_opening (test_painted_relief.PaintedReliefTests) ... ok
+test_invalid_or_opaque_clip_fails (test_painted_relief.PaintedReliefTests) ... ok
+test_mesh_is_closed_and_front_uvs_match_original_image_positions (test_painted_relief.PaintedReliefTests) ... ok
+test_rgb_opaque_and_empty_images_fail (test_painted_relief.PaintedReliefTests) ... ok
+test_source_pixels_and_file_bytes_are_unchanged (test_painted_relief.PaintedReliefTests) ... ok
+test_width_height_and_parallel_thickness_are_authored (test_painted_relief.PaintedReliefTests) ... ok
+test_live_finish_and_actual_obj (test_painted_relief_blender.PaintedIntegration) ... ok
+PAINTED RELIEF FAILED: output exists
+
+----------------------------------------------------------------------
+Ran 11 tests in 4.460s
+
+OK

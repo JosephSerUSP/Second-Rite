@@ -1371,3 +1371,53 @@ Agent-Signature:
   role: implementation
   task: six distinct casting tools with shared generated surfaces
   base: 588e0a59a34a284d90c07701c5c2b634ec579187
+
+## Follow-on: crossing construction methods
+
+The 2026-10-07 experiment compares two art directions and three hybrid routes
+for one asymmetric containment capsule. Shadow intersections pair with a loft
+and transported sweeps; fabricated plates pair with a live SDF core and sweeps;
+separate image-alpha panels pair with live surface conformance, thickness and
+the loft/sweeps. Four built-in image-generation calls supply two multiview
+references, one shared RGB atlas and four component stencils on one RGBA sheet.
+The six saved sources and runtime products remain nonshipping study assets.
+
+Bounded alpha sampling now selects components without changing original PNG
+bytes or losing full-image UV coordinates. A reusable Blender helper projects
+only the front surface onto a root-owned guide before adding thickness, can
+relax sampled boundaries beforehand, and separates smooth fronts from flat
+back/cut rims. Generated thickness has no independent paint chart, so UV
+textures/overlays on the cut-rim material are rejected. Direct saved-source
+edits remove redundant empty hull modifiers and repair rim materials/shading.
+
+The study holds each direction's reference, overall front/right bounding ratios,
+atlas and runtime view poses. Whole routes still change multiple factors and
+root fits alter component proportions. A separate SDF-core control keeps the
+noncore evaluated geometry and exported bounds identical while returning the
+core to its saved loft. The SDF versions cost 7,764/7,532 triangles versus
+1,712/1,480 for those controls, with little visible silhouette benefit at 96px
+in this object. Pixel changes record contribution, not quality. Conformed panels
+retain slender side profiles and some sampled perimeter steps; the reference's
+thick sculpted cheeks are not faithfully reproduced. Generated views disagree
+and hidden construction remains authored, rather than recovered from scans.
+
+All 84 visible evaluated components are raw closed and positive-volume, painted
+faces pass assigned-region/area checks, and original/source/compiled atlases
+match bytes. A fresh temporary six-source compile check matches retained
+products and leaves sources untouched. Identical-OBJ plain controls and actual
+native/source comparisons are retained. Ten host relief tests, existing real
+relief export integration, new real conformance integration, sixteen compiler
+cases and the 112-tool index pass locally. Canonical shipping-Project G1-G4,
+unit and save pass; seven native Effekseer assertions are unavailable. No
+shipping assets/data, previous adopted sources, baselines or G5/G6 references
+changed. No Linux stability, visual approval or merge claim is made.
+
+Full prompts, controls, saved study sources and review boundaries are in
+[the hybrid study package](item-model-hybrid-study/README.md).
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: compare hybrid item construction across two art directions
+  base: b2ea564e69d9f07dbe384b2bfd47fcea01efef87

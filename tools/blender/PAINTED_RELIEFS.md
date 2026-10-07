@@ -75,3 +75,51 @@ additional pixels. Audit final exported painted faces for missing/collapsed/
 outside UVs and alpha support, compile read-only, and inspect gameplay and
 cardinal yaws. Use separate actual geometry wherever rotation exposes the
 limitations of a prominent painted face.
+
+## Clipped components and live surface conformance
+
+One unchanged RGBA sheet may supply several separate components. `--clip`
+takes integer pixel edges `X0 Y0 X1 Y1`, with right/bottom edges exclusive.
+Sampling and largest-component selection happen inside this rectangle; UVs
+and `alphaBoundsPixels` still address the full original PNG. The report also
+records `sampleClipPixels`. Invalid, opaque or empty selections fail.
+
+```text
+python tools/blender/painted_relief.py out/panels.png --clip 0 0 512 512 --width .9 --height 3 --depth .1 --grid 40 --output out/panel-report.json --mesh-output out/panel-mesh.json
+```
+
+For a curved panel, import `surface_conform_blender.conform_panel` in a new-source
+scaffold. Place the mesh in front of a closed, root-owned mesh guide. The helper
+keeps only the alpha-supported front surface, optionally relaxes its boundary,
+projects along positive local Y with live Shrinkwrap, and adds live Solidify
+afterward. Projecting both sides of an already thick panel would collapse its
+depth. Guide dimensions and thickness are authored, not recovered from alpha.
+
+```python
+from surface_conform_blender import conform_panel
+
+panel = conform_panel("CheekPanel", mesh, root, body_guide, front, plain_edge,
+                      thickness=.14, offset=.035, projection_limit=3,
+                      smooth=True, boundary_iterations=3)
+```
+
+The edge material must be plain: generated back/rim faces inherit front UVs
+and do not have an independent paint chart. Image textures and UV overlays on
+that material are rejected; sphere overlays remain available. A live shading
+graph makes only front-material faces smooth when requested and keeps the back
+and cut rims flat. `smooth=False` keeps every face flat. Boundary relaxation
+defaults to zero; nonzero iterations reduce sampled steps but can shrink tips
+or narrow a hole. It runs before projection, so relaxed vertices reach the guide.
+
+Inspect missed projection rays, panel intersections, thickness clearance and
+UV stretching in the final evaluated source and exported product. Neither
+Shrinkwrap nor closed-component checks prove those conditions. The source
+retains the guide, modifiers, original mesh and UVs for direct editing after
+first save. The guide should be hidden from rendering/export when it is only
+a construction control.
+
+Run `test_surface_conform_blender.py` with pinned Blender for guide-edit
+response, shading/material separation, translated-root export, closed thickness,
+original UV preservation and rejection of UV-dependent cut rims. The six
+nonshipping [hybrid studies](../../docs/reports/item-model-hybrid-study/README.md)
+combine this route with lofts, SDFs, shadow intersections and transported sweeps.

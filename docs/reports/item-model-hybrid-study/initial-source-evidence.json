@@ -1,0 +1,1366 @@
+[
+  {
+    "item": "hybrid_carved_conform",
+    "sourceHash": "881213b9c404661cefa2c111946e079143345258cbba30e54e7a35c27b1385cf",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 170,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.403820657505502,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "PANEL_left",
+        "faces": 258,
+        "smoothFaces": 87,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.13908149423231334,
+        "modifiers": [
+          {
+            "type": "SHRINKWRAP",
+            "name": "Conform panel to body guide",
+            "emptyGroup": false
+          },
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "Keep_left_CutRimsFlat",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "PANEL_right",
+        "faces": 238,
+        "smoothFaces": 83,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.08180377642632142,
+        "modifiers": [
+          {
+            "type": "SHRINKWRAP",
+            "name": "Conform panel to body guide",
+            "emptyGroup": false
+          },
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "Keep_right_CutRimsFlat",
+            "emptyGroup": false
+          }
+        ]
+      }
+    ],
+    "boundsMin": [
+      -1.268576979637146,
+      -0.73794025182724,
+      -1.9007503986358643
+    ],
+    "boundsMax": [
+      1.2551344633102417,
+      0.6480904817581177,
+      1.6992497444152832
+    ],
+    "dimensions": [
+      2.5237114429473877,
+      1.386030673980713,
+      3.6000001430511475
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.8173954486846924,
+      0.7484291791915894,
+      1.0201642513275146
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_carved_conform",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_carved_conform",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_conform",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, conform construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "conform",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  },
+  {
+    "item": "hybrid_carved_hull",
+    "sourceHash": "468dd77ce2d726597aea6a9b9372fa1be70c6363853107e0afd03dfa1011f32d",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 170,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.403820657505502,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "HULL_left",
+        "faces": 620,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.5842315627875991,
+        "modifiers": [
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by side shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by top shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge shadow intersection coincidences",
+            "emptyGroup": false
+          },
+          {
+            "type": "BEVEL",
+            "name": "LowPolyBevel",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge bevel coincidences at export precision",
+            "emptyGroup": false
+          },
+          {
+            "type": "TRIANGULATE",
+            "name": "Resolve collinear shadow faces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_projected_surfaces",
+            "emptyGroup": true
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_projected_surfaces.001",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "HULL_right",
+        "faces": 540,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.48429318914689207,
+        "modifiers": [
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by side shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by top shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge shadow intersection coincidences",
+            "emptyGroup": false
+          },
+          {
+            "type": "BEVEL",
+            "name": "LowPolyBevel",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge bevel coincidences at export precision",
+            "emptyGroup": false
+          },
+          {
+            "type": "TRIANGULATE",
+            "name": "Resolve collinear shadow faces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_projected_surfaces",
+            "emptyGroup": true
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_projected_surfaces.001",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      }
+    ],
+    "boundsMin": [
+      -1.268576979637146,
+      -0.73794025182724,
+      -1.81690514087677
+    ],
+    "boundsMax": [
+      1.2551344633102417,
+      0.6480904817581177,
+      1.7830950021743774
+    ],
+    "dimensions": [
+      2.5237114429473877,
+      1.386030673980713,
+      3.6000001430511475
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.8173954486846924,
+      0.7484291791915894,
+      0.9751631021499634
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_carved_hull",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_carved_hull",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_hull",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, hull construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "hull",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  },
+  {
+    "item": "hybrid_carved_sdf",
+    "sourceHash": "ca88d170020151e06acc0acdf93785e7ebdcfa137594f6429d52ec3617ee1e57",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 3218,
+        "smoothFaces": 3218,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.385777655324467,
+        "modifiers": [
+          {
+            "type": "NODES",
+            "name": "Live_OrganicCore_SDF",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "CORE_OrganicVolume_projected_surfaces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "CORE_OrganicVolume_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "FABRICATED_left",
+        "faces": 146,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.43011995852683266,
+        "modifiers": []
+      },
+      {
+        "name": "FABRICATED_right",
+        "faces": 123,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.3234751293301902,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      }
+    ],
+    "boundsMin": [
+      -1.268576979637146,
+      -0.73794025182724,
+      -1.8164339065551758
+    ],
+    "boundsMax": [
+      1.2551344633102417,
+      0.6480904817581177,
+      1.7835659980773926
+    ],
+    "dimensions": [
+      2.5237114429473877,
+      1.386030673980713,
+      3.5999999046325684
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.8173954486846924,
+      0.7484291791915894,
+      0.9749101996421814
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_carved_sdf",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_carved_sdf",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_sdf",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, sdf construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "sdf",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  },
+  {
+    "item": "hybrid_salvage_conform",
+    "sourceHash": "2388a90be822888d8e111b7cbbe7b9926109004bb118516859e7482b2d0671c8",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 170,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.403820657505502,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "PANEL_left",
+        "faces": 266,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.12462722773733473,
+        "modifiers": [
+          {
+            "type": "SHRINKWRAP",
+            "name": "Conform panel to body guide",
+            "emptyGroup": false
+          },
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "PANEL_right",
+        "faces": 320,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.11198131101171119,
+        "modifiers": [
+          {
+            "type": "SHRINKWRAP",
+            "name": "Conform panel to body guide",
+            "emptyGroup": false
+          },
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          }
+        ]
+      }
+    ],
+    "boundsMin": [
+      -1.5394513607025146,
+      -0.8362501859664917,
+      -1.9004490375518799
+    ],
+    "boundsMax": [
+      1.5231386423110962,
+      0.7344304323196411,
+      1.6995506286621094
+    ],
+    "dimensions": [
+      3.0625901222229004,
+      1.5706806182861328,
+      3.5999996662139893
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.9919308423995972,
+      0.8481364846229553,
+      1.0200024843215942
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_salvage_conform",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_salvage_conform",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_conform",
+      "sr_authoring_description": "Nonshipping containment capsule study: salvage direction, conform construction",
+      "sr_study_only": true,
+      "sr_art_direction": "salvage",
+      "sr_hybrid_route": "conform",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[145, 17, 618, 573], [870, 17, 1120, 590], [127, 602, 590, 1167], [751, 713, 1268, 1084]], \"targetDimensions\": [3.0625899280575544, 1.5706806282722514, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  },
+  {
+    "item": "hybrid_salvage_hull",
+    "sourceHash": "3e2bfa6654a1c9db3622e4ca361612950104b5e1b289e6b09ed5f4042bd4e6d6",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 170,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.403820657505502,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "HULL_left",
+        "faces": 796,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.6552514440175082,
+        "modifiers": [
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by side shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by top shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge shadow intersection coincidences",
+            "emptyGroup": false
+          },
+          {
+            "type": "BEVEL",
+            "name": "LowPolyBevel",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge bevel coincidences at export precision",
+            "emptyGroup": false
+          },
+          {
+            "type": "TRIANGULATE",
+            "name": "Resolve collinear shadow faces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_projected_surfaces",
+            "emptyGroup": true
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_projected_surfaces.001",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_left_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "HULL_right",
+        "faces": 698,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.5395862375475212,
+        "modifiers": [
+          {
+            "type": "SOLIDIFY",
+            "name": "Thickness",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by side shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "BOOLEAN",
+            "name": "Constrain by top shadow",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge shadow intersection coincidences",
+            "emptyGroup": false
+          },
+          {
+            "type": "BEVEL",
+            "name": "LowPolyBevel",
+            "emptyGroup": false
+          },
+          {
+            "type": "WELD",
+            "name": "Merge bevel coincidences at export precision",
+            "emptyGroup": false
+          },
+          {
+            "type": "TRIANGULATE",
+            "name": "Resolve collinear shadow faces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_projected_surfaces",
+            "emptyGroup": true
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_projected_surfaces.001",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "HULL_right_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      }
+    ],
+    "boundsMin": [
+      -1.5394513607025146,
+      -0.8362501859664917,
+      -1.821295142173767
+    ],
+    "boundsMax": [
+      1.5231386423110962,
+      0.7344304323196411,
+      1.7787048816680908
+    ],
+    "dimensions": [
+      3.0625901222229004,
+      1.5706806182861328,
+      3.5999999046325684
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.9919308423995972,
+      0.8481364846229553,
+      0.9775192737579346
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_salvage_hull",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_salvage_hull",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_hull",
+      "sr_authoring_description": "Nonshipping containment capsule study: salvage direction, hull construction",
+      "sr_study_only": true,
+      "sr_art_direction": "salvage",
+      "sr_hybrid_route": "hull",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[145, 17, 618, 573], [870, 17, 1120, 590], [127, 602, 590, 1167], [751, 713, 1268, 1084]], \"targetDimensions\": [3.0625899280575544, 1.5706806282722514, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  },
+  {
+    "item": "hybrid_salvage_sdf",
+    "sourceHash": "fb82b54899764609f81af2b1bc8511a2b61aac19bd8d78f13fb3b1d77ae128ad",
+    "objects": [
+      {
+        "name": "BACK_SupportSpine",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.2627983751911039,
+        "modifiers": []
+      },
+      {
+        "name": "BASE_Cradle",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.1283333646659347,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_BackDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0710370817077353,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FoldedTail",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.018815185193138486,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_FrontDiagonal",
+        "faces": 48,
+        "smoothFaces": 32,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.06803288827752937,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_LeftReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.03188175247458743,
+        "modifiers": []
+      },
+      {
+        "name": "BINDING_RightReturn",
+        "faces": 40,
+        "smoothFaces": 24,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.032992885685188454,
+        "modifiers": []
+      },
+      {
+        "name": "CORE_OrganicVolume",
+        "faces": 3218,
+        "smoothFaces": 3218,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 2.385777655324467,
+        "modifiers": [
+          {
+            "type": "NODES",
+            "name": "Live_OrganicCore_SDF",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "CORE_OrganicVolume_projected_surfaces",
+            "emptyGroup": false
+          },
+          {
+            "type": "NODES",
+            "name": "CORE_OrganicVolume_BoundedSharedAtlas",
+            "emptyGroup": false
+          }
+        ]
+      },
+      {
+        "name": "FABRICATED_left",
+        "faces": 92,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.4847915884910281,
+        "modifiers": []
+      },
+      {
+        "name": "FABRICATED_right",
+        "faces": 83,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.36592381114625183,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_0",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_1",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_2",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      },
+      {
+        "name": "FASTENER_3",
+        "faces": 40,
+        "smoothFaces": 0,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 0.0033013938663800316,
+        "modifiers": []
+      }
+    ],
+    "boundsMin": [
+      -1.5394513607025146,
+      -0.8362501859664917,
+      -1.8242236375808716
+    ],
+    "boundsMax": [
+      1.5231386423110962,
+      0.7344304323196411,
+      1.7757763862609863
+    ],
+    "dimensions": [
+      3.0625901222229004,
+      1.5706806182861328,
+      3.5999999046325684
+    ],
+    "images": [
+      "//_textures\\hybrid_surface_atlas.png"
+    ],
+    "rootScale": [
+      0.9919308423995972,
+      0.8481364846229553,
+      0.9790910482406616
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "hybrid_salvage_sdf",
+      "sr_contract_version": 1,
+      "sr_asset_id": "hybrid_salvage_sdf",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_sdf",
+      "sr_authoring_description": "Nonshipping containment capsule study: salvage direction, sdf construction",
+      "sr_study_only": true,
+      "sr_art_direction": "salvage",
+      "sr_hybrid_route": "sdf",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[145, 17, 618, 573], [870, 17, 1120, 590], [127, 602, 590, 1167], [751, 713, 1268, 1084]], \"targetDimensions\": [3.0625899280575544, 1.5706806282722514, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "study only; open"
+    }
+  }
+]

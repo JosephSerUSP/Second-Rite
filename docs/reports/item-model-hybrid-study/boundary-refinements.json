@@ -1,0 +1,14 @@
+[
+  {
+    "item": "hybrid_carved_conform",
+    "beforeSHA256": "7e0cbe29e726b4834e0ea55a4a46890643af993bc030bdac3ba02f7e8e26c33e",
+    "afterSHA256": "24253ffd670d377bc7b5ad9a816e083ace33fd20e6715828f7e1c40fa1f529b2",
+    "change": "live boundary-only relaxation before Shrinkwrap; no source mesh or PNG replacement"
+  },
+  {
+    "item": "hybrid_salvage_conform",
+    "beforeSHA256": "824cd072d56d787af9e7a08d1f90ab99f0719d3867352ae405e868f01c84f735",
+    "afterSHA256": "5298c486efcee384ae846a4ae6f64cf247659f26777d0988f36119322c9399af",
+    "change": "live boundary-only relaxation before Shrinkwrap; no source mesh or PNG replacement"
+  }
+]

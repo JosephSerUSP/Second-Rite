@@ -1,0 +1,67 @@
+00:03.594  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_conform.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_conform.obj: vertices=1090 faces=2124 triangles=2124
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_conform.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_conform.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_conform.obj
+OBJ export of 'hybrid_carved_conform.obj' took 15.77 ms
+
+Blender quit
+00:03.625  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_hull.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_hull.obj: vertices=1174 faces=2292 triangles=2292
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_hull.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_hull.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_hull.obj
+OBJ export of 'hybrid_carved_hull.obj' took 8.49 ms
+
+Blender quit
+00:03.079  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_sdf.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_sdf.obj: vertices=3910 faces=7764 triangles=7764
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_sdf.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_sdf.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_sdf.obj
+OBJ export of 'hybrid_carved_sdf.obj' took 22.54 ms
+
+Blender quit
+00:03.391  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_conform.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_conform.obj: vertices=1180 faces=2304 triangles=2304
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_conform.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_conform.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_conform.obj
+OBJ export of 'hybrid_salvage_conform.obj' took 10.72 ms
+
+Blender quit
+00:03.219  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_hull.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_hull.obj: vertices=1341 faces=2626 triangles=2626
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_hull.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_hull.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_hull.obj
+OBJ export of 'hybrid_salvage_hull.obj' took 11.74 ms
+
+Blender quit
+00:02.796  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_sdf.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_sdf.obj: vertices=3794 faces=7532 triangles=7532
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_sdf.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_sdf.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_sdf.obj
+OBJ export of 'hybrid_salvage_sdf.obj' took 18.92 ms
+
+Blender quit
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_conform.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_conform.obj: vertices=1090 faces=2124 triangles=2124
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_hull.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_hull.obj: vertices=1174 faces=2292 triangles=2292
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_sdf.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_carved_sdf.obj: vertices=3910 faces=7764 triangles=7764
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_conform.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_conform.obj: vertices=1180 faces=2304 triangles=2304
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_hull.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_hull.obj: vertices=1341 faces=2626 triangles=2626
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_sdf.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-64cxq1wj\hybrid_salvage_sdf.obj: vertices=3794 faces=7532 triangles=7532
+ITEM BLEND COMPILE OK: 6 source(s)

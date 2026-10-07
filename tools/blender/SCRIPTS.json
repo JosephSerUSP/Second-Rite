@@ -504,6 +504,11 @@
       "purpose": "Continuous path/sleeve UV coordinates and read-only original strip seam diagnostics for generated surface atlases."
     },
     {
+      "path": "surface_conform_blender.py",
+      "role": "library",
+      "purpose": "Wrap a clipped alpha panel around a root-owned body guide, then add plain cut rims and deliberate front shading."
+    },
+    {
       "path": "surface_finishes.py",
       "role": "library",
       "purpose": "World-scale procedural finishes for authored environment studies."

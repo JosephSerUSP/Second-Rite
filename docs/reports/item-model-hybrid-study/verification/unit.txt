@@ -1,0 +1,2431 @@
+--------------------------------------------------
+SECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)
+--------------------------------------------------
+=== Testing traits.getActiveObjects ===
+  [PASS] empty battler returns only default innate traits object
+  [PASS] battler with actorData traits includes them in innate object
+  [PASS] battler with passives includes their traits
+  [PASS] battler with equipment includes their traits
+  [PASS] battler with states includes their traits
+  [PASS] battler with all combinations returns correctly ordered objects
+=== Testing creature parameter growth ===
+  [PASS] growth is the accumulated seeded record, not a curve
+  [PASS] two instances of one species grow differently
+  [PASS] mpd, mxa and mxp are form-defined and never grow
+=== Tests completed: 9 passed, 0 failed ===
+[TEST] Starting creature recruitment system tests...
+  [PASS] 11 authored recruit events, 2 of them fighting a named troop and resuming on victory
+  [PASS] GameSession:recruitActor places members correctly in party and reserve
+  [PASS] Expedition reserve is capped at four creatures
+  [PASS] Town storage is separate, capped at 99, and save-persistent
+  [PASS] Dungeon dismissal transfers instances and protects the last active creature
+  [PASS] Interpreter commands CHANGE_ITEM and OPEN_RECRUIT executed cleanly
+  [PASS] Interpreter command ERASE_EVENT erased target map event
+  [PASS] Interpreter commands GAIN_GOLD and RECOVER_PARTY executed cleanly
+  [PASS] Condition evaluator correctly handles gold: prefix
+  [PASS] End-to-end gold recruitment script executed successfully
+  [PASS] Item recruitment validates first and charges exactly once
+  [PASS] Gold recruitment validates first and charges exactly once
+  [PASS] Item requirement has one canonical quantity field
+  [PASS] Malformed placement cannot overwrite or charge
+  [PASS] Active-slot substitution is atomic
+  [PASS] Full expedition and storage failure is lossless
+  [PASS] Challenge resume preserves source and candidate identity
+  [PASS] Stray challenge resume fails loud
+  [PASS] Persistent recruit nodes save, complete once, and do not duplicate
+[TEST] All Creature Recruitment tests passed successfully!
+=== Testing Target Redirection & Target Dead Feedback ===
+  [PASS] Target dead with autoRedirect disabled emits feedback message
+  [PASS] Target dead with autoRedirect enabled redirects to living target
+  [PASS] Target dead with autoRedirect enabled but no living targets emits feedback message
+  [PASS] Savegame serialization preserves autoRedirect option
+  [PASS] Item usage on dead target with autoRedirect disabled emits feedback message
+=== Tests completed: 5 passed, 0 failed ===
+=== Testing canonical quest transitions ===
+  [PASS] offer runs authored behavior and marks the quest active once
+  [PASS] questStatus observes the canonical active flag
+  [PASS] failed completion preserves active state
+  [PASS] failed requirements grant no rewards
+  [PASS] successful completion consumes requirements and grants rewards once
+  [PASS] successful completion performs the lifecycle transition once
+  [PASS] repeated completion cannot grant rewards again
+  [PASS] questStatus continues to resolve completed quests
+  [PASS] top-level acceptHook replaces the quest.offer default through the canonical transition
+  [PASS] top-level completeHook replaces the quest.complete default through the canonical transition
+=== Quest Transition Tests: 10 passed, 0 failed ===
+[TEST] Starting permadeath ward + customization effect tests...
+  [PASS] unwarded creature is reaped, not saved
+  [PASS] reaping banks EXP (or 0 when rate is 0)
+  [PASS] ward-mode charm saves the creature from the sweep
+  [PASS] ward-mode charm is destroyed on use
+  [PASS] warded creature is alive with positive HP
+  [PASS] a saved creature banks no EXP
+  [PASS] revive-mode ward reports its mode
+  [PASS] revive restores the trait's hpFraction (0.35)
+  [PASS] charge ward spends one charge and does not break
+  [PASS] charge ward survives its first use
+  [PASS] charge ward breaks as the last charge is spent
+  [PASS] spent charge ward is removed from its slot
+  [PASS] creature dies once its ward is spent
+  [PASS] relic ward saves without being consumed
+  [PASS] rebirth's levelCost drops the creature 5 -> 3
+  [PASS] relic ward fires again on a later death
+  [PASS] relic is preferred over a consumable ward, which is left intact
+  [PASS] ward charges survive save/load
+  [PASS] learn_skill teaches the skill once
+  [PASS] learn_skill on a known skill is a no-op with a message
+  [PASS] param_plus raises the param permanently
+  [PASS] param_plus rejects an unknown param with a message
+  [PASS] skillbook is usable on a creature that lacks the skill
+  [PASS] skillbook is refused once the skill is known
+  [PASS] battlerView.trait exposes MOVE_HEAL for a carrier (Wisp)
+  [PASS] battlerView.trait returns 0 for a code the battler lacks
+  [PASS] groupView.trait sums a code across living members
+  [PASS] groupView.trait is safe for an unknown code
+  [PASS] exploration.step heals a MOVE_HEAL carrier while walking
+  [PASS] MOVE_HEAL never overheals past maxHp
+  [PASS] exploration.step leaves non-carriers alone
+  [PASS] sanity: the carrier did gain HP
+[formula] error in 'battle.round >= 15 and 16 or (battle.round >= 10 and 8 or (battle.round >= 6 and 4 or 0))': [string "formula:battle.round >= 15 and 16 or (battle...."]:1: attempt to index global 'battle' (a nil value)
+  [PASS] SYMBIOSIS heals the creature in the adjacent slot
+  [PASS] SYMBIOSIS does not heal its own carrier
+  [PASS] PARASITE drains the creature in the adjacent slot
+[formula] error in 'neighbor.name': [string "formula:neighbor.name"]:1: attempt to index global 'neighbor' (a nil value)
+  [PASS] adjacency traits no-op safely with no living neighbour
+  [PASS] recruit_egg recruits into a free party slot
+  [PASS] recruit_egg recruits the Unit named by `value`
+  [PASS] recruit_egg fixes the authored hatch provenance on the instance
+  [PASS] recruit_egg emits a recruit event for presentation
+  [PASS] recruit_egg reports an unknown actor instead of failing silently
+  [PASS] recovery site grants bonus XP to a RECOVERY_XP_BONUS carrier
+  [PASS] recovery site grants no bonus XP to a non-carrier
+  [PASS] an INITIATIVE carrier can win the front of the turn queue
+  [PASS] REAR_GUARD negates the opposing side's first strikes entirely
+  [PASS] no INITIATIVE carrier means no first-strike flags
+  [PASS] every recruitment graph is fully linked (0 dangling)
+  [PASS] every authored map event graph is fully linked
+  [PASS] a party with no senses notices nothing
+  [PASS] a level-2 trap sense notices both difficulty 1 and 2 traps
+  [PASS] trap sense does not reveal secrets (that is SEE_WALLS)
+  [PASS] SEE_WALLS reveals secrets only
+  [PASS] an ordinary event is not detectable at all
+  [PASS] capability reports the best sense in the party
+  [PASS] authored maps carry detectable trap events
+  [PASS] authored maps carry a detectable secret wall
+  [PASS] map generation preserves authored event `meta`
+  [PASS] authored traps are detectable once the floor is loaded
+[effekseer] effects disabled: effekseer_shim.dll not found
+[effekseer] build the shim per tools/effekseer/README.md to enable them
+  [PASS] detected traps render as markers on the minimap
+  [PASS] a creature with no states draws no state icon
+  [PASS] sprite is not static without a static-flagged state
+  [PASS] poison starts its looped state animation
+  [PASS] an active state draws its icon
+  [PASS] clearing the state stops its looped animation
+  [PASS] a static-flagged state (sleep) freezes the sprite
+  [PASS] dead is hidden from the state icon row
+  [PASS] equipping a ward shows the `warded` state
+  [PASS] removing the ward clears the `warded` state
+  [PASS] poison visibly tints the creature green on screen
+  [PASS] a new creature starts with an empty history and its origin species
+[formula] error in 'combat.victoryGoldBase + combat.victoryGoldPerEnemy * enemies.count + enemies.totalLevel + party.trait.GOLD_DIGGER': [string "formula:combat.victoryGoldBase + combat.victo..."]:1: attempt to index global 'enemies' (a nil value)
+[formula] error in 'round(combat.victoryExpBase + combat.victoryExpLevelScale * enemies.totalLevel)': [string "formula:round(combat.victoryExpBase + combat...."]:1: attempt to index global 'enemies' (a nil value)
+  [PASS] surviving a battle counts toward the creature's record
+  [PASS] leaving a safe map counts one expedition
+  [PASS] descending another floor is still one expedition
+  [PASS] history is exposed to formulas for display
+  [PASS] a reaped creature is filed in the memorial
+  [PASS] the memorial record keeps species, level, battles and cause of death
+  [PASS] promotion carries the creature's history and counts the promotion
+  [PASS] a promoted creature still remembers the species it started as
+  [PASS] promotion preserves permanent stat-ups
+  [PASS] promotion preserves skills taught by skillbooks
+  [PASS] the memorial survives save/load
+  [PASS] sacrifice removes the creature from its slot
+  [PASS] sacrifice files a memorial record
+  [PASS] the record distinguishes a sacrifice from a death in battle
+  [PASS] a sacrificed creature keeps the history it earned
+  [PASS] status.history term exists and substitutes the species
+  [PASS] the history line carries expedition and battle counts
+=== Ward/effect/trait tests: 87 passed, 0 failed ===
+=== Testing Item Menu Targeting, Usability & Effect Feedback ===
+  [PASS] targeting.expand handles 'none' spec
+  [PASS] canUseItem validates no-target items (Mystic Egg, MP drinks)
+  [PASS] USE_ITEM command handles target: 'none' items without single-target selection (recruits exactly 1 with random name)
+  [PASS] USE_ITEM single-target item enters state 2 when usable
+  [PASS] Detailed effect feedback for stat-up and skill learning
+  [PASS] Actor Change reports a permanent stat item without requiring a level-up
+  [PASS] Actor Change reports skillbook learning as durable development
+  [PASS] Actor Change ignores ordinary HP healing
+  [PASS] Items Scene routes durable item use into Actor Change presentation
+  [PASS] Items Scene leaves ordinary healing on the existing popup path
+  [PASS] map/common fallback reports an out-of-battle GRANT_XP transaction
+=== Item Menu Tests Completed: 11 passed, 0 failed ===
+[TEST] Starting trait characterization tests...
+  [PASS] a Reaper kill restores Summoner MP, capped at max MP
+  [PASS] KILL_MP_RESTORE reports exactly the committed MP delta
+  [PASS] the restore preserves the damage/death/event/text contract
+  [PASS] the kill restore keeps its authored presentation text
+  [PASS] the production reaction consumes an immutable resolved kill fact
+  [PASS] a non-lethal hit does not restore MP
+  [PASS] an already-dead target cannot duplicate the restore
+  [PASS] an Execution kill runs one Reaper typed kill reaction
+  [PASS] a lethal kill with no eligible trait does not restore MP
+  [PASS] enemy Reaper authority remains compatible with the production reaction
+  [PASS] a lethal drain keeps Reaper compatibility through resolvedKill
+  [PASS] multiple current KILL_MP_RESTORE contributions keep the aggregate result
+  [PASS] the old awardKill restoration path is removed
+  [PASS] BATTLE_START_DAMAGE hits the first living enemy after spawn
+  [PASS] the authored ambush changes enemy HP during battle_start
+  [PASS] the battle-start ambush damages exactly one enemy
+  [PASS] POST_BATTLE_HEAL restores exactly the authored amount on victory
+  [PASS] victory healing is carrier-local and does not heal other party members
+  [PASS] GOLD_DIGGER contributes +5 to the authored victory gold formula
+  [PASS] MOVE_HEAL can currently aggregate actor, passive, equipment, state, and Savor sources
+  [PASS] MOVE_HEAL's production calculation is repeatable and side-effect-free before commit
+  [PASS] MOVE_HEAL preserves one signed additive aggregate across all five contributing sources
+  [PASS] exploration.step consumes the same MOVE_HEAL calculation that preview returned
+  [PASS] MOVE_HEAL remains a silent HP mutation with no heal/log event
+  [PASS] non-positive signed MOVE_HEAL aggregate is a no-op rather than separate source commits
+  [PASS] semantic calculations compose ordered generic operations deterministically
+  [PASS] semantic calculation evaluation does not mutate its authored contribution records
+  [PASS] semantic calculation returns an inspectable ordered trace
+  [PASS] semantic calculations reject unordered/sparse input and unknown operations loudly
+=== Trait Characterization Tests: 29 passed, 0 failed ===
+=== Testing effects.elementMultiplier (signed two-layer element model) ===
+  [PASS] no element anywhere is a flat 1.0 -- the non-elemental hedge
+  [PASS] a neutral target is immune to advantage from either layer
+  [PASS] a neutral attacker with a neutral skill gets no user bonus
+  [PASS] single skill match keeps parity with the old flat 1.5x
+  [PASS] skill layer counts the TARGET's repeated depth, with diminishing returns
+  [PASS] skill strong and weak relations cancel before multiplier math
+  [PASS] user layer is a cross-product of both sides' depth
+  [PASS] opposed innate colors cancel exactly
+  [PASS] RGB is innately neutral into each RGB-cycle color
+  [PASS] balanced broad attacker and defender cancel exactly
+  [PASS] repeated alignment survives cancellation as remaining depth
+  [PASS] the two layers stack independently
+  [PASS] an off-element skill still carries the wielder's own relation separately
+  [PASS] a neutral mixed caster does not dilute a favorable skill
+  [PASS] disadvantage remains multiplicative by uncancelled depth
+  [PASS] the weak floor turns deep mismatch into resistance, not immunity
+  [PASS] ELEMENT_CHANGE replaces the innate list
+  [PASS] ELEMENT_ADD appends instead of replacing, deepening alignment
+  [PASS] ELEMENT_ADD stacks on top of ELEMENT_CHANGE
+  [PASS] White and Black hit each other both ways
+  [PASS] ELEMENT_RATE remains an explicit separate modifier layer
+  [PASS] rates are read from elementRules, not hardcoded
+=== Element Affinity Tests Completed: 22 passed, 0 failed ===
+=== Testing engine.craft (Item Creation) ===
+  [PASS] element is read off the name lexicon
+  [PASS] intensity comes from price, log-scaled
+  [PASS] an intensity grade multiplies the price-derived value
+  [PASS] non-elemental items sit at the origin
+  [PASS] mix, not depth, decides direction
+  [PASS] White and Black cancel to non-elemental
+  [PASS] membership defaults from what the item plainly is
+  [PASS] authored membership overrides the default
+  [PASS] craftable=false keeps an item out of every pool
+  [PASS] a discipline pool contains only what it can produce
+  [PASS] the crafter pull uses innate elements only
+  [PASS] reach grows with the discipline stat
+  [PASS] a foreign ingredient steers but does not empower
+  [PASS] the same ingredients in different hands land in different places
+  [PASS] ideation is deterministic without an rng, and scattered with one
+  [PASS] scatter shrinks as the discipline stat grows
+  [PASS] resolution ranks the neighbourhood nearest first
+  [PASS] beyond-reach costs distance but is never forbidden
+  [PASS] coherence is 1 dead on and 0 nowhere near
+=== Craft Tests Completed: 19 passed, 0 failed ===
+[TEST] Starting item vocabulary tests...
+  [PASS] engine.json enumerates item scopes
+  [PASS] scope 'always' is usable in battle and in the field
+  [PASS] scope 'battle' is refused in the field
+  [PASS] scope 'field' is refused in battle
+  [PASS] scope 'none' is never usable
+  [PASS] every registered scope has an implemented branch
+  [PASS] recruit item refuses use at the canonical party/reserve limits
+  [PASS] recruit item becomes usable when a canonical reserve slot is free
+  [PASS] a percentage HP restore heals a share of the recipient's own Max HP
+  [PASS] flat and percentage HP compose in one effect
+  [PASS] a flat-only HP restore is unchanged by the percentage param
+  [PASS] HP restore never overheals
+  [PASS] a percentage MP restore is a share of Max MP
+  [PASS] flat and percentage MP compose in one effect
+  [PASS] MP restore never overfills the pool
+  [PASS] max_mp_plus permanently raises Max MP
+  [PASS] max_mp_plus restores what it adds
+  [PASS] max_mp_plus is clamped to the Max MP cap
+  [PASS] only the applied share is restored at the cap
+  [PASS] a Max MP item at the cap is refused rather than wasted
+  [PASS] a raised Max MP is written to the save
+  [PASS] a raised Max MP survives the save round trip
+  [PASS] ITEM_EFFECT_RATE scales an item's HP restore for its recipient
+  [PASS] ITEM_EFFECT_RATE scales formula heals from items too
+  [PASS] ITEM_EFFECT_RATE leaves skill effects alone
+  [PASS] ITEM_EFFECT_RATE does not inflate permanent parameter gains
+  [PASS] the rate did not disturb Max HP
+  [PASS] an ordinary item is a valid ingredient
+  [PASS] an item with no meta at all is a valid ingredient
+  [PASS] meta.craftIngredient false excludes an item from ingredient selection
+  [PASS] an item excluded from outputs is still a valid ingredient
+  [PASS] output exclusion still keeps items out of the pool
+  [PASS] the campaign has a common event to call
+  [PASS] a common_event effect raises a request naming the event
+  [PASS] an unknown common event raises no request
+  [PASS] an unbound host declines the request instead of failing
+  [PASS] a bound host is handed the event id to start
+  [PASS] a party meal restores shared Summoner MP exactly once
+  [PASS] the same party meal applies creature-targeted HP recovery to everyone
+  [PASS] a creature discovers its exact Favorite Food
+  [PASS] Favorite Food starts its authored Savor
+  [PASS] Savor traits participate in the ordinary trait pipeline
+  [PASS] feeding during Savor does not refresh its cooldown
+  [PASS] Savor expires after its authored number of victories
+=== Item Vocabulary Tests Completed: 44 passed, 0 failed ===
+[TEST] Starting damage model tests...
+  [PASS] with no meaningful defense, damage is essentially all of power
+  [PASS] with defense equal to power, damage is 50% of power
+  [PASS] with defense at twice power, damage is 33% of power
+  [PASS] with defense at three times power, damage is 25% of power
+  [PASS] potency scales the relative result linearly
+  [PASS] a frail attacker against a wall does scratch damage, never zero
+  [PASS] damage floors at 1, never 0
+  [PASS] physical damage is reduced by DEF
+  [PASS] magical damage is reduced by MDF, not DEF
+  [PASS] a high-DEF low-MDF creature is genuinely vulnerable to magic
+  [PASS] an authored `defense` overrides the default pairing
+  [PASS] direct damage lands as authored, unreduced
+  [PASS] an ordinary hit is the plain relative result
+  [PASS] a critical multiplies the final damage
+  [PASS] a critical is reported on the damage event
+  [PASS] an ordinary hit reports no critical
+  [PASS] direct damage never criticals
+  [PASS] a critical hit guarantees the status attached to it
+  [PASS] an ordinary hit still rolls the authored chance
+  [PASS] a non-damaging status action does not critical
+  [PASS] DAMAGE_RATE halves physical damage
+  [PASS] DAMAGE_RATE halves magical damage as well
+  [PASS] two DAMAGE_RATE sources multiply rather than sum
+  [PASS] DAMAGE_RATE does not blunt direct authored damage
+  [PASS] the Defending state protects through DAMAGE_RATE, not doubled DEF
+  [PASS] every damaging skill authors power or a direct formula (0 do not)
+  [PASS] penetration ignores a share of the defending stat
+  [PASS] penetration is worth much more against a wall than a soft target
+  [PASS] full penetration reduces the target to no defense
+  [PASS] penetration clamps at the whole stat
+  [PASS] a PENETRATION trait pierces like the param
+  [PASS] the trait and the param add together
+  [PASS] a survivor left under the threshold is executed
+  [PASS] a healthy target is not executed
+  [PASS] no threshold, no execution
+  [PASS] EXECUTION_RESIST of 1 is outright protection
+  [PASS] partial resistance can pull a target out of range
+  [PASS] ...but only as far as it goes
+  [PASS] direct authored damage never executes
+  [PASS] with base accuracy and no evasion, an attack always connects
+  [PASS] a high draw against an evasive target misses
+  [PASS] a low draw against an evasive target connects
+  [PASS] 100% evasion is never hit
+  [PASS] a clumsy attacker misses on a high draw
+  [PASS] a clumsy attacker still connects on a low draw
+  [PASS] a missed attack applies none of its attached statuses
+  [PASS] a heal on oneself never rolls to hit
+=== Damage Model Tests Completed: 47 passed, 0 failed ===
+[TEST] Starting typed damage transition tests...
+  [PASS] zero participants preserve the existing one-damage-event behavior
+  [PASS] zero participants preserve the mature HP result
+  [PASS] the baseline publishes the committed damage fact without recomputation
+  [PASS] the baseline records one authoritative commit and its after-snapshot
+  [PASS] non-lethal ordinary damage publishes no resolved kill fact
+  [PASS] ordinary lethal damage reports its capped commit and damage-caused kill
+  [PASS] ordinary lethal damage publishes exactly one kill with its damage provenance
+  [PASS] the resolved kill fact and its identities are immutable
+  [PASS] damage against an already-dead target does not publish a duplicate kill fact
+  [PASS] a kill reaction receives no arbitrary session handle
+  [PASS] a kill reaction receives the immutable killer, target, and cause
+  [PASS] a resolved kill fact cannot be mutated and the reaction requests a typed follow-up
+  [PASS] the semantic Summoner MP follow-up runs once and respects the resource cap
+  [PASS] local kill reactions run in supplied order and preserve follow-up lineage
+  [PASS] an already-dead target cannot duplicate the resolved-kill reaction
+  [PASS] a non-lethal damage transition does not run a kill reaction
+  [PASS] Execution produces one typed kill reaction with execution cause
+  [PASS] the second read sees the first ordered transform
+  [PASS] a later interceptor receives the typed pending value
+  [PASS] immediate interceptors run in the supplied deterministic order
+  [PASS] an interceptor sees typed identities and cannot mutate the pending record
+  [PASS] the interceptor transforms the candidate before the single HP commit
+  [PASS] the resolved fact contains the transformed committed result
+  [PASS] resolved reactions run in the supplied deterministic order
+  [PASS] a reaction reads the final committed fact, not a recalculated formula
+  [PASS] a reaction cannot repair or mutate its already-resolved parent fact
+  [PASS] a reaction follow-up enters the ordinary typed effect path
+  [PASS] the nested semantic operation preserves minimal parent/origin lineage
+  [PASS] the parent resolved fact remains immutable after its nested operation
+  [PASS] unrelated root damage transitions have distinct provisional chain identities
+  [PASS] nested damage has its own id, links to its parent, and preserves the root identity
+  [PASS] the typed fact reports only the ordinary HP damage before Execution
+  [PASS] the existing Execution event and final death behavior remain intact
+  [PASS] Execution publishes exactly one kill with Execution provenance
+  [PASS] an Execution kill is not falsely attributed to ordinary damage
+  [PASS] the legacy event snapshot may still observe post-Execution HP
+  [PASS] a resolved reaction consumes ordinary committed damage, not Execution loss
+  [PASS] each hit completes its pending and resolved stages before the next
+  [PASS] an immediate WAIT remains presentation pacing between semantic hits
+  [PASS] the two-hit Action Sequence commits both hits and both follow-ups
+  [PASS] each multi-hit commit publishes its own resolved final amount
+  [PASS] the typed damage mechanism is symmetric for ally and enemy battlers
+  [PASS] resolved kill provenance is symmetric for ally and enemy authorities
+=== Typed Damage Transition Tests: 43 passed, 0 failed ===
+[TEST] Starting state tick tests...
+  [PASS] a positive HRG restores that share of Max HP
+  [PASS] a negative HRG drains that share of Max HP
+  [PASS] regeneration never overheals
+  [PASS] degeneration can kill
+  [PASS] a death from degeneration is reported
+  [PASS] a rate that rounds to nothing changes nothing
+  [PASS] a rate that rounds to nothing emits no event
+  [PASS] HRG sums across sources, so regen and poison net out
+  [PASS] exactly cancelling rates produce no tick
+  [PASS] the live regen state still regenerates through its trait
+  [PASS] the live poison state still damages through its trait
+  [PASS] a creature with no HRG anywhere is untouched
+  [PASS] a dead creature does not tick
+  [PASS] any source carrying HRG regenerates, not just the state named 'regen'
+  [PASS] state durations still decay one per round
+=== State Tick Tests Completed: 15 passed, 0 failed ===
+[TEST] Starting combat-state resource tests...
+  [PASS] ordinary formula healing still clamps at Max HP
+  [PASS] ordinary healing never deletes existing Overheal
+  [PASS] an explicit Overheal heal can exceed Max HP up to the system cap
+  [PASS] heal events expose the recovery cap explicitly
+  [PASS] damage consumes Overheal as ordinary current HP, with no shield pool
+  [PASS] HP ratio remains above 1.0 while current HP exceeds effective Max HP
+  [PASS] formula/UI battler views expose unclamped HP ratio and exact Overheal
+  [PASS] authored HP thresholds compare the unclamped currentHP/effectiveMaxHP ratio
+  [PASS] a state PARAM_PLUS maxHp raises the actual effective Max HP
+  [PASS] raising temporary Max HP immediately grants the new capacity as current HP
+  [PASS] temporary Max HP never mutates persistent paramPlus.maxHp
+  [PASS] formula/UI battler views distinguish underlying and active Max HP
+  [PASS] authored formulas can read the active Max-HP modifier
+  [PASS] state application emits a structured Max-HP transition
+  [PASS] state-add events preserve an authored duration for presentation replay
+  [PASS] temporary Max HP expiry restores the underlying cap and clamps current HP
+  [PASS] expiry exposes Max-HP loss and the non-damage HP clamp as structured events
+  [PASS] Max-HP expiry clamp emits neither damage nor death
+  [PASS] permanent Max-HP growth preserves existing Overheal
+  [PASS] permanent Max-HP growth reports only HP actually granted while Overhealed
+  [PASS] temporary capacity does not double-count current HP already above the grown cap
+  [PASS] growth-first reaches the grown Max HP normally
+  [PASS] Overheal applied after growth uses the grown effective Max HP as its cap base
+  [PASS] ordinary positive regeneration does not erase or refill Overheal
+  [PASS] a regen tick with no legal recovery emits no fake +0 heal event
+  [PASS] Overheal saves as real current HP rather than a second persistent resource
+=== Combat-State Resource Tests Completed: 26 passed, 0 failed ===
+[TEST] Starting status infliction tests...
+  [PASS] engine.json registers state categories
+  [PASS] the live states carry categories
+  [PASS] every authored state category is registered
+  [PASS] the dead state is not common, so no blanket can reach it
+  [PASS] ordinary afflictions are tagged common
+  [PASS] a draw under the authored chance lands the state
+  [PASS] a draw over the authored chance does not
+  [PASS] an authored chance of 0 never lands, even on a zero draw
+  [PASS] an authored chance of 1 lands on any ordinary draw
+  [PASS] a creature's own defensive stat never resists a positive state
+  [PASS] ...including a magical one
+  [PASS] STATUS_SUCCESS raises the attacker's infliction chance
+  [PASS] a negative STATUS_SUCCESS lowers it
+  [PASS] STATE_RATE lowers the chance of its named state
+  [PASS] STATE_RATE leaves other states alone
+  [PASS] a category immunity blocks a state in that category
+  [PASS] the same trait blocks every other state in the family
+  [PASS] and a critical hit does not get past it either
+  [PASS] a common-state blanket does not confer immunity to death
+  [PASS] a common-state blanket does not block positive states
+  [PASS] STATE_RATE and STATE_CATEGORY_RATE multiply together
+  [PASS] ...and the product is the chance, not a floor
+  [PASS] a state in two resisted categories takes both rates
+  [PASS] a state in only one of them takes only that rate
+  [PASS] a state rate of 0 never lands on the ordinary path
+  [PASS] a rate of 0 is not immunity, so nothing is announced as immune
+  [PASS] a critical hit forces a state through a rate of 0
+  [PASS] STATE_IMMUNITY blocks the state outright
+  [PASS] immunity is announced rather than silently doing nothing
+  [PASS] an immune target reports no state_add
+  [PASS] a critical hit cannot force a state past STATE_IMMUNITY
+  [PASS] a critical still guarantees a status against heavy resistance
+  [PASS] a chance driven over 1 clamps to certainty
+=== Status Infliction Tests Completed: 33 passed, 0 failed ===
+[TEST] Starting barrier resource tests...
+  [PASS] one magical stack negates hit 1 but not hit 2
+  [PASS] consumption and break emit structured events
+  [PASS] spent barrier does not affect later hits
+  [PASS] magical barrier ignores physical damage
+  [PASS] magical barrier consumes on magic
+  [PASS] physical barrier consumes on physical damage
+  [PASS] partial two-stack barrier reduces exactly two hits
+  [PASS] barrier without duration persists until consumed
+  [PASS] optional duration expires independently
+  [PASS] refresh restores a minimum without stockpiling
+  [PASS] maxStacks caps additive grants
+  [PASS] would-land hostile status is intercepted
+  [PASS] successful hostile-status match spends one stack
+  [PASS] failed status roll does not spend ward
+  [PASS] trait barriers grant through battle phase hooks
+  [PASS] schema rejects zero stacks
+  [PASS] schema rejects invalid reduction
+  [PASS] schema rejects invalid match kind
+=== Barrier Resource Tests Completed: 18 passed, 0 failed ===
+[TEST] Starting skill cost tests...
+  [PASS] charges come from the authored formula against base MDF
+  [PASS] an unrecorded pool reads as full
+  [PASS] a charge formula floors at 1 rather than 0
+  [PASS] an authored charges:0 stays 0 (the Overcast-only shape)
+  [PASS] a skill with no charges key has no pool
+  [PASS] PARAM_PLUS/PARAM_RATE on MDF cannot move max charges
+  [PASS] a spell with charges left spends a charge
+  [PASS] spending decrements the pool
+  [PASS] at zero charges the spell may be Overcast
+  [PASS] Overcast is paid out of the Summoner's shared pool
+  [PASS] Overcast is refused when the pool is short, with a reason
+  [PASS] an enemy never Overcasts
+  [PASS] a spell with no overcast cost cannot be cast at zero charges
+  [PASS] an Overcast-only skill Overcasts from the very first use
+  [PASS] each Breath bills the Summoner again
+  [PASS] and it never accumulates charges to spend instead
+  [PASS] rest refills the fielded party
+  [PASS] rest reaches the reserve
+  [PASS] rest reaches town storage
+  [PASS] a partial restore reports what it actually restored
+  [PASS] ...and grants exactly that
+  [PASS] amount 'all' tops the pool up
+  [PASS] restoring a full pool restores nothing, so an item can refuse itself
+  [PASS] promotion rests the creature
+  [PASS] levelling does not refill charges
+  [PASS] a cooldown skill is available at the start of a battle
+  [PASS] using it starts the authored cooldown, with a truthful displayed count
+  [PASS] the arming round-end does not consume a cooldown turn
+  [PASS] the first subsequent round consumes one cooldown turn
+  [PASS] and it comes back after two subsequent rounds have elapsed
+  [PASS] cooldown:1 survives the round-end that armed it
+  [PASS] cooldown:1 returns only after one later round
+  [PASS] a warmup skill is unavailable at the start of a battle
+  [PASS] the wait counts down and reads naturally at 1
+  [PASS] then it unlocks for the rest of the fight
+  [PASS] a new battle re-arms the warmup
+  [PASS] battle end discards the timers entirely
+  [PASS] a formula condition passes when it is satisfied
+  [PASS] ...and reports the AUTHORED text when it is not
+  [PASS] a state: condition blocks when the state is absent
+  [PASS] and passes when it is present
+  [PASS] canUseSkill allows a paid-for skill
+  [PASS] canUseSkill refuses an empty pool, with the reason the menu shows
+  [PASS] Soothing Mote explicitly remains usable in the field
+  [PASS] Root Mend explicitly remains usable in the field
+  [PASS] Field Surgery explicitly remains battle-only
+  [PASS] missing skill scope is rejected instead of derived from a charged-heal shape
+  [PASS] authored battle scope wins even for a charged pure-heal skill
+  [PASS] the basic attack carries no cost or gate
+  [PASS] a flat hpCost reads as authored
+  [PASS] a formula hpCost scales with the user
+  [PASS] using it pays out of the user's own HP
+  [PASS] a cost the creature cannot survive blocks the skill
+  [PASS] ...and exactly enough to survive is allowed
+  [PASS] a skill may cost both HP and a charge
+  [PASS] a charged spell shows its REMAINING count in the charges colour
+  [PASS] an emptied pool shows the Overcast price in the MP colour instead
+  [PASS] an enemy sees the empty pool, never an Overcast price
+  [PASS] a spent spell with no Overcast shows its empty pool rather than nothing
+  [PASS] an HP cost shows in the HP colour
+  [PASS] a cooling-down skill exposes its remaining turns in the cost column
+  [PASS] the visible cooldown marker counts down with the authoritative timer
+  [PASS] a free skill shows no cost at all
+  [PASS] verbose shows remaining/max AND the Overcast price together
+  [PASS] ...and the pool counts down in place
+  [PASS] an Overcast-only skill shows only its price, never an empty 0/0
+=== Skill Cost Tests Completed: 66 passed, 0 failed ===
+[TEST] Starting forced action tests...
+  [PASS] an uncompelled creature performs the skill it was given
+  [PASS] a berserk creature attacks instead of casting what it was told to
+  [PASS] the forced action still resolves a target
+  [PASS] a berserk creature cannot be told to defend
+  [PASS] a berserk creature cannot use an item
+  [PASS] any source carrying FORCE_ACTION compels, and it names the skill
+  [PASS] a berserk enemy is compelled by the same trait
+  [PASS] a compelled enemy skips the AI skill roll (1 draws vs 2)
+  [PASS] the live Berserk state forces an action
+  [PASS] the action Berserk forces is a real skill (attack)
+  [PASS] Berserk still raises ATK -- the trade, not just the penalty
+=== Forced Action Tests Completed: 11 passed, 0 failed ===
+[TEST] Starting MPD economy tests...
+  [PASS] party.mpd is the combined MPD of the party
+  [PASS] a dead creature contributes no MPD
+  [PASS] ordinary dangerous-map traversal spends no Summoner MP
+  [PASS] a heavy manifested party still walks for free
+  [PASS] the Summoner alone walks for free
+  [PASS] safe-map traversal also spends no Summoner MP
+  [PASS] 600 ordinary steps leave the expedition MP pool untouched
+  [PASS] MPD-1 party pays the authored 50 + 15 * MPD battle activation cost
+  [PASS] battle activation scales with the living party's combined MPD
+  [PASS] safe-map battles skip expedition activation cost
+  [PASS] insufficient MP spends the remainder and still enters battle at zero
+  [PASS] round 1 costs nothing
+  [PASS] round 2 costs nothing
+  [PASS] round 3 costs nothing
+  [PASS] round 4 costs nothing
+  [PASS] round 5 costs nothing
+  [PASS] round 6 strains at 4x combined MPD
+  [PASS] round 9 is still the first band
+  [PASS] round 10 escalates to 8x
+  [PASS] round 14 is still the second band
+  [PASS] round 15 escalates to 16x
+  [PASS] the top band does not escalate further
+  [PASS] Strain scales with the party's combined MPD
+  [PASS] no Strain on a safe map
+  [PASS] a party with no living creatures strains nothing
+  [PASS] a creature reports its form MPD
+  [PASS] an MPD reduction applies
+  [PASS] MPD never falls below 1
+  [PASS] the floored value is what the party query reports
+  [PASS] battle activation consumes the same floored MPD value
+=== MPD Economy Tests Completed: 30 passed, 0 failed ===
+[formula] error in 'n +': [string "formula:n +"]:1: unexpected symbol near '<eof>'
+[formula] error in 'record.absent + 1': [string "formula:record.absent + 1"]:1: attempt to perform arithmetic on field 'absent' (a nil value)
+[formula] error in 'record.absent.value': [string "formula:record.absent.value"]:1: attempt to index field 'absent' (a nil value)
+[formula] error in 'floor('nope')': bad argument #1 to '?' (number expected, got string)
+[formula] error in 'record': formula did not return a number, boolean or string
+[formula] error in 'os.time()': [string "formula:os.time()"]:1: attempt to index global 'os' (a nil value)
+[formula] error in '{}': formula did not return a number, boolean or string
+LIGHTING PARITY TEST OK
+[TEST] Starting growth tests...
+  [PASS] the same seed always produces the same history
+  [PASS] a creature generated at level 20 replays the same history
+  [PASS] different seeds produce different lifetime totals
+  [PASS] and reach them by different paths
+  [PASS] growth consumes no global RNG
+  [PASS] Pixie's authored default growth seed preserves the pre-symbolic growth stream
+  [PASS] default growth does not depend on Unit ID spelling
+  [PASS] ad-hoc non-catalog Battler data gets a neutral deterministic fallback
+  [PASS] every seed stays near the authored budget (worst drift 7.7%)
+  [PASS] level 1 grants no growth
+  [PASS] growth stops past the last authored band
+  [PASS] every level raises HP by at least 1
+  [PASS] HP growth is uneven, not a flat rate (2..18 across the band)
+  [PASS] growth.apply permanently records exactly packetFor's seeded gains
+  [PASS] growth.apply does not decide or mutate the Unit's level
+  [PASS] growth.apply preserves the individual's authored seed
+  [PASS] growth.apply is a composable additive operation, not a hidden level hook
+  [PASS] growth.apply assigns the same stable fallback seed used by other unseeded battler paths
+  [PASS] growth.apply rejects malformed semantic inputs visibly
+  [PASS] APPLY_GROWTH applies the exact seeded packet through ordinary Event semantics
+  [PASS] APPLY_GROWTH never changes the Unit's committed level
+  [PASS] APPLY_GROWTH is a silent semantic mutation, not a presentation event
+  [PASS] APPLY_GROWTH is exposed by the shared authored command registry
+  [PASS] APPLY_GROWTH uses the ordinary battlerRef + Formula authoring vocabulary
+  [PASS] a battler keeps the seed it was given
+  [PASS] a battler carries an accumulated growth record
+  [PASS] the creature levelled
+  [PASS] levelling accrued permanent growth
+  [PASS] and the stat followed
+  [PASS] the accumulated record is what the stat reads
+  [PASS] an unseeded battler resolves stably
+  [PASS] the growth seed survives a save
+  [PASS] and the creature is the same creature afterwards
+  [PASS] recruited creatures get their own seeds
+=== Growth Tests Completed: 34 passed, 0 failed ===
+[TEST] Starting progress tests...
+  [PASS] authored progression resolves the level-1 threshold
+  [PASS] authored progression evaluates against the current level
+  [PASS] curveCost sums the same authored thresholds gainExp crosses
+  [PASS] nonlinear authored curves are supported
+  [PASS] nonlinear curveCost uses the exact same helper
+  [PASS] nonpositive thresholds fail visibly instead of hanging level resolution
+  [PASS] nonfinite thresholds fail visibly
+  [PASS] fractional EXP thresholds require an explicit authored rounding choice
+[formula] error in 'level *': [string "formula:level *"]:1: unexpected symbol near '<eof>'
+  [PASS] broken threshold formulas fail visibly
+[formula] error in 'expNeeded': formula did not return a number, boolean or string
+  [PASS] headless party/status rows use the shared nonlinear progression threshold
+  [PASS] Project LEVEL_REACHED policy adds no presentation event
+  [PASS] Project LEVEL_REACHED policy applies the exact seeded growth packet
+  [PASS] resolved LEVEL_REACHED fact retains authoritative Unit identity and crossing values
+  [PASS] Formula exposes LEVEL_REACHED as the top-level event.* noun
+  [PASS] LEVEL_REACHED rejects non-atomic previousLevel/level pairs
+  [PASS] Unit LEVEL_REACHED reactions see read-only event.level and run in authored order
+  [PASS] unknown Unit reaction triggers fail loudly
+  [PASS] Unit LEVEL_REACHED reactions reuse the registered transform command
+  [PASS] RESTORE_HP sets current HP directly to effective Max HP
+  [PASS] RESTORE_HP does not clear or reinterpret target states
+  [PASS] RESTORE_HP emits no heal/presentation event
+  [PASS] level gain remains executable after authored HP restoration migration: nil
+  [PASS] Project LEVEL_GAIN_RESOLVED owns level-gain HP restoration
+  [PASS] LEVEL_GAIN_RESOLVED default adds no presentation event
+  [PASS] LEVEL_GAIN_RESOLVED retains the whole committed level span
+  [PASS] Formula exposes the transaction-complete event.* noun directly
+  [PASS] LEVEL_GAIN_RESOLVED rejects a transaction with no level crossing
+  [PASS] a Project with no seeded growth policy still crosses the authored level threshold
+  [PASS] native gainExp does not apply seeded growth when the resolved level policy omits it
+  [PASS] multi-level gain completes with LEVEL_REACHED publication active
+  [PASS] gainExp crosses every authored threshold in order
+  [PASS] gainExp preserves residual EXP after a multi-level grant
+  [PASS] LEVEL_REACHED publishes every intermediate level in deterministic order
+  [PASS] each LEVEL_REACHED publication is post-commit
+  [PASS] LEVEL_GAIN_RESOLVED publishes exactly the final committed transaction span
+  [PASS] transaction-complete publication occurs after every per-level growth packet
+  [PASS] transaction-complete publication follows all atomic LEVEL_REACHED programs
+  [PASS] economy training value and native level crossing share one curve authority
+  [PASS] a creature that levelled produces exactly one entry
+  [PASS] the entry spans the whole grant, not one level of it
+  [PASS] the entry carries a portrait key
+  [PASS] the published next threshold comes from the authored progression authority
+  [PASS] HP is reported from the same accessor the status screen reads
+  [PASS] the delta is derived, and pre-signed for the window's format string
+  [PASS] sub-threshold EXP publishes no LEVEL_REACHED fact
+  [PASS] sub-threshold EXP publishes no LEVEL_GAIN_RESOLVED fact
+  [PASS] a sub-threshold grant reports nothing
+  [PASS] every growing parameter gets a row
+  [PASS] an unchanged stat shows no delta text
+  [PASS] the Egg hatched into another actor
+  [PASS] a level-up that transforms the creature still reports once
+  [PASS] and says what it became
+  [PASS] publishing nothing clears the vars
+  [PASS] publishing selects by index
+  [PASS] published level-up rows are copied rather than aliased into Scene state
+  [PASS] published level-up projection remains a valid authored Scene-state tree
+  [PASS] and shows a position while there is more than one
+  [PASS] a lone level-up needs no position indicator
+=== Progress Tests: 58 passed, 0 failed ===
+[TEST] Starting promotion tests...
+  [PASS] a level-1 Pixie cannot promote (its path needs level 6)
+  [PASS] a level-6 Pixie can
+  [PASS] the creature promoted
+  [PASS] the growth seed survives -- it is the same individual
+  [PASS] accumulated lower-form growth is preserved exactly
+  [PASS] re-deriving under the new form would have given different numbers
+  [PASS] the creature keeps its name
+  [PASS] and its level
+  [PASS] the promotion is recorded
+  [PASS] history still remembers what it hatched as
+  [PASS] the authored one-time bonus is applied exactly once
+  [PASS] the bonus does not grow for promoting late
+  [PASS] a creature promoted later carries more accumulated growth
+  [PASS] the promoted creature levels
+  [PASS] and accrues further growth
+  [PASS] the two forms really do budget that level differently (a meaningful test)
+  [PASS] permanent stat-up items are not wiped by promotion
+  [PASS] current HP carries rather than being topped up
+  [PASS] and stays within the new max
+  [PASS] promotion raises Max HP
+  [PASS] a full-health creature is not clipped by the old max
+  [PASS] a learned skill survives promotion
+  [PASS] an evolution with no level requirement is open at level 1
+  [PASS] and a level-1 creature can take it
+  [PASS] reserve promotion produces one durable Actor Change
+  [PASS] reserve promotion is classified as a form change
+  [PASS] the report retains both sides of the promotion
+  [PASS] ritual promotion scene opens
+  [PASS] first select enters ritual confirmation without manufacturing a report
+  [PASS] ritual confirmation performs the reserve promotion
+  [PASS] successful ritual promotion opens the generic Actor Change modal
+  [PASS] the modal receives the resolved promotion report
+  [PASS] dismissing Actor Change returns to the already-resolved ritual result
+=== Promotion Tests Completed: 33 passed, 0 failed ===
+[TEST] Starting transform tests...
+  [PASS] TRANSFORM_ACTOR replaces the concrete Battler object
+  [PASS] live Event references follow the transformed Unit
+  [PASS] subsequent Formula commands observe the replacement through every live alias
+  [PASS] LEVEL_REACHED live target follows a transformation
+  [PASS] resolved event.unit remains the immutable pre-transform event snapshot
+  [PASS] the creature changed form
+  [PASS] the seed survives
+  [PASS] accumulated growth is preserved, not re-derived
+  [PASS] permanent gains survive
+  [PASS] name and level survive
+  [PASS] learned skills survive
+  [PASS] a reversible transformation remembers the origin
+  [PASS] and the level it happened at
+  [PASS] revert returns the exact original species
+  [PASS] and clears the memory afterwards
+  [PASS] a creature with no origin does not revert
+  [PASS] provenance selects the outcome
+  [PASS] and its provenance-specific bonus
+  [PASS] an unlisted provenance takes the default
+  [PASS] metamorphosis is deterministic
+  [PASS] a changed profile still resolves
+  [PASS] and is recomputed from the profile, not cached
+  [PASS] an ordered intrinsic secret overrides ordinary Homunculus classification
+  [PASS] equipment does not alter a Homunculus intrinsic secret
+  [PASS] Second Gate's LEVEL_GAIN_RESOLVED policy hatches an Egg at level 10
+  [PASS] the authored hatch replaces the live Unit and restores the final form
+  [PASS] Second Gate's transaction policy metamorphoses a Homunculus at level 10
+  [PASS] the authored metamorph returns and restores the replacement Unit
+  [PASS] a reversible Kappa returns to its remembered form after three levels
+  [PASS] authored reversion clears the remembered origin state
+  [PASS] authored transaction policy preserves Kappa -> Egg -> hatch chaining
+  [PASS] final authored RESTORE_HP runs after a chained transformation
+=== Transform Tests Completed: 32 passed, 0 failed ===
+[TEST] Starting developer mode tests...
+  [PASS] an ordinary launch builds ordinary sessions
+  [PASS] and data reads it as false, not nil
+  [PASS] a freshly constructed pre-run session has no party
+  [PASS] the protagonist is not represented as a Summoner Battler
+  [PASS] the legacy Summoner Unit is absent from the live registry
+  [PASS] Shop Progression starts at the Project-authored initial value
+  [PASS] a developer launch builds developer sessions
+  [PASS] and data can read it
+  [PASS] explicit New Game population still creates the starting party
+  [PASS] a loaded save is still a developer session
+  [PASS] Shop Progression survives save/load
+  [PASS] save/load does not recreate a Summoner Battler
+  [PASS] and an ordinary launch loading that same save is not
+  [PASS] RESET_SESSION can explicitly create a developer-room session
+  [PASS] RESET_SESSION populates the starting party at the New Game boundary
+  [PASS] RESET_SESSION still creates no Summoner Battler
+  [PASS] the developer-room override does not change the launch default
+  [PASS] giveAllItems populates full stacks of all authored items in ordinary sessions
+  [PASS] the developer menu still offers ADD EVERY ITEM
+  [PASS] the developer_menu ADD EVERY ITEM row grants full item stacks
+=== Developer Mode Tests: 20 passed, 0 failed ===
+[TEST] Starting map transfer tests...
+  [PASS] 3D event sprites resolve small-battler keys to an image path
+  [PASS] 3D event sprites preserve directly authored image paths
+  [PASS] 3D structural openings align across an east-west passage
+  [PASS] 3D structural openings align across a north-south passage
+  [PASS] an isolated structural opening resolves deterministically
+  [PASS] 3D tileset pools resolve authored weights rather than array position
+  [PASS] 3D weighted variants are stable for one map cell
+  [PASS] a tileset variant without an explicit weight defaults to one
+  [PASS] sparse map tileset overrides merge, append and remove pool entries by id
+  [PASS] map tileset overrides preserve immutable loader data and own a cache identity
+  [PASS] tileset injection places wall and floor fixtures but lights only emitters
+  [PASS] tileset fixture placement is deterministic per cell
+  [PASS] tileset fixture injection consumes no gameplay RNG
+  [PASS] a fixture prefab supplies its predicate and default injection probability
+  [PASS] feature injection consumes the same sparse tileset override as rendering
+  [PASS] a solid fixture is refused on the one-wide corridor joining two rooms
+  [PASS] every cell stays reachable except the ones solid fixtures occupy (floor=13, solid=7)
+  [PASS] map 2 seed 1007 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 seed 1041 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 seed 1057 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 seed 1101 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 seed 1202 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 seed 1303 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 2 actually places solid fixtures on every seeded layout (fewest=7, total=93 over 6 layouts)
+  [PASS] map 2 strands nothing behind its solid fixtures (worst=0)
+  [PASS] map 3 seed 1007 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 seed 1041 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 seed 1057 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 seed 1101 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 seed 1202 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 seed 1303 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 3 actually places solid fixtures on every seeded layout (fewest=24, total=176 over 6 layouts)
+  [PASS] map 3 strands nothing behind its solid fixtures (worst=0)
+  [PASS] map 4 seed 1007 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 seed 1041 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 seed 1057 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 seed 1101 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 seed 1202 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 seed 1303 leaves the exit staircase reachable past its solid fixtures
+  [PASS] map 4 actually places solid fixtures on every seeded layout (fewest=24, total=215 over 6 layouts)
+  [PASS] map 4 strands nothing behind its solid fixtures (worst=0)
+  [PASS] fixture predicates compose all/not across authored and generated zones
+  [PASS] fixture predicates compose any with diagonal feature adjacency
+  [PASS] fixture distance targets zones and previously placed features
+  [PASS] OBJ kit-piece loader triangulates a quad and accepts negative indices
+  [PASS] OBJ kit-piece loader converts standard Y-up geometry into the Z-up world
+  [PASS] OBJ kit-piece loader builds a cached GPU mesh with its MTL material
+  [PASS] OBJ kit-piece meshes are reused instead of rebuilt
+  [PASS] OBJ kit-piece loader fails loudly on invalid faces
+  [PASS] a zero-area face fails even when every vertex carries an authored normal
+  [PASS] mesh builder keeps one group per material in authored order
+  [PASS] mesh builder preserves material order
+  [PASS] mesh builder generates a face normal for vertices that omit one
+  [PASS] mesh builder reports bounds across every group
+  [PASS] mesh builder refuses a degenerate triangle
+  [PASS] mesh builder refuses a model with no faces
+  [PASS] wall-model local depth points outward on all four face normals
+  [PASS] a model-backed opening renders through the live depth-tested world path (draws=1)
+  [PASS] a wall-event door model resolves onto its visible wall face (draws=1)
+  [PASS] a model-only wall feature keeps the base atlas instead of forcing a 64px overlay composite
+  [PASS] model-backed wall and floor fixtures share the live world model path (draws=2)
+  [PASS] 3D structural topology is reused while the map is unchanged
+  [PASS] resolved 3D wall descriptors and composites are reused between frames
+  [PASS] a structural mutation invalidates cached 3D topology
+  [PASS] a structural mutation invalidates resolved 3D wall descriptors
+  [PASS] a map presentation revision invalidates cached 3D lookups
+  [PASS] a geometry quality change invalidates cached 3D meshes
+  [PASS] Labyrinth Gate door is authored into a wall cell
+  [PASS] the Labyrinth gate uses wall-bump activation and its authored gate plate
+  [PASS] Sign door is authored into a wall cell
+  [PASS] Sign door uses wall-bump activation and the shared composite sprite
+  [PASS] Temple door is authored into a wall cell
+  [PASS] Temple door uses wall-bump activation and the shared composite sprite
+  [PASS] St. Maria has two interior doors and one distinct Labyrinth gate
+  [PASS] Labyrinth Gate is a wall event, so its sprite must be a 64x64 fixture plate
+  [PASS] Labyrinth Gate is a person on a wall; a wall overlay is stretched to its tile, so a character sprite belongs on a floor event
+  [PASS] Sign is a wall event, so its sprite must be a 64x64 fixture plate
+  [PASS] Sign is a person on a wall; a wall overlay is stretched to its tile, so a character sprite belongs on a floor event
+  [PASS] Temple is a wall event, so its sprite must be a 64x64 fixture plate
+  [PASS] Temple is a person on a wall; a wall overlay is stretched to its tile, so a character sprite belongs on a floor event
+  [PASS] the shared subtractive fade renders through LÖVE's subtract blend
+  [PASS] a door threshold transition starts
+  [PASS] the event waits until after the door approach
+  [PASS] the door remains fully zoomed while black covers it
+  [PASS] entry fades progressively to black
+  [PASS] the event begins only once the screen is covered
+  [PASS] entry lingers at full black before revealing the static room
+  [PASS] the static room is progressively revealed
+  [PASS] the interior reveal completes and unlocks input
+  [PASS] lane exit begins without a wall approach
+  [PASS] lane exit never moves the camera into a facade
+  [PASS] lane exit never moves the camera into a facade
+  [PASS] lane exit never moves the camera into a facade
+  [PASS] lane exit never moves the camera into a facade
+  [PASS] lane exit never moves the camera into a facade
+  [PASS] lane exit transfers once under the fade
+  [PASS] an inverse door threshold transition starts on exit
+  [PASS] the static room fades to black without changing scale
+  [PASS] the map returns only at full black and remains hidden during the exit hold
+  [PASS] the outside door begins fully zoomed behind black
+  [PASS] the outside door reverses its zoom while the map is revealed
+  [PASS] the inverse exit reveal completes
+  [PASS] Town Portal is refused in town before it can be consumed
+  [PASS] Town Portal is usable inside the dungeon
+  [PASS] LOAD_MAP in an event compiles to a node instead of a dead end
+  [PASS] and it runs immediately, because a map transfer asks the player nothing
+  [PASS] LOAD_MAP resolves an authored map id instead of using the array index
+  [PASS] entering Floor 1 puts the party at depth 1
+  [PASS] dungeon generation tags rooms, corridors, entrance and exit
+  [PASS] procedural floors select validated generation profiles instead of legacy fields
+  [PASS] procedural maps opt into deterministic room-threshold openings
+  [PASS] and the `floor` token reports it -- it used to always read 1
+  [PASS] Floor 5 is depth 5
+  [PASS] returning to Town puts the party back at depth 0
+  [PASS] an authored safe-map spawn places the player on its declared open tile
+  [PASS] an authored safe-map spawn controls the arrival facing
+  [PASS] the Developer Room does not inject random fixtures or obstacles
+  [PASS] the stairs on Floor 1 lead to Floor 2
+  [PASS] and the stairs on Floor 5 reach the Sanctum, which the old clamp hid
+  [PASS] climbing back restores the exact generated floor instead of regenerating it
+  [PASS] restored floors retain their fog-of-war history
+  [PASS] restored floors retain both staircase landmarks
+  [PASS] climbing up arrives beside the previous floor's exit
+  [PASS] generated exit stairs occupy a wall and use the wall compositor
+  [PASS] generated entrance stairs occupy a wall and use the wall compositor
+  [PASS] every generated floor has physical stairs back up
+  [PASS] PORTAL_TO_TOWN opens a resumable route and moves the party to safety
+  [PASS] RETURN_TO_PORTAL restores the exact dungeon tile and facing
+  [PASS] temporary portal travel does not count as a new expedition
+  [PASS] the return trip closes the temporary portal
+  [PASS] a new expedition receives a fresh floor instead of reusing the completed route
+  [PASS] generated floor snapshots survive save/load
+  [PASS] generated structural zones survive off-floor save/load
+  [PASS] an open portal destination survives save/load
+  [PASS] SET_MAP_PRESENTATION changes the current map's tileset and fog immediately
+  [PASS] SET_MAP_PRESENTATION rebakes map lighting immediately
+  [PASS] a changed town presentation survives save/load
+  [PASS] the festival ambient-light state survives save/load
+  [PASS] ENTER_LOCATION selects a static illustrated dialogue backdrop
+  [PASS] New Game's opening is authored as a cinematic common event
+  [PASS] the opening exposes an authored cleanup label for skipping
+  [PASS] TEXT preserves the authored 1-5 portrait expression in the event graph
+  [PASS] Alicia's Vigil page does not hide her introductory event before the Vigil
+  [PASS] CHOICE compiles its authored cancel option
+  [PASS] CHOICE disables Cancel when its authored cancel option is hidden
+  [PASS] WAIT compiles to a pausing event-graph node instead of a synchronous no-op
+  [PASS] string pictures support constant-speed linear movement for credit-style scrolls
+  [PASS] string pictures support the shared SHOW TEXT character reveal
+  [PASS] image pictures support event-authored crossfades, transforms and additive blend
+  [PASS] string pictures support event-authored additive blend
+  [PASS] the Game Over sequence never zooms its image
+  [PASS] the deepest floor carries no stairs event
+  [PASS] generation respects the deepest floor's missing down-stairs marker
+  [PASS] a transfer to a map that does not exist raises
+=== Map Transfer Tests: 154 passed, 0 failed ===
+[TEST] Starting battle command tests...
+  [PASS] a creature that authors no list gets the default set, in menu order
+  [PASS] an Egg can only wait
+  [PASS] an actor's list is drawn in registry order, not authoring order
+  [PASS] an unknown command id never reaches the menu
+  [PASS] command 'attack' declares how it resolves
+  [PASS] command 'skill' declares how it resolves
+  [PASS] command 'defend' declares how it resolves
+  [PASS] command 'item' declares how it resolves
+  [PASS] command 'flee' declares how it resolves
+  [PASS] command 'wait' declares how it resolves
+  [PASS] Wait and Flee are registry commands like the rest
+  [PASS] Flee is backed by a real skill
+  [PASS] Wait is a genuine no-op -- it spends the turn and does nothing
+  [PASS] blocked skill feedback preserves the exact in-progress command state
+  [PASS] blocked skill feedback is exposed through the command help text
+  [PASS] the Flee skill escapes by declaring an effect, not by its id
+  [PASS] an escape effect can succeed, emitting flee_success
+  [PASS] and can fail, which is what makes it a gamble
+  [PASS] an escape effect outside battle does nothing rather than erroring
+  [PASS] live scene resolution preserves the authoritative Overcast MP spend
+  [PASS] live scene resolution starts a presentation projection instead of rolling state back
+  [PASS] the projection holds the pre-resolution MP frame after the engine has spent it
+  [PASS] the resolved Overcast fact advances the projected MP pool
+  [PASS] KILL_MP_RESTORE advances the projected MP to the engine's resolved value
+  [PASS] projecting a Reaper MP reward does not perform the authoritative restore again
+  [PASS] a requested channel with no resolved fact behind it is refused, not guessed
+=== Battle Command Tests: 26 passed, 0 failed ===
+[TEST] Starting troop tests...
+  [PASS] a named slot builds exactly one enemy
+  [PASS] at the level the slot authored
+  [PASS] and it enters at full HP
+  [PASS] a slot with no level uses the actor's authored default
+  [PASS] a pool slot's count varies across its range
+  [PASS] and never leaves it
+  [PASS] pooled enemies respect the slot's level range
+  [PASS] a fixed boss can carry a variable escort, and the boss is always enemy one
+  [PASS] a troop inherits the base troop's events
+  [PASS] and can suppress one by id, keeping the rest
+  [PASS] or opt out of the base troop entirely
+  [PASS] a troop's own events run after the inherited ones
+  [PASS] an unknown troop id raises instead of producing an empty battle
+  [PASS] every map with an encounter table rolls a fightable troop
+  [PASS] one wandering troop draws each floor's own roster, and never another's
+  [PASS] a map can name its own encounter troop instead
+  [PASS] an ordinary troop is charged Strain in a long fight
+  [PASS] and a troop that suppresses it is not
+  [PASS] a round_start event fires at the top of the round
+  [PASS] an after_action event fires as a turn resolves
+  [PASS] a `once` threshold event fires when its condition holds
+  [PASS] and an event whose condition is false does not
+=== Troop Tests: 22 passed, 0 failed ===
+[TEST] Starting early-game balance tests...
+  [PASS] Saban starts at level 3, matching the top of Floor 1's enemy range
+  [PASS] opening playtest baseline starts the Summoner at 900 MP
+  [PASS] battle activation tuning is authored as 50 + 15 * party MPD
+  [PASS] Floor 1 uses its opening-specific wandering troop
+  [PASS] Floor 1 rolls one or two enemies, never the later-floor cap of three
+  [PASS] every Floor 1 enemy has an offensive action
+  [note] ordinary Darting Peck 12 vs level-3 Mandrake root Mend 22 (informational; no longer asserted)
+  [PASS] Darting Peck is non-elemental with icon 6
+  [PASS] Saban carries Wind Blade for Green elemental attacks
+  [PASS] Weakened status duration is 3 rounds (not infinite)
+  [PASS] Floor 1 contains Blue elemental enemies for Saban's Green elemental advantage
+  [PASS] ordinary dangerous-map traversal does not spend Summoner MP
+  [PASS] Saban-only battle activation costs 65 MP in the opening playtest baseline
+  [PASS] Cerberus is aligned to Black and White elements
+  [PASS] Cerberus carries a heavy manifestation MPD of 6
+  [PASS] The Stray Hound sidequest is registered in quests.json
+=== Early-game Balance Tests: 15 passed, 0 failed ===
+  datalog tests passed
+[TEST] Starting dock tests...
+  [PASS] config reload preserves canonical party capacity
+  [PASS] config reload preserves canonical reserve capacity
+  [PASS] party list source exposes exactly the canonical party slots
+  [PASS] reserve list source exposes exactly the canonical reserve slots
+  [PASS] reserve list preserves occupied slot three and surrounding holes
+  [PASS] scene 'items' declares dock variant 'item_inspect'
+  [PASS] scene 'map' declares dock variant 'party_status'
+  [PASS] scene 'battle' declares dock variant 'battle'
+  [PASS] scene 'options' declares dock variant 'party_status'
+  [PASS] scene 'datalog' declares dock variant 'party_status'
+  [PASS] scene 'save_menu' declares dock variant 'party_status'
+  [PASS] scene 'dialogue' declares dock variant 'dialogue'
+  [PASS] scene 'controls' declares dock variant 'party_status'
+  [PASS] scene 'quest_log' declares dock variant 'party_status'
+  [PASS] scene 'shop' declares dock variant 'item_inspect'
+  [PASS] data/engine.json declares a dock registry
+  [PASS] the dock registry defines variant 'item_inspect'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'battle'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'dialogue'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'party_status'
+  [PASS] the dock registry defines variant 'item_inspect'
+  [PASS] dialogue message remains visible behind a choice
+  [PASS] dialogue choices embed without drawing a second frame
+  [PASS] embedded dialogue choices stay anchored to the panel bottom
+  [PASS] no scene re-declares a dock-owned window (found: )
+  [PASS] entering from no dock starts the party_status reveal
+  [PASS] an initial dock reveal grows horizontally and vertically from zero
+  [PASS] entering a party_status scene shows that variant
+  [PASS] the dock built its window table
+  [PASS] moving between party_status scenes keeps the variant
+  [PASS] the dock's window table SURVIVES the scene change (no animation replay)
+  [PASS] a same-variant transition starts no cross-fade
+[formula] error in 'sceneState.dialogueCursorIdx': formula did not return a number, boolean or string
+  [PASS] content remains on the source variant during morph
+  [PASS] a variant change starts a shell morph
+  [PASS] the destination starts from a clean content store
+  [PASS] dialogue content appears after shell geometry settles
+  [PASS] leaving the dock starts a two-axis shell collapse
+  [PASS] retiring to no dock collapses horizontally and vertically
+  [PASS] a scene with no config.dock retires it after collapse
+  [PASS] a destination may add a third horizontally-growing shell
+  [PASS] an undeclared dock variant raises instead of silently drawing nothing
+  [PASS] capture settling materializes and finishes declarative windows
+  [PASS] capture settling finishes runtime windows
+=== Dock Tests: 48 passed, 0 failed ===
+[TEST] Starting geometry tests...
+=== Geometry Asset Contract ===
+  [PASS] a well-formed plane asset parses its declared topology and surface
+  [PASS] an omitted stand-off resolves to its default rather than nil
+  [PASS] a well-formed asset reports no warnings
+  [PASS] albedo and height of different sizes are refused, since registration cannot hold
+  [PASS] an unregistered topology is refused
+  [PASS] an unregistered height operation is refused
+  [PASS] blocksMovement on a surface fixture is refused
+  [PASS] a nonexistent asset directory is refused
+  [PASS] a non-grayscale height map warns, since only its red channel is read
+=== Height Field Composition ===
+  [PASS] a tiling height field reuses its first sample at the terminal edge
+  [PASS] periodic sampling leaves interior coordinates unchanged
+=== Model Near-Plane Clipping ===
+  [PASS] a model triangle crossing the near plane is clipped into two triangles
+  [PASS] clipped model vertices never remain behind the near plane
+  [PASS] a model triangle wholly in front of the near plane is preserved
+  [PASS] a model triangle wholly behind the near plane is discarded
+  [PASS] near-plane clipping can write into a caller-owned reusable output buffer
+  [PASS] a reused clip buffer clears stale output vertices when the result shrinks
+  [PASS] intersection vertex tables are recycled across clipped frames
+  [PASS] a reused clip buffer becomes empty when the next triangle is fully hidden
+  [PASS] a clipped mesh cache hits only for the exact pose that produced it
+  [PASS] movement, turning, or a near-plane change invalidates clipped mesh reuse
+  [PASS] an uncached clipped mesh pose never reports a reuse hit
+  [PASS] near-clip pose caching is allowed for a settled camera
+  [PASS] an idle or pitch-only focus camera does not invalidate XY near-clip reuse
+  [PASS] movement, bump, door, and focus dolly states suppress pose caching
+  [PASS] expired movement timers restore settled-camera pose caching
+  [PASS] a neutral height map displaces nothing
+  [PASS] add composes as base + signedOverlay * alpha
+  [PASS] replace composes as mix(base, overlay, alpha)
+  [PASS] add and replace produce distinct composite displacement over a raised base
+  [PASS] the none operation contributes albedo only and leaves height untouched
+  [PASS] mirrored wall height fields reverse X exactly like mirrored albedo UVs
+=== Plane Meshing ===
+  [PASS] a flat surface collapses to a handful of triangles, not its budget
+  [PASS] a flat surface still emits a surface
+  [PASS] a compiled plane uploads a GPU mesh textured by its own albedo
+  [PASS] an identical composition is compiled once and reused
+  [PASS] a different geometry quality compiles a distinct model
+  [PASS] returning to a geometry quality reuses its retained compiled variant
+  [PASS] a tileset-level height surface keeps the shared atlas texture
+  [PASS] an identical tileset-level height surface is cached
+  [PASS] a wall plane spans exactly one cell across
+  [PASS] a wall plane reaches no further than its skirt allows
+  [PASS] a wall plane still covers the whole cell floor to ceiling
+  [PASS] a wall plane stands off its structural surface rather than z-fighting it
+  [PASS] every wall-plane face normal points out of the wall
+=== Shell Topology ===
+  [PASS] a shell asset parses its surface mode and edge treatment
+  [PASS] image symmetry and front/back reflection default off and stay separate
+  [PASS] a frontBack shell with differing coverage masks is refused
+  [PASS] a coverage mask with more than one island is refused
+  [PASS] a coverage mask with no silhouette is refused
+  [PASS] frontBack mode without a front/back atlas layout is refused
+  [PASS] a stitched shell compiles and uploads
+  [PASS] a shell occupies depth on both sides of its central plane
+  [PASS] the rear grid is wound in reverse so both faces are visible
+  [PASS] pinch mode closes the edge without the side faces stitch emits
+  [PASS] mirrorDepth produces geometry symmetric about the central plane
+=== Radial Topology ===
+  [PASS] a radial asset parses its segment counts and cap flags
+  [PASS] a radial object wider than its cell is refused before it clips the walls
+  [PASS] a radial asset compiles and uploads
+  [PASS] a radial object stands on the cell floor and reaches its declared height
+  [PASS] no radial vertex escapes its own cell
+  [PASS] the angular parameterization wraps exactly at the seam
+  [PASS] capTop fans a closed lid to the central axis
+=== Surface Composition ===
+  [PASS] a base and its surface fixture compile to ONE mesh, not two
+  [PASS] the composed model records its layer stack in order
+  [PASS] a composed surface is textured by its composed albedo
+  [PASS] composing a fixture changes the surface it composes onto
+  [PASS] a layer of different dimensions is refused; registration cannot hold
+  [PASS] a floor fixture is refused when composing onto a wall
+  [PASS] an object fixture is refused as a composition layer
+  [PASS] a shell is refused as a composition layer
+=== Composition Cache ===
+  [PASS] an identical composition is compiled once and reused
+  [PASS] layer ORDER is part of the cache identity, since height ops do not commute
+  [PASS] a composition is not confused with its base alone
+  [PASS] the compiler version is part of the cache identity
+=== Diagnostics ===
+  [PASS] the final composed pair is emitted in register, same dimensions
+  [PASS] the composed pair is emitted at texture resolution, not mesh resolution
+  [PASS] the composed heightfield is emitted as a viewable normalized image
+=== Dense Sampling and Decimation ===
+  [PASS] decimation reaches its triangle budget
+  [PASS] decimation actually reduces the mesh
+  [PASS] decimation preserves the cell seam across the wall
+  [PASS] decimation preserves floor and ceiling contact
+  [PASS] decimation keeps the skirt within its declared reach
+  [PASS] the two tiling seams of a wall decimate identically, so tile meets tile
+  [PASS] a mirrored tile's seam decimates to the same points as the tile beside it
+      (plain seam 3 points, mirrored seam 3 points)
+  [PASS] decimation is deterministic across a fresh compile
+  [PASS] an asset samples its field more finely than its triangle budget
+  [PASS] a steep displaced floor is watertight (64 triangles, 54 rim edges, 0 interior tears)
+=== Geometry Tests: 88 passed, 0 failed ===
+map geometry export tests: 44 passed, 0 failed
+=== Consumer Geometry Visibility Profiles (#291) ===
+map geometry export + #291 profile tests: 73 passed, 0 failed
+test_map_build_profiler: OK
+=== OBJ Export Vertex Welding (#302) ===
+  [PASS] ordinary quad fixture satisfies the renderable contract
+  [PASS] two triangles of one ordinary quad reuse the two duplicated corner indices
+  [PASS] OBJ emits one aligned v/vt/vn record per distinct export tuple
+  [PASS] ordinary quad faces actually reference shared corner indices
+  [PASS] welding leaves triangle/face count unchanged
+  [PASS] identical full serialized tuples weld even across surface/group boundaries
+  [PASS] cross-surface tuple reuse does not collapse faces
+  [PASS] same position with a different UV remains an intentional split
+  [PASS] same position/UV with a different normal remains an intentional split
+  [PASS] bundle vertex colour is not treated as an OBJ discontinuity because current OBJ never serializes it
+  [PASS] export-relevant colour/alpha discontinuity remains face-scoped through material assignment
+  [PASS] surface/group material assignments and face count are unchanged by welding
+  [PASS] welded OBJ serialization is deterministic
+  [PASS] representative geometry has fewer exported vertices after welding
+  [PASS] OBJ round-trip preserves the pre-weld resolved triangle position/UV/normal/material stream
+  [PASS] negative control detects the semantic damage from an unsafe position-only weld
+  [PASS] safe full-tuple welding preserves the UV-seam fixture that the negative control breaks
+  [PASS] map 8 produces an authoritative renderable bundle: nil
+  [PASS] map 8 bundle satisfies the renderable contract
+[OBJ WELD MAP 8] before v=302586 vt=302586 vn=302586 f=100862 bytes=38585000 surfaces=200 materials=4 | after v=253117 vt=253117 vn=253117 f=100862 bytes=33243556 surfaces=200 materials=4
+  [PASS] map 8 keeps authoritative source vertex and triangle counts unchanged
+  [PASS] map 8 exported OBJ vertex count drops after exact-tuple welding
+  [PASS] map 8 retains aligned position/UV/normal index tables
+  [PASS] map 8 face, surface, and material counts are unchanged
+  [PASS] map 8 OBJ byte size drops despite the explicit weld metadata comment
+=== test_obj_vertex_weld: 24 passed, 0 failed ===
+[TEST] Starting prepared-map cache tests...
+  [PASS] A -> B -> A reuses A's prepared structure
+  [PASS] A -> B -> A builds only A and B
+  [PASS] lifecycle counters report two misses and the third-leg hit
+  [PASS] same-map render frames do not inflate prepared-map hit counters
+  [PASS] LRU eviction removes B after A was touched most recently
+  [PASS] LRU stays bounded at capacity two
+  [PASS] explicit structure invalidation releases all resident resources
+  [PASS] explicit invalidation leaves no resident prepared structures
+  [PASS] explicit invalidation cannot reuse a stale structure
+  [PASS] map mutation invalidates and releases the prior prepared structure
+  [PASS] map mutation is observable as a prepared-map invalidation
+  [PASS] pre-draw map mutation cannot reuse a resident stale structure
+  [PASS] material source replacement invalidates prepared lookup/geometry state
+  [PASS] geometry quality change never reuses incompatible GPU geometry
+  [PASS] quality variants remain safely separated in the LRU
+  [PASS] authored map replacement invalidates same-index prepared geometry
+  [PASS] eviction explicitly releases the placed near-clip stream mesh
+  [PASS] capacity-one control forces A eviction before A -> B -> A revisit
+  [PASS] forced-eviction control reports deterministic miss/eviction counters
+  [PASS] capacity-zero control keeps no resident entry and counts one lifecycle miss
+  [PASS] capacity-zero control rebuilds after every map transition
+  [PASS] capacity-zero control reports misses without prepared residency or eviction
+  [PASS] map switch suspends effect handles without releasing cached geometry
+  [PASS] cached map effects are marked for clean reinitialization on revisit
+  [PASS] retained mesh/vertex counts are exposed
+  [PASS] retained surface-batch vertex-map indices are exposed
+  [PASS] GPU vertex byte estimate follows the 13-float world vertex format
+  [PASS] GPU index byte estimate is reported separately
+  [PASS] combined GPU bytes remain explicitly approximate
+  [PASS] CPU vertex payload estimate is reported separately
+  [PASS] retained payload is reported per resident map entry
+=== Prepared Map Cache Tests: 31 passed, 0 failed ===
+[TEST] Starting current-main prepared-map cache seam tests...
+test_prepared_map_cache_current_main: OK
+[TEST] Starting prepared-map production lifecycle integration test...
+test_prepared_map_cache_integration: OK
+[TEST] Starting icon tests...
+=== Icon Reference Resolution ===
+  [PASS] a bare integer resolves to that id with original colors
+  [PASS] an entity table reads its `icon` field
+  [PASS] an entity table reads its `iconPalette` field
+  [PASS] an explicit palette override beats the entity's own
+  [PASS] an override applies to an entity that declares no palette
+  [PASS] an empty palette string means original colors, not a lookup miss
+  [PASS] a list row may carry its icon as `id`
+  [PASS] a normalized nested icon reference resolves
+  [PASS] a nil source resolves to the empty icon
+  [PASS] icon 0 resolves to the empty icon
+  [PASS] a negative id stays non-positive so drawIcon rejects it
+  [PASS] a table with no icon field resolves to the empty icon
+  [PASS] a non-numeric, non-table source resolves to the empty icon
+=== Palette Registry ===
+  [PASS] data/iconPalettes.json is loaded onto the loader
+  [PASS] a palette resolves through the loader, not a hardcoded fallback
+  [PASS] a resolved palette is a four-entry ramp
+  [PASS] hex ramp colors are parsed into normalized 0..1 components
+  [PASS] ramp colors are opaque
+  [PASS] every registered palette resolves to a four-entry ramp
+  [PASS] no palette means no recolor
+  [PASS] an unregistered palette resolves to nil
+  [PASS] a resolved palette is cached and returned identically
+=== Key Profiles ===
+  [PASS] data/iconKeyProfiles.json is loaded and carries a default profile
+  [PASS] an icon with no custom profile still resolves a profile
+  [PASS] a resolved profile carries all five keying fields
+  [PASS] an uncalibrated icon inherits the default profile from data
+  [PASS] the resolved lightness window is well-ordered
+  [PASS] a custom profile overrides the field it declares
+  [PASS] a custom profile overrides every field it declares
+  [PASS] a custom profile inherits the fields it omits
+  [PASS] inheritance covers the whole lightness window
+  [PASS] a neighbouring icon is unaffected by another icon's calibration
+  [PASS] a profile resolves the same whether the id arrives as number or string
+=== Palette Shader ===
+  [PASS] the icon palette shader compiles
+  [PASS] compiling the shader yields a shader object
+  [PASS] every uniform drawIcon sends is declared by the shader
+=== Ramp Output (GPU) ===
+  [PASS] control point 1 renders as its own palette stop (got 0.00,0.00,0.00)
+  [PASS] control point 2 renders as its own palette stop (got 1.00,0.00,0.00)
+  [PASS] control point 3 renders as its own palette stop (got 0.00,1.00,0.00)
+  [PASS] control point 4 renders as its own palette stop (got 0.00,0.00,1.00)
+  [PASS] between two stops the ramp blends rather than snapping (got 0.50,0.50,0.00)
+  [PASS] a mid-ramp blend does not pull in a stop it sits nowhere near
+  [PASS] an unkeyed pixel passes through untouched (got 0.20,0.80,0.30)
+=== Authored Data ===
+  [PASS] content actually authors palettes (199 items)
+  [PASS] every palette referenced by an item resolves
+=== Icon Tests: 45 passed, 0 failed ===
+[TEST] Starting item display tests...
+  [PASS] Armor Penetration reads as 'Pierce 45%', not a sentence
+  [PASS] a parameter bonus is the parameter's own name plus a signed number
+  [PASS] a parameter rate reads as the change, not the multiplier
+  [PASS] a multiplicative rate keeps its absolute form
+  [PASS] trait 'COVER_ALIGNED_BACK' label fits the info pane: 'Cover Back'
+  [PASS] trait 'HIT' label fits the info pane: 'Accuracy'
+  [PASS] trait 'EVA' label fits the info pane: 'Evade'
+  [PASS] trait 'CRI' label fits the info pane: 'Crit'
+  [PASS] trait 'CEV' label fits the info pane: 'Crit Guard'
+  [PASS] trait 'HRG' label fits the info pane: 'Regen'
+  [PASS] trait 'POST_BATTLE_HEAL' label fits the info pane: 'Win Heal'
+  [PASS] trait 'GOLD_DIGGER' label fits the info pane: 'Gold Find'
+  [PASS] trait 'PARASITE' label fits the info pane: 'Parasite'
+  [PASS] trait 'BATTLE_START_DAMAGE' label fits the info pane: 'Ambush'
+  [PASS] trait 'MOVE_HEAL' label fits the info pane: 'Step Heal'
+  [PASS] trait 'RECOVERY_XP_BONUS' label fits the info pane: 'Rest XP'
+  [PASS] trait 'FLEE_CHANCE_BONUS' label fits the info pane: 'Escape'
+  [PASS] trait 'ON_PERMADEATH' label fits the info pane: 'Death Ward'
+  [PASS] trait 'SEE_TRAPS' label fits the info pane: 'Trap Sense'
+  [PASS] trait 'SEE_WALLS' label fits the info pane: 'Secret Eye'
+  [PASS] trait 'SYMBIOSIS' label fits the info pane: 'Symbiosis'
+  [PASS] trait 'INITIATIVE' label fits the info pane: 'First Move'
+  [PASS] trait 'REAR_GUARD' label fits the info pane: 'Rear Guard'
+  [PASS] trait 'ELEMENT_CHANGE' label fits the info pane: 'Element'
+  [PASS] trait 'ELEMENT_ADD' label fits the info pane: '+ Element'
+  [PASS] trait 'XP_RATE' label fits the info pane: 'XP Gain'
+  [PASS] trait 'CRAFT_YIELD_RATE' label fits the info pane: 'Craft Yield'
+  [PASS] trait 'PENETRATION' label fits the info pane: 'Pierce'
+  [PASS] trait 'EXECUTION_THRESHOLD' label fits the info pane: 'Execute'
+  [PASS] trait 'EXECUTION_RESIST' label fits the info pane: 'Exec Guard'
+  [PASS] trait 'FORCE_ACTION' label fits the info pane: 'Forced'
+  [PASS] trait 'INVERT_TARGETING' label fits the info pane: 'Confused'
+  [PASS] trait 'STATE_IMMUNITY' label fits the info pane: 'Immune'
+  [PASS] trait 'STATE_CATEGORY_IMMUNITY' label fits the info pane: 'Immune'
+  [PASS] trait 'STATUS_SUCCESS' label fits the info pane: 'Status Hit'
+  [PASS] trait 'DAMAGE_RATE' label fits the info pane: 'Dmg Taken'
+  [PASS] trait 'ITEM_EFFECT_RATE' label fits the info pane: 'Item Power'
+  [PASS] trait 'HEAL_RATE' label fits the info pane: 'Heal Power'
+  [PASS] trait 'TARGET_RATE' label fits the info pane: 'Aggro'
+  [PASS] trait 'KILL_MP_RESTORE' label fits the info pane: 'MP on Kill'
+  [PASS] trait 'BARRIER_GRANT' label fits the info pane: 'Barrier'
+  [PASS] a state rate names the state and states the odds
+  [PASS] a subject-valued trait puts the subject in the value column
+  [PASS] a cure names the status once, in the label, and carries no number
+  [PASS] a guaranteed status shows its duration, not '100%'
+  [PASS] a common-event hook does not print its internal id
+  [PASS] a bonus reads as good
+  [PASS] a penalty reads as bad
+  [PASS] taking LESS damage reads as good, though the number went down
+  [PASS] being MORE susceptible reads as bad, though the number went up
+  [PASS] an element change is a fact, not a bonus
+  [PASS] a flag trait takes its tone from its polarity alone
+  [PASS] trait 'COVER_ALIGNED_BACK' renders a label
+  [PASS] trait 'PARAM_PLUS' renders a label
+  [PASS] trait 'PARAM_RATE' renders a label
+  [PASS] trait 'HIT' renders a label
+  [PASS] trait 'EVA' renders a label
+  [PASS] trait 'CRI' renders a label
+  [PASS] trait 'CEV' renders a label
+  [PASS] trait 'HRG' renders a label
+  [PASS] trait 'POST_BATTLE_HEAL' renders a label
+  [PASS] trait 'GOLD_DIGGER' renders a label
+  [PASS] trait 'PARASITE' renders a label
+  [PASS] trait 'BATTLE_START_DAMAGE' renders a label
+  [PASS] trait 'MOVE_HEAL' renders a label
+  [PASS] trait 'RECOVERY_XP_BONUS' renders a label
+  [PASS] trait 'FLEE_CHANCE_BONUS' renders a label
+  [PASS] trait 'ON_PERMADEATH' renders a label
+  [PASS] trait 'SEE_TRAPS' renders a label
+  [PASS] trait 'SEE_WALLS' renders a label
+  [PASS] trait 'SYMBIOSIS' renders a label
+  [PASS] trait 'INITIATIVE' renders a label
+  [PASS] trait 'REAR_GUARD' renders a label
+  [PASS] trait 'ELEMENT_CHANGE' renders a label
+  [PASS] trait 'ELEMENT_ADD' renders a label
+  [PASS] trait 'XP_RATE' renders a label
+  [PASS] trait 'CRAFT_YIELD_RATE' renders a label
+  [PASS] trait 'PENETRATION' renders a label
+  [PASS] trait 'EXECUTION_THRESHOLD' renders a label
+  [PASS] trait 'EXECUTION_RESIST' renders a label
+  [PASS] trait 'FORCE_ACTION' renders a label
+  [PASS] trait 'INVERT_TARGETING' renders a label
+  [PASS] trait 'STATE_RATE' renders a label
+  [PASS] trait 'STATE_IMMUNITY' renders a label
+  [PASS] trait 'STATE_CATEGORY_IMMUNITY' renders a label
+  [PASS] trait 'STATE_CATEGORY_RATE' renders a label
+  [PASS] trait 'STATUS_SUCCESS' renders a label
+  [PASS] trait 'DAMAGE_RATE' renders a label
+  [PASS] trait 'ITEM_EFFECT_RATE' renders a label
+  [PASS] trait 'HEAL_RATE' renders a label
+  [PASS] trait 'TARGET_RATE' renders a label
+  [PASS] trait 'ELEMENT_RATE' renders a label
+  [PASS] trait 'KILL_MP_RESTORE' renders a label
+  [PASS] trait 'BARRIER_GRANT' renders a label
+  [PASS] effect 'hp_damage' renders a label
+  [PASS] effect 'hp_heal' renders a label
+  [PASS] effect 'hp_drain' renders a label
+  [PASS] effect 'add_status' renders a label
+  [PASS] effect 'hp' renders a label
+  [PASS] effect 'maxHp' renders a label
+  [PASS] effect 'learn_skill' renders a label
+  [PASS] effect 'param_plus' renders a label
+  [PASS] effect 'xp' renders a label
+  [PASS] effect 'mp_heal' renders a label
+  [PASS] effect 'max_mp_plus' renders a label
+  [PASS] effect 'restore_charges' renders a label
+  [PASS] effect 'common_event' renders a label
+  [PASS] effect 'remove_status' renders a label
+  [PASS] effect 'recruit_egg' renders a label
+  [PASS] effect 'escape' renders a label
+  [PASS] effect 'barrier' renders a label
+  [PASS] a plain item still gets one row
+  [PASS] formula session.itemCount respects inventory tab 1
+  [PASS] formula session.itemCount respects inventory tab 2
+  [PASS] formula session.itemCount respects inventory tab 3
+  [PASS] formula session.itemCount respects inventory tab 4
+  [PASS] formula session.itemCount defaults deliberately to tab 1 without local tab context
+  [PASS] no authored item produces an overlong value column
+=== Item Display Tests Completed: 118 passed, 0 failed ===
+[TEST] Starting 3D item model viewer tests...
+  [PASS] Item scene: valid model path 'bottle_family__basis.obj' enriched on HP Tonic row
+  [PASS] Synthetic missing-model row keeps the empty model field contract
+  [PASS] Selected item with no model ('') resolves placeholder_question.obj
+  [PASS] Selected item with nil model resolves placeholder_question.obj
+[item_model_view] warning: model file not found 'assets/models/items/invalid_nonexistent_item.obj'
+  [PASS] Selected item with invalid model path resolves placeholder_question.obj
+  [PASS] Invalid model path resolution is cached rather than retried
+  [PASS] Initial angle for Wind Charm is 0
+  [PASS] Repeated lookup at the same clock time does not advance rotation
+  [PASS] Wind Charm angle follows one second of clock time at 0.4 rad/s (got 0.4)
+  [PASS] Selection change to Light Amulet (same OBJ) resets angle to 0
+  [PASS] Returning to Wind Charm resets angle to 0 rather than inheriting Light Amulet's angle
+  [PASS] Resetting rotation states restarts the selection clock
+  [PASS] Tall bottle fit includes local-Y tilt in extents
+  [PASS] Long horizontal sword fits tilted rotation-safe horizontal radius
+  [PASS] Flat charm bounds fit safely with tilt
+  [PASS] Zero-sized bounds calculate safely without division by zero
+  [PASS] Wide viewport (aspect 2.0) fits tilted horizontal radius
+  [PASS] Narrow viewport (aspect 0.5) fits tilted horizontal radius across height
+[validator] warning: item 'valid_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: valid item model path passes validation
+[validator] warning: item 'no_model_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: item without model field passes validation
+[validator] warning: item 'missing_model_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: missing model asset yields 'resolves to no asset' problem
+[validator] warning: item 'empty_model_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: empty model path string yields 'must be a non-empty asset path' problem
+[validator] warning: item 'numeric_model_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: numeric model path yields 'must be a non-empty asset path' problem without crashing
+[validator] warning: item 'bool_model_item' ('nil') has no discipline membership; it can never be crafted
+[validator] total items with no discipline membership: 1
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Real validator: boolean model path yields 'must be a non-empty asset path' problem without crashing
+  [PASS] Caller graphics color is restored after item_model_view.draw
+  [PASS] Caller offset scissor is restored after item_model_view.draw
+  [PASS] Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (481 px)
+  [PASS] Item raster DPI contract draw succeeds: nil
+  [PASS] Item turntable allocates colour and depth through surface.newRasterCanvas
+  [PASS] Item colour target uses the logical item viewport dimensions
+  [PASS] Item depth target uses the same DPI-neutral logical dimensions
+  [PASS] engine.json materialBlendOps matches the shader's own blend table
+  [PASS] engine.json materialUvSources matches the shader's own uv-source table
+  [PASS] MTL 'pass' declares an overlay with uv source, blend, strength and texture
+  [PASS] MTL refl is sugar for an additive sphere-mapped pass, not a second mechanism
+  [PASS] MTL refl with an unsupported type fails loudly
+  [PASS] MTL refl without a -type is rejected
+  [PASS] An unknown pass blend fails at load rather than rendering nothing
+  [PASS] An unknown pass uv source fails at load
+  [PASS] A non-numeric pass strength fails at load
+  [PASS] Declaring more passes than the shader has slots fails rather than dropping them
+  [PASS] The comparison actually rendered the model (719 px covered)
+  [PASS] add brightens the base (1500 vs 422)
+  [PASS] subtract darkens the base (0 vs 422)
+  [PASS] multiply darkens the base (211 vs 422)
+  [PASS] screen brightens the base (1287 vs 422)
+  [PASS] subtract and multiply are genuinely different operations
+  [PASS] add and screen are genuinely different operations
+  [PASS] A pass at strength 0 leaves the base exactly unchanged
+  [PASS] Shared 3D shader explicitly converts between Y-down screen pixels and canonical Y-up clip space
+  [PASS] LÖVE 11.5 Y inversion is isolated as a named legacy runtime handoff
+  [PASS] Player light owns an explicit world anchor instead of assuming camera equals player
+  [PASS] World shader pins compositionOrigin to matching mediump precision in vertex and pixel stages
+  [PASS] World shader with explicit GLES precision still compiles on the desktop LÖVE backend
+  [PASS] World orthographic and perspective projection both construct canonical Y-up NDC before runtime handoff
+  [PASS] Vertex snapping crosses explicitly into Y-down pixel space and back, in one shared place
+  [PASS] World snapping calls the shared grid anchored at its composition origin
+  [PASS] World shader applies the legacy LÖVE 11 conversion only at final clip-space output
+  [PASS] Item-model projection uses the same canonical Y-up NDC convention
+  [PASS] Item-model snapping calls the shared grid at origin zero, and still ends on the LÖVE 11 handoff
+  [PASS] world shader does not re-implement pixel snapping inline
+  [PASS] world shader dithers through the shared quantizer, not its own copy
+  [PASS] item shader does not re-implement pixel snapping inline
+  [PASS] item shader dithers through the shared quantizer, not its own copy
+  [PASS] Ordered-dither quantization is declared once in the shared source
+Item model view tests completed: 65 passed, 0 failed
+[TEST] Starting 3D item model assignment tests...
+  [PASS] Item ID 2 exists in database
+  [PASS] Item ID 2 (Sigil Ink) model path matches expected ('assets/models/items/bottle_family__angular.obj')
+  [PASS] Item ID 2 model path is non-empty
+  [PASS] OBJ file exists for Item ID 2: assets/models/items/bottle_family__angular.obj
+  [PASS] MTL file exists for Item ID 2: assets/models/items/item_complete_library.mtl
+  [PASS] Item ID 31 exists in database
+  [PASS] Item ID 31 (Glass of Wine) model path matches expected ('assets/models/items/glass_of_wine.obj')
+  [PASS] Item ID 31 model path is non-empty
+  [PASS] OBJ file exists for Item ID 31: assets/models/items/glass_of_wine.obj
+  [PASS] MTL file exists for Item ID 31: assets/models/items/glass_of_wine.mtl
+  [PASS] Item ID 11 exists in database
+  [PASS] Item ID 11 (Mystic Egg) model path matches expected ('assets/models/items/mystic_egg.obj')
+  [PASS] Item ID 11 model path is non-empty
+  [PASS] OBJ file exists for Item ID 11: assets/models/items/mystic_egg.obj
+  [PASS] MTL file exists for Item ID 11: assets/models/items/mystic_egg.mtl
+  [PASS] Item ID 27 exists in database
+  [PASS] Item ID 27 (Shattered Edge) model path matches expected ('assets/models/items/shattered_edge.obj')
+  [PASS] Item ID 27 model path is non-empty
+  [PASS] OBJ file exists for Item ID 27: assets/models/items/shattered_edge.obj
+  [PASS] MTL file exists for Item ID 27: assets/models/items/shattered_edge.mtl
+  [PASS] Item ID 9 exists in database
+  [PASS] Item ID 9 (Alert Charm) model path matches expected ('assets/models/items/wind_charm.obj')
+  [PASS] Item ID 9 model path is non-empty
+  [PASS] OBJ file exists for Item ID 9: assets/models/items/wind_charm.obj
+  [PASS] MTL file exists for Item ID 9: assets/models/items/wind_charm.mtl
+  [PASS] Item ID 23 exists in database
+  [PASS] Item ID 23 (Hermes' Boots) model path matches expected ('assets/models/items/hermes_boots.obj')
+  [PASS] Item ID 23 model path is non-empty
+  [PASS] OBJ file exists for Item ID 23: assets/models/items/hermes_boots.obj
+  [PASS] MTL file exists for Item ID 23: assets/models/items/hermes_boots.mtl
+  [PASS] Item ID 19 exists in database
+  [PASS] Item ID 19 (Holy Sword Gram) model path matches expected ('assets/models/items/holy_sword_gram.obj')
+  [PASS] Item ID 19 model path is non-empty
+  [PASS] OBJ file exists for Item ID 19: assets/models/items/holy_sword_gram.obj
+  [PASS] MTL file exists for Item ID 19: assets/models/items/holy_sword_gram.mtl
+  [PASS] Item ID 1 exists in database
+  [PASS] Item ID 1 (HP Tonic) model path matches expected ('assets/models/items/bottle_family__basis.obj')
+  [PASS] Item ID 1 model path is non-empty
+  [PASS] OBJ file exists for Item ID 1: assets/models/items/bottle_family__basis.obj
+  [PASS] MTL file exists for Item ID 1: assets/models/items/bottle_family__basis.mtl
+  [PASS] Item ID 40 exists in database
+  [PASS] Item ID 40 (Melted Wax) model path matches expected ('assets/models/items/melted_wax.obj')
+  [PASS] Item ID 40 model path is non-empty
+  [PASS] OBJ file exists for Item ID 40: assets/models/items/melted_wax.obj
+  [PASS] MTL file exists for Item ID 40: assets/models/items/melted_wax.mtl
+  [PASS] Item ID 32 exists in database
+  [PASS] Item ID 32 (Scrap Plating) model path matches expected ('assets/models/items/scrap_plating.obj')
+  [PASS] Item ID 32 model path is non-empty
+  [PASS] OBJ file exists for Item ID 32: assets/models/items/scrap_plating.obj
+  [PASS] MTL file exists for Item ID 32: assets/models/items/scrap_plating.mtl
+  [PASS] Item ID 28 exists in database
+  [PASS] Item ID 28 (Meteorite Plate) model path matches expected ('assets/models/items/meteorite_plate.obj')
+  [PASS] Item ID 28 model path is non-empty
+  [PASS] OBJ file exists for Item ID 28: assets/models/items/meteorite_plate.obj
+  [PASS] MTL file exists for Item ID 28: assets/models/items/meteorite_plate.mtl
+  [PASS] Item ID 24 exists in database
+  [PASS] Item ID 24 (Glittering Teardrop) model path matches expected ('assets/models/items/glittering_teardrop.obj')
+  [PASS] Item ID 24 model path is non-empty
+  [PASS] OBJ file exists for Item ID 24: assets/models/items/glittering_teardrop.obj
+  [PASS] MTL file exists for Item ID 24: assets/models/items/glittering_teardrop.mtl
+  [PASS] Item ID 33 exists in database
+  [PASS] Item ID 33 (Sludge) model path matches expected ('assets/models/items/sludge.obj')
+  [PASS] Item ID 33 model path is non-empty
+  [PASS] OBJ file exists for Item ID 33: assets/models/items/sludge.obj
+  [PASS] MTL file exists for Item ID 33: assets/models/items/sludge.mtl
+  [PASS] Item ID 52 exists in database
+  [PASS] Item ID 52 (Verdigris Coin) model path matches expected ('assets/models/items/verdigris_coin.obj')
+  [PASS] Item ID 52 model path is non-empty
+  [PASS] OBJ file exists for Item ID 52: assets/models/items/verdigris_coin.obj
+  [PASS] MTL file exists for Item ID 52: assets/models/items/verdigris_coin.mtl
+  [PASS] Item ID 20 exists in database
+  [PASS] Item ID 20 (Dark Scepter Lucille) model path matches expected ('assets/models/items/dark_scepter_lucille.obj')
+  [PASS] Item ID 20 model path is non-empty
+  [PASS] OBJ file exists for Item ID 20: assets/models/items/dark_scepter_lucille.obj
+  [PASS] MTL file exists for Item ID 20: assets/models/items/dark_scepter_lucille.mtl
+  [PASS] Item ID 51 exists in database
+  [PASS] Item ID 51 (Abyssal Pearl) model path matches expected ('assets/models/items/abyssal_pearl.obj')
+  [PASS] Item ID 51 model path is non-empty
+  [PASS] OBJ file exists for Item ID 51: assets/models/items/abyssal_pearl.obj
+  [PASS] MTL file exists for Item ID 51: assets/models/items/abyssal_pearl.mtl
+  [PASS] Item ID 46 exists in database
+  [PASS] Item ID 46 (Whetstone Draught) model path matches expected ('assets/models/items/whetstone_draught.obj')
+  [PASS] Item ID 46 model path is non-empty
+  [PASS] OBJ file exists for Item ID 46: assets/models/items/whetstone_draught.obj
+  [PASS] MTL file exists for Item ID 46: assets/models/items/whetstone_draught.mtl
+  [PASS] Item ID 16 exists in database
+  [PASS] Item ID 16 (Radiant Blade Flavio) model path matches expected ('assets/models/items/radiant_blade_flavio.obj')
+  [PASS] Item ID 16 model path is non-empty
+  [PASS] OBJ file exists for Item ID 16: assets/models/items/radiant_blade_flavio.obj
+  [PASS] MTL file exists for Item ID 16: assets/models/items/radiant_blade_flavio.mtl
+  [PASS] Item ID 21 exists in database
+  [PASS] Item ID 21 (Mars Emblem) model path matches expected ('assets/models/items/mars_emblem.obj')
+  [PASS] Item ID 21 model path is non-empty
+  [PASS] OBJ file exists for Item ID 21: assets/models/items/mars_emblem.obj
+  [PASS] MTL file exists for Item ID 21: assets/models/items/mars_emblem.mtl
+  [PASS] Item ID 38 exists in database
+  [PASS] Item ID 38 (Chrysalis Sigil) model path matches expected ('assets/models/items/chrysalis_sigil.obj')
+  [PASS] Item ID 38 model path is non-empty
+  [PASS] OBJ file exists for Item ID 38: assets/models/items/chrysalis_sigil.obj
+  [PASS] MTL file exists for Item ID 38: assets/models/items/chrysalis_sigil.mtl
+  [PASS] Item ID 14 exists in database
+  [PASS] Item ID 14 (Vitality Seal 2) model path matches expected ('assets/models/items/vitality_seal_2.obj')
+  [PASS] Item ID 14 model path is non-empty
+  [PASS] OBJ file exists for Item ID 14: assets/models/items/vitality_seal_2.obj
+  [PASS] MTL file exists for Item ID 14: assets/models/items/vitality_seal_2.mtl
+  [PASS] Item ID 49 exists in database
+  [PASS] Item ID 49 (Qilin Bell) model path matches expected ('assets/models/items/qilin_bell.obj')
+  [PASS] Item ID 49 model path is non-empty
+  [PASS] OBJ file exists for Item ID 49: assets/models/items/qilin_bell.obj
+  [PASS] MTL file exists for Item ID 49: assets/models/items/qilin_bell.mtl
+  [PASS] Item ID 48 exists in database
+  [PASS] Item ID 48 (Ember Bit) model path matches expected ('assets/models/items/ember_bit.obj')
+  [PASS] Item ID 48 model path is non-empty
+  [PASS] OBJ file exists for Item ID 48: assets/models/items/ember_bit.obj
+  [PASS] MTL file exists for Item ID 48: assets/models/items/ember_bit.mtl
+  [PASS] Item ID 12 exists in database
+  [PASS] Item ID 12 (Golden Egg) model path matches expected ('assets/models/items/golden_egg.obj')
+  [PASS] Item ID 12 model path is non-empty
+  [PASS] OBJ file exists for Item ID 12: assets/models/items/golden_egg.obj
+  [PASS] MTL file exists for Item ID 12: assets/models/items/golden_egg.mtl
+  [PASS] Item ID 45 exists in database
+  [PASS] Item ID 45 (Tome: Wind Blade) model path matches expected ('assets/models/items/tome_wind_blade.obj')
+  [PASS] Item ID 45 model path is non-empty
+  [PASS] OBJ file exists for Item ID 45: assets/models/items/tome_wind_blade.obj
+  [PASS] MTL file exists for Item ID 45: assets/models/items/tome_wind_blade.mtl
+  [PASS] Item ID 47 exists in database
+  [PASS] Item ID 47 (Black Hinge) model path matches expected ('assets/models/items/black_hinge.obj')
+  [PASS] Item ID 47 model path is non-empty
+  [PASS] OBJ file exists for Item ID 47: assets/models/items/black_hinge.obj
+  [PASS] MTL file exists for Item ID 47: assets/models/items/black_hinge.mtl
+  [PASS] Item ID 10 exists in database
+  [PASS] Item ID 10 (Rear Mirror) model path matches expected ('assets/models/items/rear_mirror.obj')
+  [PASS] Item ID 10 model path is non-empty
+  [PASS] OBJ file exists for Item ID 10: assets/models/items/rear_mirror.obj
+  [PASS] MTL file exists for Item ID 10: assets/models/items/rear_mirror.mtl
+  [PASS] Item ID 37 exists in database
+  [PASS] Item ID 37 (Philosopher's Stone) model path matches expected ('assets/models/items/philosophers_stone.obj')
+  [PASS] Item ID 37 model path is non-empty
+  [PASS] OBJ file exists for Item ID 37: assets/models/items/philosophers_stone.obj
+  [PASS] MTL file exists for Item ID 37: assets/models/items/philosophers_stone.mtl
+  [PASS] Item ID 35 exists in database
+  [PASS] Item ID 35 (Broken Spring) model path matches expected ('assets/models/items/broken_spring.obj')
+  [PASS] Item ID 35 model path is non-empty
+  [PASS] OBJ file exists for Item ID 35: assets/models/items/broken_spring.obj
+  [PASS] MTL file exists for Item ID 35: assets/models/items/broken_spring.mtl
+  [PASS] Item ID 8 exists in database
+  [PASS] Item ID 8 (Light Amulet) model path matches expected ('assets/models/items/wind_charm.obj')
+  [PASS] Item ID 8 model path is non-empty
+  [PASS] OBJ file exists for Item ID 8: assets/models/items/wind_charm.obj
+  [PASS] MTL file exists for Item ID 8: assets/models/items/wind_charm.mtl
+  [PASS] Item ID 44 exists in database
+  [PASS] Item ID 44 (Thrice-Blessed Bead) model path matches expected ('assets/models/items/thrice_blessed_bead.obj')
+  [PASS] Item ID 44 model path is non-empty
+  [PASS] OBJ file exists for Item ID 44: assets/models/items/thrice_blessed_bead.obj
+  [PASS] MTL file exists for Item ID 44: assets/models/items/thrice_blessed_bead.mtl
+  [PASS] Item ID 43 exists in database
+  [PASS] Item ID 43 (Vial of Second Breath) model path matches expected ('assets/models/items/vial_of_second_breath.obj')
+  [PASS] Item ID 43 model path is non-empty
+  [PASS] OBJ file exists for Item ID 43: assets/models/items/vial_of_second_breath.obj
+  [PASS] MTL file exists for Item ID 43: assets/models/items/vial_of_second_breath.mtl
+  [PASS] Item ID 7 exists in database
+  [PASS] Item ID 7 (Wind Charm) model path matches expected ('assets/models/items/wind_charm.obj')
+  [PASS] Item ID 7 model path is non-empty
+  [PASS] OBJ file exists for Item ID 7: assets/models/items/wind_charm.obj
+  [PASS] MTL file exists for Item ID 7: assets/models/items/wind_charm.mtl
+  [PASS] Item ID 17 exists in database
+  [PASS] Item ID 17 (Wind Dancer) model path matches expected ('assets/models/items/wind_dancer.obj')
+  [PASS] Item ID 17 model path is non-empty
+  [PASS] OBJ file exists for Item ID 17: assets/models/items/wind_dancer.obj
+  [PASS] MTL file exists for Item ID 17: assets/models/items/wind_dancer.mtl
+  [PASS] Item ID 41 exists in database
+  [PASS] Item ID 41 (Ectoplasm) model path matches expected ('assets/models/items/ectoplasm.obj')
+  [PASS] Item ID 41 model path is non-empty
+  [PASS] OBJ file exists for Item ID 41: assets/models/items/ectoplasm.obj
+  [PASS] MTL file exists for Item ID 41: assets/models/items/ectoplasm.mtl
+  [PASS] Item ID 6 exists in database
+  [PASS] Item ID 6 (Bone Plate) model path matches expected ('assets/models/items/bone_plate.obj')
+  [PASS] Item ID 6 model path is non-empty
+  [PASS] OBJ file exists for Item ID 6: assets/models/items/bone_plate.obj
+  [PASS] MTL file exists for Item ID 6: assets/models/items/bone_plate.mtl
+  [PASS] Item ID 39 exists in database
+  [PASS] Item ID 39 (Obsidian Shard) model path matches expected ('assets/models/items/obsidian_shard.obj')
+  [PASS] Item ID 39 model path is non-empty
+  [PASS] OBJ file exists for Item ID 39: assets/models/items/obsidian_shard.obj
+  [PASS] MTL file exists for Item ID 39: assets/models/items/obsidian_shard.mtl
+  [PASS] Item ID 36 exists in database
+  [PASS] Item ID 36 (Ambrosia) model path matches expected ('assets/models/items/ambrosia.obj')
+  [PASS] Item ID 36 model path is non-empty
+  [PASS] OBJ file exists for Item ID 36: assets/models/items/ambrosia.obj
+  [PASS] MTL file exists for Item ID 36: assets/models/items/ambrosia.mtl
+  [PASS] Item ID 5 exists in database
+  [PASS] Item ID 5 (Silver Blade) model path matches expected ('assets/models/items/silver_blade.obj')
+  [PASS] Item ID 5 model path is non-empty
+  [PASS] OBJ file exists for Item ID 5: assets/models/items/silver_blade.obj
+  [PASS] MTL file exists for Item ID 5: assets/models/items/silver_blade.mtl
+  [PASS] Item ID 34 exists in database
+  [PASS] Item ID 34 (Burnt Slop) model path matches expected ('assets/models/items/burnt_slop.obj')
+  [PASS] Item ID 34 model path is non-empty
+  [PASS] OBJ file exists for Item ID 34: assets/models/items/burnt_slop.obj
+  [PASS] MTL file exists for Item ID 34: assets/models/items/burnt_slop.mtl
+  [PASS] Item ID 30 exists in database
+  [PASS] Item ID 30 (Pint of Stout) model path matches expected ('assets/models/items/pint_of_stout.obj')
+  [PASS] Item ID 30 model path is non-empty
+  [PASS] OBJ file exists for Item ID 30: assets/models/items/pint_of_stout.obj
+  [PASS] MTL file exists for Item ID 30: assets/models/items/pint_of_stout.mtl
+  [PASS] Item ID 4 exists in database
+  [PASS] Item ID 4 (Elixir of Insight) model path matches expected ('assets/models/items/bottle_family__tall.obj')
+  [PASS] Item ID 4 model path is non-empty
+  [PASS] OBJ file exists for Item ID 4: assets/models/items/bottle_family__tall.obj
+  [PASS] MTL file exists for Item ID 4: assets/models/items/bottle_family__tall.mtl
+  [PASS] Item ID 29 exists in database
+  [PASS] Item ID 29 (Mug of Ale) model path matches expected ('assets/models/items/mug_of_ale.obj')
+  [PASS] Item ID 29 model path is non-empty
+  [PASS] OBJ file exists for Item ID 29: assets/models/items/mug_of_ale.obj
+  [PASS] MTL file exists for Item ID 29: assets/models/items/mug_of_ale.mtl
+  [PASS] Item ID 26 exists in database
+  [PASS] Item ID 26 (Shattered Blade) model path matches expected ('assets/models/items/shattered_blade.obj')
+  [PASS] Item ID 26 model path is non-empty
+  [PASS] OBJ file exists for Item ID 26: assets/models/items/shattered_blade.obj
+  [PASS] MTL file exists for Item ID 26: assets/models/items/shattered_blade.mtl
+  [PASS] Item ID 22 exists in database
+  [PASS] Item ID 22 (Mercury Crest) model path matches expected ('assets/models/items/mercury_crest.obj')
+  [PASS] Item ID 22 model path is non-empty
+  [PASS] OBJ file exists for Item ID 22: assets/models/items/mercury_crest.obj
+  [PASS] MTL file exists for Item ID 22: assets/models/items/mercury_crest.mtl
+  [PASS] Item ID 25 exists in database
+  [PASS] Item ID 25 (Untarnished Signet) model path matches expected ('assets/models/items/untarnished_signet.obj')
+  [PASS] Item ID 25 model path is non-empty
+  [PASS] OBJ file exists for Item ID 25: assets/models/items/untarnished_signet.obj
+  [PASS] MTL file exists for Item ID 25: assets/models/items/untarnished_signet.mtl
+  [PASS] Item ID 50 exists in database
+  [PASS] Item ID 50 (Cinder Ruby) model path matches expected ('assets/models/items/cinder_ruby.obj')
+  [PASS] Item ID 50 model path is non-empty
+  [PASS] OBJ file exists for Item ID 50: assets/models/items/cinder_ruby.obj
+  [PASS] MTL file exists for Item ID 50: assets/models/items/cinder_ruby.mtl
+  [PASS] Item ID 3 exists in database
+  [PASS] Item ID 3 (Whispered Lessons) model path matches expected ('assets/models/items/crystal.obj')
+  [PASS] Item ID 3 model path is non-empty
+  [PASS] OBJ file exists for Item ID 3: assets/models/items/crystal.obj
+  [PASS] MTL file exists for Item ID 3: assets/models/items/crystal.mtl
+  [PASS] Item ID 18 exists in database
+  [PASS] Item ID 18 (Water Scepter) model path matches expected ('assets/models/items/water_scepter.obj')
+  [PASS] Item ID 18 model path is non-empty
+  [PASS] OBJ file exists for Item ID 18: assets/models/items/water_scepter.obj
+  [PASS] MTL file exists for Item ID 18: assets/models/items/water_scepter.mtl
+  [PASS] Item ID 42 exists in database
+  [PASS] Item ID 42 (Warding Charm) model path matches expected ('assets/models/items/warding_charm.obj')
+  [PASS] Item ID 42 model path is non-empty
+  [PASS] OBJ file exists for Item ID 42: assets/models/items/warding_charm.obj
+  [PASS] MTL file exists for Item ID 42: assets/models/items/warding_charm.mtl
+  [PASS] Item ID 15 exists in database
+  [PASS] Item ID 15 (Vitality Seal 3) model path matches expected ('assets/models/items/vitality_seal_3.obj')
+  [PASS] Item ID 15 model path is non-empty
+  [PASS] OBJ file exists for Item ID 15: assets/models/items/vitality_seal_3.obj
+  [PASS] MTL file exists for Item ID 15: assets/models/items/vitality_seal_3.mtl
+  [PASS] Item ID 13 exists in database
+  [PASS] Item ID 13 (Vitality Seal 1) model path matches expected ('assets/models/items/vitality_seal_1.obj')
+  [PASS] Item ID 13 model path is non-empty
+  [PASS] OBJ file exists for Item ID 13: assets/models/items/vitality_seal_1.obj
+  [PASS] MTL file exists for Item ID 13: assets/models/items/vitality_seal_1.mtl
+  [PASS] Synthetic fallback probe keeps the optional-model path exercised
+  [PASS] No production item explicitly references placeholder_question.obj (ID 1)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 2)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 3)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 4)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 5)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 6)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 7)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 8)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 9)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 10)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 11)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 12)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 13)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 14)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 15)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 16)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 17)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 18)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 19)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 20)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 21)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 22)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 23)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 24)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 25)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 26)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 27)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 28)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 29)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 30)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 31)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 32)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 33)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 34)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 35)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 36)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 37)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 38)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 39)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 40)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 41)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 42)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 43)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 44)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 45)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 46)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 47)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 48)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 49)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 50)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 51)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 52)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 53)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 54)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 55)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 56)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 57)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 58)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 59)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 60)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 61)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 62)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 63)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 64)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 65)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 66)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 67)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 68)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 69)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 70)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 71)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 72)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 73)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 74)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 75)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 76)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 77)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 78)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 79)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 80)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 81)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 82)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 83)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 84)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 85)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 86)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 87)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 88)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 89)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 90)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 91)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 92)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 93)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 94)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 95)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 96)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 97)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 98)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 99)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 100)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 101)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 102)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 103)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 104)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 105)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 106)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 107)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 108)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 109)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 110)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 111)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 112)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 113)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 114)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 115)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 116)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 117)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 118)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 119)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 120)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 121)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 122)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 123)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 124)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 125)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 126)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 127)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 128)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 129)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 130)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 131)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 132)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 133)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 134)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 135)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 136)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 137)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 138)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 139)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 140)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 141)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 142)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 143)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 144)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 145)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 146)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 147)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 148)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 149)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 150)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 151)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 152)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 153)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 154)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 155)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 156)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 157)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 158)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 159)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 160)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 161)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 162)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 163)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 164)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 165)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 166)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 167)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 168)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 169)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 170)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 171)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 172)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 173)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 174)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 175)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 176)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 177)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 178)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 179)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 180)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 181)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 182)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 183)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 184)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 185)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 186)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 187)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 188)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 189)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 190)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 191)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 192)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 193)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 194)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 195)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 196)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 197)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 198)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 199)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 200)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 201)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 202)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 203)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 204)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 205)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 206)
+  [PASS] No production item explicitly references placeholder_question.obj (ID 207)
+  [PASS] Bone Plate (ID 6) resolves real model rather than fallback
+  [PASS] Holy Sword Gram (ID 19) resolves real model rather than fallback
+  [PASS] Ambrosia (ID 36) resolves real model rather than fallback
+  [PASS] Qilin Bell (ID 49) resolves real model rather than fallback
+  [PASS] Synthetic fallback probe (ID -1) resolves fallback placeholder through normal viewer behavior
+Item model assignment tests completed: 473 passed, 0 failed
+=== test_model_resource: 29 passed ===
+[test_reachability] ALL REACHABILITY TESTS OK
+=== TEST FORMATION ===
+[PASS] Formation pure geometry functions
+[PASS] JSON sparse array round-trip ({ b1, false, b2, false })
+[PASS] Starting party Saban in slot 1
+[PASS] Recruitment preferred slot & fallback
+[PASS] Interpreter OPEN_RECRUIT cmd.suggestedSlot parameter wiring
+[PASS] Sparse formation Saban-1 / empty-2 / Pixie-3 targeting, rects, & cover
+[PASS] Save v5 sparse formation JSON round-trip
+[PASS] Cover interception edge cases (dead, restricted, wrong column, bypass)
+[PASS] Targeting shapes (row, column, all, random)
+[PASS] Action priority ordering and equal-speed tie resolution via real Battle:buildTurnQueue
+[PASS] Transformation slot retention via ordinary TRANSFORM_ACTOR
+[PASS] Validator fixedMembers slot bounds check
+[PASS] Sparse party round-end state duration and skill timer ticks (slot 3)
+[PASS] Sparse party victory XP awards (slot 3)
+[PASS] Target 'none' spec safety (Mystic Egg item 11)
+[PASS] Action-agnostic execution-time cover (real UI Potion-on-Ally, non-intercepted support, & Charmed cover)
+=== ALL FORMATION TESTS OK ===
+=== TEST CHEST 3D ===
+  [PASS] cameraSpaceDepth neutral pitch
+  [PASS] cameraSpaceDepth pitched depth calculation
+  [PASS] pitched billboard top and feet stay on one camera-facing plane
+  [PASS] pitched billboard keeps parallel screen-horizontal edges
+  [PASS] side-view billboard facing mirrors the selected frame horizontally
+  [PASS] billboard facing mirror preserves the exact walk-cycle frame
+  [PASS] Positive pitch shifts horizon upward
+  [PASS] Negative pitch shifts horizon downward
+  [PASS] 24 design pixels equal one world tile at pixelsPerTile=24
+  [PASS] Design-pixel density converts fractional world extents exactly
+  [PASS] World presentation resolution returns a non-mutating presentation copy
+  [PASS] Resolved presentation camera cannot mutate authored Scene data
+  [PASS] Non-positive design-pixel density fails loud
+  [PASS] 45-degree RPG grid correction is sqrt(2)/2
+  [PASS] 45-degree equivalent vertical stretch is sqrt(2)
+  [PASS] 45-degree corrected unit wall is one tile high
+  [PASS] Human-facing FOV degrees resolve to the shader half-extent contract
+  [PASS] Perspective FOV conversion round-trips
+  [PASS] RPG wall-height metric responds to pitch around the 45-degree unity point
+  [PASS] Degenerate RPG grid correction fails loud
+  [PASS] Default resolved Map camera names current first-person perspective policy
+  [PASS] Resolved first-person camera preserves current player-eye position
+  [PASS] First-person player light preserves historical camera-anchored position
+  [PASS] First-person fog preserves historical camera-forward depth policy
+  [PASS] First-person fog distance remains byte-compatible camera depth
+  [PASS] Resolved first-person camera preserves current cardinal basis
+  [PASS] Resolved first-person camera preserves current projection constants
+  [PASS] Resolved WorldCamera owns historical Classic principal-point framing
+  [PASS] Resolved first-person camera carries current play visibility policy
+  [PASS] Wide render surface changes principal point without changing camera pixel scale
+  [PASS] Perspective oracle pins a nonzero near/far screen separation
+  [PASS] Principal-point shift is depth-independent in screen pixels
+  [PASS] Principal-point shift preserves near/far perspective separation
+  [PASS] Resolved camera composes door approach and focus dolly
+  [PASS] Resolved camera composes focus pitch and FOV
+  [PASS] Resolved camera preserves square room-bake framing
+  [PASS] Square room-bake projection frame stays centered on its target
+  [PASS] WorldCamera owns the same pitched camera-space depth contract
+  [PASS] Scene-authored camera defaults resolve without mutating session gameplay state
+  [PASS] Ephemeral session camera profile overrides the authored Scene default
+  [PASS] Different perspective lenses preserve requested target tile framing
+  [PASS] 26-degree telephoto framing pulls the camera materially farther from the target
+  [PASS] RPG perspective defaults to the reviewed 26-degree / 18-tile telephoto profile
+  [PASS] Telephoto perspective gains safe depth range without widening orthographic defaults
+  [PASS] Changing authored art density alone does not move or zoom the camera
+  [PASS] Every overhead projection family resolves dedicated play-overhead visibility
+  [PASS] Live Wall Top plan preserves neutral-gray compatibility fallback
+  [PASS] Live Wall Top plan uses authored weighted atlas variant
+  [PASS] Live Wall Top plan routes image-authored geometry through placed-surface machinery
+  [PASS] Live Wall Top plan reuses generic atlas height-surface compiler
+  [PASS] Scene-owned worldPresentation camera reaches the existing Map viewport path
+  [PASS] Live viewport gates Wall Top materialization through resolved consumer visibility
+  [PASS] Overhead orthographic profile resolves independently from Map semantics
+  [PASS] RPG orthographic profile applies exact sin(pitch) X projection metric
+  [PASS] Camera profile resolution does not mutate player/map coordinates
+  [PASS] Overhead player light follows the player target rather than camera XY
+  [PASS] Overhead fog is anchored to gameplay focus rather than camera
+  [PASS] Overhead fog is radial in ground space, independent of camera-forward axis
+  [PASS] Uncorrected 45-degree orthographic grid visibly squashes camera-forward cells
+  [PASS] Corrected 45-degree RPG orthographic grid has equal screen-pixel basis scales
+  [PASS] Oblique perspective profiles share the same camera contract
+  [PASS] Anamorphic perspective is locally square at the optical target
+  [PASS] Perspective RPG calibration uses the same exact sin(pitch) metric
+  [PASS] Neutral world_focus pitch does not erase overhead base pitch
+  [PASS] world_focus pitch composes as an offset over overhead base pitch
+  [PASS] XY-only static bounds defer to exact vertices for pitched cameras
+  [PASS] Static model near clipping uses WorldHeight under pitched camera depth
+  [PASS] Static near-clip cache identity includes camera height and pitch
+  [PASS] Base event resolves model from CE
+  [PASS] Model path resolves correctly
+  [PASS] Focus preset resolves correctly
+  [PASS] Page suppressing model falls back to sprite
+  [PASS] collectEventModelPlacements returns 1 model placement
+  [PASS] Model placement cell center coordinates correct
+  [PASS] Model placement model path matches
+  [PASS] Unknown focus preset fails loud
+  [PASS] Focus update re-throws callback error loud
+  [PASS] Focus state resets after callback error
+  [PASS] Known focus preset is discoverable
+  [PASS] Unknown focus preset is not discoverable
+  [PASS] Non-function focus callback fails loud
+  [PASS] Malformed focus coordinates fail loud
+  [PASS] Callback-created focus receives a distinct operation token
+  [PASS] Completed old focus does not release callback-created replacement
+  [PASS] Stale operation cannot cancel current focus
+  [PASS] Current operation token cancels focus
+  [PASS] Map change cancels focus even from map index zero
+  [PASS] Reentrant callback error remains fail-loud
+  [PASS] Old callback error does not reset replacement focus
+  [PASS] Focus enters holding phase after focus_in finishes
+  [PASS] Camera maintains pitch during holding phase
+  [PASS] Focus remains in holding phase indefinitely until released
+  [PASS] world_focus.release transitions holding to focus_out
+  [PASS] Phase is focus_out after release
+  [PASS] Focus resets to idle after focus_out completes
+  [PASS] CHANGE_ITEM random on empty treasures fails loud
+  [PASS] Session transferred to Floor 2
+  [PASS] Saved game data exists
+  [PASS] Loaded session starts on Floor 2
+  [PASS] Chest event remains erased on Floor 1 after save/load cycle
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Validator catches sparse treasures array
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Validator catches missing treasures array when random loot used
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Canonical validator accepts current legitimate authored resource references
+  [PASS] Recruit Creature has no dead default sprite; recruit host owns presentation
+  [PASS] Shared sprite resolver accepts authored chest sprite
+  [PASS] Shared file resolver accepts authored chest model
+  [PASS] Panorama shorthand resolves through authored resource contract
+  [PASS] Location-art shorthand resolves through authored resource contract
+  [PASS] Optional omitted and explicitly suppressed resource references remain legal
+  [PASS] Embedded/generated tileset texture remains legal without a filesystem path
+  [PASS] Missing required sprite is rejected by shared resolver
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+  [PASS] Canonical validator fails loudly on planted missing common-event sprite
+=== test_chest_3d: 112 passed, 0 failed ===
+  [PASS] Projection-window authored/session/direct precedence
+[TEST] Starting projection window panning tests...
+  [PASS] Principal-point shift is depth-independent across all depths and positions
+  [PASS] Near-far separation is strictly invariant under projection window panning
+  [PASS] Camera strafe exhibits parallax variation (negative control)
+  [PASS] Projection window offset behaves identically across multiple master FOV choices
+  [PASS] Effekseer world camera matrices agree with shader projection
+  [PASS] Quantization grids and dither-phase properties validated
+  [PASS] Town eye-height/pitch treatment resolves with locked optical corrections
+=== Projection Window Panning Tests: all checks passed ===
+  [INFO] selective-AA wide pixels: 1x=35568 3x=36265 envSS=319194
+WORLD PASS COMPOSITOR TESTS: 17 passed, 0 failed
+[TEST] Starting battle presentation authority tests...
+[PASS] Battle presentation authority boundary
+  [PASS] Reserve roster uses list navigation and list-row swap pickup semantics
+=== Authored storage manifest: 13 passed, 0 failed ===
+=== ENGINE-STATE semantic registry census: 1 passed, 0 failed ===
+presentation surface tests passed
+Android touch boot and complete target geometry tests passed
+[TEST] Starting render surface option tests...
+  [PASS] cycle walks classic -> four_three -> wide -> classic
+  [PASS] output presentation cycles nearest -> crt -> nearest
+  [PASS] getRenderSurface reports the active profile
+  [PASS] an unknown profile is refused, leaving the surface untouched
+  [PASS] headless run with no presentation bound degrades to a no-op
+  [PASS] user settings round-trip and survive a cache reset
+  [PASS] a pinned capture ignores stored settings and never writes
+  [PASS] a missing stored setting falls back to the supplied default
+=== Render Surface Option Tests: 8 passed, 0 failed ===
+  [PASS] Projection-window authored/session/direct precedence
+[TEST] Starting projection window panning tests...
+  [PASS] Principal-point shift is depth-independent across all depths and positions
+  [PASS] Near-far separation is strictly invariant under projection window panning
+  [PASS] Camera strafe exhibits parallax variation (negative control)
+  [PASS] Projection window offset behaves identically across multiple master FOV choices
+  [PASS] Effekseer world camera matrices agree with shader projection
+  [PASS] Quantization grids and dither-phase properties validated
+  [PASS] Town eye-height/pitch treatment resolves with locked optical corrections
+=== Projection Window Panning Tests: all checks passed ===
+output presentation tests passed
+[TEST] Starting font option tests...
+  [PASS] cycle walks monogram-extended-italic -> monogram-extended -> monogram-extended-italic
+  [PASS] getFont reports the active font
+  [PASS] setFont switches font and records call
+  [PASS] headless run with no presentation bound degrades gracefully
+=== Font Option Tests: 4 passed, 0 failed ===
+[TEST] Starting font asset tests...
+  [PASS] predicate accepts each sfnt magic
+  [PASS] predicate rejects the #662 payload shape
+  [PASS] at least one font directory was found
+  [PASS] assets/fonts: directory is not empty
+  [PASS] assets/fonts/04B_03__.TTF is a real font
+  [PASS] assets/fonts/04B_11__.TTF is a real font
+  [PASS] assets/fonts/C&C Red Alert [INET].ttf is a real font
+  [PASS] assets/fonts/C&C Red Alert [LAN].ttf is a real font
+  [PASS] assets/fonts/CozetteCrossedSevenVector.ttf is a real font
+  [PASS] assets/fonts/CozetteVector.ttf is a real font
+  [PASS] assets/fonts/DotGothic16-Regular.ttf is a real font
+  [PASS] assets/fonts/IBMPlexMono-Regular.ttf is a real font
+  [PASS] assets/fonts/Jersey10-Regular.ttf is a real font
+  [PASS] assets/fonts/JoHandwriting.ttf is a real font
+  [PASS] assets/fonts/Micro5-Regular.ttf is a real font
+  [PASS] assets/fonts/PixelifySans-Regular.ttf is a real font
+  [PASS] assets/fonts/PressStart2P.ttf is a real font
+  [PASS] assets/fonts/Silkscreen.ttf is a real font
+  [PASS] assets/fonts/Silver.ttf is a real font
+  [PASS] assets/fonts/SpaceMono-Regular.ttf is a real font
+  [PASS] assets/fonts/Tiny5-Regular.ttf is a real font
+  [PASS] assets/fonts/VT323-Regular.ttf is a real font
+  [PASS] assets/fonts/monogram-extended-italic.ttf is a real font
+  [PASS] assets/fonts/monogram-extended.ttf is a real font
+  [PASS] the scan actually inspected fonts
+=== Font Asset Tests: 25 passed, 0 failed ===
+[TEST] Starting frozen G5 backdrop tests...
+  [PASS] harness backdrop resolves to a map with its private tileset
+  [PASS] backdrop declares a complete floor spawn
+  [PASS] backdrop has no events
+  [PASS] backdrop has no encounters
+  [PASS] backdrop has no recruits
+  [PASS] backdrop has no treasures
+  [PASS] _gate_room texture stays under the frozen asset directory
+  [PASS] _gate_room heightMap stays under the frozen asset directory
+  [PASS] _gate_room has no probabilistic features
+  [PASS] _gate_room has no probabilistic fixturePrefabs
+=== Frozen G5 Backdrop Tests: 10 passed, 0 failed ===
+[TEST] Starting runtime boundary tests...
+  [PASS] runtime code requires nothing from tools/ or tests/
+  [PASS] scene_host has no direct presentation dependency
+  [PASS] geometry boundary scanner detects a planted presentation dependency
+  [PASS] engine geometry has no presentation or love.graphics dependency
+  [PASS] neutral geometry builder output is deterministic and inspectable
+  [PASS] scene goto publishes exit then enter transition facts
+  [PASS] scene mutation scanner detects omitted contexts (negative control)
+  [PASS] shipped runtime scene mutations carry explicit context
+  [PASS] main has no currentScene compatibility surface
+  [PASS] scene_host has no remembered-context compatibility fallback
+  [PASS] the scanner detects a forbidden require (negative control)
+  [PASS] every declared exception is still present in the source
+=== Runtime Boundary Tests: 12 passed, 0 failed ===
+[TEST] Starting Map Instance lifecycle characterization...
+  [PASS] Map Scene is initially current
+  [PASS] Dialogue displacement leaves the same Map Instance current and resident
+  [PASS] closing Dialogue returns to the same Map Instance
+  [PASS] Battle displacement leaves the same Map Instance current and resident
+  [PASS] Battle Scene completion returns to the same Map Instance
+  [PASS] transfer makes Map B the authoritative current Map
+  [PASS] transfer caches Map A's dangerous runtime state before replacement
+  [PASS] Map B activation completes with a resolved runtime Map copy
+  [PASS] resume transfer restores Map A's cached grid and arrival position
+  [PASS] first generated load has no cached Map Instance record yet
+  [PASS] leaving the generated Map creates the current cache record
+  [PASS] cached return restores the generated runtime collections by reference
+  [PASS] no explicit Map Instance identity field distinguishes creation from revisit
+  [PASS] a standing-on-Map save records the resumable Map scene and state
+  [PASS] save restore builds a new runtime host around restored Map state
+  [PASS] save restore reconstructs authored Map data and resident cache data without loadMap
+  [PASS] blocked movement commits no coordinate and runs no step or encounter phase
+  [PASS] successful movement commits coordinates, then runs step Flow, then encounter check
+  [PASS] a committed step Event runs after the step Flow and suppresses encounter processing
+=== Map Instance Lifecycle: 19 passed, 0 failed ===
+=== Scene State Boundary Tests: 3 passed, 0 failed ===
+=== SCENE_EVENT Validation Tests: 3 passed, 0 failed ===
+[TEST] Starting Autorun/Parallel current-model characterization...
+  [PASS] Page resolution returns the last matching incarnation with its trigger and program
+  [PASS] when no Page condition matches, the Event base remains the effective incarnation
+  [PASS] immediate WAIT does not suspend later command execution
+  [PASS] immediate WAIT emits one presentation wait event
+  [PASS] interactive mode separates immediate command runs from a suspending WAIT node
+  [PASS] the interactive walker remains on WAIT until its host advances it
+  [PASS] Common Event invocation compiles as an interactive continuation node
+  [PASS] immediate mode refuses an interactive Common Event invocation
+  [PASS] Scene on_frame runs on an update tick and records its local wait timer
+  [PASS] Scene WAIT suppresses the next Scene hook tick while its timer remains
+  [PASS] Scene hook resumes after its timer expires
+  [PASS] fixed Scene produces equivalent logical history under different host dt chunking
+  [PASS] fixed on_frame receives Scene-local v.time dt/tick/elapsed from logical time
+  [PASS] fixed v.time context is transient and does not become persistent Scene state
+  [PASS] host dt below fixed step accumulates without inventing a logical tick
+  [PASS] maxCatchUp bounds per-frame work while retaining undiscarded logical backlog
+  [PASS] fixed Scene WAIT resumes identically under equivalent host-time chunking
+  [PASS] Scene transition stops outgoing fixed catch-up and does not transfer backlog
+  [PASS] authored fixed Scene update contract rejects invalid mode/step/maxCatchUp
+  [PASS] authored Scene fixture owns picture X/Y in Scene State
+  [PASS] SHOW_IMAGE_PICTURE resolves all coherent transform formulas before presentation
+  [PASS] Scene State arithmetic/clamp updates the Scene-local position state
+  [PASS] MOVE_IMAGE_PICTURE consumes Scene State arithmetic/clamp expressions as numeric presentation values
+  [PASS] literal numeric image transforms preserve their authored values
+[formula] error in 'sceneState.': [string "formula:sceneState."]:1: '<name>' expected near '<eof>'
+  [PASS] malformed picture transform formulas fail loudly
+[formula] error in 'sceneState.missing + 1': [string "formula:sceneState.missing + 1"]:1: attempt to perform arithmetic on field 'missing' (a nil value)
+  [PASS] unknown picture variables fail loudly instead of becoming zero
+  [PASS] non-numeric picture formula results fail loudly
+[formula] error in 'rawSession.gold': [string "formula:rawSession.gold"]:1: attempt to index global 'rawSession' (a nil value)
+  [PASS] picture formula context does not gain privileged raw session access
+  [PASS] existing image-picture interpolation remains intact at mid-move
+  [PASS] existing image-picture interpolation still completes at the numeric target
+  [PASS] current save payload contains Map/session state but no Event continuation or process state
+=== Autorun/Parallel current model: 31 passed, 0 failed ===
+test_map_inspection: OK
+[TEST] Starting compiled geometry store tests...
+  [PASS] identical neutral input + identity serializes deterministically
+  [PASS] round-trip preserves every vertex field and triangle-stream position EXACTLY
+  [PASS] renaming an artifact cannot bypass its embedded identity
+  [PASS] quality/compiler identity selects a different artifact path
+  [PASS] a real prebaked plane exactly reproduces the neutral runtime compiler
+  [PASS] ambiguous legacy runtime identity is rejected instead of shipping stale geometry
+  [PASS] current campaign's eligible prebake set compiles without ambiguous identities
+  [PASS] a blob without the magic header is refused
+  [PASS] a truncated blob is refused rather than half-decoded
+  [PASS] a future format version is refused, not misread
+  [PASS] release provenance accepts identical source bytes and rejects changed identity
+  [PASS] manifest compiler mismatch rejects cleanly
+  [PASS] an absent release prebake remains a cache miss
+  [PASS] an empty model is not written
+=== Compiled Geometry Store Tests: 14 passed, 0 failed ===
+[TEST] Starting eventOverrides save/load regression tests...
+  [PASS] eventOverrides numeric and string keys survive save/load round-trip
+  [PASS] resolvePage reflects restored eventOverrides
+  [PASS] unlockedLore string keys preserved
+  [PASS] #407 Game Variables survive save/load with typed value semantics
+[TEST] Starting Event actor animation-state tests...
+  event actor animation-state tests passed
+  animation controller tests passed
+  Event animation controller runtime tests passed
+  event presentation policy tests passed
+  animation signal command tests passed
+  animation controller save-boundary tests passed
+[TEST] Starting playable player-actor tests...
+  playable player-actor tests passed
+=== Authored State Value Tests: 14 passed, 0 failed ===
+=== Game Variable Tests: 26 passed, 0 failed ===
+JSON codec membrane: OK
+=== eventOverrides save regression: all checks passed ===
+=== savegame I/O regression: all checks passed ===
+[TEST] Starting persistent Map Event SELF state tests...
+  [PASS] authored placed Events carry distinct stable instanceId values
+  [PASS] Event A Self Switch does not affect Event B
+  [PASS] Event A Self Variable does not affect Event B
+  [PASS] two placements sharing one reusable behavior keep independent Self Switch state
+  [PASS] two placements sharing one reusable behavior keep independent Self Variable state
+  [PASS] Control SELF Variable set/change uses deterministic numeric operations
+  [PASS] SELF Variable is readable from the formula context
+  [PASS] Control SELF Variable authors structured values through the shared stateValue evaluator
+  [PASS] Control SELF Switch mutates persistent SELF gameplay state
+  [PASS] shared authoring fixture executes with the same SELF command semantics at runtime
+  [PASS] Page SELF conditions deterministically change the active Page after each mutation
+  [PASS] save/load preserves Self Switch state
+  [PASS] save/load preserves non-boolean typed Self Variable state
+  [PASS] deleted/recreated Event reusing numeric id and coordinates cannot inherit old SELF state
+  [PASS] Event without stable authored instanceId fails SELF access instead of falling back to numeric id
+  [PASS] deliberate cross-Event access requires and honors stable Map/Event identity
+  [PASS] partial cross-Event target is rejected
+  [PASS] unknown cross-Event stable identity is rejected
+  [PASS] Self Variables use by-value copy semantics on write and read
+  [PASS] malformed/unserializable values fail under shared typed authored-state semantics
+  [PASS] malformed Self Switch values fail instead of coercing to boolean
+  [PASS] relational Self Variable Page conditions require finite numeric authored values
+  [PASS] SELF Page conditions reject undeclared compatibility aliases
+  [PASS] SELF Page equality requires an explicit value instead of overloading absence
+  [PASS] malformed saved Self Switch values fail the save serialization boundary
+  [PASS] existing Event with no SELF state behaves identically without instanceId
+=== event_self_state: 26 passed, 0 failed ===
+SPRITE SHEET TEST OK
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+[validator] items outside Item Creation entirely (neither ingredient nor output): 15
+[validator] warning: flag 'alicia_visits_pub' is set but no condition reads it
+[validator] warning: flag 'shipment_investigated' is set but no condition reads it
+[validator] warning: flag 'dungeon_entered' is set but no condition reads it
+[validator] total SCRIPT usages: 95
+[validator] total deprecated usages: 0
+=== test_lighting_composition: 22 passed, 0 failed ===
+=== test_baked_environment_package: 69 passed, 0 failed ===
+=== test_bounded_lane: 284 passed, 0 failed ===
+=== test_bounded_lane_levels: 55 passed, 0 failed ===
+=== test_town_threshold_direction: 46 passed, 0 failed ===
+  [PASS] navigation markers start visible
+  [PASS] player preference hides markers
+  [PASS] player preference restores markers
+  [PASS] authored Options exposes navigation arrows
+  [PASS] Options button dispatch hides arrows through the real hook
+  [PASS] Options button dispatch restores arrows
+  [PASS] hidden preference survives settings reload
+  [PASS] visible preference survives settings reload
+=== Transition Markers: 8 passed ===
+  [PASS] Fresh greeting can be left
+  [PASS] Active blade quest without the blade can be left
+  [PASS] Equipment topics and Back return to the main menu
+  [PASS] Quest offer returns to a usable main menu
+  [PASS] Weapon shop returns to the main menu
+  [PASS] Reforging completes once and still allows leaving
+  [PASS] Completed quest can be revisited without locking the menu
+=== Weaponsmith Dialogue: 7 passed ===
+=== cortico_doorstep: 4807 passed, 0 failed ===
+=== test_passage_house_hall: 47 passed, 0 failed ===
+[TEST] Starting presentation contract tests...
+  [PASS] contract declares version 1 and the three fact groups
+  [PASS] every atlas rectangle is a positive-area integer rect
+  [PASS] the windowskin ring covers its declared border thickness
+  [PASS] the target ring covers its own declared border thickness
+  [PASS] panel minimum geometry is one fact, not two
+  [PASS] exposed ui metrics come from the contract
+  [PASS] exposed ui colour vocabulary comes from the contract
+  [PASS] mutating an exposed colour cannot corrupt the contract
+  [PASS] the reader fails loudly on a missing or malformed fact
+  [PASS] presentation/ui.lua spells no promoted fact as a literal
+=== test_presentation_contract: 10 passed, 0 failed ===
+NATIVE COVERAGE UNAVAILABLE: Effekseer shim unavailable; 7 test_map_transfer world-effect assertions were NOT exercised
+ALL UNIT TESTS OK
+powershell : AL lib: (EE) alc_cleanup: 1 device not closed
+No D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\verify_hybrid.ps1:20 caractere:2
++  powershell -NoProfile -ExecutionPolicy Bypass -File $gate.Script -Ga ...
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (AL lib: (EE) al...vice not closed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError

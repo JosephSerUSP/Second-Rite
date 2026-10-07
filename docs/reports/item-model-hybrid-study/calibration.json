@@ -1,0 +1,122 @@
+{
+  "carved": {
+    "clips": [
+      [
+        0,
+        0,
+        656,
+        599
+      ],
+      [
+        656,
+        0,
+        1312,
+        599
+      ],
+      [
+        0,
+        599,
+        656,
+        1199
+      ],
+      [
+        656,
+        599,
+        1312,
+        1199
+      ]
+    ],
+    "opaqueMainComponentBounds": [
+      [
+        223,
+        12,
+        631,
+        594
+      ],
+      [
+        869,
+        12,
+        1095,
+        599
+      ],
+      [
+        160,
+        599,
+        564,
+        1185
+      ],
+      [
+        722,
+        723,
+        1214,
+        1081
+      ]
+    ],
+    "targetDimensions": [
+      2.5237113402061855,
+      1.38603066439523,
+      3.6
+    ],
+    "boundary": "Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction."
+  },
+  "salvage": {
+    "clips": [
+      [
+        0,
+        0,
+        656,
+        599
+      ],
+      [
+        656,
+        0,
+        1312,
+        599
+      ],
+      [
+        0,
+        599,
+        656,
+        1199
+      ],
+      [
+        656,
+        599,
+        1312,
+        1199
+      ]
+    ],
+    "opaqueMainComponentBounds": [
+      [
+        145,
+        17,
+        618,
+        573
+      ],
+      [
+        870,
+        17,
+        1120,
+        590
+      ],
+      [
+        127,
+        602,
+        590,
+        1167
+      ],
+      [
+        751,
+        713,
+        1268,
+        1084
+      ]
+    ],
+    "targetDimensions": [
+      3.0625899280575544,
+      1.5706806282722514,
+      3.6
+    ],
+    "boundary": "Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction."
+  }
+}

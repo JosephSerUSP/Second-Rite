@@ -1,0 +1,6 @@
+test_live_target_edit_changes_closed_panel_without_losing_uvs (test_surface_conform_blender.SurfaceConformTests) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.291s
+
+OK

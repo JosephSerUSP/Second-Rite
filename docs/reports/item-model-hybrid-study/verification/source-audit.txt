@@ -1,0 +1,41 @@
+00:03.547  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_conform.blend"
+D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid_audit.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if mat.use_nodes:
+00:05.328  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_conform-front.png'
+00:05.375  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_conform-right.png'
+00:05.437  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_conform-back.png'
+00:05.500  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_conform-top.png'
+00:05.515  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_hull.blend"
+00:06.515  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_hull-front.png'
+00:06.609  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_hull-right.png'
+00:06.703  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_hull-back.png'
+00:06.781  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_hull-top.png'
+00:06.781  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_carved_sdf.blend"
+00:07.343  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_sdf-front.png'
+00:07.422  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_sdf-right.png'
+00:07.500  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_sdf-back.png'
+00:07.578  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_carved_sdf-top.png'
+00:07.593  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_conform.blend"
+00:08.062  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_conform-front.png'
+00:08.109  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_conform-right.png'
+00:08.156  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_conform-back.png'
+00:08.203  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_conform-top.png'
+00:08.203  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_hull.blend"
+00:08.718  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_hull-front.png'
+00:08.797  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_hull-right.png'
+00:08.890  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_hull-back.png'
+00:08.968  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_hull-top.png'
+00:08.968  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\source-project\assets\authoring\items\hybrid_salvage_sdf.blend"
+00:09.531  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_sdf-front.png'
+00:09.609  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_sdf-right.png'
+00:09.703  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_sdf-back.png'
+00:09.781  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\hybrid-source-views\hybrid_salvage_sdf-top.png'
+SOURCE AUDIT hybrid_carved_conform [2.5237112045288086, 1.386030673980713, 3.5999999046325684] []
+SOURCE AUDIT hybrid_carved_hull [2.5237114429473877, 1.386030673980713, 3.6000001430511475] []
+SOURCE AUDIT hybrid_carved_sdf [2.5237114429473877, 1.386030673980713, 3.5999999046325684] []
+SOURCE AUDIT hybrid_salvage_conform [3.0625901222229004, 1.5706806182861328, 3.5999999046325684] []
+SOURCE AUDIT hybrid_salvage_hull [3.0625901222229004, 1.5706806182861328, 3.5999999046325684] []
+SOURCE AUDIT hybrid_salvage_sdf [3.0625901222229004, 1.5706806182861328, 3.5999999046325684] []
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit

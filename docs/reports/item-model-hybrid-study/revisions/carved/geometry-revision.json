@@ -1,0 +1,19 @@
+{
+  "baseSourceSHA256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+  "geometryControlSHA256": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06",
+  "changes": [
+    "HULL_left: deeper 3D envelope, convex crown and rounder cut edges",
+    "HULL_right: deeper 3D envelope, convex crown and rounder cut edges",
+    "CORE_OrganicVolume: shorter, rounder saved loft with subdivision",
+    "Removed four invented screw-like fasteners from bone assembly",
+    "Upper crest carries an actual shallow carved channel",
+    "Raised cloth selvages and 16 physical edge stitches"
+  ],
+  "boundary": "Derived by opening and editing saved hull geometry; original six study sources unchanged. Overall envelope matched, individual components deliberately changed.",
+  "subsequentSavedMeshEdits": [
+    "Voxel remesh and relaxation of the saved cheeks",
+    "Smooth contraction of cheek cross-sections toward silhouette edges"
+  ],
+  "bakedSourceBeforeSurfaceBakeSHA256Historical": "d403288d2fbdea2bae3e771c5094e7652160982bf5c8d3d83e1e56e8611ce316",
+  "recordScope": "Initial saved-source surgery followed by voxel and cross-section edits; final source-evidence.json is the measured final state. The early crest cut is not claimed as a readable final recess after relaxation."
+}

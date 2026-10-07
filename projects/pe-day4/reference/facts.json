@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "project": "pe-day4",
+  "scope": "Reference facts for the St. Francis Hospital vertical slice. Facts only; no copyrighted reference media.",
+  "statusDefinitions": {
+    "verified": "Grounded directly in a primary/manual/owner-observed source. A verifier does not require two independent secondary sources.",
+    "corroborated": "At least two independent source groups agree.",
+    "single_source": "One source group currently supports the fact. Usable for planning, not an original-faithful numeric claim.",
+    "prototype": "Deliberate slice/engine assumption; not a claim about Parasite Eve.",
+    "unknown": "Unresolved or conflicting; value should be null unless the alternatives are explicitly represented."
+  },
+  "sources": {
+    "pe-manual-na-1998-owner-pack": {
+      "kind": "primary_manual",
+      "title": "Parasite Eve North American instruction manual (1998)",
+      "url": null,
+      "independenceGroup": "square-manual",
+      "access": "owner_reference_pack",
+      "notes": "Facts may be recorded; scanned pages/media remain private and must not ship."
+    },
+    "gamefaqs-young-gamer-day4": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Walkthrough — Day 4: Conception (_Young-Gamer_, 2023)",
+      "url": "https://gamefaqs.gamespot.com/ps/198265-parasite-eve/faqs/80267/day-4-conception",
+      "independenceGroup": "young-gamer",
+      "access": "public"
+    },
+    "almars-day4": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Day 4 Walkthrough (Almar's Guides)",
+      "url": "https://almarsguides.com/retro/walkthroughs/PS1/Games/ParasiteEve/FullPlaythrough/Day4/",
+      "independenceGroup": "almars",
+      "access": "public"
+    },
+    "gamefaqs-taerm": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Guide/Walkthrough (taerm)",
+      "url": "https://gamefaqs.gamespot.com/ps/198265-parasite-eve/faqs/4076",
+      "independenceGroup": "taerm",
+      "access": "public"
+    },
+    "gamefaqs-nrokk": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Guide/Walkthrough (NRokk)",
+      "url": "https://gamefaqs.gamespot.com/ps/198265-parasite-eve/faqs/7330",
+      "independenceGroup": "nrokk",
+      "access": "public"
+    },
+    "gamefaqs-iamnothing": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Walkthrough (iamnothing)",
+      "url": "https://gamefaqs.gamespot.com/ps/198265-parasite-eve/faqs/8790",
+      "independenceGroup": "iamnothing",
+      "access": "public"
+    },
+    "gamefaqs-shotgunnova": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Guide/Walkthrough (Shotgunnova)",
+      "url": "https://gamefaqs.gamespot.com/ps/198265-parasite-eve/faqs/55672",
+      "independenceGroup": "shotgunnova",
+      "access": "public"
+    },
+    "rpgclassics-experience": {
+      "kind": "reference_table",
+      "title": "Parasite Eve Experience Chart (RPGClassics)",
+      "url": "https://shrines.rpgclassics.com/psx/pe/experience.shtml",
+      "independenceGroup": "rpgclassics",
+      "access": "public"
+    },
+    "rpgclassics-weapons": {
+      "kind": "reference_table",
+      "title": "Parasite Eve Weapons (RPGClassics)",
+      "url": "https://shrines.rpgclassics.com/psx/pe/weapons.shtml",
+      "independenceGroup": "rpgclassics",
+      "access": "public"
+    },
+    "rpgclassics-pe": {
+      "kind": "reference_table",
+      "title": "Parasite Eve Parasite Energy table (RPGClassics)",
+      "url": "https://shrines.rpgclassics.com/psx/pe/pe.shtml",
+      "independenceGroup": "rpgclassics",
+      "access": "public"
+    },
+    "fandom-gameplay": {
+      "kind": "community_reference",
+      "title": "Parasite Eve Gameplay (Parasite Eve Wiki)",
+      "url": "https://parasiteeve.fandom.com/wiki/Parasite_Eve_Gameplay",
+      "independenceGroup": "fandom",
+      "access": "public"
+    },
+    "fandom-spiderwoman": {
+      "kind": "community_reference",
+      "title": "Spiderwoman (Parasite Eve Wiki)",
+      "url": "https://parasiteeve.fandom.com/wiki/Spiderwoman",
+      "independenceGroup": "fandom",
+      "access": "public"
+    },
+    "nomaki-day4": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Day 4 guide (parasiteeve.nomaki.jp)",
+      "url": "https://parasiteeve.nomaki.jp/day4.html",
+      "independenceGroup": "nomaki",
+      "access": "public"
+    },
+    "oocities-day3": {
+      "kind": "walkthrough",
+      "title": "Parasite Eve Day 3 guide (archived fan guide)",
+      "url": "https://www.oocities.org/timessquare/chasm/1347/ParasiteEve/day3.html",
+      "independenceGroup": "oocities",
+      "access": "public"
+    }
+  },
+  "facts": [
+    {"id":"slice.chapter","category":"scope","value":"Day 4: Conception — St. Francis Hospital","status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.elevator_crash_to_basement","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-nrokk"]},
+    {"id":"route.eve_cuts_main_power_after_crash","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-nrokk"]},
+    {"id":"route.basement_stairs_destroyed","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-nrokk"]},
+    {"id":"route.fuse1.storage_room","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.autopsy_key.morgue","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.blue_cardkey.autopsy_inner","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-taerm"]},
+    {"id":"route.fuse2.autopsy_inner","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-taerm"]},
+    {"id":"route.fuse3.office","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-taerm"]},
+    {"id":"route.restore_power.requires_three_fuses_and_wire_repair","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.power_restoration_enables_elevator_return","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.nurse_gives_green_cardkey","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","gamefaqs-taerm"]},
+    {"id":"route.green_cardkey.opens_storage_area","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]},
+    {"id":"route.liquid_nitrogen_valve_before_13f","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4","nomaki-day4"]},
+    {"id":"route.13f_research_button_opens_deeper_route","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","nomaki-day4"]},
+    {"id":"route.elevator_key.on_13f","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-shotgunnova","nomaki-day4"]},
+    {"id":"route.rooftop_spiderwoman_mandatory","category":"route","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","nomaki-day4"]},
+    {"id":"route.rooftop_escape_timer_seconds","category":"route","value":35,"status":"single_source","sources":["nomaki-day4"],"note":"Japanese Day 4 guide reports a 35-second escape window; verify against owner capture before treating as canonical."},
+    {"id":"progression.day3_end_level","category":"progression","value":18,"status":"single_source","sources":["gamefaqs-young-gamer-day4"],"note":"Guide states Aya reaches level 18 after Kerberos. The slice uses this as a bootstrap target, not a claim about every possible player save."},
+    {"id":"progression.haste_unlock_level","category":"progression","value":20,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","rpgclassics-pe","fandom-gameplay"]},
+    {"id":"starting.day4_briefing_ammo_bonus","category":"inventory","value":30,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-nrokk"]},
+    {"id":"starting.kerberos_drop_weapon","category":"inventory","value":"M9-2","status":"corroborated","sources":["oocities-day3","gamefaqs-young-gamer-day4"],"note":"The slice may normalize the post-Day-3 weapon to this guaranteed boss drop."},
+    {"id":"system.bp_awarded_on_level_up","category":"system","value":true,"status":"verified","sources":["pe-manual-na-1998-owner-pack"]},
+    {"id":"system.bp_targets","category":"system","value":["Active Time","Item Capacity","equipment parameters"],"status":"verified","sources":["pe-manual-na-1998-owner-pack"]},
+    {"id":"system.item_menu_reload_exists","category":"system","value":true,"status":"verified","sources":["pe-manual-na-1998-owner-pack"]},
+    {"id":"system.tune_up_transfers_equipment_properties","category":"system","value":true,"status":"verified","sources":["pe-manual-na-1998-owner-pack"]},
+    {"id":"system.random_encounters_exist","category":"system","value":true,"status":"verified","sources":["pe-manual-na-1998-owner-pack"]},
+    {"id":"boss.spiderwoman.phase1_hp","category":"boss","value":450,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","fandom-spiderwoman","nomaki-day4"]},
+    {"id":"boss.spiderwoman.exp","category":"boss","value":6500,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-shotgunnova","fandom-spiderwoman"]},
+    {"id":"boss.spiderwoman.drop","category":"boss","value":"G23","status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-shotgunnova"]},
+    {"id":"boss.spiderwoman.attacks","category":"boss","value":["physical slash/arm","fire projectile/breath","three-web shot"],"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-shotgunnova","fandom-spiderwoman"]},
+    {"id":"boss.spiderwoman.relocates_midfight_near_half_hp","category":"boss","value":true,"status":"corroborated","sources":["gamefaqs-young-gamer-day4","gamefaqs-shotgunnova"]},
+    {"id":"boss.spiderwoman.total_encounter_hp","category":"boss","value":null,"status":"unknown","sources":[],"note":"Sources expose an ambiguity: some list 450 for Spiderwoman/phase 1 while another lists 900 for the boss encounter. Keep phase/total semantics unresolved until checked against owner capture or game-data evidence."},
+    {"id":"enemy.hospital_roster","category":"enemy","value":["Bacterium","Flyman","Ratman","Spider","Mixedman"],"status":"corroborated","sources":["gamefaqs-young-gamer-day4","almars-day4"]}
+  ],
+  "disagreements": [
+    {
+      "id": "spiderwoman-hp-semantics",
+      "factIds": ["boss.spiderwoman.phase1_hp","boss.spiderwoman.total_encounter_hp"],
+      "summary": "Multiple sources report 450 HP for Spiderwoman/phase 1, while another guide reports 900 HP for the boss. The likely explanation is phase-versus-total accounting, but the project must not encode that inference as canonical until directly checked.",
+      "resolutionNeeded": "Owner capture/game-data inspection that distinguishes phase HP from total encounter HP."
+    }
+  ]
+}

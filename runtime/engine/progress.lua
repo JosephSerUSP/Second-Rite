@@ -48,10 +48,19 @@ end
 -- name; `formName` is species/form identity and can change while the individual
 -- name deliberately survives promotion.
 local function snapshotMember(battler, session)
+    -- Equipment is set aside while the parameters are read, so putting on a
+    -- vest is not reported as development (it used to be: getParam includes
+    -- equipment, and every equip in a Scene opened "ATTRIBUTE UP!").
     local params = {}
-    for _, p in ipairs(growth.PARAMS) do
-        params[p] = traits.getParam(battler, p, session)
-    end
+    local equipment = battler.equipment
+    battler.equipment = {}
+    local ok, err = pcall(function()
+        for _, p in ipairs(growth.PARAMS) do
+            params[p] = traits.getParam(battler, p, session)
+        end
+    end)
+    battler.equipment = equipment
+    assert(ok, err)
     return {
         actorId = battler.actorData and battler.actorData.id,
         name = battler.name,

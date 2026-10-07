@@ -1155,6 +1155,33 @@
       "description": "Applies the target Unit's authored seeded permanent growth packet for the specified level without changing its level."
     },
     {
+      "id": "ADD_PARAM",
+      "category": "Progression",
+      "label": "Add Parameter",
+      "params": [
+        {
+          "key": "target",
+          "type": "battlerRef"
+        },
+        {
+          "key": "param",
+          "type": "text"
+        },
+        {
+          "key": "amount",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "battle_phase",
+        "common",
+        "map",
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Permanently adds amount to one parameter of a Unit (the param_plus effect as a command). Any parameter the Unit declares in baseParams is accepted, so a Project's own stat tracks can grow; undeclared names are refused."
+    },
+    {
       "id": "DAMAGE",
       "category": "Battler",
       "label": "Damage",
@@ -2822,7 +2849,7 @@
         {
           "key": "reduction",
           "type": "number",
-          "min": 0.000001,
+          "min": 1e-06,
           "max": 1
         },
         {

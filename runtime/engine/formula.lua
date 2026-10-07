@@ -154,6 +154,14 @@ function formula.battlerView(battler, session, opts)
             __index = function(_, code)
                 return traits.getRate(battler, code, session)
             end
+        }),
+        -- Final value of ANY parameter (`a.stat.act`), equipment, states and
+        -- permanent bonuses included: the fixed fields above cover the
+        -- engine's own stats; a Project's declared stats read through here.
+        stat = setmetatable({}, {
+            __index = function(_, paramName)
+                return traits.getParam(battler, paramName, session)
+            end
         })
     }
 end

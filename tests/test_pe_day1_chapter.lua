@@ -138,6 +138,15 @@ local ok, err = pcall(function()
     useDoor("to_foyer", "day1_foyer")
     useDoor("to_auditorium", "day1_auditorium"); dismissCard()
     useDoor("to_stage", "day1_stage"); win()
+    do
+        local aya = ctx.session.party[1]
+        local traits = require("engine.traits")
+        local vars = require("engine.game_variables")
+        check(aya.level == 3, "Melissa's 12 EXP takes Aya to level 3 (3 + 9 EXP)")
+        check(traits.getParam(aya, "offense", ctx.session) == 3 and traits.getParam(aya, "defense", ctx.session) == 3
+            and traits.getParam(aya, "act", ctx.session) == 1, "levels raise Offense and Defense; Active Time waits for BP")
+        check(vars.get(ctx.session, "bp") == 40, "a fight without a hit taken pays its full 40 BP")
+    end
     useDoor("to_backstage", "day1_backstage")
     useDoor("to_corridor_a", "day1_corridor_a"); dismissCard(); win()
     useDoor("to_corridor_b", "day1_corridor_a"); dismissCard()          -- locked until the basement
@@ -243,6 +252,20 @@ local ok, err = pcall(function()
     hold("DOWN", 10)
     check(v().walkY < 2.2, "after release, DOWN follows the new view")
 
+    -- Active Time and PEnergy are stats the battle formulas read: raising
+    -- them speeds the AT gauge and PE recovery.
+    do
+        local formula = require("engine.formula")
+        local aya = session.party[1]
+        local function rate(expr) local vw = formula.battlerView(aya, session); return formula.eval(expr, { a = vw, ally = vw }) end
+        local at, pe = loader.system.realtimeBattle.atPerTick, "3 + ally.stat.penergy"
+        local at1, pe1 = rate(at), rate(pe)
+        require("engine.interpreter").runImmediate({ { cmd = "FOR_EACH", scope = "party", as = "aya", ["do"] = {
+            { cmd = "ADD_PARAM", target = "aya", param = "act", amount = 5 },
+            { cmd = "ADD_PARAM", target = "aya", param = "penergy", amount = 2 } } } }, ctx)
+        check(rate(at) > at1 * 1.4 and rate(pe) == pe1 + 2, "Active Time speeds the AT gauge; PEnergy speeds PE recovery")
+    end
+
     -- With no ammunition at all, the Baton still wins the Melissa and Eve
     -- fights honestly (no HP edits), which is why the original never dead-ends.
     for _, room in ipairs({ "day1_stage", "day1_rehearsal" }) do
@@ -260,6 +283,11 @@ local ok, err = pcall(function()
         local outcome, swings = fightWithBaton()
         print(("    %s: %s after %d baton swings, Aya HP %d"):format(room, outcome, swings, session.party[1].hp))
         check(outcome == "victory", room .. ": winnable with zero ammo on the Baton alone")
+        local hits = v().hits
+        tap("A")
+        local base = room == "day1_stage" and 40 or 120
+        check(require("engine.game_variables").get(session, "bp") == math.floor(base * math.max(0.5, 1 - 0.1 * hits)),
+            room .. ": BP shrink by 10% per hit taken (" .. hits .. " hits)")
     end
 end)
 pc.reset(); sh.init(nil)

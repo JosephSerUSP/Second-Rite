@@ -212,7 +212,9 @@
           3.5
         ],
         "cleared": "melissa_defeated",
-        "after": "Melissa's body twists into\nsomething else. She flees\nbackstage."
+        "after": "Melissa's body twists into\nsomething else. She flees\nbackstage.",
+        "exp": 12,
+        "bp": 40
       },
       "environment": "assets/models/rooms/stage/environment.obj",
       "views": [
@@ -362,7 +364,9 @@
           2
         ],
         "cleared": "rat_defeated",
-        "after": "The thing that was a rat\nlies still."
+        "after": "The thing that was a rat\nlies still.",
+        "exp": 2,
+        "bp": 10
       },
       "doors": [
         {
@@ -399,7 +403,9 @@
           8
         ],
         "cleared": "corridor_rat_cleared",
-        "after": "Another one. Whatever she\nis doing, it is spreading."
+        "after": "Another one. Whatever she\nis doing, it is spreading.",
+        "exp": 2,
+        "bp": 10
       },
       "views": [
         {
@@ -845,7 +851,9 @@
           4
         ],
         "cleared": "eve_defeated",
-        "after": "She calls herself Eve.\nShe slips away through\na hatch to the sewers."
+        "after": "She calls herself Eve.\nShe slips away through\na hatch to the sewers.",
+        "exp": 40,
+        "bp": 120
       },
       "environment": "assets/models/rooms/rehearsal/environment.obj",
       "views": [
@@ -913,7 +921,9 @@
           3
         ],
         "cleared": "sewer_rats_cleared",
-        "after": "The tunnel goes quiet."
+        "after": "The tunnel goes quiet.",
+        "exp": 6,
+        "bp": 20
       },
       "pickups": [
         {
@@ -1090,7 +1100,9 @@
           3
         ],
         "cleared": "channel_rats_cleared",
-        "after": "Only the water moves now."
+        "after": "Only the water moves now.",
+        "exp": 6,
+        "bp": 20
       },
       "views": [
         {
@@ -1162,7 +1174,9 @@
           3.5
         ],
         "cleared": "alligator_defeated",
-        "after": "The alligator sinks.\nAhead, a ladder to the street."
+        "after": "The alligator sinks.\nAhead, a ladder to the street.",
+        "exp": 80,
+        "bp": 200
       },
       "environment": "assets/models/rooms/sewer_deep/environment.obj",
       "views": [

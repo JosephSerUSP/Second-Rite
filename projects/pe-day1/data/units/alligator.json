@@ -14,7 +14,8 @@
     "mat": 6,
     "mdf": 6,
     "mpd": 1,
-    "asp": 10
+    "asp": 10,
+    "act": 1
   },
   "growthBands": [],
   "realtime": {

@@ -3,6 +3,9 @@
   "name": "Sewers - channel",
   "kind": "menu",
   "draw": "windows",
+  "config": {
+    "actorChangeReports": false
+  },
   "update": {
     "mode": "fixed",
     "step": 0.016666666666666666,
@@ -887,6 +890,26 @@
             "value": "''"
           },
           {
+            "name": "hits",
+            "value": 0
+          },
+          {
+            "name": "lastHitAge",
+            "value": 1000000000.0
+          },
+          {
+            "name": "bpGain",
+            "value": 0
+          },
+          {
+            "name": "gained",
+            "value": 0
+          },
+          {
+            "name": "lvl0",
+            "value": 1
+          },
+          {
             "name": "walkX",
             "value": "sceneState.walkX or 0"
           },
@@ -1211,6 +1234,30 @@
             "cmd": "REALTIME_BATTLE_STEP",
             "dx": "sceneState.dx",
             "dy": "sceneState.dy"
+          },
+          {
+            "cmd": "IF",
+            "condition": "rt.hitOnPlayer and rt.hitAge < sceneState.lastHitAge",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "hits",
+                    "value": "sceneState.hits + 1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "lastHitAge",
+                "value": "rt.hitOnPlayer and rt.hitAge or 1e9"
+              }
+            ]
           },
           {
             "cmd": "IF",
@@ -1911,12 +1958,106 @@
                         "cmd": "SET_SCENE_STATE",
                         "assignments": [
                           {
+                            "name": "bpGain",
+                            "value": "floor(20 * max(0.5, 1 - 0.1 * sceneState.hits))"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "FOR_EACH",
+                        "scope": "party",
+                        "as": "aya",
+                        "do": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "lvl0",
+                                "value": "aya.level"
+                              }
+                            ]
+                          },
+                          {
+                            "cmd": "GRANT_XP",
+                            "target": "aya",
+                            "amount": 6
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "FOR_EACH",
+                        "scope": "party",
+                        "as": "aya",
+                        "do": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "gained",
+                                "value": "aya.level - sceneState.lvl0"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "sceneState.gained > 0",
+                        "then": [
+                          {
+                            "cmd": "FOR_EACH",
+                            "scope": "party",
+                            "as": "aya",
+                            "do": [
+                              {
+                                "cmd": "ADD_PARAM",
+                                "target": "aya",
+                                "param": "offense",
+                                "amount": "sceneState.gained"
+                              },
+                              {
+                                "cmd": "ADD_PARAM",
+                                "target": "aya",
+                                "param": "defense",
+                                "amount": "sceneState.gained"
+                              },
+                              {
+                                "cmd": "ADD_PARAM",
+                                "target": "aya",
+                                "param": "penergy",
+                                "amount": "sceneState.gained"
+                              },
+                              {
+                                "cmd": "ADD_PARAM",
+                                "target": "aya",
+                                "param": "srecover",
+                                "amount": "sceneState.gained"
+                              },
+                              {
+                                "cmd": "ADD_PARAM",
+                                "target": "aya",
+                                "param": "maxHp",
+                                "amount": "8 * sceneState.gained"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_GAME_VARIABLE",
+                        "name": "bp",
+                        "value": "(variables.bp or 0) + sceneState.bpGain"
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
                             "name": "card",
-                            "value": "'Only the water moves now.'"
+                            "value": "'Only the water moves now.\\n\\n' .. 'EXP +6   BP +' .. sceneState.bpGain .. (sceneState.gained > 0 and '   LEVEL UP!' or '')"
                           },
                           {
                             "name": "cardLines",
-                            "value": 1
+                            "value": 3
                           },
                           {
                             "name": "ui",
@@ -1954,6 +2095,14 @@
                               {
                                 "name": "ui",
                                 "value": 0
+                              },
+                              {
+                                "name": "hits",
+                                "value": 0
+                              },
+                              {
+                                "name": "lastHitAge",
+                                "value": 1000000000.0
                               }
                             ]
                           },

@@ -3,6 +3,9 @@
   "name": "Carnegie Hall - shared dressing room",
   "kind": "menu",
   "draw": "windows",
+  "config": {
+    "actorChangeReports": false
+  },
   "update": {
     "mode": "fixed",
     "step": 0.016666666666666666,
@@ -472,6 +475,26 @@
           {
             "name": "mArmor",
             "value": "''"
+          },
+          {
+            "name": "hits",
+            "value": 0
+          },
+          {
+            "name": "lastHitAge",
+            "value": 1000000000.0
+          },
+          {
+            "name": "bpGain",
+            "value": 0
+          },
+          {
+            "name": "gained",
+            "value": 0
+          },
+          {
+            "name": "lvl0",
+            "value": 1
           },
           {
             "name": "walkX",

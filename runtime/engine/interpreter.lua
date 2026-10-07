@@ -715,6 +715,16 @@ end
 -- Applies one deterministic, permanent growth packet without changing the
 -- Unit's level. The command owns no level-up policy: authored hosts decide
 -- when to invoke it, and growth.apply owns the seeded mutation semantics.
+-- Permanent bonus to one parameter (the param_plus effect as a command):
+-- Bonus Point allocation, training, stat items authored as events.
+handlers.ADD_PARAM = function(cmd, ctx)
+    local target = resolveRef(cmd.target, ctx)
+    if not target then return end
+    local amount = evalFormula(cmd.amount, ctx)
+    emitAll(ctx, effects.apply({ type = "param_plus", param = cmd.param, value = tonumber(amount) or 0 },
+        target, target, ctx.session))
+end
+
 handlers.APPLY_GROWTH = function(cmd, ctx)
     local target = resolveRef(cmd.target, ctx)
     if not target then return end
@@ -2151,6 +2161,9 @@ handlers.RESET_SESSION = function(cmd, ctx)
     fresh:initializeStartingParty()
     _G.activeSession = fresh
     ctx.session = fresh
+    -- Re-point the party with the session, as LOAD_GAME does; a stale
+    -- ctx.party made every later FOR_EACH party act on the old run's Unit.
+    ctx.party = fresh.party
     present("clearStringPictures")
     present("disableEventSkip")
     present("rebindSession", fresh)

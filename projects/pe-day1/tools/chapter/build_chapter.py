@@ -469,7 +469,7 @@ def on_enter(room, spawn):
     hooks = [
         {"cmd": "COMMENT", "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."},
         setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, ix=0, iy=0, held=0, camYaw=0, ilen=1, range=4, aim=0, ratAim=0,
-             fight=0, near="''", card="''", cardLines=1, status="''", menuNote="''", mHp=0, mMax=1, mPe=0, mDef=0, mArmor="''",
+             fight=0, near="''", card="''", cardLines=1, status="''", menuNote="''", mHp=0, mMax=1, mPe=0, mDef=0, mArmor="''", hits=0, lastHitAge=1e9, bpGain=0, gained=0, lvl0=1,
              walkX="sceneState.walkX or %s" % spawn[0], walkY="sceneState.walkY or %s" % spawn[1]),
         setv(entryX="sceneState.walkX", entryY="sceneState.walkY"),
         issue_kit(),
@@ -564,10 +564,32 @@ def on_frame(room):
         setv(moving="sceneState.moving == 1 and rt.outcome == '' and 1 or 0"),
         {"cmd": "REALTIME_BATTLE_PAUSE", "paused": "sceneState.ui > 0"},
         {"cmd": "REALTIME_BATTLE_STEP", "dx": "sceneState.dx", "dy": "sceneState.dy"},
+        iff("rt.hitOnPlayer and rt.hitAge < sceneState.lastHitAge", [setv(hits="sceneState.hits + 1")]),
+        setv(lastHitAge="rt.hitOnPlayer and rt.hitAge or 1e9"),
         iff("sceneState.moving == 0", [setv(aim="atan2(rt.enemy.x - rt.player.x, rt.player.y - rt.enemy.y)")]),
         setv(ratAim="atan2(rt.player.x - rt.enemy.x, rt.enemy.y - rt.player.y)"),
     ]
     return [tick] + hooks + [iff(FIGHT, fight, explore)]
+
+
+def rewards(enc):
+    """EXP and Bonus Points after a won fight, as in the original: BP shrink
+    by 10% per hit Aya took (to half at most); each level gained raises
+    Offense, Defense, PEnergy, Status Recover and max HP."""
+    bp = "floor(%d * max(0.5, 1 - 0.1 * sceneState.hits))" % enc["bp"]
+    aya = lambda *cmds: {"cmd": "FOR_EACH", "scope": "party", "as": "aya", "do": list(cmds)}
+    grow = [{"cmd": "ADD_PARAM", "target": "aya", "param": p, "amount": "sceneState.gained"}
+            for p in ("offense", "defense", "penergy", "srecover")]
+    grow.append({"cmd": "ADD_PARAM", "target": "aya", "param": "maxHp", "amount": "8 * sceneState.gained"})
+    text = q(enc["after"] + "\n\n") + " .. 'EXP +%d   BP +' .. sceneState.bpGain .. (sceneState.gained > 0 and '   LEVEL UP!' or '')" % enc["exp"]
+    return [
+        setv(bpGain=bp),
+        aya(setv(lvl0="aya.level"), {"cmd": "GRANT_XP", "target": "aya", "amount": enc["exp"]}),
+        aya(setv(gained="aya.level - sceneState.lvl0")),
+        iff("sceneState.gained > 0", [aya(*grow)]),
+        {"cmd": "SET_GAME_VARIABLE", "name": "bp", "value": "(variables.bp or 0) + sceneState.bpGain"},
+        setv(card=text, cardLines=enc["after"].count("\n") + 3, ui=9),
+    ]
 
 
 def fight_select(room):
@@ -591,11 +613,11 @@ def fight_select(room):
                                                setv(ui=0, status="''")])])])])])
     leave = [setv(walkX="rt.player.x", walkY="rt.player.y"), {"cmd": "REALTIME_BATTLE_END"}, setv(fight=0, ui=0)]
     return iff("rt.outcome == 'victory'", [
-        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + [message(enc["after"], ui=9)], [
+        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + rewards(enc), [
         iff("rt.outcome == 'defeat'", [
             {"cmd": "COMMENT", "text": "Rough-chapter retry: restore Aya and restart this room's fight where she entered."},
             {"cmd": "REALTIME_BATTLE_END"}, {"cmd": "RECOVER_PARTY"},
-            setv(walkX="sceneState.entryX", walkY="sceneState.entryY", ui=0), battle_start(room)], [
+            setv(walkX="sceneState.entryX", walkY="sceneState.entryY", ui=0, hits=0, lastHitAge=1e9), battle_start(room)], [
             iff("rt.outcome == 'escaped'", leave + [setv(status="'Escaped. It is still here.'")], [menu])])])
 
 
@@ -642,6 +664,8 @@ def scene(room, room_model, spawn):
                               iff("sceneState.ui == 21 or sceneState.ui == 22", [setv(choice="(sceneState.choice+1)%2", menuNote="''")])]
     return {
         "id": "day1_" + room["id"], "name": room["name"], "kind": "menu", "draw": "windows",
+        # Level-ups are reported in the victory message, not the engine's generic Actor Change modal.
+        "config": {"actorChangeReports": False},
         "update": {"mode": "fixed", "step": 1 / 60, "maxCatchUp": 60},
         "windows": windows(room, room_model),
         "hooks": {"on_enter": on_enter(room, spawn), "on_frame": on_frame(room), "on_select": on_select(room),

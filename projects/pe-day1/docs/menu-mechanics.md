@@ -2,47 +2,68 @@
 
 The owner's verdict on UI pass 3: the menu is still fundamentally different
 from the original, and it needs mechanics underneath it to work. This file
-specifies those mechanics. `Menu.png` in the private pack is an HD fan
-remake (owner-confirmed), so it is not evidence of the original layout. The
-evidence is the decompilation (github.com/khasinski/parasite-eve-decomp),
-read for facts only; nothing from it is copied here.
+specifies those mechanics.
 
-## What the original does (from the decompilation)
+## Evidence
 
-- **Seven stat tracks** (`Aya_StatDerivation`, `Inv_RecalcSlotStats`):
-  0 Max HP, 1 Offense, 2 Defense, 3 PE / AT gauge, 4 Status recovery,
-  5 a battle stat (Active Time), 6 Item capacity. Each track stores a
-  growth value; a per-track 99-level growth table turns it into a level
-  plus a sub-level 0–48 (`Stat_QueryLevelAndSubLevel`), and a shared
-  per-level table gives the stat (`Aya_LookupLevelStats`).
-- **Max HP** = (points + 20) × tableHP / 20. Other tracks read their row at
-  (track level + bonus points allocated to that track).
-- **Item capacity is a stat**: the capacity column sets Aya's inventory
-  slot count (`Inv_SetAyaSlotCount`). Weapons and armor occupy slots
-  (`Inv_EquipmentCapacityFlow`, `Inv_ArmorCapacity`).
-- **Level-up after battle** (`Battle_StepLevelUp` → `Aya_SetTotalExp`):
-  EXP plus a PE bonus are awarded together, then every track is recomputed.
-- **PE abilities unlock by level** (`Aya_UnlockParasiteSpell`).
-- **Weapons and armor are inventory items with their own parameters**
-  (`Inv_BuildWeaponList`, `Inv_BuildArmorList`, `BattleCmd_LoadWeaponModifiers`).
-- **Status panel** (`Menu_DrawStatusPanel`): name at the top, then level and
-  stats, then the equipped weapon and armor rows 16 px apart. The menu has a
-  help line for the focused entry and a play-time clock (`Menu_ContextHelpFlow`).
+- **Primary:** the PlayStation manual (pp. 10–13) and in-game captures in
+  the owner's private reference pack
+  (`out/parasite-eve-day1-reference-pack/`: `menu-*.jpg`,
+  `longplay-14m00s-inventory.png`, `battle-mutated-rat.png`).
+- **Corroborating:** the decompilation (github.com/khasinski/parasite-eve-decomp),
+  read for facts only; nothing from it is copied here.
+- `Menu.png` in the older pack is an HD fan remake (owner-confirmed) and is
+  not evidence.
 
-The growth tables themselves are disc data, not in the decompilation; ours
-are original numbers with the same structure.
+## The original's menu
 
-## What we build
+- **Opens on Triangle** over the live field, dimmed; Circle closes/cancels.
+- **Frame:** a title bar across the top shows the help text for the focused
+  entry (or the focused item's name), with the play-time clock at its right.
+  A vertical icon column on the left selects the page: Item, PE, Weapon,
+  Armor, SYS, SORT (Tune-up and BP appear when available). Aya's HP
+  ("45/45 HP") with a green PE bar sits at the bottom right.
+- **Status screen** (the default view): portrait and name; Level; Next Level
+  (EXP to go, 3 at level 1); Equipment: weapon with its loaded rounds, then
+  armor. Right column: Bonus Point; Offense, Defense, PEnergy, Status
+  Recover; Active Time, Item Capacity (all start at 1). Labels sit on
+  slanted blue tabs.
+- **Item page:** two columns of slots, each an icon, name and count; equipped
+  items highlighted blue; unusable items gray; "Total 6/10" capacity. Every
+  carried thing takes a slot: weapons, armor, each Medicine, the Ammo Crate
+  (whose count is its rounds). Commands: Use, Discard, Move, Reload. Day 1
+  start: M84F, Club, N Vest, Ammo Crate (42), Medicine ×2 → 6/10.
+- **PE page:** abilities usable at Aya's level (Heal 1 at the start); gray if
+  PE is short.
+- **Weapon page:** the equipped weapon's Attack, Range, Bullets with base and
+  plus columns, effect slots below; carried weapons listed on the right;
+  choose one to equip.
+- **Armor page:** Defense, PEnergy, Critical with base/plus, effect slots;
+  carried armor on the right.
+- **Bonus Points:** awarded after each battle, fewer the more Aya was hit.
+  100 BP buy one level of Active Time or Item Capacity, or +1 to an
+  equipment parameter.
+- **Stats:** Offense/Defense are Aya's attack/defense skill; PEnergy sets the
+  PE bar's recovery and how fast PE use drains it; Status Recover shortens
+  abnormal states; Active Time sets the AT fill rate; Item Capacity the slot
+  count (10 at the start).
+- **Battle HUD** (top left): a long cyan AT bar, HP as large digits with no
+  bar, a green PE bar; AT/HP/PE labels to the right.
 
-1. **Level and EXP.** Fights award EXP and Bonus Points; level-ups raise the
-   tracks. Shown as Level and Next Level.
-2. **Bonus Points** spent from the menu into Offense, Defense, PE, Active
-   Time or Item Capacity.
-3. **Derived stats** feeding the existing battle: Offense → damage, Defense,
-   Active Time → AT fill rate, PE → max PE.
-4. **Inventory capacity**: a slot count from the capacity track; pickups
-   that do not fit are refused with a message.
-5. **Weapons and armor as inventory items** with parameters (attack, range,
-   rounds, capacity; defense) shown on their pages.
-6. **The menu itself** rebuilt on the original's structure: status panel,
-   then Item / PE / Weapon / Armor pages with the help line and clock.
+## Implementation plan
+
+1. **Engine (owner-approved):** permanent per-battler parameter bonuses
+   (`paramPlus`) accept any parameter a unit declares, not only the five
+   growth stats; formulas read final values of any parameter. Aya declares
+   `offense`, `defense`, `penergy`, `srecover`, `act` and `cap`.
+2. **Progression:** an EXP curve (3 to reach level 2), EXP and BP per fight,
+   BP reduced per hit taken; level-ups raise the tracks.
+3. **Inventory:** slot capacity from Item Capacity; weapons, armor, each
+   Medicine and the Ammo Crate take slots; full pickups are refused.
+4. **Weapons and armor** as items with Attack/Range/Bullets and
+   Defense/PEnergy/Critical; equip from their pages.
+5. **The menu** rebuilt on this frame and these pages.
+6. **Battle HUD** to the original's layout.
+
+Not in Day 1 scope: Tune-up (appears later in the game), SYS window colour
+and position settings, SORT orders beyond one.

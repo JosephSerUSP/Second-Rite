@@ -186,6 +186,14 @@ do
     local evs = effects.apply({ type = "param_plus", param = "nonsense", value = 2 }, b, b, sess)
     check(evs[1] and evs[1].type == "text" and evs[1].text:match("unknown param"),
         "param_plus rejects an unknown param with a message")
+
+    -- A parameter the unit declares (a Project stat track) can be raised too,
+    -- and formulas read its final value through a.stat.
+    b.actorData = setmetatable({ baseParams = setmetatable({ act = 1 }, { __index = b.actorData.baseParams }) },
+        { __index = b.actorData })
+    effects.apply({ type = "param_plus", param = "act", value = 2 }, b, b, sess)
+    check(require("engine.traits").getParam(b, "act", sess) == 3, "param_plus raises a declared custom param")
+    check(require("engine.formula").battlerView(b, sess).stat.act == 3, "a.stat reads a declared param's final value")
 end
 
 -- 10. Usability: a skillbook is offered until the skill is known, then refused.

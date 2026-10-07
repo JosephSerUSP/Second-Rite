@@ -1,0 +1,46 @@
+# Blender 5.2.2 LTS MTL File: 'hybrid_carved_hull.blend'
+# www.blender.org
+
+newmtl hybrid_carved_hull_binding
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hybrid_surface_atlas.png
+
+pass uv add 0.16 assets/models/items/hybrid_surface_atlas.png
+newmtl hybrid_carved_hull_core
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hybrid_surface_atlas.png
+
+pass uv add 0.16 assets/models/items/hybrid_surface_atlas.png
+newmtl hybrid_carved_hull_outer
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hybrid_surface_atlas.png
+
+pass uv add 0.16 assets/models/items/hybrid_surface_atlas.png
+newmtl hybrid_carved_hull_spine
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd hybrid_surface_atlas.png
+pass uv add 0.16 assets/models/items/hybrid_surface_atlas.png

@@ -1,0 +1,85 @@
+{
+  "platform": "local Windows",
+  "blender": "5.2.2 LTS, pinned",
+  "logs": {
+    "compile-check": {
+      "log": "compile-check.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "825ea55a5f5d8401c41776d0820e334aea4f7114a5978b36346d021d5cad63f7",
+      "retainedSHA256": "48e8cc8575acf85d3c1c543db3e1b636b26415c159a972f6cb77f01e726a74a6",
+      "marker": "ITEM BLEND COMPILE OK: 6 source(s)"
+    },
+    "compiler-tests": {
+      "log": "compiler-tests.txt",
+      "originalEncoding": "utf-8-sig",
+      "originalSHA256": "9a9c66dc33228990387316e698bcfabe78ffd3aafef387d4172329ffc5e9a9cd",
+      "retainedSHA256": "db24c8a2a00854b1e14a1eeb195f922231205d6e07972a75398361475353d09c",
+      "marker": "Ran 16 tests"
+    },
+    "conformance-tests": {
+      "log": "conformance-tests.txt",
+      "originalEncoding": "utf-8-sig",
+      "originalSHA256": "e6c6032ceb45b8a954ae097d0250afea7951950f0e29bea35aaaf92d2dc70a15",
+      "retainedSHA256": "5613fcf0b3bf7134a77847e13d48d11b3f474466fa7d3e39d6a0d5c37192e1e4",
+      "marker": "Ran 1 test"
+    },
+    "painted-tests": {
+      "log": "painted-tests.txt",
+      "originalEncoding": "utf-8-sig",
+      "originalSHA256": "8a6a6c5061ee3e1fe94f14a331638133b3b3f3ba638231ec7c13a04a2353bb25",
+      "retainedSHA256": "13010b20f8e6b9cc716eb2c85bc07de4b592926f3cf9b6aca1961338fa733287",
+      "marker": "Ran 11 tests"
+    },
+    "g1": {
+      "log": "g1.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "0983bca88a14545f384fd729a3b20b592fbac2e4d030cf2661f4dbf6386f0733",
+      "retainedSHA256": "73565bd68ac129a9becbbfe95b88853a2fe193bf1b19e9b38272a917a80b584e",
+      "marker": "VALIDATE OK"
+    },
+    "g2": {
+      "log": "g2.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "db54679963f9dd1f922f21abc12727dd616f6ef51ba61fb11ed55ed7d1eb9038",
+      "retainedSHA256": "aa1e977aa5cae2fa75c37be35db83ce53977fc586e725098f4be937e58cdedbf",
+      "marker": "Golden log matches for fixture 'growth'."
+    },
+    "g3": {
+      "log": "g3.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "2ccd999f3e2d47491fd18e9c0cbcdd9c47f50f620dc6daf59cffc8e22716b338",
+      "retainedSHA256": "83807d1ecb48f51904d2e6e4ba25c55daffc46ae7edecd5dcbef16df58f576cd",
+      "marker": "Golden UI log matches for scene 'reserve'."
+    },
+    "g4": {
+      "log": "g4.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "c2d7b89a65495c63ee5af1b68874ca89c3c37e708a0e689f05ffb0642c65a893",
+      "retainedSHA256": "7bbedbfcd33c6ca3129addde313e6f3e8e402896312bc611b58a587358e5b060",
+      "marker": "Engine state doc matches."
+    },
+    "unit": {
+      "log": "unit.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "5bd830356167e49a984fe4e0d113bfc986c196787ca1a22a83f40d05493dfc4a",
+      "retainedSHA256": "fcd420063ebba8e2d983abffe68e0c75c79e7b614fce97e45d355b791fce3e60",
+      "marker": "ALL UNIT TESTS OK"
+    },
+    "save": {
+      "log": "save.txt",
+      "originalEncoding": "utf-16",
+      "originalSHA256": "a7e656ff74b0cf561e6b2176c98f34ac4c956dceeebb2a367336afbb7dbe924b",
+      "retainedSHA256": "3a2830bfd4a0fddc9cda18a53e6b8408beedcb0d52fa4ca24deca3605490c381",
+      "marker": "SAVETEST OK"
+    },
+    "source-audit": {
+      "log": "source-audit.txt",
+      "originalEncoding": "utf-8-sig",
+      "originalSHA256": "64521481044c4681842522895af9a0c5906c89967f7c474820aa4a359ec1eeea",
+      "retainedSHA256": "08e2fdb17a08275bde495410ead11aa7f66fc6dd252bbc3b3e197f5f18c353b6"
+    }
+  },
+  "unavailable": "7 native Effekseer world-effect assertions",
+  "normalization": "Decode BOM-aware original logs, normalize line endings to LF and trim trailing whitespace/empty EOF lines; retain UTF-8 review copies. Original hashes recorded separately.",
+  "limits": "G1-G4/unit/save run on fresh canonical shipping Project, not the study-only Project. No G5/G6 or Linux byte check; no baseline rewrite. Core/UV/topology evidence is local review, not aesthetic acceptance."
+}

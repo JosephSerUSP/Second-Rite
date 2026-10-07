@@ -1,0 +1,38 @@
+[
+  {
+    "item": "hybrid_carved_conform",
+    "mtl": "plain/hybrid_carved_conform.mtl",
+    "sha256": "96155e2ac99a92f8b0de8774e5821c2482a389aa015c4dd6795b15d304ac741c",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  },
+  {
+    "item": "hybrid_carved_hull",
+    "mtl": "plain/hybrid_carved_hull.mtl",
+    "sha256": "224bd4f3be8e8388a1ccd1ca1b9965e3e3fc9a9f2221f759ef7d810bb363ed6d",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  },
+  {
+    "item": "hybrid_carved_sdf",
+    "mtl": "plain/hybrid_carved_sdf.mtl",
+    "sha256": "528fc53a07a16e2854350fe861d9145ec5f39532d79b7b8a046e970eccfef63d",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  },
+  {
+    "item": "hybrid_salvage_conform",
+    "mtl": "plain/hybrid_salvage_conform.mtl",
+    "sha256": "2ee93728cf440940d9c4706cd742acdb023007af948bbdfff792513cd3febb29",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  },
+  {
+    "item": "hybrid_salvage_hull",
+    "mtl": "plain/hybrid_salvage_hull.mtl",
+    "sha256": "9af00fdeaa68bc319afb9b93427ab7d7ba27bc6496e5015e3bdc67eedf112cd2",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  },
+  {
+    "item": "hybrid_salvage_sdf",
+    "mtl": "plain/hybrid_salvage_sdf.mtl",
+    "sha256": "d6df18e08d3465202da4dc0046b3386721fccd5a84020edfef5c14de936aa5d3",
+    "geometry": "Reuse exact retained study OBJ; control OBJ bytes identical."
+  }
+]

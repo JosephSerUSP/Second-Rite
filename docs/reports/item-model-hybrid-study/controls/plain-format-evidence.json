@@ -1,0 +1,24 @@
+{
+  "normalization": "Comparison MTL line endings normalized to LF and trailing empty EOF lines removed. No source, OBJ, texture or material tokens changed.",
+  "decodedRGBIdenticalSixStripsAndFullSheet": true,
+  "beforeHashes": {
+    "hybrid_carved_conform": "374954ce1c1b0b0d7594ff19a1365539b97df12166e3d134bc019ccb61d0b132",
+    "hybrid_carved_hull": "fb62f4564cb36d9493aa0daa375c151f5ba44e1fd07876aad2a47e6ff7bf6ab8",
+    "hybrid_carved_sdf": "aaf4a480866e224a206de8cf2839d13c43309d0ca63b670fa0cf91d836630e16",
+    "hybrid_salvage_conform": "2ec3d92227c56c8b6cf744d0e2c6006a5511754170e010a67bba24bd70eb52dd",
+    "hybrid_salvage_hull": "79eabd44caf2a83852a3e980bb6ebfb31ec6c17241a94aa7e929d207a9ed0770",
+    "hybrid_salvage_sdf": "de56aa99326fa0fdb3ca9429fe2defec6db096e40045eb044fd6fdd8fc60ec69"
+  },
+  "afterHashes": {
+    "hybrid_carved_conform": "96155e2ac99a92f8b0de8774e5821c2482a389aa015c4dd6795b15d304ac741c",
+    "hybrid_carved_hull": "224bd4f3be8e8388a1ccd1ca1b9965e3e3fc9a9f2221f759ef7d810bb363ed6d",
+    "hybrid_carved_sdf": "528fc53a07a16e2854350fe861d9145ec5f39532d79b7b8a046e970eccfef63d",
+    "hybrid_salvage_conform": "2ee93728cf440940d9c4706cd742acdb023007af948bbdfff792513cd3febb29",
+    "hybrid_salvage_hull": "9af00fdeaa68bc319afb9b93427ab7d7ba27bc6496e5015e3bdc67eedf112cd2",
+    "hybrid_salvage_sdf": "d6df18e08d3465202da4dc0046b3386721fccd5a84020edfef5c14de936aa5d3"
+  },
+  "renderTags": [
+    "hybrid-plain96",
+    "hybrid-plain-lf96"
+  ]
+}

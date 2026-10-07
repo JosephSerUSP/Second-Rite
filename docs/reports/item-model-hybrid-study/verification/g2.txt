@@ -1,0 +1,11 @@
+EFFEKSEER SHIM ABSENT: effekseer_shim.dll is not present (allowed).
+powershell : AL lib: (EE) alc_cleanup: 1 device not closed
+No D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\verify_hybrid.ps1:20 caractere:2
++  powershell -NoProfile -ExecutionPolicy Bypass -File $gate.Script -Ga ...
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (AL lib: (EE) al...vice not closed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Golden log matches for fixture 'affinity'.
+Golden log matches for fixture 'default'.
+Golden log matches for fixture 'growth'.

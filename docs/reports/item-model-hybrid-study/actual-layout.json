@@ -1,0 +1,147 @@
+{
+  "imageSize": [
+    1536,
+    1024
+  ],
+  "insetPixels": 6,
+  "regions": {
+    "carved_outer": {
+      "pixels": [
+        23,
+        22,
+        746,
+        242
+      ]
+    },
+    "salvage_outer": {
+      "pixels": [
+        790,
+        22,
+        1513,
+        241
+      ]
+    },
+    "carved_core": {
+      "pixels": [
+        23,
+        270,
+        746,
+        491
+      ]
+    },
+    "salvage_core": {
+      "pixels": [
+        790,
+        270,
+        1513,
+        491
+      ]
+    },
+    "carved_binding": {
+      "pixels": [
+        23,
+        518,
+        746,
+        738
+      ]
+    },
+    "salvage_binding": {
+      "pixels": [
+        790,
+        518,
+        1513,
+        738
+      ]
+    },
+    "carved_spine": {
+      "pixels": [
+        23,
+        764,
+        746,
+        1002
+      ]
+    },
+    "salvage_spine": {
+      "pixels": [
+        790,
+        764,
+        1513,
+        1002
+      ]
+    }
+  },
+  "requested": {
+    "imageSize": [
+      1536,
+      1024
+    ],
+    "insetPixels": 5,
+    "regions": {
+      "carved_outer": {
+        "pixels": [
+          24,
+          24,
+          744,
+          240
+        ]
+      },
+      "salvage_outer": {
+        "pixels": [
+          792,
+          24,
+          1512,
+          240
+        ]
+      },
+      "carved_core": {
+        "pixels": [
+          24,
+          280,
+          744,
+          496
+        ]
+      },
+      "salvage_core": {
+        "pixels": [
+          792,
+          280,
+          1512,
+          496
+        ]
+      },
+      "carved_binding": {
+        "pixels": [
+          24,
+          536,
+          744,
+          752
+        ]
+      },
+      "salvage_binding": {
+        "pixels": [
+          792,
+          536,
+          1512,
+          752
+        ]
+      },
+      "carved_spine": {
+        "pixels": [
+          24,
+          792,
+          744,
+          1000
+        ]
+      },
+      "salvage_spine": {
+        "pixels": [
+          792,
+          792,
+          1512,
+          1000
+        ]
+      }
+    }
+  },
+  "boundary": "Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain."
+}

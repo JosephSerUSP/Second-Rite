@@ -1,0 +1,30 @@
+powershell : AL lib: (EE) alc_cleanup: 1 device not closed
+No D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\verify_hybrid.ps1:20 caractere:2
++  powershell -NoProfile -ExecutionPolicy Bypass -File $gate.Script -Ga ...
++  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (AL lib: (EE) al...vice not closed:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Golden UI log matches for scene 'developer_3d'.
+Golden UI log matches for scene 'map'.
+Golden UI log matches for scene 'developer_menu'.
+Golden UI log matches for scene 'battle'.
+Golden UI log matches for scene 'actor_change'.
+Golden UI log matches for scene 'recruit'.
+Golden UI log matches for scene 'controls'.
+Golden UI log matches for scene 'crt_options'.
+Golden UI log matches for scene 'developer_geometry_export'.
+Golden UI log matches for scene 'quest_log'.
+Golden UI log matches for scene '1'.
+Golden UI log matches for scene 'save_menu'.
+Golden UI log matches for scene 'cinematic'.
+Golden UI log matches for scene 'title'.
+Golden UI log matches for scene 'ritual'.
+Golden UI log matches for scene 'datalog'.
+Golden UI log matches for scene 'options'.
+Golden UI log matches for scene 'game_over'.
+Golden UI log matches for scene 'items'.
+Golden UI log matches for scene 'status'.
+Golden UI log matches for scene 'dialogue'.
+Golden UI log matches for scene 'shop'.
+Golden UI log matches for scene 'reserve'.

@@ -1,0 +1,206 @@
+[
+  {
+    "item": "hybrid_carved_conform",
+    "paintedMaterials": {
+      "hybrid_carved_conform_spine": {
+        "faces": 400,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_carved_conform_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_carved_conform_core": {
+        "faces": 380,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 336
+      },
+      "hybrid_carved_conform_outer": {
+        "faces": 340,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 338
+      }
+    },
+    "findings": 0
+  },
+  {
+    "item": "hybrid_carved_hull",
+    "paintedMaterials": {
+      "hybrid_carved_hull_spine": {
+        "faces": 400,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_carved_hull_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_carved_hull_core": {
+        "faces": 380,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 336
+      },
+      "hybrid_carved_hull_outer": {
+        "faces": 1160,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 0
+      }
+    },
+    "findings": 0
+  },
+  {
+    "item": "hybrid_carved_sdf",
+    "paintedMaterials": {
+      "hybrid_carved_sdf_spine": {
+        "faces": 400,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_carved_sdf_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_carved_sdf_core": {
+        "faces": 6432,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 6432
+      },
+      "hybrid_carved_sdf_outer": {
+        "faces": 580,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 0
+      }
+    },
+    "findings": 0
+  },
+  {
+    "item": "hybrid_salvage_conform",
+    "paintedMaterials": {
+      "hybrid_salvage_conform_spine": {
+        "faces": 160,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_salvage_conform_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_salvage_conform_core": {
+        "faces": 380,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 336
+      },
+      "hybrid_salvage_conform_outer": {
+        "faces": 650,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 0
+      }
+    },
+    "findings": 0
+  },
+  {
+    "item": "hybrid_salvage_hull",
+    "paintedMaterials": {
+      "hybrid_salvage_hull_spine": {
+        "faces": 160,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_salvage_hull_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_salvage_hull_core": {
+        "faces": 380,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 336
+      },
+      "hybrid_salvage_hull_outer": {
+        "faces": 1734,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 0
+      }
+    },
+    "findings": 0
+  },
+  {
+    "item": "hybrid_salvage_sdf",
+    "paintedMaterials": {
+      "hybrid_salvage_sdf_spine": {
+        "faces": 160,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 128
+      },
+      "hybrid_salvage_sdf_binding": {
+        "faces": 352,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 272
+      },
+      "hybrid_salvage_sdf_core": {
+        "faces": 6432,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 6432
+      },
+      "hybrid_salvage_sdf_outer": {
+        "faces": 588,
+        "missing": 0,
+        "collapsed": 0,
+        "outsideRegion": 0,
+        "varyingNormals": 0
+      }
+    },
+    "findings": 0
+  }
+]

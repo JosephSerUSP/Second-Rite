@@ -1,0 +1,22 @@
+test_analysis_rejects_a_source_that_never_imports_the_validator (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_analysis_rejects_a_source_with_the_validate_call_removed (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_analysis_rejects_validation_placed_before_the_mtl_injection (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_imports_the_shared_runtime_validator (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_validates_the_exported_product_in_main (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_validation_runs_after_the_mtl_injection (test_compile_item_blend_validation.CompileItemBlendValidationTests) ... ok
+test_collinear_triangle_is_refused (test_compile_item_blend_validation.GuardRejectsRealDegenerateGeometryTests) ... ok
+test_second_fan_triangle_of_a_quad_is_checked (test_compile_item_blend_validation.GuardRejectsRealDegenerateGeometryTests) ... ok
+test_sound_mesh_passes (test_compile_item_blend_validation.GuardRejectsRealDegenerateGeometryTests) ... ok
+test_check_mode_fails_on_empty_source_discovery (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_compare_bytes_matching_product (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_compare_bytes_missing_expected_product (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_compare_bytes_stale_product (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_default_project_discovery (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_duplicate_source_arguments_rejected (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+test_explicit_source_arguments (test_compile_item_blends_host.TestCompileItemBlendsHost) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.309s
+
+OK
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\tmpbez3xvs4\item.obj: vertices=3 faces=1 triangles=1

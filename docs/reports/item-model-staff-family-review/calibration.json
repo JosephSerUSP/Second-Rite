@@ -1,0 +1,425 @@
+{
+  "boundary": "Original reference pixels unchanged. Measured opaque connected-body bounds within manually selected independent view clips; disconnected gem/tassel details may be omitted. Top views vary in scale; do not treat as scans. Thickness/joints/hidden undersides inferred. Direction interpretation does not alter lore/data.",
+  "items": {
+    "silver_rod": {
+      "reference": "reference-a.png",
+      "clips": [
+        [
+          100,
+          0,
+          270,
+          446
+        ],
+        [
+          345,
+          0,
+          475,
+          446
+        ],
+        [
+          600,
+          0,
+          770,
+          446
+        ],
+        [
+          810,
+          95,
+          1086,
+          300
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          130,
+          10,
+          239,
+          441
+        ],
+        "right": [
+          370,
+          11,
+          448,
+          440
+        ],
+        "back": [
+          626,
+          11,
+          733,
+          440
+        ],
+        "top": [
+          848,
+          120,
+          1028,
+          263
+        ]
+      },
+      "headClip": [
+        100,
+        0,
+        270,
+        126
+      ],
+      "frontHeadBounds": [
+        130,
+        10,
+        239,
+        126
+      ],
+      "frontWidthHeightRatio": 0.2529002320185615,
+      "headWidthHeightRatio": 0.2529002320185615,
+      "sideWidthHeightRatio": 0.18181818181818182
+    },
+    "mage_staff": {
+      "reference": "reference-a.png",
+      "clips": [
+        [
+          75,
+          448,
+          285,
+          929
+        ],
+        [
+          345,
+          448,
+          490,
+          929
+        ],
+        [
+          580,
+          448,
+          790,
+          929
+        ],
+        [
+          850,
+          495,
+          1040,
+          800
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          110,
+          453,
+          261,
+          924
+        ],
+        "right": [
+          386,
+          453,
+          465,
+          925
+        ],
+        "back": [
+          620,
+          455,
+          769,
+          925
+        ],
+        "top": [
+          908,
+          521,
+          978,
+          745
+        ]
+      },
+      "headClip": [
+        75,
+        448,
+        285,
+        635
+      ],
+      "frontHeadBounds": [
+        110,
+        453,
+        261,
+        635
+      ],
+      "frontWidthHeightRatio": 0.3205944798301486,
+      "headWidthHeightRatio": 0.3205944798301486,
+      "sideWidthHeightRatio": 0.1673728813559322
+    },
+    "sage_staff": {
+      "reference": "reference-a.png",
+      "clips": [
+        [
+          48,
+          931,
+          300,
+          1448
+        ],
+        [
+          350,
+          931,
+          485,
+          1448
+        ],
+        [
+          565,
+          931,
+          803,
+          1448
+        ],
+        [
+          808,
+          1050,
+          1086,
+          1220
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          72,
+          938,
+          290,
+          1435
+        ],
+        "right": [
+          387,
+          938,
+          440,
+          1435
+        ],
+        "back": [
+          576,
+          940,
+          798,
+          1435
+        ],
+        "top": [
+          838,
+          1078,
+          1043,
+          1177
+        ]
+      },
+      "headClip": [
+        48,
+        931,
+        300,
+        1086
+      ],
+      "frontHeadBounds": [
+        72,
+        938,
+        290,
+        1086
+      ],
+      "frontWidthHeightRatio": 0.4386317907444668,
+      "headWidthHeightRatio": 0.4386317907444668,
+      "sideWidthHeightRatio": 0.10663983903420524
+    },
+    "ether_staff": {
+      "reference": "reference-b.png",
+      "clips": [
+        [
+          65,
+          0,
+          305,
+          572
+        ],
+        [
+          360,
+          0,
+          490,
+          572
+        ],
+        [
+          590,
+          0,
+          795,
+          572
+        ],
+        [
+          810,
+          150,
+          1086,
+          300
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          100,
+          14,
+          285,
+          561
+        ],
+        "right": [
+          402,
+          13,
+          454,
+          562
+        ],
+        "back": [
+          590,
+          14,
+          752,
+          562
+        ],
+        "top": [
+          831,
+          180,
+          1060,
+          288
+        ]
+      },
+      "headClip": [
+        65,
+        0,
+        305,
+        250
+      ],
+      "frontHeadBounds": [
+        100,
+        14,
+        285,
+        250
+      ],
+      "frontWidthHeightRatio": 0.3382084095063985,
+      "headWidthHeightRatio": 0.3382084095063985,
+      "sideWidthHeightRatio": 0.0947176684881603
+    },
+    "war_staff": {
+      "reference": "reference-b.png",
+      "clips": [
+        [
+          90,
+          575,
+          300,
+          1000
+        ],
+        [
+          350,
+          575,
+          500,
+          1000
+        ],
+        [
+          580,
+          575,
+          795,
+          1000
+        ],
+        [
+          810,
+          640,
+          1086,
+          890
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          116,
+          575,
+          260,
+          990
+        ],
+        "right": [
+          373,
+          575,
+          476,
+          990
+        ],
+        "back": [
+          592,
+          575,
+          740,
+          990
+        ],
+        "top": [
+          847,
+          659,
+          1041,
+          844
+        ]
+      },
+      "headClip": [
+        90,
+        575,
+        300,
+        750
+      ],
+      "frontHeadBounds": [
+        116,
+        575,
+        260,
+        750
+      ],
+      "frontWidthHeightRatio": 0.3469879518072289,
+      "headWidthHeightRatio": 0.3469879518072289,
+      "sideWidthHeightRatio": 0.24819277108433735
+    },
+    "healing_staff": {
+      "reference": "reference-b.png",
+      "clips": [
+        [
+          65,
+          1004,
+          290,
+          1448
+        ],
+        [
+          350,
+          1004,
+          495,
+          1448
+        ],
+        [
+          580,
+          1004,
+          795,
+          1448
+        ],
+        [
+          790,
+          1100,
+          1086,
+          1300
+        ]
+      ],
+      "bodyBounds": {
+        "front": [
+          96,
+          1007,
+          280,
+          1432
+        ],
+        "right": [
+          396,
+          1006,
+          459,
+          1432
+        ],
+        "back": [
+          580,
+          1005,
+          743,
+          1432
+        ],
+        "top": [
+          818,
+          1139,
+          1071,
+          1251
+        ]
+      },
+      "headClip": [
+        65,
+        1004,
+        290,
+        1200
+      ],
+      "frontHeadBounds": [
+        96,
+        1007,
+        263,
+        1200
+      ],
+      "frontWidthHeightRatio": 0.4329411764705882,
+      "headWidthHeightRatio": 0.39294117647058824,
+      "sideWidthHeightRatio": 0.14788732394366197
+    }
+  }
+}

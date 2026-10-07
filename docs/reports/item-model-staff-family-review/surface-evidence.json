@@ -1,0 +1,2083 @@
+{
+  "items": [
+    {
+      "item": "silver_rod",
+      "source": {
+        "item": "silver_rod",
+        "sourceHash": "11ff70598b39fddf78a6d6bb7aeee462007890209af35111be80045060ad836b",
+        "objects": [
+          {
+            "name": "A_FlutedFacetedSilverBody",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 88,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.39411304835486466
+          },
+          {
+            "name": "B_IndigoGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.13688877661055637
+          },
+          {
+            "name": "B_IndigoGrip_ActualRaisedWrap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006793029909403717
+          },
+          {
+            "name": "C_BrassJoin_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.007972148445535725
+          },
+          {
+            "name": "C_BrassJoin_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.00797214505141627
+          },
+          {
+            "name": "C_BrassJoin_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.007972134869057967
+          },
+          {
+            "name": "D_ClosedHexagonalSilverHead",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 36,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.2557753817164061
+          },
+          {
+            "name": "E_HexagonalBrassInsetSeat",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.025606644440681982
+          },
+          {
+            "name": "F_ActualSapphireInset",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 18,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.16668736947351384
+          },
+          {
+            "name": "G_ClosedRearHeadPlate",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 18,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06518053604442187
+          }
+        ],
+        "boundsMin": [
+          -0.6668395400047302,
+          -0.5750284194946289,
+          -2.4000000953674316
+        ],
+        "boundsMax": [
+          0.6668395400047302,
+          0.3686079680919647,
+          2.7899999618530273
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "silver_rod",
+          "sr_contract_version": 1,
+          "sr_asset_id": "silver_rod",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-a.png\", \"clips\": [[100, 0, 270, 446], [345, 0, 475, 446], [600, 0, 770, 446], [810, 95, 1086, 300]], \"bodyBounds\": {\"front\": [130, 10, 239, 441], \"right\": [370, 11, 448, 440], \"back\": [626, 11, 733, 440], \"top\": [848, 120, 1028, 263]}, \"headClip\": [100, 0, 270, 126], \"frontHeadBounds\": [130, 10, 239, 126], \"frontWidthHeightRatio\": 0.2529002320185615, \"headWidthHeightRatio\": 0.2529002320185615, \"sideWidthHeightRatio\": 0.18181818181818182}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 1.4744318673937509, \"initialDepth\": 0.6399999856948853, \"targetDepth\": 0.9436363740400835, \"height\": 5.190000057220459, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}"
+        }
+      },
+      "worldDimensions": [
+        1.3336790800094604,
+        0.9436363875865936,
+        5.190000057220459
+      ],
+      "objSHA256": "2e9a5f8e0645d916a07594222940d6054dc73cfbbfd5c7b1d45230f93d152883",
+      "mtlSHA256": "b71ab485819ab54ed7f25e44baa51d8b197f6213879a087037298ac404f5aecd",
+      "vertices": 822,
+      "triangles": 1612,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 1299
+    },
+    {
+      "item": "mage_staff",
+      "source": {
+        "item": "mage_staff",
+        "sourceHash": "80b1134d92b25353d146120af42c26ee339199a447811a8fc780eeb628b75a8c",
+        "objects": [
+          {
+            "name": "A_WholeCrookedWoodAndOpenHook",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 192,
+            "smoothFaces": 168,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.7127815080888203
+          },
+          {
+            "name": "B_IndigoClothGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11440019055934639
+          },
+          {
+            "name": "B_IndigoClothGrip_ActualRaisedWrap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.007024830570432812
+          },
+          {
+            "name": "C_CopperBinding_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.019674581074639
+          },
+          {
+            "name": "C_CopperBinding_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.019674596710606115
+          },
+          {
+            "name": "C_CopperBinding_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0196746006195979
+          },
+          {
+            "name": "C_CopperBinding_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.019674600619597915
+          },
+          {
+            "name": "D_SuspensionLink",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 64,
+            "smoothFaces": 32,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005925041972020214
+          },
+          {
+            "name": "E_ShortSuspensionStem",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 8,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.000372910849529658
+          },
+          {
+            "name": "F_LanternGemCap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 36,
+            "smoothFaces": 12,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006605998104234324
+          },
+          {
+            "name": "G_FacetedBlueSuspendedStone",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.19202035189451533
+          },
+          {
+            "name": "H_BroadTrailingCloth",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 40,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.01000716060434428
+          },
+          {
+            "name": "I_BulbousTimberButt",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 64,
+            "smoothFaces": 64,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03147596028422152
+          }
+        ],
+        "boundsMin": [
+          -0.9894219040870667,
+          -0.5057740211486816,
+          -3.0199999809265137
+        ],
+        "boundsMax": [
+          0.9832829236984253,
+          0.4753178358078003,
+          2.8417136669158936
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "mage_staff",
+          "sr_contract_version": 1,
+          "sr_asset_id": "mage_staff",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-a.png\", \"clips\": [[75, 448, 285, 929], [345, 448, 490, 929], [580, 448, 790, 929], [850, 495, 1040, 800]], \"bodyBounds\": {\"front\": [110, 453, 261, 924], \"right\": [386, 453, 465, 925], \"back\": [620, 455, 769, 925], \"top\": [908, 521, 978, 745]}, \"headClip\": [75, 448, 285, 635], \"frontHeadBounds\": [110, 453, 261, 635], \"frontWidthHeightRatio\": 0.3205944798301486, \"headWidthHeightRatio\": 0.3205944798301486, \"sideWidthHeightRatio\": 0.1673728813559322}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 1.4856944308619562, \"initialDepth\": 0.6603591442108154, \"targetDepth\": 0.9810919029227758, \"height\": 5.861713647842407, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}"
+        }
+      },
+      "worldDimensions": [
+        1.972704827785492,
+        0.9810918569564819,
+        5.861713647842407
+      ],
+      "objSHA256": "b7abff575a1e0f2a3ac5846d6f753d233dd5f51139ffff9e3797ac851953cadd",
+      "mtlSHA256": "dfa8609565f924b31496c558f36b6725bcc57a51346433b75c6e17433a239477",
+      "vertices": 1084,
+      "triangles": 2120,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 1046
+    },
+    {
+      "item": "sage_staff",
+      "source": {
+        "item": "sage_staff",
+        "sourceHash": "ea9a486b44929d68fd9cd6208b3ec95c06d41ff6e6273fa03a32b4f20ed93d89",
+        "objects": [
+          {
+            "name": "A_PaleAshShaft",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 80,
+            "smoothFaces": 40,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.2881614387196434
+          },
+          {
+            "name": "B_IndigoStudyGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.12054755652751672
+          },
+          {
+            "name": "B_IndigoStudyGrip_ActualRaisedWrap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.007345102794230307
+          },
+          {
+            "name": "C_BrassJoin_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.02007025847653073
+          },
+          {
+            "name": "C_BrassJoin_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020070258476530746
+          },
+          {
+            "name": "C_BrassJoin_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.02007025847653072
+          },
+          {
+            "name": "D_SubstantialTabletSocket",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 60,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.12306400100628587
+          },
+          {
+            "name": "E_ActualForkShoulder_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 40,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05836447567900625
+          },
+          {
+            "name": "E_ActualForkShoulder_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 40,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05833867959785776
+          },
+          {
+            "name": "F_StoneSupportLug_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03550516777096187
+          },
+          {
+            "name": "F_StoneSupportLug_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03550516777096187
+          },
+          {
+            "name": "G_TasselCap_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 24,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.009159750840746717
+          },
+          {
+            "name": "G_TasselCap_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 24,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.009159750840746717
+          },
+          {
+            "name": "H_BlueTasselBead_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 48,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.009377997971101937
+          },
+          {
+            "name": "H_BlueTasselBead_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 48,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.009377997971101937
+          },
+          {
+            "name": "I_TasselStem_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 8,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005226933010110994
+          },
+          {
+            "name": "I_TasselStem_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 8,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0005226933010111008
+          },
+          {
+            "name": "J_ThickFlutedBlueTassel_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 64,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.04838241052135828
+          },
+          {
+            "name": "J_ThickFlutedBlueTassel_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 64,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.04838241052135828
+          },
+          {
+            "name": "K_SteppedIvoryTabletAndLargeMark",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 98,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 1.223267329719385
+          },
+          {
+            "name": "L_FacetedBrassButt",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06153430407582358
+          }
+        ],
+        "boundsMin": [
+          -1.4600000381469727,
+          -0.32098591327667236,
+          -3.0199999809265137
+        ],
+        "boundsMax": [
+          1.4600000381469727,
+          0.32098591327667236,
+          3.0
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "sage_staff",
+          "sr_contract_version": 1,
+          "sr_asset_id": "sage_staff",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-a.png\", \"clips\": [[48, 931, 300, 1448], [350, 931, 485, 1448], [565, 931, 803, 1448], [808, 1050, 1086, 1220]], \"bodyBounds\": {\"front\": [72, 938, 290, 1435], \"right\": [387, 938, 440, 1435], \"back\": [576, 940, 798, 1435], \"top\": [838, 1078, 1043, 1177]}, \"headClip\": [48, 931, 300, 1086], \"frontHeadBounds\": [72, 938, 290, 1086], \"frontWidthHeightRatio\": 0.4386317907444668, \"headWidthHeightRatio\": 0.4386317907444668, \"sideWidthHeightRatio\": 0.10663983903420524}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 1.1068480128007607, \"initialDepth\": 0.5799999833106995, \"targetDepth\": 0.6419718289519221, \"height\": 6.019999980926514, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}"
+        }
+      },
+      "worldDimensions": [
+        2.9200000762939453,
+        0.6419718265533447,
+        6.019999980926514
+      ],
+      "objSHA256": "2d1cf3f12df164016b96d27d80c1f6c27c50fcc0237027fbdcbc7c5a3fa08fc1",
+      "mtlSHA256": "9f3e71eb796f98fe1df16d009fbd03b531d74f74b6556e62fb44f586bf02a701",
+      "vertices": 1290,
+      "triangles": 2496,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 1460
+    },
+    {
+      "item": "ether_staff",
+      "source": {
+        "item": "ether_staff",
+        "sourceHash": "dba198be400a5c932e0e2e205d7a87228eb1c07abe6fec05fb6724b28b35d16c",
+        "objects": [
+          {
+            "name": "A_TaperedSilverStem",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 112,
+            "smoothFaces": 112,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.2713399073256713
+          },
+          {
+            "name": "B_PlumGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.1419202201971037
+          },
+          {
+            "name": "C_SilverCollar_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.021853456076439574
+          },
+          {
+            "name": "C_SilverCollar_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.021853437468346455
+          },
+          {
+            "name": "C_SilverCollar_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.021853437468346486
+          },
+          {
+            "name": "C_SilverCollar_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.02185343746834645
+          },
+          {
+            "name": "C_SilverCollar_4",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03414599765965628
+          },
+          {
+            "name": "D_ActualBroadSilverGripSpiral",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.008468181250478633
+          },
+          {
+            "name": "E_OuterCrescentWithBrassDepth",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 186,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.23045114377828393
+          },
+          {
+            "name": "F_InnerOpposingCrescent",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 186,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.17735687320339744
+          },
+          {
+            "name": "G_DiagonalAmethystPrism",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 30,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.13021557032064088
+          },
+          {
+            "name": "H_PrismEndMount_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.018344001222722842
+          },
+          {
+            "name": "H_PrismEndMount_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.018344001222722842
+          },
+          {
+            "name": "I_ActualMountBridge_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 8,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0013130594303307974
+          },
+          {
+            "name": "I_ActualMountBridge_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 8,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0013130593186799116
+          }
+        ],
+        "boundsMin": [
+          -1.0524972677230835,
+          -0.2853989601135254,
+          -3.0
+        ],
+        "boundsMax": [
+          0.9638805389404297,
+          0.2853989601135254,
+          3.02630877494812
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "ether_staff",
+          "sr_contract_version": 1,
+          "sr_asset_id": "ether_staff",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-b.png\", \"clips\": [[65, 0, 305, 572], [360, 0, 490, 572], [590, 0, 795, 572], [810, 150, 1086, 300]], \"bodyBounds\": {\"front\": [100, 14, 285, 561], \"right\": [402, 13, 454, 562], \"back\": [590, 14, 752, 562], \"top\": [831, 180, 1060, 288]}, \"headClip\": [65, 0, 305, 250], \"frontHeadBounds\": [100, 14, 285, 250], \"frontWidthHeightRatio\": 0.3382084095063985, \"headWidthHeightRatio\": 0.3382084095063985, \"sideWidthHeightRatio\": 0.0947176684881603}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 0.9513298234522616, \"initialDepth\": 0.6000000238418579, \"targetDepth\": 0.5707979167528274, \"height\": 6.02630877494812, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}",
+          "sr_precision_repair": "[{\"object\": \"E_OuterCrescentWithBrassDepth\", \"verticesBefore\": 238, \"verticesAfter\": 236, \"maxRemainingVertexDisplacement\": 0.0}, {\"object\": \"F_InnerOpposingCrescent\", \"verticesBefore\": 240, \"verticesAfter\": 236, \"maxRemainingVertexDisplacement\": 0.0}]"
+        }
+      },
+      "worldDimensions": [
+        2.016377806663513,
+        0.5707979202270508,
+        6.02630877494812
+      ],
+      "objSHA256": "a179bcb895b9618991cd8f456f2b4495530b7b4e4d683248a4c8b0b0b4f8d04f",
+      "mtlSHA256": "fb6d2bad50282a2d0d3aa3253047132410d1cef35897ed91e6fdc2cc569c9c5b",
+      "vertices": 1436,
+      "triangles": 2812,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 964
+    },
+    {
+      "item": "war_staff",
+      "source": {
+        "item": "war_staff",
+        "sourceHash": "52e8d71881118acd4f8ad3806a7a0c3c99527cbc1f91ecddd821204237d90394",
+        "objects": [
+          {
+            "name": "A_StoutAshwoodPole",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 16,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.3374451492574118
+          },
+          {
+            "name": "B_BrownFightingGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.2514312190791839
+          },
+          {
+            "name": "B_BrownFightingGrip_ActualRaisedWrap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.008479880642460772
+          },
+          {
+            "name": "C_BoltedIronCollar_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.052419533309993785
+          },
+          {
+            "name": "C_BoltedIronCollar_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05241952991385536
+          },
+          {
+            "name": "C_BoltedIronCollar_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05241953330999384
+          },
+          {
+            "name": "C_BoltedIronCollar_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.05241953330999384
+          },
+          {
+            "name": "D_RealCollarBolt_0_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_0_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_0_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_0_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_1_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_1_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_1_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_1_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_2_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_2_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_2_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_2_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_3_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_3_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_3_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "D_RealCollarBolt_3_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0004389954380351901
+          },
+          {
+            "name": "E_HeavyFourSidedCore",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 16,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.5856666713953014
+          },
+          {
+            "name": "F_ThickHammerFlange_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.19104945699794673
+          },
+          {
+            "name": "F_ThickHammerFlange_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.13178387402209246
+          },
+          {
+            "name": "F_ThickHammerFlange_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.19104945699794673
+          },
+          {
+            "name": "F_ThickHammerFlange_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.13178387402209246
+          },
+          {
+            "name": "G_BluntFacetedIronButt",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.07632603754998293
+          }
+        ],
+        "boundsMin": [
+          -0.9800000190734863,
+          -0.7396144866943359,
+          -3.0299999713897705
+        ],
+        "boundsMax": [
+          0.9800000190734863,
+          0.7396144866943359,
+          2.930000066757202
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "war_staff",
+          "sr_contract_version": 1,
+          "sr_asset_id": "war_staff",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-b.png\", \"clips\": [[90, 575, 300, 1000], [350, 575, 500, 1000], [580, 575, 795, 1000], [810, 640, 1086, 890]], \"bodyBounds\": {\"front\": [116, 575, 260, 990], \"right\": [373, 575, 476, 990], \"back\": [592, 575, 740, 990], \"top\": [847, 659, 1041, 844]}, \"headClip\": [90, 575, 300, 750], \"frontHeadBounds\": [116, 575, 260, 750], \"frontWidthHeightRatio\": 0.3469879518072289, \"headWidthHeightRatio\": 0.3469879518072289, \"sideWidthHeightRatio\": 0.24819277108433735}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 0.973176936639691, \"initialDepth\": 1.5199999809265137, \"targetDepth\": 1.4792289251304533, \"height\": 5.960000038146973, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}"
+        }
+      },
+      "worldDimensions": [
+        1.9600000381469727,
+        1.4792289733886719,
+        5.960000038146973
+      ],
+      "objSHA256": "61648a42c40ca89308b57b99e0db18c96a6a2006eb1ac87108f2d499796bfe8e",
+      "mtlSHA256": "9989bfdc3996d291db24d00874ff79decff4a35c4e000a099335dafc0007e15e",
+      "vertices": 1300,
+      "triangles": 2484,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 1212
+    },
+    {
+      "item": "healing_staff",
+      "source": {
+        "item": "healing_staff",
+        "sourceHash": "0ee5e14f5350a9f26289c2dc1e3110e170d472c80b26c2e26b4536b7c4b1a3b7",
+        "objects": [
+          {
+            "name": "A_HoneyWoodShaft",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 96,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.25626295516590464
+          },
+          {
+            "name": "B_SageGreenClothGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.13286362112153086
+          },
+          {
+            "name": "B_SageGreenClothGrip_ActualRaisedWrap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006779826633408375
+          },
+          {
+            "name": "C_WarmBrassJoin_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.01553641446788169
+          },
+          {
+            "name": "C_WarmBrassJoin_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.015536428714702417
+          },
+          {
+            "name": "C_WarmBrassJoin_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.015536428714702406
+          },
+          {
+            "name": "D_BranchingWoodShoulder_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 50,
+            "smoothFaces": 30,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0354240553416691
+          },
+          {
+            "name": "D_BranchingWoodShoulder_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 50,
+            "smoothFaces": 30,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0354318410686373
+          },
+          {
+            "name": "E_ChunkyCeramicPetal_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11677439886620683
+          },
+          {
+            "name": "E_ChunkyCeramicPetal_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11677439886620683
+          },
+          {
+            "name": "E_ChunkyCeramicPetal_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11677439886620683
+          },
+          {
+            "name": "E_ChunkyCeramicPetal_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11677439886620683
+          },
+          {
+            "name": "E_ChunkyCeramicPetal_4",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 32,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.11677439886620683
+          },
+          {
+            "name": "F_RearBrassHaloSupport",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 272,
+            "smoothFaces": 256,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0542321157438579
+          },
+          {
+            "name": "G_ActualPetalClip_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03172083419660727
+          },
+          {
+            "name": "G_ActualPetalClip_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03172083419660727
+          },
+          {
+            "name": "G_ActualPetalClip_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03172083419660727
+          },
+          {
+            "name": "G_ActualPetalClip_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 26,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.03172083419660727
+          },
+          {
+            "name": "H_JadeSeatRim",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.07612903263222065
+          },
+          {
+            "name": "I_ConvexJadeMedallion",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 96,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06367569917759
+          },
+          {
+            "name": "J_JadeSupportCup",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 64,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.04850895811716187
+          },
+          {
+            "name": "K_BroadGreenTrailingCloth",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 40,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.011516957109420979
+          },
+          {
+            "name": "L_CarvedBulbousWoodButt",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 80,
+            "smoothFaces": 60,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.08280728160373643
+          },
+          {
+            "name": "M_BrassButtCap",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0119240148922893
+          }
+        ],
+        "boundsMin": [
+          -1.217904806137085,
+          -0.5506945848464966,
+          -3.0450000762939453
+        ],
+        "boundsMax": [
+          1.217904806137085,
+          0.38242676854133606,
+          3.2646777629852295
+        ],
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "healing_staff",
+          "sr_contract_version": 1,
+          "sr_asset_id": "healing_staff",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "ritual_staff_family_direction",
+          "sr_authoring_description": "Crafted ritual tools; six distinct head masses; strong shoulders, clear joins, quiet materials; no all-over filigree.",
+          "sr_shared_atlas": "ritual_staff_family_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1254, 1254], \"insetPixels\": 5, \"regions\": {\"sapphire\": {\"pixels\": [29, 29, 375, 343], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [402, 29, 830, 343], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [855, 29, 1225, 343], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [29, 372, 375, 635], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [402, 372, 735, 635], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [763, 372, 1225, 635], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [29, 663, 613, 761], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [642, 664, 1225, 761], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [29, 791, 402, 891], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [432, 791, 803, 891], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [833, 791, 1225, 891], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [29, 919, 402, 1047], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [432, 919, 804, 1047], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [834, 919, 1225, 1047], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [29, 1076, 613, 1224], \"users\": [\"healing_staff\"]}}, \"requestedImageSize\": [2048, 2048], \"requestedRegions\": {\"sapphire\": {\"pixels\": [48, 48, 608, 560], \"users\": [\"silver_rod\", \"mage_staff\"]}, \"sage_front\": {\"pixels\": [656, 48, 1280, 560], \"users\": [\"sage_staff\"]}, \"sage_back\": {\"pixels\": [1328, 48, 2000, 560], \"users\": [\"sage_staff\"]}, \"amethyst\": {\"pixels\": [48, 608, 608, 1040], \"users\": [\"ether_staff\"]}, \"jade\": {\"pixels\": [656, 608, 1200, 1040], \"users\": [\"healing_staff\"]}, \"ivory\": {\"pixels\": [1248, 608, 2000, 1040], \"users\": [\"sage_staff\", \"healing_staff\"]}, \"silver\": {\"pixels\": [48, 1088, 1000, 1248], \"users\": [\"silver_rod\", \"ether_staff\"]}, \"brass\": {\"pixels\": [1048, 1088, 2000, 1248], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\", \"ether_staff\", \"healing_staff\"]}, \"iron\": {\"pixels\": [48, 1296, 656, 1456], \"users\": [\"war_staff\"]}, \"dark_wood\": {\"pixels\": [704, 1296, 1312, 1456], \"users\": [\"mage_staff\"]}, \"ash_wood\": {\"pixels\": [1360, 1296, 2000, 1456], \"users\": [\"sage_staff\", \"war_staff\", \"healing_staff\"]}, \"indigo\": {\"pixels\": [48, 1504, 656, 1712], \"users\": [\"silver_rod\", \"mage_staff\", \"sage_staff\"]}, \"plum\": {\"pixels\": [704, 1504, 1312, 1712], \"users\": [\"ether_staff\"]}, \"brown\": {\"pixels\": [1360, 1504, 2000, 1712], \"users\": [\"war_staff\"]}, \"green_cloth\": {\"pixels\": [48, 1760, 1000, 2000], \"users\": [\"healing_staff\"]}}, \"boundary\": \"Measured panel support from original RGB (>65 median max-channel across7 pixels at panel centre), visually checked. Panel allocations moved and actual size differs from requested2048. Insets reserve sampling clearance; original pixels unchanged. No seamlessness claim.\"}",
+          "sr_reference_measurements": "{\"reference\": \"reference-b.png\", \"clips\": [[65, 1004, 290, 1448], [350, 1004, 495, 1448], [580, 1004, 795, 1448], [790, 1100, 1086, 1300]], \"bodyBounds\": {\"front\": [96, 1007, 280, 1432], \"right\": [396, 1006, 459, 1432], \"back\": [580, 1005, 743, 1432], \"top\": [818, 1139, 1071, 1251]}, \"headClip\": [65, 1004, 290, 1200], \"frontHeadBounds\": [96, 1007, 263, 1200], \"frontWidthHeightRatio\": 0.4329411764705882, \"headWidthHeightRatio\": 0.39294117647058824, \"sideWidthHeightRatio\": 0.14788732394366197}",
+          "sr_direction_criteria": "[\"Unique outline before texture\", \"Head width and shoulders readable at96px\", \"Negative gaps visible\", \"Plain control retains identity\", \"Smooth shafts / flat cut faces\", \"Hero motif gets its own pixel region\"]",
+          "sr_generation_method": "one family direction, two triple multiview sheets, one original shared atlas for six independent constructions",
+          "sr_visual_acceptance": "open; native checks are not owner acceptance",
+          "sr_saved_depth_adjustment": "{\"method\": \"World-Y root scale toward independently measured right-view main-body bounds; front X/Z preserved\", \"factor\": 1.5297071290409647, \"initialDepth\": 0.6100000143051147, \"targetDepth\": 0.9331213705976245, \"height\": 6.309677839279175, \"boundary\": \"Right silhouette includes attachments and generated views differ; this is a proportion target, not a depth scan. Initial profiles/path metadata are provenance; source geometry and transform remain authority.\"}"
+        }
+      },
+      "worldDimensions": [
+        2.43580961227417,
+        0.9331213533878326,
+        6.309677839279175
+      ],
+      "objSHA256": "3e28b69bdf5d27a927a8315e3d7f8c5c1154013fb0b41e39f0ab0c57fb1b8a99",
+      "mtlSHA256": "b37c6f1cd29ef625a2e635b5a07ad5d7bedaf561c581fd7cb3d806b4d06d4267",
+      "vertices": 1724,
+      "triangles": 3356,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixelsFirstTwoViews": 1240
+    }
+  ],
+  "paintedFaces": [
+    {
+      "item": "silver_rod",
+      "paintedMaterials": {
+        "silver_rod_silver": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 256,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "silver_rod_indigo": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1068,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1008
+        },
+        "silver_rod_brass": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 264,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "silver_rod_sapphire": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 24,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "mage_staff",
+      "paintedMaterials": {
+        "mage_staff_dark_wood": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 456,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 432
+        },
+        "mage_staff_indigo": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1132,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1008
+        },
+        "mage_staff_brass": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 496,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 104
+        },
+        "mage_staff_sapphire": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 36,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "sage_staff",
+      "paintedMaterials": {
+        "sage_staff_ash_wood": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 120,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 80
+        },
+        "sage_staff_indigo": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1404,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1152
+        },
+        "sage_staff_brass": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 784,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 128
+        },
+        "sage_staff_sage_front": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 14,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "sage_staff_ivory": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 160,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "sage_staff_sage_back": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 14,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "ether_staff",
+      "paintedMaterials": {
+        "ether_staff_silver": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1652,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1056
+        },
+        "ether_staff_plum": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 192,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 144
+        },
+        "ether_staff_brass": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 920,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 32
+        },
+        "ether_staff_amethyst": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 48,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "war_staff",
+      "paintedMaterials": {
+        "war_staff_ash_wood": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 32
+        },
+        "war_staff_brown": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1068,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1008
+        },
+        "war_staff_iron": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1352,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "healing_staff",
+      "paintedMaterials": {
+        "healing_staff_ash_wood": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 424,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 340
+        },
+        "healing_staff_green_cloth": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1132,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1008
+        },
+        "healing_staff_brass": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 1328,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 656
+        },
+        "healing_staff_ivory": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 280,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "healing_staff_jade": {
+          "texture": "ritual_staff_family_atlas.png",
+          "faces": 192,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 168
+        }
+      },
+      "findings": 0
+    }
+  ],
+  "atlasRegions": {
+    "atlasSHA256": "edbae1b42d75107a8970baf6a79ed1ca7487f21a8845488446904c2e5ffb4047",
+    "opaqueRGB": true,
+    "oneOriginalImageSixSources": true,
+    "runtimeRegions": [
+      {
+        "item": "silver_rod",
+        "regions": {
+          "silver": {
+            "faces": 256,
+            "uvMin": [
+              0.027113,
+              0.397129
+            ],
+            "uvMax": [
+              0.484848,
+              0.467305
+            ]
+          },
+          "indigo": {
+            "faces": 1068,
+            "uvMin": [
+              0.027113,
+              0.169059
+            ],
+            "uvMax": [
+              0.316587,
+              0.263158
+            ]
+          },
+          "brass": {
+            "faces": 264,
+            "uvMin": [
+              0.515949,
+              0.397129
+            ],
+            "uvMax": [
+              0.972887,
+              0.466507
+            ]
+          },
+          "sapphire": {
+            "faces": 24,
+            "uvMin": [
+              0.027113,
+              0.730462
+            ],
+            "uvMax": [
+              0.295056,
+              0.972887
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "mage_staff",
+        "regions": {
+          "dark_wood": {
+            "faces": 456,
+            "uvMin": [
+              0.348485,
+              0.293461
+            ],
+            "uvMax": [
+              0.636364,
+              0.365231
+            ]
+          },
+          "indigo": {
+            "faces": 1132,
+            "uvMin": [
+              0.027113,
+              0.169059
+            ],
+            "uvMax": [
+              0.316587,
+              0.263158
+            ]
+          },
+          "brass": {
+            "faces": 496,
+            "uvMin": [
+              0.515949,
+              0.397129
+            ],
+            "uvMax": [
+              0.972887,
+              0.466507
+            ]
+          },
+          "sapphire": {
+            "faces": 36,
+            "uvMin": [
+              0.027113,
+              0.730462
+            ],
+            "uvMax": [
+              0.295056,
+              0.972887
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "sage_staff",
+        "regions": {
+          "ash_wood": {
+            "faces": 120,
+            "uvMin": [
+              0.668262,
+              0.293461
+            ],
+            "uvMax": [
+              0.972887,
+              0.365231
+            ]
+          },
+          "indigo": {
+            "faces": 1404,
+            "uvMin": [
+              0.027113,
+              0.169059
+            ],
+            "uvMax": [
+              0.316587,
+              0.263158
+            ]
+          },
+          "brass": {
+            "faces": 784,
+            "uvMin": [
+              0.515949,
+              0.397129
+            ],
+            "uvMax": [
+              0.972887,
+              0.466507
+            ]
+          },
+          "sage_front": {
+            "faces": 14,
+            "uvMin": [
+              0.332532,
+              0.739293
+            ],
+            "uvMax": [
+              0.649924,
+              0.964057
+            ]
+          },
+          "ivory": {
+            "faces": 160,
+            "uvMin": [
+              0.61244,
+              0.497608
+            ],
+            "uvMax": [
+              0.972887,
+              0.699362
+            ]
+          },
+          "sage_back": {
+            "faces": 14,
+            "uvMin": [
+              0.69267,
+              0.739293
+            ],
+            "uvMax": [
+              0.966022,
+              0.964057
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "ether_staff",
+        "regions": {
+          "silver": {
+            "faces": 1652,
+            "uvMin": [
+              0.027113,
+              0.397129
+            ],
+            "uvMax": [
+              0.484848,
+              0.467305
+            ]
+          },
+          "plum": {
+            "faces": 192,
+            "uvMin": [
+              0.348485,
+              0.169059
+            ],
+            "uvMax": [
+              0.637161,
+              0.263158
+            ]
+          },
+          "brass": {
+            "faces": 920,
+            "uvMin": [
+              0.515949,
+              0.397129
+            ],
+            "uvMax": [
+              0.972887,
+              0.466507
+            ]
+          },
+          "amethyst": {
+            "faces": 48,
+            "uvMin": [
+              0.027113,
+              0.497608
+            ],
+            "uvMax": [
+              0.295056,
+              0.699362
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "war_staff",
+        "regions": {
+          "ash_wood": {
+            "faces": 64,
+            "uvMin": [
+              0.668262,
+              0.293461
+            ],
+            "uvMax": [
+              0.972887,
+              0.365231
+            ]
+          },
+          "brown": {
+            "faces": 1068,
+            "uvMin": [
+              0.669059,
+              0.169059
+            ],
+            "uvMax": [
+              0.972887,
+              0.263158
+            ]
+          },
+          "iron": {
+            "faces": 1352,
+            "uvMin": [
+              0.027113,
+              0.293461
+            ],
+            "uvMax": [
+              0.316587,
+              0.365231
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "healing_staff",
+        "regions": {
+          "ash_wood": {
+            "faces": 424,
+            "uvMin": [
+              0.668262,
+              0.293461
+            ],
+            "uvMax": [
+              0.972887,
+              0.365231
+            ]
+          },
+          "green_cloth": {
+            "faces": 1132,
+            "uvMin": [
+              0.027113,
+              0.027911
+            ],
+            "uvMax": [
+              0.484848,
+              0.137959
+            ]
+          },
+          "brass": {
+            "faces": 1328,
+            "uvMin": [
+              0.515949,
+              0.397129
+            ],
+            "uvMax": [
+              0.972887,
+              0.466507
+            ]
+          },
+          "ivory": {
+            "faces": 280,
+            "uvMin": [
+              0.625519,
+              0.497608
+            ],
+            "uvMax": [
+              0.959808,
+              0.699362
+            ]
+          },
+          "jade": {
+            "faces": 192,
+            "uvMin": [
+              0.324561,
+              0.497608
+            ],
+            "uvMax": [
+              0.582137,
+              0.699362
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      }
+    ],
+    "stripEndDiagnostics": {
+      "silver": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 7.548611111111111,
+        "maxChannelDelta": 21,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "brass": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 5.045138888888889,
+        "maxChannelDelta": 16,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "iron": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 5.173611111111111,
+        "maxChannelDelta": 17,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "dark_wood": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 6.53125,
+        "maxChannelDelta": 20,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "ash_wood": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 4.40625,
+        "maxChannelDelta": 18,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "indigo": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 4.559027777777778,
+        "maxChannelDelta": 15,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "plum": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 4.916666666666667,
+        "maxChannelDelta": 15,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "brown": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 4.458333333333333,
+        "maxChannelDelta": 15,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "green_cloth": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 4.440972222222222,
+        "maxChannelDelta": 15,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      }
+    },
+    "boundary": "Six models consume one original image with explicit region users and original filename. Region containment is not a texel quality, memory or draw-call benchmark; strip endpoints can differ."
+  },
+  "nativeCell": 96,
+  "candidateShippingDecodedRGBIdentical": true,
+  "originalSourceCompiledShippingAtlasBytesIdentical": true,
+  "independentRepeatedExportBytesIdentical": true,
+  "shippingCompileCheckPassed": true,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 42,
+  "boundary": "Native 96px runtime captures. Workbench cardinal captures are read-only geometry/UV views, not runtime lighting. Plain copies preserve exact OBJ bytes and sphere passes, replace map_Kd/UV gain with constant allocation-mean RGB times 1.16. Changed pixels measure contribution, not quality. Raw evaluated components closed and positive-volume; intersections between components not mechanically ruled out."
+}

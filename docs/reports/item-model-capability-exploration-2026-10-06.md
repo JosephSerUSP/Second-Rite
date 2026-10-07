@@ -1328,3 +1328,46 @@ across the stack. No G5/G6 run/recapture or Linux byte-stability claim.
 Generated grain and baked shading remain, fine details simplify at 96px, and
 owner visual acceptance is open. Full prompts and actual comparisons are in
 [the complex-weapon review](item-model-weapons-atlas-review/).
+
+## Follow-on: six casting tools with stronger family direction
+
+Silver Rod, Mage Staff, Sage Staff, Ether Staff, War Staff and Healing Staff
+extend the shared-atlas method to six different constructions. An initial
+direction lineup chooses crafted ritual tools with broad heads, strong joins,
+quiet surfaces and one focal face per item. Two three-item multiview sheets
+guide volume, and one unchanged RGB atlas supplies fifteen bounded regions.
+Four generation calls serve six items; no monetary or rendering-cost savings
+were measured. The returned atlas is 1254 square rather than the requested
+2048, so measured allocations and five-pixel insets replace assumed guide UVs.
+
+Hexagonal rim, timber hook, forked tablet, opposing crescents, four-flange iron
+head and ceramic halo remain distinct in identical-OBJ plain-material controls.
+Round shafts/wraps and jade are smooth; cut planes, crystal facets, tablet,
+crescents, petals and flanges are flat. All 112 evaluated components are closed
+and positive-volume. Hidden support and thickness remain authored; generated
+view discrepancies and independent side-proportion adjustments are explicit.
+The Sage mark is painted, not recovered relief. Fine clips/wraps simplify at
+96px; visual acceptance remains open.
+
+Authoring exposed cached transform bounds in `item_kit.report`; updating the
+view layer and a pinned-Blender transform regression test fix the report.
+Export validation caught Ether bevel tips collapsing after six-decimal rounding.
+Direct saved-source merges repair those tips without moving remaining vertices
+or relaxing the compiler. Earlier adopted sources were not regenerated.
+
+Local shipping compile, independent repeat export, texture/contract/index,
+strict prospective cohort review and staged G1-G4/unit/save pass. Seven native
+Effekseer assertions were unavailable. Actual baselines remain red and
+unchanged: 92 stale accepted keys, two inherited duplicate groups, 26 UV-less
+assignments, one shared-file group; asset regression 108 changed records across
+the stack. Missing source coverage is 42/207, not quality acceptance. No G5/G6
+run/recapture, full-corpus recompile or Linux byte claim. Complete prompts,
+original references, source cardinal views and native controls are in
+[the six-item family review](item-model-staff-family-review/README.md).
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: six distinct casting tools with shared generated surfaces
+  base: 588e0a59a34a284d90c07701c5c2b634ec579187

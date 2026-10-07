@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 def build_mesh(image_path, *, width=2.0, height=None, grid=48, depth=.12,
-               bow=.16, relief=0.0, alpha=240):
+               bow=.16, relief=0.0, alpha=240, clip=None):
     from PIL import Image
     for key,value in (('width',width),('depth',depth),('bow',bow),('relief',relief)):
         if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value):
@@ -32,11 +32,20 @@ def build_mesh(image_path, *, width=2.0, height=None, grid=48, depth=.12,
         if 'A' not in raw.getbands():raise ValueError('an actual alpha channel is required')
         image=raw.convert('RGBA')
     iw,ih=image.size; pixels=image.load()
-    mask=image.getchannel('A'); histogram=mask.histogram()
+    if clip is not None:
+        if (not isinstance(clip,(list,tuple)) or len(clip)!=4
+                or any(isinstance(v,bool) or not isinstance(v,int) for v in clip)
+                or not 0<=clip[0]<clip[2]<=iw or not 0<=clip[1]<clip[3]<=ih):
+            raise ValueError('clip must be four integer pixel edges inside the original image')
+        clip=tuple(clip)
+    else:clip=(0,0,iw,ih)
+    # Restrict sampling only. UVs still address the original full image and the
+    # original file is neither cropped nor rewritten.
+    mask=image.getchannel('A').crop(clip); histogram=mask.histogram()
     if not sum(histogram[:alpha]):raise ValueError('image has no transparent silhouette boundary')
     bbox=mask.point(lambda v:255 if v>=alpha else 0).getbbox()
     if bbox is None:raise ValueError('no pixels meet the alpha threshold')
-    left,upper,right,lower=bbox
+    left,upper,right,lower=(bbox[0]+clip[0],bbox[1]+clip[1],bbox[2]+clip[0],bbox[3]+clip[1])
     # Image-space coordinates are pixel centres. Grid is along the long edge.
     pw=right-left-1;ph=lower-upper-1
     if min(pw,ph)<2:raise ValueError('silhouette too small')
@@ -99,7 +108,8 @@ def build_mesh(image_path, *, width=2.0, height=None, grid=48, depth=.12,
         if len(matches)==1:
             a,b=matches[0];faces.append((b,a,a+count,b+count));materials.append(1)
         elif len(matches)!=2:raise ValueError('nonmanifold generated edge')
-    report={'imageHash':digest,'imageSize':[iw,ih],'alphaThreshold':alpha,'alphaBoundsPixels':list(bbox),
+    report={'imageHash':digest,'imageSize':[iw,ih],'sampleClipPixels':list(clip),
+            'alphaThreshold':alpha,'alphaBoundsPixels':[left,upper,right,lower],
             'grid':[nx,nz],'acceptedCells':len(cells),'discardedDetachedCells':discarded,
             'depthControls':{'width':width,'height':height,'depth':depth,'bow':bow,'luminanceRelief':relief},
             'vertices':len(vertices),'faces':len(faces),'triangles':sum(len(f)-2 for f in faces),
@@ -114,6 +124,7 @@ def main(argv=None):
     parser.add_argument('--width',type=float,default=2);parser.add_argument('--height',type=float)
     parser.add_argument('--depth',type=float,default=.12);parser.add_argument('--bow',type=float,default=.16)
     parser.add_argument('--relief',type=float,default=0);parser.add_argument('--alpha',type=int,default=240)
+    parser.add_argument('--clip',type=int,nargs=4,metavar=('X0','Y0','X1','Y1'))
     parser.add_argument('--output',type=Path);parser.add_argument('--mesh-output',type=Path)
     args=parser.parse_args(argv)
     try:
@@ -121,7 +132,7 @@ def main(argv=None):
             if target and target.exists():raise ValueError('output exists')
         if args.output and args.mesh_output and args.output.resolve()==args.mesh_output.resolve():
             raise ValueError('report and mesh outputs must differ')
-        mesh=build_mesh(args.image,grid=args.grid,width=args.width,height=args.height,depth=args.depth,bow=args.bow,relief=args.relief,alpha=args.alpha)
+        mesh=build_mesh(args.image,grid=args.grid,width=args.width,height=args.height,depth=args.depth,bow=args.bow,relief=args.relief,alpha=args.alpha,clip=args.clip)
         text=json.dumps(mesh['report'],indent=2)+'\n'
         if args.output:
             args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(text,encoding='utf-8')

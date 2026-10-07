@@ -52,5 +52,20 @@ class PaintedReliefTests(unittest.TestCase):
         self.assertEqual(relief.main([str(self.path),'--mesh-output',str(output)]),1)
         self.assertEqual(output.read_bytes(),b'owner')
 
+    def test_clip_selects_second_component_and_preserves_full_image_uvs(self):
+        image=Image.new('RGBA',(65,33),(0,0,0,0));d=ImageDraw.Draw(image)
+        d.rectangle((4,4,28,28),fill=(200,10,10,252))
+        d.rectangle((40,8,60,24),fill=(10,200,10,252));image.save(self.path)
+        before=self.path.read_bytes();mesh=self.mesh(clip=(33,0,65,33),width=2,height=2)
+        self.assertEqual(mesh['report']['alphaBoundsPixels'],[40,8,61,25])
+        self.assertEqual(mesh['report']['discardedDetachedCells'],0)
+        for row in mesh['uvs']:
+            for u,v in row:self.assertTrue(40/64<=u<=60/64 and 8/32<=v<=24/32)
+        self.assertEqual(self.path.read_bytes(),before)
+
+    def test_invalid_or_opaque_clip_fails(self):
+        for clip in ((-1,0,10,10),(0,0,34,33),(4,0,4,33),(0,0,True,10),(0,0,2.5,10),(4,4,28,28)):
+            with self.subTest(clip=clip),self.assertRaises(ValueError):self.mesh(clip=clip)
+
 
 if __name__=='__main__':unittest.main()

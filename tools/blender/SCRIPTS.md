@@ -44,7 +44,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (40)
+## Implementation modules and Blender workers (41)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -80,6 +80,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [shadow_volume_blender.py](shadow_volume_blender.py) | `run.py` | Build and inspect live three-shadow intersections with editable masks, cut stencils, export-precision cleanup and generated-face UVs. |
 | [source_dependencies.py](source_dependencies.py) | `import` | Fail before rendering when an editable source cannot resolve its dependencies. |
 | [surface_atlas.py](surface_atlas.py) | `import` | Continuous path/sleeve UV coordinates and read-only original strip seam diagnostics for generated surface atlases. |
+| [surface_conform_blender.py](surface_conform_blender.py) | `import` | Wrap a clipped alpha panel around a root-owned body guide, then add plain cut rims and deliberate front shading. |
 | [surface_finishes.py](surface_finishes.py) | `import` | World-scale procedural finishes for authored environment studies. |
 | [thestra_camera.py](thestra_camera.py) | `import` | Blender preview helpers for serialized Thestra WorldCamera calibration records. |
 | [town_environment_pipeline.py](town_environment_pipeline.py) | `python` | Blender-authored baked environment pipeline for Second Gate town slices. |

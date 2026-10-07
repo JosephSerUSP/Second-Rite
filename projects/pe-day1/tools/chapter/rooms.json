@@ -41,19 +41,35 @@
         }
       ],
       "environment": "assets/models/rooms/foyer/environment.obj",
-      "camera": {
-        "position": [
-          0,
-          -2.4,
-          3.6
-        ],
-        "target": [
-          0,
-          3.6,
-          0.6
-        ],
-        "fov": 56
-      }
+      "views": [
+        {
+          "when": "y < 3",
+          "position": [
+            0,
+            -2.4,
+            3.6
+          ],
+          "target": [
+            0,
+            3.6,
+            0.6
+          ],
+          "fov": 56
+        },
+        {
+          "position": [
+            -3.9,
+            5.6,
+            3.3
+          ],
+          "target": [
+            1.5,
+            1.2,
+            0.5
+          ],
+          "fov": 56
+        }
+      ]
     },
     {
       "id": "auditorium",
@@ -91,20 +107,36 @@
           "label": "Stage"
         }
       ],
-      "camera": {
-        "position": [
-          0,
-          -2.6,
-          4.4
-        ],
-        "target": [
-          0,
-          4.6,
-          0.6
-        ],
-        "fov": 58
-      },
-      "environment": "assets/models/rooms/auditorium/environment.obj"
+      "environment": "assets/models/rooms/auditorium/environment.obj",
+      "views": [
+        {
+          "when": "y < 4",
+          "position": [
+            0,
+            -2.6,
+            4.4
+          ],
+          "target": [
+            0,
+            4.6,
+            0.6
+          ],
+          "fov": 58
+        },
+        {
+          "position": [
+            5.2,
+            7.5,
+            4.2
+          ],
+          "target": [
+            -1.5,
+            2.5,
+            0.4
+          ],
+          "fov": 58
+        }
+      ]
     },
     {
       "id": "stage",
@@ -224,20 +256,36 @@
           "lockedText": "Something scratches below.\nCheck the basement first."
         }
       ],
-      "camera": {
-        "position": [
-          0,
-          -2.6,
-          4.6
-        ],
-        "target": [
-          0,
-          2.8,
-          0.4
-        ],
-        "fov": 54
-      },
-      "environment": "assets/models/rooms/backstage/environment.obj"
+      "environment": "assets/models/rooms/backstage/environment.obj",
+      "views": [
+        {
+          "when": "x < 0",
+          "position": [
+            3.4,
+            -1.8,
+            3.4
+          ],
+          "target": [
+            -1.8,
+            3.0,
+            0.5
+          ],
+          "fov": 54
+        },
+        {
+          "position": [
+            -3.4,
+            -1.8,
+            3.4
+          ],
+          "target": [
+            1.8,
+            3.0,
+            0.5
+          ],
+          "fov": 54
+        }
+      ]
     },
     {
       "id": "basement_rat",
@@ -340,20 +388,36 @@
           "lockedText": "Locked. There must be a key."
         }
       ],
-      "camera": {
-        "position": [
-          0,
-          -2.4,
-          4.0
-        ],
-        "target": [
-          0,
-          3.6,
-          0.6
-        ],
-        "fov": 56
-      },
-      "environment": "assets/models/rooms/dressing/environment.obj"
+      "environment": "assets/models/rooms/dressing/environment.obj",
+      "views": [
+        {
+          "when": "x < 0",
+          "position": [
+            4.4,
+            -1.6,
+            3.6
+          ],
+          "target": [
+            -2.4,
+            3.6,
+            0.5
+          ],
+          "fov": 56
+        },
+        {
+          "position": [
+            -4.4,
+            -1.6,
+            3.6
+          ],
+          "target": [
+            2.4,
+            3.6,
+            0.5
+          ],
+          "fov": 56
+        }
+      ]
     },
     {
       "id": "rehearsal",
@@ -476,7 +540,36 @@
           "lockedText": "Clear the tunnel first."
         }
       ],
-      "environment": "assets/models/rooms/sewer/environment.obj"
+      "environment": "assets/models/rooms/sewer/environment.obj",
+      "views": [
+        {
+          "when": "x < 0",
+          "position": [
+            5.4,
+            0.8,
+            2.6
+          ],
+          "target": [
+            -3,
+            3.2,
+            0.4
+          ],
+          "fov": 52
+        },
+        {
+          "position": [
+            -5.4,
+            0.8,
+            2.6
+          ],
+          "target": [
+            3,
+            3.2,
+            0.4
+          ],
+          "fov": 52
+        }
+      ]
     },
     {
       "id": "sewer_deep",

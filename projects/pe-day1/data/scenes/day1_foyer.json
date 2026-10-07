@@ -22,14 +22,14 @@
       "viewport": {
         "camera": {
           "position": [
-            0,
-            -2.4,
-            3.6
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and 0 or -3.9)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and -2.4 or 5.6)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and 3.6 or 3.3)"
           ],
           "target": [
-            0,
-            3.6,
-            0.6
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and 0 or 1.5)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and 3.6 or 1.2)",
+            "(((sceneState.fight == 1 and rt.player.y or sceneState.walkY) < 3) and 0.6 or 0.5)"
           ],
           "fov": 56
         },

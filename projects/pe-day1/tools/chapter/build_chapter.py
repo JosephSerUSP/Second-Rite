@@ -12,6 +12,7 @@ runs, every domain fact is read from rt.* exactly as basement_rat does; the
 walk position is copied back from rt only when the fight ends.
 """
 import json
+import re
 import math
 import os
 
@@ -274,6 +275,24 @@ def scene_models(room, room_model):
 
 
 def camera_of(room):
+    """A room may list several fixed "views", as the original's rooms do: each
+    has a "when" condition on Aya's x/y (the last is the fallback), and the
+    camera hard-cuts to the first view whose condition holds."""
+    if room.get("views"):
+        views = room["views"]
+        fov = views[0]["fov"]
+        assert all(v["fov"] == fov for v in views), room["id"] + ": views share one fov"
+
+        def cond(text):
+            return "(" + re.sub(r"\by\b", PY, re.sub(r"\bx\b", PX, text)) + ")"
+
+        def pick(key, axis):
+            expr = "%g" % views[-1][key][axis]
+            for v in reversed(views[:-1]):
+                expr = "(%s and %g or %s)" % (cond(v["when"]), v[key][axis], expr)
+            return expr
+        return {"position": [pick("position", i) for i in range(3)],
+                "target": [pick("target", i) for i in range(3)], "fov": fov}
     if room.get("camera"):
         return dict(room["camera"])
     if room.get("corridor"):

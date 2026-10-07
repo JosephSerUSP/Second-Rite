@@ -62,34 +62,6 @@ Ks 0.1 0.1 0.1
 d 1
 illum 2
 
-newmtl enemy_alligator
-Ka 1 1 1
-Kd 0.220 0.360 0.160
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl eve_gown
-Ka 1 1 1
-Kd 0.550 0.020 0.030
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl eve_hair
-Ka 1 1 1
-Kd 0.550 0.400 0.180
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl eve_skin
-Ka 1 1 1
-Kd 0.850 0.700 0.620
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
 newmtl hall_floor
 Ka 1 1 1
 Kd 0.360 0.080 0.090
@@ -128,27 +100,6 @@ illum 2
 newmtl lobby_wall
 Ka 1 1 1
 Kd 0.620 0.520 0.380
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl melissa_gown
-Ka 1 1 1
-Kd 0.420 0.030 0.040
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl melissa_hair
-Ka 1 1 1
-Kd 0.160 0.070 0.040
-Ks 0.1 0.1 0.1
-d 1
-illum 2
-
-newmtl melissa_skin
-Ka 1 1 1
-Kd 0.800 0.620 0.520
 Ks 0.1 0.1 0.1
 d 1
 illum 2

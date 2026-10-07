@@ -237,20 +237,47 @@
             "visible": "(sceneState.fight == 1 and (rt.actAge < 12) or false)"
           },
           {
+            "id": "enemy_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.enemy.x) or 0)",
+              "(sceneState.fight == 1 and (rt.enemy.y) or 0)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "(sceneState.fight == 1 and (rt.outcome ~= 'victory') or false)",
+            "scale": [
+              1.6,
+              1.6,
+              1
+            ]
+          },
+          {
             "id": "enemy",
-            "model": "assets/models/blockout/alligator.obj",
+            "model": "assets/models/bosses/alligator_idle.obj",
             "position": [
               "(sceneState.fight == 1 and (rt.enemy.x) or 0)",
               "(sceneState.fight == 1 and (rt.enemy.y) or 0)",
               0
             ],
             "yaw": "sceneState.ratAim",
-            "visible": "(sceneState.fight == 1 and (rt.outcome ~= 'victory') or false)",
-            "scale": [
+            "visible": "(sceneState.fight == 1 and (not rt.enemy.windup and rt.outcome ~= 'victory') or false)",
+            "tint": [
               1,
-              1,
-              "(sceneState.fight == 1 and (rt.enemy.windup and 1.08 or 1) or 1)"
+              "(sceneState.fight == 1 and (rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1) or 1)",
+              "(sceneState.fight == 1 and (rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1) or 1)"
+            ]
+          },
+          {
+            "id": "enemy_windup",
+            "model": "assets/models/bosses/alligator_windup.obj",
+            "position": [
+              "(sceneState.fight == 1 and (rt.enemy.x) or 0)",
+              "(sceneState.fight == 1 and (rt.enemy.y) or 0)",
+              0
             ],
+            "yaw": "sceneState.ratAim",
+            "visible": "(sceneState.fight == 1 and (rt.enemy.windup and rt.outcome ~= 'victory') or false)",
             "tint": [
               1,
               "(sceneState.fight == 1 and (rt.hitAge < 12 and not rt.hitOnPlayer and .4 or 1) or 1)",

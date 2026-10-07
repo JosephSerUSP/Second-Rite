@@ -1,0 +1,20 @@
+{
+  "source": "assets/authoring/characters/bosses.blend",
+  "sourceSha256": "3f44ca6155807e58efc3991aa26b3aa2cef6605584e5fa8d3adb937547bb23f5",
+  "blenderVersion": "5.2.2 LTS",
+  "basis": "Original low-poly character studies; no commercial asset extracts",
+  "files": {
+    "alligator_idle.mtl": "a1c2dd9a125558b86d043dae2082502126b95b54a51ec8e8bc49886e8df9afc3",
+    "alligator_idle.obj": "091659b4a8e0f0bfa9f174d4dc0b163bdab73f196188ed858412593ee5aadd08",
+    "alligator_windup.mtl": "a1c2dd9a125558b86d043dae2082502126b95b54a51ec8e8bc49886e8df9afc3",
+    "alligator_windup.obj": "be00a0ae8a15e96217145eb09f1ae5b148d37e14c1f0c55c2165f3768baa4d3f",
+    "eve_idle.mtl": "b3322dcba880a56530e3973f311065de7c31c08dee35e98dd6dd4b68bc718f04",
+    "eve_idle.obj": "697c9f7464f12433e8f382c746050d58a995274e526ae4a39c57fe67482bfd51",
+    "eve_windup.mtl": "b3322dcba880a56530e3973f311065de7c31c08dee35e98dd6dd4b68bc718f04",
+    "eve_windup.obj": "ab2dfb048c25a82e2d4e096c084283518247f2e83b86792f9679e37d30385ecb",
+    "melissa_idle.mtl": "3a74d70ecbc3542010a9faa1871f3f2e93cee3e4279c75bd18d00455eb8dba99",
+    "melissa_idle.obj": "cdd8ad5eeba9f2b13c062a9c6fde3d0621f5f922bc675e85ad37e1e5e6031934",
+    "melissa_windup.mtl": "3a74d70ecbc3542010a9faa1871f3f2e93cee3e4279c75bd18d00455eb8dba99",
+    "melissa_windup.obj": "be48d1704df17d599b026d73a14cc2aa1bf8fef01d75112b2c499b5735bc190b"
+  }
+}

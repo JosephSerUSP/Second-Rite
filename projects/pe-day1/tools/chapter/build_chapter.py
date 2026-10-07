@@ -21,6 +21,7 @@ SCENES = os.path.join(PROJECT, "data", "scenes")
 BLOCKOUT = os.path.join(PROJECT, "assets", "models", "blockout")
 BACKSTAGE = "assets/models/backstage/"
 AYA = "assets/models/aya/"
+BOSSES = "assets/models/bosses/"
 
 WALK_SPEED = 0.05          # world units per fixed tick while exploring
 NEAR = 0.9                 # interaction radius for doors and pickups
@@ -36,14 +37,6 @@ PALETTES = {  # floor, wall, trim (blockout colours, not art)
     "rehearsal": ([0.38, 0.27, 0.17], [0.50, 0.46, 0.40], [0.75, 0.70, 0.58]),
     "sewer":     ([0.16, 0.20, 0.16], [0.30, 0.31, 0.27], [0.22, 0.26, 0.22]),
     "street":    ([0.30, 0.30, 0.32], [0.20, 0.22, 0.30], [0.85, 0.85, 0.90]),
-}
-# Melissa and Eve read as one silhouette in the reference frames: a woman in
-# a floor-length red gown. (gown, skin, hair) colours; geometry in gowned_figure.
-GOWNED = {"melissa": ([0.42, 0.03, 0.04], [0.80, 0.62, 0.52], [0.16, 0.07, 0.04]),
-          "eve":     ([0.55, 0.02, 0.03], [0.85, 0.70, 0.62], [0.55, 0.40, 0.18])}
-ENEMY_BOXES = {  # blockout bosses: list of (cx, cy, cz, sx, sy, sz) boxes, colour
-    "alligator": ([(0, 0, 0.35, 0.9, 2.6, 0.7), (0, -1.6, 0.3, 0.6, 0.9, 0.45),
-                   (0, 1.8, 0.2, 0.3, 1.2, 0.3)], [0.22, 0.36, 0.16]),
 }
 
 
@@ -84,22 +77,6 @@ class Obj:
         for f in ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)):
             self.lines.append("f " + " ".join(str(b + i + 1) for i in f))
         self.n += 8
-
-    def frustum(self, mat, cx, cy, z0, z1, r0, r1, n=12, sy=1.0):
-        """Closed tapered cylinder (skirts, torsos, heads), world z up."""
-        self.lines.append("usemtl " + mat)
-        b = self.n
-        for z, r in ((z0, r0), (z1, r1)):
-            for i in range(n):
-                a = i / n * math.tau
-                x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * sy
-                self.lines.append("v %.4f %.4f %.4f" % (x, z, -y))
-        for i in range(n):
-            j = (i + 1) % n
-            self.lines.append("f %d %d %d %d" % (b + i + 1, b + j + 1, b + n + j + 1, b + n + i + 1))
-        self.lines.append("f " + " ".join(str(b + n - i) for i in range(n)))
-        self.lines.append("f " + " ".join(str(b + n + i + 1) for i in range(n)))
-        self.n += 2 * n
 
     def write(self, path):
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
@@ -168,24 +145,6 @@ def build_shared_objs(mats):
     o = Obj("blockout.mtl")
     o.box("door_marker", 0, 0, 0.02, 0.9, 0.9, 0.04)
     o.write(os.path.join(BLOCKOUT, "door_marker.obj"))
-    for enemy, (gown, skin, hair) in GOWNED.items():
-        mats["%s_gown" % enemy], mats["%s_skin" % enemy], mats["%s_hair" % enemy] = gown, skin, hair
-        o = Obj("blockout.mtl")
-        o.frustum(enemy + "_gown", 0, 0, 0.0, 1.05, 0.46, 0.17, 16, 1.15)    # skirt, train behind
-        o.frustum(enemy + "_gown", 0, 0, 1.05, 1.42, 0.17, 0.15, 12)         # bodice
-        o.frustum(enemy + "_skin", 0, 0, 1.42, 1.5, 0.15, 0.05, 10)          # shoulders
-        for side in (-1, 1):
-            o.box(enemy + "_skin", side * 0.19, 0, 1.15, 0.06, 0.07, 0.5)    # arms
-        o.frustum(enemy + "_skin", 0, 0, 1.5, 1.56, 0.04, 0.04, 8)           # neck
-        o.frustum(enemy + "_skin", 0, 0, 1.56, 1.78, 0.09, 0.08, 10)         # head
-        o.frustum(enemy + "_hair", 0, 0.02, 1.62, 1.84, 0.11, 0.07, 10)      # hair
-        o.write(os.path.join(BLOCKOUT, enemy + ".obj"))
-    for enemy, (boxes, kd) in ENEMY_BOXES.items():
-        mats["enemy_" + enemy] = kd
-        o = Obj("blockout.mtl")
-        for b in boxes:
-            o.box("enemy_" + enemy, *b)
-        o.write(os.path.join(BLOCKOUT, enemy + ".obj"))
 
 
 # --- scene --------------------------------------------------------------------
@@ -289,10 +248,16 @@ def scene_models(room, room_model):
                  "visible": in_fight("(not rt.enemy.windup and rt.enemy.strikeAge < 20) and " + live, "false"), "tint": [1, tint, tint]},
             ]
         else:
-            lunge = in_fight("rt.enemy.windup and 1.08 or 1", 1)
-            models.append({"id": "enemy", "model": "assets/models/blockout/%s.obj" % enemy, "position": epos,
-                           "yaw": "sceneState.ratAim", "visible": in_fight(live, "false"),
-                           "scale": [1, 1, lunge], "tint": [1, tint, tint]})
+            # Authored boss poses (tools/build_bosses.py): idle, and the wind-up
+            # telegraph swapped in while the attack charges.
+            models += [
+                {"id": "enemy_shadow", "model": BACKSTAGE + "contact_shadow.obj", "position": epos, "yaw": 0,
+                 "visible": in_fight(live, "false"), "scale": [1.6, 1.6, 1]},
+                {"id": "enemy", "model": BOSSES + enemy + "_idle.obj", "position": epos, "yaw": "sceneState.ratAim",
+                 "visible": in_fight("not rt.enemy.windup and " + live, "false"), "tint": [1, tint, tint]},
+                {"id": "enemy_windup", "model": BOSSES + enemy + "_windup.obj", "position": epos, "yaw": "sceneState.ratAim",
+                 "visible": in_fight("rt.enemy.windup and " + live, "false"), "tint": [1, tint, tint]},
+            ]
         models += [
             {"id": "target", "model": BACKSTAGE + "target_cursor.obj", "position": [epos[0], epos[1], 1.1], "yaw": 0,
              "visible": "sceneState.ui == 2"},

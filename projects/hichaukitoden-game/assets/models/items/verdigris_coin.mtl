@@ -1,52 +1,48 @@
-# Blender 5.0.1 MTL File: 'second_rite_item_model_library_expanded.blend'
+# Blender 5.2.2 LTS MTL File: 'verdigris_coin.blend'
 # www.blender.org
 
-newmtl MAT_BrightGold
-Ns 577.599976
-Ka 0.780000 0.780000 0.780000
-Kd 0.920000 0.650000 0.160000
+newmtl verdigris_coin_bronze
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
 
-newmtl MAT_DarkIron
-Ns 435.599945
-Ka 0.820000 0.820000 0.820000
-Kd 0.080000 0.090000 0.110000
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+pass sphere add 0.075 assets/models/matcaps/gold.png
+newmtl verdigris_coin_coin_back
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
 
-newmtl MAT_OldGold
-Ns 384.399994
-Ka 0.720000 0.720000 0.720000
-Kd 0.560000 0.340000 0.090000
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+newmtl verdigris_coin_coin_front
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
 
-newmtl MAT_Pearl
-Ns 705.600098
-Ka 0.160000 0.160000 0.160000
-Kd 0.720000 0.780000 0.860000
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+newmtl verdigris_coin_gold
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
-
-newmtl MAT_Verdigris
-Ns 176.400024
-Ka 0.550000 0.550000 0.550000
-Kd 0.080000 0.370000 0.310000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 3
+illum 2
+map_Kd relic_pair_surface_atlas.png
+pass uv add 0.17 assets/models/items/relic_pair_surface_atlas.png
+pass sphere add 0.075 assets/models/matcaps/gold.png

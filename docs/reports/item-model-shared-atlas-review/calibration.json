@@ -1,0 +1,37 @@
+{
+  "untarnished_signet": {
+    "frontOuterPixelBounds": [
+      43,
+      91,
+      417,
+      520
+    ],
+    "holePixelBounds": [
+      108,
+      239,
+      355,
+      468
+    ],
+    "sideBandPixelWidth": 76,
+    "sideSealPixelWidth": 181,
+    "frontSealPixelWidth": 213,
+    "normalizedOverallHeight": 2.0,
+    "bandOuterRadius": 0.88,
+    "fingerHoleRadius": 0.61,
+    "lowerBandDepth": 0.354,
+    "sealWidth": 1.0,
+    "sealDepth": 0.84,
+    "construction": "D-section closed variable-width band; raised octagonal seal table; 20 degree authored display tilt",
+    "inference": "Reference front sees seal top despite orthographic request. Top and side scales disagree; front diameter/hole and side/front ratios guide normalized construction. Hidden band section/bevel and display tilt authored; not recovered exact geometry."
+  },
+  "verdigris_coin": {
+    "frontDiameterPixels": 420,
+    "rightThicknessPixels": 74,
+    "topDiameterPixels": 324,
+    "topThicknessPixels": 72,
+    "diameter": 2.0,
+    "thickness": 0.3523809523809524,
+    "construction": "Closed stepped coin profile, inset stamp planes, raised rim and actual 64 reeded-edge ridges",
+    "inference": "Top view is smaller than front. Front diameter and right thickness govern depth; top confirms a thick edge only. Stamp relief and wear are primarily generated colour, not recovered displacement."
+  }
+}

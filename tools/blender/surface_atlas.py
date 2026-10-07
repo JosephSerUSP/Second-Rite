@@ -7,6 +7,25 @@ and supplied by callers only when measuring the original texture seam.
 import math
 
 
+def pixel_rectangle_uv(bounds, size, *, inset=0):
+    """Top-left image pixel edges -> bottom-left OBJ UV bounds, without cropping.
+
+    Bounds are half-open edges, not pixel centres. An explicit inset reserves
+    sampling clearance inside the allocation; it is not generated padding.
+    """
+    x0, y0, x1, y1 = bounds
+    width, height = size
+    values = (x0, y0, x1, y1, width, height, inset)
+    if any(not math.isfinite(v) for v in values) or not (
+        width > 0 and height > 0 and inset >= 0
+        and 0 <= x0 < x1 <= width and 0 <= y0 < y1 <= height
+        and 2 * inset < min(x1 - x0, y1 - y0)
+    ):
+        raise ValueError('finite image dimensions and nonempty inset rectangle required')
+    return ((x0 + inset) / width, 1 - (y1 - inset) / height,
+            (x1 - inset) / width, 1 - (y0 + inset) / height)
+
+
 def path_parameters(points):
     if len(points) < 2 or any(any(not math.isfinite(c) for c in p) for p in points):
         raise ValueError('finite path with at least two points required')

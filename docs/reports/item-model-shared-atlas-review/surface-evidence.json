@@ -1,0 +1,298 @@
+{
+  "items": [
+    {
+      "item": "untarnished_signet",
+      "source": {
+        "item": "untarnished_signet",
+        "sourceHash": "ce3a55c2d0e7e7600ed742ded370be39bb2043ca920fe3a423d11dda065d615b",
+        "objects": [
+          {
+            "name": "A_ClosedDSectionBandAndShoulders",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 512,
+            "smoothFaces": 512,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.5939305935664446
+          },
+          {
+            "name": "B_UnmarkedOctagonalSealWithBeveledEdges",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 18,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.16164530221980244
+          }
+        ],
+        "boundsMin": [
+          -0.8799999952316284,
+          -0.7007961273193359,
+          -0.9820688962936401
+        ],
+        "boundsMax": [
+          0.8799999952316284,
+          0.4852593243122101,
+          1.0295159816741943
+        ],
+        "outerCoverUVContinuity": null,
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "untarnished_signet",
+          "sr_contract_version": 1,
+          "sr_asset_id": "untarnished_signet",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "shared_atlas_closed_band",
+          "sr_authoring_description": "Heavy unmarked signet: open finger hole, D-section band, widening shoulders and solid octagonal seal",
+          "sr_shared_atlas": "relic_pair_surface_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1536, 1024], \"insetPixels\": 4, \"regions\": {\"coin_front\": {\"pixels\": [48, 48, 560, 560], \"users\": [\"verdigris_coin\"], \"role\": \"front sun/waves stamp\"}, \"coin_back\": {\"pixels\": [592, 48, 1104, 560], \"users\": [\"verdigris_coin\"], \"role\": \"back compass stamp\"}, \"signet_face\": {\"pixels\": [1160, 48, 1480, 368], \"users\": [\"untarnished_signet\"], \"role\": \"unmarked flat seal table\"}, \"gold\": {\"pixels\": [48, 608, 1488, 762], \"users\": [\"untarnished_signet\", \"verdigris_coin\"], \"role\": \"shared calm exposed gold\"}, \"bronze\": {\"pixels\": [48, 795, 1488, 970], \"users\": [\"verdigris_coin\"], \"role\": \"quiet patinated bronze sleeve\"}}, \"requestedRegions\": {\"coin_front\": [48, 48, 560, 560], \"coin_back\": [592, 48, 1104, 560], \"signet_face\": [1160, 48, 1480, 368], \"gold\": [48, 640, 1488, 784], \"bronze\": [48, 832, 1488, 976]}, \"boundary\": \"Actual generated rectangles measured from original pixels; 4px sampling inset. Gold/bronze moved vertically relative to guide; no image edits.\"}",
+          "sr_reference_measurements": "{\"frontOuterPixelBounds\": [43, 91, 417, 520], \"holePixelBounds\": [108, 239, 355, 468], \"sideBandPixelWidth\": 76, \"sideSealPixelWidth\": 181, \"frontSealPixelWidth\": 213, \"normalizedOverallHeight\": 2.0, \"bandOuterRadius\": 0.88, \"fingerHoleRadius\": 0.61, \"lowerBandDepth\": 0.354, \"sealWidth\": 1.0, \"sealDepth\": 0.84, \"construction\": \"D-section closed variable-width band; raised octagonal seal table; 20 degree authored display tilt\", \"inference\": \"Reference front sees seal top despite orthographic request. Top and side scales disagree; front diameter/hole and side/front ratios guide normalized construction. Hidden band section/bevel and display tilt authored; not recovered exact geometry.\"}",
+          "sr_generation_method": "one combined multiview reference + one unchanged atlas for two items",
+          "sr_review_status": "provisional; native review is not owner acceptance"
+        }
+      },
+      "objSHA256": "25ffc642b04cbb0395d4d9a4d5775f9c3ec93185259e302dc6d0f918144d4d8c",
+      "mtlSHA256": "b04363f5bf9e0fe7775ca8761281c0121c8aaa4e8c176484e3a59834dbfdb8c3",
+      "vertices": 536,
+      "triangles": 1068,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 3589
+    },
+    {
+      "item": "verdigris_coin",
+      "source": {
+        "item": "verdigris_coin",
+        "sourceHash": "b477d0f4199d210196bce5e18046e0a8eb2445c061ff3e1f20d657b1a4779e97",
+        "objects": [
+          {
+            "name": "A_ClosedCoinRaisedRimAnd64EdgeReeds",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 1344,
+            "smoothFaces": 384,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 1.05107536639963
+          }
+        ],
+        "boundsMin": [
+          -1.0119999647140503,
+          -0.19419047236442566,
+          -1.0119999647140503
+        ],
+        "boundsMax": [
+          1.0119999647140503,
+          0.19419047236442566,
+          1.0119999647140503
+        ],
+        "outerCoverUVContinuity": null,
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "verdigris_coin",
+          "sr_contract_version": 1,
+          "sr_asset_id": "verdigris_coin",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "shared_atlas_reeded_profile",
+          "sr_authoring_description": "Separate coin: measured thickness, recessed stamp planes, raised rim, geometric reeds and independent front/back paint",
+          "sr_shared_atlas": "relic_pair_surface_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1536, 1024], \"insetPixels\": 4, \"regions\": {\"coin_front\": {\"pixels\": [48, 48, 560, 560], \"users\": [\"verdigris_coin\"], \"role\": \"front sun/waves stamp\"}, \"coin_back\": {\"pixels\": [592, 48, 1104, 560], \"users\": [\"verdigris_coin\"], \"role\": \"back compass stamp\"}, \"signet_face\": {\"pixels\": [1160, 48, 1480, 368], \"users\": [\"untarnished_signet\"], \"role\": \"unmarked flat seal table\"}, \"gold\": {\"pixels\": [48, 608, 1488, 762], \"users\": [\"untarnished_signet\", \"verdigris_coin\"], \"role\": \"shared calm exposed gold\"}, \"bronze\": {\"pixels\": [48, 795, 1488, 970], \"users\": [\"verdigris_coin\"], \"role\": \"quiet patinated bronze sleeve\"}}, \"requestedRegions\": {\"coin_front\": [48, 48, 560, 560], \"coin_back\": [592, 48, 1104, 560], \"signet_face\": [1160, 48, 1480, 368], \"gold\": [48, 640, 1488, 784], \"bronze\": [48, 832, 1488, 976]}, \"boundary\": \"Actual generated rectangles measured from original pixels; 4px sampling inset. Gold/bronze moved vertically relative to guide; no image edits.\"}",
+          "sr_reference_measurements": "{\"frontDiameterPixels\": 420, \"rightThicknessPixels\": 74, \"topDiameterPixels\": 324, \"topThicknessPixels\": 72, \"diameter\": 2.0, \"thickness\": 0.3523809523809524, \"construction\": \"Closed stepped coin profile, inset stamp planes, raised rim and actual 64 reeded-edge ridges\", \"inference\": \"Top view is smaller than front. Front diameter and right thickness govern depth; top confirms a thick edge only. Stamp relief and wear are primarily generated colour, not recovered displacement.\"}",
+          "sr_generation_method": "one combined multiview reference + one unchanged atlas for two items",
+          "sr_review_status": "provisional; native review is not owner acceptance"
+        }
+      },
+      "objSHA256": "a4fb2aa43bb5381bac66c7be4f1f49cb2bbba5d73a480f5ca62ae438ed968f8b",
+      "mtlSHA256": "64f36659e836ff463abb3da003e41fd6d4353024100b087417ff73899cbac57b",
+      "vertices": 1154,
+      "triangles": 2304,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 5256
+    }
+  ],
+  "paintedFaces": [
+    {
+      "item": "untarnished_signet",
+      "paintedMaterials": {
+        "untarnished_signet_gold": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 1062,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1024
+        },
+        "untarnished_signet_signet_face": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 6,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "verdigris_coin",
+      "paintedMaterials": {
+        "verdigris_coin_coin_front": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 576,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "verdigris_coin_coin_back": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 576,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "verdigris_coin_gold": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 768,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 768
+        },
+        "verdigris_coin_bronze": {
+          "texture": "relic_pair_surface_atlas.png",
+          "faces": 384,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    }
+  ],
+  "atlasRegions": {
+    "atlasSHA256": "7f47837bc36f618a5e3b79c9f1b4867581c0cc4981e0778f7af8e2b6e5255885",
+    "opaqueRGB": true,
+    "oneOriginalImageTwoSources": true,
+    "runtimeRegions": [
+      {
+        "item": "untarnished_signet",
+        "regions": {
+          "gold": {
+            "faces": 1062,
+            "uvMin": [
+              0.033854,
+              0.259766
+            ],
+            "uvMax": [
+              0.966146,
+              0.402344
+            ]
+          },
+          "signet_face": {
+            "faces": 6,
+            "uvMin": [
+              0.757812,
+              0.644531
+            ],
+            "uvMax": [
+              0.960938,
+              0.949219
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "verdigris_coin",
+        "regions": {
+          "coin_front": {
+            "faces": 576,
+            "uvMin": [
+              0.041237,
+              0.468105
+            ],
+            "uvMax": [
+              0.354596,
+              0.938145
+            ]
+          },
+          "coin_back": {
+            "faces": 576,
+            "uvMin": [
+              0.395404,
+              0.468105
+            ],
+            "uvMax": [
+              0.708763,
+              0.938145
+            ]
+          },
+          "gold": {
+            "faces": 768,
+            "uvMin": [
+              0.033854,
+              0.259766
+            ],
+            "uvMax": [
+              0.966146,
+              0.402344
+            ]
+          },
+          "bronze": {
+            "faces": 384,
+            "uvMin": [
+              0.033854,
+              0.069238
+            ],
+            "uvMax": [
+              0.966146,
+              0.207129
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      }
+    ],
+    "stripEndDiagnostics": {
+      "gold": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 11.559027777777779,
+        "maxChannelDelta": 47,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "bronze": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 16.78472222222222,
+        "maxChannelDelta": 94,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      }
+    },
+    "boundary": "Both models consume the same gold allocation and original filename. Region containment is not a texel quality, memory or draw-call benchmark; strip endpoints can differ."
+  },
+  "nativeCell": 96,
+  "candidateShippingDecodedRGBIdentical": true,
+  "originalSourceCompiledShippingAtlasBytesIdentical": true,
+  "independentRepeatedExportBytesIdentical": true,
+  "shippingCompileCheckPassed": true,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 50,
+  "boundary": "Runtime captures at native 96px; orthographic Workbench captures read-only shape/UV evidence only. Plain copies preserve exact OBJ bytes and sphere passes, remove map_Kd and UV gain. Changed pixels are contribution, not quality. Raw evaluated components closed and positive-volume."
+}

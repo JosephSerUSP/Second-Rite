@@ -1261,3 +1261,43 @@ Agent-Signature:
   role: implementation
   task: multiview volume with continuous generated surfaces
   base: 8b7b4a64631b3eef9227ef9b2360c6db1b38aa73
+
+## Follow-on: two items per generated texture
+
+The 2026-10-07 pilot gives **Untarnished Signet** and **Verdigris Coin** separate
+saved sources using one unchanged generated RGB atlas. One combined multiview
+reference and one flat-atlas generation served both, rather than two calls per
+item. Unique coin faces and blank signet table remain separate allocations;
+both models consume the same gold strip. This measures fewer generation calls,
+not cost, memory or draw-call savings.
+
+The ring's actual finger hole, thick widening band and beveled blank table are
+geometry; the coin has measured depth, recessed stamp planes, raised rim and
+64 physical edge reeds. Rounded band/rim surfaces are smooth, broad faces flat.
+The stamp's apparent relief is mainly painted. Generated view inconsistency
+and authored hidden construction are recorded. The single atlas displaced its
+requested gold/bronze strip positions; measured UV correspondence preserves
+original pixels instead of assuming guide adherence. Shared `surface_atlas`
+now converts pixel-edge allocations and sampling insets into OBJ UV bounds.
+
+Both exports repeat exactly, sources remain byte-unchanged during inspection,
+and native 96px candidate/shipping captures match. Painted-face region/area
+checks and raw closed positive-volume component checks pass. Identical-OBJ
+plain controls isolate generated surface contribution. Quiet regions are still
+grainy, strip endpoints differ, and shared edits couple both consumers.
+
+Five host tests, texture/asset contract/index, strict prospective cohort review,
+fresh G1-G4/unit/save pass locally. Seven Effekseer assertions are unavailable.
+Actual baselines remain red and unchanged: corpus 85 stale keys, two inherited
+duplicate groups, 33 UV-less items and one shared-file group; asset regression
+100 changed model records across the stack. No G5/G6 recapture/run or Linux
+byte-stability claim. Prior adopted sources were not regenerated. Full prompts,
+allocations and native/source comparisons are in
+[the shared-atlas review package](item-model-shared-atlas-review/).
+
+Agent-Signature:
+  platform: Codex
+  model: platform-selected/unknown
+  role: implementation
+  task: two independent items from one generated surface atlas
+  base: cfe1006e10abbb26d3a3201d64ca36d902b6ac97

@@ -543,6 +543,9 @@ def planar_uv(verts, faces, *, axes=(0, 2), scale=1.0, offset=(0.5, 0.5)):
 
 def report(root, extra=None):
     """One machine-readable line, like the other recipes."""
+    # Location/rotation edits are lazy. Read current bounds, not the previous
+    # operator's matrix cache (especially for newly positioned head pieces).
+    bpy.context.view_layer.update()
     lo = Vector((1e9,) * 3)
     hi = Vector((-1e9,) * 3)
     count = 0

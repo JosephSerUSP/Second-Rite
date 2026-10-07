@@ -22,7 +22,8 @@ end
 
 -- Carried slots include worn equipment. Unstacked quantities occupy one row
 -- per unit; an authored meta.carriedStack item occupies one row for its stack.
--- The projection is shared by formulas, list rendering and indexed commands.
+-- This is the semantic authority that later formula/list/command adapters must
+-- consume rather than independently reconstructing carried order.
 function inventory.carriedRows(session)
     local rows, ids = {}, {}
     for id, qty in pairs(session.inventory or {}) do

@@ -324,31 +324,38 @@ def windows(room, room_model):
     if "encounter" in room:
         hud = FIGHT
         out += [
-            {"id": "combat_hud", "rect": {"x": "1.5 - surface.originX", "y": 1, "w": 13, "h": 4.5}, "style": "panel", "chrome": "overlay",
+            # Battle status panel: AT / HP / PE rows on the 8px text grid, each a
+            # label, a gauge and a value; the weapon and its rounds below.
+            {"id": "combat_hud", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "overlay",
              "visible": hud, "content": [
-                {"type": "gauge", "x": 0.7, "y": 0.65, "width": 8.5, "height": 0.4, "labelPlacement": "right", "label": "AT",
+                {"type": "gauge", "x": 3.2, "y": 1.3, "width": 8, "height": 0.45, "labelPlacement": "none",
                  "value": "rt.player.at", "max": "100", "fill": [0.08, "rt.player.at >= 100 and .45+.4*abs(sin(sceneState.gait)) or .7", 0.85],
                  "color": [0.04, 0.07, 0.06]},
-                {"type": "gauge", "x": 0.7, "y": 3.5, "width": 8.5, "height": 0.4, "labelPlacement": "right", "label": "PE",
-                 "value": "rt.player.res.pe", "max": "100", "fill": [0.02, 0.85, 0.15], "color": [0.04, 0.07, 0.06]}]},
-            {"id": "hp", "rect": {"x": "3.2 - surface.originX", "y": 2.3, "w": 7, "h": 1.5}, "style": "panel", "chrome": "none",
-             "visible": hud, "content": [{"type": "text", "text": "{rt.player.hp}/{rt.player.maxHp}"}]},
-            {"id": "hp_label", "rect": {"x": "10 - surface.originX", "y": 2.3, "w": 3.5, "h": 1.5}, "style": "panel", "chrome": "none",
-             "visible": hud, "content": [{"type": "text", "text": "HP"}]},
-            {"id": "command", "rect": {"x": "1 - surface.originX", "y": 7, "w": 13, "h": 8}, "style": "panel", "chrome": "overlay",
+                {"type": "gauge", "x": 3.2, "y": 3.3, "width": 8, "height": 0.45, "labelPlacement": "none",
+                 "value": "rt.player.hp", "max": "rt.player.maxHp", "fill": [0.85, 0.75, 0.2], "color": [0.07, 0.06, 0.03]},
+                {"type": "gauge", "x": 3.2, "y": 5.3, "width": 8, "height": 0.45, "labelPlacement": "none",
+                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.25, 0.55, 0.95], "color": [0.03, 0.05, 0.08]}]},
+            {"id": "hud_labels", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "none",
+             "visible": hud, "content": [{"type": "text", "text": "AT\n\nHP\n\nPE\n\n{" + WEAPON + " == 'baton' and 'BATON' or 'M84F'}"}]},
+            {"id": "hud_values", "rect": {"x": "12 - surface.originX", "y": 1, "w": 8, "h": 9}, "style": "panel", "chrome": "none",
+             "visible": hud, "content": [{"type": "text", "text":
+                "\n\n{rt.player.hp}/{rt.player.maxHp}\n\n{rt.player.res.pe}/{rt.player.res.peMax}\n\n"
+                "{" + WEAPON + " == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"}]},
+            # Battle menus: one column under the status panel, one width, a title row.
+            {"id": "command", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 7}, "style": "panel", "chrome": "overlay",
              "visible": "sceneState.ui == 1", "content": [{"type": "text", "text":
-                "{sceneState.choice == 0 and '> Attack' or '  Attack'}\n{sceneState.choice == 1 and '> P. Energy' or '  P. Energy'}\n"
-                "{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"}]},
-            {"id": "target_info", "rect": {"x": "surface.width - surface.originX - 13", "y": 13, "w": 12, "h": 5}, "style": "panel",
+                "COMMAND\n{sceneState.choice == 0 and '> ' or '  '}Attack\n{sceneState.choice == 1 and '> ' or '  '}P. Energy\n"
+                "{sceneState.choice == 2 and '> ' or '  '}Item\n{sceneState.choice == 3 and '> ' or '  '}Escape"}]},
+            {"id": "target_info", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel",
              "chrome": "overlay", "visible": "sceneState.ui == 2",
-             "content": [{"type": "text", "text": "{" + WEAPON + " == 'baton' and 'BATON' or 'M84F'}\n"
-                          "{" + WEAPON + " == 'baton' and 'NO AMMO' or 'BULLETS ' .. (rt.items.handgun_ammo or 0)}\nTARGET   1"}]},
-            {"id": "pe_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 15, "h": 5}, "style": "panel", "chrome": "overlay",
-             "visible": "sceneState.ui == 3", "content": [{"type": "text", "text": "> Heal 1\nRecover 30 HP\nPE cost 30"}]},
-            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 7, "w": 17, "h": 5}, "style": "panel", "chrome": "overlay",
+             "content": [{"type": "text", "text": "TARGET\n{" + WEAPON + " == 'baton' and 'Baton  range 1.5' or 'M84F   range 4'}\n"
+                          "A: fire   B: back"}]},
+            {"id": "pe_menu", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel", "chrome": "overlay",
+             "visible": "sceneState.ui == 3", "content": [{"type": "text", "text": "P. ENERGY\n> Heal 1     PE 30\n  Recover 30 HP"}]},
+            {"id": "item_menu", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 5}, "style": "panel", "chrome": "overlay",
              "visible": "sceneState.ui == 4", "content": [{"type": "text", "text":
-                "{sceneState.choice == 0 and '>' or ' '} Medicine x{(rt.items.medicine or 0)}\n"
-                "{sceneState.choice == 1 and '>' or ' '} Equip {" + OTHER + " == 'baton' and 'Baton' or 'Handgun'}"}]},
+                "ITEM\n{sceneState.choice == 0 and '> ' or '  '}Medicine   x{(rt.items.medicine or 0)}\n"
+                "{sceneState.choice == 1 and '> ' or '  '}Equip {" + OTHER + " == 'baton' and 'Baton' or 'M84F'}"}]},
             {"id": "result", "rect": {"x": 6, "y": 9, "w": 21, "h": 6}, "style": "panel", "chrome": "overlay",
              "visible": in_fight("rt.outcome == 'victory'", "false") + " and sceneState.ui ~= 9",
              "content": [{"type": "text", "text": "Battle over\n> Obtain all"}]},
@@ -356,23 +363,28 @@ def windows(room, room_model):
              "visible": in_fight("rt.outcome == 'defeat'", "false"), "content": [{"type": "text", "text": "Aya has fallen\nEnter: retry"}]},
         ]
     out += [
-        {"id": "card", "rect": {"x": "4 - surface.originX", "y": 7, "w": "surface.width - 8", "h": 14}, "style": "panel",
+        # Bottom message box, sized to its text.
+        {"id": "card", "rect": {"x": "4 - surface.originX", "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
+                                "w": "surface.width - 8", "h": "3 + sceneState.cardLines"}, "style": "panel",
          "chrome": "overlay", "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
-        {"id": "weapon", "rect": {"x": "surface.width - surface.originX - 15", "y": 1, "w": 14, "h": 2}, "style": "panel",
-         "chrome": "none", "visible": "sceneState.ui ~= 9",
-         "content": [{"type": "text", "text": "{" + WEAPON + " == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"}]},
-        {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": 27.5, "w": 34, "h": 2}, "style": "panel", "chrome": "none",
-         "visible": "sceneState.ui ~= 9",
-         "content": [{"type": "text", "text": "{%s}" % in_fight("rt.refusalAge < 90 and rt.refusal or sceneState.status", "sceneState.status")}]},
+        # Battle-only feedback line (refusals, prompts); the field stays clean.
+        {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": "surface.height - surface.originY - 2.5", "w": 34, "h": 2},
+         "style": "panel", "chrome": "none", "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",
+         "content": [{"type": "text", "text": "{%s}" % in_fight("rt.refusalAge < 90 and rt.refusal or sceneState.status", "''")}]},
     ]
     return out
+
+
+def message(text, **more):
+    """Show a message box; it is sized to the text's line count."""
+    return setv(card=q(text), cardLines=text.count("\n") + 1, **more)
 
 
 def on_enter(room, spawn):
     hooks = [
         {"cmd": "COMMENT", "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."},
         setv(ui=0, choice=0, menuHeld="false", gait=0, moving=0, dx=0, dy=0, ix=0, iy=0, held=0, camYaw=0, ilen=1, range=4, aim=0, ratAim=0,
-             fight=0, near="''", card="''", status=q(room["name"]),
+             fight=0, near="''", card="''", cardLines=1, status="''",
              walkX="sceneState.walkX or %s" % spawn[0], walkY="sceneState.walkY or %s" % spawn[1]),
         setv(entryX="sceneState.walkX", entryY="sceneState.walkY"),
     ]
@@ -381,7 +393,7 @@ def on_enter(room, spawn):
         hooks.append(iff("flag:" + flag, [setv(**{sv(flag): 1})]))
     card = room.get("card")
     if card:
-        show = [setv(card=q(card["text"]))]
+        show = [message(card["text"])]
         if card.get("once"):
             hooks.append(iff("flag:" + card["once"], [], [{"cmd": "SET_FLAG", "flag": card["once"], "value": True}] + show))
         else:
@@ -389,7 +401,7 @@ def on_enter(room, spawn):
     visit = room.get("visitCard")
     if visit:
         seen = "visited_" + room["id"] + "_" + visit["flag"]
-        grant = [{"cmd": "SET_FLAG", "flag": seen, "value": True}, setv(card=q(visit["text"]))]
+        grant = [{"cmd": "SET_FLAG", "flag": seen, "value": True}, message(visit["text"])]
         if visit.get("heal"):
             grant.append({"cmd": "RECOVER_PARTY"})
         if visit.get("item"):
@@ -443,7 +455,7 @@ def on_frame(room):
              walkY="max(%s, min(%s, sceneState.walkY + sceneState.dy * %s))" % (b["minY"], b["maxY"], WALK_SPEED)),
         iff("sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0", [SWAP]),
         setv(menuHeld="sceneState.input.X"),
-        setv(near="''", status=q(room["name"])),
+        setv(near="''", status="''"),
     ]
     dist = "((sceneState.walkX - (%s))^2 + (sceneState.walkY - (%s))^2 < %s)"
     for door in room["doors"]:
@@ -492,7 +504,7 @@ def fight_select(room):
                         [SWAP]), setv(ui=0, status="''")])])])])])
     leave = [setv(walkX="rt.player.x", walkY="rt.player.y"), {"cmd": "REALTIME_BATTLE_END"}, setv(fight=0, ui=0)]
     return iff("rt.outcome == 'victory'", [
-        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + [setv(card=q(enc["after"]), ui=9)], [
+        {"cmd": "SET_FLAG", "flag": enc["cleared"], "value": True}] + leave + [message(enc["after"], ui=9)], [
         iff("rt.outcome == 'defeat'", [
             {"cmd": "COMMENT", "text": "Rough-chapter retry: restore Aya and restart this room's fight where she entered."},
             {"cmd": "REALTIME_BATTLE_END"}, {"cmd": "RECOVER_PARTY"},
@@ -511,7 +523,7 @@ def on_select(room):
         go = [{"cmd": "SCENE_EVENT", "kind": "goto", "scene": "day1_" + door["to"],
                "sceneState": [{"name": "walkX", "value": door["spawn"][0]}, {"name": "walkY", "value": door["spawn"][1]}]}]
         if door.get("needs"):
-            go = [iff("flag:" + door["needs"], go, [setv(card=q(door["lockedText"]), ui=9)])]
+            go = [iff("flag:" + door["needs"], go, [message(door["lockedText"], ui=9)])]
         explore.append(iff("sceneState.near == %s" % q(door["id"]), go))
     for p in room.get("pickups", []):
         got = [{"cmd": "SET_FLAG", "flag": "got_" + p["id"], "value": True}, setv(**{sv("got_" + p["id"]): 1})]
@@ -519,7 +531,7 @@ def on_select(room):
             got.append({"cmd": "CHANGE_ITEM", "item": p["item"][0], "count": p["item"][1]})
         if p.get("flag"):
             got.append({"cmd": "SET_FLAG", "flag": p["flag"], "value": True})
-        got.append(setv(card=q(p["text"]), ui=9))
+        got.append(message(p["text"], ui=9))
         explore.append(iff("sceneState.near == %s" % q("p:" + p["id"]), got))
     body = explore
     if "encounter" in room:

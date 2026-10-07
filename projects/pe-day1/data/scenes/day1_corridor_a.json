@@ -406,10 +406,10 @@
     {
       "id": "combat_hud",
       "rect": {
-        "x": "1.5 - surface.originX",
+        "x": "1 - surface.originX",
         "y": 1,
-        "w": 13,
-        "h": 4.5
+        "w": 19,
+        "h": 9
       },
       "style": "panel",
       "chrome": "overlay",
@@ -417,12 +417,11 @@
       "content": [
         {
           "type": "gauge",
-          "x": 0.7,
-          "y": 0.65,
-          "width": 8.5,
-          "height": 0.4,
-          "labelPlacement": "right",
-          "label": "AT",
+          "x": 3.2,
+          "y": 1.3,
+          "width": 8,
+          "height": 0.45,
+          "labelPlacement": "none",
           "value": "rt.player.at",
           "max": "100",
           "fill": [
@@ -438,34 +437,53 @@
         },
         {
           "type": "gauge",
-          "x": 0.7,
-          "y": 3.5,
-          "width": 8.5,
-          "height": 0.4,
-          "labelPlacement": "right",
-          "label": "PE",
-          "value": "rt.player.res.pe",
-          "max": "100",
+          "x": 3.2,
+          "y": 3.3,
+          "width": 8,
+          "height": 0.45,
+          "labelPlacement": "none",
+          "value": "rt.player.hp",
+          "max": "rt.player.maxHp",
           "fill": [
-            0.02,
             0.85,
-            0.15
+            0.75,
+            0.2
           ],
           "color": [
-            0.04,
             0.07,
-            0.06
+            0.06,
+            0.03
+          ]
+        },
+        {
+          "type": "gauge",
+          "x": 3.2,
+          "y": 5.3,
+          "width": 8,
+          "height": 0.45,
+          "labelPlacement": "none",
+          "value": "rt.player.res.pe",
+          "max": "rt.player.res.peMax",
+          "fill": [
+            0.25,
+            0.55,
+            0.95
+          ],
+          "color": [
+            0.03,
+            0.05,
+            0.08
           ]
         }
       ]
     },
     {
-      "id": "hp",
+      "id": "hud_labels",
       "rect": {
-        "x": "3.2 - surface.originX",
-        "y": 2.3,
-        "w": 7,
-        "h": 1.5
+        "x": "1 - surface.originX",
+        "y": 1,
+        "w": 19,
+        "h": 9
       },
       "style": "panel",
       "chrome": "none",
@@ -473,17 +491,17 @@
       "content": [
         {
           "type": "text",
-          "text": "{rt.player.hp}/{rt.player.maxHp}"
+          "text": "AT\n\nHP\n\nPE\n\n{(variables.weapon or 'handgun') == 'baton' and 'BATON' or 'M84F'}"
         }
       ]
     },
     {
-      "id": "hp_label",
+      "id": "hud_values",
       "rect": {
-        "x": "10 - surface.originX",
-        "y": 2.3,
-        "w": 3.5,
-        "h": 1.5
+        "x": "12 - surface.originX",
+        "y": 1,
+        "w": 8,
+        "h": 9
       },
       "style": "panel",
       "chrome": "none",
@@ -491,7 +509,7 @@
       "content": [
         {
           "type": "text",
-          "text": "HP"
+          "text": "\n\n{rt.player.hp}/{rt.player.maxHp}\n\n{rt.player.res.pe}/{rt.player.res.peMax}\n\n{(variables.weapon or 'handgun') == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"
         }
       ]
     },
@@ -499,9 +517,9 @@
       "id": "command",
       "rect": {
         "x": "1 - surface.originX",
-        "y": 7,
-        "w": 13,
-        "h": 8
+        "y": 10.5,
+        "w": 19,
+        "h": 7
       },
       "style": "panel",
       "chrome": "overlay",
@@ -509,16 +527,16 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.choice == 0 and '> Attack' or '  Attack'}\n{sceneState.choice == 1 and '> P. Energy' or '  P. Energy'}\n{sceneState.choice == 2 and '> Item' or '  Item'}\n{sceneState.choice == 3 and '> Escape' or '  Escape'}"
+          "text": "COMMAND\n{sceneState.choice == 0 and '> ' or '  '}Attack\n{sceneState.choice == 1 and '> ' or '  '}P. Energy\n{sceneState.choice == 2 and '> ' or '  '}Item\n{sceneState.choice == 3 and '> ' or '  '}Escape"
         }
       ]
     },
     {
       "id": "target_info",
       "rect": {
-        "x": "surface.width - surface.originX - 13",
-        "y": 13,
-        "w": 12,
+        "x": "1 - surface.originX",
+        "y": 10.5,
+        "w": 19,
         "h": 5
       },
       "style": "panel",
@@ -527,7 +545,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{(variables.weapon or 'handgun') == 'baton' and 'BATON' or 'M84F'}\n{(variables.weapon or 'handgun') == 'baton' and 'NO AMMO' or 'BULLETS ' .. (rt.items.handgun_ammo or 0)}\nTARGET   1"
+          "text": "TARGET\n{(variables.weapon or 'handgun') == 'baton' and 'Baton  range 1.5' or 'M84F   range 4'}\nA: fire   B: back"
         }
       ]
     },
@@ -535,8 +553,8 @@
       "id": "pe_menu",
       "rect": {
         "x": "1 - surface.originX",
-        "y": 7,
-        "w": 15,
+        "y": 10.5,
+        "w": 19,
         "h": 5
       },
       "style": "panel",
@@ -545,7 +563,7 @@
       "content": [
         {
           "type": "text",
-          "text": "> Heal 1\nRecover 30 HP\nPE cost 30"
+          "text": "P. ENERGY\n> Heal 1     PE 30\n  Recover 30 HP"
         }
       ]
     },
@@ -553,8 +571,8 @@
       "id": "item_menu",
       "rect": {
         "x": "1 - surface.originX",
-        "y": 7,
-        "w": 17,
+        "y": 10.5,
+        "w": 19,
         "h": 5
       },
       "style": "panel",
@@ -563,7 +581,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.choice == 0 and '>' or ' '} Medicine x{(rt.items.medicine or 0)}\n{sceneState.choice == 1 and '>' or ' '} Equip {((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton') == 'baton' and 'Baton' or 'Handgun'}"
+          "text": "ITEM\n{sceneState.choice == 0 and '> ' or '  '}Medicine   x{(rt.items.medicine or 0)}\n{sceneState.choice == 1 and '> ' or '  '}Equip {((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton') == 'baton' and 'Baton' or 'M84F'}"
         }
       ]
     },
@@ -607,9 +625,9 @@
       "id": "card",
       "rect": {
         "x": "4 - surface.originX",
-        "y": 7,
+        "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
         "w": "surface.width - 8",
-        "h": 14
+        "h": "3 + sceneState.cardLines"
       },
       "style": "panel",
       "chrome": "overlay",
@@ -622,38 +640,20 @@
       ]
     },
     {
-      "id": "weapon",
-      "rect": {
-        "x": "surface.width - surface.originX - 15",
-        "y": 1,
-        "w": 14,
-        "h": 2
-      },
-      "style": "panel",
-      "chrome": "none",
-      "visible": "sceneState.ui ~= 9",
-      "content": [
-        {
-          "type": "text",
-          "text": "{(variables.weapon or 'handgun') == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"
-        }
-      ]
-    },
-    {
       "id": "feedback",
       "rect": {
         "x": "1 - surface.originX",
-        "y": 27.5,
+        "y": "surface.height - surface.originY - 2.5",
         "w": 34,
         "h": 2
       },
       "style": "panel",
       "chrome": "none",
-      "visible": "sceneState.ui ~= 9",
+      "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",
       "content": [
         {
           "type": "text",
-          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or '')}"
         }
       ]
     }
@@ -740,8 +740,12 @@
             "value": "''"
           },
           {
+            "name": "cardLines",
+            "value": 1
+          },
+          {
             "name": "status",
-            "value": "'Carnegie Hall - service corridor'"
+            "value": "''"
           },
           {
             "name": "walkX",
@@ -806,6 +810,10 @@
               {
                 "name": "card",
                 "value": "'Scorch marks run along\\nthe walls. The air smells\\nof burnt hair.'"
+              },
+              {
+                "name": "cardLines",
+                "value": 3
               }
             ]
           }
@@ -1187,7 +1195,7 @@
               },
               {
                 "name": "status",
-                "value": "'Carnegie Hall - service corridor'"
+                "value": "''"
               }
             ]
           },
@@ -1319,6 +1327,10 @@
                       {
                         "name": "card",
                         "value": "'Another one. Whatever she\\nis doing, it is spreading.'"
+                      },
+                      {
+                        "name": "cardLines",
+                        "value": 2
                       },
                       {
                         "name": "ui",
@@ -1723,6 +1735,10 @@
                           {
                             "name": "card",
                             "value": "'Something scratches below.\\nCheck the basement first.'"
+                          },
+                          {
+                            "name": "cardLines",
+                            "value": 2
                           },
                           {
                             "name": "ui",

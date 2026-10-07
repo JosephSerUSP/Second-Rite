@@ -207,9 +207,9 @@
       "id": "card",
       "rect": {
         "x": "4 - surface.originX",
-        "y": 7,
+        "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
         "w": "surface.width - 8",
-        "h": 14
+        "h": "3 + sceneState.cardLines"
       },
       "style": "panel",
       "chrome": "overlay",
@@ -222,38 +222,20 @@
       ]
     },
     {
-      "id": "weapon",
-      "rect": {
-        "x": "surface.width - surface.originX - 15",
-        "y": 1,
-        "w": 14,
-        "h": 2
-      },
-      "style": "panel",
-      "chrome": "none",
-      "visible": "sceneState.ui ~= 9",
-      "content": [
-        {
-          "type": "text",
-          "text": "{(variables.weapon or 'handgun') == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"
-        }
-      ]
-    },
-    {
       "id": "feedback",
       "rect": {
         "x": "1 - surface.originX",
-        "y": 27.5,
+        "y": "surface.height - surface.originY - 2.5",
         "w": 34,
         "h": 2
       },
       "style": "panel",
       "chrome": "none",
-      "visible": "sceneState.ui ~= 9",
+      "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",
       "content": [
         {
           "type": "text",
-          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or '')}"
         }
       ]
     }
@@ -340,8 +322,12 @@
             "value": "''"
           },
           {
+            "name": "cardLines",
+            "value": 1
+          },
+          {
             "name": "status",
-            "value": "'Carnegie Hall - auditorium'"
+            "value": "''"
           },
           {
             "name": "walkX",
@@ -382,6 +368,10 @@
               {
                 "name": "card",
                 "value": "'On stage, the actress Melissa\\nsings... and the audience\\nbursts into flame.\\n\\nOnly you are left standing.'"
+              },
+              {
+                "name": "cardLines",
+                "value": 5
               }
             ]
           }
@@ -526,7 +516,7 @@
           },
           {
             "name": "status",
-            "value": "'Carnegie Hall - auditorium'"
+            "value": "''"
           }
         ]
       },

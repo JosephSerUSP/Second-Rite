@@ -20,6 +20,23 @@ Three-pass plan, as requested by the owner on 2026-10-07:
 - Our own UI was captured state by state from the engine (battle idle,
   command menu, targeting, PE menu, item menu, field message).
 
+- **The decompilation** (github.com/khasinski/parasite-eve-decomp, source
+  only, work in progress) has the original's battle HUD and menu code by
+  name: `Battle_DrawHPBar`, `Battle_DrawStatusPanel`, and a `menu/`
+  subsystem (`Menu_DrawStatusPanel`, `Menu_DrawEquipSelectionList`,
+  `Menu_DrawItemDetailPanel`, `Menu_TextboxDraw`, `Menu_ContextHelpFlow`,
+  …). It is Square Enix's code: read it for facts and numbers, never copy
+  it into this repo. Facts taken from it so far:
+  - AT gauge: 56 px wide on a dark green track (#1D3E32) with a grey frame
+    (#303030), filled by a cyan gradient (#004682 → #9FFFF9). A green
+    (#008236 → #4AFF3B) and a pink-red (#FF3D81 → #831301) gradient are also
+    defined there.
+  - Numbers are 6×10 digit sprites; floating damage/recovery numbers are 8×8
+    digits that rise for 30 frames while fading (white damage, green
+    recovery, plus yellow and magenta styles).
+  - The menu shows a help line for the focused entry (item description,
+    ability or option hint) and a play-time clock.
+
 ## What the original does
 
 | Area | Original | Status |
@@ -55,15 +72,21 @@ Three-pass plan, as requested by the owner on 2026-10-07:
 - **Battle menus**: one column under the status panel, same width,
   with a title row.
 
-## Pass 2 — features to add
+## Pass 2 — features (landed)
 
-- Field menu (button: Menu/B) with Status, Item, Equip, PE pages.
-- Inventory with a slot limit and item descriptions; use Medicine in the field.
-- Equipment: weapon slot (Handgun M84F, Baton) and an armor slot (Day 1
-  starts with a basic vest), with stats shown and changed in the menu.
-- Battle: a "Change" command for weapons instead of a hidden Item entry.
+- Field menu on B: Item and Equip pages, Aya's status alongside, a help
+  line at the bottom; B backs out page by page.
+- Items: Medicine usable in the field; rounds listed. (Slot limit: pass 3.)
+- Equipment: the weapon (M84F / Baton) and a real engine Armor slot. Aya
+  starts in a Police Vest (DEF +2); a Kevlar Vest (DEF +6) is in the prop
+  store. Armor stats apply through the production stat path.
+- Battle: a Change command swaps weapons; Item holds items only.
+- Engine: `session.items.<id>` and `<battler>.equip.<slot>` formula views;
+  the Actor Change snapshot no longer counts equipment as development.
 
 ## Pass 3 — fine-tuning
 
-Check every screen against `ART/Menu.png` and the guide screenshot once the
-reference drive is online; tune colour, borders, fonts, spacing.
+Check every screen against the decompilation's menu and HUD code (exact
+positions, sizes, colours, gauge styles) and `ART/Menu.png` once the drive
+is online; add the PE page, an inventory slot limit and the play-time clock;
+tune colour, borders, fonts, spacing.

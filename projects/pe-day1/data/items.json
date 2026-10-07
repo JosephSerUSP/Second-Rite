@@ -18,5 +18,33 @@
         "value": 30
       }
     ]
+  },
+  {
+    "id": "police_vest",
+    "name": "Police Vest",
+    "type": "equipment",
+    "equipType": "Armor",
+    "description": "Standard-issue vest. DEF +2.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "id": "kevlar_vest",
+    "name": "Kevlar Vest",
+    "type": "equipment",
+    "equipType": "Armor",
+    "description": "A heavier vest from a security locker. DEF +6.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 6
+      }
+    ]
   }
 ]

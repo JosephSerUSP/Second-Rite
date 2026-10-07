@@ -108,6 +108,18 @@ local ok, err = pcall(function()
         if f:match("^day1_") then scenes[#scenes + 1] = f:gsub("%.json$", "") end
     end
     restore = require("tests.pe_day1_fixture")(loader, { scenes = scenes })
+    -- Every {formula} in every window's text parses; a syntax error there
+    -- otherwise renders as a silent 0 and passes validation.
+    for _, id in ipairs(scenes) do
+        for _, w in ipairs(sceneDef(id).windows or {}) do
+            for _, block in ipairs(w.content or {}) do
+                for expr in tostring(block.text or ""):gmatch("{(.-)}") do
+                    assert(load("return " .. expr), id .. "/" .. w.id .. ": window formula does not parse: " .. expr)
+                end
+            end
+        end
+    end
+    check(true, "every window text formula in every room parses")
     math.randomseed(5)
     pc.reset(); sh.init(nil)
     local session = sessionModule.GameSession.new(loader)
@@ -130,7 +142,7 @@ local ok, err = pcall(function()
     useDoor("to_corridor_a", "day1_corridor_a"); dismissCard(); win()
     useDoor("to_corridor_b", "day1_corridor_a"); dismissCard()          -- locked until the basement
     useDoor("to_props", "day1_props")
-    take("backstage_medicine"); take("props_ammo")
+    take("backstage_medicine"); take("props_ammo"); take("props_vest")
     useDoor("to_corridor_a", "day1_corridor_a")
     useDoor("to_backstage", "day1_backstage")
     useDoor("to_basement_rat", "day1_basement_rat"); dismissCard(); win()
@@ -173,6 +185,35 @@ local ok, err = pcall(function()
     tapX()
     check(require("engine.game_variables").get(session, "weapon") == "handgun", "X again equips the handgun")
 
+    -- Field menu (B): Aya starts in her Police Vest; Medicine heals in the
+    -- field; armor and weapon change from the Equip page; B backs out.
+    local aya = session.party[1]
+    check(aya.equipment[2] and aya.equipment[2].id == "police_vest", "Aya starts wearing the Police Vest")
+    local traits = require("engine.traits")
+    local def0 = traits.getParam(aya, "def", session)
+    tap("B")
+    check(v().ui == 20 and v().mArmor == "police_vest", "B opens the field menu with Aya's status")
+    local x0 = v().walkX
+    pc.press("RIGHT", ctx); frames(10); pc.release("RIGHT")
+    check(v().walkX == x0, "the open menu holds Aya still")
+    aya.hp = 10; session:addItem("medicine", 1)
+    local meds = session.inventory.medicine
+    tap("A")
+    check(v().ui == 21, "Item opens the item page")
+    tap("A")
+    check(aya.hp == 40 and session.inventory.medicine == meds - 1 and v().mHp == 40, "Medicine heals 30 in the field and is used up")
+    tap("B"); tap("DOWN"); tap("A")
+    check(v().ui == 22, "Equip opens the equipment page")
+    session:addItem("kevlar_vest", 1)
+    tap("DOWN"); tap("A")
+    check(aya.equipment[2].id == "kevlar_vest" and session.inventory.police_vest == 1, "the Kevlar Vest replaces the Police Vest")
+    check(traits.getParam(aya, "def", session) == def0 + 4 and v().mDef == def0 + 4, "armor changes Aya's defence")
+    tap("UP"); tap("A")
+    check(require("engine.game_variables").get(session, "weapon") == "baton", "the Equip page changes the weapon")
+    tap("A")
+    tap("B"); tap("B")
+    check(v().ui == 0, "B backs out of the menu page by page")
+
     -- Movement is screen-relative. Backstage's low view (x < 0) looks down
     -- the corridor toward -x, so UP walks Aya away from it, toward -x.
     local function hold(button, n)
@@ -203,8 +244,8 @@ local ok, err = pcall(function()
         sh.push(room, ctx)
         if v().ui == 9 then tap("A") end
         while session.party[1].at < 100 do frames(1) end
-        tapX(); tap("DOWN"); tap("DOWN"); tap("A"); tap("DOWN"); tap("A")
-        check(require("engine.game_variables").get(session, "weapon") == "baton", room .. ": the battle Item menu equips the Baton")
+        tapX(); tap("DOWN"); tap("DOWN"); tap("DOWN"); tap("A")
+        check(require("engine.game_variables").get(session, "weapon") == "baton", room .. ": the battle Change command equips the Baton")
         local outcome, swings = fightWithBaton()
         print(("    %s: %s after %d baton swings, Aya HP %d"):format(room, outcome, swings, session.party[1].hp))
         check(outcome == "victory", room .. ": winnable with zero ammo on the Baton alone")

@@ -110,6 +110,13 @@ function formula.battlerView(battler, session, opts)
         x = battler.field and battler.field.x or nil,
         y = battler.field and battler.field.y or nil,
         res = res,
+        -- Equipped item ids by slot ("" when empty), so a declarative menu can
+        -- show and branch on what is worn without SCRIPT. Read-only.
+        equip = {
+            weapon = battler.equipment and battler.equipment[1] and battler.equipment[1].id or "",
+            armor = battler.equipment and battler.equipment[2] and battler.equipment[2].id or "",
+            accessory = battler.equipment and battler.equipment[3] and battler.equipment[3].id or "",
+        },
         meta = battler.meta or {},
         -- Creature history, readable from data so a scene can show "3rd
         -- expedition, 11 battles" without engine changes (engine/session.lua
@@ -220,6 +227,11 @@ function formula.sessionView(session, v)
     if not session then return nil end
     return {
         gold = session.gold or 0,
+        -- Inventory counts by item id (`session.items.medicine`), 0 when absent:
+        -- the field-side twin of the real-time battle view's `rt.items`.
+        items = setmetatable({}, { __index = function(_, id)
+            return (session.inventory and session.inventory[id]) or 0
+        end }),
         mp = session.mp or 0,
         maxMp = session.maxMp or 0,
         expBank = session.expBank or 0,

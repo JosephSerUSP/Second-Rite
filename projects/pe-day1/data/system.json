@@ -4,6 +4,7 @@
     "fontSize": 16,
     "fontOffsetY": -4,
     "fontNormalize": true,
+    "windowskinMode": "overlay",
     "renderSurfaceProfile": "wide"
   },
   "spawn": {

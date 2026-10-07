@@ -409,6 +409,12 @@ or `"none"` and an authored tile-unit `height`; existing gauges retain their
 standard label-above-bar geometry.
 Gauge color components may be formulas, allowing authored full-AT flashing
 without changing the resolved gauge value or introducing another clock.
+`system.ui.windowskinMode` selects the regular window shell Project-wide:
+`skin` (the default) or `overlay`. The shared panel renderer applies it to
+regular shells everywhere, including title, message and menu windows; button
+and highlight roles retain their authored skins. Explicit custom chrome and
+damage labels retain their own rendering. Studio exposes the setting; both
+G1 validation paths reject unknown modes.
 Panel text can declare a positive `textScale` (default 1) in the window or
 its shared layout. It scales only text and wraps against the available width
 in local coordinates; shell and gauge geometry keep their authored size.

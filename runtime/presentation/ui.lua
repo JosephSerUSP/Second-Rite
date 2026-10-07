@@ -417,6 +417,17 @@ function ui.drawOverlayPanel(x, y, w, h)
 end
 
 function ui.drawPanel(x, y, w, h, title, role)
+    -- A Project selects the regular shell once, covering title screens,
+    -- dialogue, menus and nested panels through this shared renderer.
+    -- Interactive cell skins retain their separate button roles.
+    local mode = config.ui and config.ui.windowskinMode or "skin"
+    assert(mode == "skin" or mode == "overlay", "Unknown ui.windowskinMode: " .. tostring(mode))
+    if mode == "overlay" and (role == nil or role == "back") then
+        if w < PANEL_MIN_W or h < PANEL_MIN_H then return end
+        ui.drawOverlayPanel(x, y, w, h)
+        if title then ui.drawPanelTitle(title, x, y) end
+        return
+    end
     -- Snap to whole pixels before anything is measured from the rect.
     --
     -- The open/close animations ("grow") produce fractional rects, and the

@@ -2,6 +2,11 @@
 local rules = {}
 
 function rules.validate(loader, check)
+    local mode = loader.system and loader.system.ui and loader.system.ui.windowskinMode
+    if mode ~= nil then
+        check(mode == "skin" or mode == "overlay",
+            "system.ui.windowskinMode must be 'skin' or 'overlay'")
+    end
     local function layout(value, where)
         if type(value) ~= "table" then return end
         if value.textScale ~= nil then

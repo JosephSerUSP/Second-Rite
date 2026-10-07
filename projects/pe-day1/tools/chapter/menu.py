@@ -163,22 +163,25 @@ class Menu:
 
     def windows(self):
         h = self.h
-        W = lambda wid, x, y, w, hh, text, visible=OPEN, chrome="none": {
-            "id": wid, "rect": {"x": fx(x), "y": y, "w": w, "h": hh}, "style": "panel", "chrome": chrome,
-            "visible": visible, "content": [{"type": "text", "text": text}] if text is not None else []}
+        def W(wid, x, y, w, hh, text, visible=OPEN, chrome="none"):
+            win = {"id": wid, "rect": {"x": fx(x), "y": y, "w": w, "h": hh}, "style": "panel",
+                   "visible": visible, "content": [{"type": "text", "text": text}] if text is not None else []}
+            if chrome != "skin":          # "skin": the Project's bevelled windowskin
+                win["chrome"] = chrome
+            return win
         mark = lambda k: ("{sceneState.ui == 20 and sceneState.mcol == %d and '>' or "
                           "(sceneState.ui > 20 and sceneState.mcol == %d and '*' or ' ')}") % (k, k)
         cur = lambda var, k: "{sceneState.%s == %d and '> ' or '  '}" % (var, k)
         rounds = "{%s == 'baton' and '--' or session.items.handgun_ammo}" % h.WEAPON
         out = [
             # frame: title bar (help + clock), icon column, content panel, HP block
-            W("menu_title_frame", 0, 0.5, 40, 3, None, chrome="overlay"),
+            dict(W("menu_title_frame", 0, 0.5, 40, 3, None, chrome="skin"), dimBehind=0.45),   # PS1 darken behind the menu
             W("menu_title", 0, 0.5, 31, 3, "{" + self.help_text() + "}"),
             W("menu_clock", 31, 0.5, 9, 3, CLOCK),
             W("menu_column", 0, 4, 6, 17, (N + N).join(mark(k) + name.upper()[:4] for k, name in enumerate(COLUMN)),
-              chrome="overlay"),
-            W("menu_panel", 6, 4, 34, 17, None, chrome="overlay"),
-            W("menu_hp", 27, 22, 13, 4, "{sceneState.mHp}/{sceneState.mMax} HP", chrome="overlay"),
+              chrome="skin"),
+            W("menu_panel", 6, 4, 34, 17, None, chrome="skin"),
+            W("menu_hp", 27, 22, 13, 4, "{sceneState.mHp}/{sceneState.mMax} HP", chrome="skin"),
             {"id": "menu_pe_bar", "rect": {"x": fx(27), "y": 22, "w": 13, "h": 4}, "style": "panel", "chrome": "none",
              "visible": OPEN, "content": [{"type": "gauge", "x": 1, "y": 2.4, "width": 9, "height": 0.45,
                                            "labelPlacement": "right", "label": "PE", "value": "sceneState.mPe",

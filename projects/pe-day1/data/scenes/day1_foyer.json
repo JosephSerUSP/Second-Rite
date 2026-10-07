@@ -215,7 +215,6 @@
         "h": "3 + sceneState.cardLines"
       },
       "style": "panel",
-      "chrome": "overlay",
       "visible": "sceneState.ui == 9",
       "content": [
         {
@@ -251,9 +250,9 @@
         "h": 3
       },
       "style": "panel",
-      "chrome": "overlay",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
-      "content": []
+      "content": [],
+      "dimBehind": 0.45
     },
     {
       "id": "menu_title",
@@ -264,14 +263,14 @@
         "h": 3
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": [
         {
           "type": "text",
           "text": "{(sceneState.menuNote ~= '' and sceneState.menuNote or (sceneState.ui == 20 and (sceneState.mcol == 0 and 'Use or inspect items.' or (sceneState.mcol == 1 and 'Use Parasite Energy.' or (sceneState.mcol == 2 and 'Change weapons.' or (sceneState.mcol == 3 and 'Change armor.' or (sceneState.mcol == 4 and 'Distribute Bonus Points.' or ''))))) or (sceneState.ui == 21 and (sel('menu_items') and sel('menu_items').description or '') or (sceneState.ui == 22 and (sceneState.wi == 0 and 'M84F: handgun. Fires rounds from the Ammo Crate.' or 'Club: melee. Unlimited swings at close range.') or (sceneState.ui == 23 and 'Heal 1: restores 30 HP for 30 PE.' or (sceneState.ui == 24 and (sceneState.ai == 0 and 'N Vest: DEF +2.' or (sceneState.ai == 1 and 'N Protector: DEF +6.' or '')) or (sceneState.bi == 0 and 'Active Time: the AT gauge fills faster. 100 BP per level.' or 'Item Capacity: one more item slot. 100 BP per level.')))))))}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_clock",
@@ -282,14 +281,14 @@
         "h": 3
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": [
         {
           "type": "text",
           "text": "{floor((variables.playSeconds or 0) / 3600)}:{floor((variables.playSeconds or 0) / 60) % 60 < 10 and '0' or ''}{floor((variables.playSeconds or 0) / 60) % 60}:{floor((variables.playSeconds or 0)) % 60 < 10 and '0' or ''}{floor((variables.playSeconds or 0)) % 60}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_column",
@@ -300,7 +299,6 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "overlay",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": [
         {
@@ -318,7 +316,6 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "overlay",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": []
     },
@@ -331,7 +328,6 @@
         "h": 4
       },
       "style": "panel",
-      "chrome": "overlay",
       "visible": "sceneState.ui >= 20 and sceneState.ui <= 25",
       "content": [
         {
@@ -384,14 +380,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 20",
       "content": [
         {
           "type": "text",
           "text": "Aya\n\nLEVEL       {sceneState.mLv}\n\nNEXT LEVEL  {sceneState.mNext}\n\n\nEQUIPMENT\n\n {((variables.weapon or 'handgun') == 'baton' and 'Club' or 'M84F')}  {(variables.weapon or 'handgun') == 'baton' and '--' or session.items.handgun_ammo}\n\n {(sceneState.mArmor == 'n_vest' and 'N Vest' or (sceneState.mArmor == 'n_protector' and 'N Protector' or '--'))}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_status_right",
@@ -402,14 +398,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 20",
       "content": [
         {
           "type": "text",
           "text": "BONUS POINT  {variables.bp or 0}\n\n\nOFFENSE         {sceneState.mOff}\n\nDEFENSE         {sceneState.mDef}\n\nPENERGY         {sceneState.mPen}\n\nSTATUS RECOVER  {sceneState.mSrec}\n\n\nACTIVE TIME     {sceneState.mAct}\n\nITEM CAPACITY   {sceneState.mCapLv}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_items",
@@ -440,14 +436,14 @@
         "h": 3
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 21",
       "content": [
         {
           "type": "text",
           "text": "Worn: {(sceneState.mArmor == 'n_vest' and 'N Vest' or (sceneState.mArmor == 'n_protector' and 'N Protector' or '--'))}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_items_total",
@@ -458,14 +454,14 @@
         "h": 3
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 21",
       "content": [
         {
           "type": "text",
           "text": "Total  {sceneState.mUsed}/{sceneState.mCap}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_weapon_stats",
@@ -476,14 +472,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 22",
       "content": [
         {
           "type": "text",
           "text": "{(sceneState.wi == 0 and 'M84F' .. '\\n\\nATTACK   7\\nRANGE    4.0\\nROUNDS   ' .. session.items.handgun_ammo or 'Club\\n\\nATTACK   3\\nRANGE    1.5\\nROUNDS   --')}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_weapon_list",
@@ -494,14 +490,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 22",
       "content": [
         {
           "type": "text",
           "text": "{sceneState.wi == 0 and '> ' or '  '}M84F{(variables.weapon or 'handgun') == 'handgun' and ' E' or ''}\n{sceneState.wi == 1 and '> ' or '  '}Club{(variables.weapon or 'handgun') == 'baton' and ' E' or ''}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_pe",
@@ -512,14 +508,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 23",
       "content": [
         {
           "type": "text",
           "text": "> Heal 1       PE 30"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_armor_stats",
@@ -530,14 +526,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 24",
       "content": [
         {
           "type": "text",
           "text": "{(sceneState.ai == 0 and 'N Vest\\n\\nDEFENSE  +2' or (sceneState.ai == 1 and 'N Protector\\n\\nDEFENSE  +6' or ''))}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_armor_list",
@@ -548,14 +544,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 24",
       "content": [
         {
           "type": "text",
           "text": "{sceneState.ai == 0 and '> ' or '  '}{(session.items.n_vest > 0 or sceneState.mArmor == 'n_vest') and 'N Vest' or '--'}{sceneState.mArmor == 'n_vest' and ' E' or ''}\n{sceneState.ai == 1 and '> ' or '  '}{(session.items.n_protector > 0 or sceneState.mArmor == 'n_protector') and 'N Protector' or '--'}{sceneState.mArmor == 'n_protector' and ' E' or ''}"
         }
-      ]
+      ],
+      "chrome": "none"
     },
     {
       "id": "menu_bp",
@@ -566,14 +562,14 @@
         "h": 17
       },
       "style": "panel",
-      "chrome": "none",
       "visible": "sceneState.ui == 25",
       "content": [
         {
           "type": "text",
           "text": "BONUS POINT  {variables.bp or 0}\n\n{sceneState.bi == 0 and '> ' or '  '}ACTIVE TIME    {sceneState.mAct}\n{sceneState.bi == 1 and '> ' or '  '}ITEM CAPACITY  {sceneState.mCapLv}\n\n100 BP raise one level."
         }
-      ]
+      ],
+      "chrome": "none"
     }
   ],
   "hooks": {

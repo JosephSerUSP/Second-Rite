@@ -33,7 +33,7 @@
         // window even when the scene omits rect entirely.
         const SCENE_OVERRIDES_ALWAYS = ['x', 'y', 'width', 'height'];
         // These are only overridden when the scene's entry actually sets them.
-        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'visibleRows'];
+        const SCENE_OVERRIDES_IF_SET = ['style', 'title', 'emptyText', 'lineSpacing', 'visibleRows', 'dimBehind'];
 
         // Everything else (contentX/contentY, gridColumns, portrait*, gauges,
         // pages/pageFormula, anim, vertical, hideMp, rowPitch, ...) has no
@@ -516,6 +516,8 @@
             numField('rowPitch', 'rowPitch'); numField('spriteSize', 'spriteSize');
             numField('gaugeHeight', 'gaugeHeight'); numField('gridColumns', 'gridColumns');
             numField('portraitX', 'portraitX'); numField('portraitY', 'portraitY');
+            // PS1 subtractive dim of everything drawn behind this window, 0..1.
+            numField('dimBehind', 'dimBehind');
             propBox.appendChild(grid);
 
             const styleRow = document.createElement('div');

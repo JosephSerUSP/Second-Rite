@@ -368,7 +368,7 @@ def windows(room, room_model):
         # Bottom message box, sized to its text.
         {"id": "card", "rect": {"x": "4 - surface.originX", "y": "surface.height - surface.originY - 4 - sceneState.cardLines",
                                 "w": "surface.width - 8", "h": "3 + sceneState.cardLines"}, "style": "panel",
-         "chrome": "overlay", "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
+         "visible": "sceneState.ui == 9", "content": [{"type": "text", "text": "{sceneState.card}"}]},
         # Battle-only feedback line (refusals, prompts); the field stays clean.
         {"id": "feedback", "rect": {"x": "1 - surface.originX", "y": "surface.height - surface.originY - 2.5", "w": 34, "h": 2},
          "style": "panel", "chrome": "none", "visible": "sceneState.ui ~= 9 and sceneState.fight == 1",

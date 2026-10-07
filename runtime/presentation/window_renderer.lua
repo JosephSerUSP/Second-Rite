@@ -1877,6 +1877,14 @@ local function drawWindow(id, win, layout, state, sceneData, ctx, env, listCache
     if style == "confirm" then
         subtractive_fade.draw(0.4)
     end
+    -- Any window may darken what was drawn before it the same way: the
+    -- PS1 subtractive dim behind a field menu, a pause screen, a dialogue.
+    -- `dimBehind` is an amount 0..1 or a formula (so it can fade in).
+    if layout.dimBehind ~= nil then
+        local amount = layout.dimBehind
+        if type(amount) == "string" then amount = tonumber((formula.eval(amount, env))) or 0 end
+        subtractive_fade.draw(amount, false)
+    end
 
     local animOpen = layout.anim and layout.anim.open
     if animOpen and animOpen.anchor then
@@ -2133,6 +2141,7 @@ function wr.drawWindowFromData(sceneData, state, ctx, opts)
         if winDef.align ~= nil then layout.align = winDef.align end
         if winDef.waitInput ~= nil then layout.waitInput = winDef.waitInput end
         if winDef.chrome ~= nil then layout.chrome = winDef.chrome end
+        if winDef.dimBehind ~= nil then layout.dimBehind = winDef.dimBehind end
         layout.viewport = winDef.viewport
         -- Propagate shiftWith from winDef to layout (scenes.json overrides
         -- engine.json, so this must happen AFTER baseLayout merge).

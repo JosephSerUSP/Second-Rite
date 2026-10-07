@@ -155,6 +155,17 @@ function formula.battlerView(battler, session, opts)
                 return traits.getRate(battler, code, session)
             end
         }),
+        -- EXP progress (`a.progress.exp`, `a.progress.toNext`): lazy, so the
+        -- authored curve is consulted only by a formula that asks.
+        progress = setmetatable({}, {
+            __index = function(_, key)
+                if key == "exp" then return battler.exp or 0 end
+                if key == "toNext" then
+                    local ok, need = pcall(require("engine.progression").nextLevelExp, battler.level or 1)
+                    return ok and math.max(0, need - (battler.exp or 0)) or 0
+                end
+            end
+        }),
         -- Final value of ANY parameter (`a.stat.act`), equipment, states and
         -- permanent bonuses included: the fixed fields above cover the
         -- engine's own stats; a Project's declared stats read through here.

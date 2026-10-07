@@ -503,16 +503,16 @@
           "text": "A guard's spare clip.\nAmmo +6"
         },
         {
-          "id": "props_vest",
+          "id": "props_protector",
           "at": [
             2.6,
             1.4
           ],
           "item": [
-            "kevlar_vest",
+            "n_protector",
             1
           ],
-          "text": "A security locker.\nFound a Kevlar Vest.\nEquip it from the menu (B)."
+          "text": "A security locker.\nFound the N Protector.\nEquip it from the menu (B)."
         }
       ],
       "views": [
@@ -735,7 +735,11 @@
             4.5
           ],
           "flag": "has_rehearsal_key",
-          "text": "Found the Rehearsal Room key."
+          "text": "Found the Rehearse Key.",
+          "item": [
+            "rehearse_key",
+            1
+          ]
         },
         {
           "id": "diary",

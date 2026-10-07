@@ -1,9 +1,9 @@
 [
   {
     "id": "handgun_ammo",
-    "name": "Handgun Ammo",
-    "type": "consumable",
-    "description": "Rounds for the handgun.",
+    "name": "Ammo Crate",
+    "type": "ammo",
+    "description": "Rounds for the M84F. Takes one slot however full.",
     "effects": []
   },
   {
@@ -20,8 +20,20 @@
     ]
   },
   {
-    "id": "police_vest",
-    "name": "Police Vest",
+    "id": "m84f",
+    "name": "M84F",
+    "type": "weapon",
+    "description": "Aya's service handgun. Fires rounds from the Ammo Crate."
+  },
+  {
+    "id": "club",
+    "name": "Club",
+    "type": "weapon",
+    "description": "A police club. Melee, unlimited swings."
+  },
+  {
+    "id": "n_vest",
+    "name": "N Vest",
     "type": "equipment",
     "equipType": "Armor",
     "description": "Standard-issue vest. DEF +2.",
@@ -34,11 +46,11 @@
     ]
   },
   {
-    "id": "kevlar_vest",
-    "name": "Kevlar Vest",
+    "id": "n_protector",
+    "name": "N Protector",
     "type": "equipment",
     "equipType": "Armor",
-    "description": "A heavier vest from a security locker. DEF +6.",
+    "description": "A heavier protector. DEF +6.",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -46,5 +58,11 @@
         "value": 6
       }
     ]
+  },
+  {
+    "id": "rehearse_key",
+    "name": "Rehearse Key",
+    "type": "key",
+    "description": "Opens the Rehearsal Room."
   }
 ]

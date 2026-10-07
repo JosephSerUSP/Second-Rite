@@ -151,7 +151,17 @@ local ok, err = pcall(function()
     useDoor("to_corridor_a", "day1_corridor_a"); dismissCard(); win()
     useDoor("to_corridor_b", "day1_corridor_a"); dismissCard()          -- locked until the basement
     useDoor("to_props", "day1_props")
-    take("backstage_medicine"); take("props_ammo"); take("props_vest")
+    -- A full inventory refuses a pickup: every slot counts.
+    do
+        local inv = ctx.session.inventory
+        local used = (inv.m84f or 0) + (inv.club or 0) + (inv.medicine or 0) + ((inv.handgun_ammo or 0) > 0 and 1 or 0) + 1
+        ctx.session:addItem("medicine", 10 - used)
+        standAt("pickup_backstage_medicine"); tap("A")
+        check(v()["f_got_backstage_medicine"] ~= 1 and v().card:find("Item Capacity"), "a full inventory refuses a pickup")
+        tap("A")
+        ctx.session:addItem("medicine", -(10 - used))
+    end
+    take("backstage_medicine"); take("props_ammo"); take("props_protector")
     useDoor("to_corridor_a", "day1_corridor_a")
     useDoor("to_backstage", "day1_backstage")
     useDoor("to_basement_rat", "day1_basement_rat"); dismissCard(); win()
@@ -194,39 +204,65 @@ local ok, err = pcall(function()
     tapX()
     check(require("engine.game_variables").get(session, "weapon") == "handgun", "X again equips the handgun")
 
-    -- Field menu (B): Aya starts in her Police Vest; Medicine heals in the
-    -- field; armor and weapon change from the Equip page; B backs out.
+    -- Field menu (B), on the original's structure: an icon column (Item, PE,
+    -- Weapon, Armor, BP) over the status screen; A enters a page, B backs out.
     local aya = session.party[1]
-    check(aya.equipment[2] and aya.equipment[2].id == "police_vest", "Aya starts wearing the Police Vest")
     local traits = require("engine.traits")
+    local vars = require("engine.game_variables")
+    local resources = require("engine.battler_resources")
+    check(aya.equipment[2] and aya.equipment[2].id == "n_vest" and session.inventory.m84f == 1
+        and session.inventory.club == 1, "Aya starts with the M84F, the Club and the N Vest worn")
     local def0 = traits.getParam(aya, "def", session)
     tap("B")
-    check(v().ui == 20 and v().mArmor == "police_vest", "B opens the field menu with Aya's status")
+    check(v().ui == 20 and v().mcol == 0 and v().mArmor == "n_vest" and v().mCap == 10,
+        "B opens the status screen: Item Capacity 1 gives 10 slots")
     local x0 = v().walkX
     pc.press("RIGHT", ctx); frames(10); pc.release("RIGHT")
     check(v().walkX == x0, "the open menu holds Aya still")
-    aya.hp = 10; session:addItem("medicine", 1)
+    -- Item: the real inventory; Medicine is used from its row.
+    aya.hp = 10
     local meds = session.inventory.medicine
     tap("A")
-    check(v().ui == 21, "Item opens the item page")
+    check(v().ui == 21 and v().mi == 1, "Item opens the inventory")
+    tap("DOWN"); tap("DOWN"); tap("DOWN")      -- club, Ammo Crate, M84F, Medicine
     tap("A")
-    check(aya.hp == 40 and session.inventory.medicine == meds - 1 and v().mHp == 40, "Medicine heals 30 in the field and is used up")
-    tap("B"); tap("DOWN"); tap("A")
-    check(v().ui == 22, "Equip opens the equipment page")
-    session:addItem("kevlar_vest", 1)
+    check(aya.hp == 40 and (session.inventory.medicine or 0) == meds - 1 and v().mHp == 40,
+        "Medicine used from the item list heals 30")
+    -- Armor: the N Protector replaces the N Vest and raises DEF.
+    tap("B"); tap("DOWN"); tap("DOWN"); tap("DOWN"); tap("A")
+    check(v().ui == 24, "Armor opens the armor page")
+    session:addItem("n_protector", 1)
     tap("DOWN"); tap("A")
-    check(aya.equipment[2].id == "kevlar_vest" and session.inventory.police_vest == 1, "the Kevlar Vest replaces the Police Vest")
-    check(traits.getParam(aya, "def", session) == def0 + 4 and v().mDef == def0 + 4, "armor changes Aya's defence")
+    check(aya.equipment[2].id == "n_protector" and session.inventory.n_vest == 1, "the N Protector replaces the N Vest")
+    check(traits.getParam(aya, "def", session) == def0 + 4, "armor changes Aya's defence")
+    -- Weapon: choose the Club, then the M84F again.
+    tap("B"); tap("UP"); tap("A")
+    check(v().ui == 22 and v().wi == 0, "Weapon opens on the equipped M84F")
+    tap("DOWN"); tap("A")
+    check(vars.get(session, "weapon") == "baton", "the weapon page equips the Club")
     tap("UP"); tap("A")
-    check(require("engine.game_variables").get(session, "weapon") == "baton", "the Equip page changes the weapon")
-    tap("A")
-    tap("B"); tap("DOWN"); tap("A")
-    check(v().ui == 23, "P. Energy opens the PE page")
-    local resources = require("engine.battler_resources")
+    check(vars.get(session, "weapon") == "handgun", "and the M84F again")
+    -- PE: Heal 1 in the field.
+    tap("B"); tap("UP"); tap("A")
+    check(v().ui == 23, "PE opens the Parasite Energy page")
     aya.hp = 10
     local pe0 = resources.get(aya, "pe", session)
     tap("A")
     check(aya.hp == 40 and resources.get(aya, "pe", session) == pe0 - 30, "Heal 1 in the field restores 30 HP for 30 PE")
+    -- BP: 100 Bonus Points buy one level of Active Time.
+    tap("B"); tap("UP"); tap("UP"); tap("A")
+    check(v().ui == 25, "BP opens the Bonus Point page")
+    require("engine.game_variables").set(session, "bp", 150)
+    local act0 = traits.getParam(aya, "act", session)
+    tap("A")
+    check(traits.getParam(aya, "act", session) == act0 + 1 and vars.get(session, "bp") == 50,
+        "100 BP buy one level of Active Time")
+    tap("A")
+    check(traits.getParam(aya, "act", session) == act0 + 1 and v().menuNote:find("100 BP"), "without 100 BP nothing is bought")
+    tap("DOWN")
+    require("engine.game_variables").set(session, "bp", 100)
+    tap("A")
+    check(traits.getParam(aya, "cap", session) == 2, "Item Capacity can be bought the same way")
     tap("B"); tap("B")
     check(v().ui == 0, "B backs out of the menu page by page")
     local t0 = require("engine.game_variables").get(session, "playSeconds") or 0

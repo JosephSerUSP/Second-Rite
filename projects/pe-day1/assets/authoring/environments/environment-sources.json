@@ -23,7 +23,7 @@
     },
     "pe_dressing.blend": {
       "status": "adopted",
-      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+      "basis": "Authored 2026-10-06 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets. Re-authored 2026-10-07 for the expanded route (single front door)."
     },
     "pe_rehearsal.blend": {
       "status": "adopted",
@@ -38,6 +38,38 @@
       "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
     },
     "pe_street.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_entrance.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_corridor_a.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_props.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_corridor_b.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_melissa.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_green_room.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_sewer_stairs.blend": {
+      "status": "adopted",
+      "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
+    },
+    "pe_sewer_channel.blend": {
       "status": "adopted",
       "basis": "Authored 2026-10-07 by tools/chapter/author_rooms.py from rooms.json, then the editable source authority. Baked with tools/blender/town_environment_pipeline.py via tools/chapter/bake_rooms.py; original geometry, no extracted assets."
     }

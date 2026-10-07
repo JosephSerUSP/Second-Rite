@@ -604,7 +604,7 @@
                   },
                   {
                     "name": "walkY",
-                    "value": 4.6
+                    "value": 4.8
                   }
                 ]
               }
@@ -625,7 +625,7 @@
                   },
                   {
                     "name": "walkY",
-                    "value": 0.8
+                    "value": 0.9
                   }
                 ]
               }

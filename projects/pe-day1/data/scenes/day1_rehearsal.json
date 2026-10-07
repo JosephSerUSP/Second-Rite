@@ -63,7 +63,7 @@
             "bakedLighting": true
           },
           {
-            "id": "door_to_dressing",
+            "id": "door_to_corridor_b",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               -4.6,
@@ -71,7 +71,7 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_dressing'"
+            "visible": "sceneState.near == 'to_corridor_b'"
           },
           {
             "id": "door_to_sewer",
@@ -1173,11 +1173,11 @@
                 "assignments": [
                   {
                     "name": "near",
-                    "value": "'to_dressing'"
+                    "value": "'to_corridor_b'"
                   },
                   {
                     "name": "status",
-                    "value": "'Enter: Dressing rooms'"
+                    "value": "'Enter: Corridor'"
                   }
                 ]
               }
@@ -1606,20 +1606,20 @@
             "else": [
               {
                 "cmd": "IF",
-                "condition": "sceneState.near == 'to_dressing'",
+                "condition": "sceneState.near == 'to_corridor_b'",
                 "then": [
                   {
                     "cmd": "SCENE_EVENT",
                     "kind": "goto",
-                    "scene": "day1_dressing",
+                    "scene": "day1_corridor_b",
                     "sceneState": [
                       {
                         "name": "walkX",
-                        "value": 4.2
+                        "value": 4.8
                       },
                       {
                         "name": "walkY",
-                        "value": 3
+                        "value": 2
                       }
                     ]
                   }
@@ -1644,7 +1644,7 @@
                           },
                           {
                             "name": "walkY",
-                            "value": 0.8
+                            "value": 0.9
                           }
                         ]
                       }

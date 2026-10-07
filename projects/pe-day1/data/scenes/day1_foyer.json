@@ -63,6 +63,17 @@
             "bakedLighting": true
           },
           {
+            "id": "door_to_entrance",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_entrance'"
+          },
+          {
             "id": "door_to_auditorium",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
@@ -338,7 +349,7 @@
           },
           {
             "name": "walkY",
-            "value": "sceneState.walkY or 0.8"
+            "value": "sceneState.walkY or 1"
           }
         ]
       },
@@ -352,27 +363,6 @@
           {
             "name": "entryY",
             "value": "sceneState.walkY"
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:seen_arrival",
-        "then": [],
-        "else": [
-          {
-            "cmd": "SET_FLAG",
-            "flag": "seen_arrival",
-            "value": true
-          },
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "card",
-                "value": "'Christmas Eve, 1997.\\nCarnegie Hall, New York.\\n\\nAya Brea, NYPD, arrives\\nfor the opera.'"
-              }
-            ]
           }
         ]
       },
@@ -562,6 +552,25 @@
       },
       {
         "cmd": "IF",
+        "condition": "((sceneState.walkX - (0))^2 + (sceneState.walkY - (0.3))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_entrance'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Outside'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
         "condition": "((sceneState.walkX - (0))^2 + (sceneState.walkY - (5.6))^2 < 0.81)",
         "then": [
           {
@@ -602,6 +611,27 @@
         "else": [
           {
             "cmd": "IF",
+            "condition": "sceneState.near == 'to_entrance'",
+            "then": [
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "goto",
+                "scene": "day1_entrance",
+                "sceneState": [
+                  {
+                    "name": "walkX",
+                    "value": 0
+                  },
+                  {
+                    "name": "walkY",
+                    "value": 4.8
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
             "condition": "sceneState.near == 'to_auditorium'",
             "then": [
               {
@@ -615,7 +645,7 @@
                   },
                   {
                     "name": "walkY",
-                    "value": 0.8
+                    "value": 0.9
                   }
                 ]
               }

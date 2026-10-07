@@ -14,16 +14,16 @@
     3.4
   ],
   "stats": {
-    "triangleCount": 1408,
-    "vertexCount": 816,
+    "triangleCount": 1336,
+    "vertexCount": 768,
     "materialGroupCount": 1,
     "textureDimensions": [
       1024,
       1024
     ],
-    "pngSizeBytes": 858033,
-    "renderMeshSizeBytes": 118163,
-    "packageSizeBytes": 976325
+    "pngSizeBytes": 804909,
+    "renderMeshSizeBytes": 111035,
+    "packageSizeBytes": 916073
   },
   "anchors": {
     "spawn": {
@@ -73,24 +73,24 @@
           "NVIDIA GeForce GTX 1650"
         ]
       },
-      "batchedSourceObjects": 56,
+      "batchedSourceObjects": 50,
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 1.8841099999845028,
-        "filteredCharts": 80,
-        "preservedSmallCharts": 256,
-        "filteredTexels": 832714,
+        "seconds": 2.309973799972795,
+        "filteredCharts": 72,
+        "preservedSmallCharts": 228,
+        "filteredTexels": 848868,
         "alphaUnchanged": true
       },
       "texelAlignment": {
         "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 241,
-        "preservedUnsafeCharts": 95,
+        "alignedCharts": 210,
+        "preservedUnsafeCharts": 90,
         "existingSharedTexelPairs": 0,
         "newSharedTexelPairs": 0,
         "atlasSize": 1024
       }
     },
-    "exportSeconds": 7.272283700061962
+    "exportSeconds": 8.520106500014663
   }
 }

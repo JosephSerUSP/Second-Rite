@@ -494,9 +494,136 @@ def room_street(S, room):
     light(S, "moon", "SUN", (0, 0, 10), 0.15, (0.6, 0.7, 1.0), rot=(math.radians(40), 0, math.radians(20)))
 
 
+def room_entrance(S, room):
+    """Outside the hall on a snowy night: lit canopy, brass doors, a police
+    car at the kerb, a street lamp (orig bg 1/5)."""
+    w, d = room["size"]
+    snow = patterned("snowy_pavement", (0.45, 0.47, 0.52), (0.30, 0.32, 0.36), "noise", 2.5, 0.8)
+    facade = patterned("hall_brick", (0.36, 0.20, 0.13), (0.22, 0.12, 0.08), "brick", 1.2, 0.8)
+    shell(S, room, snow, facade, mat("kerb", (0.35, 0.35, 0.36), 0.7),
+          mat("brass_doors", (0.55, 0.40, 0.18), 0.35, 0.8), mat("frame_stone", (0.55, 0.50, 0.42), 0.7))
+    canopy = mat("canopy", (0.30, 0.04, 0.04), 0.6)
+    bulbs = mat("canopy_bulbs", (1, 0.9, 0.7), 0.3, emit=(1, 0.85, 0.55), strength=10)
+    iron = mat("lamp_iron", (0.05, 0.05, 0.05), 0.4, 0.8)
+    box(S, "canopy", (0, d - 1.0, 2.9), (w * 0.45, 2.0, 0.15), canopy)
+    box(S, "canopy_lights", (0, d - 2.0, 2.82), (w * 0.45, 0.05, 0.06), bulbs)
+    for sx in (-1, 1):
+        cyl(S, "canopy_post_%d" % sx, (sx * w * 0.2, d - 1.95, 1.4), 0.05, 2.8, iron, 8)
+    light(S, "canopy_light", "AREA", (0, d - 1.2, 2.7), 260, WARM, 3.0)
+    glow = mat("window_glow", (1, 0.8, 0.5), 0.4, emit=WARM, strength=5)
+    for i in range(5):
+        box(S, "arch_window_%d" % i, (-w / 2 + 1.0 + i * (w - 2) / 4, d - 0.01, 2.0), (0.7, 0.04, 1.3), glow)
+    # police car at the kerb, its lights frozen mid-flash
+    body = mat("car_white", (0.75, 0.76, 0.78), 0.3, 0.3)
+    dark = mat("car_glass", (0.04, 0.05, 0.06), 0.1, 0.5)
+    red = mat("siren_red", (1, 0.1, 0.1), 0.3, emit=(1, 0.08, 0.05), strength=14)
+    blue = mat("siren_blue", (0.2, 0.3, 1), 0.3, emit=(0.15, 0.3, 1), strength=14)
+    cx, cy = w / 2 - 2.2, 1.0
+    box(S, "car_body", (cx, cy, 0.55), (3.8, 1.6, 0.6), body)
+    box(S, "car_cabin", (cx - 0.2, cy, 1.05), (2.0, 1.45, 0.5), dark)
+    box(S, "siren_r", (cx - 0.45, cy, 1.36), (0.35, 0.9, 0.1), red)
+    box(S, "siren_b", (cx + 0.05, cy, 1.36), (0.35, 0.9, 0.1), blue)
+    for wx in (-1.2, 1.2):
+        for wy in (-0.8, 0.8):
+            cyl(S, "wheel", (cx + wx, cy + wy, 0.3), 0.3, 0.2, dark, 12, rot=(math.radians(90), 0, 0))
+    light(S, "siren_red_light", "POINT", (cx - 0.45, cy, 1.6), 120, (1, 0.15, 0.1), 0.2)
+    light(S, "siren_blue_light", "POINT", (cx + 0.05, cy, 1.6), 120, (0.2, 0.35, 1), 0.2)
+    bulb = mat("streetlamp_glow", (1, 0.95, 0.8), 0.3, emit=(1, 0.9, 0.7), strength=12)
+    x = -w / 2 + 0.8
+    cyl(S, "lamp_post", (x, 0.6, 1.5), 0.06, 3.0, iron, 8)
+    sphere(S, "lamp_globe", (x, 0.6, 3.1), 0.18, bulb)
+    light(S, "lamp_light", "POINT", (x, 0.6, 3.0), 90, (1.0, 0.88, 0.7), 0.3)
+    for i in range(8):
+        box(S, "snowbank_%d" % i, (-w / 2 + 0.6 + i * (w - 1.2) / 7, 0.25, 0.08),
+            (0.8, 0.45, 0.14 + (i % 2) * 0.08), snow)
+
+
+def room_corridor(S, room):
+    """A long service corridor seen down its length (orig bg 9/10/11):
+    linoleum, panelled walls, a run of ceiling lamps, red doors."""
+    w, d = room["size"]
+    floor = patterned("linoleum", (0.26, 0.24, 0.20), (0.18, 0.17, 0.14), "checker", 2.0, 0.4)
+    wall = patterned("corridor_panels", (0.32, 0.25, 0.18), (0.24, 0.18, 0.13), "stripes", 1.0, 0.7)
+    shell(S, room, floor, wall, mat("dark_base", (0.08, 0.07, 0.06), 0.6),
+          mat("door_red", (0.42, 0.03, 0.03), 0.5), mat("frame_cream", (0.72, 0.66, 0.52), 0.5))
+    lamp = mat("lamp_glow", (1, 0.9, 0.7), 0.3, emit=(1, 0.85, 0.6), strength=10)
+    n = max(2, int(d / 3))
+    for i in range(n):
+        y = (i + 0.5) * d / n
+        box(S, "lamp_%d" % i, (0, y, WALL_H - 0.05), (0.4, 0.4, 0.06), lamp)
+        light(S, "lamp_light_%d" % i, "SPOT", (0, y, WALL_H - 0.15), 220, WARM, 0.3, spot=100)
+    neon = mat("exit_neon", (0.4, 0.8, 1.0), 0.3, emit=(0.3, 0.75, 1.0), strength=6)
+    for sx in (-1, 1):
+        for k in range(2):
+            box(S, "neon_%d_%d" % (sx, k), (sx * (w / 2 - 0.03), d * (0.3 + 0.4 * k), 2.4), (0.03, 0.6, 0.06), neon)
+    pipe = mat("pipe", (0.25, 0.22, 0.18), 0.4, 0.8)
+    cyl(S, "pipe_run", (w / 2 - 0.15, d / 2, 3.0), 0.05, d, pipe, 8, rot=(math.radians(90), 0, 0))
+    crate = patterned("crate_wood", (0.30, 0.20, 0.10), (0.20, 0.12, 0.06), "planks", 4.0, 0.8)
+    box(S, "crate", (-w / 2 + 0.45, d * 0.2, 0.3), (0.6, 0.6, 0.6), crate)
+
+
+def room_props(S, room):
+    """The prop store, seen as a high cut-away (orig bg 14/18): racks of
+    costumes, trunks, painted flats leaning on the walls."""
+    w, d = room["size"]
+    floor = patterned("store_boards", (0.22, 0.15, 0.09), (0.30, 0.20, 0.11), "planks", 2.0, 0.7)
+    wall = patterned("masonry", (0.30, 0.26, 0.20), (0.14, 0.12, 0.10), "brick", 1.4, 0.85)
+    shell(S, room, floor, wall, mat("dark_base", (0.08, 0.07, 0.06), 0.6),
+          mat("door_red", (0.42, 0.03, 0.03), 0.5), mat("frame_cream", (0.72, 0.66, 0.52), 0.5))
+    brass = mat("brass", (0.75, 0.55, 0.22), 0.35, 1.0)
+    colours = ((0.5, 0.1, 0.1), (0.15, 0.3, 0.5), (0.6, 0.5, 0.2), (0.2, 0.4, 0.2), (0.45, 0.2, 0.45))
+    for r, y in enumerate((d - 0.6, d - 1.6)):
+        box(S, "rail_%d" % r, (-w / 2 + 2.0, y, 1.7), (3.0, 0.04, 0.04), brass)
+        for i in range(9):
+            box(S, "garment_%d_%d" % (r, i), (-w / 2 + 0.7 + i * 0.32, y, 1.1), (0.08, 0.4, 1.1),
+                mat("garment_%d" % ((i + r) % 5), colours[(i + r) % 5], 0.9))
+    trunk = mat("trunk", (0.30, 0.16, 0.08), 0.6)
+    for i, (x, y) in enumerate(((w / 2 - 1.0, d - 0.6), (w / 2 - 1.0, d - 1.4), (w / 2 - 2.1, d - 0.6))):
+        box(S, "trunk_%d" % i, (x, y, 0.3), (0.9, 0.6, 0.6), trunk)
+        box(S, "trunk_band_%d" % i, (x, y, 0.45), (0.92, 0.62, 0.05), brass)
+    flat = patterned("painted_flat", (0.35, 0.45, 0.55), (0.55, 0.50, 0.35), "noise", 1.5, 0.9)
+    for i in range(3):
+        box(S, "flat_%d" % i, (w / 2 - 0.25 - i * 0.08, 1.2 + i * 0.6, 1.4), (0.05, 1.2, 2.8), flat)
+    bulb = mat("bare_bulb", (1, 0.95, 0.8), 0.3, emit=(1, 0.9, 0.7), strength=14)
+    sphere(S, "bare_bulb", (0, d * 0.5, 2.9), 0.08, bulb)
+    light(S, "bare_bulb_light", "POINT", (0, d * 0.5, 2.8), 220, WARM, 0.2)
+
+
+def room_melissa(S, room):
+    """Melissa's own dressing room (orig bg 17): a lit vanity heaped with
+    roses, a writing desk, a tall cabinet."""
+    w, d = room["size"]
+    floor = patterned("rose_carpet", (0.32, 0.08, 0.06), (0.24, 0.05, 0.04), "diamond", 2.5, 0.9)
+    wall = patterned("cream_paper", (0.55, 0.45, 0.32), (0.46, 0.37, 0.26), "stripes", 3.0, 0.8)
+    wood = mat("vanity_wood", (0.25, 0.12, 0.06), 0.45)
+    shell(S, room, floor, wall, wood, mat("door_red", (0.42, 0.03, 0.03), 0.5),
+          mat("frame_cream", (0.72, 0.66, 0.52), 0.5))
+    mirror = mat("mirror", (0.55, 0.6, 0.62), 0.05, 1.0)
+    bulb = mat("bulb", (1, 0.95, 0.8), 0.3, emit=(1, 0.9, 0.7), strength=12)
+    box(S, "vanity", (0, d - 0.4, 0.42), (2.2, 0.6, 0.84), wood)
+    box(S, "mirror", (0, d - 0.03, 1.6), (1.4, 0.04, 1.1), mirror)
+    for i in range(6):
+        sphere(S, "bulb_%d" % i, (-0.75 + i * 0.3, d - 0.07, 2.22), 0.06, bulb, 8)
+    light(S, "vanity_light", "AREA", (0, d - 0.5, 2.2), 160, (1, 0.85, 0.6), 1.6, rot=(math.radians(20), 0, 0))
+    petals = mat("roses", (0.6, 0.05, 0.06), 0.8)
+    leaves = mat("leaves", (0.08, 0.22, 0.06), 0.8)
+    for k, x in enumerate((-1.6, 1.6, -0.6)):
+        cyl(S, "vase_%d" % k, (x, d - 0.45, 1.0), 0.12, 0.35, mat("vase", (0.6, 0.55, 0.45), 0.3), 10)
+        for i in range(10):
+            a = i * 0.63
+            sphere(S, "rose_%d_%d" % (k, i), (x + math.cos(a) * 0.2, d - 0.45 + math.sin(a) * 0.15,
+                                               1.3 + (i % 3) * 0.08), 0.09, petals if i % 3 else leaves, 6)
+    box(S, "desk", (-w / 2 + 1.0, 1.6, 0.4), (1.2, 0.7, 0.8), wood)
+    box(S, "desk_papers", (-w / 2 + 1.0, 1.6, 0.82), (0.5, 0.35, 0.02), mat("paper", (0.85, 0.82, 0.7), 0.9))
+    box(S, "cabinet", (w / 2 - 0.4, d - 1.4, 1.1), (0.6, 1.0, 2.2), wood)
+    light(S, "ceiling_glow", "POINT", (0, d * 0.4, 3.0), 90, WARM, 0.6)
+
+
 BUILDERS = {"foyer": room_foyer, "auditorium": room_auditorium, "stage": room_stage,
             "backstage": room_backstage, "dressing": room_dressing, "rehearsal": room_rehearsal,
-            "sewer": room_sewer, "sewer_deep": room_sewer_deep, "street": room_street}
+            "sewer": room_sewer, "sewer_deep": room_sewer_deep, "street": room_street,
+            "entrance": room_entrance, "corridor": room_corridor, "props": room_props,
+            "melissa": room_melissa}
 
 
 def build(room_id, force):
@@ -506,7 +633,7 @@ def build(room_id, force):
         raise SystemExit("%s exists and is the authority now; edit it in Blender, or pass --force" % path)
     cols = reset()
     S = cols["TH_SOURCE"]
-    BUILDERS[room_id](S, room)
+    BUILDERS[room.get("art", room_id)](S, room)   # "art" names a shared builder
     # TH_RENDER: the same surfaces, joined and unwrapped, receive the bake.
     meshes = [o for o in S.objects if o.type == "MESH"]
     bpy.ops.object.select_all(action="DESELECT")

@@ -63,7 +63,7 @@
             "bakedLighting": true
           },
           {
-            "id": "door_to_sewer",
+            "id": "door_to_sewer_channel",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               -5.6,
@@ -71,10 +71,10 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_sewer'"
+            "visible": "sceneState.near == 'to_sewer_channel'"
           },
           {
-            "id": "door_to_exit",
+            "id": "door_to_street",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               5.6,
@@ -82,7 +82,7 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_exit'"
+            "visible": "sceneState.near == 'to_street'"
           },
           {
             "id": "aya_shadow",
@@ -1173,11 +1173,11 @@
                 "assignments": [
                   {
                     "name": "near",
-                    "value": "'to_sewer'"
+                    "value": "'to_sewer_channel'"
                   },
                   {
                     "name": "status",
-                    "value": "'Enter: Back'"
+                    "value": "'Enter: Channel'"
                   }
                 ]
               }
@@ -1192,7 +1192,7 @@
                 "assignments": [
                   {
                     "name": "near",
-                    "value": "'to_exit'"
+                    "value": "'to_street'"
                   },
                   {
                     "name": "status",
@@ -1606,16 +1606,16 @@
             "else": [
               {
                 "cmd": "IF",
-                "condition": "sceneState.near == 'to_sewer'",
+                "condition": "sceneState.near == 'to_sewer_channel'",
                 "then": [
                   {
                     "cmd": "SCENE_EVENT",
                     "kind": "goto",
-                    "scene": "day1_sewer",
+                    "scene": "day1_sewer_channel",
                     "sceneState": [
                       {
                         "name": "walkX",
-                        "value": 4.6
+                        "value": 5.8
                       },
                       {
                         "name": "walkY",
@@ -1627,7 +1627,7 @@
               },
               {
                 "cmd": "IF",
-                "condition": "sceneState.near == 'to_exit'",
+                "condition": "sceneState.near == 'to_street'",
                 "then": [
                   {
                     "cmd": "IF",
@@ -1644,7 +1644,7 @@
                           },
                           {
                             "name": "walkY",
-                            "value": 0.8
+                            "value": 0.9
                           }
                         ]
                       }

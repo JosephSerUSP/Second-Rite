@@ -1,0 +1,832 @@
+{
+  "id": "day1_melissa",
+  "name": "Carnegie Hall - Melissa's room",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.016666666666666666,
+    "maxCatchUp": 60
+  },
+  "windows": [
+    {
+      "id": "world",
+      "rect": {
+        "x": "-surface.originX",
+        "y": "-surface.originY",
+        "w": "surface.width",
+        "h": "surface.height"
+      },
+      "style": "modelScene",
+      "chrome": "none",
+      "viewport": {
+        "camera": {
+          "position": [
+            "0",
+            "-1.6",
+            "2.2"
+          ],
+          "target": [
+            "0",
+            "5.5",
+            "0.9"
+          ],
+          "fov": 56
+        },
+        "background": [
+          0.025,
+          0.025,
+          0.018
+        ],
+        "models": [
+          {
+            "id": "room",
+            "model": "assets/models/rooms/melissa/environment.obj",
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "bakedLighting": true
+          },
+          {
+            "id": "door_to_corridor_b",
+            "model": "assets/models/blockout/door_marker.obj",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "yaw": 0,
+            "visible": "sceneState.near == 'to_corridor_b'"
+          },
+          {
+            "id": "pickup_rehearsal_key",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
+            "position": [
+              -3.5,
+              4.5,
+              0.15
+            ],
+            "yaw": "sceneState.gait * 0.25",
+            "visible": "sceneState.f_got_rehearsal_key == 0"
+          },
+          {
+            "id": "pickup_diary",
+            "model": "assets/models/backstage/spark.obj",
+            "scale": [
+              0.35,
+              0.35,
+              0.35
+            ],
+            "position": [
+              3.5,
+              4.5,
+              0.15
+            ],
+            "yaw": "sceneState.gait * 0.25",
+            "visible": "sceneState.f_got_diary == 0"
+          },
+          {
+            "id": "aya_shadow",
+            "model": "assets/models/backstage/contact_shadow.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": 0,
+            "visible": "true",
+            "scale": [
+              0.55,
+              0.55,
+              1
+            ]
+          },
+          {
+            "id": "aya",
+            "model": "assets/models/aya/aya_idle.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "(sceneState.fight == 1 and rt.outcome ~= 'defeat' and rt.actAge >= 12 and (sceneState.moving == 0 or sceneState.ui > 0 or rt.outcome ~= '')) or (sceneState.fight == 0 and (sceneState.moving == 0 or sceneState.ui > 0))"
+          },
+          {
+            "id": "aya_walk_0",
+            "model": "assets/models/aya/aya_walk_0.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 0 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_1",
+            "model": "assets/models/aya/aya_walk_1.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 1 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_2",
+            "model": "assets/models/aya/aya_walk_2.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 2 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_3",
+            "model": "assets/models/aya/aya_walk_3.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 3 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_4",
+            "model": "assets/models/aya/aya_walk_4.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 4 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_5",
+            "model": "assets/models/aya/aya_walk_5.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 5 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_6",
+            "model": "assets/models/aya/aya_walk_6.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 6 and (sceneState.fight == 0 or rt.outcome == '')"
+          },
+          {
+            "id": "aya_walk_7",
+            "model": "assets/models/aya/aya_walk_7.obj",
+            "position": [
+              "(sceneState.fight == 1 and rt.player.x or sceneState.walkX)",
+              "(sceneState.fight == 1 and rt.player.y or sceneState.walkY)",
+              0
+            ],
+            "yaw": "sceneState.aim",
+            "visible": "sceneState.ui == 0 and sceneState.moving == 1 and floor(sceneState.gait / 6.283185 * 8) % 8 == 7 and (sceneState.fight == 0 or rt.outcome == '')"
+          }
+        ]
+      },
+      "content": []
+    },
+    {
+      "id": "card",
+      "rect": {
+        "x": "4 - surface.originX",
+        "y": 7,
+        "w": "surface.width - 8",
+        "h": 14
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "visible": "sceneState.ui == 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.card}"
+        }
+      ]
+    },
+    {
+      "id": "weapon",
+      "rect": {
+        "x": "surface.width - surface.originX - 15",
+        "y": 1,
+        "w": 14,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(variables.weapon or 'handgun') == 'baton' and 'Baton' or 'Handgun'}{sceneState.fight == 0 and '  [X]' or ''}"
+        }
+      ]
+    },
+    {
+      "id": "feedback",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 27.5,
+        "w": 34,
+        "h": 2
+      },
+      "style": "panel",
+      "chrome": "none",
+      "visible": "sceneState.ui ~= 9",
+      "content": [
+        {
+          "type": "text",
+          "text": "{(sceneState.fight == 1 and (rt.refusalAge < 90 and rt.refusal or sceneState.status) or sceneState.status)}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "COMMENT",
+        "text": "Generated from tools/chapter/rooms.json by build_chapter.py; edit the table, not this file."
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": 0
+          },
+          {
+            "name": "choice",
+            "value": 0
+          },
+          {
+            "name": "menuHeld",
+            "value": "false"
+          },
+          {
+            "name": "gait",
+            "value": 0
+          },
+          {
+            "name": "moving",
+            "value": 0
+          },
+          {
+            "name": "dx",
+            "value": 0
+          },
+          {
+            "name": "dy",
+            "value": 0
+          },
+          {
+            "name": "ix",
+            "value": 0
+          },
+          {
+            "name": "iy",
+            "value": 0
+          },
+          {
+            "name": "held",
+            "value": 0
+          },
+          {
+            "name": "camYaw",
+            "value": 0
+          },
+          {
+            "name": "ilen",
+            "value": 1
+          },
+          {
+            "name": "range",
+            "value": 4
+          },
+          {
+            "name": "aim",
+            "value": 0
+          },
+          {
+            "name": "ratAim",
+            "value": 0
+          },
+          {
+            "name": "fight",
+            "value": 0
+          },
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "card",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - Melissa\\'s room'"
+          },
+          {
+            "name": "walkX",
+            "value": "sceneState.walkX or 0"
+          },
+          {
+            "name": "walkY",
+            "value": "sceneState.walkY or 1"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "entryX",
+            "value": "sceneState.walkX"
+          },
+          {
+            "name": "entryY",
+            "value": "sceneState.walkY"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_got_diary",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:got_diary",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_got_diary",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "f_got_rehearsal_key",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:got_rehearsal_key",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "f_got_rehearsal_key",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "flag:seen_roses",
+        "then": [],
+        "else": [
+          {
+            "cmd": "SET_FLAG",
+            "flag": "seen_roses",
+            "value": true
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "'Roses on every surface.\\nThe room is still warm,\\nas if she just left.'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ui",
+            "value": "sceneState.card ~= '' and 9 or 0"
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "READ_INPUT",
+        "name": "input"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "ix",
+            "value": "sceneState.ui == 0 and ((sceneState.input.RIGHT and 1 or 0) - (sceneState.input.LEFT and 1 or 0)) or 0"
+          },
+          {
+            "name": "iy",
+            "value": "sceneState.ui == 0 and ((sceneState.input.UP and 1 or 0) - (sceneState.input.DOWN and 1 or 0)) or 0"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.held == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "camYaw",
+                "value": "0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "held",
+            "value": "(sceneState.ix ~= 0 or sceneState.iy ~= 0) and 1 or 0"
+          },
+          {
+            "name": "ilen",
+            "value": "max(1, sqrt(sceneState.ix * sceneState.ix + sceneState.iy * sceneState.iy))"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "dx",
+            "value": "(sceneState.ix * cos(sceneState.camYaw) + sceneState.iy * sin(sceneState.camYaw)) / sceneState.ilen"
+          },
+          {
+            "name": "dy",
+            "value": "(sceneState.iy * cos(sceneState.camYaw) - sceneState.ix * sin(sceneState.camYaw)) / sceneState.ilen"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "moving",
+            "value": "sceneState.held"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.moving == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "gait",
+                "value": "sceneState.gait + time.dt * 10"
+              },
+              {
+                "name": "aim",
+                "value": "atan2(sceneState.dx, -sceneState.dy)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "walkX",
+            "value": "max(-3.6, min(3.6, sceneState.walkX + sceneState.dx * 0.05))"
+          },
+          {
+            "name": "walkY",
+            "value": "max(0.3, min(5.6, sceneState.walkY + sceneState.dy * 0.05))"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.input.X and not sceneState.menuHeld and sceneState.ui == 0",
+        "then": [
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "weapon",
+            "value": "((variables.weapon or 'handgun') == 'baton' and 'handgun' or 'baton')"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "menuHeld",
+            "value": "sceneState.input.X"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "near",
+            "value": "''"
+          },
+          {
+            "name": "status",
+            "value": "'Carnegie Hall - Melissa\\'s room'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "((sceneState.walkX - (0))^2 + (sceneState.walkY - (0.3))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'to_corridor_b'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: Corridor'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.f_got_rehearsal_key == 0 and ((sceneState.walkX - (-3.5))^2 + (sceneState.walkY - (4.5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'p:rehearsal_key'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: examine'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.f_got_diary == 0 and ((sceneState.walkX - (3.5))^2 + (sceneState.walkY - (4.5))^2 < 0.81)",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "near",
+                "value": "'p:diary'"
+              },
+              {
+                "name": "status",
+                "value": "'Enter: examine'"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 9",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "card",
+                "value": "''"
+              },
+              {
+                "name": "ui",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'to_corridor_b'",
+            "then": [
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "goto",
+                "scene": "day1_corridor_b",
+                "sceneState": [
+                  {
+                    "name": "walkX",
+                    "value": 2.5
+                  },
+                  {
+                    "name": "walkY",
+                    "value": 2.8
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'p:rehearsal_key'",
+            "then": [
+              {
+                "cmd": "SET_FLAG",
+                "flag": "got_rehearsal_key",
+                "value": true
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "f_got_rehearsal_key",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_FLAG",
+                "flag": "has_rehearsal_key",
+                "value": true
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "card",
+                    "value": "'Found the Rehearsal Room key.'"
+                  },
+                  {
+                    "name": "ui",
+                    "value": 9
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.near == 'p:diary'",
+            "then": [
+              {
+                "cmd": "SET_FLAG",
+                "flag": "got_diary",
+                "value": true
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "f_got_diary",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "card",
+                    "value": "'Melissa\\'s diary:\\n\\'Tonight I play the part\\nalone... I can feel it.\\''"
+                  },
+                  {
+                    "name": "ui",
+                    "value": 9
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_cancel": [],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+3)%4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ui == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "choice",
+                "value": "(sceneState.choice+1)%2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_left": [],
+    "on_right": []
+  }
+}

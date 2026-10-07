@@ -74,7 +74,7 @@
             "visible": "sceneState.near == 'to_stage'"
           },
           {
-            "id": "door_to_basement",
+            "id": "door_to_basement_rat",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               -2,
@@ -82,10 +82,10 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_basement'"
+            "visible": "sceneState.near == 'to_basement_rat'"
           },
           {
-            "id": "door_to_dressing",
+            "id": "door_to_corridor_a",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               3.6,
@@ -93,23 +93,7 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_dressing'"
-          },
-          {
-            "id": "pickup_backstage_medicine",
-            "model": "assets/models/backstage/spark.obj",
-            "scale": [
-              0.35,
-              0.35,
-              0.35
-            ],
-            "position": [
-              3,
-              4,
-              0.15
-            ],
-            "yaw": "sceneState.gait * 0.25",
-            "visible": "sceneState.f_got_backstage_medicine == 0"
+            "visible": "sceneState.near == 'to_corridor_a'"
           },
           {
             "id": "aya_shadow",
@@ -397,54 +381,6 @@
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
-            "name": "f_got_backstage_medicine",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:got_backstage_medicine",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "f_got_backstage_medicine",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "f_rat_defeated",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:rat_defeated",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "f_rat_defeated",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
             "name": "ui",
             "value": "sceneState.card ~= '' and 9 or 0"
           }
@@ -612,7 +548,7 @@
             "assignments": [
               {
                 "name": "near",
-                "value": "'to_basement'"
+                "value": "'to_basement_rat'"
               },
               {
                 "name": "status",
@@ -631,30 +567,11 @@
             "assignments": [
               {
                 "name": "near",
-                "value": "'to_dressing'"
+                "value": "'to_corridor_a'"
               },
               {
                 "name": "status",
-                "value": "'Enter: Dressing rooms'"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.f_got_backstage_medicine == 0 and ((sceneState.walkX - (3))^2 + (sceneState.walkY - (4))^2 < 0.81)",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "near",
-                "value": "'p:backstage_medicine'"
-              },
-              {
-                "name": "status",
-                "value": "'Enter: examine'"
+                "value": "'Enter: Service corridor'"
               }
             ]
           }
@@ -692,7 +609,7 @@
                 "sceneState": [
                   {
                     "name": "walkX",
-                    "value": 4.2
+                    "value": 3.8
                   },
                   {
                     "name": "walkY",
@@ -704,7 +621,7 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.near == 'to_basement'",
+            "condition": "sceneState.near == 'to_basement_rat'",
             "then": [
               {
                 "cmd": "SCENE_EVENT",
@@ -713,11 +630,11 @@
                 "sceneState": [
                   {
                     "name": "walkX",
-                    "value": -2
+                    "value": -1.5
                   },
                   {
                     "name": "walkY",
-                    "value": 1.2
+                    "value": 0.9
                   }
                 ]
               }
@@ -725,79 +642,20 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.near == 'to_dressing'",
+            "condition": "sceneState.near == 'to_corridor_a'",
             "then": [
               {
-                "cmd": "IF",
-                "condition": "flag:rat_defeated",
-                "then": [
+                "cmd": "SCENE_EVENT",
+                "kind": "goto",
+                "scene": "day1_corridor_a",
+                "sceneState": [
                   {
-                    "cmd": "SCENE_EVENT",
-                    "kind": "goto",
-                    "scene": "day1_dressing",
-                    "sceneState": [
-                      {
-                        "name": "walkX",
-                        "value": -3.6
-                      },
-                      {
-                        "name": "walkY",
-                        "value": 2.5
-                      }
-                    ]
-                  }
-                ],
-                "else": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "card",
-                        "value": "'Something scratches below.\\nCheck the basement first.'"
-                      },
-                      {
-                        "name": "ui",
-                        "value": 9
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.near == 'p:backstage_medicine'",
-            "then": [
-              {
-                "cmd": "SET_FLAG",
-                "flag": "got_backstage_medicine",
-                "value": true
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "f_got_backstage_medicine",
-                    "value": 1
-                  }
-                ]
-              },
-              {
-                "cmd": "CHANGE_ITEM",
-                "item": "medicine",
-                "count": 1
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "card",
-                    "value": "'Found Medicine.'"
+                    "name": "walkX",
+                    "value": 0
                   },
                   {
-                    "name": "ui",
-                    "value": 9
+                    "name": "walkY",
+                    "value": 0.9
                   }
                 ]
               }

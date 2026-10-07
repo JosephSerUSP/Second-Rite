@@ -74,7 +74,7 @@
             "visible": "sceneState.near == 'to_rehearsal'"
           },
           {
-            "id": "door_to_sewer_deep",
+            "id": "door_to_sewer_stairs",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
               5.6,
@@ -82,7 +82,7 @@
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_sewer_deep'"
+            "visible": "sceneState.near == 'to_sewer_stairs'"
           },
           {
             "id": "pickup_sewer_medicine",
@@ -1227,11 +1227,11 @@
                 "assignments": [
                   {
                     "name": "near",
-                    "value": "'to_sewer_deep'"
+                    "value": "'to_sewer_stairs'"
                   },
                   {
                     "name": "status",
-                    "value": "'Enter: Deeper'"
+                    "value": "'Enter: Stairs'"
                   }
                 ]
               }
@@ -1673,7 +1673,7 @@
                       },
                       {
                         "name": "walkY",
-                        "value": 4.6
+                        "value": 4.8
                       }
                     ]
                   }
@@ -1681,7 +1681,7 @@
               },
               {
                 "cmd": "IF",
-                "condition": "sceneState.near == 'to_sewer_deep'",
+                "condition": "sceneState.near == 'to_sewer_stairs'",
                 "then": [
                   {
                     "cmd": "IF",
@@ -1690,15 +1690,15 @@
                       {
                         "cmd": "SCENE_EVENT",
                         "kind": "goto",
-                        "scene": "day1_sewer_deep",
+                        "scene": "day1_sewer_stairs",
                         "sceneState": [
                           {
                             "name": "walkX",
-                            "value": -4.6
+                            "value": -2.8
                           },
                           {
                             "name": "walkY",
-                            "value": 2.5
+                            "value": 2
                           }
                         ]
                       }

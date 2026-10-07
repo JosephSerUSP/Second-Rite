@@ -1,6 +1,6 @@
 {
   "id": "day1_dressing",
-  "name": "Carnegie Hall - dressing rooms",
+  "name": "Carnegie Hall - shared dressing room",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -52,45 +52,18 @@
             "bakedLighting": true
           },
           {
-            "id": "door_to_backstage",
+            "id": "door_to_corridor_b",
             "model": "assets/models/blockout/door_marker.obj",
             "position": [
-              -4.6,
-              2.5,
+              0,
+              0.3,
               0
             ],
             "yaw": 0,
-            "visible": "sceneState.near == 'to_backstage'"
+            "visible": "sceneState.near == 'to_corridor_b'"
           },
           {
-            "id": "door_to_rehearsal",
-            "model": "assets/models/blockout/door_marker.obj",
-            "position": [
-              4.6,
-              3,
-              0
-            ],
-            "yaw": 0,
-            "visible": "sceneState.near == 'to_rehearsal'"
-          },
-          {
-            "id": "pickup_rehearsal_key",
-            "model": "assets/models/backstage/spark.obj",
-            "scale": [
-              0.35,
-              0.35,
-              0.35
-            ],
-            "position": [
-              -3.5,
-              4.5,
-              0.15
-            ],
-            "yaw": "sceneState.gait * 0.25",
-            "visible": "sceneState.f_got_rehearsal_key == 0"
-          },
-          {
-            "id": "pickup_diary",
+            "id": "pickup_dressing_medicine",
             "model": "assets/models/backstage/spark.obj",
             "scale": [
               0.35,
@@ -103,23 +76,7 @@
               0.15
             ],
             "yaw": "sceneState.gait * 0.25",
-            "visible": "sceneState.f_got_diary == 0"
-          },
-          {
-            "id": "pickup_dressing_ammo",
-            "model": "assets/models/backstage/spark.obj",
-            "scale": [
-              0.35,
-              0.35,
-              0.35
-            ],
-            "position": [
-              0,
-              5,
-              0.15
-            ],
-            "yaw": "sceneState.gait * 0.25",
-            "visible": "sceneState.f_got_dressing_ammo == 0"
+            "visible": "sceneState.f_got_dressing_medicine == 0"
           },
           {
             "id": "aya_shadow",
@@ -378,7 +335,7 @@
           },
           {
             "name": "status",
-            "value": "'Carnegie Hall - dressing rooms'"
+            "value": "'Carnegie Hall - shared dressing room'"
           },
           {
             "name": "walkX",
@@ -407,92 +364,20 @@
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
-            "name": "f_got_diary",
+            "name": "f_got_dressing_medicine",
             "value": 0
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "flag:got_diary",
+        "condition": "flag:got_dressing_medicine",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
-                "name": "f_got_diary",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "f_got_dressing_ammo",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:got_dressing_ammo",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "f_got_dressing_ammo",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "f_got_rehearsal_key",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:got_rehearsal_key",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "f_got_rehearsal_key",
-                "value": 1
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "f_has_rehearsal_key",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "flag:has_rehearsal_key",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "f_has_rehearsal_key",
+                "name": "f_got_dressing_medicine",
                 "value": 1
               }
             ]
@@ -659,24 +544,24 @@
           },
           {
             "name": "status",
-            "value": "'Carnegie Hall - dressing rooms'"
+            "value": "'Carnegie Hall - shared dressing room'"
           }
         ]
       },
       {
         "cmd": "IF",
-        "condition": "((sceneState.walkX - (-4.6))^2 + (sceneState.walkY - (2.5))^2 < 0.81)",
+        "condition": "((sceneState.walkX - (0))^2 + (sceneState.walkY - (0.3))^2 < 0.81)",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "near",
-                "value": "'to_backstage'"
+                "value": "'to_corridor_b'"
               },
               {
                 "name": "status",
-                "value": "'Enter: Backstage'"
+                "value": "'Enter: Corridor'"
               }
             ]
           }
@@ -684,71 +569,14 @@
       },
       {
         "cmd": "IF",
-        "condition": "((sceneState.walkX - (4.6))^2 + (sceneState.walkY - (3))^2 < 0.81)",
+        "condition": "sceneState.f_got_dressing_medicine == 0 and ((sceneState.walkX - (3.5))^2 + (sceneState.walkY - (4.5))^2 < 0.81)",
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
                 "name": "near",
-                "value": "'to_rehearsal'"
-              },
-              {
-                "name": "status",
-                "value": "'Enter: Rehearsal Room'"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.f_got_rehearsal_key == 0 and ((sceneState.walkX - (-3.5))^2 + (sceneState.walkY - (4.5))^2 < 0.81)",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "near",
-                "value": "'p:rehearsal_key'"
-              },
-              {
-                "name": "status",
-                "value": "'Enter: examine'"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.f_got_diary == 0 and ((sceneState.walkX - (3.5))^2 + (sceneState.walkY - (4.5))^2 < 0.81)",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "near",
-                "value": "'p:diary'"
-              },
-              {
-                "name": "status",
-                "value": "'Enter: examine'"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
-        "condition": "sceneState.f_got_dressing_ammo == 0 and ((sceneState.walkX - (0))^2 + (sceneState.walkY - (5))^2 < 0.81)",
-        "then": [
-          {
-            "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "near",
-                "value": "'p:dressing_ammo'"
+                "value": "'p:dressing_medicine'"
               },
               {
                 "name": "status",
@@ -781,20 +609,20 @@
         "else": [
           {
             "cmd": "IF",
-            "condition": "sceneState.near == 'to_backstage'",
+            "condition": "sceneState.near == 'to_corridor_b'",
             "then": [
               {
                 "cmd": "SCENE_EVENT",
                 "kind": "goto",
-                "scene": "day1_backstage",
+                "scene": "day1_corridor_b",
                 "sceneState": [
                   {
                     "name": "walkX",
-                    "value": 3.6
+                    "value": -2
                   },
                   {
                     "name": "walkY",
-                    "value": 2.5
+                    "value": 2.8
                   }
                 ]
               }
@@ -802,146 +630,33 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.near == 'to_rehearsal'",
-            "then": [
-              {
-                "cmd": "IF",
-                "condition": "flag:has_rehearsal_key",
-                "then": [
-                  {
-                    "cmd": "SCENE_EVENT",
-                    "kind": "goto",
-                    "scene": "day1_rehearsal",
-                    "sceneState": [
-                      {
-                        "name": "walkX",
-                        "value": -4.2
-                      },
-                      {
-                        "name": "walkY",
-                        "value": 3
-                      }
-                    ]
-                  }
-                ],
-                "else": [
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      {
-                        "name": "card",
-                        "value": "'Locked. There must be a key.'"
-                      },
-                      {
-                        "name": "ui",
-                        "value": 9
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.near == 'p:rehearsal_key'",
+            "condition": "sceneState.near == 'p:dressing_medicine'",
             "then": [
               {
                 "cmd": "SET_FLAG",
-                "flag": "got_rehearsal_key",
+                "flag": "got_dressing_medicine",
                 "value": true
               },
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
                   {
-                    "name": "f_got_rehearsal_key",
-                    "value": 1
-                  }
-                ]
-              },
-              {
-                "cmd": "SET_FLAG",
-                "flag": "has_rehearsal_key",
-                "value": true
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "card",
-                    "value": "'Found the Rehearsal Room key.'"
-                  },
-                  {
-                    "name": "ui",
-                    "value": 9
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.near == 'p:diary'",
-            "then": [
-              {
-                "cmd": "SET_FLAG",
-                "flag": "got_diary",
-                "value": true
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "f_got_diary",
-                    "value": 1
-                  }
-                ]
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "card",
-                    "value": "'Melissa\\'s diary:\\n\\'Tonight I play the part\\nalone... I can feel it.\\''"
-                  },
-                  {
-                    "name": "ui",
-                    "value": 9
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "cmd": "IF",
-            "condition": "sceneState.near == 'p:dressing_ammo'",
-            "then": [
-              {
-                "cmd": "SET_FLAG",
-                "flag": "got_dressing_ammo",
-                "value": true
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "f_got_dressing_ammo",
+                    "name": "f_got_dressing_medicine",
                     "value": 1
                   }
                 ]
               },
               {
                 "cmd": "CHANGE_ITEM",
-                "item": "handgun_ammo",
-                "count": 12
+                "item": "medicine",
+                "count": 1
               },
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
                   {
                     "name": "card",
-                    "value": "'Found handgun rounds. Ammo +12'"
+                    "value": "'Found Medicine.'"
                   },
                   {
                     "name": "ui",

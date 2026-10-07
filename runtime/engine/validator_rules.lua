@@ -21,6 +21,7 @@ validator.run = function(loader)
         if not cond then table.insert(problems, msg) end
         return cond
     end
+    require("engine.window_layout_rules").validate(loader, check)
 
     -- Recovery vocabulary is ordinary authored-data validation. It belongs in
     -- this one validator pass, not in a facade that wraps it after the fact.

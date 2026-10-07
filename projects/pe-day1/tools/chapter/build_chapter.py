@@ -327,23 +327,23 @@ def windows(room, room_model):
     if "encounter" in room:
         hud = FIGHT
         out += [
-            # Battle status panel: AT / HP / PE rows on the 8px text grid, each a
-            # label, a gauge and a value; the weapon and its rounds below.
-            {"id": "combat_hud", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "overlay",
+            # Original status silhouette: long cyan AT, large HP digits,
+            # green PE; labels sit beyond the bars' right edge.
+            {"id": "combat_hud", "rect": {"x": "1 - surface.originX", "y": 1, "w": 18, "h": 7}, "style": "panel", "chrome": "overlay",
              "visible": hud, "content": [
-                {"type": "gauge", "x": 3.2, "y": 1.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.at", "max": "100", "fill": ["rt.player.at >= 100 and .62+.3*abs(sin(sceneState.gait)) or .31", "rt.player.at >= 100 and 1 or .64", "rt.player.at >= 100 and .98 or .74"],
-                 "color": [0.11, 0.24, 0.20]},
-                {"type": "gauge", "x": 3.2, "y": 3.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.hp", "max": "rt.player.maxHp", "fill": [0.15, 0.75, 0.23], "color": [0.11, 0.24, 0.20]},
-                {"type": "gauge", "x": 3.2, "y": 5.3, "width": 8, "height": 0.45, "labelPlacement": "none",
-                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.76, 0.16, 0.26], "color": [0.11, 0.24, 0.20]}]},
-            {"id": "hud_labels", "rect": {"x": "1 - surface.originX", "y": 1, "w": 19, "h": 9}, "style": "panel", "chrome": "none",
-             "visible": hud, "content": [{"type": "text", "text": "AT\n\nHP\n\nPE\n\n{" + WEAPON + " == 'baton' and 'CLUB' or 'M84F'}"}]},
-            {"id": "hud_values", "rect": {"x": "12 - surface.originX", "y": 1, "w": 8, "h": 9}, "style": "panel", "chrome": "none",
+                {"type": "gauge", "x": 1, "y": 1, "width": 13, "height": 0.55, "labelPlacement": "none",
+                 "value": "rt.player.at", "max": "100", "fill": ["rt.player.at >= 100 and .35+.3*abs(sin(sceneState.gait)) or .12", .85, 1],
+                 "color": [0.06, 0.20, 0.22]},
+                {"type": "gauge", "x": 1, "y": 5, "width": 13, "height": 0.55, "labelPlacement": "none",
+                 "value": "rt.player.res.pe", "max": "rt.player.res.peMax", "fill": [0.12, 0.85, 0.20], "color": [0.06, 0.20, 0.10]}]},
+            {"id": "hud_labels", "rect": {"x": "14.5 - surface.originX", "y": 1, "w": 4.5, "h": 7}, "style": "panel", "chrome": "none",
+             "visible": hud, "content": [{"type": "text", "text": "AT\n\nHP\n\nPE"}]},
+            {"id": "hud_hp", "rect": {"x": "1 - surface.originX", "y": 2.2, "w": 14, "h": 3.5}, "style": "panel", "chrome": "none",
+             "textScale": 2, "align": "right", "visible": hud,
+             "content": [{"type": "text", "text": "{rt.player.hp}/{rt.player.maxHp}"}]},
+            {"id": "hud_weapon", "rect": {"x": "1 - surface.originX", "y": 7.5, "w": 18, "h": 2.5}, "style": "panel", "chrome": "none",
              "visible": hud, "content": [{"type": "text", "text":
-                "\n\n{rt.player.hp}/{rt.player.maxHp}\n\n{rt.player.res.pe}/{rt.player.res.peMax}\n\n"
-                "{" + WEAPON + " == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"}]},
+                "{" + WEAPON + " == 'baton' and 'CLUB' or 'M84F'}   {" + WEAPON + " == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"}]},
             # Battle menus: one column under the status panel, one width, a title row.
             {"id": "command", "rect": {"x": "1 - surface.originX", "y": 10.5, "w": 19, "h": 8}, "style": "panel", "chrome": "overlay",
              "visible": "sceneState.ui == 1", "content": [{"type": "text", "text":

@@ -409,6 +409,10 @@ or `"none"` and an authored tile-unit `height`; existing gauges retain their
 standard label-above-bar geometry.
 Gauge color components may be formulas, allowing authored full-AT flashing
 without changing the resolved gauge value or introducing another clock.
+Panel text can declare a positive `textScale` (default 1) in the window or
+its shared layout. It scales only text and wraps against the available width
+in local coordinates; shell and gauge geometry keep their authored size.
+The Windows tab exposes this field, and G1 rejects invalid scales.
 
 `READ_INPUT` copies the canonical logical controller's held-button snapshot
 into a named Scene-state table. Real-time authored Scenes can normalize motion

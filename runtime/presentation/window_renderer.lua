@@ -1802,8 +1802,22 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
                 local ok, secs = pcall(formula.eval, win.reveal, env)
                 if ok then revealElapsed = tonumber(secs) end
             end
-            drawTextLines(text, env, contentX, contentY, lineSpacing, w - 2 * padX,
-                align, revealElapsed)
+            -- Scale the authored text independently of its shell. Wrap in
+            -- local coordinates so large readouts retain the same bounds.
+            local textScale = layout.textScale or 1
+            assert(type(textScale) == "number" and textScale > 0 and textScale < math.huge,
+                "Window textScale must be a positive finite number")
+            if textScale == 1 then
+                drawTextLines(text, env, contentX, contentY, lineSpacing, w - 2 * padX,
+                    align, revealElapsed)
+            else
+                love.graphics.push()
+                love.graphics.translate(contentX, contentY)
+                love.graphics.scale(textScale, textScale)
+                drawTextLines(text, env, 0, 0, lineSpacing, (w - 2 * padX) / textScale,
+                    align, revealElapsed)
+                love.graphics.pop()
+            end
         end
     end
 
@@ -2159,6 +2173,7 @@ function wr.drawWindowFromData(sceneData, state, ctx, opts)
         if winDef.title ~= nil then layout.title = winDef.title end
         if winDef.emptyText ~= nil then layout.emptyText = winDef.emptyText end
         if winDef.lineSpacing ~= nil then layout.lineSpacing = winDef.lineSpacing end
+        if winDef.textScale ~= nil then layout.textScale = winDef.textScale end
         if winDef.visibleRows ~= nil then layout.visibleRows = winDef.visibleRows end
         if winDef.gridColumns ~= nil then layout.gridColumns = winDef.gridColumns end
         if winDef.rowPitch ~= nil then layout.rowPitch = winDef.rowPitch end

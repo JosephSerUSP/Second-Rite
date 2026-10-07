@@ -220,7 +220,7 @@ class Menu:
               visible="sceneState.ui == 21 or sceneState.ui >= 26"),
             W("menu_item_action", 17, 10, 13, 8,
               (N + N).join(cur("ma", k) + text for k, text in enumerate(["Use", "Move", "Discard"])),
-              visible="sceneState.ui == 26", chrome="button"),
+              visible="sceneState.ui == 26", chrome="overlay"),
             # weapon page: the highlighted weapon's real numbers; carried weapons
             W("menu_weapon_stats", 6, 4, 18, 17, chain(
                 [("sceneState.wi == 0", "'M84F' .. '\\n\\nATTACK   7\\nRANGE    4.0\\nROUNDS   ' .. session.items.handgun_ammo")],

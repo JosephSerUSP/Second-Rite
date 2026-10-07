@@ -438,8 +438,8 @@
       "rect": {
         "x": "1 - surface.originX",
         "y": 1,
-        "w": 19,
-        "h": 9
+        "w": 18,
+        "h": 7
       },
       "style": "panel",
       "chrome": "overlay",
@@ -447,62 +447,42 @@
       "content": [
         {
           "type": "gauge",
-          "x": 3.2,
-          "y": 1.3,
-          "width": 8,
-          "height": 0.45,
+          "x": 1,
+          "y": 1,
+          "width": 13,
+          "height": 0.55,
           "labelPlacement": "none",
           "value": "rt.player.at",
           "max": "100",
           "fill": [
-            "rt.player.at >= 100 and .62+.3*abs(sin(sceneState.gait)) or .31",
-            "rt.player.at >= 100 and 1 or .64",
-            "rt.player.at >= 100 and .98 or .74"
+            "rt.player.at >= 100 and .35+.3*abs(sin(sceneState.gait)) or .12",
+            0.85,
+            1
           ],
           "color": [
-            0.11,
-            0.24,
-            0.2
+            0.06,
+            0.2,
+            0.22
           ]
         },
         {
           "type": "gauge",
-          "x": 3.2,
-          "y": 3.3,
-          "width": 8,
-          "height": 0.45,
-          "labelPlacement": "none",
-          "value": "rt.player.hp",
-          "max": "rt.player.maxHp",
-          "fill": [
-            0.15,
-            0.75,
-            0.23
-          ],
-          "color": [
-            0.11,
-            0.24,
-            0.2
-          ]
-        },
-        {
-          "type": "gauge",
-          "x": 3.2,
-          "y": 5.3,
-          "width": 8,
-          "height": 0.45,
+          "x": 1,
+          "y": 5,
+          "width": 13,
+          "height": 0.55,
           "labelPlacement": "none",
           "value": "rt.player.res.pe",
           "max": "rt.player.res.peMax",
           "fill": [
-            0.76,
-            0.16,
-            0.26
+            0.12,
+            0.85,
+            0.2
           ],
           "color": [
-            0.11,
-            0.24,
-            0.2
+            0.06,
+            0.2,
+            0.1
           ]
         }
       ]
@@ -510,10 +490,10 @@
     {
       "id": "hud_labels",
       "rect": {
-        "x": "1 - surface.originX",
+        "x": "14.5 - surface.originX",
         "y": 1,
-        "w": 19,
-        "h": 9
+        "w": 4.5,
+        "h": 7
       },
       "style": "panel",
       "chrome": "none",
@@ -521,17 +501,37 @@
       "content": [
         {
           "type": "text",
-          "text": "AT\n\nHP\n\nPE\n\n{(variables.weapon or 'handgun') == 'baton' and 'CLUB' or 'M84F'}"
+          "text": "AT\n\nHP\n\nPE"
         }
       ]
     },
     {
-      "id": "hud_values",
+      "id": "hud_hp",
       "rect": {
-        "x": "12 - surface.originX",
-        "y": 1,
-        "w": 8,
-        "h": 9
+        "x": "1 - surface.originX",
+        "y": 2.2,
+        "w": 14,
+        "h": 3.5
+      },
+      "style": "panel",
+      "chrome": "none",
+      "textScale": 2,
+      "align": "right",
+      "visible": "sceneState.fight == 1",
+      "content": [
+        {
+          "type": "text",
+          "text": "{rt.player.hp}/{rt.player.maxHp}"
+        }
+      ]
+    },
+    {
+      "id": "hud_weapon",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 7.5,
+        "w": 18,
+        "h": 2.5
       },
       "style": "panel",
       "chrome": "none",
@@ -539,7 +539,7 @@
       "content": [
         {
           "type": "text",
-          "text": "\n\n{rt.player.hp}/{rt.player.maxHp}\n\n{rt.player.res.pe}/{rt.player.res.peMax}\n\n{(variables.weapon or 'handgun') == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"
+          "text": "{(variables.weapon or 'handgun') == 'baton' and 'CLUB' or 'M84F'}   {(variables.weapon or 'handgun') == 'baton' and '--' or (rt.items.handgun_ammo or 0)}"
         }
       ]
     },
@@ -893,7 +893,7 @@
           "text": "{sceneState.ma == 0 and '> ' or '  '}Use\n\n{sceneState.ma == 1 and '> ' or '  '}Move\n\n{sceneState.ma == 2 and '> ' or '  '}Discard"
         }
       ],
-      "chrome": "button"
+      "chrome": "overlay"
     },
     {
       "id": "menu_weapon_stats",

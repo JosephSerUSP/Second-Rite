@@ -714,6 +714,7 @@ function love.load(arg)
             "test_b009_spatial",
             "test_scene_state_boundary",
             "test_scene_event_validation",
+            "test_window_text_scale",
             "test_combat_project_validation",
             "test_realtime_battle",
             "test_pe_day1_scene",

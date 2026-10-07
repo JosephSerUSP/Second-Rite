@@ -481,7 +481,7 @@
           "text": "{sceneState.ma == 0 and '> ' or '  '}Use\n\n{sceneState.ma == 1 and '> ' or '  '}Move\n\n{sceneState.ma == 2 and '> ' or '  '}Discard"
         }
       ],
-      "chrome": "button"
+      "chrome": "overlay"
     },
     {
       "id": "menu_weapon_stats",

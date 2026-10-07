@@ -1,0 +1,170 @@
+{
+  "imageSize": [
+    1536,
+    1024
+  ],
+  "insetPixels": 6,
+  "regions": {
+    "blade_front": {
+      "pixels": [
+        50,
+        50,
+        480,
+        587
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    },
+    "blade_back": {
+      "pixels": [
+        530,
+        50,
+        959,
+        587
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    },
+    "crystal": {
+      "pixels": [
+        1010,
+        50,
+        1486,
+        398
+      ],
+      "users": [
+        "dark_scepter_lucille"
+      ]
+    },
+    "silver": {
+      "pixels": [
+        1010,
+        439,
+        1486,
+        588
+      ],
+      "users": [
+        "dark_scepter_lucille",
+        "hook_spear"
+      ]
+    },
+    "dark": {
+      "pixels": [
+        50,
+        627,
+        1486,
+        734
+      ],
+      "users": [
+        "dark_scepter_lucille"
+      ]
+    },
+    "leather": {
+      "pixels": [
+        50,
+        775,
+        747,
+        973
+      ],
+      "users": [
+        "dark_scepter_lucille",
+        "hook_spear"
+      ]
+    },
+    "wood": {
+      "pixels": [
+        789,
+        772,
+        1486,
+        973
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    }
+  },
+  "requestedRegions": {
+    "blade_front": {
+      "pixels": [
+        48,
+        48,
+        480,
+        608
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    },
+    "blade_back": {
+      "pixels": [
+        528,
+        48,
+        960,
+        608
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    },
+    "crystal": {
+      "pixels": [
+        1008,
+        48,
+        1488,
+        400
+      ],
+      "users": [
+        "dark_scepter_lucille"
+      ]
+    },
+    "silver": {
+      "pixels": [
+        1008,
+        448,
+        1488,
+        608
+      ],
+      "users": [
+        "dark_scepter_lucille",
+        "hook_spear"
+      ]
+    },
+    "dark": {
+      "pixels": [
+        48,
+        656,
+        1488,
+        752
+      ],
+      "users": [
+        "dark_scepter_lucille"
+      ]
+    },
+    "leather": {
+      "pixels": [
+        48,
+        800,
+        736,
+        976
+      ],
+      "users": [
+        "dark_scepter_lucille",
+        "hook_spear"
+      ]
+    },
+    "wood": {
+      "pixels": [
+        784,
+        800,
+        1488,
+        976
+      ],
+      "users": [
+        "hook_spear"
+      ]
+    }
+  },
+  "boundary": "Original generated output moved panels. Actual rectangles measured visually, six-pixel sampling inset, no pixel changes. Generated grain and relief-like engraving/crystal shading remain."
+}

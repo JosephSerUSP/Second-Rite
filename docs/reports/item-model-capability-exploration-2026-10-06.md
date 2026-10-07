@@ -1301,3 +1301,30 @@ Agent-Signature:
   role: implementation
   task: two independent items from one generated surface atlas
   base: cfe1006e10abbb26d3a3201d64ca36d902b6ac97
+
+
+## Follow-on: complex weapons sharing surface art
+
+Dark Scepter Lucille and Hook Spear extend the paired-atlas trial beyond simple
+solids. One combined multiview reference and one unchanged surface atlas guide
+a four-rib open crown with a suspended faceted crystal, swept horns and hollow
+cup, plus a thick asymmetric hooked blade with a real cutting bevel, socket,
+rivets and raised lacing. Silver and leather regions are intentionally shared.
+Hidden joints and thickness remain authored; reference views disagree in scale.
+
+The new Blender-free `path_sweep` helper transports elliptical sections with
+minimum rotation and gives side faces distance UVs plus flat radial cap fans.
+This avoids a fixed world-axis tube pinch; it does not guarantee no overlap.
+A direct saved-source scepter edit exposed silver faces/ridges after native
+review. Prior adopted documents were not regenerated. Crystal facets and blade
+planes are flat; rounded sections are smooth. All 37 evaluated components are
+closed and positive-volume; painted faces pass assigned-region and area checks.
+
+Local three sweep tests, texture/contract/index checks, repeated export and
+shipping compile, strict prospective corpus, staged G1-G4/unit/save pass.
+Seven native Effekseer assertions were unavailable. Actual baselines stay red
+and unchanged: 86 stale corpus keys and 102 changed asset-regression records
+across the stack. No G5/G6 run/recapture or Linux byte-stability claim.
+Generated grain and baked shading remain, fine details simplify at 96px, and
+owner visual acceptance is open. Full prompts and actual comparisons are in
+[the complex-weapon review](item-model-weapons-atlas-review/).

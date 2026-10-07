@@ -1,0 +1,708 @@
+{
+  "items": [
+    {
+      "item": "dark_scepter_lucille",
+      "source": {
+        "item": "dark_scepter_lucille",
+        "sourceHash": "08122dd70405d76c791a3f0df6ba1470eed94e20df2b40cb99c3e1b94d48be60",
+        "objects": [
+          {
+            "name": "A_TaperedBlackenedShaft",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 96,
+            "smoothFaces": 48,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06937571903102763
+          },
+          {
+            "name": "B_LeatherGrip",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 120,
+            "smoothFaces": 72,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.039958120245189896
+          },
+          {
+            "name": "C_RaisedSpiralGripLacing",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 732,
+            "smoothFaces": 720,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.005392584066397408
+          },
+          {
+            "name": "D_SilverCollar_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0063569941370669675
+          },
+          {
+            "name": "D_SilverCollar_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006357000452179299
+          },
+          {
+            "name": "D_SilverCollar_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006356997294623142
+          },
+          {
+            "name": "D_SilverCollar_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006357000452179292
+          },
+          {
+            "name": "E_FacetedFerrule",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020746506466305492
+          },
+          {
+            "name": "F_ActualHollowCrownCup",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 288,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.10991439142131434
+          },
+          {
+            "name": "G_OpaqueSixFacetSuspendedCrystal",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.33348602059218496
+          },
+          {
+            "name": "H_TwistedCageTalon_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 208,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020986789495615926
+          },
+          {
+            "name": "H_TwistedCageTalon_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 208,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020986789495615926
+          },
+          {
+            "name": "H_TwistedCageTalon_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 208,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.02098678949561592
+          },
+          {
+            "name": "H_TwistedCageTalon_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 208,
+            "smoothFaces": 192,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020986789495615926
+          },
+          {
+            "name": "I_SilverTalonRidge_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 144,
+            "smoothFaces": 132,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0011178791553856226
+          },
+          {
+            "name": "I_SilverTalonRidge_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 144,
+            "smoothFaces": 132,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.001117879155385623
+          },
+          {
+            "name": "I_SilverTalonRidge_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 144,
+            "smoothFaces": 132,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.001117879155385623
+          },
+          {
+            "name": "I_SilverTalonRidge_3",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 144,
+            "smoothFaces": 132,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0011178791553856226
+          },
+          {
+            "name": "J_OutwardSweptHorn_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 100,
+            "smoothFaces": 80,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.10691699206529379
+          },
+          {
+            "name": "J_OutwardSweptHorn_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 100,
+            "smoothFaces": 80,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.10691699206515624
+          },
+          {
+            "name": "K_HornSilverEdge_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 60,
+            "smoothFaces": 48,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0010893074811962416
+          },
+          {
+            "name": "K_HornSilverEdge_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 60,
+            "smoothFaces": 48,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0010872176148179647
+          }
+        ],
+        "boundsMin": [
+          -1.3447659015655518,
+          -0.6740647554397583,
+          -3.0
+        ],
+        "boundsMax": [
+          1.3447659015655518,
+          0.6740647554397583,
+          3.0
+        ],
+        "outerCoverUVContinuity": null,
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "dark_scepter_lucille",
+          "sr_contract_version": 1,
+          "sr_asset_id": "dark_scepter_lucille",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "transported_open_cage",
+          "sr_authoring_description": "Twisted four-rib crown and two swept horns around an opaque faceted violet crystal; physical negative gaps",
+          "sr_shared_atlas": "complex_weapons_surface_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"blade_front\": {\"pixels\": [50, 50, 480, 587], \"users\": [\"hook_spear\"]}, \"blade_back\": {\"pixels\": [530, 50, 959, 587], \"users\": [\"hook_spear\"]}, \"crystal\": {\"pixels\": [1010, 50, 1486, 398], \"users\": [\"dark_scepter_lucille\"]}, \"silver\": {\"pixels\": [1010, 439, 1486, 588], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"dark\": {\"pixels\": [50, 627, 1486, 734], \"users\": [\"dark_scepter_lucille\"]}, \"leather\": {\"pixels\": [50, 775, 747, 973], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"wood\": {\"pixels\": [789, 772, 1486, 973], \"users\": [\"hook_spear\"]}}, \"requestedRegions\": {\"blade_front\": {\"pixels\": [48, 48, 480, 608], \"users\": [\"hook_spear\"]}, \"blade_back\": {\"pixels\": [528, 48, 960, 608], \"users\": [\"hook_spear\"]}, \"crystal\": {\"pixels\": [1008, 48, 1488, 400], \"users\": [\"dark_scepter_lucille\"]}, \"silver\": {\"pixels\": [1008, 448, 1488, 608], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"dark\": {\"pixels\": [48, 656, 1488, 752], \"users\": [\"dark_scepter_lucille\"]}, \"leather\": {\"pixels\": [48, 800, 736, 976], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"wood\": {\"pixels\": [784, 800, 1488, 976], \"users\": [\"hook_spear\"]}}, \"boundary\": \"Original generated output moved panels. Actual rectangles measured visually, six-pixel sampling inset, no pixel changes. Generated grain and relief-like engraving/crystal shading remain.\"}",
+          "sr_reference_measurements": "{\n  \"imageSize\": [\n    1330,\n    1182\n  ],\n  \"alphaBounds\": {\n    \"dark_scepter_lucille\": {\n      \"front\": [\n        112,\n        6,\n        332,\n        591\n      ],\n      \"right\": [\n        332,\n        8,\n        607,\n        591\n      ],\n      \"back\": [\n        705,\n        6,\n        997,\n        591\n      ],\n      \"top\": [\n        997,\n        126,\n        1296,\n        404\n      ]\n    },\n    \"hook_spear\": {\n      \"front\": [\n        135,\n        591,\n        332,\n        1168\n      ],\n      \"right\": [\n        332,\n        591,\n        554,\n        1167\n      ],\n      \"back\": [\n        680,\n        591,\n        917,\n        1167\n      ],\n      \"top\": [\n        1079,\n        623,\n        1206,\n        1043\n      ]\n    }\n  },\n  \"boundary\": \"Generated multiview is inconsistent in scale; alpha bounds guide proportions, not a scan. Hidden joints, wall thickness, talon twist and bevel widths authored.\",\n  \"alphaBoundsBoundary\": \"Uniform column partitions cross silhouettes. These automatic bounds are diagnostic only; manual component spans below drive dimensions.\",\n  \"manualMeasurements\": {\n    \"scepter\": {\n      \"overallFront\": [\n        112,\n        6,\n        354,\n        570\n      ],\n      \"crystalFront\": [\n        200,\n        7,\n        271,\n        184\n      ],\n      \"crownFront\": [\n        112,\n        6,\n        354,\n        239\n      ],\n      \"rightCage\": [\n        482,\n        8,\n        605,\n        234\n      ],\n      \"nominalHeight\": 6,\n      \"referenceWidthRatio\": 0.42907801418439717,\n      \"referenceCrownHeightRatio\": 0.41312056737588654,\n      \"authoredCageClearance\": \"Crystal radius .355, talon centre radius .32..62; hidden joints/radii inferred.\"\n    },\n    \"spear\": {\n      \"overallFront\": [\n        135,\n        580,\n        374,\n        1168\n      ],\n      \"bladeFront\": [\n        135,\n        580,\n        374,\n        806\n      ],\n      \"bladeRight\": [\n        494,\n        580,\n        549,\n        807\n      ],\n      \"nominalHeight\": 6,\n      \"referenceBladeWidthRatio\": 0.4064625850340136,\n      \"referenceBladeHeightRatio\": 0.3843537414965986,\n      \"authoredBlade\": \"Manually traced contour, .20 thickness with .055 actual bevel; narrow right silhouette contains socket and asymmetrical hook, so width is not a direct thickness measurement.\"\n    }\n  }\n}\n",
+          "sr_generation_method": "combined multiview plus one original shared surface atlas; authored complex open cage / bevelled asymmetric hook",
+          "sr_review_status": "provisional; structural passes are not visual acceptance",
+          "sr_saved_source_refinement": "Direct source edit: visible engraved frame faces and exposed silver ridge positions after native96 inspection"
+        }
+      },
+      "objSHA256": "e751a5231c464be47e1f42f6af2e79e7dfb781d3e580589fda0ab6b59b02021d",
+      "mtlSHA256": "be3b55d396e7289afe43fe771d9cab3b6c4c29da90f3b592cf3bd59d37ad047b",
+      "vertices": 3012,
+      "triangles": 5936,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 943
+    },
+    {
+      "item": "hook_spear",
+      "source": {
+        "item": "hook_spear",
+        "sourceHash": "2135a0cd3ae1b7c97d1455c2ceef7f47f8e40dbdbedd777b771a07f86c723160",
+        "objects": [
+          {
+            "name": "A_AshwoodPole",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 16,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.09056968519603664
+          },
+          {
+            "name": "B_HeavyOctagonalSocket",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 40,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.06291553555027372
+          },
+          {
+            "name": "C_SocketLashingUnderlay",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 72,
+            "smoothFaces": 24,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.020538502276594154
+          },
+          {
+            "name": "D_RaisedSocketLashing",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 444,
+            "smoothFaces": 432,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.0036857559405398406
+          },
+          {
+            "name": "E_LowerGripUnderlay",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 72,
+            "smoothFaces": 24,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.042028585472073846
+          },
+          {
+            "name": "F_RaisedGripLacing",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 732,
+            "smoothFaces": 720,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.005834405108969632
+          },
+          {
+            "name": "G_GripCollar_0",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006861501929273173
+          },
+          {
+            "name": "G_GripCollar_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006861500904072844
+          },
+          {
+            "name": "G_GripCollar_2",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.006861499145735926
+          },
+          {
+            "name": "H_ButtSpike",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 24,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.01465878861583858
+          },
+          {
+            "name": "I_SolidHookBladeWithCuttingBevel",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 158,
+            "smoothFaces": 0,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.4011040246635624
+          },
+          {
+            "name": "J_SocketRivet_0.3_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 36,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.00017854500718398198
+          },
+          {
+            "name": "J_SocketRivet_0.3_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 36,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.00017854500718398198
+          },
+          {
+            "name": "J_SocketRivet_0.57_-1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 36,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.00017854500718398198
+          },
+          {
+            "name": "J_SocketRivet_0.57_1",
+            "type": "MESH",
+            "modifiers": [],
+            "faces": 48,
+            "smoothFaces": 36,
+            "rawNonmanifoldEdges": 0,
+            "positionWeldedAuditNonmanifoldEdges": 0,
+            "signedVolume": 0.00017854500718398198
+          }
+        ],
+        "boundsMin": [
+          -0.6745155453681946,
+          -0.20000000298023224,
+          -3.0
+        ],
+        "boundsMax": [
+          1.8200000524520874,
+          0.20000000298023224,
+          2.971174478530884
+        ],
+        "outerCoverUVContinuity": null,
+        "metadata": {
+          "item_export": true,
+          "item_export_name": "hook_spear",
+          "sr_contract_version": 1,
+          "sr_asset_id": "hook_spear",
+          "sr_representation": "full_model",
+          "sr_role": "item_display",
+          "sr_authoring_space": "item_display",
+          "sr_placement_frame": "item_viewport",
+          "sr_default_state": "default",
+          "sr_states_json": "[\"default\"]",
+          "sr_variants_json": "[]",
+          "sr_source_authority": "blend",
+          "sr_authoring_grammar": "thick_inset_hook_blade",
+          "sr_authoring_description": "Asymmetric crescent hook with spear tip and secondary spur; actual bevel planes, closed octagonal socket, physical helical lashing",
+          "sr_shared_atlas": "complex_weapons_surface_atlas.png",
+          "sr_atlas_allocations": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"blade_front\": {\"pixels\": [50, 50, 480, 587], \"users\": [\"hook_spear\"]}, \"blade_back\": {\"pixels\": [530, 50, 959, 587], \"users\": [\"hook_spear\"]}, \"crystal\": {\"pixels\": [1010, 50, 1486, 398], \"users\": [\"dark_scepter_lucille\"]}, \"silver\": {\"pixels\": [1010, 439, 1486, 588], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"dark\": {\"pixels\": [50, 627, 1486, 734], \"users\": [\"dark_scepter_lucille\"]}, \"leather\": {\"pixels\": [50, 775, 747, 973], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"wood\": {\"pixels\": [789, 772, 1486, 973], \"users\": [\"hook_spear\"]}}, \"requestedRegions\": {\"blade_front\": {\"pixels\": [48, 48, 480, 608], \"users\": [\"hook_spear\"]}, \"blade_back\": {\"pixels\": [528, 48, 960, 608], \"users\": [\"hook_spear\"]}, \"crystal\": {\"pixels\": [1008, 48, 1488, 400], \"users\": [\"dark_scepter_lucille\"]}, \"silver\": {\"pixels\": [1008, 448, 1488, 608], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"dark\": {\"pixels\": [48, 656, 1488, 752], \"users\": [\"dark_scepter_lucille\"]}, \"leather\": {\"pixels\": [48, 800, 736, 976], \"users\": [\"dark_scepter_lucille\", \"hook_spear\"]}, \"wood\": {\"pixels\": [784, 800, 1488, 976], \"users\": [\"hook_spear\"]}}, \"boundary\": \"Original generated output moved panels. Actual rectangles measured visually, six-pixel sampling inset, no pixel changes. Generated grain and relief-like engraving/crystal shading remain.\"}",
+          "sr_reference_measurements": "{\n  \"imageSize\": [\n    1330,\n    1182\n  ],\n  \"alphaBounds\": {\n    \"dark_scepter_lucille\": {\n      \"front\": [\n        112,\n        6,\n        332,\n        591\n      ],\n      \"right\": [\n        332,\n        8,\n        607,\n        591\n      ],\n      \"back\": [\n        705,\n        6,\n        997,\n        591\n      ],\n      \"top\": [\n        997,\n        126,\n        1296,\n        404\n      ]\n    },\n    \"hook_spear\": {\n      \"front\": [\n        135,\n        591,\n        332,\n        1168\n      ],\n      \"right\": [\n        332,\n        591,\n        554,\n        1167\n      ],\n      \"back\": [\n        680,\n        591,\n        917,\n        1167\n      ],\n      \"top\": [\n        1079,\n        623,\n        1206,\n        1043\n      ]\n    }\n  },\n  \"boundary\": \"Generated multiview is inconsistent in scale; alpha bounds guide proportions, not a scan. Hidden joints, wall thickness, talon twist and bevel widths authored.\",\n  \"alphaBoundsBoundary\": \"Uniform column partitions cross silhouettes. These automatic bounds are diagnostic only; manual component spans below drive dimensions.\",\n  \"manualMeasurements\": {\n    \"scepter\": {\n      \"overallFront\": [\n        112,\n        6,\n        354,\n        570\n      ],\n      \"crystalFront\": [\n        200,\n        7,\n        271,\n        184\n      ],\n      \"crownFront\": [\n        112,\n        6,\n        354,\n        239\n      ],\n      \"rightCage\": [\n        482,\n        8,\n        605,\n        234\n      ],\n      \"nominalHeight\": 6,\n      \"referenceWidthRatio\": 0.42907801418439717,\n      \"referenceCrownHeightRatio\": 0.41312056737588654,\n      \"authoredCageClearance\": \"Crystal radius .355, talon centre radius .32..62; hidden joints/radii inferred.\"\n    },\n    \"spear\": {\n      \"overallFront\": [\n        135,\n        580,\n        374,\n        1168\n      ],\n      \"bladeFront\": [\n        135,\n        580,\n        374,\n        806\n      ],\n      \"bladeRight\": [\n        494,\n        580,\n        549,\n        807\n      ],\n      \"nominalHeight\": 6,\n      \"referenceBladeWidthRatio\": 0.4064625850340136,\n      \"referenceBladeHeightRatio\": 0.3843537414965986,\n      \"authoredBlade\": \"Manually traced contour, .20 thickness with .055 actual bevel; narrow right silhouette contains socket and asymmetrical hook, so width is not a direct thickness measurement.\"\n    }\n  }\n}\n",
+          "sr_generation_method": "combined multiview plus one original shared surface atlas; authored complex open cage / bevelled asymmetric hook",
+          "sr_review_status": "provisional; structural passes are not visual acceptance"
+        }
+      },
+      "objSHA256": "98db034509313f39746c6dd3fae14b13b0be75b6009697919b0edaf4451f1997",
+      "mtlSHA256": "4cde914943462a9ebf3587e3456a1d407b96873d84a932dda45afe81936633d1",
+      "vertices": 1790,
+      "triangles": 3520,
+      "plainControlOBJBytesIdentical": true,
+      "changedGameplayPixels": 738
+    }
+  ],
+  "paintedFaces": [
+    {
+      "item": "dark_scepter_lucille",
+      "paintedMaterials": {
+        "dark_scepter_lucille_dark": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 1008,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 856
+        },
+        "dark_scepter_lucille_leather": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 1644,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 1584
+        },
+        "dark_scepter_lucille_silver": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 3248,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 2728
+        },
+        "dark_scepter_lucille_crystal": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 36,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    },
+    {
+      "item": "hook_spear",
+      "paintedMaterials": {
+        "hook_spear_wood": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 64,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 32
+        },
+        "hook_spear_silver": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 870,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 240
+        },
+        "hook_spear_leather": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 2520,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 2400
+        },
+        "hook_spear_blade_front": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 33,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        },
+        "hook_spear_blade_back": {
+          "texture": "complex_weapons_surface_atlas.png",
+          "faces": 33,
+          "missing": 0,
+          "collapsed": 0,
+          "outside": 0,
+          "varyingNormals": 0
+        }
+      },
+      "findings": 0
+    }
+  ],
+  "atlasRegions": {
+    "atlasSHA256": "1cf70ada11961d37e0f1c093afbf9740210a88859a9328a070e1363da473dcb1",
+    "opaqueRGB": true,
+    "oneOriginalImageTwoSources": true,
+    "runtimeRegions": [
+      {
+        "item": "dark_scepter_lucille",
+        "regions": {
+          "dark": {
+            "faces": 1008,
+            "uvMin": [
+              0.036458,
+              0.289062
+            ],
+            "uvMax": [
+              0.963542,
+              0.381836
+            ]
+          },
+          "leather": {
+            "faces": 1644,
+            "uvMin": [
+              0.036458,
+              0.055664
+            ],
+            "uvMax": [
+              0.482422,
+              0.237305
+            ]
+          },
+          "silver": {
+            "faces": 3248,
+            "uvMin": [
+              0.661458,
+              0.431641
+            ],
+            "uvMax": [
+              0.963542,
+              0.56543
+            ]
+          },
+          "crystal": {
+            "faces": 36,
+            "uvMin": [
+              0.667582,
+              0.617188
+            ],
+            "uvMax": [
+              0.957418,
+              0.945312
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      },
+      {
+        "item": "hook_spear",
+        "regions": {
+          "wood": {
+            "faces": 64,
+            "uvMin": [
+              0.517578,
+              0.055664
+            ],
+            "uvMax": [
+              0.963542,
+              0.240234
+            ]
+          },
+          "silver": {
+            "faces": 870,
+            "uvMin": [
+              0.661458,
+              0.431641
+            ],
+            "uvMax": [
+              0.963542,
+              0.56543
+            ]
+          },
+          "leather": {
+            "faces": 2520,
+            "uvMin": [
+              0.036458,
+              0.055664
+            ],
+            "uvMax": [
+              0.482422,
+              0.237305
+            ]
+          },
+          "blade_front": {
+            "faces": 33,
+            "uvMin": [
+              0.048457,
+              0.438624
+            ],
+            "uvMax": [
+              0.305359,
+              0.939401
+            ]
+          },
+          "blade_back": {
+            "faces": 33,
+            "uvMin": [
+              0.360928,
+              0.438624
+            ],
+            "uvMax": [
+              0.617216,
+              0.939401
+            ]
+          }
+        },
+        "allocationContainmentFailures": 0
+      }
+    ],
+    "stripEndDiagnostics": {
+      "silver": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 21.430555555555557,
+        "maxChannelDelta": 101,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "dark": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 14.538194444444445,
+        "maxChannelDelta": 103,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "leather": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 11.760416666666666,
+        "maxChannelDelta": 61,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      },
+      "wood": {
+        "samples": 96,
+        "meanAbsoluteRGBDelta": 9.78125,
+        "maxChannelDelta": 38,
+        "boundary": "Raw original strip end colours; grain can differ. Not a visual acceptance claim."
+      }
+    },
+    "boundary": "Both models consume the same silver/leather allocations and original filename. Region containment is not a texel quality, memory or draw-call benchmark; strip endpoints can differ."
+  },
+  "nativeCell": 96,
+  "candidateShippingDecodedRGBIdentical": true,
+  "originalSourceCompiledShippingAtlasBytesIdentical": true,
+  "independentRepeatedExportBytesIdentical": true,
+  "shippingCompileCheckPassed": true,
+  "referencedItems": 207,
+  "referencedItemsMissingSource": 48,
+  "boundary": "Runtime captures at native 96px; orthographic Workbench captures read-only shape/UV evidence only. Plain copies preserve exact OBJ bytes and sphere passes, replace map_Kd and UV gain with a constant allocation-mean RGB times 1.20. Changed pixels are contribution, not quality. Raw evaluated components closed and positive-volume."
+}

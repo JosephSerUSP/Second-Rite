@@ -1,0 +1,40 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": {
+    "reference": "Use case: stylized-concept\nAsset type: multiview construction reference for two complex RPG inventory weapons.\nOne transparent-background sheet, two rows, four orthographic views per row: front, right, back, top. Keep a CONSISTENT physical object and scale within each row. Whole weapons, no cropping, no text/labels, no shadows/background. Front camera at negative Y, Z upright, X horizontal. Long shafts vertical Z.\nTOP ROW: Dark Scepter Lucille. An elegant ominous blackened silver scepter, large architectural open crown enclosing a luminous opaque violet crystal. Four heavy curved talons twist subtly around the crystal from a stepped cup base, with clear negative gaps; twin outward swept horns form a broad winged silhouette. A slender dark shaft, three raised silver collars, a burgundy wrapped grip, pointed silver ferrule. Crown is substantial, about 35% of total height and 50% as wide as total height. Violet crystal is faceted, not a glowing flat sticker. Ornate ribbing and restrained engraved silver decoration. Crystal and talons need real spatial separation. No skull.\nBOTTOM ROW: Hook Spear. Weathered steel asymmetric hooked spear with a broad crescent hook to the RIGHT and long upward spear point, thick tapered blade bevel, a secondary small left spur. Blade occupies about 35% of total height. Heavy octagonal brass socket riveted onto brown ashwood pole, reddish leather lashings under socket and lower grip, small butt spike. Blade root slightly cut out, etched flowing line with tiny brass inlay, realistic broad plain steel regions. Hook concavity and point are easy to distinguish at 96px.\nStyle: restrained painterly low-poly fantasy, large readable shapes and physically consistent construction, materials with quiet wear, broad clean faces, no noisy all-over grain. Rounded metal rods are smooth, blade planes and crystal facets crisp. Soft neutral illumination for measuring volume and surface information, no extreme highlights, no cast shadows. Side/top views must show actual thickness, hidden back construction and cage arrangement, not repeated front pictures.",
+    "atlas": "Use case: stylized-concept\nAsset type: ONE shared UV color atlas for Dark Scepter Lucille and Hook Spear; opaque 1536x1024 landscape.\nImage1: multiview design reference, use surface color/decoration; do not copy object renders. Image2: deterministic allocation guide, follow these exact rectangles and clear gutters. Draw flat surface art only, no weapon silhouettes, no shadows, no perspective, no labels/text, no watermark. Fill every rectangular panel edge to edge; panels remain rectangular.\nRegions, top-left pixel coordinates on 1536x1024:\nblade_front x48..480 y48..608 and blade_back x528..960 y48..608: broad muted silver-gray steel, subdued long etched flowing curves in the central lower half, narrow restrained pale brass inlay, quiet fine wear, NO baked bevels or fake lighting; both fill full rectangles with steel. Geometry separately supplies the asymmetric blade silhouette, cutting bevels and thickness, so do NOT paint a weapon or mask the background.\ncrystal x1008..1488 y48..400: saturated violet crystal color, translucent-looking marbling on an OPAQUE panel, a few quiet cloudy amethyst streaks, no rendered gem, no polygons/shading/highlights; geometry supplies facets.\nsilver x1008..1488 y448..608: one even gray silver strip with restrained small engraved curling designs and worn brass undertones, no bands or rendered cylinders. Both items consume this area.\ndark x48..1488 y656..752: one quiet blackened violet-silver metal strip, very subtle cool vertical streaks, continuous even brightness.\nleather x48..736 y800..976: one calm burgundy leather panel, slight warm variation and soft grain, no fake straps or lacing. Both items consume this area; lacing is geometry.\nwood x784..1488 y800..976: medium warm ashwood color with quiet straight vertical grain, no cylinder shading.\nGutters dark neutral gray. Calm texture frequencies suited to 96px inventory display. Materials differentiated by broad color; no pervasive speckle, no hard highlights, no baked ambient occlusion. STRICT same region placement as guide."
+  },
+  "referenceOriginal": "C:/Users/josep/.codex/generated_images/01a111e6-2b3c-7281-9302-7ca09dbf4e4c/exec-42c3e1cb-5675-445d-a2da-5da2e7f22779.png",
+  "atlasOriginal": "C:/Users/josep/.codex/generated_images/01a111e6-2b3c-7281-9302-7ca09dbf4e4c/exec-84c8f938-89aa-4637-b80f-cca715b2ff88.png",
+  "atlasInputs": [
+    "reference.png",
+    "layout.png"
+  ],
+  "calls": 2,
+  "images": {
+    "reference": {
+      "size": [
+        1330,
+        1182
+      ],
+      "mode": "RGBA",
+      "sha256": "3457e5d91f50ff9f24e40b143174770ffa466ff5b92dcd80091bf470e6996de5"
+    },
+    "atlas": {
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "1cf70ada11961d37e0f1c093afbf9740210a88859a9328a070e1363da473dcb1"
+    },
+    "layout": {
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sha256": "cd95b7f229082e3014501246f4f68dc5ba2551591ada48fb9ad160fdb127faca"
+    }
+  }
+}

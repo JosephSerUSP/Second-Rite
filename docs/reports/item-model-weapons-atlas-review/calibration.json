@@ -1,0 +1,118 @@
+{
+  "imageSize": [
+    1330,
+    1182
+  ],
+  "alphaBounds": {
+    "dark_scepter_lucille": {
+      "front": [
+        112,
+        6,
+        332,
+        591
+      ],
+      "right": [
+        332,
+        8,
+        607,
+        591
+      ],
+      "back": [
+        705,
+        6,
+        997,
+        591
+      ],
+      "top": [
+        997,
+        126,
+        1296,
+        404
+      ]
+    },
+    "hook_spear": {
+      "front": [
+        135,
+        591,
+        332,
+        1168
+      ],
+      "right": [
+        332,
+        591,
+        554,
+        1167
+      ],
+      "back": [
+        680,
+        591,
+        917,
+        1167
+      ],
+      "top": [
+        1079,
+        623,
+        1206,
+        1043
+      ]
+    }
+  },
+  "boundary": "Generated multiview is inconsistent in scale; alpha bounds guide proportions, not a scan. Hidden joints, wall thickness, talon twist and bevel widths authored.",
+  "alphaBoundsBoundary": "Uniform column partitions cross silhouettes. These automatic bounds are diagnostic only; manual component spans below drive dimensions.",
+  "manualMeasurements": {
+    "scepter": {
+      "overallFront": [
+        112,
+        6,
+        354,
+        570
+      ],
+      "crystalFront": [
+        200,
+        7,
+        271,
+        184
+      ],
+      "crownFront": [
+        112,
+        6,
+        354,
+        239
+      ],
+      "rightCage": [
+        482,
+        8,
+        605,
+        234
+      ],
+      "nominalHeight": 6,
+      "referenceWidthRatio": 0.42907801418439717,
+      "referenceCrownHeightRatio": 0.41312056737588654,
+      "authoredCageClearance": "Crystal radius .355, talon centre radius .32..62; hidden joints/radii inferred."
+    },
+    "spear": {
+      "overallFront": [
+        135,
+        580,
+        374,
+        1168
+      ],
+      "bladeFront": [
+        135,
+        580,
+        374,
+        806
+      ],
+      "bladeRight": [
+        494,
+        580,
+        549,
+        807
+      ],
+      "nominalHeight": 6,
+      "referenceBladeWidthRatio": 0.4064625850340136,
+      "referenceBladeHeightRatio": 0.3843537414965986,
+      "authoredBlade": "Manually traced contour, .20 thickness with .055 actual bevel; narrow right silhouette contains socket and asymmetrical hook, so width is not a direct thickness measurement."
+    }
+  }
+}

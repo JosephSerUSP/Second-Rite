@@ -186,6 +186,20 @@ test("Actor Change reports skillbook learning as durable development", function(
     assert(changes[1].noteText:find("Wind Blade"), "presentation note should mention Wind Blade")
 end)
 
+test("Actor Change ignores equipment", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    local traits = require("engine.traits")
+    local hp0 = traits.getParam(hero, "maxHp", sess)
+    sess:addItem(6, 1) -- Bone Plate (Armor)
+    local before = progress.snapshot(sess)
+    interpreter.runImmediate({ { cmd = "EQUIP_ITEM", slot = 2, target = 1, itemIndex = 2 } },
+        { session = sess, loader = loader, sceneState = {} })
+    assert(hero.equipment[2] and hero.equipment[2].id == 6, "control: the armor is worn")
+    assert(traits.getParam(hero, "maxHp", sess) == hp0 + 3, "control: the armor's +3 max HP applies")
+    assert(#progress.changes(sess, before) == 0, "putting on armor must not be reported as Actor Change")
+end)
+
 test("Actor Change ignores ordinary HP healing", function()
     local sess = session.GameSession.new(loader)
     local hero = sess:recruitActor("pixie", 1)

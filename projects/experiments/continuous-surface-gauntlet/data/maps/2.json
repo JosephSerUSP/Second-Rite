@@ -39,20 +39,12 @@
   ],
   "traversal": {
     "provider": "continuous_surface",
-    "environmentPackage": "assets/environments/archive_antechamber/environment.json",
+    "environmentPackage": "assets/environments/service_annex/environment.json",
     "spawnAnchor": "service_spawn",
     "interactionRadius": 1.15,
     "surface": {
       "speed": 2.65,
-      "maxStep": 0.08,
-      "groundZ": 0,
-      "regions": [
-        { "points": [[-3.65,-2.65],[3.65,-2.65],[3.65,2.65],[1.4,2.65],[1.4,2.15],[-1.8,2.15],[-1.8,2.65],[-3.65,2.65]] }
-      ],
-      "obstacles": [
-        { "points": [[-0.35,-1.25],[0.85,-1.25],[0.85,0.25],[-0.35,0.25]] },
-        { "points": [[1.45,-0.25],[2.25,-0.25],[2.25,0.55],[1.45,0.55]] }
-      ]
+      "maxStep": 0.08
     }
   }
 }

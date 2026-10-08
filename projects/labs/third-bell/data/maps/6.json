@@ -1,0 +1,287 @@
+{
+  "id": 6,
+  "title": "Floor 5: Blood Chapel",
+  "intro": "Walls whisper of ancient oaths.",
+  "depth": 5,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:b31e2cdc-92b1-4190-ad6c-13627a8b1c29",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:196c90ae-d872-433e-a92c-753883aa7e18",
+      "scriptId": 7,
+      "x": 8,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:225e397c-cde0-4197-bb70-6903c9a01a7a",
+      "scriptId": 13,
+      "x": 14,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:327fd7d0-dbdd-4f91-a371-ec320dc25027",
+      "scriptId": 4,
+      "x": 6,
+      "y": 14,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:713951d5-5167-4449-941f-ed2bfb2f3ce9",
+      "name": "Unfinished Procession",
+      "label": "Unfinished Procession",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.24,
+        0.28
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_unfinished_procession",
+          "commands": [
+            {
+              "text": "The wax figures still face the empty place in their procession. One has turned its head toward you.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A procession of life-sized wax villagers kneels between the pews. Each carries an unlit Vigil lamp.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "There is a gap in the line shaped for a rider and a small, broad-backed bird.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_unfinished_procession",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:473acbef-aef1-4969-8943-63b8470783d6",
+      "name": "Warm Confessional",
+      "label": "Warm Confessional",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.68,
+        0.18,
+        0.22
+      ],
+      "commands": [
+        {
+          "condition": "flag:heard_warm_confessional",
+          "commands": [
+            {
+              "text": "The wood is cold now. From the other side, something quietly repeats Saban's name.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The confessional wood is warm. Someone on the other side is breathing at exactly your pace.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Listen.",
+                  "commands": [
+                    {
+                      "text": "\"Tell us which of you is the summon,\" your own voice whispers.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "flag": "heard_warm_confessional",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Step away.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "name": "The Half-Contract",
+      "label": "A Torn Contract",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.35,
+        0.55,
+        0.95
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "hasItem:209",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The niche is empty. The blue chalk line runs into it and stops, the way a sentence stops when the speaker is interrupted."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "The blue chalk line -- the one from the entry hall, the one that turns every corner without breaking -- ends here, in a niche at knee height."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Inside: a contract torn straight down the fold. The Summoner's half is gone. The creature's half has been signed four times."
+            },
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "flag:found_ines_mark",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "Four signatures. The gate guard said Ines went down three times, and on the fourth only her creatures came back."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "So the fourth signature is not hers. Somebody signed for her, in her hand, after."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "Four signatures in the same hand, and the fourth one is still wet."
+                }
+              ]
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Take it.",
+                  "commands": [
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": "209",
+                      "count": 1
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You take the creature's half. The blue line goes out behind you, all the way back to the entry hall, floor by floor, like a lamp being turned down."
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "hasItem:208",
+                      "commands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "In your pack, the blank Bellroot Leaf Agnes gave you is no longer blank. It says: FIVE DOWN. ONE TO GO."
+                        }
+                      ],
+                      "elseCommands": []
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Carry it up the stairs. Agnes asked for something she could hold."
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it where she left it.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You put it back exactly as it was. The chalk line stays lit. Somebody, somewhere, is still owed."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": 7,
+      "instanceId": "event:third_bell-the-half-contract"
+    }
+  ],
+  "treasures": [
+    25
+  ],
+  "encounters": [
+    {
+      "actor": "crimson_lord",
+      "weight": 2
+    },
+    {
+      "actor": "demon",
+      "weight": 8
+    },
+    {
+      "actor": "high_pixie",
+      "weight": 5
+    },
+    {
+      "actor": "red_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "blue_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "green_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "white_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "black_dragon",
+      "weight": 2
+    }
+  ],
+  "recruits": [
+    "demon",
+    "angel",
+    "cerberus",
+    "giant"
+  ]
+}

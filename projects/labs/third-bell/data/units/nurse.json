@@ -1,0 +1,138 @@
+{
+  "id": "nurse",
+  "name": "Nurse",
+  "favoriteFoods": [
+    175,
+    176,
+    187
+  ],
+  "level": 1,
+  "role": "Healer",
+  "smallBattler": "Nurse",
+  "passives": [
+    "symbiosis"
+  ],
+  "elements": [
+    "Black"
+  ],
+  "skills": [
+    "needleShot",
+    "fieldSurgery"
+  ],
+  "flavor": "She's here to help. Please don't resist.",
+  "expGrowth": 4,
+  "gold": 20,
+  "evolutions": [],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "Nurse approaches softly. 'Hold still, let me mend your injuries.'"
+    },
+    {
+      "cmd": "RECOVER_PARTY"
+    },
+    {
+      "cmd": "TEXT",
+      "text": "Nurse smiles gently. 'I shall watch over your health.'"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Recruit Nurse",
+          "commands": [
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "nurse",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Leave",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You part ways peacefully."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 2,
+      "chance": 0.2
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [
+    {
+      "itemId": 2,
+      "chance": 0.7,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Florence",
+    "Clara",
+    "Joy",
+    "Stitch",
+    "Bandage",
+    "Suture",
+    "Val",
+    "Hygiene"
+  ],
+  "baseParams": {
+    "maxHp": 48,
+    "atk": 6,
+    "def": 10,
+    "mat": 15,
+    "mdf": 14,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 23,
+      "atk": 12,
+      "def": 18,
+      "mat": 31,
+      "mdf": 25
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 34,
+      "atk": 18,
+      "def": 26,
+      "mat": 46,
+      "mdf": 37
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 38,
+      "atk": 21,
+      "def": 29,
+      "mat": 50,
+      "mdf": 41
+    }
+  ],
+  "portrait": "nurse",
+  "bigBattler": "nurse",
+  "defaultGrowthSeed": 1908133265
+}

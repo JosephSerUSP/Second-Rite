@@ -1,0 +1,106 @@
+{
+  "id": "archangel",
+  "name": "Archangel",
+  "favoriteFoods": [
+    171,
+    179,
+    187
+  ],
+  "level": 6,
+  "role": "Support",
+  "smallBattler": "Angel",
+  "passives": [
+    "holyAura"
+  ],
+  "elements": [
+    "White",
+    "White"
+  ],
+  "skills": [
+    "holySmite",
+    "divineFavor",
+    "soothingMote"
+  ],
+  "flavor": "A celestial being tasked with guiding the lost. Its patience is legendary.",
+  "expGrowth": 5,
+  "gold": 20,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 19,
+      "chance": 0.05
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [
+    {
+      "itemId": 8,
+      "chance": 0.7,
+      "count": 1
+    },
+    {
+      "itemId": 19,
+      "chance": 0.2,
+      "count": 1,
+      "minLevel": 8
+    }
+  ],
+  "names": [
+    "Gabriel",
+    "Michael",
+    "Uriel",
+    "Seraph",
+    "Halo",
+    "Mercy",
+    "Divine",
+    "Aura"
+  ],
+  "baseParams": {
+    "maxHp": 60,
+    "atk": 11,
+    "def": 17,
+    "mat": 20,
+    "mdf": 23,
+    "mpd": 3,
+    "mxa": 8,
+    "mxp": 5
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 28,
+      "atk": 23,
+      "def": 30,
+      "mat": 41,
+      "mdf": 41
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 41,
+      "atk": 33,
+      "def": 45,
+      "mat": 61,
+      "mdf": 61
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 47,
+      "atk": 37,
+      "def": 50,
+      "mat": 68,
+      "mdf": 68
+    }
+  ],
+  "portrait": "archangel",
+  "bigBattler": "archangel",
+  "defaultGrowthSeed": 387276923
+}

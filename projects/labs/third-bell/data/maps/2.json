@@ -1,0 +1,548 @@
+{
+  "id": 2,
+  "title": "Floor 1: Entry Hall",
+  "width": 17,
+  "height": 17,
+  "generationProfile": "entry",
+  "intro": "You cross the threshold into the dark.",
+  "depth": 1,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "anchors": [
+    {
+      "name": "Vault Entry Archway",
+      "x": 1,
+      "y": 1,
+      "allowRandomEvents": true,
+      "layout": [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "##o##"
+      ]
+    },
+    {
+      "name": "Alchemist's Hidden Workshop",
+      "x": 12,
+      "y": 10,
+      "allowRandomEvents": true,
+      "layout": [
+        "######",
+        "#....#",
+        "#....#",
+        "#....#",
+        "#....#",
+        "######"
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "x": 12,
+      "y": 12,
+      "passable": false,
+      "mutateTo": "o",
+      "meta": {
+        "detect": "secret",
+        "detectLevel": 1
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:3788384b-45d0-4bb5-aa6b-ed4c3b9f86db",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:682c2e1b-6103-440d-af02-fc9eec8a798c",
+      "scriptId": 7,
+      "x": 4,
+      "y": 5,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:6c60d9e6-538f-4a89-b197-db81993c6347",
+      "scriptId": 13,
+      "x": 12,
+      "y": 4,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:987b9875-f327-4568-8cf2-f5d08f957c81",
+      "scriptId": 4,
+      "x": 6,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:fd2ca933-5fcf-4394-871a-a9d6802b1fe4",
+      "scriptId": 12,
+      "x": 15,
+      "y": 15,
+      "spawn": "Random",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "name": "EV005",
+      "trigger": "interact",
+      "transparent": false,
+      "priority": "same",
+      "minimapColor": [
+        0.41,
+        1,
+        0.4
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:0066fa30-2709-428b-a60d-fdd5c71ad191",
+      "name": "Secret Lever",
+      "x": 13,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/dungeon_wall_lever.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "commands": [
+        {
+          "text": "You pull the ancient iron lever hidden behind the stone slab...",
+          "cmd": "TEXT"
+        },
+        {
+          "x": 12,
+          "y": 12,
+          "to": "o",
+          "cmd": "MUTATE_TILE"
+        },
+        {
+          "text": "A heavy stone wall grindingly recedes, revealing a passage into the Alchemist Workshop!",
+          "cmd": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "instanceId": "event:0a0ca74f-cfd5-439e-aae4-b5abdb8ae90e",
+      "name": "Teardrop Crystal Pedestal",
+      "x": 14,
+      "y": 11,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "hasItem:24",
+          "commands": [
+            {
+              "text": "The stone pedestal is empty now.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Resting on a velvet cushion is a shimmering Teardrop Crystal!",
+              "cmd": "TEXT"
+            },
+            {
+              "item": "24",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "item": "11",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "item": "171",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "item": "176",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "text": "Acquired Glittering Teardrop, Mystic Egg, Pão de Queijo, and Onigiri!",
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "instanceId": "event:f2cfca49-d9f7-4bc4-9b01-fff8e2a61d42",
+      "x": 11,
+      "y": 10,
+      "trigger": "step",
+      "label": "Spike Pit",
+      "minimapColor": [
+        1,
+        0.35,
+        0.1
+      ],
+      "meta": {
+        "detect": "trap",
+        "detectLevel": 1
+      },
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Rusted spikes snap up from the floor!"
+        },
+        {
+          "cmd": "FOR_EACH",
+          "scope": "living_allies",
+          "as": "ally",
+          "do": [
+            {
+              "cmd": "DAMAGE",
+              "target": "ally",
+              "amount": "4 + session.floor",
+              "pierce": true,
+              "minHp": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "instanceId": "event:f4a538bf-1c22-48eb-b508-bd9163b5b428",
+      "x": 5,
+      "y": 6,
+      "trigger": "step",
+      "label": "Seeping Gas",
+      "minimapColor": [
+        1,
+        0.35,
+        0.1
+      ],
+      "meta": {
+        "detect": "trap",
+        "detectLevel": 2
+      },
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A sweet, rotten smell rises from the flagstones..."
+        },
+        {
+          "cmd": "FOR_EACH",
+          "scope": "living_allies",
+          "as": "ally",
+          "do": [
+            {
+              "cmd": "ADD_STATE",
+              "target": "ally",
+              "state": "poison",
+              "duration": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "instanceId": "event:51bc793c-b811-43aa-a78a-583ac1cf9385",
+      "x": 9,
+      "y": 10,
+      "trigger": "interact",
+      "label": "Bound Chest",
+      "minimapColor": [
+        1,
+        0.8,
+        0.2
+      ],
+      "meta": {
+        "detect": "trap",
+        "detectLevel": 1
+      },
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "party.trait.SEE_TRAPS >= 1",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Your companion hisses a warning: the lid is wired to something underneath."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Open it carefully",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You lift the lid slowly. The wire goes slack, harmlessly."
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": "4",
+                      "count": 1
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": "47",
+                      "count": 1
+                    },
+                    {
+                      "cmd": "ERASE_EVENT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it alone",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You back away from the chest."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You throw the lid open -- and something bites."
+            },
+            {
+              "cmd": "FOR_EACH",
+              "scope": "living_allies",
+              "as": "ally",
+              "do": [
+                {
+                  "cmd": "DAMAGE",
+                  "target": "ally",
+                  "amount": "6",
+                  "pierce": true,
+                  "minHp": 1
+                }
+              ]
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "4",
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "47",
+              "count": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "instanceId": "event:21ee471c-2958-438b-8ff1-94617633e3f7",
+      "name": "Blue Chalk",
+      "label": "Blue Chalk",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_blue_chalk_sigil.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.2,
+        0.55,
+        1
+      ],
+      "commands": [
+        {
+          "image": "campaign_ines_mark.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "condition": "flag:found_ines_mark",
+          "commands": [
+            {
+              "text": "The blue line still points toward St. Maria, no matter which side you stand on.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A blue chalk line crosses the wall at shoulder height. It turns every corner without breaking.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Follow the line with your hand.",
+                  "commands": [
+                    {
+                      "text": "The stone is warm. Beneath the line, someone wrote INES backward, then crossed it out from the other side of the wall.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "flag": "found_ines_mark",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "instanceId": "event:b0b79ca5-bc8f-4a8d-bba3-02179bebb942",
+      "name": "First Contract",
+      "label": "Cornered Pixie",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.4,
+        0.85,
+        0.75
+      ],
+      "commands": [
+        {
+          "condition": "flag:first_recruit_complete",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Only a few green sparks remain where the creature was cornered."
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "Saban scratches twice at the wall, then steps aside. A wounded Pixie is hiding in the seam behind him."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The creature watches Saban rather than you. It is waiting to see whether your summons are companions or equipment."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Pixie's manifestation drain is 3. Saban alone costs 1 per step. Together, every tile will cost 4 — roughly a quarter of your current range."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Offer a contract.",
+                  "commands": [
+                    {
+                      "cmd": "OPEN_RECRUIT",
+                      "actorId": "pixie",
+                      "level": 1
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "first_recruit_complete",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Pixie accepts. PARTY now records two individual creatures; neither can be replaced by summoning from the field."
+                    },
+                    {
+                      "cmd": "ERASE_EVENT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it space.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Pixie remains in the seam. You may return if the expedition still has room."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    1,
+    2
+  ],
+  "encounters": [
+    {
+      "actor": "pixie",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "skeleton",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 3
+    },
+    {
+      "actor": "imp",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "cocoon",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "goblin_thief",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 3
+    },
+    {
+      "actor": "mandrake",
+      "weight": 3,
+      "levelMin": 2,
+      "levelMax": 3
+    },
+    {
+      "actor": "undine",
+      "weight": 4,
+      "levelMin": 1,
+      "levelMax": 3
+    }
+  ],
+  "encounterTroop": "floor_1_wandering",
+  "recruits": []
+}

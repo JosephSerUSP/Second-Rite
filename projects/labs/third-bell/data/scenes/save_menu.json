@@ -1,0 +1,192 @@
+{
+  "id": "save_menu",
+  "name": "Save Game",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "windows": [
+    {
+      "id": "save_help",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "style": "frame",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.mode == 'load' and 'UP/DOWN: select slot   ENTER: load   ESC: back' or 'UP/DOWN: select slot   ENTER: save   ESC: back'}"
+        }
+      ]
+    },
+    {
+      "id": "save_list",
+      "rect": {
+        "x": 4,
+        "y": 5,
+        "w": 24,
+        "h": 8
+      },
+      "style": "list",
+      "visibleRows": 3,
+      "title": "{v.mode == 'load' and 'Load Game' or 'Save Game'}",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:saveRows",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "save_confirm",
+      "rect": {
+        "x": 4,
+        "y": 14,
+        "w": 24,
+        "h": 3
+      },
+      "style": "frame",
+      "title": null,
+      "visible": "v.confirmed == true",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.mode == 'load' and 'Loaded!' or 'Saved!'}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "confirmed",
+            "value": "false"
+          },
+          {
+            "name": "mode",
+            "value": "v.mode or 'save'"
+          }
+        ]
+      },
+      {
+        "cmd": "LIST_SAVES"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "v.idx - 1"
+              },
+              {
+                "name": "confirmed",
+                "value": "false"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx < (v.saveCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "v.idx + 1"
+              },
+              {
+                "name": "confirmed",
+                "value": "false"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode ~= 'load'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SAVE_GAME",
+            "slot": "(((v.saveRows or {})[v.idx or 1]) or {}).slot or 'slot1'"
+          },
+          {
+            "cmd": "LIST_SAVES"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "confirmed",
+            "value": "true"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.mode == 'load' and not (((v.saveRows or {})[v.idx or 1]) or {}).empty",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "LOAD_GAME",
+            "slot": "(((v.saveRows or {})[v.idx or 1]) or {}).slot or 'slot1'"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {
+    "dock": {
+      "variant": "party_status",
+      "cursor": "0"
+    }
+  }
+}

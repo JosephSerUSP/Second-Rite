@@ -1,0 +1,84 @@
+{
+  "id": "cockatrice",
+  "name": "Cockatrice",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "names": [
+    "Basil",
+    "Stony",
+    "Strutter",
+    "Gazer",
+    "Plume",
+    "Clawer",
+    "Crest",
+    "Rost"
+  ],
+  "flavor": "A dangerous hybrid of rooster and serpent born from an egg. Its horrifying gaze turns living prey into motionless stone.",
+  "level": 1,
+  "role": "Assassin",
+  "discipline": "blacksmithing",
+  "smallBattler": "cockatrice",
+  "elements": [
+    "Green",
+    "Black"
+  ],
+  "skills": [
+    "attack",
+    "defend",
+    "dartingPeck",
+    "petrifyingGaze",
+    "assassinate"
+  ],
+  "passives": [
+    "watchfulStone"
+  ],
+  "expGrowth": 1,
+  "gold": 2,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "drops": [],
+  "foodReactions": [
+    "Pecked clean in seconds!",
+    "A crunchy treat."
+  ],
+  "baseParams": {
+    "maxHp": 48,
+    "atk": 16,
+    "def": 12,
+    "mat": 8,
+    "mdf": 10,
+    "mpd": 2,
+    "mxa": 3,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 52,
+      "atk": 24,
+      "def": 16,
+      "mat": 10,
+      "mdf": 14
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 62,
+      "atk": 32,
+      "def": 22,
+      "mat": 12,
+      "mdf": 18
+    }
+  ],
+  "sacrificeRewards": [],
+  "portrait": "cockatrice",
+  "bigBattler": "cockatrice",
+  "defaultGrowthSeed": 739632705
+}

@@ -1,0 +1,58 @@
+{
+  "id": "developer_geometry_export",
+  "name": "Map Geometry Export",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "export_result",
+      "rect": {
+        "x": 3,
+        "y": 5,
+        "w": 26,
+        "h": 12
+      },
+      "style": "confirm",
+      "title": "MAP GEOMETRY EXPORT",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.statusText or 'Exporting...'}"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "content": [
+        {
+          "type": "text",
+          "text": "[Confirm / Cancel] Back"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "EXPORT_MAP_GEOMETRY"
+      },
+      {
+        "cmd": "SCRIPT",
+        "code": "if ctx.v.statusText then\nctx.v.statusText = string.gsub(ctx.v.statusText, 'EXPORTED OBJ', 'EXPORTED OBJ + MTL')\nctx.v.statusText = string.gsub(ctx.v.statusText, 'Textures are not included yet%.', 'Albedo textures included in textures/. Open the OBJ path above; exact absolute OBJ + MTL paths are also printed in the console. Glow is omitted.')\nend"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  }
+}

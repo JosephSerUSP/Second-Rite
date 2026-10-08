@@ -1,0 +1,3986 @@
+{
+  "id": 1,
+  "title": "St. Maria",
+  "intro": "A remote settlement living from the Labyrinth beneath it.",
+  "depth": 0,
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "image": "TownAlencar.png",
+  "layout": [
+    "###################",
+    "#########.#########",
+    "#.........#.......#",
+    "#.###.........###.#",
+    "#.###.........###.#",
+    "#.#.#.........#.#.#",
+    "#.................#",
+    "#.###.........#.#.#",
+    "#.##....#.#...###.#",
+    "#.###..........##.#",
+    "#.###...#.#...###.#",
+    "#.................#",
+    "#########....#.#..#",
+    "#########....###..#",
+    "########..#..###..#",
+    "#########....###..#",
+    "#########....###..#",
+    "#.................#",
+    "#############.#####"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:704ee832-5d2d-4de3-9e51-97c657297daf",
+      "x": 8,
+      "y": 2,
+      "sprite": "assets/sprites/NPC00.png",
+      "trigger": "interact",
+      "name": "Gate Guard",
+      "label": "Gate Guard",
+      "transparent": false,
+      "priority": "same",
+      "spawn": "Fixed",
+      "pages": [
+        {
+          "sprite": "assets/sprites/NPC10.png",
+          "commands": [
+            {
+              "commonEventId": 34,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "condition": "flag:shipment_investigated",
+              "commands": [
+                {
+                  "text": "So Alicia heard them stop near the chasm? Damn. That means goblins or worse. Thanks for the intel. I'll double the watch.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "questId": "silent_shipment",
+                  "cmd": "QUEST_COMPLETE"
+                },
+                {
+                  "text": "You did good work. Watch your back out there.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "commonEventId": 33,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Any news on the shipment? Ask Alicia, she usually hears the carts coming.",
+                  "cmd": "TEXT"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered, hasItem:198",
+              "commands": [
+                {
+                  "text": "Ready to descend again? Don't make me carry your body out.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "commonEventId": 33,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "questStatus:silent_shipment:completed",
+                  "commands": [
+                    {
+                      "text": "You did good work. Watch your back out there.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "commonEventId": 33,
+                      "cmd": "CALL_COMMON_EVENT"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "hasItem:198",
+                      "commands": [
+                        {
+                          "commonEventId": 33,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "text": "No Crossing Writ. Speak to the Registrar at the Passage Office. And don’t try to slip past. I’ve buried faster people than you.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Anything strange happening?",
+                              "commands": [
+                                {
+                                  "text": "Strange? Always. But the supply shipment is late. Very late. It usually comes through the old tunnel, but it's silent.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "I'll investigate.",
+                                      "commands": [
+                                        {
+                                          "questId": "silent_shipment",
+                                          "cmd": "QUEST_OFFER"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Not my problem.",
+                                      "commands": []
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                }
+                              ],
+                              "condition": "questStatus:silent_shipment:inactive"
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": []
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "instanceId": "event:f20baab7-911e-4d23-9233-b6560e2b53da",
+      "x": 9,
+      "y": 0,
+      "wallEvent": true,
+      "sprite": "assets/sprites/labyrinth_gate_bellroot.png",
+      "trigger": "bump",
+      "name": "Labyrinth Gate",
+      "label": "Labyrinth Gate",
+      "priority": "same",
+      "commands": [
+        {
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "commonEventId": 43,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The guard lowers her spear across the threshold. \"Crossing Writ first. The Labyrinth will still be hungry when you return.\"",
+              "speaker": "Gate Guard",
+              "expression": 2,
+              "cmd": "TEXT"
+            },
+            {
+              "commonEventId": 34,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "instanceId": "event:c893c9c9-bd5b-498e-996f-f32f72c97005",
+      "x": 3,
+      "y": 5,
+      "sprite": "assets/sprites/NPC01.png",
+      "trigger": "interact",
+      "name": "Weapon Shop",
+      "label": "Weaponsmith",
+      "commands": [
+        {
+          "name": "weaponsmith_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "condition": "questStatus:shattered_blade_recovery:active, hasItem:26",
+          "commands": [
+            {
+              "text": "Let me see that... Hah! Yes. The core is intact. The steel is ancient, folded a thousand times. Give me an hour.",
+              "cmd": "TEXT"
+            },
+            {
+              "questId": "shattered_blade_recovery",
+              "cmd": "QUEST_COMPLETE"
+            },
+            {
+              "flag": "shattered_blade_reforged",
+              "value": true,
+              "cmd": "SET_FLAG"
+            },
+            {
+              "text": "Done. I've added my best work to the shop inventory. Special stock, just for you. Don't dull it on a rat's skull.",
+              "cmd": "TEXT"
+            },
+            {
+              "label": "weaponsmith_hub",
+              "cmd": "JUMP_TO_LABEL"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "questStatus:shattered_blade_recovery:active",
+              "commands": [
+                {
+                  "text": "Find that scrap metal yet? The forge is waiting.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:shattered_blade_reforged",
+                  "commands": [
+                    {
+                      "text": "Good to see you alive. The forge is hot, and the steel is singing today. Need anything?",
+                      "cmd": "TEXT"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "text": "Blades, hammers, axes. If it kills, I sell it. If it breaks, I fix it. If you break, that’s on you.",
+                      "cmd": "TEXT"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        },
+        {
+          "options": [
+            {
+              "label": "Buy Weapons",
+              "commands": [
+                {
+                  "shopId": 8,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask about the dungeon",
+              "commands": [
+                {
+                  "text": "Down there? Don’t fight fair. Don’t fight pretty. Fight to leave. The only winning move is coming back with your hands still yours.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask about equipment",
+              "commands": [
+                {
+                  "text": "You want to know how to not die? Fine. Listen close.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Weapons",
+                      "commands": [
+                        {
+                          "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "name": "weaponsmith_equip",
+                          "cmd": "LABEL"
+                        },
+                        {
+                          "text": "You want to know how to not die? Fine. Listen close.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Weapons",
+                              "commands": [
+                                {
+                                  "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "label": "weaponsmith_equip",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Armor",
+                              "commands": [
+                                {
+                                  "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "label": "weaponsmith_equip",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Back",
+                              "commands": [
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Armor",
+                      "commands": [
+                        {
+                          "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "weaponsmith_equip",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "weaponsmith_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Found anything interesting?",
+              "commands": [
+                {
+                  "condition": "questStatus:shattered_blade_recovery:completed",
+                  "commands": [
+                    {
+                      "text": "The blade is done. Check my wares if you have the coin.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "label": "weaponsmith_hub",
+                      "cmd": "JUMP_TO_LABEL"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "questStatus:shattered_blade_recovery:active",
+                      "commands": [
+                        {
+                          "text": "Find that scrap metal yet? The forge is waiting.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "weaponsmith_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "text": "Interesting? Maybe. Legends say a 'Shattered Blade' lies in the Cryptic Vault. Floor 4, maybe 5. It's useless scrap to you, but I could reforge it into something... lethal.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "I'll keep an eye out.",
+                              "commands": [
+                                {
+                                  "questId": "shattered_blade_recovery",
+                                  "cmd": "QUEST_OFFER"
+                                },
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Not interested.",
+                              "commands": [
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "instanceId": "event:b02afd38-41e0-42ac-9b5f-64dfbe7e906a",
+      "x": 15,
+      "y": 5,
+      "sprite": "assets/sprites/NPC07.png",
+      "trigger": "interact",
+      "name": "Yukio",
+      "label": "Yukio",
+      "pages": [
+        {
+          "sprite": "",
+          "transparent": true,
+          "priority": "below",
+          "commands": []
+        },
+        {
+          "condition": "flag:vigil_ready",
+          "sprite": "assets/sprites/NPC07.png",
+          "transparent": false,
+          "priority": "same",
+          "commands": [
+            {
+              "commonEventId": 36,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "commonEventId": 36,
+          "cmd": "CALL_COMMON_EVENT"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "instanceId": "event:a3a5b7b7-6128-4e8a-aaa5-9daca4489f3d",
+      "x": 15,
+      "y": 8,
+      "wallEvent": true,
+      "sprite": "assets/sprites/map_door_001.png",
+      "trigger": "bump",
+      "name": "Laura",
+      "label": "Laura",
+      "pages": [
+        {
+          "commands": [
+            {
+              "commonEventId": 39,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "condition": "questStatus:golden_promise:active",
+          "commands": [
+            {
+              "text": "Find that signet. Don't come back empty-handed.",
+              "speaker": "Laura",
+              "cmd": "TEXT"
+            },
+            {
+              "condition": "hasItem:25",
+              "commands": [
+                {
+                  "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+                  "speaker": "Laura",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Hand it over.",
+                      "commands": [
+                        {
+                          "questId": "golden_promise",
+                          "cmd": "QUEST_COMPLETE"
+                        },
+                        {
+                          "text": "I'll need time to work on this. Check back later. And... thanks.",
+                          "speaker": "Laura",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "commonEventId": 17,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "options": [
+                    {
+                      "label": "Still looking.",
+                      "commands": [
+                        {
+                          "commonEventId": 17,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:laura_met",
+              "commands": [
+                {
+                  "commonEventId": 31,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Hmm? Oh. You're the new one. Eyes forward, don't drag your feet. The smithy is hot, and I don't have time for tourists.",
+                  "speaker": "Laura",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "I need weapons.",
+                      "commands": [
+                        {
+                          "flag": "laura_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "shopId": 8,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "commonEventId": 31,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "You seem busy.",
+                      "commands": [
+                        {
+                          "text": "Steel doesn't shape itself. If you're not buying or repairing, get out of the smoke.",
+                          "speaker": "Laura",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Understood.",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "shopId": 8,
+                                  "cmd": "OPEN_SHOP"
+                                },
+                                {
+                                  "commonEventId": 31,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Talk",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "commonEventId": 17,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "flag": "laura_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "instanceId": "event:2f2eb10e-ff4d-4555-8a59-cb9593dfb0ef",
+      "x": 4,
+      "y": 7,
+      "wallEvent": true,
+      "sprite": "assets/sprites/map_door_001.png",
+      "trigger": "bump",
+      "name": "Sign",
+      "label": "Passage House",
+      "transparent": true,
+      "priority": "same",
+      "spawn": "Fixed",
+      "commands": [
+        {
+          "image": "st_maria_home.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be your home for the upcoming months.\" Five rooms open from the common landing. Only yours has a name card.",
+          "cmd": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:8f64d72d-a890-44a8-976d-9a9ee23ab5e4",
+      "x": 9,
+      "y": 9,
+      "sprite": "assets/sprites/NPC09.png",
+      "trigger": "step",
+      "scriptId": 7,
+      "name": "Trigger"
+    },
+    {
+      "id": 7,
+      "instanceId": "event:a193baf2-6f48-4424-a1db-77e193ec9376",
+      "x": 15,
+      "y": 9,
+      "wallEvent": true,
+      "sprite": "assets/sprites/map_door_001.png",
+      "trigger": "bump",
+      "name": "Alicia",
+      "label": "Pink-haired girl",
+      "pages": [
+        {
+          "condition": "flag:vigil_ready",
+          "commands": [
+            {
+              "commonEventId": 38,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "condition": "flag:shipment_investigated",
+              "commands": [
+                {
+                  "commonEventId": 30,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Oh! Are you looking for the supply cart? I heard it! I was listening to the wind near the chasm, and I heard squeaky wheels stop suddenly. Then... goblin noises. Lots of them.",
+                  "speaker": "Alicia",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Goblins? I should tell the guard.",
+                      "commands": [
+                        {
+                          "flag": "shipment_investigated",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "text": "Please be careful! If the goblins have the food, they'll be... energetic.",
+                          "speaker": "Alicia",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "commonEventId": 30,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:alicia_first_met",
+              "commands": [
+                {
+                  "commonEventId": 30,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Oh! H-hello—! I… I didn’t see you coming. I’m Alicia. Welcome to my shop! Uhm— please look around! And— and if you’re hungry, I can warm something up. Not for sale. Just… because.",
+                  "speaker": "Alicia",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Buy Consumables",
+                      "commands": [
+                        {
+                          "flag": "alicia_first_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "label": "Alicia",
+                          "persistent": true,
+                          "cmd": "CHANGE_EVENT_PROPERTIES"
+                        },
+                        {
+                          "shopId": 7,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "commonEventId": 30,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "You’re kind.",
+                      "commands": [
+                        {
+                          "text": "M-me? No, I’m… I’m normal. I just… I don’t like when people look empty. Like they forgot they have a body. Sorry. That sounded weird.",
+                          "speaker": "Alicia",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Not weird.",
+                              "commands": [
+                                {
+                                  "text": "…Thank you. People usually laugh. Or they say ‘that’s cute’ and then they don’t mean it. Anyway! Please— uhm— browse!",
+                                  "speaker": "Alicia",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "Buy Consumables",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        },
+                                        {
+                                          "label": "Alicia",
+                                          "cmd": "SET_EVENT_LABEL"
+                                        },
+                                        {
+                                          "shopId": 7,
+                                          "cmd": "OPEN_SHOP"
+                                        },
+                                        {
+                                          "commonEventId": 30,
+                                          "cmd": "CALL_COMMON_EVENT"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Talk",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        },
+                                        {
+                                          "commonEventId": 15,
+                                          "cmd": "CALL_COMMON_EVENT"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Leave",
+                                      "commands": [
+                                        {
+                                          "flag": "alicia_first_met",
+                                          "value": true,
+                                          "cmd": "SET_FLAG"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Buy Consumables",
+                              "commands": [
+                                {
+                                  "flag": "alicia_first_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "label": "Alicia",
+                                  "cmd": "SET_EVENT_LABEL"
+                                },
+                                {
+                                  "shopId": 7,
+                                  "cmd": "OPEN_SHOP"
+                                },
+                                {
+                                  "commonEventId": 30,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": [
+                                {
+                                  "flag": "alicia_first_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "flag": "alicia_first_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "instanceId": "event:9df9050a-d848-4dd4-b47b-83c2a9aed510",
+      "x": 14,
+      "y": 13,
+      "wallEvent": true,
+      "sprite": "assets/sprites/map_door_001.png",
+      "trigger": "bump",
+      "name": "Pub Owner",
+      "pages": [
+        {
+          "commands": [
+            {
+              "commonEventId": 37,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ]
+        }
+      ],
+      "commands": [
+        {
+          "name": "pub_main",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "The air in The Rusty Tankard is thick with the smell of cheap ale and roasted meat. Laughter and hushed whispers compete with the clinking of glasses.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Approach the Bartender",
+              "commands": [
+                {
+                  "name": "pub_bartender",
+                  "cmd": "LABEL"
+                },
+                {
+                  "text": "The bartender nods at you as he wipes a glass with a rag that's seen better days. 'What can I get you?'",
+                  "speaker": "NPC_Barkeep",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Buy a drink",
+                      "commands": [
+                        {
+                          "shopId": 5,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "label": "pub_bartender",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Any news?",
+                      "commands": [
+                        {
+                          "condition": "random() < 0.2",
+                          "commands": [
+                            {
+                              "text": "Rain's coming. My knee aches. Means the slimes on the first floor will be extra sticky.",
+                              "cmd": "TEXT"
+                            }
+                          ],
+                          "elseCommands": [
+                            {
+                              "condition": "random() < 0.25",
+                              "commands": [
+                                {
+                                  "text": "Some fool said he saw a golden egg on the third floor. Probably just a trick of the light, or a trap.",
+                                  "cmd": "TEXT"
+                                }
+                              ],
+                              "elseCommands": [
+                                {
+                                  "condition": "random() < 0.3333",
+                                  "commands": [
+                                    {
+                                      "text": "If you see a statue that looks like it's crying, don't touch it. Unless you like curses.",
+                                      "cmd": "TEXT"
+                                    }
+                                  ],
+                                  "elseCommands": [
+                                    {
+                                      "condition": "random() < 0.5",
+                                      "commands": [
+                                        {
+                                          "text": "Alicia's been baking again. Smells like burnt cinnamon. Poor girl tries hard, though.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ],
+                                      "elseCommands": [
+                                        {
+                                          "text": "News? The dungeon's deep, the monsters are hungry, and the beer is cold. That's all the news that matters.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ],
+                                      "cmd": "CONDITIONAL_BRANCH"
+                                    }
+                                  ],
+                                  "cmd": "CONDITIONAL_BRANCH"
+                                }
+                              ],
+                              "cmd": "CONDITIONAL_BRANCH"
+                            }
+                          ],
+                          "cmd": "CONDITIONAL_BRANCH"
+                        },
+                        {
+                          "label": "pub_bartender",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "pub_main",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Speak to the Drunkard",
+              "commands": [
+                {
+                  "name": "pub_drunkard",
+                  "cmd": "LABEL"
+                },
+                {
+                  "text": "*hic* Whaddya want? Can'tcha see I'm... thinkin'?",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Ask what he's thinking about.",
+                      "commands": [
+                        {
+                          "text": "Thinkin' 'bout... 'bout how the floor keeps movin'. An' how my mug's always empty. It's a conspiracy, I tell ya... A thirsty, wobbly conspiracy.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "pub_drunkard",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave him to his thoughts.",
+                      "commands": []
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                },
+                {
+                  "label": "pub_main",
+                  "cmd": "JUMP_TO_LABEL"
+                },
+                {
+                  "label": "pub_main",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Look for a table",
+              "commands": [
+                {
+                  "condition": "flag:alicia_visits_pub",
+                  "commands": [
+                    {
+                      "text": "You notice Alicia sitting by herself at a small table, nervously sipping a cup of tea. It's unusual to see her outside her shop.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Approach her",
+                          "commands": [
+                            {
+                              "text": "Oh! H-hello again. I... I just needed to get out of the shop for a little while. All the dust... it gets in my throat.",
+                              "speaker": "Alicia",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "Is everything okay?",
+                                  "commands": [
+                                    {
+                                      "text": "Yes! Everything is... fine. Laura, she... she liked the gift. I think. She's wearing it. Under her apron, so no one else can see. It's... nice. Thank you, again. For helping me.",
+                                      "speaker": "Alicia",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "You're welcome.",
+                                          "commands": [
+                                            {
+                                              "text": "(She gives you a genuine, heartfelt smile.)",
+                                              "speaker": "Alicia",
+                                              "cmd": "TEXT"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Leave her be.",
+                                          "commands": []
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "It's nice to see you out.",
+                                  "commands": [
+                                    {
+                                      "text": "Thank you. It's... a little loud. But the tea is good. It's nice to just... sit for a moment. And not worry about what needs restocking.",
+                                      "speaker": "Alicia",
+                                      "cmd": "TEXT"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave her be.",
+                                  "commands": []
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Leave her be",
+                          "commands": [
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "random() < 0.4",
+                      "commands": [
+                        {
+                          "text": "In a dimly lit corner, you spot a familiar figure shuffling a deck of cards with practiced ease.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Approach the Gambler",
+                              "commands": [
+                                {
+                                  "text": "Well met, traveler. I'm a collector of sorts. A collector of... numbers.",
+                                  "speaker": "The Gambler",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "Sure, I'm feeling lucky.",
+                                      "commands": [
+                                        {
+                                          "text": "Excellent! I'll pick a number between 1 and 10. You just have to guess if it's high or low.",
+                                          "cmd": "TEXT"
+                                        },
+                                        {
+                                          "options": [
+                                            {
+                                              "label": "Higher",
+                                              "commands": [
+                                                {
+                                                  "condition": "random() < 0.5",
+                                                  "commands": [
+                                                    {
+                                                      "text": "You won! Here's a prize.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "amount": 10,
+                                                      "cmd": "GAIN_GOLD"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "elseCommands": [
+                                                    {
+                                                      "text": "Too bad! Better luck next time.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "cmd": "CONDITIONAL_BRANCH"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "label": "Lower",
+                                              "commands": [
+                                                {
+                                                  "condition": "random() < 0.5",
+                                                  "commands": [
+                                                    {
+                                                      "text": "You won! Here's a prize.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "amount": 10,
+                                                      "cmd": "GAIN_GOLD"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "elseCommands": [
+                                                    {
+                                                      "text": "Too bad! Better luck next time.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "cmd": "CONDITIONAL_BRANCH"
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "cmd": "CHOICE"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "No thanks.",
+                                      "commands": [
+                                        {
+                                          "text": "Come back later.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                },
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                },
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Ignore him",
+                              "commands": [
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "condition": "random() < 0.3",
+                          "commands": [
+                            {
+                              "text": "An old mercenary sits by the fire, staring into the flames. He looks like he has stories to tell.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "Sit with him",
+                                  "commands": [
+                                    {
+                                      "name": "pub_geraldo",
+                                      "cmd": "LABEL"
+                                    },
+                                    {
+                                      "text": "Heh. You look like you’ve seen a ghost. Want to hear a story? They’re all true. That’s what makes them useless.",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "Tell me.",
+                                          "commands": [
+                                            {
+                                              "text": "Once, a Summoner ran out of MP and begged his own creature to stop draining him. The creature cried. Then it kept eating. The dungeon doesn’t make monsters. It just reveals who’s hungry.",
+                                              "cmd": "TEXT"
+                                            },
+                                            {
+                                              "options": [
+                                                {
+                                                  "label": "…Lovely.",
+                                                  "commands": [
+                                                    {
+                                                      "label": "pub_geraldo",
+                                                      "cmd": "JUMP_TO_LABEL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "label": "Leave",
+                                                  "commands": []
+                                                }
+                                              ],
+                                              "cmd": "CHOICE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Browse",
+                                          "commands": [
+                                            {
+                                              "shopId": 4,
+                                              "cmd": "OPEN_SHOP"
+                                            },
+                                            {
+                                              "label": "pub_geraldo",
+                                              "cmd": "JUMP_TO_LABEL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Leave",
+                                          "commands": []
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    },
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    },
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave him be",
+                                  "commands": [
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            }
+                          ],
+                          "elseCommands": [
+                            {
+                              "text": "You find an empty table. It's nice to sit down for a moment, but there's no one interesting nearby right now.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ],
+                          "cmd": "CONDITIONAL_BRANCH"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "instanceId": "event:3b2a6f8a-9de7-49c3-9eff-b5f5e637350c",
+      "x": 10,
+      "y": 13,
+      "sprite": "assets/sprites/NPC06.png",
+      "trigger": "interact",
+      "name": "Auctioneer",
+      "label": "Auctioneer",
+      "commands": [
+        {
+          "name": "auctioneer_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "Rare finds! Highest bidder takes all! …Well. Fixed price for now. But the *spirit* is the same. Spend like you’re trying to forget something.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Browse",
+              "commands": [
+                {
+                  "shopId": 4,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "auctioneer_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask what’s ‘unidentified’ mean",
+              "commands": [
+                {
+                  "text": "It means you pay first and ask questions later. Just like love. Just like the dungeon. Now— are you brave, or are you smart?",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Browse",
+                      "commands": [
+                        {
+                          "shopId": 4,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "instanceId": "event:fff689e4-c1a9-42d8-9738-aabbf5efa1fb",
+      "x": 8,
+      "y": 13,
+      "wallEvent": true,
+      "sprite": "assets/sprites/map_door_001.png",
+      "trigger": "bump",
+      "name": "Temple",
+      "label": "Temple",
+      "commands": [
+        {
+          "commonEventId": 35,
+          "cmd": "CALL_COMMON_EVENT"
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "y": 6,
+      "name": "EV012",
+      "label": "Sister Agnes",
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC11.png",
+      "transparent": false,
+      "priority": "same",
+      "spawn": "Fixed",
+      "id": 12,
+      "instanceId": "event:bb472b9c-3025-477a-8ffe-839653828049",
+      "commands": [
+        {
+          "condition": "flag:agnes_met",
+          "commands": [
+            {
+              "text": "Agnes is repairing the chapel steps with a patience better suited to embroidery.",
+              "speaker": "Sister Agnes",
+              "expression": 2,
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "You must be the new Summoner. Welcome to St. Maria. I am Agnes. If you need quiet, the chapel is open. If you need certainty, try somewhere else.",
+              "speaker": "Sister Agnes",
+              "expression": 3,
+              "cmd": "TEXT"
+            },
+            {
+              "text": "She brushes stone dust from her sleeves and returns to work.",
+              "speaker": "Sister Agnes",
+              "expression": 1,
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "agnes_met",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "instanceId": "event:ed01da4e-f3fd-4a89-93e2-c0fb66e77850",
+      "x": 11,
+      "y": 6,
+      "name": "Registrar",
+      "label": "Registrar Celina",
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC06.png",
+      "transparent": false,
+      "priority": "same",
+      "spawn": "Fixed",
+      "commands": [
+        {
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "text": "Celina glances at your pass. \"Still legible. A promising start.\"",
+              "speaker": "Registrar Celina",
+              "expression": 4,
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Ask about St. Maria.",
+                  "commands": [
+                    {
+                      "text": "\"The village sells meals, beds, steel and funerals. Summoners bring demand for all four.\"",
+                      "speaker": "Registrar Celina",
+                      "expression": 2,
+                      "cmd": "TEXT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Ask about the Labyrinth.",
+                  "commands": [
+                    {
+                      "text": "\"Return before your MP makes the decision for you. Pride is not accepted as payment at the infirmary.\"",
+                      "speaker": "Registrar Celina",
+                      "expression": 5,
+                      "cmd": "TEXT"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Celina holds out one hand. \"Your Summoner's seal. Not your name. We keep those separate here.\"",
+              "speaker": "Registrar Celina",
+              "expression": 2,
+              "cmd": "TEXT"
+            },
+            {
+              "text": "She copies the seal into a narrow ledger. Most of the page is empty. The previous page is not.",
+              "speaker": "Registrar Celina",
+              "expression": 1,
+              "cmd": "TEXT"
+            },
+            {
+              "item": "198",
+              "count": 1,
+              "cmd": "CHANGE_ITEM"
+            },
+            {
+              "text": "Obtained Crossing Writ. \"The guard will let you descend now. Coming back remains your responsibility.\"",
+              "speaker": "Registrar Celina",
+              "expression": 5,
+              "cmd": "TEXT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "instanceId": "event:a6952a13-b9c1-4816-a89d-85c6c9ba7c7f",
+      "x": 10,
+      "y": 14,
+      "name": "Euler",
+      "label": "Euler",
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC08.png",
+      "transparent": false,
+      "priority": "same",
+      "spawn": "Fixed",
+      "commands": [
+        {
+          "condition": "flag:dungeon_entered",
+          "commands": [
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "image": "campaign_lost_hound.png",
+              "text": "A scruffy caramel stray dog with floppy ears rests by the basin."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It sniffs Saban's bridle, wags its tail, and leans its warm weight against your knee."
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "greeted_euler",
+              "value": true
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "instanceId": "event:74dc4a9f-cdfc-4f86-9048-4ba9f84d2ee7",
+      "x": 12,
+      "y": 14,
+      "name": "Scholar",
+      "label": "Scholar Alchemist",
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC05.png",
+      "transparent": false,
+      "priority": "same",
+      "spawn": "Fixed",
+      "commands": [
+        {
+          "condition": "flag:found_cerberus",
+          "commands": [
+            {
+              "condition": "questStatus:lost_hound:completed",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar nods quietly. \"At least I know he found his place in the dark. Thank you for telling me.\""
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You tell the Scholar about the blue-flamed dark hound down on Floor 2, and the scent of recognition in its eyes."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar pauses, looking down at his unlit pipe. \"So he's still walking... and still keeping watch. Take care of him out there.\""
+                },
+                {
+                  "cmd": "QUEST_COMPLETE",
+                  "questId": "lost_hound"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar looks around the empty basin with an unlit pipe. \"Slipped away while I was boiling root tea. Have you seen him around the square?\""
+                },
+                {
+                  "cmd": "QUEST_OFFER",
+                  "questId": "lost_hound"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:greeted_euler",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Scholar sees Euler leaning against you. \"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "\"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [
+    {
+      "actor": "pixie",
+      "weight": 10
+    }
+  ],
+  "recruits": [],
+  "category": "town",
+  "generation": "Fixed",
+  "bgm": "",
+  "safe": true,
+  "fog": {
+    "preset": "night fog"
+  },
+  "lightObjects": [
+    {
+      "x": 14,
+      "y": 3,
+      "color": [
+        1,
+        0.58,
+        0.22
+      ],
+      "radius": 4,
+      "falloff": 2,
+      "material": "wall_torch"
+    },
+    {
+      "x": 15,
+      "y": 6,
+      "color": [
+        1,
+        0.58,
+        0.22
+      ],
+      "radius": 4,
+      "falloff": 2,
+      "material": "wall_torch"
+    },
+    {
+      "x": 4,
+      "y": 4,
+      "color": [
+        1,
+        0.58,
+        0.22
+      ],
+      "radius": 4,
+      "falloff": 2,
+      "material": "wall_torch"
+    },
+    {
+      "x": 5,
+      "y": 8,
+      "color": [
+        1,
+        0.58,
+        0.22
+      ],
+      "radius": 4,
+      "falloff": 2,
+      "material": "wall_torch"
+    },
+    {
+      "x": 12,
+      "y": 6,
+      "color": [
+        1,
+        0.58,
+        0.22
+      ],
+      "radius": 4,
+      "falloff": 2,
+      "material": "wall_torch"
+    },
+    {
+      "x": 9,
+      "y": 4,
+      "color": [
+        0.22,
+        1,
+        0.38
+      ],
+      "radius": 4.9,
+      "falloff": 2,
+      "material": "wall_torch"
+    }
+  ],
+  "anchors": [],
+  "light": [
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12127008834185193,
+        0.12757599165252734,
+        0.12535670619257744
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12230672353402292,
+        0.1213378996497333,
+        0.12050747917748504
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.13705909616030895,
+        0.20051263737902336,
+        0.15467850312120499
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.13676890134966818,
+        0.14275586871603788,
+        0.12864183689328093
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.19679788060471193,
+        0.17757267668396326,
+        0.14184821232939057
+      ],
+      [
+        0.15054214319394013,
+        0.20536151346272857,
+        0.1524319818970234
+      ],
+      [
+        0.15608637473372622,
+        0.28867593088271293,
+        0.19048356322006152
+      ],
+      [
+        0.17062294728642138,
+        0.35500068629755926,
+        0.21602977736268358
+      ],
+      [
+        0.17062294728642138,
+        0.35500068629755926,
+        0.21602977736268358
+      ],
+      [
+        0.15839309826774914,
+        0.28536687571212527,
+        0.182838490081194
+      ],
+      [
+        0.21057112244898388,
+        0.24017832143065393,
+        0.16563835733313303
+      ],
+      [
+        0.34387568253621564,
+        0.2628778018042354,
+        0.17420532875432138
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.34058982822017864,
+        0.2479421003677036,
+        0.1685297622084393
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.48590524330923623,
+        0.33311591359981746,
+        0.2008377749339475
+      ],
+      [
+        0.3515184659494042,
+        0.2976177264096382,
+        0.18740650010437443
+      ],
+      [
+        0.22959840102240114,
+        0.3266659513098234,
+        0.19850365668721742
+      ],
+      [
+        0.1930536347912245,
+        0.45052506101377643,
+        0.25605807902754685
+      ],
+      [
+        0.22092730871880412,
+        0.5868279371804213,
+        0.3084823965660409
+      ],
+      [
+        0.22092730871880412,
+        0.5868279371804213,
+        0.3084823965660409
+      ],
+      [
+        0.20653668182485568,
+        0.45073493628015576,
+        0.24567295987823212
+      ],
+      [
+        0.30106454336916116,
+        0.3681163138709442,
+        0.21422620800350461
+      ],
+      [
+        0.5100922697207618,
+        0.3895905325970256,
+        0.22229273693407314
+      ],
+      [
+        0.8002279912920803,
+        0.515423107429867,
+        0.26998877949017325
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.7989666977485782,
+        0.5188371622825008,
+        0.2712870430235877
+      ],
+      [
+        0.502739681118214,
+        0.4096360854588074,
+        0.22991544024036367
+      ],
+      [
+        0.3021180688882252,
+        0.42637147637641615,
+        0.23636856297439743
+      ],
+      [
+        0.2344103557524353,
+        0.5990217682509659,
+        0.3191217612836828
+      ],
+      [
+        0.2810861216060726,
+        0.8654989422929541,
+        0.42155422359053113
+      ],
+      [
+        0.29456916863970384,
+        0.8733191095724602,
+        0.42452049393793
+      ],
+      [
+        0.3079223820411102,
+        0.6292176367033199,
+        0.31346790391793267
+      ],
+      [
+        0.43361319049002894,
+        0.5026386469054623,
+        0.26529748972679423
+      ],
+      [
+        0.6342348027200178,
+        0.48590325598785356,
+        0.2588443669927605
+      ],
+      [
+        0.945990750325928,
+        0.6041111127773637,
+        0.3036323345906046
+      ],
+      [
+        0.92919173100853,
+        0.5893312039849473,
+        0.29802218082187665
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.8000033329407492,
+        0.5144019331056344,
+        0.2696007332469649
+      ],
+      [
+        0.8124497447822094,
+        0.5266573295620068,
+        0.2742533133709866
+      ],
+      [
+        0.5162227281518452,
+        0.4174562527383135,
+        0.23288171058776252
+      ],
+      [
+        0.3044247924222481,
+        0.42770937602614945,
+        0.23687604215188246
+      ],
+      [
+        0.2344103557524353,
+        0.6068668885775166,
+        0.33288513027763156
+      ],
+      [
+        0.28339284514009555,
+        0.8754318437428481,
+        0.4371406532946141
+      ],
+      [
+        0.35459814789474753,
+        0.9167309193405464,
+        0.4528058199006375
+      ],
+      [
+        0.44382386047300565,
+        0.7080404941938192,
+        0.3433662291729497
+      ],
+      [
+        0.6121222820670242,
+        0.6061739200201196,
+        0.3045694898737332
+      ],
+      [
+        0.5762517074068889,
+        0.45227306070623885,
+        0.24608808602387214
+      ],
+      [
+        0.5624497447822092,
+        0.3816573295620069,
+        0.21925331337098647
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.487987308491928,
+        0.3334326389253182,
+        0.20095720786822416
+      ],
+      [
+        0.34058982822017864,
+        0.2479421003677036,
+        0.1685297622084393
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.12230672353402292,
+        0.1213378996497333,
+        0.12050747917748504
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.25171977995313494,
+        0.19728834485327873,
+        0.1493169729956052
+      ],
+      [
+        0.48301358755120793,
+        0.3738848969386844,
+        0.21633542685677126
+      ],
+      [
+        0.30311042731107607,
+        0.36930292655725483,
+        0.21467630247072592
+      ],
+      [
+        0.20653668182485568,
+        0.45073493628015576,
+        0.24567295987823212
+      ],
+      [
+        0.2344103557524353,
+        0.6226017825683552,
+        0.36049020745454124
+      ],
+      [
+        0.3524224303206079,
+        0.6550276647054285,
+        0.3232579145394221
+      ],
+      [
+        0.5564274962151067,
+        0.6536716086265013,
+        0.32264893904408737
+      ],
+      [
+        0.8607490782077148,
+        0.6927333440773052,
+        0.3373568056679864
+      ],
+      [
+        0.9401203687377556,
+        0.639006830026882,
+        0.31689891871781173
+      ],
+      [
+        0.8515858282671412,
+        0.5452106528754024,
+        0.28128750362468663
+      ],
+      [
+        0.92919173100853,
+        0.5893312039849473,
+        0.29802218082187665
+      ],
+      [
+        0.8111796564403575,
+        0.5208842007354072,
+        0.2720595244168787
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ],
+      [
+        0.19351202628867492,
+        0.16263697524743145,
+        0.1361726457835085
+      ],
+      [
+        0.34058982822017864,
+        0.2479421003677036,
+        0.1685297622084393
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.5624784655626169,
+        0.3896674159595482,
+        0.22229794102012967
+      ],
+      [
+        0.37113197141411874,
+        0.33330361383043217,
+        0.2009617441054627
+      ],
+      [
+        0.22959840102240114,
+        0.3266659513098234,
+        0.19850365668721742
+      ],
+      [
+        0.18641271785407548,
+        0.4185062206714396,
+        0.31484996100097273
+      ],
+      [
+        0.3021180688882252,
+        0.42637147637641615,
+        0.23636856297439743
+      ],
+      [
+        0.5217669596916313,
+        0.49612371533797683,
+        0.2627807395944481
+      ],
+      [
+        0.8282387526006665,
+        0.5984255469186298,
+        0.30152523596650316
+      ],
+      [
+        0.932477585324567,
+        0.6042669054214791,
+        0.3036977473677587
+      ],
+      [
+        0.8513611699158101,
+        0.5441894785511698,
+        0.28089945738147826
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.8111796564403575,
+        0.5208842007354072,
+        0.2720595244168787
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.48896643927394207,
+        0.34703044071211675,
+        0.2061252952366212
+      ],
+      [
+        0.26242375933102935,
+        0.3308536950592814,
+        0.3167721532242981
+      ],
+      [
+        0.13936581969433187,
+        0.29617849556194925,
+        0.32067362884815076
+      ],
+      [
+        0.21057112244898388,
+        0.3374775711596474,
+        0.3363387954541742
+      ],
+      [
+        0.3515184659494042,
+        0.2976177264096382,
+        0.18740650010437443
+      ],
+      [
+        0.48896643927394207,
+        0.34703044071211675,
+        0.2061252952366212
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.5611796564403573,
+        0.3758842007354072,
+        0.2170595244168786
+      ],
+      [
+        0.48568058495790506,
+        0.3539790397047333,
+        0.2388432382155609
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.48568058495790506,
+        0.3598839188074419,
+        0.2492026752378567
+      ],
+      [
+        0.7976966094067263,
+        0.5565119624462235,
+        0.34531769089460684
+      ],
+      [
+        0.7976966094067263,
+        0.5130640334559011,
+        0.2690932540694798
+      ],
+      [
+        0.48568058495790506,
+        0.3320947392755849,
+        0.20044972869073913
+      ],
+      [
+        0.25149512160180376,
+        0.3289345725583943,
+        0.3816787548740602
+      ],
+      [
+        0.1347531353754831,
+        0.2929015223775434,
+        0.4046481755671868
+      ],
+      [
+        0.13348304703363117,
+        0.2871283935509437,
+        0.402454386613079
+      ],
+      [
+        0.1937366846400061,
+        0.16365814957166402,
+        0.13656069202671686
+      ],
+      [
+        0.25149512160180376,
+        0.19626717052904616,
+        0.14892892675239683
+      ],
+      [
+        0.25149512160180376,
+        0.2626168819072453,
+        0.26533192917029
+      ],
+      [
+        0.19351202628867492,
+        0.20608490423775386,
+        0.2123970826086355
+      ],
+      [
+        0.12,
+        0.147789179531857,
+        0.16875294654711756
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.34058982822017864,
+        0.2808922121616795,
+        0.22633697588208124
+      ],
+      [
+        0.48568058495790506,
+        0.3852803284559395,
+        0.2937577798843437
+      ],
+      [
+        0.48568058495790506,
+        0.41700563776388555,
+        0.34941621726670524
+      ],
+      [
+        0.34058982822017864,
+        0.3806095023970517,
+        0.4012795903301027
+      ],
+      [
+        0.19351202628867492,
+        0.3599809089884536,
+        0.4823900733993368
+      ],
+      [
+        0.12230672353402292,
+        0.37987813221169736,
+        0.5740868345493518
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12230672353402292,
+        0.3186818333907554,
+        0.46672490679331335
+      ],
+      [
+        0.13348304703363117,
+        0.2604875693088542,
+        0.35571609846906227
+      ],
+      [
+        0.13348304703363117,
+        0.21273106576780673,
+        0.27193275892336494
+      ],
+      [
+        0.12230672353402292,
+        0.1745234888300879,
+        0.2138155303710896
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12489638045018929,
+        0.12859014114068298
+      ],
+      [
+        0.12,
+        0.12806744300403888,
+        0.13415340877901558
+      ],
+      [
+        0.12,
+        0.1332892986289876,
+        0.14331455899822387
+      ],
+      [
+        0.12,
+        0.1418843004291484,
+        0.15839350952482176
+      ],
+      [
+        0.12,
+        0.15602112111246674,
+        0.1831949493201171
+      ],
+      [
+        0.25149512160180376,
+        0.25551101842387647,
+        0.25286550200648505
+      ],
+      [
+        0.25149512160180376,
+        0.29356642025803964,
+        0.319629364873438
+      ],
+      [
+        0.19351202628867492,
+        0.3219452015188691,
+        0.41566076204918856
+      ],
+      [
+        0.13348304703363117,
+        0.38636039984147014,
+        0.5765456257192657
+      ],
+      [
+        0.12,
+        0.5202461949702128,
+        0.8221863069652858
+      ],
+      [
+        0.12,
+        0.5202461949702128,
+        0.8221863069652858
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12,
+        0.27930822627143764,
+        0.3994881162656801
+      ],
+      [
+        0.12,
+        0.21729924972899345,
+        0.2907004381210412
+      ],
+      [
+        0.12,
+        0.17924384789483028,
+        0.22393657525408822
+      ],
+      [
+        0.12,
+        0.15602112111246674,
+        0.1831949493201171
+      ],
+      [
+        0.12,
+        0.1418843004291484,
+        0.15839350952482176
+      ],
+      [
+        0.12,
+        0.1332892986289876,
+        0.14331455899822387
+      ],
+      [
+        0.12,
+        0.12806744300403888,
+        0.13415340877901558
+      ],
+      [
+        0.12,
+        0.12489638045018929,
+        0.12859014114068298
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12230672353402292,
+        0.1213378996497333,
+        0.12050747917748504
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ],
+      [
+        0.13348304703363117,
+        0.12782016727950607,
+        0.12296627034739885
+      ],
+      [
+        0.12230672353402292,
+        0.28064612592117094,
+        0.39999559544316515
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12,
+        0.5202461949702128,
+        0.8221863069652858
+      ],
+      [
+        0.12,
+        0.5202461949702128,
+        0.8221863069652858
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12,
+        0.27930822627143764,
+        0.3994881162656801
+      ],
+      [
+        0.12,
+        0.21729924972899345,
+        0.2907004381210412
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.3173439337410221,
+        0.4662174276158283
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12,
+        0.37854023256196406,
+        0.5735793553718669
+      ],
+      [
+        0.12,
+        0.3173439337410221,
+        0.4662174276158283
+      ],
+      [
+        0.12,
+        0.2526674020293481,
+        0.3527498281216634
+      ],
+      [
+        0.12,
+        0.20491089848830066,
+        0.26896648857596606
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.27930822627143764,
+        0.3994881162656801
+      ],
+      [
+        0.12,
+        0.27930822627143764,
+        0.3994881162656801
+      ],
+      [
+        0.12,
+        0.2526674020293481,
+        0.3527498281216634
+      ],
+      [
+        0.12,
+        0.21729924972899345,
+        0.2907004381210412
+      ],
+      [
+        0.12,
+        0.1863497113781991,
+        0.2364030024178932
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.20491089848830066,
+        0.26896648857596606
+      ],
+      [
+        0.12,
+        0.21729924972899345,
+        0.2907004381210412
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.1863497113781991,
+        0.2364030024178932
+      ],
+      [
+        0.12,
+        0.16797161534635388,
+        0.20416072867781382
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.17924384789483028,
+        0.22393657525408822
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.1634479289903224,
+        0.19622443682512702
+      ],
+      [
+        0.12,
+        0.15295011179397588,
+        0.17780721367364194
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.15602112111246674,
+        0.1831949493201171
+      ],
+      [
+        0.12,
+        0.15602112111246674,
+        0.1831949493201171
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.1418843004291484,
+        0.15839350952482176
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.1418843004291484,
+        0.15839350952482176
+      ],
+      [
+        0.12,
+        0.1418843004291484,
+        0.15839350952482176
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.13421204619896837,
+        0.14493341438415502
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ],
+    [
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.1332892986289876,
+        0.14331455899822387
+      ],
+      [
+        0.12,
+        0.1332892986289876,
+        0.14331455899822387
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12908815427439707,
+        0.13594413030595978
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ],
+      [
+        0.12,
+        0.12,
+        0.12
+      ]
+    ]
+  ]
+}

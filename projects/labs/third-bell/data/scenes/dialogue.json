@@ -1,0 +1,17 @@
+{
+  "id": "dialogue",
+  "name": "Dialogue",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "config": {
+    "note": "Windows-drawn. Reached via scene_host.goto_scene(\"dialogue\") from map step/interact events and CALL_COMMON_EVENT chains. main.lua's handleKeyPressed dialogue branch drives GraphWalker advance/selectChoice directly (unchanged); a per-frame sync in love.update mirrors the active node into v.dialogue* fields these windows bind to, docked over the same footprint the party HUD uses elsewhere so dialogue doesn't take over the whole screen.",
+    "dock": {
+      "variant": "dialogue"
+    }
+  },
+  "hooks": {
+    "on_enter": []
+  },
+  "windows": []
+}

@@ -1,0 +1,93 @@
+{
+  "id": "nidhogg",
+  "name": "Nidhogg",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A deathly dragon unlocked by a forbidden black catalyst. It specializes in ruinous magic and dangerous creation.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Black",
+    "Black",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "darkside"
+  ],
+  "passives": [
+    "blackHunger"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 112,
+    "atk": 33,
+    "def": 28,
+    "mat": 35,
+    "mdf": 29,
+    "mpd": 8,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 107,
+      "atk": 33,
+      "def": 24,
+      "mat": 36,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 125,
+      "atk": 39,
+      "def": 28,
+      "mat": 42,
+      "mdf": 31
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 126,
+      "atk": 40,
+      "def": 30,
+      "mat": 42,
+      "mdf": 33
+    }
+  ],
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Nidhogg",
+  "bigBattler": "Nidhogg",
+  "defaultGrowthSeed": 831056546
+}

@@ -1,0 +1,93 @@
+{
+  "id": "fafnir",
+  "name": "Fafnir",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A legendary green dragon whose hunger has hardened into cunning. Its craft bends natural ingredients toward rare results.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Green",
+    "Green",
+    "Green"
+  ],
+  "skills": [
+    "windBlade",
+    "gardensGrace"
+  ],
+  "passives": [
+    "ancientGrowth"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 125,
+    "atk": 30,
+    "def": 34,
+    "mat": 31,
+    "mdf": 34,
+    "mpd": 7,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 118,
+      "atk": 28,
+      "def": 31,
+      "mat": 29,
+      "mdf": 31
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 138,
+      "atk": 33,
+      "def": 37,
+      "mat": 34,
+      "mdf": 37
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 139,
+      "atk": 34,
+      "def": 38,
+      "mat": 36,
+      "mdf": 38
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    182,
+    190
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Fafnir",
+  "bigBattler": "Fafnir",
+  "defaultGrowthSeed": 950731737
+}

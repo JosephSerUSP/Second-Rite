@@ -1,0 +1,169 @@
+{
+  "id": "golem",
+  "name": "Golem",
+  "favoriteFoods": [
+    171,
+    176,
+    182
+  ],
+  "level": 2,
+  "role": "Tank",
+  "smallBattler": "Golem",
+  "passives": [
+    "rearGuard",
+    "spellFrail"
+  ],
+  "elements": [],
+  "skills": [
+    "stoneFist"
+  ],
+  "flavor": "An animated statue, slow but incredibly durable.",
+  "expGrowth": 8,
+  "gold": 40,
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "talos"
+    }
+  ],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A massive Golem looms over you, raising its heavy stone fists!"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Battle Golem",
+          "commands": [
+            {
+              "cmd": "BATTLE",
+              "troop": "recruit_golem",
+              "onVictory": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Golem kneels in respect. 'I yield to your power. I shall be your shield.'"
+                },
+                {
+                  "cmd": "CHOICE",
+                  "options": [
+                    {
+                      "label": "Recruit Golem",
+                      "commands": [
+                        {
+                          "cmd": "OPEN_RECRUIT",
+                          "actorId": "golem",
+                          "level": 2
+                        },
+                        {
+                          "cmd": "ERASE_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "You leave the defeated creature behind."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Step Back",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You back away slowly from Golem."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 32,
+      "chance": 0.4
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [
+    {
+      "itemId": 32,
+      "chance": 0.8,
+      "count": 1
+    },
+    {
+      "itemId": 7,
+      "chance": 0.2,
+      "count": 1,
+      "minLevel": 5
+    }
+  ],
+  "names": [
+    "Rocky",
+    "Pebble",
+    "Titan",
+    "Granite",
+    "Block",
+    "Obsidian",
+    "Boulder",
+    "Clay"
+  ],
+  "baseParams": {
+    "maxHp": 70,
+    "atk": 16,
+    "def": 25,
+    "mat": 5,
+    "mdf": 8,
+    "mpd": 2,
+    "mxa": 3,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 85,
+      "atk": 19,
+      "def": 30,
+      "mat": 5,
+      "mdf": 7
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 115,
+      "atk": 28,
+      "def": 42,
+      "mat": 5,
+      "mdf": 8
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 130,
+      "atk": 32,
+      "def": 48,
+      "mat": 5,
+      "mdf": 9
+    }
+  ],
+  "portrait": "golem",
+  "bigBattler": "golem",
+  "defaultGrowthSeed": 774553846
+}

@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const Overlay = require('../js/environment-walk-surface-overlay.js');
+const DirectConsumer = require('../js/three-definition-consumer.js');
 
 function baseBundle() {
     return {
@@ -16,6 +17,15 @@ function baseBundle() {
             colors: [1,1,1,1, 1,1,1,1, 1,1,1,1]
         }]
     };
+}
+
+function directBundle() {
+    const bundle = baseBundle();
+    bundle.encoding = { kind: 'mesh-definitions-v1' };
+    bundle.definitions = [];
+    bundle.placements = [];
+    bundle.surfaces[0].transportOrder = 1;
+    return bundle;
 }
 
 const manifest = {
@@ -54,6 +64,19 @@ test('bundle augmentation adds read-only region/obstacle fills and boundaries', 
     assert.ok(inspection.every(surface => surface.source.kind === 'walk-surface-inspection'));
     assert.ok(inspection.every(surface => surface.source.readOnly === true));
     assert.ok(inspection.every(surface => surface.positions.length % 9 === 0));
+});
+
+test('direct instance transport appends inspection literals after authoritative draw order', () => {
+    const original = directBundle();
+    const augmented = Overlay.augmentBundle(original, manifest, 'fixture/environment.json');
+    assert.equal(original.surfaces[0].transportOrder, 1);
+    assert.deepEqual(augmented.surfaces.slice(1).map(surface => surface.transportOrder), [2, 3, 4, 5]);
+    const ordered = DirectConsumer.orderedRenderables(augmented);
+    assert.equal(ordered.length, 5);
+    assert.equal(ordered[0].value.id, 'base_surface');
+    assert.deepEqual(ordered.slice(1).map(entry => entry.value.source.surface), [
+        'walk-region', 'walk-region', 'walk-obstacle', 'walk-obstacle'
+    ]);
 });
 
 test('viewport installation replays the authoritative bundle without creating an editing path', () => {

@@ -77,3 +77,14 @@
 
     return { createInspectionRequester, DEFAULT_TIMEOUT_MS, BRIDGE_GRACE_MS };
 }));
+
+// Map inspection is the early browser entrypoint for spatial authoring support.
+// Load the read-only environment walk-surface adapter here so it can subscribe
+// to the viewport-ready event before the first runtime bundle arrives. Node
+// contract tests require this file directly; the browser-only guard keeps that
+// pure requester surface unchanged.
+if (typeof window !== 'undefined') {
+    import('/js/environment-walk-surface-studio.js').catch(error => {
+        console.error('Environment walk-surface Studio extension failed to load:', error);
+    });
+}

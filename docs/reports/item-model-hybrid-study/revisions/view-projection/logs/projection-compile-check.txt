@@ -1,0 +1,12 @@
+00:02.641  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\view-projection\source-project\assets\authoring\items\carved_capsule_projected.blend"
+Info: File exported successfully
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-7tmg7bxa\carved_capsule_projected.obj: vertices=10172 faces=20232 triangles=20232
+COMPILED ITEM SOURCE docs\reports\item-model-hybrid-study\revisions\view-projection\source-project\assets\authoring\items\carved_capsule_projected.blend -> C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-7tmg7bxa\carved_capsule_projected.obj
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+Writing to C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-7tmg7bxa\carved_capsule_projected.obj
+OBJ export of 'carved_capsule_projected.obj' took 55.83 ms
+
+Blender quit
++ C:\Program Files\Blender Foundation\Blender 5.2\blender.exe --background --factory-startup --python-exit-code 1 D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\view-projection\source-project\assets\authoring\items\carved_capsule_projected.blend --python D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\tools\blender\compile_item_blend.py
+RUNTIME OBJ OK C:\Users\josep\AppData\Local\Temp\second-rite-item-compile-7tmg7bxa\carved_capsule_projected.obj: vertices=10172 faces=20232 triangles=20232
+ITEM BLEND COMPILE OK: 1 source(s)

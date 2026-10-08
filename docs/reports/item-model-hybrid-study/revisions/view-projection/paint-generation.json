@@ -1,0 +1,54 @@
+{
+  "provider": "built-in imagegen",
+  "mode": "edit",
+  "transparentBackground": true,
+  "prompt": "Use case: precise-object-edit. Asset type: geometry-conditioned projection-paint sheet for a real 3D game item.\nINPUT 1 is the EDIT TARGET: a 1024-square transparent 2x2 sheet of exact renders of the ACTUAL saved mesh. INPUT 2 is the same exact views with flat part colours, a supporting geometric/material-ID guide. INPUT 3 is ONLY an art/material reference; its shapes are different and MUST NOT replace the edit target geometry.\nPaint materials onto INPUT 1, preserving its exact object positions, rotations, framing, scales, outer silhouettes, holes, visible component boundaries, diagonal straps, hanging tails and stitches. Output the same 2x2 order: front, right, back, top. Transparent background and identical cell spacing. No labels or text.\nReference-inspired materials: creamy worn carved bone with substantial but restrained brown pores and layered mottling; muted terracotta organic core with natural wrinkles and shallow irregular creases (not a bright cracked mosaic); dark walnut grain on the actual rear support; deep blue-indigo textile with woven construction, rolled edge seams and the existing stitches. Give broad forms readable value gradients and gentle cavity shadows. Keep local colours natural and moderately saturated, rich material definition without garish yellow bone or vivid orange checker cells.\nCRITICAL: This is surface paint on the exact existing mesh in input 1, not a redesign or four newly invented objects. Do not reshape the hooks, thicken/shrink any part, move a strap, change the core outline, fill any hole, add object parts, change camera angles, or invent geometry to copy input 3. Every internal material division must stay aligned with input 2. Preserve transparency. No rim lighting, cast ground shadow, glow, text, numerals or decorative runes.",
+  "inputs": [
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/view-projection/mesh-material-guide.png",
+      "sha256": "f0bb692997d2cc590dd0a11b5ab408894ba9656305337b7954fbc0fc4facb839",
+      "role": "edit target"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/view-projection/mesh-ids-guide.png",
+      "sha256": "5c0cf300a510df4fdd18d32a1e4ee54f9a5aa85f6c08b6c270169f88ac16e44f",
+      "role": "geometry/material-ID guide"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/reference-carved.png",
+      "sha256": "4dbe014b85e0b362cb671e1ff99ae71d7f0f717ba533945c4fc3757508b0ed39",
+      "role": "art direction only"
+    }
+  ],
+  "output": {
+    "originalFile": "C:\\Users\\josep\\.codex\\generated_images\\01a111e6-2b3c-7281-9302-7ca09dbf4e4c\\exec-37768cc4-6bbe-4467-8cff-ab77cfb26201.png",
+    "file": "mesh-paint-v1.png",
+    "sha256": "5cf3f90af0bacaf70a3f39a2f04b62c5ec8b8d14e9e74b5651cccb91362a7f0a",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  "fixedFrameSilhouetteCheck": [
+    {
+      "name": "front",
+      "silhouetteIoU": 0.525982798645203,
+      "actualSupportMissing": 0.160185325839283
+    },
+    {
+      "name": "right",
+      "silhouetteIoU": 0.5010132122882386,
+      "actualSupportMissing": 0.17827705397500665
+    },
+    {
+      "name": "back",
+      "silhouetteIoU": 0.541527543829923,
+      "actualSupportMissing": 0.16815432902089872
+    },
+    {
+      "name": "top",
+      "silhouetteIoU": 0.6612374492299445,
+      "actualSupportMissing": 0.006382055889460314
+    }
+  ]
+}

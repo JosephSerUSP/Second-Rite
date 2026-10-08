@@ -1,0 +1,59 @@
+{
+  "provider": "built-in imagegen",
+  "mode": "edit",
+  "prompt": "Use case: precise-object-edit. EDIT INPUT 1 as an existing rendered screenshot. INPUT 2 supplies exact material regions of the same mesh and the same screenshot layout. Add surface paint ONLY inside the existing objects; leave all background and layout pixels unchanged. This is a fixed opaque screenshot, not a transparent cutout or a product photograph. Preserve the complete square canvas, gray background, black cross-dividers and outer frame EXACTLY. Output the same full canvas without cropping, zooming, recentering or enlarging any object.\nThe four views are locked front/right/back/top views of one real 3D mesh. Retain every silhouette, gap, contour, occlusion, stitch, strap width, core outline and component boundary at its existing pixel position. Do NOT improve or redesign the geometry. Nothing may move to make room for textures. Keep object size exactly as input 1.\nChange only material appearance: warm cream carved bone with readable natural pores and layered mineral wear, muted terracotta core with organic wrinkles and shallow natural creases, dark walnut support grain, blue-indigo woven cloth with edge seams at the EXISTING stitches. Natural material values, moderate saturation, soft broad surface shading; no garish yellow, vivid orange mosaic, neon, metallic gloss or dramatic light. Keep both straps and wood projections in their exact existing positions.\nNo additional objects, embellishments, new stitches, runes, labels, text, shadows on the background or transparency. The frame and gray background must be preserved. This is texture painting onto the exact screenshot geometry. Pixel registration takes precedence over beauty.",
+  "transparentBackground": false,
+  "cameraOrthoScale": 4.0,
+  "renderSize": [
+    512,
+    512
+  ],
+  "inputs": [
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/view-projection/fixed-mesh-material-guide.png",
+      "sha256": "277913dbe7729d6ce90f06652eaf249c0b84b5c7c773860ab7a1aaef175d0832",
+      "role": "edit target"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/view-projection/fixed-mesh-ids-guide.png",
+      "sha256": "0daa00e085c7d46726f00bfaacf8cc41381c4e7729c7e5a98b299d7606232d5d",
+      "role": "material ID and shape guide"
+    }
+  ],
+  "output": {
+    "originalFile": "C:\\Users\\josep\\.codex\\generated_images\\01a111e6-2b3c-7281-9302-7ca09dbf4e4c\\exec-f4cb5177-cd90-494c-993d-6319f1516c7f.png",
+    "file": "mesh-paint-v2.png",
+    "sha256": "dddb30c72f45b87eaf137afb191b7a99d72ec938f13d995b1d9f99c9c074f396",
+    "size": [
+      1254,
+      1254
+    ]
+  },
+  "fixedFrameSilhouetteCheck": [
+    {
+      "name": "front",
+      "silhouetteIoU": 0.9787382820182243,
+      "actualSupportMissing": 0.014185255697762713,
+      "outsideActualSupport": 0.0072808271551580836
+    },
+    {
+      "name": "right",
+      "silhouetteIoU": 0.9715610362298059,
+      "actualSupportMissing": 0.021203171647780166,
+      "outsideActualSupport": 0.007551468793229718
+    },
+    {
+      "name": "back",
+      "silhouetteIoU": 0.9773855548721554,
+      "actualSupportMissing": 0.012933281570628362,
+      "outsideActualSupport": 0.00993524843683941
+    },
+    {
+      "name": "top",
+      "silhouetteIoU": 0.9624669054664382,
+      "actualSupportMissing": 0.028999820434548393,
+      "outsideActualSupport": 0.009048218989806437
+    }
+  ],
+  "silhouetteEstimation": "Nearest resize for measurement only; object chroma >=12 RGB range separates coloured material from gray background, including enclosed holes. Estimate, not semantic/internal correspondence proof."
+}

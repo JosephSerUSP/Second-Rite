@@ -45,7 +45,14 @@ async function capture(page, name) {
 }
 
 async function selectMap(page, index, packageFragment) {
-    await page.locator(`.map-tree-item[data-idx="${index}"]`).click();
+    // The golden-editor harness uses this same live global boundary. The map
+    // tree is workspace chrome and may be collapsed/absent depending on saved
+    // layout; currentMapIndex + loadActiveMap are the actual editor selection
+    // operation and therefore make the proof independent of incidental chrome.
+    await page.evaluate(expectedIndex => {
+        currentMapIndex = expectedIndex;
+        loadActiveMap();
+    }, index);
     await page.waitForFunction(({ expectedIndex, fragment }) => {
         const host = window.ThestraEditorHost;
         const viewport = window.ThestraRuntimeCameraViewport;

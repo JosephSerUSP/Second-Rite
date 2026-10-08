@@ -92,6 +92,75 @@ local ok,err=pcall(function()
     local sx,sy=camera.projectPoint({0,5,1},{position={0,-8,7},target={0,5,1},fov=43},256,240)
     near(sx,128);near(sy,120)
     assert(camera.projectPoint({0,-10,7},{position={0,-8,7},target={0,5,1},fov=43},256,240)==nil)
+
+    -- Renderer-level control for the generic baked-lighting seam. Avoid the
+    -- broad visual gate here: this pins the actual modelScene draw plumbing and
+    -- shader contract deterministically, without depending on a whole-scene
+    -- capture finishing on the host.
+    local moduleKey="presentation.scene_model_view"
+    local oldCamera=package.loaded[moduleKey]
+    local modelResource=require("presentation.model_resource")
+    local materialShader=require("presentation.mesh_material_shader")
+    local oldModelLoad=modelResource.load
+    local oldRasterCanvas=surface.newRasterCanvas
+    local oldMaterialSet=materialShader.set
+    local graphics=love.graphics
+    local graphicsNames={"newShader","getCanvas","push","setCanvas","setScissor","clear",
+        "setColor","setDepthMode","setMeshCullMode","setShader","draw","pop"}
+    local oldGraphics={}
+    for _,name in ipairs(graphicsNames) do oldGraphics[name]=graphics[name] end
+    local sentBaked={}
+    local shaderSource
+    local fakeShader={send=function(_,name,value)
+        if name=="bakedLighting" then sentBaked[#sentBaked+1]=value end
+    end}
+    local fakeCanvas={setFilter=function() end}
+    local fakeMesh={setTexture=function() end}
+    local bakedOk,bakedErr=pcall(function()
+        package.loaded[moduleKey]=nil
+        modelResource.load=function()
+            return {groups={{color={1,1,1},mesh=fakeMesh}}}
+        end
+        surface.newRasterCanvas=function() return fakeCanvas end
+        materialShader.set=function() end
+        graphics.newShader=function(source) shaderSource=source;return fakeShader end
+        graphics.getCanvas=function() return nil end
+        graphics.push=function() end;graphics.setCanvas=function() end;graphics.setScissor=function() end
+        graphics.clear=function() end;graphics.setColor=function() end;graphics.setDepthMode=function() end
+        graphics.setMeshCullMode=function() end;graphics.setShader=function() end;graphics.draw=function() end
+        graphics.pop=function() end
+        local renderCamera=require(moduleKey)
+        renderCamera.draw(0,0,32,32,{
+            camera={position={0,-4,2},target={0,0,0},fov=45},
+            models={
+                {model="live.obj",position={0,0,0}},
+                {model="baked.obj",position={0,0,0},bakedLighting=true},
+            },
+        },{})
+        assert(#sentBaked==2,"modelScene should bind bakedLighting once per drawn model")
+        assert(sentBaked[1]==0,"ordinary modelScene entities must retain directional relighting")
+        assert(sentBaked[2]==1,"baked modelScene entities must bypass directional relighting")
+        assert(shaderSource and shaderSource:find("uniform float bakedLighting",1,true),
+            "modelScene shader must declare the bakedLighting uniform")
+        assert(shaderSource:find("light=mix(light,1.0,bakedLighting)",1,true),
+            "modelScene shader must resolve baked lighting to an unmodified light multiplier")
+        local bakedErrors={}
+        renderCamera.validate({
+            camera={position={0,-4,2},target={0,0,0},fov=45},
+            models={{model="room.obj",bakedLighting="yes"}},
+        },function(valid,message) if not valid then bakedErrors[#bakedErrors+1]=message end end,
+            function() return true end,function() return true end)
+        local found=false
+        for _,message in ipairs(bakedErrors) do
+            if message=="modelScene bakedLighting must be a boolean" then found=true end
+        end
+        assert(found,"modelScene validation must reject non-boolean bakedLighting authoring")
+    end)
+    modelResource.load=oldModelLoad;surface.newRasterCanvas=oldRasterCanvas;materialShader.set=oldMaterialSet
+    for _,name in ipairs(graphicsNames) do graphics[name]=oldGraphics[name] end
+    package.loaded[moduleKey]=oldCamera
+    assert(bakedOk,bakedErr)
+
     local errors={}
     camera.validate({camera={},models="invalid"},function(valid,message)
         if not valid then errors[#errors+1]=message end

@@ -96,16 +96,18 @@ end
 -- The adapter is intentionally presentation-only and ephemeral: it is never
 -- stored on GameSession, never serialized, and never returned by engine.*.
 -- New presentation code must consume resolve()/environment()/actor() instead.
-local function legacyLane(view)
-    if not view or view.provider == "bounded_lane" then
-        return view and view.boundedLane or nil
-    end
-    local actor = view.actor
+local function legacyLane(raw)
+    if not raw or raw.provider == "bounded_lane" then return nil end
+    -- IMPORTANT: translate the provider's RAW actor pose. viewport_3d's legacy
+    -- townPlayerPose() still applies presentation.door_transition itself; using
+    -- resolve() here would decorate the pose once in this module and again in
+    -- the old viewport, doubling the approach offset/animation.
+    local actor = copyActor(raw.actor)
     if not actor then return nil end
     local z = tonumber(actor.z) or 0
     return {
         provider = "bounded_lane",
-        environment = view.environment,
+        environment = raw.environment,
         x = actor.x,
         y = actor.y,
         z = z,
@@ -132,14 +134,14 @@ local function legacyLane(view)
         walkFrameIndex = actor.frame or 0,
         facing = actor.facing or 1,
         doorways = {},
-        camera = view.camera,
+        camera = raw.camera,
     }
 end
 
 function traversal_view.legacyViewportSession(session)
-    local view = traversal_view.resolve(session)
-    if not view or view.provider == "bounded_lane" then return session end
-    local lane = legacyLane(view)
+    if session and session.townTraversal then return session end
+    local raw = traversal_host.presentationView(session)
+    local lane = legacyLane(raw)
     if not lane then return session end
     return setmetatable({ townTraversal = lane }, { __index = session })
 end

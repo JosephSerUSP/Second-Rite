@@ -754,6 +754,20 @@ function bundle.collect(session, profileName, options)
         end
     end
 
+    if options and options.includeActor then
+        local actor = require("presentation.animated_actor").resolve(session,
+            traversalView.resolve(session), options.actorClock or 0)
+        if actor then
+            for i, group in ipairs(actor.groups) do
+                local material = registerAssetMaterial(registry, group.texturePath, nil, {1,1,1,1})
+                local surface = newSurface(surfaces, "actor_"..i,
+                    {kind="actor", surface="character", character=actor.character,
+                        materialSlot=group.material, clip=actor.clip, time=actor.time}, material)
+                for _, v in ipairs(group.vertices) do pushVertex(surface, v) end
+            end
+        end
+    end
+
     local mapId = mapData.id or session.currentMapIndex or "runtime"
     local mapName = mapData.name or mapData.title or ("map_" .. tostring(mapId))
     local stats = summarize(surfaces, registry.list)

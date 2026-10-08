@@ -11,6 +11,7 @@ local function run()
     local bundle = require("presentation.map_renderable_bundle")
     local json = require("engine.data.json")
     loader.init()
+    require("tests.test_character_animation")
     require("engine.user_settings").pinForCapture()
     surface.setProfile("wide")
     view.init()
@@ -35,9 +36,13 @@ local function run()
             if math.max(r,g,b) > 0.02 then visible = visible + 1 end
         end end
         assert(visible > width * height * 0.1, "empty world capture " .. label .. " pixels=" .. visible)
+        local stats = view.getLastFrameStats()
+        assert(stats.dynamicByCategory.actor == 1, "native renderer lost animated character " .. label)
         captures[#captures+1] = {label = label, image = love.data.encode("string","base64",image:encode("png")),
             visiblePixels = visible, stats = view.getLastFrameStats(), actor = host.serialize(game)}
+        local hash = love.data.hash("sha256", image:getString())
         image:release(); canvas:release()
+        return hash
     end
     loader.system.dungeon = loader.system.dungeon or {}
     loader.system.dungeon.psxRendering = loader.system.dungeon.psxRendering or {}
@@ -55,17 +60,38 @@ local function run()
                     return previous[key]
                 end})
             end
-            local result = assert(bundle.collect(game, "authoring", {includeCollision=true}))
+            local result = assert(bundle.collect(game, "authoring", {includeCollision=true, includeActor=true}))
             local renderFound, collisionFound = false, false
             for _, item in ipairs(result.surfaces) do
                 renderFound = renderFound or item.source.kind == "environment" and item.source.surface == "render"
                 collisionFound = collisionFound or item.source.kind == "environment" and item.source.surface == "collision"
             end
             assert(renderFound and collisionFound, "collector lost environment or collision")
+            local actorFound = false
+            for _, item in ipairs(result.surfaces) do
+                if item.source.kind == "actor" then
+                    assert(#item.positions == 696*9, "collector lost character triangles")
+                    actorFound = true
+                end
+            end
+            assert(actorFound, "Studio collector lost the actual character")
             local prefix = "room-" .. mapId .. "-ss" .. scale
-            capture(game,prefix .. "-idle")
+            local idleHash = capture(game,prefix .. "-idle")
+            assert(capture(game,prefix .. "-idle-repeat") == idleHash, "idle capture repeat unstable")
+            love.timer.getTime = function() return 2.75 end
+            assert(capture(game,prefix .. "-idle-later") ~= idleHash, "idle clip does not move rendered pixels")
+            love.timer.getTime = function() return 1.25 end
             host.update(game,0.15,{left=true})
             capture(game,prefix .. "-walking")
+            host.update(game,0.15,{up=true,right=true})
+            local diagonal = host.serialize(game)
+            assert(diagonal.facingX > 0 and diagonal.facingY < 0, "diagonal heading lost")
+            capture(game,prefix .. "-diagonal")
+            host.update(game,0.1,{})
+            local actor = require("presentation.animated_actor")
+            assert(actor.resolve(game, require("presentation.traversal_view").resolve(game), 1.25).clip == "idle",
+                "stopped character still walks")
+            capture(game,prefix .. "-stopped")
             local raw = host.serialize(game)
             assert(door.begin(function() end,{actorDirection="away"}))
             door.update(0.12)
@@ -73,6 +99,13 @@ local function run()
             local after = host.serialize(game)
             assert(raw.x == after.x and raw.y == after.y, "presentation changed gameplay pose")
             while door.isActive() do door.update(1) end
+            -- Keep input held into the physical boundary. Motion must become
+            -- idle on the owner's resolved blocked fact, not input intent.
+            for _=1,120 do host.update(game,0.1,{left=true}) end
+            assert(not game.continuousTraversal.moving, "wall did not stop movement")
+            assert(actor.resolve(game, require("presentation.traversal_view").resolve(game), 1.25).clip == "idle",
+                "blocked character walks in place")
+            capture(game,prefix .. "-blocked")
         end
     end
     -- An actor/grid remnant must not satisfy native environment proof.

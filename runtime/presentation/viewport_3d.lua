@@ -1081,6 +1081,10 @@ end
 local PLAYER_IDLE_SPRITE = "assets/character/player.png"
 local PLAYER_WALK_SPRITE = "assets/character/walker.png"
 
+local function modelDirectionalLight(nx, ny, nz)
+    return math.max(0.35, 0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+end
+
 local function playerSpritePath(actor)
     if actor.moving then return PLAYER_WALK_SPRITE end
     return PLAYER_IDLE_SPRITE
@@ -2487,7 +2491,7 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
                 texture = texture,
                 vertices = {},
                 category = category,
-                presentationPass = category == "billboard" and "live" or "environment",
+                presentationPass = (category == "billboard" or category == "actor") and "live" or "environment",
             }
             textureGroups[category] = grp
         end
@@ -2964,8 +2968,7 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
                 -- independently of the placement's role or cache identity.
                 local light = bakedLighting
                     and { 1, 1, 1, 1 } or colorAt(wx, wy, wz, false)
-                local directional = bakedLighting and 1 or math.max(0.35,
-                    0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+                local directional = bakedLighting and 1 or modelDirectionalLight(nx, ny, nz)
                 vertices[#vertices + 1] = {
                     wx, wy, vertex[4], vertex[5],
                     modelGroup.color[1], modelGroup.color[2], modelGroup.color[3], modelGroup.color[4],
@@ -3371,12 +3374,36 @@ end
         end
     end
 
-    if traversalPresentation and traversalPresentation.actor then
+    local animatedActor = require("presentation.animated_actor")
+    if traversalPresentation and traversalPresentation.actor
+            and (not animatedActor.spec(session) or worldPass ~= "environment") then
         local pose = traversalPresentation.actor
-        local playerImage = getEventSprite({ sprite = playerSpritePath(pose) }, session)
-        if playerImage then
-            addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
-                pose.frame, pose.facing)
+        local animated = animatedActor.resolve(session,
+            traversalPresentation, love.timer.getTime())
+        if animated then
+            for _, source in ipairs(animated.groups) do
+                local target = group(require("presentation.mesh").texture(source.texturePath), "actor")
+                if #target.vertices == 0 then
+                    target.depth = viewport_3d.cameraSpaceDepth(pose.x, pose.y, pose.z + animated.height * 0.5,
+                        cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
+                    target.sequence = #surfaces + 1
+                    surfaces[#surfaces+1] = target
+                end
+                for _, v in ipairs(source.vertices) do
+                    local illumination = colorAt(v[1], v[2], v[3], false)
+                    local directional = modelDirectionalLight(v[6], v[7], v[8])
+                    target.vertices[#target.vertices+1] = {v[1], v[2], v[4], v[5],
+                        v[9], v[10], v[11], v[12], illumination[1]*directional,
+                        illumination[2]*directional, illumination[3]*directional, 1, v[3]}
+                end
+                target.model = true
+            end
+        else
+            local playerImage = getEventSprite({ sprite = playerSpritePath(pose) }, session)
+            if playerImage then
+                addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
+                    pose.frame, pose.facing)
+            end
         end
     end
 

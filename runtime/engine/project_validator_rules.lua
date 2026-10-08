@@ -252,6 +252,10 @@ function validator.run(loader)
             "common event '" .. tostring(id) .. "'")
     end
     for _, map in ipairs(loader.maps or {}) do
+        if map.traversal and map.traversal.actorAppearance then
+            local ok, err = pcall(require("presentation.animated_actor").validateSpec, map.traversal.actorAppearance)
+            check(ok, "map '"..tostring(map.id).."' actorAppearance: "..tostring(err))
+        end
         for eventIndex, event in ipairs(map.events or {}) do
             validateCommandTree(event.commands or event.script,
                 "map '" .. tostring(map.id or "?") .. "' event[" .. eventIndex .. "]")

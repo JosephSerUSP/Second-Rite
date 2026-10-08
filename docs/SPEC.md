@@ -2598,6 +2598,18 @@ not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
 
+The standalone continuous-surface gauntlet now consumes one deform-skinned
+player built by the external `chara-compiler`. A compiled skin resource retains
+its deform hierarchy, inverse binds, weights, UV0/material-slot identity and TRS
+clips. `presentation/character_animation.lua` is the single CPU posing consumer;
+its triangle groups use the existing world shader/depth/streaming mesh path and
+shared Model Instance placement. Studio receives those resolved triangles through
+the existing renderable bridge, with a fixed idle authoring sample. Maps select
+the resource through `traversal.actorAppearance` (character, height, stride),
+G1 validates it, and traversal supplies heading/travel facts without taking
+ownership of presentation. This experimental player does not convert the
+shipping roster or change battle animation ownership.
+
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 
 Sky art is authored against the canonical 256x240 composition and has no

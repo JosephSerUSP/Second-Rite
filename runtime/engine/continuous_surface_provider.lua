@@ -224,6 +224,9 @@ function provider.presentationView(session)
             frame = state.walkFrameIndex or 0,
             facing = state.facing or 1,
             moving = state.moving == true,
+            facingX = state.facingX,
+            facingY = state.facingY,
+            walkDistance = state.walkDistance,
         },
     }
 end

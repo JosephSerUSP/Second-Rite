@@ -9,6 +9,8 @@ on:
       - 'tools/blender/tests/test_environment_pipeline_walk_surface.py'
       - 'runtime/presentation/editor_renderable_bridge.lua'
       - 'runtime/presentation/traversal_view.lua'
+      - 'runtime/presentation/character_animation.lua'
+      - 'runtime/presentation/animated_actor.lua'
       - 'runtime/presentation/viewport_3d.lua'
       - 'runtime/presentation/map_renderable_bundle.lua'
       - 'runtime/presentation/world_pass_compositor.lua'

@@ -13,6 +13,10 @@ on:
       - 'runtime/engine/player_controller.lua'
       - 'runtime/presentation/continuous_surface_world.lua'
       - 'runtime/presentation/traversal_view.lua'
+      - 'runtime/presentation/character_animation.lua'
+      - 'runtime/presentation/animated_actor.lua'
+      - 'tools/characters/**'
+      - 'tests/test_character_animation.lua'
       - 'runtime/presentation/viewport_3d.lua'
       - 'runtime/presentation/map_renderable_bundle.lua'
       - 'runtime/presentation/world_pass_compositor.lua'
@@ -47,6 +51,10 @@ jobs:
         run: |
           python tools/blender/tests/test_environment_walk_surface.py
           if ($LASTEXITCODE -ne 0) { throw "walk-surface compiler contract failed (exit $LASTEXITCODE)" }
+          python tools/characters/test_compile_character.py
+          if ($LASTEXITCODE -ne 0) { throw "character compiler contract failed" }
+          python tools/characters/compile_character.py projects/experiments/continuous-surface-gauntlet/assets/authoring/characters/surveyor.glb --out projects/experiments/continuous-surface-gauntlet/assets/characters/surveyor --check
+          if ($LASTEXITCODE -ne 0) { throw "compiled character disagrees with GLB" }
           python tools/spikes/continuous-surface/build-fixture-sprites.py --check
           if ($LASTEXITCODE -ne 0) { throw "gauntlet raster fixtures disagree with source" }
 

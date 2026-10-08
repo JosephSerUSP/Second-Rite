@@ -91,6 +91,8 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             local result, collectErr = renderables.collect(vSession, "authoring", {
                 includeCollision = true,
                 includeEventModels = false,
+                includeActor = true,
+                actorClock = 0,
             })
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 

@@ -39,6 +39,11 @@
   ],
   "traversal": {
     "provider": "continuous_surface",
+    "actorAppearance": {
+      "character": "assets/characters/surveyor/character.json",
+      "height": 1.75,
+      "stride": 2.52
+    },
     "environmentPackage": "assets/environments/service_annex/environment.json",
     "spawnAnchor": "service_spawn",
     "interactionRadius": 1.15,

@@ -19,6 +19,9 @@ local function copyActor(actor)
         frame = tonumber(actor.frame) or 0,
         facing = tonumber(actor.facing) or 1,
         moving = actor.moving == true,
+        facingX = actor.facingX,
+        facingY = actor.facingY,
+        walkDistance = actor.walkDistance,
     }
 end
 
@@ -31,6 +34,12 @@ local function decorateActor(actor)
         actor.y = actor.y + (tonumber(pose.y) or 0)
         if pose.frame ~= nil then actor.frame = tonumber(pose.frame) or actor.frame end
         actor.moving = true
+        actor.animationPhase = actor.frame / 6
+        local dx, dy = tonumber(pose.x) or 0, tonumber(pose.y) or 0
+        if dx ~= 0 or dy ~= 0 then
+            local length = math.sqrt(dx^2 + dy^2)
+            actor.facingX, actor.facingY = dx / length, dy / length
+        end
     end
     return actor
 end
@@ -61,6 +70,9 @@ local function bounded(session)
         frame = state.walkFrameIndex or 0,
         facing = state.facing or 1,
         moving = state.moving == true or state.walking == true,
+        facingX = 0,
+        facingY = state.facing or 1,
+        walkDistance = state.walkDistance or 0,
     }
     return {
         provider = "bounded_lane",

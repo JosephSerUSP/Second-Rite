@@ -1,0 +1,117 @@
+name: continuous surface authoring
+
+on:
+  pull_request:
+    paths:
+      - 'tools/blender/town_environment_pipeline.py'
+      - 'tools/blender/semantics/**'
+      - 'tools/blender/tests/test_environment_walk_surface.py'
+      - 'tools/blender/tests/test_environment_pipeline_walk_surface.py'
+      - 'runtime/presentation/editor_renderable_bridge.lua'
+      - 'studio/editor/js/environment-walk-surface-overlay.js'
+      - 'studio/editor/js/environment-walk-surface-studio.js'
+      - 'studio/editor/js/map-inspection-request.js'
+      - 'studio/editor/tests/test-environment-walk-surface-overlay.js'
+      - 'studio/editor/capture-continuous-surface-proof.js'
+      - 'projects/experiments/continuous-surface-gauntlet/**'
+      - '.github/workflows/continuous-surface-authoring.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blender-authority:
+    name: Blender -> environment walkSurface
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      BLENDER_TESTS_REQUIRED: '1'
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Blender
+        uses: ./.github/actions/install-blender
+
+      - name: Pure semantic geometry contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python tools/blender/tests/test_environment_walk_surface.py
+          if ($LASTEXITCODE -ne 0) { throw "walk-surface semantic contract failed (exit $LASTEXITCODE)" }
+
+      - name: Canonical environment export owns walkSurface
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m unittest tools.blender.tests.test_environment_pipeline_walk_surface
+          if ($LASTEXITCODE -ne 0) { throw "canonical walk-surface export failed (exit $LASTEXITCODE)" }
+
+  studio-inspection:
+    name: Studio read-only walkSurface proof
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node workspace dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw "npm ci failed (exit $LASTEXITCODE)" }
+          node studio/editor/sync-three-vendor.js
+          if ($LASTEXITCODE -ne 0) { throw "Three vendor sync failed (exit $LASTEXITCODE)" }
+
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+        with:
+          add-to-path: 'true'
+
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
+
+      - name: Studio inspection contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node --test studio/editor/tests/test-environment-walk-surface-overlay.js studio/editor/tests/test-map-inspection-request.js
+          if ($LASTEXITCODE -ne 0) { throw "Studio walk-surface contracts failed (exit $LASTEXITCODE)" }
+
+      - name: Capture real Studio proof frames
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $out = Join-Path $env:RUNNER_TEMP 'continuous-surface-studio-proof'
+          $env:CONTINUOUS_SURFACE_VISUAL_OUT = $out
+          node studio/editor/capture-continuous-surface-proof.js
+          if ($LASTEXITCODE -ne 0) { throw "Studio visual proof failed (exit $LASTEXITCODE)" }
+          $expected = @(
+            '01-archive-perspective-walk-surface.png',
+            '02-archive-top-walk-surface.png',
+            '03-service-annex-top-walk-surface.png',
+            '04-service-annex-walk-vs-collision.png',
+            'proof.json'
+          )
+          foreach ($file in $expected) {
+            if (-not (Test-Path (Join-Path $out $file))) { throw "missing Studio proof output $file" }
+          }
+          "CONTINUOUS_SURFACE_PROOF=$out" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload Studio contact-sheet source frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuous-surface-studio-proof-${{ github.sha }}
+          path: ${{ env.CONTINUOUS_SURFACE_PROOF }}
+          if-no-files-found: error
+          retention-days: 14

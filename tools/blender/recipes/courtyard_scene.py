@@ -11,6 +11,7 @@ import bpy
 from mathutils import Vector
 import second_rite_asset_core as core
 import thestra_camera,render_profiles
+import source_tidy
 from first_stratum.common import box
 from architectural_assemblies import Window,window
 from opening_families import door,box_receiver
@@ -444,6 +445,16 @@ def build(output, *, map_data=None, profile_authority='data/maps/32.json'):
     scene.eevee.use_raytracing=True;scene.eevee.use_fast_gi=True;scene.eevee.fast_gi_method='AMBIENT_OCCLUSION_ONLY';scene.eevee.fast_gi_distance=3
     scene['courtyard_revision']=18;scene['authored_map']=json.dumps(map_data);scene['source_profile_authority']=profile_authority
     scene['authoring_paradigm']='connected closed building volumes with aperture-owned architectural assemblies; rich source / simple targets'
+    # The recipe places roofs a pantile at a time and windows a slat at a time. Keep the
+    # evaluated geometry and tidy the structure: join each repeated run into one object
+    # and file the pieces under their building part (see source_tidy.py).
+    before=source_tidy.geometry_summary(b.source)
+    joined=source_tidy.consolidate(b.source)
+    source_tidy.file_by_part(b.source)
+    bpy.context.view_layer.update()
+    if not source_tidy.summaries_match(before,source_tidy.geometry_summary(b.source)):
+        raise ValueError('Tidying the court source changed its geometry')
+    scene['source_tidy_groups']=len(joined);scene['source_tidy_pieces']=sum(joined.values())
     bpy.context.view_layer.update()
     counts={'both':0,'source':0,'receiver':0};source_triangles=0
     graph=bpy.context.evaluated_depsgraph_get()

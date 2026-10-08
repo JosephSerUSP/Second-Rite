@@ -185,8 +185,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 32,
-          "arrival": "cortico_entry"
+          "mapId": 34,
+          "arrival": "exit_door"
         }
       ],
       "direction": "away"

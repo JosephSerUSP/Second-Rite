@@ -285,7 +285,7 @@ SCREENS = {
               ("euler", "Euler", "npc_euler", 262.1214)],
         doors=[
             ("west_praca", "The Praca", 17, "east_backstreet", 49.9986, None, "left"),
-            ("lodging_door", "Passage House", 32, "cortico_entry", 344.0091, None, "away", 0.9),
+            ("lodging_door", "Passage House", 34, "exit_door", 344.0091, None, "away", 0.9),
             ("padaria_back", "The padaria's back door", 23, "exit_door", 438.6826, None, "away", 1.5),
             ("port_stair", "Down to the Port", 31, "cortico_stair", 600.7268, None, "away", 1.2),
             ("east_market", "Market Row", 18, "west_cortico", 723.5793, None, "right"),
@@ -392,7 +392,7 @@ SCREENS = {
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
         npcs=[],
-        doors=[("exit_door", "Out to the arrival court", 32, "lodging_entry", 404.0, None, "away")],
+        doors=[("exit_door", "Out to the gallery", 34, "room3_door", 404.0, None, "away")],
     ),
     "alicias_padaria": dict(
         pixels_per_y=PIXELS_PER_Y,
@@ -447,11 +447,11 @@ for _key, (_min_y, _max_y, _width) in SCREEN_CONTRACTS.items():
 #
 # tools/towngen/check_town.py gates this boundary: a hand-edit to an owned map
 # now fails CI instead of surviving until the next rebuild deletes it.
-# Authored 3D annex: only its registration is owned here. Its profile and events
-# live in data/maps/32.json; rebuilding the flat-plate town must preserve them.
-AUTHORED_TOWN_MAPS = {32: "passage_house_courtyard"}
+# Authored 3D annexes would be registered here. The Passage House court (map 32) was
+# retired when the Cortico door began entering the stair hall (map 34) directly.
+AUTHORED_TOWN_MAPS = {}
 AUTHORED_NOT_GENERATED = {"weaponsmith", "praca", "alicias_padaria"}
-AUTHORED_REFERENCE_MAPS = {17, 20, 27, 28, 29, 32}
+AUTHORED_REFERENCE_MAPS = {17, 20, 27, 28, 29, 34}
 
 # Written for NPCs that have no map-1 ancestor. Short, in register, and never
 # contradicting the authored dialogue that crosses over.

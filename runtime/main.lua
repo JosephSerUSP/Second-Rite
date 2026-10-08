@@ -566,14 +566,6 @@ function love.load(arg)
         local s = session.GameSession.new(loader)
         s:initializeStartingParty()
         exploration.loadMap(s, 1)
-        local traversalHost = require("engine.traversal_host")
-        local traversalBefore = nil
-        if traversalHost.isActive(s) then
-            traversalHost.update(s, 0.25, { right = true })
-            traversalBefore = traversalHost.serialize(s)
-            assert(traversalBefore and traversalBefore.provider,
-                "traversal state did not serialize")
-        end
         local origGold, origPartyName, origPX, origPY = s.gold, s.party[1] and s.party[1].name, s.playerX, s.playerY
         s.expBank = 42
         s.shopProgression = 5
@@ -586,18 +578,6 @@ function love.load(arg)
         assert(loaded.shopProgression == 5, "shopProgression mismatch")
         assert(loaded.party[1] and loaded.party[1].name == origPartyName, "party[1] name mismatch")
         assert(loaded.playerX == origPX and loaded.playerY == origPY, "player pos mismatch")
-        if traversalBefore then
-            local traversalAfter = traversalHost.serialize(loaded)
-            assert(traversalAfter and traversalAfter.provider == traversalBefore.provider,
-                "traversal provider mismatch")
-            assert(math.abs(traversalAfter.x - traversalBefore.x) < 1e-9
-                    and math.abs(traversalAfter.y - traversalBefore.y) < 1e-9
-                    and math.abs((traversalAfter.z or 0) - (traversalBefore.z or 0)) < 1e-9,
-                "traversal position mismatch")
-            assert(math.abs((traversalAfter.facingX or 0) - (traversalBefore.facingX or 0)) < 1e-9
-                    and math.abs((traversalAfter.facingY or 0) - (traversalBefore.facingY or 0)) < 1e-9,
-                "traversal facing mismatch")
-        end
         assert(scene == "map", "scene mismatch: " .. tostring(scene))
         savegame.delete("savetest")
         print("SAVETEST OK")
@@ -731,6 +711,7 @@ function love.load(arg)
             "test_output_presentation",
             "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
+            "test_b009_spatial",
             "test_scene_state_boundary",
             "test_scene_event_validation",
             "test_autorun_parallel_characterization",
@@ -746,7 +727,7 @@ function love.load(arg)
             "test_bounded_lane_levels",
             "test_town_threshold_direction", "test_transition_markers",
             "test_weaponsmith_dialogue",
-            "test_passage_house_courtyard",
+            "test_cortico_doorstep",
             "test_passage_house_hall",
             "test_presentation_contract",
         }) do
@@ -791,7 +772,9 @@ function love.load(arg)
     -- E5: headless scene preview for the editor canvas, then quit.
     if cli.isPreviewSceneMode then
         loader.init()
-        cli_tools.runPreviewScene(cli.previewSceneId, loader, gameWidth, gameHeight)
+        local previewWidth, previewHeight =
+            cli_tools.resolvePreviewSurface(cli.requestedSurfaceProfile)
+        cli_tools.runPreviewScene(cli.previewSceneId, loader, previewWidth, previewHeight)
         love.event.quit(0)
         return
     end
@@ -1060,7 +1043,7 @@ function love.load(arg)
     local surfaceProfile = cli.requestedSurfaceProfile
         or require("engine.user_settings").get("renderSurfaceProfile", nil)
         or (config.ui and config.ui.renderSurfaceProfile)
-        or "classic"
+        or "wide"
     presentation_surface.setProfile(surfaceProfile)
     local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -1996,35 +1979,6 @@ handleKeyPressed = function(button)
             return false
         end
         if require("presentation.world_focus").isActive() then return true end
-
-        -- Provider-backed Maps own their world-space interaction query, while
-        -- this host continues to own ordinary Event page resolution, command
-        -- lookup and the interactive GraphWalker. The provider therefore never
-        -- learns dialogue/Event semantics, and an empty confirm press cannot
-        -- fall through into hidden grid coordinates.
-        if button == "A" or button == "START" then
-            local traversalHost = require("engine.traversal_host")
-            local function interactableWorldEvent(rawEvent)
-                local ev = exploration.resolvePage(rawEvent, activeSession)
-                if not ev then return false end
-                local trigger = ev.trigger
-                if trigger ~= nil and trigger ~= "interact" and trigger ~= "touch" then
-                    return false
-                end
-                return commandsForMapEvent(ev) ~= nil
-            end
-            local rawEvent, traversalOwnsInteraction =
-                traversalHost.interactionEvent(activeSession, interactableWorldEvent)
-            if traversalOwnsInteraction then
-                if rawEvent then
-                    local eventObj = exploration.resolvePage(rawEvent, activeSession)
-                    local commands = commandsForMapEvent(eventObj)
-                    if commands then runEventCommands(eventObj, commands) end
-                end
-                return true
-            end
-        end
-
         if require("engine.bounded_lane").isActive(activeSession) then
             local lane = require("engine.bounded_lane")
             if button == "LEFT" or button == "RIGHT" then

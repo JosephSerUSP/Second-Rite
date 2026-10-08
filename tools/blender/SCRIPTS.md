@@ -107,10 +107,11 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [study_house_grammar.py](study_house_grammar.py) | `run.py` | Photograph the first grammar-generated building as CLAY, against the real camera. |
 | [study_town_perspective.py](study_town_perspective.py) | `run.py` | Compare level/pitched town cameras on an exterior and an interior. |
 
-## Recorded source surgery and migrations (13)
+## Recorded source surgery and migrations (15)
 
 | Script | Run with | Purpose |
 |---|---|---|
+| [add_passage_house_mark.py](add_passage_house_mark.py) | `run.py` | Give the Passage House one mark (leaf, azulejo plaque, lantern) on both its Praca and Cortico faces as a new island source revision. |
 | [add_registry_gate.py](add_registry_gate.py) | `run.py` | Cut the Passage House gate into the Registry's public back wall as a new source revision. |
 | [define_registry_bay.py](define_registry_bay.py) | `run.py` | Fix counter support and add a wall-connected timber service screen. |
 | [enrich_registry_source.py](enrich_registry_source.py) | `run.py` | Edit the Registry document: tactile finishes, coherent windows, selected props. |
@@ -121,6 +122,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [open_registry_plan.py](open_registry_plan.py) | `run.py` | Remove the detached masonry frame from an existing Registry source revision. |
 | [probe_registry_shell.py](probe_registry_shell.py) | `run.py` | Read-only probe of the recorded Registry shell experiment. |
 | [reauthor_praca_spiral.py](reauthor_praca_spiral.py) | `run.py` | Re-author st_maria_praca.blend for the spiral layout. |
+| [rebuild_island_exteriors.py](rebuild_island_exteriors.py) | `run.py` | Rebuild every St. Maria island building with the house grammar (same footprints, doors and base heights) as a new island source revision. |
 | [refine_registry_cabinet.py](refine_registry_cabinet.py) | `run.py` | Edit the retained Registry: larger records press and a public-side woven runner. |
 | [refine_registry_materials.py](refine_registry_materials.py) | `run.py` | Refine the existing Registry source: book silhouettes and material hierarchy. |
 | [revise_registry_source.py](revise_registry_source.py) | `run.py` | Edit an existing Registry document into the recessed service-hatch study. |

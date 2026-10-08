@@ -8,11 +8,11 @@
       "registrarY": 4.5833,
       "registrarX": 1.15
     },
-    "passage_office_r17.blend": {
+    "passage_office_r18.blend": {
       "status": "reference",
-      "basis": "Revision 17 (2026-10-05): r13 plus the Passage House gate (tools/blender/add_registry_gate.py, run on r13) with the public entrance moved right of the gate (tools/blender/move_registry_exit.py, shift -1.9 Blender Y; entrance now at engine lane Y 2.9833). Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit.",
-      "sha256": "c6ac7e714615cc0f409c57b0dbdd3a0867f1611be357a12f3da469eb24df0c3c",
-      "exitY": 2.9833
+      "basis": "Revision 18 (2026-10-05): r13 plus the Passage House gate (tools/blender/add_registry_gate.py, run on r13), with the public entrance moved to the far right of the lane (tools/blender/move_registry_exit.py, total shift -3.6 Blender Y; entrance at engine lane Y 6.5833) so the interactables spread out. Byte-identical to the adopted assets/authoring/environments/passage_office.blend, which is the source to edit.",
+      "sha256": "9e55dd6ee7320b6df1185305a501a33a9381e173451a600b1f07b96c9d6f8585",
+      "exitY": 6.5833
     }
   }
 }

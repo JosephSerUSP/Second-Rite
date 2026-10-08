@@ -19,6 +19,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | `battle` | battle | windows | - | 10 | 8 |
 | `cinematic` | menu | windows | - | 0 | 2 |
 | `controls` | menu | windows | - | 2 | 6 |
+| `crt_options` | menu | windows | - | 3 | 7 |
 | `datalog` | menu | windows | - | 3 | 4 |
 | `developer_3d` | menu | windows | - | 3 | 5 |
 | `developer_geometry_export` | menu | windows | - | 2 | 3 |
@@ -39,7 +40,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 
 ## Registry (authored resource: engine)
 
-- commands: **100**
+- commands: **101**
 - effect types: **17**
 - trait codes: **42**
 - meta keys: **8** (tier, disciplines, intensityGrade, craftable, craftIngredient, dungeonOnly, detect, detectLevel)
@@ -86,7 +87,7 @@ The registry below is the closed semantic trigger vocabulary exposed by Studio.
 - item-creation disciplines across the roster: alchemyx15, blacksmithingx15, cookingx18, tinkeringx17
 - items: **207** (consumablex66, equipmentx124, questx17)
 - skills: **47**, passives: **41**, states: **14**, roles: **13**, elements: **5**
-- maps: **41**, common events: **23**, shops: **8**, quests: **5**, lore entries: **3**
+- maps: **40**, common events: **23**, shops: **8**, quests: **5**, lore entries: **3**
 - animations: **29**, tilesets: **15**
 
 ## Notes for agents

@@ -694,6 +694,24 @@
                         'number', !!spec.readOnly, spec.inputId, true, markDirty);
                     if (spec.step !== undefined) input.step = spec.step;
 
+                } else if (spec.kind === 'json') {
+                    const group = document.createElement('div');
+                    group.className = 'form-group';
+                    const label = document.createElement('label');
+                    label.textContent = spec.label;
+                    const input = document.createElement('textarea');
+                    input.className = 'form-control inset-bevel';
+                    input.rows = spec.rows || 10;
+                    input.setAttribute('aria-label', spec.label);
+                    input.value = JSON.stringify(readValue(spec) || {}, null, 2);
+                    input.oninput = () => {
+                        try {
+                            const value = JSON.parse(input.value);
+                            if (!value || Array.isArray(value) || typeof value !== 'object') throw Error('Expected an object');
+                            writeValue(spec, value); input.setCustomValidity(''); markDirty(true);
+                        } catch (error) { input.setCustomValidity(error.message); }
+                    };
+                    group.append(label,input);container.appendChild(group);
                 } else if (spec.kind === 'textarea') {
                     const group = document.createElement('div');
                     group.className = 'form-group';

@@ -2093,6 +2093,7 @@ handlers.RESET_SESSION = function(cmd, ctx)
     fresh:initializeStartingParty()
     _G.activeSession = fresh
     ctx.session = fresh
+    ctx.party = fresh.party
     present("clearStringPictures")
     present("disableEventSkip")
     present("rebindSession", fresh)
@@ -3041,6 +3042,11 @@ local function buildScriptApi(ctx)
         end,
     }
     return api
+end
+
+handlers.READ_INPUT = function(cmd, ctx)
+    assert(ctx.sceneState,"READ_INPUT requires a Scene")
+    ctx.sceneState[cmd.name or "input"] = require("engine.player_controller").snapshot()
 end
 
 handlers.SCRIPT = function(cmd, ctx)

@@ -43,8 +43,8 @@
       }
     },
     "passage_house_room3.blend": {
-      "status": "scaffold",
-      "basis": "Written by recipes/passage_house_room3.py (regenerated to the Classic 256 preset at 689ccb83); no shipped package is baked from it, and no adoption is recorded.",
+      "status": "adopted",
+      "basis": "Rebuilt in 4df0e2aa1 and shipped on map 25 by c616ee976 on 2026-10-05; passage_house_room3/environment.json cites this source. Edit the shipped source directly; never regenerate it.",
       "eevee": {
         "exposureEV": 0.0,
         "probeCells": 2,
@@ -75,8 +75,8 @@
       }
     },
     "passage_house_courtyard.blend": {
-      "status": "scaffold",
-      "basis": "Revision 18 visually approved by owner and promoted on 2026-10-01. Scaffold recipe retained; source profile authority is data/maps/32.json. Shipping source geometry and atlas match the approved study; further foreground refinement remains issue 1308.",
+      "status": "superseded",
+      "basis": "Retired 2026-10-05. The Arrival Court (map 32) left the live route when the Cortico door began entering the Passage House stair hall (map 34) directly; its map and shipped package were removed. Kept as the reference for the court's masonry and window assemblies; do not write it.",
       "eevee": {
         "exposureEV": 0.0,
         "supersample": 2,
@@ -84,12 +84,13 @@
         "emissiveLights": false,
         "fixtureLights": false,
         "basis": "EEVEE at neutral exposure with authored dusk sun, sky and lamps attached to visible lantern fixtures; automatic lighting shims disabled."
-      }
+      },
+      "supersededBy": "passage_house_stair_hall.blend"
     },
     "passage_office.blend": {
       "status": "adopted",
-      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; r16 added the Passage House gate (tools/blender/add_registry_gate.py) and r17 moved the public entrance right of it (tools/blender/move_registry_exit.py), approved and promoted on 2026-10-05. Byte-identical copy of preserved candidate passage_office_r17.blend. Edit directly; never regenerate.",
-      "sha256": "c6ac7e714615cc0f409c57b0dbdd3a0867f1611be357a12f3da469eb24df0c3c"
+      "basis": "Owner approved r13 and authorized game integration on 2026-10-02; r16 added the Passage House gate (tools/blender/add_registry_gate.py) and r18 moved the public entrance to the far right of the lane (tools/blender/move_registry_exit.py), approved and promoted on 2026-10-05. Byte-identical copy of preserved candidate passage_office_r18.blend. Edit directly; never regenerate.",
+      "sha256": "9e55dd6ee7320b6df1185305a501a33a9381e173451a600b1f07b96c9d6f8585"
     },
     "st_maria_core.blend": {
       "status": "adopted",
@@ -111,8 +112,8 @@
       "basis": "Owner chose this church over the rectangular chapel on 2026-10-04 (\"massively better\") and asked for it to be promoted onto map 22 as a pre-rendered plate with a pew foreground, in the 'vigil' grade, from the oblique runtime camera. Shipped plate and foreground are rendered from this document (tools/blender/stage_room_model.py, then build_layered_package.py). Edit the adopted source directly; never regenerate it."
     },
     "passage_house_stair_hall.blend": {
-      "status": "scaffold",
-      "basis": "Written by recipes/passage_house_stair_hall.py (layout doc section 5.1); no shipped package is baked from it, and no adoption is recorded.",
+      "status": "adopted",
+      "basis": "Shipped on map 34 by c616ee976 on 2026-10-05; passage_house_hall/environment.json cites this source. It replaces the Arrival Court on the live route (f6b17a447). Edit the shipped source directly; never regenerate it.",
       "eevee": {
         "exposureEV": 0.0,
         "probeCells": 4,

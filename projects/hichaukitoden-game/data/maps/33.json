@@ -181,7 +181,7 @@
       "y": 0,
       "worldPosition": [
         0.0,
-        2.9833,
+        6.5833,
         0.0
       ],
       "trigger": "bump",
@@ -198,7 +198,7 @@
     {
       "id": 3303,
       "instanceId": "st-maria-passage-office-gate_door",
-      "name": "Passage House gate",
+      "name": "Stair down to the Passage House",
       "x": 0,
       "y": 0,
       "worldPosition": [

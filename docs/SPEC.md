@@ -392,6 +392,31 @@ disagree about what a correction means.
   and player paths. `expand` errors on unknown specs; the validator gates
   every spec in data.
 
+Authored Scene windows may use the registry style `modelScene` with a
+`viewport` definition: a perspective camera (position, target, fov), and a
+list of Model references with formula-bound position, scale, yaw, tint and
+visibility. `presentation/scene_model_view.lua` consumes those resolved
+transforms through the shared Model acquisition and mesh-material shader
+seams. It never updates gameplay state. Studio edits the definition through
+the schema form layer; native Scene preview renders it. G1 rejects missing
+viewport definitions/assets and malformed transform expressions.
+
+The optional `labels` list projects formula-bound world positions through the
+same camera basis, displaying resolved values such as damage without mutating
+the encounter. Scene windows can use `chrome: "overlay"` for a compact
+translucent gradient shell. Gauge blocks support `labelPlacement: "right"`
+or `"none"` and an authored tile-unit `height`; existing gauges retain their
+standard label-above-bar geometry.
+Gauge color components may be formulas, allowing authored full-AT flashing
+without changing the resolved gauge value or introducing another clock.
+
+`READ_INPUT` copies the canonical logical controller's held-button snapshot
+into a named Scene-state table. Real-time authored Scenes can normalize motion
+using `sqrt` and `time.dt` without depending on menu-repeat intervals or
+accessing device keys. Direction edges and held state remain one controller.
+B009 uses this seam for its independent lab encounter; production Battle is
+unchanged.
+
 ### 1.3 Project authored-data boundary (13.08.2026)
 
 - **A runnable authored game is one Project.** `data/` inside the opened Project
@@ -2652,3 +2677,12 @@ ZIP that has travelled to a tester. Unavailable git metadata is reported as
 unknown rather than failing the build — an export from a source drop is still a
 valid export — and the manifest carries no absolute paths, environment, or
 machine identity, which is asserted by test rather than left to reviewer care.
+
+Scene window geometry formulas can read `surface.width`, `surface.height`,
+`surface.originX` and `surface.originY` in tile units. These are read-only
+presentation projections of the active surface; a full-surface window uses
+`x=-surface.originX`, `y=-surface.originY`, `w=surface.width`, `h=surface.height`.
+Normal desktop play defaults to Wide (426x240, the existing integer-centred
+16:9 approximation) unless an explicit CLI, saved player or Project preference
+overrides it. Native Scene previews use the CLI or Project profile, defaulting
+to Wide, and do not inherit machine-specific saved preferences.

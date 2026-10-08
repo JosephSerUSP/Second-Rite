@@ -10,6 +10,7 @@ if not _G.love then
 end
 
 local session = require("engine.session")
+local inventory = require("engine.inventory")
 local loader = require("engine.data.loader")
 local targeting = require("engine.targeting")
 local usability = require("engine.usability")
@@ -139,6 +140,39 @@ test("Detailed effect feedback for stat-up and skill learning", function()
     assert(ctx.sceneState.popupText:find("ATK rises by 2"), "Feedback text should include stat boost details: " .. tostring(ctx.sceneState.popupText))
 end)
 
+test("carriedRows expands units, collapses authored stacks, keeps worn equipment, and preserves moves", function()
+    local items = {
+        [1] = { id = 1, name = "Tonic", icon = 1, type = "item", description = "heal" },
+        [2] = { id = 2, name = "Ammo", icon = 2, type = "item", description = "rounds",
+            meta = { carriedStack = true } },
+    }
+    local armor = { id = 6, name = "Bone Plate", icon = 6, type = "equipment", description = "armor" }
+    local fake = {
+        inventory = { [1] = 2, [2] = 12 },
+        loader = { getItem = function(id) return items[id] end },
+        party = { { equipment = { [2] = armor } } },
+    }
+
+    local rows = inventory.carriedRows(fake)
+    assert(#rows == 4, "two ordinary units + one authored stack + worn equipment should make four rows")
+    assert(rows[1].key == "item:1:1" and rows[2].key == "item:1:2",
+        "ordinary quantities should occupy one stable row per unit")
+    assert(rows[3].key == "item:2:1" and rows[3].qty == 12,
+        "carriedStack should collapse the authored quantity into one row")
+    assert(rows[4].key == "equip:1:2" and rows[4].equipped == true,
+        "worn equipment must stay visible in the carried projection")
+
+    inventory.moveCarried(fake, 4, 1)
+    local moved = inventory.carriedRows(fake)
+    assert(moved[1].key == "equip:1:2" and moved[4].key == "item:2:1",
+        "moveCarried should persist row order by stable key")
+    assert(fake.inventory[1] == 2 and fake.inventory[2] == 12,
+        "moving carried rows must never mutate authoritative quantities")
+
+    local ok = pcall(function() inventory.moveCarried(fake, 0, 1) end)
+    assert(not ok, "moveCarried should reject out-of-range indices")
+end)
+
 test("Actor Change reports a permanent stat item without requiring a level-up", function()
     local sess = session.GameSession.new(loader)
     local hero = sess:recruitActor("pixie", 1)
@@ -184,6 +218,20 @@ test("Actor Change reports skillbook learning as durable development", function(
     assert(#changes[1].learnedSkills == 1 and changes[1].learnedSkills[1] == "Wind Blade",
         "Actor Change should name the learned skill")
     assert(changes[1].noteText:find("Wind Blade"), "presentation note should mention Wind Blade")
+end)
+
+test("Actor Change ignores equipment", function()
+    local sess = session.GameSession.new(loader)
+    local hero = sess:recruitActor("pixie", 1)
+    local traits = require("engine.traits")
+    local hp0 = traits.getParam(hero, "maxHp", sess)
+    sess:addItem(6, 1) -- Bone Plate (Armor)
+    local before = progress.snapshot(sess)
+    interpreter.runImmediate({ { cmd = "EQUIP_ITEM", slot = 2, target = 1, itemIndex = 2 } },
+        { session = sess, loader = loader, sceneState = {} })
+    assert(hero.equipment[2] and hero.equipment[2].id == 6, "control: the armor is worn")
+    assert(traits.getParam(hero, "maxHp", sess) == hp0 + 3, "control: the armor's +3 max HP applies")
+    assert(#progress.changes(sess, before) == 0, "putting on armor must not be reported as Actor Change")
 end)
 
 test("Actor Change ignores ordinary HP healing", function()

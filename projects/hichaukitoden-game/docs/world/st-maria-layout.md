@@ -187,7 +187,7 @@ end of the day. She is the only person in St. Maria who commutes, and now the
 map says so.
 
 **The player's first civic loop** begins in Passage House Room 3. The player
-leaves along the gallery, walks down the stair to the Arrival Court, goes
+leaves along the gallery, walks down the stair and out the great door, goes
 out to the Cortiço, reaches the Praça, and registers at the Registry (§5.1). Only then are preparation and descent meaningful choices:
 Churchyard and the Gate are uphill; Market Row/Padaria and the Port/forge are
 below. The first trip therefore teaches a useful mental map instead of asking the
@@ -209,7 +209,7 @@ Independent of the shape above, and true under any layout:
 | 23 Laura's House (off Backstreet) | retired as a separate house; Laura sleeps in the padaria's attached home |
 | 27 Padaria (off Market) | the shop half of the same building |
 | 20 Weaponsmith | Laura's forge, re-sited to the Port |
-| 25 Passage House | **Room 3**, one apartment of the Passage House, reached through its Arrival Court on the Cortiço |
+| 25 Passage House | **Room 3**, one apartment of the Passage House, reached from the gallery of the stair hall, whose great door opens on the Cortiço |
 | 33 Passage Office | the **Registry** floor of the same Passage House, entered from the Praça |
 | Registrar previously copied into Room 3 | removed; registration belongs only to the Registry floor (map 33) |
 
@@ -236,12 +236,13 @@ second way out.
 ```
  PRAÇA side (high)                                       CORTIÇO side (mid)
 
- street ──> [33 Registry] ── iron gate ──┐   (locked until the Crossing Writ)
-                                          │
- upper floor        gallery: Room 2 · ROOM 3 · Room 4 ──┘                 <──┐
- (Praça level)             ^ stair (walked, one storey)                        │
- ground floor    service rooms (shut)   post wall · stair foot · great door ─> [32 Arrival Court]
- (Cortiço level)                                                           ─> street [26 Cortiço]
+ Praça (z 14.07) ──> [33 Registry] ── back-door stair down ──┐
+                       (cellar, z 11.3)                         │ the PASSAGE: level, under the
+                                                                │ Praça terrace, ~10 m
+ gallery level (z 11.3)    gallery: Room 2 · ROOM 3 · Room 4 ───┘ (iron gate, locked until the Crossing Writ)
+ (one storey above the street)  ^ stair (walked, one storey)                   <──┐
+ ground floor    service rooms (shut)   post wall · stair foot · great door ─> street [1001 Cortiço]
+ (Cortiço street, z 8.1)                                                    street door ─> same street, 3 m along
 
                   [34 Stair hall] is the whole of this, one screen, one continuous walk
                   [25 Room 3]  is entered from its gallery door
@@ -250,23 +251,29 @@ second way out.
 | # | Screen | Floor | Role | Axis spent (interior brief §4b) |
 |---|--------|-------|------|------|
 | 33 | **Registry** | Praça level | Public floor. Celina, the ledger, the Crossing Writ. Front door to the Praça. | already authored; unchanged |
-| 32 | **Arrival Court** | Cortiço level | The house's lower yard; its covered entry is the great door of the stair hall. | already authored; unchanged |
 | 34 | **Stair hall** (new) | both | One double-height room with two walkable lanes. Ground: the great door to the court, a post wall of lodgers' letters (some never collected), a bench, a water stand, the shut service doors, and a street door at the far end. A masonry stair stands behind the lane, linking ground to gallery. Gallery: a terracotta deck on a stone arcade, three apartment doors (Room 3's the only one lit, with traces of the others' tenants: boots, a coat, a strapped trunk, straw), and at the far end a **wrought-iron gate with the Registry visible through it**. | **Floor level, taken to a storey** — the stair, the deck and the balustrade carry the second level |
 | 25 | **Room 3** | upper | One apartment, off the gallery: two beds, washstand, window that does not close, straw and a feed bowl for Saban, the missing picture, the low coat hook. | **Alcove** — an *alcova*, the sleeping recess of a rented room, with a header across its mouth |
 
 Connections:
 
-- **The exits.** The stair hall has two ground-floor doors: the great door to the
-  Arrival Court and the street door at the far end. The house's Praça way in is the
-  Registry's front door, and the gate joins the two halves from inside, so the
-  building has a through-route and the player can see that it does. Where the
-  street door leads is open (the Cortiço lane is the obvious answer).
-- **Room 3 door → along the gallery → down the stair → great door → Arrival Court →
+- **The exits.** The stair hall has two ground-floor doors, both onto the Cortiço
+  street: the great door (the Passage House doorstep) and the street door at the
+  far end, which lets out about 3 m along the street from it. The old Arrival Court
+  (map 32) is retired. The house's Praça way in is the
+  Registry's front door. The two halves are one building because of the
+  **Passage**: a level corridor under the Praça terrace that joins the end of the
+  gallery to the Registry's cellar, whose stair comes up at the Registry's back
+  door. The numbers close: the gallery floor is 3.2 m above the Cortiço street
+  (z 11.3); the Praça terrace is 6 m above it (z 14.07) and the Registry's floor is
+  on the terrace; one storey under the Registry floor is also z 11.3. So the
+  passage never climbs or crosses the Praça lane; it runs beneath the retaining
+  wall and the strip, and nothing about it needs a plate to show it.
+- **Room 3 door → along the gallery → down the stair → great door →
   Cortiço → Praça → Registry front door.** This is the opening's first civic loop,
   now starting inside one building.
-- **The gate** (far end of the gallery, a few steps from Celina on the other side
-  of the wall) is locked on the first visit and opens after the player holds a
-  Crossing Writ. After that the return loop is faster: Praça → Registry → gate →
+- **The gate** (far end of the gallery) opens onto the Passage and is locked on the
+  first visit; it opens after the player holds a Crossing Writ, so the first walk
+  to the Praça is still the long way, over the street. After that the return loop is faster: Praça → Registry → gate →
   gallery → Room 3.
 - **The other apartment doors** are closed, with traces of tenants who are out in
   the Labyrinth. They are set dressing, not screens.
@@ -274,8 +281,14 @@ Connections:
   floor and the camera is yawed so it recedes; a tall window lights the stair;
   Room 3's lamp is the one warm door.
 
-The only new screen is 34. The Registry keeps its adopted room; the gate on its rear
-wall is an edit to that adopted source, never a regeneration. Room 3's contents come
+The only new screen is 34; the Passage itself is not a screen, it is the
+transfer between the gallery gate and the Registry's back door. The Registry
+keeps its adopted room; the door on its back wall is an edit to that adopted
+source, never a regeneration. Why not relocate a building instead: the Praça
+lane runs between the two blocks, so any single mass would have to cross it
+(an arch would hide the player behind a wall; a bridge sits above what either
+plate frames), and moving the Registry or the apartments gives up the opening's
+first walk or the Praça's civic role. Room 3's contents come
 from its authored text (missing picture, chipped feed bowl, low coat hook, straw):
 they are what make it that room and not another rented room.
 

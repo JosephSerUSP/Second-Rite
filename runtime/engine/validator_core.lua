@@ -26,11 +26,42 @@ local function usesFullRegressionFixture(loader)
     return type(loader.flows) == "table" and type(loader.flows._test) == "table"
 end
 
+-- Scene host lookup has historically treated numeric and string Scene ids as
+-- the same identity (`tostring(scene.id) == tostring(requested)`). Second Gate
+-- still contains one legacy numeric Scene id (1), while its SCENE_EVENT target
+-- is authored as the string "1". Project validation should police the runtime
+-- identity contract rather than invent a stricter one: normalize only the
+-- validation view, leaving the actual resolved loader graph untouched for the
+-- full game regression suite and runtime consumers.
+local function projectValidationView(loader)
+    local view = setmetatable({}, { __index = loader })
+    view.scenes = {}
+    for index, scene in ipairs(loader.scenes or {}) do
+        local copy = {}
+        for key, value in pairs(scene) do copy[key] = value end
+        if scene.id ~= nil then copy.id = tostring(scene.id) end
+        view.scenes[index] = copy
+    end
+    view.getScene = function(id)
+        local wanted = tostring(id)
+        for _, scene in ipairs(view.scenes) do
+            if tostring(scene.id) == wanted then return scene end
+        end
+        return nil
+    end
+    return view
+end
+
 function validator.run(loader)
+    -- Reusable Project invariants are the floor, not an alternative to the
+    -- Second Gate regression fixture. Running only full_rules for the root
+    -- Project let it validate while an authored Options hook referenced a Scene
+    -- omitted from the ordered Scene index; the exported player then crashed
+    -- when that transition was taken. Every Project, including the fixture,
+    -- must first prove its startup graph and literal authored references.
+    project_rules.run(projectValidationView(loader))
     if usesFullRegressionFixture(loader) then
         full_rules.run(loader)
-    else
-        project_rules.run(loader)
     end
     scene_update_contract.validateScenes(loader.scenes)
     resource_reference.validateAuthored(loader)

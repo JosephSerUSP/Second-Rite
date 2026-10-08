@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Thestra Scene Benchmarks",
+  "identity": "hichaukitoden-benchmarks",
+  "productName": "Thestra Scene Benchmarks",
+  "executableName": "Thestra Scene Benchmarks",
+  "buildSlug": "hichaukitoden-benchmarks",
+  "windowTitle": "Thestra Scene Benchmarks",
+  "productVersion": "0.0.0-dev"
+}

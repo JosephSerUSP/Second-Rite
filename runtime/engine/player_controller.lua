@@ -1,6 +1,5 @@
 local controls = require("engine.player_controls")
 local scene_host = require("engine.scene_host")
-local traversal_host = require("engine.traversal_host")
 
 local controller = {}
 
@@ -17,14 +16,6 @@ local function assertButton(button)
 end
 
 local function dispatch(button, ctx)
-    -- A traversal provider consumes only canonical logical buttons. It never
-    -- sees the physical key/device that produced them, and only gets first say
-    -- while the Map Scene owns input. Providers that do not consume the edge
-    -- fall through to the same authored Scene/main-host path as before.
-    if scene_host.getCurrent() == "map" and ctx and ctx.session
-            and traversal_host.buttonpressed(ctx.session, button) then
-        return true
-    end
     return scene_host.buttonpressed(button, ctx)
 end
 
@@ -60,14 +51,20 @@ function controller.isHeld(button)
     return held[button] ~= nil
 end
 
+function controller.snapshot()
+    local result={}
+    for button in pairs(require("engine.input_map").getBindings()) do result[button]=controller.isHeld(button) end
+    return result
+end
+
 function controller.reset()
     held = {}
 end
 
 -- Host-driven logical repeat. `initial` and `interval` are supplied by the
 -- ordinary Project UI configuration so physical and automated players share
--- the existing timing policy. Providers may additionally sample the canonical
--- held directions continuously; they still receive no physical key or device.
+-- the existing timing policy. This emits only canonical button presses; it has
+-- no map-step, turn, dialogue-choice, Event, coordinate, or Scene-hook API.
 function controller.update(dt, ctx, options)
     options = options or {}
     local initial = tonumber(options.initial) or 0.3
@@ -75,18 +72,6 @@ function controller.update(dt, ctx, options)
     if initial < 0 then initial = 0 end
     if interval <= 0 then interval = 0.06 end
     dt = math.max(0, tonumber(dt) or 0)
-
-    if scene_host.getCurrent() == "map" and ctx and ctx.session then
-        local function down(button)
-            return held[button] ~= nil and held[button].consumed ~= true
-        end
-        traversal_host.update(ctx.session, dt, {
-            up = down("UP"),
-            down = down("DOWN"),
-            left = down("LEFT"),
-            right = down("RIGHT"),
-        })
-    end
 
     local fired = false
     for _, button in ipairs(REPEAT_ORDER) do

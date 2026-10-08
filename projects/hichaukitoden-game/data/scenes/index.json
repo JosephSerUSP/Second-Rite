@@ -21,6 +21,7 @@
     "developer_geometry_export.json",
     "developer_3d.json",
     "options.json",
+    "crt_options.json",
     "controls.json"
   ]
 }

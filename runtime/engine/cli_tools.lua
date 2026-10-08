@@ -19,7 +19,8 @@ local function makeHarnessSession(loader)
             vSession:addItem(item.id, 3)
         end
     end
-    vSession:addItem(1, 5) -- HP Tonic
+    -- The canonical UI fixture uses item 1; external Projects need not own it.
+    if loader.getItem(1) then vSession:addItem(1, 5) end
     return vSession
 end
 cli.makeHarnessSession = makeHarnessSession
@@ -396,6 +397,18 @@ end
 -- geometry + resolved rows/text/cursor) as one JSON document between
 -- PREVIEW BEGIN/END markers. Errors become an { error } payload, never a
 -- crash — a broken scene is when the author needs the preview most.
+-- Scene previews show the surface the Project will actually run at: an
+-- explicit surface=<id> wins, then the Project's renderSurfaceProfile, then
+-- the Wide default. The cold `preview-scene` CLI and the warm Studio worker
+-- both resolve through here so their answers cannot drift apart.
+function cli.resolvePreviewSurface(requestedProfile)
+    local surface = require("presentation.surface")
+    local config = require("engine.config")
+    surface.setProfile(requestedProfile
+        or (config.ui and config.ui.renderSurfaceProfile) or "wide")
+    return surface.renderSize()
+end
+
 function cli.runPreviewScene(sceneId, loader, gameWidth, gameHeight)
     local json = require("engine.data.json")
     local payload

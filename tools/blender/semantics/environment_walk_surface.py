@@ -7,23 +7,25 @@ not carry enough information to reconstruct that meaning safely.
 
 Authoring contract (V1):
 
-* ``TH_WALKABLE`` is required and contains one or more direct planar mesh faces.
-  Every face becomes one unioned walk region.
+* ``TH_WALKABLE`` is required when walk semantics are authored and contains one
+  or more direct planar mesh faces. Every face becomes one unioned walk region.
 * ``TH_OBSTACLES`` is optional and contains direct planar mesh faces on the same
   ground plane. Every face becomes one blocking polygon.
 * Mesh objects in these semantic collections must not have modifiers. The
   semantic source is the authored face loop itself, not evaluated beauty output.
 * Object transforms are applied before XY/Z extraction.
 
-Run inside Blender, after (or as part of) the ordinary environment export::
+The canonical environment exporter imports this module directly when a
+``TH_WALKABLE`` collection is present. The command-line entry point remains
+useful for auditing or patching an already-exported manifest::
 
     blender --background room.blend \
       --python tools/blender/semantics/environment_walk_surface.py -- \
       --manifest path/to/environment.json
 
-The command patches only ``walkSurface`` and provenance on the existing
-manifest. Render mesh, atlas, bounds, anchors and collisionMesh remain owned by
-the ordinary environment exporter.
+Both paths use ``apply_manifest`` so package schema and provenance are defined
+once. Render mesh, atlas, bounds, anchors and collisionMesh remain owned by the
+ordinary environment exporter.
 """
 
 from __future__ import annotations
@@ -145,9 +147,13 @@ def compile_blender_walk_surface() -> dict:
     }
 
 
-def patch_manifest(path: Path, walk_surface: dict) -> None:
-    with path.open("r", encoding="utf-8") as handle:
-        manifest = json.load(handle)
+def apply_manifest(manifest: dict, walk_surface: dict) -> dict:
+    """Install the compiled semantic record into one environment manifest.
+
+    This mutates and returns ``manifest`` so the canonical exporter can compose
+    beauty/collision/anchor facts and walk semantics before a single write.
+    """
+
     if manifest.get("contractVersion") != 1:
         raise ValueError(
             f"unsupported environment contract {manifest.get('contractVersion')!r}"
@@ -160,6 +166,13 @@ def patch_manifest(path: Path, walk_surface: dict) -> None:
     provenance["walkSurfaceAuthority"] = (
         f"Blender collections {WALKABLE_COLLECTION}/{OBSTACLE_COLLECTION}"
     )
+    return manifest
+
+
+def patch_manifest(path: Path, walk_surface: dict) -> None:
+    with path.open("r", encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    apply_manifest(manifest, walk_surface)
 
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(manifest, handle, indent=2, ensure_ascii=False)

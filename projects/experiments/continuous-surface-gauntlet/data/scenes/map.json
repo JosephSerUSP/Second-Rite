@@ -11,7 +11,7 @@
       "target": { "x": 0.0, "y": 0.0, "z": 1.0 },
       "distance": 11.5,
       "yawDegrees": 0,
-      "pitchDegrees": -12,
+      "pitchDegrees": 12,
       "eyeHeight": 3.25,
       "fovDegrees": 42,
       "projectionScale": { "x": 1.0, "y": 1.0 },

@@ -151,10 +151,17 @@ async function main() {
         });
         const page = await waitFor('main Studio renderer', () => app.windows().find(candidate =>
             /^http:\/\/127\.0\.0\.1:\d+\/(?:\?.*)?$/.test(candidate.url())) || null);
+        // Publish the isolated bridge before any authoring script requests a
+        // bundle. Setting it after boot races the adapter's default port.
+        const mainUrl = page.url();
+        await page.goto('about:blank');
+        await page.addInitScript(url => { globalThis.THESTRA_RENDERABLE_URL = url; },
+            `http://127.0.0.1:${bridgePort}/api/map-renderable`);
         page.on('pageerror', error => diagnostics.push(`pageerror: ${error.stack || error.message}`));
         page.on('console', message => {
             if (message.type() === 'error') diagnostics.push(`console: ${message.text()}`);
         });
+        await page.goto(mainUrl);
         await page.waitForFunction(() => {
             const boot = window.thestraDatabaseBootState;
             return !!window.thestraStudio && !!boot && boot.done === true;

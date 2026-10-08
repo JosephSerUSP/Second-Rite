@@ -12,6 +12,11 @@ on:
       - 'runtime/engine/traversal_host.lua'
       - 'runtime/engine/player_controller.lua'
       - 'runtime/presentation/continuous_surface_world.lua'
+      - 'runtime/presentation/traversal_view.lua'
+      - 'runtime/presentation/viewport_3d.lua'
+      - 'runtime/presentation/map_renderable_bundle.lua'
+      - 'runtime/presentation/world_pass_compositor.lua'
+      - 'tests/test_traversal_view.lua'
       - 'runtime/presentation/world_renderer.lua'
       - 'projects/experiments/continuous-surface-gauntlet/**'
       - 'tools/spikes/continuous-surface/**'
@@ -42,6 +47,8 @@ jobs:
         run: |
           python tools/blender/tests/test_environment_walk_surface.py
           if ($LASTEXITCODE -ne 0) { throw "walk-surface compiler contract failed (exit $LASTEXITCODE)" }
+          python tools/spikes/continuous-surface/build-fixture-sprites.py --check
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet raster fixtures disagree with source" }
 
       - name: Install LOVE
         uses: ./.github/actions/install-love
@@ -171,6 +178,7 @@ jobs:
 
           function love.load()
               loader.init()
+              require("tests.test_traversal_view")
               local map1 = loader.getMapIndex(1)
               local map2 = loader.getMapIndex(2)
               assert(map1 and map2, "compiled gauntlet must expose Maps 1 and 2")
@@ -224,10 +232,26 @@ jobs:
               love.event.quit(0)
               os.exit(0)
           end
+          function love.errorhandler(message)
+              print(message)
+              if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+              os.exit(1)
+          end
           '@ | Set-Content -Path $main -Encoding utf8
 
           & $env:LOVEC $env:GAUNTLET_STAGE
           if ($LASTEXITCODE -ne 0) { throw "continuous transfer/save contract failed (exit $LASTEXITCODE)" }
+
+      - name: Native room rendering and missing-environment negative control
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item tools/spikes/continuous-surface/project-render-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          Push-Location $env:GAUNTLET_STAGE
+          try {
+            & $env:LOVEC .
+            if ($LASTEXITCODE -ne 0) { throw "native continuous presentation proof failed (exit $LASTEXITCODE)" }
+          } finally { Pop-Location }
 
       - name: Continuous traversal semantic and host assertions
         shell: pwsh

@@ -3,6 +3,7 @@
   "renderMesh": "environment.obj",
   "materialLibrary": "environment.mtl",
   "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
   "bounds": [-4.0, -3.0, 0.0, 4.0, 3.0, 3.2],
   "anchors": {
     "spawn_player": { "position": [-2.6, 0.0, 0.0] },
@@ -21,6 +22,7 @@
   },
   "provenance": {
     "source": "original gauntlet fixture; hand-authored V0",
-    "walkSurfaceAuthority": "environment package; Blender semantic compiler target"
+    "walkSurfaceAuthority": "environment package; Blender semantic compiler target",
+    "collisionAuthority": "explicit Project-owned coarse collision mesh"
   }
 }

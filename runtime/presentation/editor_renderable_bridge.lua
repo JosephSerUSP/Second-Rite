@@ -86,12 +86,9 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- has one visible representation and never waits for recompilation.
             --
             -- Provider-backed Maps enter presentation through the same neutral
-            -- traversal view as live rendering. Only the still-legacy viewport/
-            -- collector vocabulary is adapted, inside presentation.*, and the
-            -- real GameSession never gains a fake townTraversal field.
+            -- traversal view as live rendering and collection.
             local traversalPresentation = traversalView.resolve(vSession)
-            local renderSession = traversalView.legacyViewportSession(vSession)
-            local result, collectErr = renderables.collect(renderSession, "authoring", {
+            local result, collectErr = renderables.collect(vSession, "authoring", {
                 includeCollision = true,
                 includeEventModels = false,
             })
@@ -110,7 +107,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.request = { transient = true, seed = seed }
             local authoredCamera = request.map.traversal and request.map.traversal.camera
             if traversalPresentation and authoredCamera then
-                result.spatialCamera = require("presentation.world_camera").resolve(renderSession, {
+                result.spatialCamera = require("presentation.world_camera").resolve(vSession, {
                     authoredCamera = authoredCamera,
                     profile = authoredCamera.profile,
                 })

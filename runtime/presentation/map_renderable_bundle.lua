@@ -6,6 +6,7 @@
 -- uses, preserves semantic provenance, and packages the result into plain Lua
 -- tables suitable for JSON transport or external-format serializers.
 local viewport_3d = require("presentation.viewport_3d")
+local traversalView = require("presentation.traversal_view")
 local model_resource = require("presentation.model_resource")
 local mesh = require("presentation.mesh")
 local geometry = require("engine.geometry")
@@ -729,7 +730,7 @@ function bundle.collect(session, profileName, options)
 
     -- Consume the package already resolved by exploration. OBJ import and
     -- placement remain the runtime's authority, including transport axes.
-    local environment = session.townTraversal and session.townTraversal.environment
+    local environment = traversalView.environment(session)
     if environment then
         addPlacedModel(surfaces, registry, "environment_render",
             { kind = "environment", path = environment.renderMesh,

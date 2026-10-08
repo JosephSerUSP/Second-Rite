@@ -185,7 +185,7 @@ function M.run()
     -- 10. viewport_3d getFogConfig respects baked town environments (#1037)
     local viewport_3d = require("presentation.viewport_3d")
     check(type(viewport_3d.getFogConfig) == "function", "viewport_3d.getFogConfig is exposed")
-    check(type(viewport_3d.isLiveBakedTown) == "function", "viewport_3d.isLiveBakedTown is exposed")
+    check(type(viewport_3d.isLiveBakedEnvironment) == "function", "viewport_3d.isLiveBakedEnvironment is exposed")
 
     -- Case A: Dungeon / non-town session (townTraversal == nil)
     local dungeonSession = {}
@@ -202,7 +202,7 @@ function M.run()
             environment = aliciaPkg,
         },
     }
-    check(viewport_3d.isLiveBakedTown(liveTownSession), "liveTownSession identified as live baked town")
+    check(viewport_3d.isLiveBakedEnvironment(liveTownSession), "liveTownSession identified as live baked town")
 
     local liveFogDef, liveHasFog = viewport_3d.getFogConfig(liveTownSession, {})
     check(not liveHasFog, "live town map without fog returns hasFog == false")
@@ -220,7 +220,7 @@ function M.run()
             environment = pubPkg,
         },
     }
-    check(not viewport_3d.isLiveBakedTown(preRenderTownSession), "preRenderTownSession is not live baked mesh")
+    check(not viewport_3d.isLiveBakedEnvironment(preRenderTownSession), "preRenderTownSession is not live baked mesh")
     local preFogDef = viewport_3d.getFogConfig(preRenderTownSession, {})
     check(math.abs(preFogDef.minFactor - 0.12) < 0.001, "pre-rendered town environment defaults to minFactor == 0.12")
 

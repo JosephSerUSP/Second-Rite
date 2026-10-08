@@ -723,6 +723,7 @@ function love.load(arg)
             "test_sprite_sheet",
             "test_lighting_composition",
             "test_baked_environment_package",
+            "test_traversal_view",
             "test_bounded_lane",
             "test_bounded_lane_levels",
             "test_town_threshold_direction", "test_transition_markers",

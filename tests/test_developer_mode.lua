@@ -74,6 +74,34 @@ check(resetCtx.session.summoner == nil,
 check(sessionModule.developerMode == false,
     "the developer-room override does not change the launch default")
 
+-- RESET_SESSION replaces the session object in-place during an immediate
+-- program. Any aliases cached on that same command context must move with it:
+-- FOR_EACH resolves `ctx.party` before `ctx.session.party`, so leaving the old
+-- alias behind makes commands after RESET_SESSION operate on the previous run.
+local stale = sessionModule.GameSession.new(loader)
+stale:initializeStartingParty()
+-- Four references make the stale alias observably different from the current
+-- one-member New Game party without inventing another actor or changing any
+-- authored starting-party policy. The explicit negative-control assertion below
+-- makes this fixture fail loudly if that authored policy ever changes to match.
+local staleAlias = { stale.party[1], stale.party[1], stale.party[1], stale.party[1] }
+local resetLoopCtx = { session = stale, loader = loader, party = staleAlias, events = {} }
+interpreter.runImmediate({
+    { cmd = "RESET_SESSION" },
+    { cmd = "SET_LOCAL", name = "freshGold", value = "session.gold" },
+    { cmd = "FOR_EACH", scope = "party", as = "member", ["do"] = {
+        { cmd = "GAIN_GOLD", amount = 1 },
+    } },
+}, resetLoopCtx)
+local freshPartyCount = 0
+for _, member in pairs(resetLoopCtx.party) do if member then freshPartyCount = freshPartyCount + 1 end end
+check(freshPartyCount ~= #staleAlias,
+    "RESET_SESSION regression fixture keeps stale and fresh roster sizes distinct")
+check(resetLoopCtx.party == resetLoopCtx.session.party,
+    "RESET_SESSION rebinds the immediate party alias to the fresh session")
+check(resetLoopCtx.session.gold == resetLoopCtx.locals.freshGold + freshPartyCount,
+    "commands after RESET_SESSION iterate the fresh party, not stale caller state")
+
 -- Developer Menu "ADD EVERY ITEM" works for ordinary player sessions
 local ordinaryCtx = { session = plain, loader = loader, events = {} }
 interpreter.runImmediate({ { cmd = "SCRIPT", code = "api.giveAllItems()" } }, ordinaryCtx)

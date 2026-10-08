@@ -2093,6 +2093,7 @@ handlers.RESET_SESSION = function(cmd, ctx)
     fresh:initializeStartingParty()
     _G.activeSession = fresh
     ctx.session = fresh
+    ctx.party = fresh.party
     present("clearStringPictures")
     present("disableEventSkip")
     present("rebindSession", fresh)

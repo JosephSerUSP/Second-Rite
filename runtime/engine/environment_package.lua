@@ -1,5 +1,6 @@
--- Runtime reader for a baked spatial package.  The package owns geometry,
--- bounds and anchors; gameplay meaning remains in Project/Event data.
+-- Runtime reader for a baked spatial package. The package owns spatial facts
+-- (geometry, bounds, anchors and optional walk/collision semantics); gameplay
+-- meaning and locomotion tuning remain in Project/Event data.
 local json = require("engine.data.json")
 
 local environment_package = {}
@@ -30,6 +31,14 @@ local function requiredString(value, label)
     return value
 end
 
+local function finiteNumber(value, label)
+    value = tonumber(value)
+    if not value or value ~= value or value == math.huge or value == -math.huge then
+        error("environment package " .. label .. " must be finite", 0)
+    end
+    return value
+end
+
 local function readJson(path)
     local text = love.filesystem.read(path)
     if not text then error("environment package missing: " .. path, 0) end
@@ -38,6 +47,59 @@ local function readJson(path)
         error("environment package is not valid JSON: " .. path, 0)
     end
     return value
+end
+
+-- A walk surface is deliberately a package spatial fact, not a traversal
+-- provider. Blender/source tooling may compile the same room for different
+-- games, while each Project remains free to choose speed, input and interaction
+-- policy. V1 is intentionally planar: ordered XY polygon loops plus one ground Z.
+local function normalizeWalkSurface(raw)
+    if raw == nil or raw == json.null then return nil end
+    if type(raw) ~= "table" then
+        error("environment package walkSurface must be an object", 0)
+    end
+    if type(raw.regions) ~= "table" or #raw.regions == 0 then
+        error("environment package walkSurface.regions must be a non-empty array", 0)
+    end
+
+    local function polygon(value, label)
+        if type(value) ~= "table" then
+            error("environment package " .. label .. " must be an object", 0)
+        end
+        local points = value.points or value
+        if type(points) ~= "table" or #points < 3 then
+            error("environment package " .. label .. " must contain at least 3 points", 0)
+        end
+        local normalized = { points = {} }
+        for index, point in ipairs(points) do
+            if type(point) ~= "table" then
+                error("environment package " .. label .. ".points[" .. index .. "] must be a point", 0)
+            end
+            normalized.points[index] = {
+                finiteNumber(point.x ~= nil and point.x or point[1],
+                    label .. ".points[" .. index .. "].x"),
+                finiteNumber(point.y ~= nil and point.y or point[2],
+                    label .. ".points[" .. index .. "].y"),
+            }
+        end
+        return normalized
+    end
+
+    if raw.obstacles ~= nil and raw.obstacles ~= json.null and type(raw.obstacles) ~= "table" then
+        error("environment package walkSurface.obstacles must be an array", 0)
+    end
+    local result = {
+        groundZ = finiteNumber(raw.groundZ or 0, "walkSurface.groundZ"),
+        regions = {},
+        obstacles = {},
+    }
+    for index, region in ipairs(raw.regions) do
+        result.regions[index] = polygon(region, "walkSurface.regions[" .. index .. "]")
+    end
+    for index, obstacle in ipairs(raw.obstacles or {}) do
+        result.obstacles[index] = polygon(obstacle, "walkSurface.obstacles[" .. index .. "]")
+    end
+    return result
 end
 
 function environment_package.load(path)
@@ -133,6 +195,7 @@ function environment_package.load(path)
     if manifest.collisionMesh ~= nil and manifest.collisionMesh ~= json.null then
         collisionMesh = asset("collisionMesh", "collisionMesh")
     end
+    local walkSurface = normalizeWalkSurface(manifest.walkSurface)
     local bakedLighting = manifest.bakedLighting
     if bakedLighting == nil then
         bakedLighting = (preRendered == nil)
@@ -146,6 +209,7 @@ function environment_package.load(path)
         materialLibrary = asset("materialLibrary", "materialLibrary"),
         textureAtlas = asset("textureAtlas", "textureAtlas"),
         collisionMesh = collisionMesh,
+        walkSurface = walkSurface,
         bounds = manifest.bounds,
         anchors = manifest.anchors,
         preRendered = preRendered,

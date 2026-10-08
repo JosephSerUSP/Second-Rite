@@ -45,23 +45,10 @@ local function withTransientMap(loader, mapId, mapSnapshot, fn)
     return a, b
 end
 
--- map_renderable_bundle still consumes the historic bounded-lane-shaped
--- environment view. Continuous traversal deliberately does not install that
--- shape into GameSession, so presentation hosts use the provider's existing
--- ephemeral compatibility record on a proxy session. This is the same debt as
--- continuous_surface_world.lua, made explicit here rather than leaking
--- townTraversal into gameplay state. A later provider-neutral renderable seam
--- can delete both adapters together.
-local function presentationSession(session)
-    if session.townTraversal then return session end
-    local laneView = require("engine.traversal_host").presentationLaneView(session)
-    if not laneView then return session end
-    return setmetatable({ townTraversal = laneView }, { __index = session })
-end
-
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("engine.data.json")
     local instanceTransport = require("presentation.renderable_instance_transport")
+    local traversalView = require("presentation.traversal_view")
     local useInstances = instanceTransport.requested()
     local request = readRequest(requestPath)
     local requestedId = request.map.id
@@ -98,10 +85,12 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- Map snapshot. Keep the runtime bundle static so a dragged Event
             -- has one visible representation and never waits for recompilation.
             --
-            -- Provider-backed Maps get an ephemeral presentation proxy here;
-            -- their real GameSession remains topology-correct and never gains a
-            -- fake townTraversal field.
-            local renderSession = presentationSession(vSession)
+            -- Provider-backed Maps enter presentation through the same neutral
+            -- traversal view as live rendering. Only the still-legacy viewport/
+            -- collector vocabulary is adapted, inside presentation.*, and the
+            -- real GameSession never gains a fake townTraversal field.
+            local traversalPresentation = traversalView.resolve(vSession)
+            local renderSession = traversalView.legacyViewportSession(vSession)
             local result, collectErr = renderables.collect(renderSession, "authoring", {
                 includeCollision = true,
                 includeEventModels = false,
@@ -120,7 +109,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
             local authoredCamera = request.map.traversal and request.map.traversal.camera
-            if renderSession.townTraversal and authoredCamera then
+            if traversalPresentation and authoredCamera then
                 result.spatialCamera = require("presentation.world_camera").resolve(renderSession, {
                     authoredCamera = authoredCamera,
                     profile = authoredCamera.profile,

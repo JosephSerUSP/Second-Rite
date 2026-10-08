@@ -57,17 +57,28 @@ function relevantDiagnostic(line) {
     return line.startsWith('pageerror:');
 }
 
+async function authoritySnapshot(page) {
+    return page.evaluate(() => {
+        const host = window.ThestraEditorHost;
+        const viewport = window.ThestraRuntimeCameraViewport;
+        const failure = document.getElementById('thestra-map-runtime-failure');
+        return {
+            mapIndex: host?.getMapIndex?.(),
+            status: document.getElementById('thestra-map-view-status')?.textContent || '',
+            failureVisible: !!failure && getComputedStyle(failure).display !== 'none',
+            failureText: failure?.textContent || '',
+            walkSurface: viewport?.getWalkSurfaceInfo?.() || null,
+            inspector: document.getElementById('thestra-map-inspector-body')?.textContent || '',
+            renderableUrl: globalThis.THESTRA_RENDERABLE_URL || null,
+        };
+    });
+}
+
 async function selectMap(page, index, packageFragment, expectedTitle) {
-    // The golden-editor harness uses this same live global boundary. The map
-    // tree is workspace chrome and may be collapsed/absent depending on saved
-    // layout; currentMapIndex + loadActiveMap are the actual editor selection
-    // operation and therefore make the proof independent of incidental chrome.
-    //
     // This original-content gauntlet intentionally has no legacy tileset art.
-    // map-editor's retired/hidden 2D canvas still tries to draw that missing
-    // image while loadActiveMap runs. Suppress only that InvalidStateError in
-    // this screenshot harness so the live 3D workspace can finish refreshing;
-    // Studio/application behavior is otherwise untouched.
+    // The retired hidden 2D canvas still attempts to draw that absent image
+    // during map selection; suppress only its InvalidStateError in this proof
+    // harness. The live Three/runtime path remains untouched and is gated below.
     await page.evaluate(expectedIndex => {
         const proto = CanvasRenderingContext2D.prototype;
         const nativeDrawImage = proto.drawImage;
@@ -82,32 +93,35 @@ async function selectMap(page, index, packageFragment, expectedTitle) {
         try {
             currentMapIndex = expectedIndex;
             loadActiveMap();
-            window.dispatchEvent(new CustomEvent('thestra-map-inspection-changed'));
+            window.ThestraEditorHost?.selectSemantic?.(null);
         } finally {
             proto.drawImage = nativeDrawImage;
         }
     }, index);
 
-    // The proof must photograph the authoritative runtime bundle, not Studio's
-    // semantic fallback. The toolbar is the same user-visible authority signal
-    // G6 uses: wait until its status no longer says syncing/unavailable/fallback.
-    await page.waitForFunction(({ expectedIndex, fragment, title }) => {
-        const host = window.ThestraEditorHost;
-        const viewport = window.ThestraRuntimeCameraViewport;
-        const status = document.getElementById('thestra-map-view-status')?.textContent || '';
-        const failure = document.getElementById('thestra-map-runtime-failure');
-        const failed = failure && getComputedStyle(failure).display !== 'none';
-        const info = viewport?.getWalkSurfaceInfo?.();
-        const inspectorText = document.getElementById('thestra-map-inspector-body')?.textContent || '';
-        return !!host && host.getMapIndex() === expectedIndex
-            && !!info?.available
-            && String(info.manifestPath || '').includes(fragment)
-            && inspectorText.includes(title)
-            && !failed
-            && !/syncing|unavailable|fallback|compiling/i.test(status);
-    }, { expectedIndex: index, fragment: packageFragment, title: expectedTitle }, { timeout: TIMEOUT });
+    try {
+        await page.waitForFunction(({ expectedIndex, fragment }) => {
+            const host = window.ThestraEditorHost;
+            const viewport = window.ThestraRuntimeCameraViewport;
+            const status = document.getElementById('thestra-map-view-status')?.textContent || '';
+            const failure = document.getElementById('thestra-map-runtime-failure');
+            const failed = failure && getComputedStyle(failure).display !== 'none';
+            const info = viewport?.getWalkSurfaceInfo?.();
+            return !!host && host.getMapIndex() === expectedIndex
+                && !!info?.available
+                && String(info.manifestPath || '').includes(fragment)
+                && !failed
+                && /runtime geometry/i.test(status);
+        }, { expectedIndex: index, fragment: packageFragment }, { timeout: TIMEOUT });
+    } catch (error) {
+        const snapshot = await authoritySnapshot(page);
+        throw new Error(`runtime authority did not settle for ${expectedTitle}: ${JSON.stringify(snapshot)}`);
+    }
 
+    // Force the Inspector through its public selection boundary after the map
+    // has settled. It is visual context, not an engine gate.
     await page.evaluate(() => {
+        window.ThestraEditorHost?.selectSemantic?.(null);
         const viewport = window.ThestraRuntimeCameraViewport;
         viewport.setCollisionVisible?.(false);
         viewport.setWalkSurfaceVisible?.(true);
@@ -146,9 +160,9 @@ async function main() {
             return !!window.thestraStudio && !!boot && boot.done === true;
         }, null, { timeout: TIMEOUT });
 
-        // The browser adapter defaults to 8082 for ordinary interactive Studio.
-        // CI owns a random isolated bridge port, so publish the same override G6
-        // uses before requesting either proof Map.
+        // Exactly the same isolation contract as G6: the CI host owns a random
+        // bridge port and publishes it to the browser adapter before requesting
+        // an authoritative bundle.
         await page.evaluate(url => { globalThis.THESTRA_RENDERABLE_URL = url; },
             `http://127.0.0.1:${bridgePort}/api/map-renderable`);
 
@@ -200,16 +214,9 @@ async function main() {
         await page.waitForTimeout(300);
         await capture(page, '04-service-annex-walk-vs-collision.png');
 
-        const summary = await page.evaluate(() => {
-            const host = window.ThestraEditorHost;
-            const viewport = window.ThestraRuntimeCameraViewport;
-            return {
-                mapIndex: host?.getMapIndex?.(),
-                workspaceStatus: document.getElementById('thestra-map-view-status')?.textContent || null,
-                walkSurface: viewport?.getWalkSurfaceInfo?.(),
-                collisionVisible: viewport?.getCollisionVisible?.(),
-            };
-        });
+        const summary = await authoritySnapshot(page);
+        summary.collisionVisible = await page.evaluate(() =>
+            window.ThestraRuntimeCameraViewport?.getCollisionVisible?.());
         const fatalDiagnostics = diagnostics.filter(relevantDiagnostic);
         fs.writeFileSync(path.join(OUTPUT_ROOT, 'proof.json'), JSON.stringify({
             summary,

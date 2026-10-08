@@ -1317,7 +1317,6 @@ function love.update(dt)
     if scene_host.getCurrent() == "battle" then
         require("engine.scenes.battle").update(dt)
     end
-
     if scene_host.getCurrent() == "dialogue" then
         syncDialogueWindowState()
     end
@@ -1979,6 +1978,35 @@ handleKeyPressed = function(button)
             return false
         end
         if require("presentation.world_focus").isActive() then return true end
+
+        -- Provider-backed Maps own only the world-space interaction query. The
+        -- existing host still owns page resolution, trigger vocabulary,
+        -- Common Event lookup and the interactive GraphWalker. If the active
+        -- provider owns interaction but finds no candidate, confirm is still
+        -- consumed here so it cannot fall through into compatibility-grid data.
+        if button == "A" or button == "START" then
+            local traversalHost = require("engine.traversal_host")
+            local function interactableWorldEvent(rawEvent)
+                local ev = exploration.resolvePage(rawEvent, activeSession)
+                if not ev then return false end
+                local trigger = ev.trigger
+                if trigger ~= nil and trigger ~= "interact" and trigger ~= "touch" then
+                    return false
+                end
+                return commandsForMapEvent(ev) ~= nil
+            end
+            local rawEvent, traversalOwnsInteraction =
+                traversalHost.interactionEvent(activeSession, interactableWorldEvent)
+            if traversalOwnsInteraction then
+                if rawEvent then
+                    local eventObj = exploration.resolvePage(rawEvent, activeSession)
+                    local commands = commandsForMapEvent(eventObj)
+                    if commands then runEventCommands(eventObj, commands) end
+                end
+                return true
+            end
+        end
+
         if require("engine.bounded_lane").isActive(activeSession) then
             local lane = require("engine.bounded_lane")
             if button == "LEFT" or button == "RIGHT" then

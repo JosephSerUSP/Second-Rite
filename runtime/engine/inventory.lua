@@ -65,7 +65,8 @@ end
 function inventory.moveCarried(session, from, to)
     local rows = inventory.carriedRows(session)
     assert(rows[from] and rows[to], "Carried item move index out of range")
-    rows[from], rows[to] = rows[to], rows[from]
+    local moved = table.remove(rows, from)
+    table.insert(rows, to, moved)
     session.carriedItemOrder = {}
     for _, row in ipairs(rows) do session.carriedItemOrder[#session.carriedItemOrder + 1] = row.key end
 end

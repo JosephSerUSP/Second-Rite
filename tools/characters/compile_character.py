@@ -149,7 +149,7 @@ def compile_glb(path):
         clips[name] = {'duration': duration, 'channels': channels}
     if not {'idle', 'walk'} <= clips.keys():
         raise ValueError('character requires authored idle and walk clips')
-    bundle = {'kind': 'thestra-character', 'version': 1,
+    bundle = {'kind': 'hichaukitoden-character', 'version': 1,
               'source': {'sha256': hashlib.sha256(Path(path).read_bytes()).hexdigest(), 'format': 'glTF-2',
                          'up': 'y', 'forward': '+z'},
               'nodes': nodes, 'joints': [j + 1 for j in skin['joints']],

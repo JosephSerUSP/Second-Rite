@@ -3,7 +3,7 @@ local passed=0
 local function check(v,label) assert(v,label); passed=passed+1 end
 local function near(a,b) return math.abs(a-b)<1e-5 end
 local identity={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}
-local asset={kind="thestra-character",version=1,
+local asset={kind="hichaukitoden-character",version=1,
     source={up="y",forward="+z"},
     nodes={{translation={0,0,0},rotation={0,0,0,1},scale={1,1,1}},
         {parent=1,translation={0,0,0},rotation={0,0,0,1},scale={1,1,1}}},

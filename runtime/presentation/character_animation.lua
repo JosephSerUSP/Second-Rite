@@ -13,7 +13,7 @@ local function index(i, count)
     assert(finite(i) and i == math.floor(i) and i >= 1 and i <= count, "character index out of range")
 end
 function animation.validate(asset)
-    assert(asset.kind == "thestra-character" and asset.version == 1, "unsupported character contract")
+    assert(asset.kind == "hichaukitoden-character" and asset.version == 1, "unsupported character contract")
     assert(asset.source and asset.source.up=="y" and asset.source.forward=="+z", "unsupported deform source basis")
     assert(type(asset.nodes) == "table" and #asset.nodes > 0, "character nodes missing")
     local visited, active = {}, {}

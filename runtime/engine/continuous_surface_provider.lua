@@ -206,42 +206,25 @@ function provider.nearestEvent(session, radius, predicate)
     return best, bestDistance2
 end
 
--- Presentation-only compatibility record for the existing world mesh path.
--- This is NOT installed into GameSession.townTraversal: continuous traversal
--- remains its own gameplay capability. The renderer may consume this ephemeral
--- view while the generic viewport is being taught a first-class traversal seam.
-function provider.presentationLaneView(session)
+-- Provider-neutral presentation facts. Gameplay supplies only the physical
+-- environment and raw actor pose it owns; presentation-side code may decorate
+-- this with door-transition offsets or other visual policy. In particular this
+-- deliberately does NOT masquerade as `bounded_lane` and contains no lane
+-- levels/ranges/doorways.
+function provider.presentationView(session)
     local state = provider.ensure(session)
     if not state then return nil end
     return {
-        provider = "bounded_lane",
+        provider = "continuous_surface",
         environment = state.environment,
-        x = state.x,
-        y = state.y,
-        z = state.z,
-        visualX = state.x,
-        visualY = state.y,
-        groundZ = state.z,
-        groundProfile = nil,
-        baseLevel = "ground",
-        level = "ground",
-        levels = {
-            ground = {
-                minY = -100000,
-                maxY = 100000,
-                groundZ = state.z,
-                groundProfile = nil,
-                blockedRanges = {},
-            },
+        actor = {
+            x = state.x,
+            y = state.y,
+            z = state.z,
+            frame = state.walkFrameIndex or 0,
+            facing = state.facing or 1,
+            moving = state.moving == true,
         },
-        minY = -100000,
-        maxY = 100000,
-        blockedRanges = {},
-        moving = state.moving,
-        walking = state.moving,
-        walkFrameIndex = state.walkFrameIndex or 0,
-        facing = state.facing or 1,
-        doorways = {},
     }
 end
 

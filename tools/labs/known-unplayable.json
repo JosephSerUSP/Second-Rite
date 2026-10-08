@@ -28,7 +28,7 @@
     },
     "a004_sokoban": {
       "issue": 917,
-      "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",
+      "reason": "declared terminal state v.win is unreachable — the shipped board has no solution",
       "expect": "not-reached"
     },
     "d002_sokoban": {
@@ -40,6 +40,11 @@
       "issue": 914,
       "reason": "crashes on any win or loss: SCRIPT indexes nil ctx.interpreter behind the v.lost/v.win guard",
       "expect": "not-reached"
+    },
+    "c003_moving_breakout": {
+      "issue": 993,
+      "reason": "terminal loss is reached by waits alone before any authored key input (same as a002)",
+      "expect": "terminated-unplayed"
     }
   }
 }

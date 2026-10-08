@@ -133,7 +133,7 @@
           },
           {
             "name": "ballY",
-            "value": 13.5
+            "value": 12.0
           },
           {
             "name": "ballVX",
@@ -141,7 +141,7 @@
           },
           {
             "name": "ballVY",
-            "value": 10
+            "value": -10
           },
           {
             "name": "score",
@@ -200,7 +200,7 @@
           },
           {
             "name": "ballY",
-            "value": 13.5
+            "value": 12.0
           },
           {
             "name": "ballVX",
@@ -208,7 +208,7 @@
           },
           {
             "name": "ballVY",
-            "value": 10
+            "value": -10
           },
           {
             "name": "score",
@@ -368,7 +368,6 @@
     "process_bricks": "\nlocal sceneState = ctx.sceneState\n\n-- move bricks logic\nsceneState.brickMoveTimer = sceneState.brickMoveTimer + sceneState.time.dt\nif sceneState.brickMoveTimer > 1.0 then\n    sceneState.brickMoveTimer = 0\n    local hitEdge = false\n    for i, b in ipairs(sceneState.bricks) do\n        if b.intact then\n            local nextX = b.x + sceneState.brickMoveDir\n            if nextX < 1 or nextX >= sceneState.fieldW - 1 then\n                hitEdge = true\n                break\n            end\n        end\n    end\n    \n    if hitEdge then\n        sceneState.brickMoveDir = -sceneState.brickMoveDir\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact then\n                b.y = b.y + 1\n            end\n        end\n    else\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact then\n                b.x = b.x + sceneState.brickMoveDir\n            end\n        end\n    end\nend\n\nlocal bx, by = math.floor(sceneState.ballX + 0.5), math.floor(sceneState.ballY + 0.5)\nlocal count = 0\nlocal lowestBrickY = 0\n\nfor i, b in ipairs(sceneState.bricks) do\n    if b.intact then\n        count = count + 1\n        if b.y > lowestBrickY then\n            lowestBrickY = b.y\n        end\n        if bx == b.x and by == b.y then\n            b.intact = false\n            sceneState.score = sceneState.score + 10\n            sceneState.ballVY = -sceneState.ballVY\n            break\n        end\n    end\nend\nif count == 0 then sceneState.gameWon = true end\nif lowestBrickY >= sceneState.padY then sceneState.gameOver = true end\n\nlocal out = \"\"\nfor y = 0, sceneState.fieldH - 1 do\n    for x = 0, sceneState.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif sceneState.gameOver == true then out = out .. \"GAME OVER\\n\" end\nif sceneState.gameWon == true then out = out .. \"YOU WIN!\\n\" end\nsceneState.renderedField = out\n"
   },
   "goldenScript": [
-    "wait 1",
-    "wait 2"
+    {"wait": 1.0}, {"wait": 2.0}
   ]
 }

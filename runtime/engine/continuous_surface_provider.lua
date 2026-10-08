@@ -48,6 +48,38 @@ local function eventPosition(event)
     return x, y, z
 end
 
+-- Spatial authority and gameplay tuning deliberately meet only here. An
+-- environment package may own the walk-region/obstacle geometry because those
+-- shapes describe the physical authored room. The Map still owns locomotion
+-- tuning (speed/maxStep) because that is gameplay policy. Older Projects that
+-- have no package walkSurface retain their Map-authored surface unchanged.
+local function semanticSpec(spec, environment)
+    local tuning = spec.surface
+    local authored = environment and environment.walkSurface
+    if not authored then
+        if type(tuning) ~= "table" then
+            error("continuous surface traversal requires either environment walkSurface or Map surface", 0)
+        end
+        return tuning
+    end
+
+    if tuning ~= nil and type(tuning) ~= "table" then
+        error("continuous surface traversal surface tuning must be an object", 0)
+    end
+    tuning = tuning or {}
+    if tuning.regions ~= nil or tuning.obstacles ~= nil or tuning.groundZ ~= nil then
+        error("continuous surface Map duplicates package-owned walk geometry; "
+            .. "remove surface.regions/obstacles/groundZ", 0)
+    end
+    return {
+        speed = tuning.speed,
+        maxStep = tuning.maxStep,
+        groundZ = authored.groundZ,
+        regions = authored.regions,
+        obstacles = authored.obstacles,
+    }
+end
+
 local function initialize(session, arrival)
     local spec, map = specFor(session)
     if not spec then
@@ -58,11 +90,9 @@ local function initialize(session, arrival)
     if type(spec.environmentPackage) ~= "string" or spec.environmentPackage == "" then
         error("continuous surface traversal requires environmentPackage", 0)
     end
-    if type(spec.surface) ~= "table" then
-        error("continuous surface traversal requires a surface object", 0)
-    end
 
     local environment = environment_package.load(spec.environmentPackage)
+    local surface = semanticSpec(spec, environment)
     local spawnId = spec.spawnAnchor or "spawn_player"
     -- LOAD_MAP already owns an optional arrival string. As with bounded_lane,
     -- an arrival that names an anchor in the destination environment selects
@@ -76,7 +106,7 @@ local function initialize(session, arrival)
         error("continuous surface spawn anchor missing: " .. tostring(spawnId), 0)
     end
 
-    local state = semantic.new(spec.surface, spawn)
+    local state = semantic.new(surface, spawn)
     state.mapId = map.id
     state.environment = environment
     state.spawnAnchor = spawnId
@@ -230,7 +260,8 @@ function provider.restore(session, saved)
         return nil
     end
     local environment = environment_package.load(spec.environmentPackage)
-    local state = semantic.restore(spec.surface, saved)
+    local surface = semanticSpec(spec, environment)
+    local state = semantic.restore(surface, saved)
     state.mapId = map.id
     state.environment = environment
     state.spawnAnchor = saved.spawnAnchor or spec.spawnAnchor or "spawn_player"

@@ -5,6 +5,7 @@ on:
     paths:
       - 'runtime/main.lua'
       - 'runtime/engine/exploration.lua'
+      - 'runtime/engine/environment_package.lua'
       - 'runtime/engine/savegame.lua'
       - 'runtime/engine/continuous_surface.lua'
       - 'runtime/engine/continuous_surface_provider.lua'
@@ -14,6 +15,8 @@ on:
       - 'runtime/presentation/world_renderer.lua'
       - 'projects/experiments/continuous-surface-gauntlet/**'
       - 'tools/spikes/continuous-surface/**'
+      - 'tools/blender/semantics/**'
+      - 'tools/blender/tests/test_environment_walk_surface.py'
       - '.github/workflows/continuous-surface-gauntlet.yml'
   workflow_dispatch:
 
@@ -34,6 +37,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Compile walk-surface semantic contract without Blender
+        shell: pwsh
+        run: |
+          python tools/blender/tests/test_environment_walk_surface.py
+          if ($LASTEXITCODE -ne 0) { throw "walk-surface compiler contract failed (exit $LASTEXITCODE)" }
+
       - name: Install LOVE
         uses: ./.github/actions/install-love
 
@@ -53,6 +62,30 @@ jobs:
             throw 'standalone gauntlet Project data/assets reference Second Gate'
           }
 
+      - name: Assert environment packages own walk geometry
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'projects/experiments/continuous-surface-gauntlet'
+          foreach ($mapId in @(1, 2)) {
+            $map = Get-Content (Join-Path $root "data/maps/$mapId.json") -Raw | ConvertFrom-Json
+            $surface = $map.traversal.surface
+            foreach ($field in @('regions', 'obstacles', 'groundZ')) {
+              if ($surface.PSObject.Properties.Name -contains $field) {
+                throw "Map $mapId duplicates package spatial authority in traversal.surface.$field"
+              }
+            }
+          }
+          foreach ($relative in @(
+            'assets/environments/archive_antechamber/environment.json',
+            'assets/environments/service_annex/environment.json'
+          )) {
+            $manifest = Get-Content (Join-Path $root $relative) -Raw | ConvertFrom-Json
+            if (-not $manifest.walkSurface -or -not $manifest.walkSurface.regions -or $manifest.walkSurface.regions.Count -lt 1) {
+              throw "$relative does not own a non-empty walkSurface"
+            }
+          }
+
       - name: Stage only the experiment Project
         shell: pwsh
         run: |
@@ -67,7 +100,10 @@ jobs:
             throw 'staged Project is missing data/project.json'
           }
           if (-not (Test-Path (Join-Path $stage 'assets/environments/archive_antechamber/environment.json'))) {
-            throw 'staged Project is missing its own environment package'
+            throw 'staged Project is missing Archive environment package'
+          }
+          if (-not (Test-Path (Join-Path $stage 'assets/environments/service_annex/environment.json'))) {
+            throw 'staged Project is missing Service Annex environment package'
           }
 
       - name: Validate the staged Project
@@ -112,6 +148,17 @@ jobs:
               })
           end
 
+          local function assertPackageAuthority(game, expectedFragment)
+              local state = game.continuousTraversal
+              assert(state and state.environment and state.environment.walkSurface,
+                  "provider did not consume package-owned walkSurface")
+              assert((state.environment.manifestPath or ""):find(expectedFragment, 1, true),
+                  "wrong environment package for Map " .. tostring(game.currentMapData.id))
+              local tuning = game.currentMapData.traversal.surface or {}
+              assert(tuning.regions == nil and tuning.obstacles == nil and tuning.groundZ == nil,
+                  "Map traversal data regained spatial geometry authority")
+          end
+
           local function assertAtAnchor(game, state, anchorId)
               assert(state and state.spawnAnchor == anchorId,
                   "expected arrival anchor " .. anchorId .. ", got " .. tostring(state and state.spawnAnchor))
@@ -131,6 +178,7 @@ jobs:
               local game = session.GameSession.new(loader)
               exploration.loadMap(game, map1)
               assert(traversal.isActive(game), "gauntlet traversal provider is not active")
+              assertPackageAuthority(game, "archive_antechamber/environment.json")
 
               local initial = traversal.serialize(game)
               assertAtAnchor(game, initial, "spawn_player")
@@ -138,6 +186,7 @@ jobs:
               -- This is the authored Event Program, not a direct provider call.
               runEventProgram(game, 102)
               assert(game.currentMapData.id == 2, "Archive Service Door did not LOAD_MAP 2")
+              assertPackageAuthority(game, "service_annex/environment.json")
               local serviceArrival = traversal.serialize(game)
               assertAtAnchor(game, serviceArrival, "arrival_from_archive")
               local serviceDefault = game.continuousTraversal.environment.anchors.service_spawn.position
@@ -146,6 +195,7 @@ jobs:
 
               runEventProgram(game, 201)
               assert(game.currentMapData.id == 1, "Service Archive Door did not LOAD_MAP 1")
+              assertPackageAuthority(game, "archive_antechamber/environment.json")
               local archiveArrival = traversal.serialize(game)
               assertAtAnchor(game, archiveArrival, "arrival_from_service")
               local archiveDefault = game.continuousTraversal.environment.anchors.spawn_player.position

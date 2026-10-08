@@ -45,6 +45,20 @@ local function withTransientMap(loader, mapId, mapSnapshot, fn)
     return a, b
 end
 
+-- map_renderable_bundle still consumes the historic bounded-lane-shaped
+-- environment view. Continuous traversal deliberately does not install that
+-- shape into GameSession, so presentation hosts use the provider's existing
+-- ephemeral compatibility record on a proxy session. This is the same debt as
+-- continuous_surface_world.lua, made explicit here rather than leaking
+-- townTraversal into gameplay state. A later provider-neutral renderable seam
+-- can delete both adapters together.
+local function presentationSession(session)
+    if session.townTraversal then return session end
+    local laneView = require("engine.traversal_host").presentationLaneView(session)
+    if not laneView then return session end
+    return setmetatable({ townTraversal = laneView }, { __index = session })
+end
+
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("engine.data.json")
     local instanceTransport = require("presentation.renderable_instance_transport")
@@ -83,7 +97,12 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- Studio already owns live Event boxes/models from the authored
             -- Map snapshot. Keep the runtime bundle static so a dragged Event
             -- has one visible representation and never waits for recompilation.
-            local result, collectErr = renderables.collect(vSession, "authoring", {
+            --
+            -- Provider-backed Maps get an ephemeral presentation proxy here;
+            -- their real GameSession remains topology-correct and never gains a
+            -- fake townTraversal field.
+            local renderSession = presentationSession(vSession)
+            local result, collectErr = renderables.collect(renderSession, "authoring", {
                 includeCollision = true,
                 includeEventModels = false,
             })
@@ -100,10 +119,11 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.light = resolvedMap and resolvedMap.runtimeLight or nil
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
-            if vSession.townTraversal then
-                result.spatialCamera = require("presentation.world_camera").resolve(vSession, {
-                    authoredCamera = request.map.traversal.camera,
-                    profile = request.map.traversal.camera.profile,
+            local authoredCamera = request.map.traversal and request.map.traversal.camera
+            if renderSession.townTraversal and authoredCamera then
+                result.spatialCamera = require("presentation.world_camera").resolve(renderSession, {
+                    authoredCamera = authoredCamera,
+                    profile = authoredCamera.profile,
                 })
             end
             return result

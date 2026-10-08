@@ -92,10 +92,14 @@ function traversal_host.interactionEvent(session, predicate)
     return provider.nearestEvent(session, nil, predicate), true
 end
 
-function traversal_host.presentationLaneView(session)
+-- Provider-owned raw presentation facts. This engine host does not add camera,
+-- sprite, transition, or bounded-lane policy; presentation code may decorate
+-- the returned environment/actor record without teaching the provider about a
+-- renderer. Legacy bounded_lane remains outside this registry for now.
+function traversal_host.presentationView(session)
     local provider = traversal_host.ensure(session)
-    if not provider or not provider.presentationLaneView then return nil end
-    return provider.presentationLaneView(session)
+    if not provider or not provider.presentationView then return nil end
+    return provider.presentationView(session)
 end
 
 function traversal_host.serialize(session)

@@ -31,8 +31,8 @@ vec4 position(mat4 transform_projection, vec4 vertex_position) {
     vec3 n=VertexNormal/objectScale;
     n=normalize(vec3(n.x*c-n.y*s,n.x*s+n.y*c,n.z));
     float light=0.55+0.45*max(0.0,dot(n,normalize(vec3(-0.4,-0.6,1.0))));
-    -- A baked appearance consumes its authored illumination (viewport_3d's
-    -- bakedLighting contract): draw the atlas as baked, never relit.
+    // A baked appearance consumes its authored illumination (viewport_3d's
+    // bakedLighting contract): draw the atlas as baked, never relit.
     light=mix(light,1.0,bakedLighting);
     worldColor=vec4(VertexColor.rgb*materialColor*light,VertexColor.a);
     vec3 d=p-cameraPosition;

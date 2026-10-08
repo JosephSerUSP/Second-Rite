@@ -117,7 +117,13 @@ local function runProviderHostTests()
 
     local hostView = host.presentationView(fake)
     assertTrue(hostView and hostView.provider == "continuous_surface"
-            and hostView.actor == providerView.actor,
+            and hostView.environment == fakeEnvironment
+            and hostView.actor and hostView.actor.x == providerView.actor.x
+            and hostView.actor.y == providerView.actor.y
+            and hostView.actor.z == providerView.actor.z
+            and hostView.actor.frame == providerView.actor.frame
+            and hostView.actor.facing == providerView.actor.facing
+            and hostView.actor.moving == providerView.actor.moving,
         "traversal host forwards provider-neutral presentation facts")
 
     provider.ensure = originalEnsure

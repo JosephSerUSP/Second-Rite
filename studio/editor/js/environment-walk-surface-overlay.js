@@ -10,6 +10,7 @@
         obstacleFill: { id: '__walk_surface_obstacle_fill', color: [1.00, 0.36, 0.16, 0.30] },
         obstacleEdge: { id: '__walk_surface_obstacle_edge', color: [1.00, 0.68, 0.28, 0.96] },
     });
+    const INSTANCE_TRANSPORT_KIND = 'mesh-definitions-v1';
     const REGION_Z_OFFSET = 0.018;
     const OBSTACLE_Z_OFFSET = 0.032;
     const EDGE_HALF_WIDTH = 0.025;
@@ -149,9 +150,23 @@
         return surfaces;
     }
 
+    function transportAwareSurfaces(bundle, surfaces) {
+        if (bundle?.encoding?.kind !== INSTANCE_TRANSPORT_KIND) return surfaces;
+        const baseCount = (Array.isArray(bundle.placements) ? bundle.placements.length : 0)
+            + (Array.isArray(bundle.surfaces) ? bundle.surfaces.length : 0);
+        return surfaces.map((surface, index) => ({
+            ...surface,
+            // Direct runtime transport preserves one explicit global draw order
+            // across definition placements and literal surfaces. Inspection
+            // geometry is Studio-only, so append it after every authoritative
+            // runtime surface rather than mutating/re-numbering runtime order.
+            transportOrder: baseCount + index + 1,
+        }));
+    }
+
     function augmentBundle(bundle, manifest, manifestPath) {
         if (!bundle || !Array.isArray(bundle.surfaces) || !manifest?.walkSurface) return bundle;
-        const addedSurfaces = surfaceSet(manifest.walkSurface, manifestPath);
+        const addedSurfaces = transportAwareSurfaces(bundle, surfaceSet(manifest.walkSurface, manifestPath));
         if (!addedSurfaces.length) return bundle;
         const ids = new Set((bundle.materials || []).map(material => material && material.id));
         const addedMaterials = Object.values(MATERIALS).filter(material => !ids.has(material.id));
@@ -228,5 +243,5 @@
         return api;
     }
 
-    return { MATERIALS, normalizeLoop, triangulate, surfaceSet, augmentBundle, install };
+    return { MATERIALS, normalizeLoop, triangulate, surfaceSet, transportAwareSurfaces, augmentBundle, install };
 }));

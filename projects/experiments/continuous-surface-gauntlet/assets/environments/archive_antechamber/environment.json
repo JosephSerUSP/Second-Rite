@@ -8,10 +8,19 @@
     "spawn_player": { "position": [-2.6, 0.0, 0.0] },
     "far_door": { "position": [3.35, -2.15, 0.0] },
     "arrival_from_service": { "position": [2.45, -2.15, 0.0] },
-    "service_spawn": { "position": [2.65, 0.9, 0.0] },
-    "service_return_door": { "position": [-3.35, 1.85, 0.0] },
-    "arrival_from_archive": { "position": [-2.45, 1.85, 0.0] },
     "console": { "position": [1.85, 1.85, 0.0] }
   },
-  "provenance": { "source": "original gauntlet fixture; hand-authored V0" }
+  "walkSurface": {
+    "groundZ": 0,
+    "regions": [
+      { "points": [[-3.65,-2.65],[3.65,-2.65],[3.65,2.65],[1.4,2.65],[1.4,2.15],[-1.8,2.15],[-1.8,2.65],[-3.65,2.65]] }
+    ],
+    "obstacles": [
+      { "points": [[-0.65,-0.7],[0.65,-0.7],[0.65,0.7],[-0.65,0.7]] }
+    ]
+  },
+  "provenance": {
+    "source": "original gauntlet fixture; hand-authored V0",
+    "walkSurfaceAuthority": "environment package; Blender semantic compiler target"
+  }
 }

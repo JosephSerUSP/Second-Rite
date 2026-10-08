@@ -58,6 +58,7 @@ local function runProviderHostTests()
     -- Environment-package boot is an integration concern exercised by the
     -- standalone Project lane. Here we keep one already-live provider state so
     -- the spike can characterize only the provider/host interaction membrane.
+    local fakeEnvironment = { manifestPath = "fixture/environment.json" }
     local fake = {
         currentMapData = {
             id = 1,
@@ -75,6 +76,10 @@ local function runProviderHostTests()
             y = 1.0,
             z = 0,
             interactionRadius = 1.15,
+            walkFrameIndex = 3,
+            facing = -1,
+            moving = true,
+            environment = fakeEnvironment,
         },
     }
 
@@ -97,6 +102,23 @@ local function runProviderHostTests()
 
     assertTrue(provider.buttonpressed(fake, "L") and provider.buttonpressed(fake, "R"),
         "continuous provider consumes legacy grid-strafe edges")
+
+    local providerView = provider.presentationView(fake)
+    assertTrue(providerView and providerView.provider == "continuous_surface"
+            and providerView.environment == fakeEnvironment,
+        "provider exposes environment through neutral presentation facts")
+    assertTrue(providerView.actor and providerView.actor.x == 1.0
+            and providerView.actor.y == 1.0 and providerView.actor.z == 0
+            and providerView.actor.frame == 3 and providerView.actor.facing == -1
+            and providerView.actor.moving == true,
+        "provider exposes raw actor pose without bounded-lane vocabulary")
+    assertTrue(provider.presentationLaneView == nil,
+        "continuous provider no longer exposes a bounded-lane presentation proxy")
+
+    local hostView = host.presentationView(fake)
+    assertTrue(hostView and hostView.provider == "continuous_surface"
+            and hostView.actor == providerView.actor,
+        "traversal host forwards provider-neutral presentation facts")
 
     provider.ensure = originalEnsure
 end

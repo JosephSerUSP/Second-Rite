@@ -1,0 +1,11 @@
+00:02.844  blend            | Read blend: "D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\docs\reports\item-model-hybrid-study\revisions\view-projection\source-project\assets\authoring\items\carved_capsule_projected.blend"
+D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\projection_audit.py:26: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if mat.use_nodes:
+00:04.125  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\projection-source-views\carved_capsule_projected-front.png'
+00:04.172  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\projection-source-views\carved_capsule_projected-right.png'
+00:04.203  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\projection-source-views\carved_capsule_projected-back.png'
+00:04.234  render           | Saved: 'D:\Antigravity\Hichaukitoden\.claude\worktrees\stale-item-models\out\work\projection-source-views\carved_capsule_projected-top.png'
+SOURCE AUDIT carved_capsule_projected [2.5237112045288086, 1.3669137954711914, 3.590569019317627] []
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)
+
+Blender quit

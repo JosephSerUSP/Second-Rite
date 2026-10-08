@@ -1,0 +1,646 @@
+{
+  "parentSourceSHA256": "b8c64d34233a0b5b8da50cea4e78f3bbdad1d0e21452523c9271e89bd41c8663",
+  "sourceSHA256": "47245287c1b40fd964a4cb583ef588277475c72574ae3156dd76ffc052e8a9cc",
+  "referenceSHA256": "4dbe014b85e0b362cb671e1ff99ae71d7f0f717ba533945c4fc3757508b0ed39",
+  "power": 6,
+  "views": [
+    {
+      "name": "front",
+      "uvLayer": "Projection_front",
+      "visibilityAttribute": "Projection_front_visible",
+      "fitBounds": false,
+      "towardCamera": [
+        0.3495943248271942,
+        -0.932251513004303,
+        0.09322530776262283
+      ],
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "rectangle": [
+        0.0,
+        0.0,
+        627.0,
+        627.0
+      ],
+      "clip": [
+        0.0,
+        0.0,
+        627.0,
+        627.0
+      ],
+      "affinePanel": {
+        "axes": [
+          0,
+          1
+        ],
+        "center": [
+          0.0,
+          627.0
+        ],
+        "scale": [
+          627.0,
+          -627.0
+        ]
+      },
+      "cameraMatrixWorld": [
+        [
+          0.936329185962677,
+          -0.03273358196020126,
+          0.3495943248271942,
+          2.993278741836548
+        ],
+        [
+          0.3511234521865845,
+          0.08728955686092377,
+          -0.932251513004303,
+          -8.078998565673828
+        ],
+        [
+          -2.8099940152515046e-09,
+          0.9956450462341309,
+          0.09322529286146164,
+          0.8073335886001587
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "cameraOrthoScale": 4.0,
+      "renderSize": [
+        512,
+        512
+      ],
+      "pixelAspect": [
+        1.0,
+        1.0
+      ],
+      "visibleCorners": 16968,
+      "corners": 46214,
+      "vertices": 10172
+    },
+    {
+      "name": "right",
+      "uvLayer": "Projection_right",
+      "visibilityAttribute": "Projection_right_visible",
+      "fitBounds": false,
+      "towardCamera": [
+        0.9874286651611328,
+        -0.12342865765094757,
+        0.09874288737773895
+      ],
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "rectangle": [
+        627.0,
+        0.0,
+        1254.0,
+        627.0
+      ],
+      "clip": [
+        627.0,
+        0.0,
+        1254.0,
+        627.0
+      ],
+      "affinePanel": {
+        "axes": [
+          0,
+          1
+        ],
+        "center": [
+          627.0,
+          627.0
+        ],
+        "scale": [
+          627.0,
+          -627.0
+        ]
+      },
+      "cameraMatrixWorld": [
+        [
+          0.12403477728366852,
+          -0.09798029065132141,
+          0.987428605556488,
+          7.993278503417969
+        ],
+        [
+          0.9922778606414795,
+          0.012247612699866295,
+          -0.12342860549688339,
+          -1.0789982080459595
+        ],
+        [
+          -7.257579426322991e-08,
+          0.9951130151748657,
+          0.09874280542135239,
+          0.8073335886001587
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "cameraOrthoScale": 4.0,
+      "renderSize": [
+        512,
+        512
+      ],
+      "pixelAspect": [
+        1.0,
+        1.0
+      ],
+      "visibleCorners": 13812,
+      "corners": 46214,
+      "vertices": 10172
+    },
+    {
+      "name": "back",
+      "uvLayer": "Projection_back",
+      "visibilityAttribute": "Projection_back_visible",
+      "fitBounds": false,
+      "towardCamera": [
+        -0.24140217900276184,
+        0.965609073638916,
+        0.09656088054180145
+      ],
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "rectangle": [
+        0.0,
+        627.0,
+        627.0,
+        1254.0
+      ],
+      "clip": [
+        0.0,
+        627.0,
+        627.0,
+        1254.0
+      ],
+      "affinePanel": {
+        "axes": [
+          0,
+          1
+        ],
+        "center": [
+          0.0,
+          1254.0
+        ],
+        "scale": [
+          627.0,
+          -627.0
+        ]
+      },
+      "cameraMatrixWorld": [
+        [
+          -0.9701425433158875,
+          0.023419396951794624,
+          -0.24140219390392303,
+          -2.006721258163452
+        ],
+        [
+          -0.2425355464220047,
+          -0.09367797523736954,
+          0.9656091332435608,
+          7.92100191116333
+        ],
+        [
+          -8.561087128100553e-08,
+          0.9953270554542542,
+          0.0965610221028328,
+          0.8073335886001587
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "cameraOrthoScale": 4.0,
+      "renderSize": [
+        512,
+        512
+      ],
+      "pixelAspect": [
+        1.0,
+        1.0
+      ],
+      "visibleCorners": 18547,
+      "corners": 46214,
+      "vertices": 10172
+    },
+    {
+      "name": "top",
+      "uvLayer": "Projection_top",
+      "visibilityAttribute": "Projection_top_visible",
+      "fitBounds": false,
+      "towardCamera": [
+        0.0,
+        -0.03747357055544853,
+        0.9992976784706116
+      ],
+      "imageSize": [
+        1254,
+        1254
+      ],
+      "rectangle": [
+        627.0,
+        627.0,
+        1254.0,
+        1254.0
+      ],
+      "clip": [
+        627.0,
+        627.0,
+        1254.0,
+        1254.0
+      ],
+      "affinePanel": {
+        "axes": [
+          0,
+          1
+        ],
+        "center": [
+          627.0,
+          1254.0
+        ],
+        "scale": [
+          627.0,
+          -627.0
+        ]
+      },
+      "cameraMatrixWorld": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0067212581634521484
+        ],
+        [
+          0.0,
+          0.9992976188659668,
+          -0.03747357428073883,
+          -0.37899819016456604
+        ],
+        [
+          0.0,
+          0.03747357428073883,
+          0.9992976188659668,
+          8.007333755493164
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "cameraOrthoScale": 4.0,
+      "renderSize": [
+        512,
+        512
+      ],
+      "pixelAspect": [
+        1.0,
+        1.0
+      ],
+      "visibleCorners": 12932,
+      "corners": 46214,
+      "vertices": 10172
+    }
+  ],
+  "bakes": [
+    {
+      "name": "mesh_projection_single",
+      "sha256": "8913c1861b8fe395b6d8cb882811f289fac9a574d3edcb27db4d457bcea20b56"
+    },
+    {
+      "name": "mesh_projection_single_coverage",
+      "sha256": "941d202efc0732ca393482d1ec8ae3c2f8b954447ebee37d511ce5de946f9547"
+    },
+    {
+      "name": "mesh_projection_multi",
+      "sha256": "d76e0200ec7c21423721d49d1fbcc97cbc5593e47f1f1e855e494aae44222eae"
+    },
+    {
+      "name": "mesh_projection_multi_coverage",
+      "sha256": "8051fd89bddc02375adc9145229c1d2c9586c1386947f42bd3af6aa169a8177a"
+    }
+  ],
+  "boundary": "Paintovers of actual saved-mesh renders; fixed camera framing, no silhouette fitting. First transparent paintover rejected for drift. Second opaque plate has estimated silhouette overlap 96-98 percent; internal semantic correspondence still requires visual review.",
+  "visibilitySampling": "Corner-local rays sample 0.001 toward a tessellated triangle centre; front-facing confidence is evaluated in the bake shader.",
+  "rejectedOriginalReferenceProjection": {
+    "sourceSHA256": "bade86208aab94ef2bc4e6a90761f27e33b150028056c2c2bee3b818b160508c",
+    "views": [
+      {
+        "name": "front",
+        "uvLayer": "Projection_front",
+        "visibilityAttribute": "Projection_front_visible",
+        "towardCamera": [
+          0.3495943248271942,
+          -0.932251513004303,
+          0.09322530776262283
+        ],
+        "imageSize": [
+          1312,
+          1199
+        ],
+        "rectangle": [
+          223,
+          12,
+          631,
+          594
+        ],
+        "clip": [
+          0,
+          0,
+          656,
+          599
+        ],
+        "affinePanel": {
+          "axes": [
+            0,
+            1
+          ],
+          "center": [
+            58.643756700551535,
+            652.6303657735988
+          ],
+          "scale": [
+            749.2909623858375,
+            -699.9835960135479
+          ]
+        },
+        "cameraMatrixWorld": [
+          [
+            0.936329185962677,
+            -0.03273358196020126,
+            0.3495943248271942,
+            2.993278741836548
+          ],
+          [
+            0.3511234521865845,
+            0.08728955686092377,
+            -0.932251513004303,
+            -8.078998565673828
+          ],
+          [
+            -2.8099940152515046e-09,
+            0.9956450462341309,
+            0.09322529286146164,
+            0.8073335886001587
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "visibleCorners": 16968,
+        "corners": 46214,
+        "vertices": 10172
+      },
+      {
+        "name": "right",
+        "uvLayer": "Projection_right",
+        "visibilityAttribute": "Projection_right_visible",
+        "towardCamera": [
+          0.9874286651611328,
+          -0.12342865765094757,
+          0.09874288737773895
+        ],
+        "imageSize": [
+          1312,
+          1199
+        ],
+        "rectangle": [
+          869,
+          12,
+          1095,
+          599
+        ],
+        "clip": [
+          656,
+          0,
+          1312,
+          599
+        ],
+        "affinePanel": {
+          "axes": [
+            0,
+            1
+          ],
+          "center": [
+            632.4018768468148,
+            675.1217494412523
+          ],
+          "scale": [
+            711.1369798089394,
+            -717.1739640323984
+          ]
+        },
+        "cameraMatrixWorld": [
+          [
+            0.12403477728366852,
+            -0.09798029065132141,
+            0.987428605556488,
+            7.993278503417969
+          ],
+          [
+            0.9922778606414795,
+            0.012247612699866295,
+            -0.12342860549688339,
+            -1.0789982080459595
+          ],
+          [
+            -7.257579426322991e-08,
+            0.9951130151748657,
+            0.09874280542135239,
+            0.8073335886001587
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "visibleCorners": 13812,
+        "corners": 46214,
+        "vertices": 10172
+      },
+      {
+        "name": "back",
+        "uvLayer": "Projection_back",
+        "visibilityAttribute": "Projection_back_visible",
+        "towardCamera": [
+          -0.24140217900276184,
+          0.965609073638916,
+          0.09656088054180145
+        ],
+        "imageSize": [
+          1312,
+          1199
+        ],
+        "rectangle": [
+          160,
+          599,
+          564,
+          1185
+        ],
+        "clip": [
+          0,
+          599,
+          656,
+          1199
+        ],
+        "affinePanel": {
+          "axes": [
+            0,
+            1
+          ],
+          "center": [
+            -10.016958913727478,
+            1245.6177237779289
+          ],
+          "scale": [
+            736.2691040471556,
+            -703.5669093823587
+          ]
+        },
+        "cameraMatrixWorld": [
+          [
+            -0.9701425433158875,
+            0.023419396951794624,
+            -0.24140219390392303,
+            -2.006721258163452
+          ],
+          [
+            -0.2425355464220047,
+            -0.09367797523736954,
+            0.9656091332435608,
+            7.92100191116333
+          ],
+          [
+            -8.561087128100553e-08,
+            0.9953270554542542,
+            0.0965610221028328,
+            0.8073335886001587
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "visibleCorners": 18547,
+        "corners": 46214,
+        "vertices": 10172
+      },
+      {
+        "name": "top",
+        "uvLayer": "Projection_top",
+        "visibilityAttribute": "Projection_top_visible",
+        "towardCamera": [
+          0.0,
+          -0.03747357055544853,
+          0.9992976784706116
+        ],
+        "imageSize": [
+          1312,
+          1199
+        ],
+        "rectangle": [
+          722,
+          723,
+          1214,
+          1081
+        ],
+        "clip": [
+          656,
+          599,
+          1312,
+          1199
+        ],
+        "affinePanel": {
+          "axes": [
+            0,
+            1
+          ],
+          "center": [
+            509.8651995168999,
+            1446.907251154959
+          ],
+          "scale": [
+            916.2695873127194,
+            -1096.9484987472629
+          ]
+        },
+        "cameraMatrixWorld": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -0.0067212581634521484
+          ],
+          [
+            0.0,
+            0.9992976188659668,
+            -0.03747357428073883,
+            -0.37899819016456604
+          ],
+          [
+            0.0,
+            0.03747357428073883,
+            0.9992976188659668,
+            8.007333755493164
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "visibleCorners": 12932,
+        "corners": 46214,
+        "vertices": 10172
+      }
+    ],
+    "bakes": [
+      {
+        "name": "projection_single",
+        "sha256": "1ee2894db93ba02783397b3bed1974265390354fc68f63b58d253ed3b30b0fde"
+      },
+      {
+        "name": "projection_single_coverage",
+        "sha256": "cc2de5cfc01f763996d7fbf8a8d2e612720c48234d839401e91992aab1e8cf0a"
+      },
+      {
+        "name": "projection_multi",
+        "sha256": "fd0346affc0b67e0ef603a6ef4de7a9e90d1f407267d3478b893447ee1338b91"
+      },
+      {
+        "name": "projection_multi_coverage",
+        "sha256": "f742909923a90763ddc23ebc5bd980d55a5cef8d10dae3c8d5a2dded27eed978"
+      }
+    ],
+    "boundary": "Rejected by owner: source topology/shape does not correspond to the original image."
+  },
+  "paintFile": "mesh-paint-v2.png",
+  "paintSHA256": "dddb30c72f45b87eaf137afb191b7a99d72ec938f13d995b1d9f99c9c074f396"
+}

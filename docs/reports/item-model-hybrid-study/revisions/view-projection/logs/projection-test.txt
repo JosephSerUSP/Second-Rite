@@ -1,0 +1,6 @@
+test_real_bake_rejects_occlusion_and_preserves_unseen_fallback (tools.blender.tests.test_view_projection_blender.ViewProjectionTests) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.738s
+
+OK

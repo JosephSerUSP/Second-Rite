@@ -44,7 +44,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (41)
+## Implementation modules and Blender workers (42)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -88,6 +88,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [tree_material.py](tree_material.py) | `import` | The one Blender material for foliage atlas cards. |
 | [tree_mesh.py](tree_mesh.py) | `import` | Blender-free meshing for :mod:`tree_generator` skeletons. |
 | [vendor_assets_blender.py](vendor_assets_blender.py) | `run.py` | Build/check a portable named-datablock library; no network or preferences changes. |
+| [view_projection.py](view_projection.py) | `import` | Project paintovers of actual mesh renders with exact camera framing, occlusion, support masks, view weighting and explicit unseen fallback. |
 | [wide_screen.py](wide_screen.py) | `run.py` | Render a whole side-view location in one frame, at canon scale. |
 
 ## Experiments and measurements (23)

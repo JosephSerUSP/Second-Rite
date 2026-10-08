@@ -1,0 +1,81 @@
+{
+  "base": "6ecf989751e4c1f3ab6b8a1f671f32013b187713",
+  "exactVertexOrderTriangleWindingAndBakedUVsUnchanged": true,
+  "singleAndMultiOnlyTextureBindingsDiffer": true,
+  "vertices": 10172,
+  "triangles": 20232,
+  "atlasInteriorCoverageFraction": 0.5666626824273003,
+  "atlasInteriorOverlappingTexels": 0,
+  "minimumUVTriangleArea": 2.1361099999999867e-07,
+  "uvTestBoundary": "1536-square texel centres strictly inside triangles, shared edges excluded. Not a subtexel overlap proof.",
+  "observedInteriorTexelFraction": {
+    "mesh_projection_single": 0.26807562129513623,
+    "mesh_projection_multi": 0.5791476709613479
+  },
+  "coverageBoundary": "Green dominance in actual coverage bakes on UV triangle interiors. Reports sampled paint availability, not correspondence or art acceptance.",
+  "unchangedPriorSourcesAndGeneratedImages": [
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_conform.blend",
+      "sha256": "244996c14e14894bae015f6fef05ecfcac3ed074dc2b7dbe45d718f03a4a90da"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_hull.blend",
+      "sha256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_carved_sdf.blend",
+      "sha256": "8960e67c6f238298ee898f50d16c53499d4edbaf82896ed8f3930fd905abc34a"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_conform.blend",
+      "sha256": "53d5e41d2a30ddcee7a2a28cc46cdb997b2787900aea6a0ea24ada41a05f2c89"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_hull.blend",
+      "sha256": "1886bbe82599287a13ac03423f628ca0f5b3aec8b03e123e5b4e0654e9527d6e"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/source-project/assets/authoring/items/hybrid_salvage_sdf.blend",
+      "sha256": "ea71eff1a1dafcd94348a96cce9bcaac2827850eee3e6ec9f29d5edbb4d6a38d"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/carved/source-project/assets/authoring/items/carved_capsule_baked.blend",
+      "sha256": "b8c64d34233a0b5b8da50cea4e78f3bbdad1d0e21452523c9271e89bd41c8663"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/revisions/carved/source-project/assets/authoring/items/carved_capsule_geometry.blend",
+      "sha256": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/reference-carved.png",
+      "sha256": "4dbe014b85e0b362cb671e1ff99ae71d7f0f717ba533945c4fc3757508b0ed39"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/reference-salvage.png",
+      "sha256": "f945c2c6657b7e49efd24e9bfb09a73e1809b133c9579221cb8ba248006fef6b"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/hybrid_surface_atlas.png",
+      "sha256": "63130c56ed7d568aa2e05016d4dc426fb94d52c3648b3f25e623a315ea5580ac"
+    },
+    {
+      "path": "docs/reports/item-model-hybrid-study/panels.png",
+      "sha256": "fc7bd9543400451543cec9b0cf571c37cda42d08086f246aa550440d9415a08d"
+    }
+  ],
+  "sourceSHA256": "47245287c1b40fd964a4cb583ef588277475c72574ae3156dd76ffc052e8a9cc",
+  "canonicalProductHashes": [
+    {
+      "file": "carved_capsule_projected.mtl",
+      "sha256": "af9ff2847771722a1c134dc6e7f524356291b493c94431d35e5a060f218f9213"
+    },
+    {
+      "file": "carved_capsule_projected.obj",
+      "sha256": "013aa5bcf01a81da9966847da726d7c05102da20626d0d9ec8d17a8afe1bd1ae"
+    },
+    {
+      "file": "mesh_projection_multi.png",
+      "sha256": "d76e0200ec7c21423721d49d1fbcc97cbc5593e47f1f1e855e494aae44222eae"
+    }
+  ]
+}

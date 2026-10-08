@@ -1,0 +1,90 @@
+[
+  {
+    "item": "carved_capsule_projected",
+    "sourceHash": "47245287c1b40fd964a4cb583ef588277475c72574ae3156dd76ffc052e8a9cc",
+    "objects": [
+      {
+        "name": "BakedAssembly",
+        "faces": 12991,
+        "smoothFaces": 12655,
+        "rawNonmanifold": 0,
+        "weldedNonmanifold": 0,
+        "signedVolume": 5.44733868710896,
+        "modifiers": []
+      }
+    ],
+    "boundsMin": [
+      -1.2685768604278564,
+      -0.7624551057815552,
+      -1.7879509925842285
+    ],
+    "boundsMax": [
+      1.2551343441009521,
+      0.604458749294281,
+      1.802618145942688
+    ],
+    "dimensions": [
+      2.5237112045288086,
+      1.3669137954711914,
+      3.590569019317627
+    ],
+    "images": [
+      "//_textures\\fixed-mesh-support.png",
+      "//_textures\\",
+      "//_textures\\hybrid_surface_atlas.png",
+      "//_textures\\mesh-paint-v2.png",
+      "//_textures\\mesh_projection_multi.png",
+      "//_textures\\mesh_projection_multi_coverage.png",
+      "//_textures\\mesh_projection_single.png",
+      "//_textures\\mesh_projection_single_coverage.png",
+      "//_textures\\"
+    ],
+    "rootScale": [
+      0.8173953890800476,
+      0.6980423331260681,
+      0.9596229195594788
+    ],
+    "metadata": {
+      "item_export": true,
+      "item_export_name": "carved_capsule_projected",
+      "sr_contract_version": 1,
+      "sr_asset_id": "carved_capsule_projected",
+      "sr_representation": "full_model",
+      "sr_role": "item_display",
+      "sr_authoring_space": "item_display",
+      "sr_placement_frame": "item_viewport",
+      "sr_default_state": "default",
+      "sr_states_json": "[\"default\"]",
+      "sr_variants_json": "[]",
+      "sr_source_authority": "blend",
+      "sr_authoring_grammar": "hybrid_hull",
+      "sr_authoring_description": "Nonshipping containment capsule study: carved direction, hull construction",
+      "sr_study_only": true,
+      "sr_art_direction": "carved",
+      "sr_hybrid_route": "hull",
+      "sr_reference_calibration": "{\"clips\": [[0, 0, 656, 599], [656, 0, 1312, 599], [0, 599, 656, 1199], [656, 599, 1312, 1199]], \"opaqueMainComponentBounds\": [[223, 12, 631, 594], [869, 12, 1095, 599], [160, 599, 564, 1185], [722, 723, 1214, 1081]], \"targetDimensions\": [2.5237113402061855, 1.38603066439523, 3.6], \"boundary\": \"Independent connected opaque front/right silhouette ratios; includes bindings. Top/back inconsistent; hidden guides, core shape and cheek component outlines authored. Bounds matching is not scan reconstruction.\"}",
+      "sr_shared_atlas_regions": "{\"imageSize\": [1536, 1024], \"insetPixels\": 6, \"regions\": {\"carved_outer\": {\"pixels\": [23, 22, 746, 242]}, \"salvage_outer\": {\"pixels\": [790, 22, 1513, 241]}, \"carved_core\": {\"pixels\": [23, 270, 746, 491]}, \"salvage_core\": {\"pixels\": [790, 270, 1513, 491]}, \"carved_binding\": {\"pixels\": [23, 518, 746, 738]}, \"salvage_binding\": {\"pixels\": [790, 518, 1513, 738]}, \"carved_spine\": {\"pixels\": [23, 764, 746, 1002]}, \"salvage_spine\": {\"pixels\": [790, 764, 1513, 1002]}}, \"requested\": {\"imageSize\": [1536, 1024], \"insetPixels\": 5, \"regions\": {\"carved_outer\": {\"pixels\": [24, 24, 744, 240]}, \"salvage_outer\": {\"pixels\": [792, 24, 1512, 240]}, \"carved_core\": {\"pixels\": [24, 280, 744, 496]}, \"salvage_core\": {\"pixels\": [792, 280, 1512, 496]}, \"carved_binding\": {\"pixels\": [24, 536, 744, 752]}, \"salvage_binding\": {\"pixels\": [792, 536, 1512, 752]}, \"carved_spine\": {\"pixels\": [24, 792, 744, 1000]}, \"salvage_spine\": {\"pixels\": [792, 792, 1512, 1000]}}}, \"boundary\": \"Actual contiguous material support measured at panel centres; original RGB unchanged. Texture grain and end seams remain.\"}",
+      "sr_comparison_contract": "Same direction reference, global dimensions, atlas palette, camera and common binding/back assembly; route changes cheek/core construction. Shape similarity is measured, not presumed.",
+      "sr_hidden_geometry": "Rear support/fasteners, core shape, body guide and conformance thickness are authored; references are inconsistent drawings, not scans.",
+      "sr_visual_acceptance": "owner review open",
+      "sr_source_refinement": "Direct saved-source edits: smooth loft walls, plain conformed cut rims, redundant empty hull modifier removed",
+      "sr_revision_parent": "D:\\Antigravity\\Hichaukitoden\\.claude\\worktrees\\stale-item-models\\docs\\reports\\item-model-hybrid-study\\source-project\\assets\\authoring\\items\\hybrid_carved_hull.blend",
+      "sr_revision_parent_sha256": "09b4b801cd50eedee9087dcd247918d847ae05f59eec35ade421bb1fc1488724",
+      "sr_owner_feedback": "Weak geometry relative to reference; featureless/quiet texture, not overly loud. Need meaningful surface structure and baked shading.",
+      "sr_geometry_revision": "[\"HULL_left: deeper 3D envelope, convex crown and rounder cut edges\", \"HULL_right: deeper 3D envelope, convex crown and rounder cut edges\", \"CORE_OrganicVolume: shorter, rounder saved loft with subdivision\", \"Removed four invented screw-like fasteners from bone assembly\", \"Upper crest carries an actual shallow carved channel\", \"Raised cloth selvages and 16 physical edge stitches\"]",
+      "sr_geometry_control_sha256": "5483c48fcf29181d300eaf2cf77d1db2d055be9f58230c56e6add37d19b66f06",
+      "sr_rounding_revision": "Voxelized saved cheek meshes at 0.025, 14 relaxation steps, 18 percent decimation; original silhouettes retained as historical study.",
+      "sr_baked_surface_revision": "1536 unique UVs, material-specific pores/veins/grain/dye; Cycles EMIT albedo plus directionless contact AO. Final mesh editable; old graphs retained in original study.",
+      "sr_bake_distance": 0.34,
+      "sr_bake_occlusion_floor": 0.32,
+      "sr_control_material_boundary": "Nonrendering historical mask/cutter controls have no export material slots; procedural bake node graphs retained as fake-user material recipes.",
+      "sr_cross_section_rounding": "Saved cheek cross-sections contracted smoothly toward outline edges, 0.24-unit round-over radius, 0.22 edge depth floor.",
+      "sr_bake_recipe_components": "[{\"vertices\": 42, \"faces\": 48, \"role\": \"spine\", \"votes\": {\"spine\": 48}}, {\"vertices\": 722, \"faces\": 720, \"role\": \"core\", \"votes\": {\"core\": 720}}, {\"vertices\": 4968, \"faces\": 6607, \"role\": \"outer\", \"votes\": {\"outer\": 6607}}, {\"vertices\": 3904, \"faces\": 4968, \"role\": \"outer\", \"votes\": {\"outer\": 4968}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"spine\", \"votes\": {\"spine\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 34, \"faces\": 40, \"role\": \"binding\", \"votes\": {\"binding\": 40}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 42, \"faces\": 48, \"role\": \"binding\", \"votes\": {\"binding\": 48}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}, {\"vertices\": 14, \"faces\": 18, \"role\": \"core\", \"votes\": {\"core\": 2, \"binding\": 2}}]",
+      "sr_projection_parent_sha256": "b8c64d34233a0b5b8da50cea4e78f3bbdad1d0e21452523c9271e89bd41c8663",
+      "sr_projection_views": "[{\"name\": \"front\", \"uvLayer\": \"Projection_front\", \"visibilityAttribute\": \"Projection_front_visible\", \"fitBounds\": false, \"towardCamera\": [0.3495943248271942, -0.932251513004303, 0.09322530776262283], \"imageSize\": [1254, 1254], \"rectangle\": [0.0, 0.0, 627.0, 627.0], \"clip\": [0.0, 0.0, 627.0, 627.0], \"affinePanel\": {\"axes\": [0, 1], \"center\": [0.0, 627.0], \"scale\": [627.0, -627.0]}, \"cameraMatrixWorld\": [[0.936329185962677, -0.03273358196020126, 0.3495943248271942, 2.993278741836548], [0.3511234521865845, 0.08728955686092377, -0.932251513004303, -8.078998565673828], [-2.8099940152515046e-09, 0.9956450462341309, 0.09322529286146164, 0.8073335886001587], [0.0, 0.0, 0.0, 1.0]], \"cameraOrthoScale\": 4.0, \"renderSize\": [512, 512], \"pixelAspect\": [1.0, 1.0], \"visibleCorners\": 16968, \"corners\": 46214, \"vertices\": 10172}, {\"name\": \"right\", \"uvLayer\": \"Projection_right\", \"visibilityAttribute\": \"Projection_right_visible\", \"fitBounds\": false, \"towardCamera\": [0.9874286651611328, -0.12342865765094757, 0.09874288737773895], \"imageSize\": [1254, 1254], \"rectangle\": [627.0, 0.0, 1254.0, 627.0], \"clip\": [627.0, 0.0, 1254.0, 627.0], \"affinePanel\": {\"axes\": [0, 1], \"center\": [627.0, 627.0], \"scale\": [627.0, -627.0]}, \"cameraMatrixWorld\": [[0.12403477728366852, -0.09798029065132141, 0.987428605556488, 7.993278503417969], [0.9922778606414795, 0.012247612699866295, -0.12342860549688339, -1.0789982080459595], [-7.257579426322991e-08, 0.9951130151748657, 0.09874280542135239, 0.8073335886001587], [0.0, 0.0, 0.0, 1.0]], \"cameraOrthoScale\": 4.0, \"renderSize\": [512, 512], \"pixelAspect\": [1.0, 1.0], \"visibleCorners\": 13812, \"corners\": 46214, \"vertices\": 10172}, {\"name\": \"back\", \"uvLayer\": \"Projection_back\", \"visibilityAttribute\": \"Projection_back_visible\", \"fitBounds\": false, \"towardCamera\": [-0.24140217900276184, 0.965609073638916, 0.09656088054180145], \"imageSize\": [1254, 1254], \"rectangle\": [0.0, 627.0, 627.0, 1254.0], \"clip\": [0.0, 627.0, 627.0, 1254.0], \"affinePanel\": {\"axes\": [0, 1], \"center\": [0.0, 1254.0], \"scale\": [627.0, -627.0]}, \"cameraMatrixWorld\": [[-0.9701425433158875, 0.023419396951794624, -0.24140219390392303, -2.006721258163452], [-0.2425355464220047, -0.09367797523736954, 0.9656091332435608, 7.92100191116333], [-8.561087128100553e-08, 0.9953270554542542, 0.0965610221028328, 0.8073335886001587], [0.0, 0.0, 0.0, 1.0]], \"cameraOrthoScale\": 4.0, \"renderSize\": [512, 512], \"pixelAspect\": [1.0, 1.0], \"visibleCorners\": 18547, \"corners\": 46214, \"vertices\": 10172}, {\"name\": \"top\", \"uvLayer\": \"Projection_top\", \"visibilityAttribute\": \"Projection_top_visible\", \"fitBounds\": false, \"towardCamera\": [0.0, -0.03747357055544853, 0.9992976784706116], \"imageSize\": [1254, 1254], \"rectangle\": [627.0, 627.0, 1254.0, 1254.0], \"clip\": [627.0, 627.0, 1254.0, 1254.0], \"affinePanel\": {\"axes\": [0, 1], \"center\": [627.0, 1254.0], \"scale\": [627.0, -627.0]}, \"cameraMatrixWorld\": [[1.0, 0.0, 0.0, -0.0067212581634521484], [0.0, 0.9992976188659668, -0.03747357428073883, -0.37899819016456604], [0.0, 0.03747357428073883, 0.9992976188659668, 8.007333755493164], [0.0, 0.0, 0.0, 1.0]], \"cameraOrthoScale\": 4.0, \"renderSize\": [512, 512], \"pixelAspect\": [1.0, 1.0], \"visibleCorners\": 12932, \"corners\": 46214, \"vertices\": 10172}]",
+      "sr_projection_boundary": "Paintovers of actual saved-mesh renders; fixed camera framing, no silhouette fitting. First transparent paintover rejected for drift. Second opaque plate has estimated silhouette overlap 96-98 percent; internal semantic correspondence still requires visual review.",
+      "sr_visibility_sampling": "Corner-local rays sample 0.001 toward a tessellated triangle centre; front-facing confidence is evaluated in the bake shader.",
+      "sr_reference_role": "Original different-shape concept is art direction only; never final projection paint."
+    }
+  }
+]

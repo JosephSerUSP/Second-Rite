@@ -1,0 +1,13 @@
+# Blender 5.2.2 LTS MTL File: 'carved_capsule_projected.blend'
+# www.blender.org
+
+newmtl carved_capsule_mesh_projected_surface
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd mesh_projection_multi.png
+pass uv add 0.16 assets/models/items/mesh_projection_multi.png

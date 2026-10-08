@@ -559,6 +559,11 @@
       "purpose": "Build/check a portable named-datablock library; no network or preferences changes."
     },
     {
+      "path": "view_projection.py",
+      "role": "library",
+      "purpose": "Project paintovers of actual mesh renders with exact camera framing, occlusion, support masks, view weighting and explicit unseen fallback."
+    },
+    {
       "path": "wide_screen.py",
       "role": "library",
       "purpose": "Render a whole side-view location in one frame, at canon scale."

@@ -51,16 +51,13 @@ function expectedLegacyCanvasDiagnostic(line) {
 
 function relevantDiagnostic(line) {
     if (expectedLegacyCanvasDiagnostic(line)) return false;
-    // Connection-refused noise can happen while the short-lived Electron host
-    // tears down. It is relevant only when a walk/renderable subsystem names
-    // itself in the same diagnostic.
     if (line.includes('ERR_CONNECTION_REFUSED')
             && !/walk[- ]surface|renderable/i.test(line)) return false;
     if (/walk[- ]surface|renderable/i.test(line)) return true;
     return line.startsWith('pageerror:');
 }
 
-async function selectMap(page, index, packageFragment) {
+async function selectMap(page, index, packageFragment, expectedTitle) {
     // The golden-editor harness uses this same live global boundary. The map
     // tree is workspace chrome and may be collapsed/absent depending on saved
     // layout; currentMapIndex + loadActiveMap are the actual editor selection
@@ -85,17 +82,31 @@ async function selectMap(page, index, packageFragment) {
         try {
             currentMapIndex = expectedIndex;
             loadActiveMap();
+            window.dispatchEvent(new CustomEvent('thestra-map-inspection-changed'));
         } finally {
             proto.drawImage = nativeDrawImage;
         }
     }, index);
-    await page.waitForFunction(({ expectedIndex, fragment }) => {
+
+    // The proof must photograph the authoritative runtime bundle, not Studio's
+    // semantic fallback. The toolbar is the same user-visible authority signal
+    // G6 uses: wait until its status no longer says syncing/unavailable/fallback.
+    await page.waitForFunction(({ expectedIndex, fragment, title }) => {
         const host = window.ThestraEditorHost;
         const viewport = window.ThestraRuntimeCameraViewport;
-        if (!host || host.getMapIndex() !== expectedIndex || !viewport?.getWalkSurfaceInfo) return false;
-        const info = viewport.getWalkSurfaceInfo();
-        return info.available && String(info.manifestPath || '').includes(fragment);
-    }, { expectedIndex: index, fragment: packageFragment }, { timeout: TIMEOUT });
+        const status = document.getElementById('thestra-map-view-status')?.textContent || '';
+        const failure = document.getElementById('thestra-map-runtime-failure');
+        const failed = failure && getComputedStyle(failure).display !== 'none';
+        const info = viewport?.getWalkSurfaceInfo?.();
+        const inspectorText = document.getElementById('thestra-map-inspector-body')?.textContent || '';
+        return !!host && host.getMapIndex() === expectedIndex
+            && !!info?.available
+            && String(info.manifestPath || '').includes(fragment)
+            && inspectorText.includes(title)
+            && !failed
+            && !/syncing|unavailable|fallback|compiling/i.test(status);
+    }, { expectedIndex: index, fragment: packageFragment, title: expectedTitle }, { timeout: TIMEOUT });
+
     await page.evaluate(() => {
         const viewport = window.ThestraRuntimeCameraViewport;
         viewport.setCollisionVisible?.(false);
@@ -134,6 +145,13 @@ async function main() {
             const boot = window.thestraDatabaseBootState;
             return !!window.thestraStudio && !!boot && boot.done === true;
         }, null, { timeout: TIMEOUT });
+
+        // The browser adapter defaults to 8082 for ordinary interactive Studio.
+        // CI owns a random isolated bridge port, so publish the same override G6
+        // uses before requesting either proof Map.
+        await page.evaluate(url => { globalThis.THESTRA_RENDERABLE_URL = url; },
+            `http://127.0.0.1:${bridgePort}/api/map-renderable`);
+
         await app.evaluate(({ BrowserWindow }) => {
             const win = BrowserWindow.getAllWindows().find(candidate =>
                 !candidate.webContents.getURL().includes('surface='));
@@ -143,7 +161,7 @@ async function main() {
         await page.waitForFunction(() => !!window.ThestraRuntimeCameraViewport?.getWalkSurfaceInfo,
             null, { timeout: TIMEOUT });
 
-        await selectMap(page, 0, 'archive_antechamber');
+        await selectMap(page, 0, 'archive_antechamber', 'Archive Antechamber');
         await page.evaluate(() => {
             const viewport = window.ThestraRuntimeCameraViewport;
             viewport.setMode?.('perspective');
@@ -161,7 +179,7 @@ async function main() {
         await page.waitForTimeout(300);
         await capture(page, '02-archive-top-walk-surface.png');
 
-        await selectMap(page, 1, 'service_annex');
+        await selectMap(page, 1, 'service_annex', 'Service Annex');
         await page.evaluate(() => {
             const viewport = window.ThestraRuntimeCameraViewport;
             viewport.setMode?.('top');
@@ -187,6 +205,7 @@ async function main() {
             const viewport = window.ThestraRuntimeCameraViewport;
             return {
                 mapIndex: host?.getMapIndex?.(),
+                workspaceStatus: document.getElementById('thestra-map-view-status')?.textContent || null,
                 walkSurface: viewport?.getWalkSurfaceInfo?.(),
                 collisionVisible: viewport?.getCollisionVisible?.(),
             };

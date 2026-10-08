@@ -1,7 +1,7 @@
 {
   "contractVersion": 1,
-  "renderMesh": "../archive_antechamber/environment.obj",
-  "materialLibrary": "../archive_antechamber/environment.mtl",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
   "textureAtlas": "../archive_antechamber/environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [-4.0, -3.0, 0.0, 4.0, 3.0, 3.2],
@@ -21,8 +21,8 @@
     ]
   },
   "provenance": {
-    "source": "original gauntlet fixture; service topology V0",
-    "renderFixture": "shares archive_antechamber Project-owned render assets during semantic-authority lane",
+    "source": "original gauntlet fixture; service topology V1",
+    "renderFixture": "distinct Service Annex OBJ with shared neutral Project-owned atlas",
     "walkSurfaceAuthority": "environment package; Blender semantic compiler target",
     "collisionAuthority": "explicit Project-owned coarse collision mesh"
   }

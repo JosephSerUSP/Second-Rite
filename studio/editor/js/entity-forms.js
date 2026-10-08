@@ -691,8 +691,10 @@
                 } else if (spec.kind === 'number') {
                     const input = createFormField(container, spec.label, readValue(spec) !== undefined ? readValue(spec) : (spec.fallback || 0),
                         val => writeValue(spec, spec.parse ? spec.parse(val) : (parseInt(val) || spec.fallback || 0)),
-                        'number', !!spec.readOnly, spec.inputId, true, markDirty);
+                        'number', !!spec.readOnly, spec.inputId, true, markDirty, spec.inputEvent || 'input');
                     if (spec.step !== undefined) input.step = spec.step;
+                    if (spec.min !== undefined) input.min = spec.min;
+                    if (spec.max !== undefined) input.max = spec.max;
 
                 } else if (spec.kind === 'json') {
                     const group = document.createElement('div');

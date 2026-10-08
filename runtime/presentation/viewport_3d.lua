@@ -1501,14 +1501,25 @@ local function drawTownPrerender(session, inspection)
     end
 
     local playerPose = townPlayerPose(session)
+    local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
+    local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
+    local playerScreenX = screenXForTownY(actorY) + poseX - baseX
+    local playerFootY = screenFootY(actorY) + poseY - baseY
+    local playerScale = baseDepth / poseDepth
+    if inspection then
+        inspection.player = {
+            world = { x = playerPose.x, y = playerPose.y, z = playerPose.z },
+            screen = { x = playerScreenX, y = playerFootY },
+            plate = {
+                centerX = centerX, screenY = screenY, sliceY = sliceY, panX = panX,
+                imageWidth = imageWidth * scaleX, imageHeight = imageHeight * scaleY,
+            },
+        }
+    end
     local playerImage = getEventSprite({ sprite = playerSpritePath(state, playerPose.moving) }, session)
     if playerImage then
-        local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
-        local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
-        local scale = baseDepth / poseDepth
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY) + poseX - baseX,
-            screenFootY(actorY) + poseY - baseY,
-            actorWidth * scale, actorHeight * scale, 24, 48, playerPose.frame,
+        drawTownPrerenderSprite(playerImage, playerScreenX, playerFootY,
+            actorWidth * playerScale, actorHeight * playerScale, 24, 48, playerPose.frame,
             playerPose.facing)
     end
 

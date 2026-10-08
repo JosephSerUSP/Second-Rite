@@ -3,6 +3,7 @@
   "renderMesh": "../archive_antechamber/environment.obj",
   "materialLibrary": "../archive_antechamber/environment.mtl",
   "textureAtlas": "../archive_antechamber/environment.png",
+  "collisionMesh": "collision.obj",
   "bounds": [-4.0, -3.0, 0.0, 4.0, 3.0, 3.2],
   "anchors": {
     "service_spawn": { "position": [2.65, 0.9, 0.0] },
@@ -22,6 +23,7 @@
   "provenance": {
     "source": "original gauntlet fixture; service topology V0",
     "renderFixture": "shares archive_antechamber Project-owned render assets during semantic-authority lane",
-    "walkSurfaceAuthority": "environment package; Blender semantic compiler target"
+    "walkSurfaceAuthority": "environment package; Blender semantic compiler target",
+    "collisionAuthority": "explicit Project-owned coarse collision mesh"
   }
 }

@@ -1,7 +1,5 @@
-newmtl room_beauty
-Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-d 1.0
-illum 1
+# Second Rite Environment Material
+newmtl EnvironmentBakedAtlas
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
 map_Kd environment.png

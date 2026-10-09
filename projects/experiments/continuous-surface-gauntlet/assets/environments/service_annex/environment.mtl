@@ -1,5 +1,5 @@
-# Service Annex uses the gauntlet's neutral Project-owned atlas.
-newmtl annex_beauty
+# Second Rite Environment Material
+newmtl EnvironmentBakedAtlas
 Ka 1.000 1.000 1.000
 Kd 1.000 1.000 1.000
-map_Kd ../archive_antechamber/environment.png
+map_Kd environment.png

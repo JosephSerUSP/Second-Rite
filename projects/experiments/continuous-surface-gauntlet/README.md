@@ -20,9 +20,9 @@ The current spatial slice proves the Lane A / Lane B substrate from #1402:
 - provider-owned world position, facing, distance state and arrival-anchor identity survive save/load;
 - presentation uses the existing fixed-eye WorldCamera math without giving camera ownership to traversal.
 
-Archive Antechamber and Service Annex have distinct beauty and collision meshes and distinct package-owned `walkSurface` records. They share the Project's neutral texture atlas. Both rooms leave their camera-facing wall open for the Scene's fixed camera; walkability remains independent of beauty and collision geometry.
+Archive Antechamber and Service Annex have distinct beauty and collision meshes and distinct package-owned `walkSurface` records. Each room has a lit atlas baked from its adopted Blender source. Both rooms leave their camera-facing wall open for the Scene's fixed camera; walkability remains independent of beauty and collision geometry.
 
-The player uses the compiler-built surveyor described in `assets/authoring/characters/README.md`. Maps select its appearance independently of traversal geometry. The archive attendant and dormant service-floor sentinel use distinct compiled appearances through ordinary Event fields. The sentinel's ordinary Event starts a one-enemy arena encounter. Confirm with full AT opens Command, another confirm chooses Attack and opens Targeting, and confirm resolves an in-range attack. Cancel backs out without spending the action. A red ground ring telegraphs the enemy attack; the blue targeting ring shows the player's exact circular range. Command/Targeting pause simulation while UI presentation continues. Victory hides the sentinel through an Event page; loss runs authored party recovery. Both return to exploration, and saves are rejected during the encounter. `tools/spikes/continuous-surface/build-fixture-sprites.py` maintains the unused sprite player fixtures and the opaque neutral environment atlas.
+The player uses the compiler-built surveyor described in `assets/authoring/characters/README.md`. Maps select its appearance independently of traversal geometry. The archive attendant and dormant service-floor sentinel use distinct compiled appearances through ordinary Event fields. The sentinel's ordinary Event starts a one-enemy arena encounter. Confirm with full AT opens Command, another confirm chooses Attack and opens Targeting, and confirm resolves an in-range attack. Cancel backs out without spending the action. A red ground ring telegraphs the enemy attack; the blue targeting ring shows the player's exact circular range. Command/Targeting pause simulation while UI presentation continues. Victory hides the sentinel through an Event page; loss runs authored party recovery. Both return to exploration, and saves are rejected during the encounter. `tools/spikes/continuous-surface/build-fixture-sprites.py` maintains the unused sprite player fixtures.
 
 ## Blender authoring contract
 
@@ -36,12 +36,33 @@ The compiler applies object transforms, preserves authored face-loop order, reje
 After the normal environment export, run inside Blender:
 
 ```text
-blender --background room.blend \
-  --python tools/blender/semantics/environment_walk_surface.py -- \
+python tools/blender/run.py tools/blender/semantics/environment_walk_surface.py --blend room.blend -- \
   --manifest path/to/environment.json
 ```
 
 The semantic pass patches only `walkSurface` plus provenance. Beauty mesh, texture atlas, bounds, anchors and optional generic collision mesh remain the ordinary environment exporter's responsibility.
+
+The adopted sources live in `assets/authoring/environments/`, with authority
+recorded in `environment-sources.json`. Edit these documents directly. The
+Project's `tools/light_environments.py` exports them through the shared
+environment pipeline without writing the sources:
+
+```text
+python tools/blender/run.py projects/experiments/continuous-surface-gauntlet/tools/light_environments.py -- --output out/gauntlet-lighting
+python projects/experiments/continuous-surface-gauntlet/tools/check_lighting.py
+```
+
+The output is a candidate: inspect native staged frames before copying it into
+the Project. `--create-sources` was the one-time adoption route from the original
+neutral OBJ fixtures; it refuses existing sources. Sprite-fixture generation
+does not own the environment atlases anymore. CI checks source and product
+fingerprints to reject stale bakes.
+
+Test rooms need readable lighting even when they represent no particular place:
+a lit floor, volume readable on walls/obstacles, and enough ambient fill to see
+characters and hostile effects. These sources use warm/cool area lights and low
+ambient fill, baked with Cycles. Character shading remains the runtime's existing
+path. This is a test-environment minimum, not final art or dynamic lighting.
 
 No Parasite Eve names, maps, dialogue, characters or art are used. The reference game is requirements evidence only.
 

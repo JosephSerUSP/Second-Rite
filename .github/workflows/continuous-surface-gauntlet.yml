@@ -61,6 +61,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "compiled character disagrees with GLB" }
           python tools/spikes/continuous-surface/build-fixture-sprites.py --check
           if ($LASTEXITCODE -ne 0) { throw "gauntlet raster fixtures disagree with source" }
+          python tools/blender/environment_sources.py --check --root projects/experiments/continuous-surface-gauntlet
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet environment source authority invalid" }
+          python projects/experiments/continuous-surface-gauntlet/tools/check_lighting.py
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet lighting bake is stale" }
 
       - name: Install LOVE
         uses: ./.github/actions/install-love

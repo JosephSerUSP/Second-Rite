@@ -54,9 +54,6 @@ if __name__ == "__main__":
     frames = [figure(s) for s in (0, 1, 2, 0, -1, -2)]
     outputs[TARGET / "walker.png"] = png([sum((frame[y] for frame in frames), [])
         for y in range(48)])
-    atlas = [[(112, 124, 132, 255) if x % 16 == 0 or y % 16 == 0
-        else (165, 174, 180, 255) for x in range(64)] for y in range(64)]
-    outputs[TARGET.parent / "environments/archive_antechamber/environment.png"] = png(atlas)
     for path, data in outputs.items():
         if "--check" in sys.argv:
             assert path.read_bytes() == data, f"fixture disagrees with source: {path}"

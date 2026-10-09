@@ -1,29 +1,221 @@
 {
   "contractVersion": 1,
+  "environmentId": "service_annex",
   "renderMesh": "environment.obj",
   "materialLibrary": "environment.mtl",
-  "textureAtlas": "../archive_antechamber/environment.png",
+  "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
-  "bounds": [-4.0, -3.0, 0.0, 4.0, 3.0, 3.2],
-  "anchors": {
-    "service_spawn": { "position": [2.65, 0.9, 0.0] },
-    "service_return_door": { "position": [-3.35, 1.85, 0.0] },
-    "arrival_from_archive": { "position": [-2.45, 1.85, 0.0] }
-  },
-  "walkSurface": {
-    "groundZ": 0,
-    "regions": [
-      { "points": [[-3.65,-2.65],[3.65,-2.65],[3.65,2.65],[1.4,2.65],[1.4,2.15],[-1.8,2.15],[-1.8,2.65],[-3.65,2.65]] }
+  "bounds": [
+    -4.0,
+    -3.0,
+    -0.0,
+    4.0,
+    3.0,
+    3.2
+  ],
+  "stats": {
+    "triangleCount": 38,
+    "vertexCount": 32,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
     ],
-    "obstacles": [
-      { "points": [[-0.35,-1.25],[0.85,-1.25],[0.85,0.25],[-0.35,0.25]] },
-      { "points": [[1.45,-0.25],[2.25,-0.25],[2.25,0.55],[1.45,0.55]] }
-    ]
+    "pngSizeBytes": 309352,
+    "renderMeshSizeBytes": 3804,
+    "packageSizeBytes": 314997
+  },
+  "anchors": {
+    "service_spawn": {
+      "id": "service_spawn",
+      "position": [
+        2.65,
+        0.9,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "service_return_door": {
+      "id": "service_return_door",
+      "position": [
+        -3.35,
+        1.85,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "arrival_from_archive": {
+      "id": "arrival_from_archive",
+      "position": [
+        -2.45,
+        1.85,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
   },
   "provenance": {
-    "source": "original gauntlet fixture; service topology V1",
-    "renderFixture": "distinct Service Annex OBJ with shared neutral Project-owned atlas",
-    "walkSurfaceAuthority": "environment package; Blender semantic compiler target",
-    "collisionAuthority": "explicit Project-owned coarse collision mesh"
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "service_annex.blend",
+    "walkSurfaceAuthority": "Blender collections TH_WALKABLE/TH_OBSTACLES",
+    "bake": {
+      "backend": "cycles",
+      "device": "CPU",
+      "samples": 32,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 32,
+        "supersample": 1,
+        "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "CPU",
+        "computeBackend": "CPU",
+        "devices": []
+      },
+      "batchedSourceObjects": 1,
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 0.20084610000048997,
+        "filteredCharts": 16,
+        "preservedSmallCharts": 2,
+        "filteredTexels": 220170,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 18,
+        "preservedUnsafeCharts": 0,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 512
+      }
+    },
+    "exportSeconds": 3.208324999999604,
+    "sourceSha256": "7ae5b069b00a320ae5ec879cac2a2828f24e0b626cb3991a6498b92f5fbf75b6",
+    "productsSha256": {
+      "environment.obj": "b3e89dfd7f75c3290af9fdf827fa0bc69fb1b536f7fb1fdcba47cee49aa5d850",
+      "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+      "environment.png": "baad9fe16af77ef0b402466c8b093f953481f8dadaa4c631b9c4cb5385a0abcc",
+      "collision.obj": "817a7384845ac8bec4ab9fddbccebddd6e8f9ac042cb43a128704b9ecddde32a"
+    }
+  },
+  "walkSurface": {
+    "groundZ": 0.0,
+    "regions": [
+      {
+        "points": [
+          [
+            -3.6500000953674316,
+            -2.6500000953674316
+          ],
+          [
+            3.6500000953674316,
+            -2.6500000953674316
+          ],
+          [
+            3.6500000953674316,
+            2.6500000953674316
+          ],
+          [
+            1.399999976158142,
+            2.6500000953674316
+          ],
+          [
+            1.399999976158142,
+            2.1500000953674316
+          ],
+          [
+            -1.7999999523162842,
+            2.1500000953674316
+          ],
+          [
+            -1.7999999523162842,
+            2.6500000953674316
+          ],
+          [
+            -3.6500000953674316,
+            2.6500000953674316
+          ]
+        ]
+      }
+    ],
+    "obstacles": [
+      {
+        "points": [
+          [
+            -0.3499999940395355,
+            -1.25
+          ],
+          [
+            0.8500000238418579,
+            -1.25
+          ],
+          [
+            0.8500000238418579,
+            0.25
+          ],
+          [
+            -0.3499999940395355,
+            0.25
+          ]
+        ]
+      },
+      {
+        "points": [
+          [
+            1.4500000476837158,
+            -0.25
+          ],
+          [
+            2.25,
+            -0.25
+          ],
+          [
+            2.25,
+            0.550000011920929
+          ],
+          [
+            1.4500000476837158,
+            0.550000011920929
+          ]
+        ]
+      }
+    ]
   }
 }

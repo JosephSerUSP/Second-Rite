@@ -28,5 +28,10 @@
   },
   "rtp": {
     "revision": "1.0"
+  },
+  "dungeon": {
+    "psxRendering": {
+      "affineTextures": false
+    }
   }
 }

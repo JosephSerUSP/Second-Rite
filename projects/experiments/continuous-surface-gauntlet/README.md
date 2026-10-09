@@ -82,3 +82,8 @@ ordinary collision, then recovers. Lethal contact holds a short fade/aftermath
 before exploration resumes. These are experimental arbitration rules and timing
 values, not measured reference-game parity. Current attack feedback is a tracer,
 flash and damage label; compiled skeletal attack clips are still absent.
+
+Baked room textures use perspective-correct interpolation (`affineTextures: false`)
+so shadows remain registered to their geometry; repository-wide follow-up is #1488.
+Visible door panels/frames mark the transfer Events. The fixture check compares
+exported box footprints with package walk blockers to catch planar axis drift.

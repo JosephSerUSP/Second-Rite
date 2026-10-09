@@ -14,16 +14,16 @@
     3.2
   ],
   "stats": {
-    "triangleCount": 38,
-    "vertexCount": 32,
+    "triangleCount": 86,
+    "vertexCount": 64,
     "materialGroupCount": 1,
     "textureDimensions": [
       512,
       512
     ],
-    "pngSizeBytes": 309352,
-    "renderMeshSizeBytes": 3804,
-    "packageSizeBytes": 314997
+    "pngSizeBytes": 348681,
+    "renderMeshSizeBytes": 8128,
+    "packageSizeBytes": 358650
   },
   "anchors": {
     "service_spawn": {
@@ -108,31 +108,31 @@
         "computeBackend": "CPU",
         "devices": []
       },
-      "batchedSourceObjects": 1,
+      "batchedSourceObjects": 5,
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 0.20084610000048997,
-        "filteredCharts": 16,
-        "preservedSmallCharts": 2,
-        "filteredTexels": 220170,
+        "seconds": 0.3644209999984014,
+        "filteredCharts": 19,
+        "preservedSmallCharts": 22,
+        "filteredTexels": 225372,
         "alphaUnchanged": true
       },
       "texelAlignment": {
         "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
-        "alignedCharts": 18,
-        "preservedUnsafeCharts": 0,
+        "alignedCharts": 39,
+        "preservedUnsafeCharts": 2,
         "existingSharedTexelPairs": 0,
         "newSharedTexelPairs": 0,
         "atlasSize": 512
       }
     },
-    "exportSeconds": 3.208324999999604,
-    "sourceSha256": "7ae5b069b00a320ae5ec879cac2a2828f24e0b626cb3991a6498b92f5fbf75b6",
+    "exportSeconds": 3.3221583000049577,
+    "sourceSha256": "f4931253043ef3736407ffe61d6b86372f7bbe98300fea352f12147247828808",
     "productsSha256": {
-      "environment.obj": "b3e89dfd7f75c3290af9fdf827fa0bc69fb1b536f7fb1fdcba47cee49aa5d850",
+      "environment.obj": "eb63119a0718a4bee7a833899824008c5feb4eb4d618541862e4c5ba6600345a",
       "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
-      "environment.png": "baad9fe16af77ef0b402466c8b093f953481f8dadaa4c631b9c4cb5385a0abcc",
-      "collision.obj": "817a7384845ac8bec4ab9fddbccebddd6e8f9ac042cb43a128704b9ecddde32a"
+      "environment.png": "5a427eb48b8f40217dd558d8a9034a8cca08b3e2cd850935991289077ffac8b3",
+      "collision.obj": "ec078b0798ab92a05cdeaf8a9b125469eee09cccec7121cf65842e67fa795980"
     }
   },
   "walkSurface": {

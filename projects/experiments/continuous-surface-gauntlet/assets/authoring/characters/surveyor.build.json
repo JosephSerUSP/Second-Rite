@@ -314,7 +314,7 @@
   ],
   "authoredClips": {
     "recipe": "surveyor.clips.json",
-    "sha256": "5056a55aed744b485eb56dad97f0553c7670e44bd3ec3a73dbdc95eb8b20e97a",
+    "sha256": "0a2919fe5e4ef3da3404034e6294359ae5b5e195289e145fb06791546d185e67",
     "compiler": "tools/characters/author_character_clips.py"
   }
 }

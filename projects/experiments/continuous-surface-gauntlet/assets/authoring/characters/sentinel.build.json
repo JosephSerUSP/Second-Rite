@@ -314,7 +314,7 @@
   ],
   "authoredClips": {
     "recipe": "sentinel.clips.json",
-    "sha256": "2029d75065397e407e305c6f5d54d862343c9666e8082156e1f5f2b90f3cd4e2",
+    "sha256": "70a240e002ea711d9c8b217a5f1d5552fea411cf4360aa0b8990753728d5cc6d",
     "compiler": "tools/characters/author_character_clips.py"
   }
 }

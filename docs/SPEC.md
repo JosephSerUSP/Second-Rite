@@ -1473,6 +1473,12 @@ share this burn-to-black mathematics, while door zoom choreography remains
 specific to doors. Drawing the subtraction during the map or illustrated
 backdrop pass keeps HUD and dialogue UI outside the effect.
 
+The dialogue host seeds its complete window state before Scene entry, including
+the one-based choice cursor, and mirrors that cursor during both text and choice
+nodes. A closing dock retains the outgoing Scene definition, state and context
+for its close animation. Reopening a variant interrupts a pending collapse;
+the active transition destination governs retargeting.
+
 Dialogue `TEXT` commands may author `expression` from 1 through 5. Human
 portrait sheets are five 128x192 columns; column 1 is always the default pose.
 The selected column persists into the following choice until another spoken

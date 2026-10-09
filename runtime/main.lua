@@ -1156,6 +1156,14 @@ local function clearDialogueMessage()
     state.v.dialogueWaiting = false
 end
 
+local function initialDialogueWindowState()
+    return {
+        dialogueCursorIdx = dialogueSelectIdx, dialogueMode = "text",
+        dialogueText = "", dialogueSpeaker = "", dialogueExpression = 1,
+        dialogueRevealElapsed = 0, dialogueWaiting = false, dialogueOptions = {},
+    }
+end
+
 local function syncDialogueWindowState()
     local state = scene_host.getCurrentState()
     if not state then return end
@@ -1170,6 +1178,9 @@ local function syncDialogueWindowState()
     end
     state.v = state.v or {}
     local sceneState = state.v
+    -- The dock resolves its primary cursor even while the choice strip is hidden.
+    -- Mirror the owner cursor for TEXT as well as CHOICE.
+    sceneState.dialogueCursorIdx = dialogueSelectIdx
 
     if node.type == "TEXT" then
         sceneState.dialogueMode = "text"
@@ -1210,7 +1221,6 @@ local function syncDialogueWindowState()
             table.insert(opts, opt.label)
         end
         sceneState.dialogueOptions = opts
-        sceneState.dialogueCursorIdx = dialogueSelectIdx
 
         -- RPG Maker rule: the choice strip grows up from the dialog box's
         -- bottom (fitRows), and when the retained TEXT wouldn't fit in what
@@ -1511,7 +1521,7 @@ handleDialogueAction = function()
     -- TEXT needs the dialogue scene's windows/backdrop; leaving the walker in
     -- the deliberately empty cinematic scene produces a black soft-lock.
     if node.type == "TEXT" and scene_host.getCurrent() == "cinematic" then
-        scene_host.goto_scene("dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
+        scene_host.goto_scene("dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} }, initialDialogueWindowState())
     end
 
     if node.type == "ACTION" then
@@ -1767,7 +1777,8 @@ local function runEventCommands(eventTarget, commands)
         -- Command ownership is fixed for this graph. Common Event commands
         -- injected into the same walker keep the placed caller as SELF owner.
         activeWalker.eventOwner = activeEv
-        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
+        dialogueSelectIdx = 1
+        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} }, initialDialogueWindowState())
         handleDialogueAction()
     end
 

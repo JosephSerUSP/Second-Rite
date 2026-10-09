@@ -42,6 +42,7 @@ love.update = function(dt)
     elseif step == 3 and elapsed > 3 then
         assert(scenes.getCurrent()=="dialogue","NPC did not enter Dialogue")
         local state=scenes.getCurrentState()
+        assert(state.v.dialogueCursorIdx==1,"TEXT dialogue cursor not initialized")
         assert(state.v.dialogueText:find("The service door is the blue door",1,true),"NPC text not synchronized")
         assert(scenes.getCurrentSceneData({session=activeSession,loader=activeSession.loader}).config.dock.variant=="dialogue")
         assert(activeSession.loader.engine.dock.variants.dialogue.windows[1],"Dialogue dock has no window definitions")
@@ -125,8 +126,38 @@ love.update = function(dt)
             assert(not activeSession.arenaEncounter,"load restarted combat")
             love.graphics.captureScreenshot("chapter-complete-proof.png")
             print("PLAYTHROUGH CHAPTER REPORT AND SAVE LOAD OK")
-            love.event.quit(0)
+            -- Clone the fixture: test CHOICE-first without modifying shared loader data.
+            local json=require("engine.data.json")
+            activeSession.currentMapData=json.decode(json.encode(activeSession.currentMapData))
+            local event=activeSession.currentMapData.events[1]
+            event.pages=nil
+            event.commands={{cmd="CHOICE",options={
+                {label="First",commands={{cmd="SET_GAME_VARIABLE",name="dialogueProbe",value="1"}}},
+                {label="Second",commands={{cmd="SET_GAME_VARIABLE",name="dialogueProbe",value="2"}}}
+            }}}
+            activeSession.continuousTraversal.x,activeSession.continuousTraversal.y=1.85,1.85
+            checkpoint=elapsed;step=15
         end
+    elseif step == 15 and elapsed-checkpoint>.5 then
+        love.keypressed("return");love.keyreleased("return")
+        assert(scenes.getCurrentState().v.dialogueCursorIdx==1,"CHOICE entry cursor missing before update")
+        checkpoint=elapsed;step=16
+    elseif step == 16 and elapsed-checkpoint>.5 then
+        local state=scenes.getCurrentState()
+        assert(state.v.dialogueMode=="choice" and #state.v.dialogueOptions==2,"CHOICE-first state missing")
+        love.keypressed("up");love.keyreleased("up")
+        checkpoint=elapsed;step=17
+    elseif step == 17 and elapsed-checkpoint>.3 then
+        assert(scenes.getCurrentState().v.dialogueCursorIdx==2,"choice cursor did not wrap")
+        love.keypressed("return");love.keyreleased("return")
+        assert(require("engine.game_variables").get(activeSession,"dialogueProbe")==2,"wrong choice executed")
+        assert(scenes.getCurrent()=="map","choice did not return to exploration")
+        checkpoint=elapsed;step=18
+    elseif step == 18 and elapsed-checkpoint>.5 then
+        love.keypressed("return");love.keyreleased("return")
+        assert(scenes.getCurrentState().v.dialogueCursorIdx==1,"new conversation retained prior cursor")
+        print("PLAYTHROUGH DIALOGUE CURSOR AND CHOICE OK")
+        love.event.quit(0)
     end
     assert(elapsed<65,"chapter playthrough timed out at step "..step)
 end

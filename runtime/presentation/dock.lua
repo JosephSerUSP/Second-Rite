@@ -17,7 +17,7 @@ local store = { _dataWins = {}, _visTrack = {} }
 local currentVariant = nil
 local currentShells = nil
 local transition = nil
-local lastV = nil
+local lastPresentation = nil
 
 local function registry(ctx)
     local engine = ctx and ctx.loader and ctx.loader.engine
@@ -188,6 +188,7 @@ local function beginTransition(reg, wantVariant)
     -- on the way to a variant that has no slots.
     transition.fromVariant = currentVariant
     transition.fromStore = store
+    transition.fromPresentation = assert(lastPresentation, "outgoing dock requires its Scene context")
 
     -- A window the incoming variant ALSO has is not opening -- it is simply
     -- still there. The party slots survive map -> items and exploration ->
@@ -224,8 +225,9 @@ function dock.draw(state, sceneData, ctx)
         and require("presentation.door_transition").isActive() then
         return
     end
-    if wantVariant ~= currentVariant
-        and (not transition or transition.targetVariant ~= wantVariant) then
+    local destination = currentVariant
+    if transition then destination = transition.targetVariant end
+    if wantVariant ~= destination then
         beginTransition(reg, wantVariant)
     end
     if state and state.v then
@@ -290,6 +292,7 @@ function dock.draw(state, sceneData, ctx)
                 currentVariant = transition.targetVariant
                 currentShells = currentVariant and transition.to or nil
                 transition = nil
+                lastPresentation = { state = state, sceneData = sceneData, ctx = ctx }
                 if state and state.v then state.v._dockContentReady = true end
             end
         elseif staticShell then
@@ -310,7 +313,8 @@ function dock.draw(state, sceneData, ctx)
                 end
                 if #closing > 0 then
                     require("presentation.window_renderer").drawWindowFromData(
-                        sceneData, state, ctx,
+                        transition.fromPresentation.sceneData, transition.fromPresentation.state,
+                        transition.fromPresentation.ctx,
                         { windows = closing, store = transition.fromStore })
                 end
             end
@@ -318,7 +322,7 @@ function dock.draw(state, sceneData, ctx)
             drawShells(transition.from)
         end
     elseif currentVariant and state then
-        lastV = state.v
+        lastPresentation = { state = state, sceneData = sceneData, ctx = ctx }
         -- Content windows draw their own shell panel at the settled geometry.
         -- There is exactly one visible content layer per shell.
         require("presentation.window_renderer").drawWindowFromData(
@@ -336,7 +340,7 @@ function dock.reset()
     currentVariant = nil
     currentShells = nil
     transition = nil
-    lastV = nil
+    lastPresentation = nil
 end
 
 function dock.variant()

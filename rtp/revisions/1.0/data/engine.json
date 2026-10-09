@@ -2681,7 +2681,7 @@
         {
           "key": "reduction",
           "type": "number",
-          "min": 0.000001,
+          "min": 1e-06,
           "max": 1
         },
         {
@@ -2756,6 +2756,91 @@
         "scene"
       ],
       "interactive": false
+    },
+    {
+      "id": "ARENA_START",
+      "category": "Progression",
+      "label": "Start Arena Encounter",
+      "params": [
+        {
+          "key": "eventId",
+          "type": "number"
+        },
+        {
+          "key": "enemyUnitId",
+          "type": "actorId"
+        },
+        {
+          "key": "playerSlot",
+          "type": "number"
+        },
+        {
+          "key": "skillId",
+          "type": "skillId"
+        },
+        {
+          "key": "readySeconds",
+          "type": "formula"
+        },
+        {
+          "key": "enemyPeriod",
+          "type": "formula"
+        },
+        {
+          "key": "windupSeconds",
+          "type": "formula"
+        },
+        {
+          "key": "range",
+          "type": "formula"
+        },
+        {
+          "key": "attackRadius",
+          "type": "formula"
+        },
+        {
+          "key": "enemySpeed",
+          "type": "formula"
+        },
+        {
+          "key": "stopDistance",
+          "type": "formula"
+        },
+        {
+          "key": "onVictory",
+          "type": "commands"
+        },
+        {
+          "key": "onDefeat",
+          "type": "commands"
+        }
+      ],
+      "contexts": [
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Starts a continuous-surface encounter using the shared action executor. The host runs its outcome command list after cleanup. Active encounters cannot be saved."
+    },
+    {
+      "id": "ARENA_INPUT",
+      "category": "Scene",
+      "label": "Arena Input",
+      "params": [
+        {
+          "key": "button",
+          "type": "select",
+          "options": [
+            "confirm",
+            "cancel"
+          ]
+        }
+      ],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Routes command/targeting input to an active arena; otherwise leaves the Scene hook unhandled."
     }
   ],
   "paramLabels": {

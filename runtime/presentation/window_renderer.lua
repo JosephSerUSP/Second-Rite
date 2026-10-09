@@ -508,6 +508,7 @@ local function buildEnv(state, sceneData, ctx, listCache)
     local termsLoader = ctx.loader or (ctx.session and ctx.session.loader)
     env.terms = termsLoader and termsLoader.terms or {}
     if ctx.session then
+        env.variables = formula.makeContext({},ctx.session).variables
         env.session = formula.sessionView(ctx.session)
         env.party = formula.groupView(ctx.session.party or {}, ctx.session)
     end

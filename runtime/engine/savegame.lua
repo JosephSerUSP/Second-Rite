@@ -234,7 +234,13 @@ end
 -- Builds the full save payload for a session. `sceneName` should be
 -- scene_host.getCurrent() ("map" or "town") — the caller decides whether
 -- saving is currently allowed.
+function savegame.canSave(sessionObj)
+    if sessionObj.arenaEncounter then return false,"saving an active arena encounter is not supported" end
+    return true
+end
+
 function savegame.serialize(sessionObj, loader, sceneName)
+    assert(savegame.canSave(sessionObj))
     local reserve = {}
     for k, b in pairs(sessionObj.reserve or {}) do
         reserve[tostring(k)] = serializeBattler(b)
@@ -477,6 +483,8 @@ function savegame.list()
 end
 
 function savegame.save(sessionObj, loader, sceneName, slot)
+    local allowed,reason=savegame.canSave(sessionObj)
+    if not allowed then return nil,reason end
     slot = slot or "quicksave"
     local created, createErr = love.filesystem.createDirectory(SAVE_DIR)
     if not created then

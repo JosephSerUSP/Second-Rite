@@ -2616,6 +2616,30 @@ Continuous-surface camera controls edit the Scene through the generated camera
 resolver; Map traversal data is unaffected. These experimental appearances do
 not convert the shipping roster or change battle animation ownership.
 
+The experimental arena uses ordinary `ARENA_START` Event commands and
+`ARENA_INPUT` Scene hooks. `engine/arena_host.lua` owns simulation time,
+readiness, enemy movement, telegraphs and terminal cleanup. It calls the shared
+single-action mutation in `engine/action_execution.lua`; Battle delegates to
+that same module while retaining rounds, phase hooks and outcome scheduling.
+Item application and cover evaluation are shared as well. The arena context
+supplies existing Battlers and targeting groups, not a second damage model.
+
+`engine/world_event_actor.lua` owns transient XYZ roots through the same
+continuous-surface collision semantic and package authority. It publishes
+idle/moving state to the existing Event animation owner. Rendering reads world
+roots and the simulation clock; command/targeting pauses freeze locomotion and
+readiness but leave presentation time running. Target range and a fixed
+telegraph zone use a circular distance check. Authored immediate outcome commands execute
+after encounter bindings are removed, with Scene/window facts consumed by the
+same Scene owner as ordinary hooks. Arena tuning formulas use the shared
+Formula compiler/evaluator; positive finite values are checked at activation. Interactive dialogue belongs in the routed
+destination Scene rather than an immediate outcome list. Active encounters explicitly reject
+save/Map-transfer requests; exploration saves remain valid. Command and targeting panels use the existing windowskin and slide timers.
+The HUD observes
+published facts through ordinary Game Variables, also exposed to window formulas
+through the canonical formula context. This slice supports one enemy and one
+basic Attack; no round-timed skill progression or roster conversion is added.
+
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 
 Sky art is authored against the canonical 256x240 composition and has no

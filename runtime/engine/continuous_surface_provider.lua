@@ -149,6 +149,14 @@ function provider.enterMap(session, arrival)
     return initialize(session, arrival)
 end
 
+function provider.createActor(session, event)
+    local spec = assert(specFor(session), "world actor requires continuous surface")
+    local environment = environment_package.load(spec.environmentPackage)
+    local x,y,z = eventPosition(event)
+    assert(x and y, "world actor requires authored worldPosition")
+    return semantic.new(semanticSpec(spec,environment),{x=x,y=y,z=z})
+end
+
 function provider.update(session, dt, held)
     local state = provider.ensure(session)
     if not state then return false end
@@ -190,7 +198,9 @@ function provider.nearestEvent(session, radius, predicate)
     local best, bestDistance2 = nil, radius * radius
     for _, event in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         if not predicate or predicate(event) then
-            local x, y = eventPosition(event)
+            local root=require("engine.world_event_actor").snapshot(session,event)
+            local x,y
+            if root then x,y=root.x,root.y else x,y=eventPosition(event) end
             if x and y then
                 local eventRadius = tonumber(event.interactionRadius) or radius
                 local dx, dy = state.x - x, state.y - y

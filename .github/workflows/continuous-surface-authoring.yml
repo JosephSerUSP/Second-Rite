@@ -122,6 +122,7 @@ jobs:
             '05-archive-runtime-camera.png',
             '06-attendant-character-controls.png',
             '07-scene-camera-controls.png',
+            '08-arena-command-authoring.png',
             'proof.json'
           )
           foreach ($file in $expected) {

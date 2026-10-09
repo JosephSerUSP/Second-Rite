@@ -216,6 +216,10 @@ function validator.run(loader)
                     .. "' which is not registered by the resolved engine vocabulary")
             end
 
+            if node.cmd=="ARENA_START" then
+                local ok,err=pcall(require("engine.arena_host").validateSpec,node,loader,true)
+                check(ok,where.." ARENA_START: "..tostring(err))
+            end
             if node.cmd == "SCENE_EVENT" then
                 check(SCENE_EVENT_KINDS[node.kind] == true,
                     where .. " SCENE_EVENT has unknown kind '" .. tostring(node.kind) .. "'")
@@ -259,6 +263,14 @@ function validator.run(loader)
         validateCommandTree(commonEvent.commands or commonEvent,
             "common event '" .. tostring(id) .. "'")
     end
+    local function validateArenaCommands(node,map,owner)
+        if type(node)~="table" then return end
+        if node.cmd=="ARENA_START" then
+            local ok,err=pcall(require("engine.arena_host").validate,node,loader,map,true)
+            check(ok,owner.." ARENA_START: "..tostring(err))
+        end
+        for key,value in pairs(node) do if key~="meta" then validateArenaCommands(value,map,owner) end end
+    end
     for _, map in ipairs(loader.maps or {}) do
         if map.traversal and map.traversal.actorAppearance then
             local ok, err = pcall(require("presentation.animated_actor").validateSpec, map.traversal.actorAppearance)
@@ -275,11 +287,18 @@ function validator.run(loader)
         end
         for eventIndex, event in ipairs(map.events or {}) do
             local owner="map '"..tostring(map.id).."' event["..eventIndex.."]"
+            validateArenaCommands(event.commands,map,owner)
+            local common=event.scriptId and loader.commonEvents[tostring(event.scriptId)]
+            if common then validateArenaCommands(common.commands,map,owner.." common event") end
             validateCharacterResource(event, owner)
             validateCharacterPlacement(event, owner)
             validateCommandTree(event.commands or event.script, owner)
             for pageIndex, page in ipairs(event.pages or {}) do
                 local pageOwner = owner.." page["..pageIndex.."]"
+                validateArenaCommands(page.commands,map,pageOwner)
+                local commonId=page.scriptId or event.scriptId
+                local pageCommon=commonId and loader.commonEvents[tostring(commonId)]
+                if pageCommon then validateArenaCommands(pageCommon.commands,map,pageOwner.." common event") end
                 validateCharacterResource(page, pageOwner)
                 local effective = {}
                 for key, value in pairs(event) do effective[key] = value end

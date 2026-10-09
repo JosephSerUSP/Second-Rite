@@ -1055,6 +1055,7 @@ local arrivalBeside = exploration.arrivalBeside
 -- for a temporary town portal. Capability-backed Maps may interpret any other
 -- arrival string as an authored environment anchor through traversal_host.
 function exploration.loadMap(session, mapIdx, opts)
+    assert(not session.arenaEncounter,"leave the arena encounter before loading a Map")
     local profileLoad = buildProfiler.span("gameplay.loadMap.total", "aggregate")
     opts = opts or {}
     local rawMapData = session.loader.maps[mapIdx]

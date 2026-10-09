@@ -4,8 +4,14 @@
   "category": "experiment",
   "depth": 0,
   "safe": true,
-  "layout": ["."],
-  "spawn": { "x": 0, "y": 0, "dir": "N" },
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
   "events": [
     {
       "id": 201,
@@ -13,20 +19,32 @@
       "name": "Archive Door",
       "x": 0,
       "y": 0,
-      "worldPosition": [-3.35, 1.85, 0.0],
+      "worldPosition": [
+        -3.35,
+        1.85,
+        0.0
+      ],
       "interactionRadius": 1.15,
       "trigger": "interact",
       "commands": [
-        { "cmd": "LOAD_MAP", "mapId": 1, "arrival": "arrival_from_service" }
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1,
+          "arrival": "arrival_from_service"
+        }
       ]
     },
     {
       "id": 203,
       "instanceId": "gauntlet-service-sentinel",
-      "name": "Dormant Sentinel",
+      "name": "Service Sentinel",
       "x": 0,
       "y": 0,
-      "worldPosition": [1.6, -1.4, 0.0],
+      "worldPosition": [
+        1.6,
+        -1.4,
+        0.0
+      ],
       "interactionRadius": 1.0,
       "facing": "W",
       "trigger": "interact",
@@ -36,8 +54,47 @@
       },
       "commands": [
         {
-          "cmd": "TEXT",
-          "text": "A dormant sentinel watches the service floor. Its encounter is not active."
+          "cmd": "ARENA_START",
+          "eventId": 203,
+          "enemyUnitId": "sentinel",
+          "playerSlot": 1,
+          "skillId": "attack",
+          "readySeconds": 2.5,
+          "enemyPeriod": 3,
+          "windupSeconds": 1.25,
+          "range": 2.6,
+          "attackRadius": 1.1,
+          "enemySpeed": 0.65,
+          "onVictory": [
+            {
+              "cmd": "SET_GAME_VARIABLE",
+              "name": "sentinelDefeated",
+              "value": "true"
+            },
+            {
+              "cmd": "SCENE_EVENT",
+              "kind": "goto",
+              "scene": "map"
+            }
+          ],
+          "onDefeat": [
+            {
+              "cmd": "RECOVER_PARTY"
+            }
+          ],
+          "stopDistance": 0.7
+        }
+      ],
+      "pages": [
+        {
+          "condition": "variables.sentinelDefeated == true",
+          "actorAppearance": false,
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The service floor is quiet again."
+            }
+          ]
         }
       ]
     },
@@ -47,7 +104,11 @@
       "name": "Maintenance Ledger",
       "x": 0,
       "y": 0,
-      "worldPosition": [2.15, 1.45, 0.0],
+      "worldPosition": [
+        2.15,
+        1.45,
+        0.0
+      ],
       "interactionRadius": 0.95,
       "trigger": "interact",
       "commands": [

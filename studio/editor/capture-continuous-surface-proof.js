@@ -159,6 +159,7 @@ async function main() {
         await page.addInitScript(url => { globalThis.THESTRA_RENDERABLE_URL = url; },
             `http://127.0.0.1:${bridgePort}/api/map-renderable`);
         page.on('pageerror', error => diagnostics.push(`pageerror: ${error.stack || error.message}`));
+        page.on('response', response => { if(response.status()>=400) diagnostics.push(`http: ${response.status()} ${response.url()}`); });
         page.on('console', message => {
             if (message.type() === 'error') diagnostics.push(`console: ${message.text()}`);
         });
@@ -313,6 +314,20 @@ async function main() {
             for (const key of Object.keys(scene)) delete scene[key];
             Object.assign(scene,JSON.parse(original));closeEngineModal(true);
         },sceneBefore);
+
+        await selectMap(page,1,'service_annex','Service Annex');
+        const arenaEventBefore=await page.evaluate(()=>JSON.stringify(dbPayload.maps[1].events.find(value=>value.id===203)));
+        await page.evaluate(()=>{
+            const event=dbPayload.maps[1].events.find(value=>value.id===203);
+            openCommandModalForEdit(event.commands,0,()=>{}, {context:'map'});
+        });
+        assert.equal(await page.locator('#cmd-dyn-enemyUnitId').inputValue(),'sentinel');
+        assert.equal(await page.locator('#cmd-dyn-range').inputValue(),'2.6');
+        assert.equal(await page.locator('#cmd-dyn-readySeconds').inputValue(),'2.5');
+        await capture(page,'08-arena-command-authoring.png');
+        await page.evaluate(()=>closeCmdDialog(true));
+        assert.equal(await page.evaluate(()=>JSON.stringify(dbPayload.maps[1].events.find(value=>value.id===203))),arenaEventBefore,
+            'opening arena command fields mutated authored data');
 
         const summary = await authoritySnapshot(page);
         summary.collisionVisible = await page.evaluate(() =>

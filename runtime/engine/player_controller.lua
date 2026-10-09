@@ -86,12 +86,18 @@ function controller.update(dt, ctx, options)
         local function down(button)
             return held[button] ~= nil and held[button].consumed ~= true
         end
-        traversal_host.update(ctx.session, dt, {
-            up = down("UP"),
-            down = down("DOWN"),
-            left = down("LEFT"),
-            right = down("RIGHT"),
-        })
+        local paused = require("engine.arena_host").update(ctx.session,dt)
+        if paused then
+            local root=ctx.session.continuousTraversal
+            if root then root.moving=false end
+        else
+            traversal_host.update(ctx.session, dt, {
+                up = down("UP"),
+                down = down("DOWN"),
+                left = down("LEFT"),
+                right = down("RIGHT"),
+            })
+        end
     end
 
     local fired = false

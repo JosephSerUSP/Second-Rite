@@ -3352,6 +3352,27 @@ end
             target.model = true
         end
     end
+    local encounter=session.arenaEncounter
+    if encounter and worldPass ~= "environment" then
+        local function ring(zone,color)
+            local target=group(getWhiteWallTexture(),"billboard")
+            target.depth=viewport_3d.cameraSpaceDepth(zone.x,zone.y,zone.z,cameraX,cameraY,cameraZ,dirX,dirY,pitchVal)
+            if #target.vertices==0 then target.sequence=#surfaces+1;surfaces[#surfaces+1]=target end
+            local function point(angle,radius)
+                return {x=zone.x+math.cos(angle)*radius,y=zone.y+math.sin(angle)*radius,z=zone.z+0.025}
+            end
+            for index=0,47 do
+                local first,last=index*math.pi/24,(index+1)*math.pi/24
+                addNearClippedQuad(target,point(first,zone.radius),point(last,zone.radius),
+                    point(last,zone.radius-0.06),point(first,zone.radius-0.06),{0,0,1,1},{color,color,color,color})
+            end
+        end
+        if encounter.telegraph then ring(encounter.telegraph,{1,0.15,0.03,1}) end
+        if encounter.mode=="targeting" then
+            local x,y,z=require("engine.traversal_host").actorRoot(session)
+            ring({x=x,y=y,z=z,radius=encounter.spec.range},{0.05,0.8,1,1})
+        end
+    end
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then

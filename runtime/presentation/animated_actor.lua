@@ -54,6 +54,7 @@ function actor.resolve(session,view,clock)
     local pose=view.actor
     local clip=pose.moving and "walk" or "idle"
     local duration=prepared.asset.clips[clip].duration
+    clock=session.arenaEncounter and session.arenaEncounter.elapsed or clock
     local time=pose.moving and (pose.walkDistance or 0)/spec.stride*duration or clock
     if pose.animationPhase then time=pose.animationPhase*duration end
     return sample(spec,prepared,pose,clip,time)
@@ -68,12 +69,16 @@ function actor.resolveEvent(session,event,presentation,clock)
     assert(not state.overrideKind or state.overrideKind == "pose",
         "compiled Event characters currently support locomotion and held poses; one-shot playback is not authored")
     local x,y,z=require("presentation.viewport_3d").eventWorldPosition(event)
+    local root=require("engine.world_event_actor").snapshot(session,event)
+    if root then x,y,z=root.x,root.y,root.z end
+    clock=session.arenaEncounter and session.arenaEncounter.elapsed or clock
     if session.currentMapData.traversal and session.currentMapData.traversal.provider == "bounded_lane" then
         z=require("engine.bounded_lane").eventGroundAt(session,event,y) or z
     end
     local directions={N={0,-1},E={1,0},S={0,1},W={-1,0}}
     local facing=assert(directions[state.facing],"unknown Event facing")
-    local pose={x=x,y=y,z=z,facingX=facing[1],facingY=facing[2]}
+    local worldHeading=root and (root.walkDistance or 0)>0
+    local pose={x=x,y=y,z=z,facingX=worldHeading and root.facingX or facing[1],facingY=worldHeading and root.facingY or facing[2]}
     return sample(spec,prepared,pose,state.clip,state.overrideKind == "pose" and 0 or clock)
 end
 function actor.clearCache() cache={} end

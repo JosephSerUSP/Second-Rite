@@ -1,0 +1,10 @@
+{
+  "id": "dialogue",
+  "name": "Dialogue",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "config": { "dock": { "variant": "dialogue" } },
+  "hooks": { "on_enter": [] },
+  "windows": []
+}

@@ -451,5 +451,20 @@ assert(completedNode and completedNode.completed and not completedNode.candidate
     "Completed recruit node did not survive save/load")
 print("  [PASS] Persistent recruit nodes save, complete once, and do not duplicate")
 
-print("[TEST] All Creature Recruitment tests passed successfully!")
 
+
+-- String Project item ids must use the same inventory authority as numeric ids.
+do
+    local conditions = require("engine.conditions")
+    local inventory = { autopsy_key = 1, [198] = 1 }
+    local session = { hasItem = function(_, id, amount) return (inventory[id] or 0) >= amount end }
+    local matched, allowed = conditions.evalPrefixed("hasItem:autopsy_key", session)
+    assert(matched and allowed, "string inventory identity cannot open authored gate")
+    inventory.autopsy_key = nil
+    matched, allowed = conditions.evalPrefixed("hasItem:autopsy_key", session)
+    assert(matched and not allowed, "missing string key opens authored gate")
+    matched, allowed = conditions.evalPrefixed("hasItem:198", session)
+    assert(matched and allowed, "numeric inventory gate changed")
+end
+
+print("[TEST] All Creature Recruitment tests passed successfully!")

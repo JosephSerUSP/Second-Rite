@@ -95,10 +95,13 @@ def create_source(name, source):
 
 
 def main():
+    global PROJECT
     parser = argparse.ArgumentParser()
+    parser.add_argument("--project", type=Path, default=PROJECT)
     parser.add_argument("--create-sources", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:])
+    PROJECT = args.project.resolve()
     for name in ("archive_antechamber", "service_annex"):
         source = PROJECT / "assets/authoring/environments" / (name + ".blend")
         if args.create_sources:

@@ -1,0 +1,81 @@
+{
+  "id": "map",
+  "name": "Hospital Traversal Starter",
+  "kind": "map",
+  "draw": "world",
+  "world": "continuous_surface",
+  "worldPresentation": {
+    "pixelsPerTile": 24,
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "distance": 11.5,
+      "yawDegrees": 0,
+      "pitchDegrees": 12,
+      "eyeHeight": 3.25,
+      "fovDegrees": 42,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "nearPlane": 0.05,
+      "farPlane": 48
+    }
+  },
+  "config": {},
+  "hooks": {
+    "on_up": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ]
+  },
+  "windows": [
+    {
+      "id": "slice_objective",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 1,
+        "w": "surface.width - 2",
+        "h": 5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "{session.mapTitle}\n{variables.powerState == 'on' and 'Power restored. Return to the 1F elevator.' or 'Collect 3 fuses, repair wires and restore power.'}\nBlue door: routes   Bright bench: interact   Arrows/Enter   F5/F6: save/load"
+        }
+      ]
+    }
+  ]
+}

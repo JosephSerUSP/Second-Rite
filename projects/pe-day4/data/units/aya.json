@@ -1,0 +1,18 @@
+{
+  "id": "aya",
+  "name": "Traversal actor",
+  "level": 18,
+  "skills": [],
+  "baseParams": {
+    "maxHp": 60,
+    "atk": 12,
+    "def": 5,
+    "mat": 1,
+    "mdf": 1,
+    "mpd": 1,
+    "mxa": 1,
+    "mxp": 1
+  },
+  "growthBands": [],
+  "defaultGrowthSeed": 12345
+}

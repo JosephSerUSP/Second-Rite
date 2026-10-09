@@ -1,0 +1,90 @@
+{
+  "id": 8,
+  "title": "Basement autopsy room (proxy)",
+  "category": "experiment",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 801,
+      "instanceId": "autopsy_room-route-door",
+      "name": "Blue route door",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        -3.35,
+        1.85,
+        0.0
+      ],
+      "interactionRadius": 1.15,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Basement main corridor",
+              "commands": [
+                {
+                  "cmd": "CONDITIONAL_BRANCH",
+                  "condition": "hasItem:autopsy_key",
+                  "commands": [
+                    {
+                      "cmd": "LOAD_MAP",
+                      "mapId": 5,
+                      "arrival": "arrival_from_archive"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "This route is unavailable in the current power/key state."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Basement inner autopsy room",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 9,
+                  "arrival": "arrival_from_archive"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cancelOption": 3
+        }
+      ]
+    }
+  ],
+  "traversal": {
+    "provider": "continuous_surface",
+    "actorAppearance": {
+      "character": "assets/characters/surveyor/character.json",
+      "height": 1.75,
+      "stride": 2.52
+    },
+    "environmentPackage": "assets/environments/service_annex/environment.json",
+    "spawnAnchor": "service_spawn",
+    "interactionRadius": 1.15,
+    "surface": {
+      "speed": 2.65,
+      "maxStep": 0.08
+    }
+  }
+}

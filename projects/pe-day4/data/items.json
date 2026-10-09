@@ -1,0 +1,69 @@
+[
+  {
+    "id": "handgun_ammo",
+    "name": "Handgun Ammo",
+    "type": "key",
+    "cost": 0,
+    "description": "Snapshot inventory identity; no use behavior in this traversal starter."
+  },
+  {
+    "id": "mayoke",
+    "name": "Mayoke",
+    "type": "key",
+    "cost": 0,
+    "description": "Snapshot inventory identity; no use behavior in this traversal starter."
+  },
+  {
+    "id": "fuse_1",
+    "name": "Fuse 1",
+    "type": "key",
+    "cost": 0,
+    "description": "Hospital route item; retained after installation/use under explicit prototype policy."
+  },
+  {
+    "id": "fuse_2",
+    "name": "Fuse 2",
+    "type": "key",
+    "cost": 0,
+    "description": "Hospital route item; retained after installation/use under explicit prototype policy."
+  },
+  {
+    "id": "fuse_3",
+    "name": "Fuse 3",
+    "type": "key",
+    "cost": 0,
+    "description": "Hospital route item; retained after installation/use under explicit prototype policy."
+  },
+  {
+    "id": "autopsy_key",
+    "name": "Autopsy Key",
+    "type": "key",
+    "cost": 0,
+    "description": "Hospital route item; retained after installation/use under explicit prototype policy."
+  },
+  {
+    "id": "blue_cardkey",
+    "name": "Blue Cardkey",
+    "type": "key",
+    "cost": 0,
+    "description": "Hospital route item; retained after installation/use under explicit prototype policy."
+  },
+  {
+    "id": "m9_2",
+    "name": "M9 2",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "cost": 0,
+    "traits": [],
+    "description": "Snapshot equipment identity only; prototype parameters. No mechanical acceptance."
+  },
+  {
+    "id": "n_jacket",
+    "name": "N Jacket",
+    "type": "equipment",
+    "equipType": "Armor",
+    "cost": 0,
+    "traits": [],
+    "description": "Snapshot equipment identity only; prototype parameters. No mechanical acceptance."
+  }
+]

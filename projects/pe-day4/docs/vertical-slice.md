@@ -26,8 +26,9 @@ archaeology and early combat presentation.
 Start from `reference/canonical-start.json` at the hospital exterior, after the
 Day-4 NYPD briefing and Maeda arrival conversation. Do not replay Days 1–3.
 
-End when the rooftop escape reaches the emergency elevator/gondola terminal
-state after Spiderwoman.
+End after the normal Spider fight in the escape gondola. Rooftop escape
+arrival and final encounter victory are separate states; reaching safety clears
+the escape countdown but does not complete the slice.
 
 The mandatory state graph is `reference/route.json`.
 
@@ -112,6 +113,6 @@ is not source-fidelity acceptance. A booted window is not owner play.
 
 ## Delivery order
 
-M0 establishes reference facts, the canonical starting snapshot and the route/state contract. M1 implements traversal and persistent world-state changes. M2 replaces combat stubs with distinct enemy ecology and an honest mechanical route. M3 adds magazine/Reload and the minimum equipment economy needed by the slice. M4 finishes Spiderwoman, the rooftop escape and end-to-end acceptance.
+M0 establishes reference facts, the canonical starting snapshot and the route/state contract. M1 implements traversal and persistent world-state changes. M2 replaces combat stubs with distinct enemy ecology and an honest mechanical route. M3 adds magazine/Reload and the minimum equipment economy needed by the slice. M4 finishes Spiderwoman, the rooftop escape, the separate gondola Spider fight and end-to-end acceptance.
 
 Each milestone must preserve the separation between source facts, project-local PE policy and genuinely generic Thestra primitives. If a proposed engine feature lacks a Second Gate analogue and a second PE use-case, keep it project-local until that justification exists.

@@ -1987,6 +1987,14 @@ end
 -- array index as an internal storage detail; event data must not depend on it.
 -- Omitting mapId defers to system.spawn.mapId, so "where New Game starts" is
 -- data-editable without touching this command.
+handlers.ARENA_START = function(cmd,ctx)
+    local arena=require("engine.arena_host")
+    arena.start(ctx.session,arena.resolveSpec(cmd,function(value) return evalFormula(value,ctx) end))
+end
+handlers.ARENA_INPUT = function(cmd,ctx)
+    if not require("engine.arena_host").input(ctx.session,cmd.button) then ctx.hookFallback=true end
+end
+
 handlers.LOAD_MAP = function(cmd, ctx)
     local exploration = require("engine.exploration")
     local sys = ctx.session.loader and ctx.session.loader.system

@@ -1052,8 +1052,10 @@ local arrivalBeside = exploration.arrivalBeside
 
 -- Initialize or restore map state in GameSession. `arrival` is authored by the
 -- transfer command: entrance when descending, exit when climbing, and resume
--- for a temporary town portal.
+-- for a temporary town portal. Capability-backed Maps may interpret any other
+-- arrival string as an authored environment anchor through traversal_host.
 function exploration.loadMap(session, mapIdx, opts)
+    assert(not session.arenaEncounter,"leave the arena encounter before loading a Map")
     local profileLoad = buildProfiler.span("gameplay.loadMap.total", "aggregate")
     opts = opts or {}
     local rawMapData = session.loader.maps[mapIdx]
@@ -1202,14 +1204,17 @@ function exploration.loadMap(session, mapIdx, opts)
     session.playerY = startY
     session.playerDir = startDir or "N"
 
-    -- A Project may opt this map into a narrow traversal capability.  The
-    -- ordinary grid remains loaded for shared Map/Event infrastructure, while
-    -- the provider owns continuous actor position and package-backed anchors.
+    -- A Project may opt this map into a narrow traversal capability. The
+    -- ordinary grid remains loaded for shared Map/Event infrastructure. New
+    -- provider families enter through traversal_host so exploration does not
+    -- learn their topology; bounded_lane remains the explicit pre-registry
+    -- compatibility path until that older capability is promoted.
     session.townTraversal = nil
     session.worldCameraProjectionWindowOffsetX = nil
     session.worldCameraProjectionWindowOffsetY = nil
     local traversal = mapData.traversal
-    if type(traversal) == "table" and traversal.provider == "bounded_lane" then
+    local hostedTraversal = require("engine.traversal_host").enterMap(session, opts.arrival)
+    if not hostedTraversal and type(traversal) == "table" and traversal.provider == "bounded_lane" then
         local environment = require("engine.environment_package").load(
             traversal.environmentPackage)
         require("engine.bounded_lane").initialize(session, mapData, environment, opts.arrival)

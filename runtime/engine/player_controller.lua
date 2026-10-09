@@ -1,7 +1,15 @@
 local controls = require("engine.player_controls")
 local scene_host = require("engine.scene_host")
+local traversal_host = require("engine.traversal_host")
 
 local controller = {}
+
+-- Screen directions use the same resolved basis as the authored world camera.
+-- The traversal provider still receives only a neutral world-space vector.
+function controller.worldMovement(camera, horizontal, vertical)
+    return horizontal * camera.rightX + vertical * camera.dirX,
+        horizontal * camera.rightY + vertical * camera.dirY
+end
 
 -- Held state belongs to the logical player membrane, never to a keyboard
 -- adapter. A physical key and an external player policy therefore accumulate
@@ -16,6 +24,14 @@ local function assertButton(button)
 end
 
 local function dispatch(button, ctx)
+    -- A traversal provider consumes only canonical logical buttons. It never
+    -- sees the physical key/device that produced them, and only gets first say
+    -- while the Map Scene owns input. Providers that do not consume the edge
+    -- fall through to the same authored Scene/main-host path as before.
+    if scene_host.getCurrent() == "map" and ctx and ctx.session
+            and traversal_host.buttonpressed(ctx.session, button) then
+        return true
+    end
     return scene_host.buttonpressed(button, ctx)
 end
 
@@ -63,8 +79,8 @@ end
 
 -- Host-driven logical repeat. `initial` and `interval` are supplied by the
 -- ordinary Project UI configuration so physical and automated players share
--- the existing timing policy. This emits only canonical button presses; it has
--- no map-step, turn, dialogue-choice, Event, coordinate, or Scene-hook API.
+-- the existing timing policy. Providers may additionally sample the canonical
+-- held directions continuously; they still receive no physical key or device.
 function controller.update(dt, ctx, options)
     options = options or {}
     local initial = tonumber(options.initial) or 0.3
@@ -72,6 +88,34 @@ function controller.update(dt, ctx, options)
     if initial < 0 then initial = 0 end
     if interval <= 0 then interval = 0.06 end
     dt = math.max(0, tonumber(dt) or 0)
+
+    if scene_host.getCurrent() == "map" and ctx and ctx.session then
+        local function down(button)
+            return held[button] ~= nil and held[button].consumed ~= true
+        end
+        local paused = require("engine.arena_host").update(ctx.session,dt)
+        if paused then
+            local root=ctx.session.continuousTraversal
+            if root then root.moving=false end
+        else
+            local movement = {
+                up = down("UP"),
+                down = down("DOWN"),
+                left = down("LEFT"),
+                right = down("RIGHT"),
+            }
+            if ctx.session.continuousTraversal then
+                local scene = scene_host.getCurrentSceneData(ctx)
+                local authored = assert(scene.worldPresentation.camera,
+                    "continuous movement requires an authored Scene camera")
+                local camera = require("engine.generated.world-view").resolveTownCamera(authored)
+                movement.worldX, movement.worldY = controller.worldMovement(camera,
+                    (movement.right and 1 or 0) - (movement.left and 1 or 0),
+                    (movement.up and 1 or 0) - (movement.down and 1 or 0))
+            end
+            traversal_host.update(ctx.session, dt, movement)
+        end
+    end
 
     local fired = false
     for _, button in ipairs(REPEAT_ORDER) do

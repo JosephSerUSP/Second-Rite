@@ -1,0 +1,20 @@
+{
+  "id": "sentinel",
+  "name": "Sentinel",
+  "level": 1,
+  "skills": [
+    "attack"
+  ],
+  "baseParams": {
+    "maxHp": 36,
+    "atk": 10,
+    "def": 4,
+    "mat": 1,
+    "mdf": 1,
+    "mpd": 1,
+    "mxa": 1,
+    "mxp": 1
+  },
+  "growthBands": [],
+  "defaultGrowthSeed": 12345
+}

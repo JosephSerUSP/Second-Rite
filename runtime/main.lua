@@ -723,6 +723,10 @@ function love.load(arg)
             "test_sprite_sheet",
             "test_lighting_composition",
             "test_baked_environment_package",
+            "test_traversal_view",
+            "test_character_animation",
+        "test_contact_audio",
+            "test_action_timeline",
             "test_bounded_lane",
             "test_bounded_lane_levels",
             "test_town_threshold_direction", "test_transition_markers",
@@ -1152,6 +1156,14 @@ local function clearDialogueMessage()
     state.v.dialogueWaiting = false
 end
 
+local function initialDialogueWindowState()
+    return {
+        dialogueCursorIdx = dialogueSelectIdx, dialogueMode = "text",
+        dialogueText = "", dialogueSpeaker = "", dialogueExpression = 1,
+        dialogueRevealElapsed = 0, dialogueWaiting = false, dialogueOptions = {},
+    }
+end
+
 local function syncDialogueWindowState()
     local state = scene_host.getCurrentState()
     if not state then return end
@@ -1166,6 +1178,9 @@ local function syncDialogueWindowState()
     end
     state.v = state.v or {}
     local sceneState = state.v
+    -- The dock resolves its primary cursor even while the choice strip is hidden.
+    -- Mirror the owner cursor for TEXT as well as CHOICE.
+    sceneState.dialogueCursorIdx = dialogueSelectIdx
 
     if node.type == "TEXT" then
         sceneState.dialogueMode = "text"
@@ -1206,7 +1221,6 @@ local function syncDialogueWindowState()
             table.insert(opts, opt.label)
         end
         sceneState.dialogueOptions = opts
-        sceneState.dialogueCursorIdx = dialogueSelectIdx
 
         -- RPG Maker rule: the choice strip grows up from the dialog box's
         -- bottom (fitRows), and when the retained TEXT wouldn't fit in what
@@ -1317,7 +1331,6 @@ function love.update(dt)
     if scene_host.getCurrent() == "battle" then
         require("engine.scenes.battle").update(dt)
     end
-
     if scene_host.getCurrent() == "dialogue" then
         syncDialogueWindowState()
     end
@@ -1352,6 +1365,8 @@ function love.update(dt)
         initial = conf("ui", "autoRepeatInitial", 0.3),
         interval = conf("ui", "autoRepeatInterval", 0.06),
     })
+    local encounter=activeSession and activeSession.arenaEncounter
+    require("presentation.contact_audio").present(encounter and encounter.impact)
 end
 
 -- F2 (overhaul-6): every scene draws the SAME declarative "party" window
@@ -1506,7 +1521,7 @@ handleDialogueAction = function()
     -- TEXT needs the dialogue scene's windows/backdrop; leaving the walker in
     -- the deliberately empty cinematic scene produces a black soft-lock.
     if node.type == "TEXT" and scene_host.getCurrent() == "cinematic" then
-        scene_host.goto_scene("dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
+        scene_host.goto_scene("dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} }, initialDialogueWindowState())
     end
 
     if node.type == "ACTION" then
@@ -1762,7 +1777,8 @@ local function runEventCommands(eventTarget, commands)
         -- Command ownership is fixed for this graph. Common Event commands
         -- injected into the same walker keep the placed caller as SELF owner.
         activeWalker.eventOwner = activeEv
-        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
+        dialogueSelectIdx = 1
+        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} }, initialDialogueWindowState())
         handleDialogueAction()
     end
 
@@ -1979,6 +1995,35 @@ handleKeyPressed = function(button)
             return false
         end
         if require("presentation.world_focus").isActive() then return true end
+
+        -- Provider-backed Maps own only the world-space interaction query. The
+        -- existing host still owns page resolution, trigger vocabulary,
+        -- Common Event lookup and the interactive GraphWalker. If the active
+        -- provider owns interaction but finds no candidate, confirm is still
+        -- consumed here so it cannot fall through into compatibility-grid data.
+        if button == "A" or button == "START" then
+            local traversalHost = require("engine.traversal_host")
+            local function interactableWorldEvent(rawEvent)
+                local ev = exploration.resolvePage(rawEvent, activeSession)
+                if not ev then return false end
+                local trigger = ev.trigger
+                if trigger ~= nil and trigger ~= "interact" and trigger ~= "touch" then
+                    return false
+                end
+                return commandsForMapEvent(ev) ~= nil
+            end
+            local rawEvent, traversalOwnsInteraction =
+                traversalHost.interactionEvent(activeSession, interactableWorldEvent)
+            if traversalOwnsInteraction then
+                if rawEvent then
+                    local eventObj = exploration.resolvePage(rawEvent, activeSession)
+                    local commands = commandsForMapEvent(eventObj)
+                    if commands then runEventCommands(eventObj, commands) end
+                end
+                return true
+            end
+        end
+
         if require("engine.bounded_lane").isActive(activeSession) then
             local lane = require("engine.bounded_lane")
             if button == "LEFT" or button == "RIGHT" then

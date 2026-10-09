@@ -1,8 +1,9 @@
 (function (root, factory) {
-    const api = factory();
+    const api = factory(typeof module === 'object' && module.exports
+        ? require('./generated/world-view.js') : root.ThestraWorldViewSemantics);
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.ThestraWorldPresentation = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function (WorldView) {
     'use strict';
 
     const PROFILE_SPECS = Object.freeze({
@@ -59,6 +60,10 @@
         if (camera == null) return errors;
         if (!camera || typeof camera !== 'object' || Array.isArray(camera)) {
             return ['worldPresentation.camera must be an object'];
+        }
+        if (camera.profile === 'town_sideview') {
+            try { WorldView.resolveTownCamera(camera); return []; }
+            catch (error) { return [error.message]; }
         }
         if (camera.profile != null && !PROFILE_SPECS[camera.profile]) {
             errors.push(`worldPresentation.camera has unknown profile '${camera.profile}'`);
@@ -183,7 +188,35 @@
 
     function mapWorldScenes(payload) {
         return ((payload && payload.scenes) || []).filter(scene => scene
-            && scene.draw === 'world' && scene.world === 'map');
+            && scene.draw === 'world' && (scene.world === 'map' || scene.world === 'continuous_surface'));
+    }
+
+    // Field writes use the generated WorldCamera contract, also consumed by
+    // LÖVE. Studio adds controls, not a second fixed-camera interpretation.
+    function fixedCameraSchema(scene) {
+        const fields = [
+            ['Target X', 'target.x'], ['Target Y', 'target.y'], ['Target Z', 'target.z'],
+            ['Distance', 'distance'], ['Yaw degrees', 'yawDegrees'], ['Pitch degrees', 'pitchDegrees'],
+            ['Eye height', 'eyeHeight'], ['FOV degrees', 'fovDegrees'],
+            ['Projection scale X', 'projectionScale.x'], ['Projection scale Y', 'projectionScale.y'],
+            ['Near plane', 'nearPlane'], ['Far plane', 'farPlane']
+        ].map(([label, path]) => {
+            const keys = path.split('.');
+            return {
+                kind: 'number', label, step: '0.01', inputId: `scene-camera-${keys.join('-')}`,
+                get: data => keys.reduce((value, key) => value?.[key], data.worldPresentation.camera),
+                parse: value => numeric(value, label),
+                set(data, value) {
+                    const camera = JSON.parse(JSON.stringify(data.worldPresentation.camera));
+                    let parent = camera;
+                    for (const key of keys.slice(0, -1)) parent = parent[key] || (parent[key] = {});
+                    parent[keys[keys.length - 1]] = value;
+                    WorldView.resolveTownCamera(camera);
+                    data.worldPresentation.camera = camera;
+                }
+            };
+        });
+        return { resolve: () => scene, fields };
     }
 
     function previewFocus(payload, mapIndex, selection) {
@@ -212,6 +245,11 @@
 
     function resolveCamera(authoredCamera, session) {
         const authored = authoredCamera && typeof authoredCamera === 'object' ? authoredCamera : {};
+        if (authored.profile === 'town_sideview') {
+            return Object.assign(WorldView.resolveTownCamera(authored), {
+                provenance: 'authored Scene', coordinateSpace: 'runtime'
+            });
+        }
         const profile = authored.profile || 'first_person';
         const preset = PROFILE_SPECS[profile];
         if (!preset) throw new Error(`unknown world camera profile: ${profile}`);
@@ -308,7 +346,7 @@
         PROFILE_SPECS, PROFILE_IDS, AUTHORING_STATE_MARKER,
         validateCamera, validateWorldPresentation,
         setPixelsPerTile, setCameraField, clearCamera,
-        imageSizeInTiles, mapWorldScenes, previewFocus, resolveCamera,
+        imageSizeInTiles, mapWorldScenes, fixedCameraSchema, previewFocus, resolveCamera,
         createPreviewStateMachine, own
     };
 }));

@@ -1,0 +1,174 @@
+{
+  "id": "map",
+  "name": "Continuous Room",
+  "kind": "map",
+  "draw": "world",
+  "world": "continuous_surface",
+  "worldPresentation": {
+    "pixelsPerTile": 24,
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      },
+      "distance": 11.5,
+      "yawDegrees": 0,
+      "pitchDegrees": 12,
+      "eyeHeight": 3.25,
+      "fovDegrees": 42,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "nearPlane": 0.05,
+      "farPlane": 48
+    }
+  },
+  "config": {},
+  "hooks": {
+    "on_up": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "FALLBACK"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "ARENA_INPUT",
+        "button": "confirm"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "ARENA_INPUT",
+        "button": "cancel"
+      }
+    ]
+  },
+  "windows": [
+    {
+      "id": "arena_hud",
+      "visible": "variables.arena ~= nil and variables.arena.active == true",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 1,
+        "w": 31,
+        "h": 5.5
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "HP {variables.arena.hp}/{variables.arena.maxHp}   Sentinel {variables.arena.enemyHp}/{variables.arena.enemyMaxHp}\n{variables.arena.mode == 'aftermath' and (variables.arena.result == 'victory' and 'Victory - encounter ending' or 'Defeat - recovering...') or variables.arena.result == 'victory' and 'Victory - exploration resumed' or variables.arena.result == 'defeat' and 'Recovered - encounter ended' or variables.arena.mode == 'execution' and 'Committed - contact then recovery' or variables.arena.mode == 'aftermath' and 'Encounter ending...' or variables.arena.mode == 'simulation' and 'Move to evade. Confirm when AT is full.' or variables.arena.mode == 'command' and 'Attack: Confirm to choose / Cancel to move' or 'Target Sentinel: Confirm / Cancel'}\n{variables.arena.message == 'out_of_range' and 'Target is outside the blue range ring.' or variables.arena.message == 'unavailable' and 'Attack unavailable.' or ''}"
+        },
+        {
+          "type": "gauge",
+          "x": 0.5,
+          "y": 4,
+          "width": 24,
+          "height": 0.5,
+          "value": "variables.arena.at",
+          "max": 1,
+          "label": "AT",
+          "labelPlacement": "right",
+          "fill": [
+            0.1,
+            0.8,
+            0.9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arena_command",
+      "visible": "variables.arena ~= nil and variables.arena.mode == 'command'",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 21,
+        "w": 23,
+        "h": 7
+      },
+      "style": "panel",
+      "title": "Command",
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "slideUp"
+        },
+        "close": {
+          "duration": 0.16,
+          "effect": "slideDown"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "> Attack\nConfirm: choose target\nCancel: resume movement"
+        }
+      ]
+    },
+    {
+      "id": "arena_target",
+      "visible": "variables.arena ~= nil and variables.arena.mode == 'targeting'",
+      "rect": {
+        "x": "surface.width - surface.originX - 25",
+        "y": 21,
+        "w": 24,
+        "h": 7
+      },
+      "style": "panel",
+      "title": "Target",
+      "anim": {
+        "open": {
+          "duration": 0.16,
+          "effect": "slideUp"
+        },
+        "close": {
+          "duration": 0.16,
+          "effect": "slideDown"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "> Sentinel  {variables.arena.enemyHp}/{variables.arena.enemyMaxHp}\n{variables.arena.message == 'out_of_range' and 'Outside range - cancel to move' or 'Confirm: attack / Cancel: back'}"
+        }
+      ]
+    },
+    {
+      "id": "chapter_objective",
+      "visible": "variables.arena == nil or variables.arena.active ~= true",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 1,
+        "w": "surface.width - 2",
+        "h": 4
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "{variables.chapterComplete == true and 'Assignment complete. The annex is open.' or variables.sentinelDefeated == true and 'Access restored. Return to the archive attendant.' or variables.sentinelInspected == true and 'Inspect the Sentinel to retry.' or 'Use the blue service door. Inspect the dormant Sentinel.'}\nArrows: move   Enter: interact   F5: save / F6: load"
+        }
+      ]
+    }
+  ]
+}

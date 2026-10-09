@@ -45,10 +45,13 @@
         if (model === false) model = null;
         let sprite = event && event.sprite;
         if (!sprite && commonEvent) sprite = commonEvent.sprite || null;
+        let actorAppearance = event && event.actorAppearance;
+        if (actorAppearance === undefined && commonEvent) actorAppearance = commonEvent.actorAppearance;
         return {
+            actorAppearance: actorAppearance && typeof actorAppearance === 'object' ? actorAppearance : null,
             model: typeof model === 'string' && model ? model : null,
             sprite: typeof sprite === 'string' && sprite ? sprite : null,
-            provenance: model ? 'model' : (sprite ? 'sprite' : 'fallback')
+            provenance: actorAppearance ? 'character' : model ? 'model' : (sprite ? 'sprite' : 'fallback')
         };
     }
     function authoredPoint(value, fallback) {

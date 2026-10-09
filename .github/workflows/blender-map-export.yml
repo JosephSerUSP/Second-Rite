@@ -54,6 +54,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install Node workspace dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          # export_map_blend reaches the model-import source host, which uses
+          # root-pinned dependencies such as fengari. The job previously ran
+          # Node directly on a clean checkout without ever materializing the
+          # lockfile, so touching any tools/blender path exposed MODULE_NOT_FOUND.
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw "npm ci failed (exit $LASTEXITCODE)" }
+
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3

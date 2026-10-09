@@ -31,6 +31,16 @@
         // spawn, transparent, minimap color) are just disabled in page mode,
         // so their DOM values survive untouched.
         let eventBaseFieldStash = null;
+        let eventCharacterDraft = {};
+
+        function renderEventCharacterForm() {
+            const panel = document.getElementById('event-character-form');
+            panel.replaceChildren();
+            const schema = compiledCharacterFormSchema(eventCharacterDraft);
+            schema.rerender = renderEventCharacterForm;
+            schema.onChange = () => { eventModalDirty = true; };
+            buildEntityForm(panel, eventCharacterDraft, schema);
+        }
 
         // rgb01 array <-> #rrggbb hex for <input type=color>
         function rgb01ToHex(c) {
@@ -141,6 +151,7 @@
                 ? JSON.parse(JSON.stringify(eventData.pages)) : [];
             activeEventPageIdx = -1;
             eventBaseFieldStash = null;
+            setPresentationFormUI(eventData || {});
             updateEventPageModeUI(false);
             renderEventPageTabs();
 
@@ -287,6 +298,9 @@
             const fMode = document.getElementById('event-prop-focus-mode').value;
             const fPreset = document.getElementById('event-prop-focus-preset').value;
             return {
+                appearanceMode: eventCharacterDraft.actorAppearance === false ? 'suppress'
+                    : eventCharacterDraft.actorAppearance ? 'override' : 'inherit',
+                appearanceValue: eventCharacterDraft.actorAppearance,
                 modelMode: mMode,
                 modelValue: mMode === 'override' ? mPath : (mMode === 'suppress' ? false : undefined),
                 focusMode: fMode,
@@ -296,6 +310,8 @@
 
         function setPresentationFormUI(target) {
             target = target || {};
+            eventCharacterDraft = JSON.parse(JSON.stringify({actorAppearance:target.actorAppearance}));
+            renderEventCharacterForm();
             const mVal = target.model;
             const fVal = target.interactionFocus;
 
@@ -554,6 +570,7 @@
             // If a page tab is showing, commit it and restore the Base tab's
             // fields into the DOM so the reads below see base values.
             if (activeEventPageIdx !== -1) selectEventPageTab(-1);
+            else commitEventPageFields();
 
             const map = dbPayload.maps[currentMapIndex];
             if (!map.events) map.events = [];
@@ -602,6 +619,11 @@
                 eventData.model = eventBaseFieldStash.model;
             } else {
                 delete eventData.model;
+            }
+            if (eventBaseFieldStash && Object.prototype.hasOwnProperty.call(eventBaseFieldStash, 'actorAppearance')) {
+                eventData.actorAppearance = eventBaseFieldStash.actorAppearance;
+            } else {
+                delete eventData.actorAppearance;
             }
             if (eventBaseFieldStash && Object.prototype.hasOwnProperty.call(eventBaseFieldStash, 'interactionFocus')) {
                 eventData.interactionFocus = eventBaseFieldStash.interactionFocus;

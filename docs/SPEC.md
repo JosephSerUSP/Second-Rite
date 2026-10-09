@@ -1473,6 +1473,12 @@ share this burn-to-black mathematics, while door zoom choreography remains
 specific to doors. Drawing the subtraction during the map or illustrated
 backdrop pass keeps HUD and dialogue UI outside the effect.
 
+The dialogue host seeds its complete window state before Scene entry, including
+the one-based choice cursor, and mirrors that cursor during both text and choice
+nodes. A closing dock retains the outgoing Scene definition, state and context
+for its close animation. Reopening a variant interrupts a pending collapse;
+the active transition destination governs retargeting.
+
 Dialogue `TEXT` commands may author `expression` from 1 through 5. Human
 portrait sheets are five 128x192 columns; column 1 is always the default pose.
 The selected column persists into the following choice until another spoken
@@ -2597,6 +2603,73 @@ small number of rigid-jointed PS1-style townsfolk remains an exploratory option,
 not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
+
+The standalone continuous-surface gauntlet consumes a deform-skinned
+player and two floor Event appearances built by the external `chara-compiler`. A compiled skin resource retains
+its deform hierarchy, inverse binds, weights, UV0/material-slot identity and TRS
+clips. `presentation/character_animation.lua` is the single CPU posing consumer;
+its triangle groups use the existing world shader/depth/streaming mesh path and
+shared Model Instance placement. Studio receives those resolved triangles through
+the existing renderable bridge, with a fixed idle authoring sample. Maps select
+the resource through `traversal.actorAppearance` (character, height, stride),
+G1 validates it, and traversal supplies heading/travel facts without taking
+ownership of presentation. Floor Events select `actorAppearance` (character,
+height), including page/Common Event inheritance and explicit `false` suppression.
+Their existing Event actor owner supplies facing, idle/walk and held-pose facts;
+one-shot playback currently fails explicitly. Studio uses schema-built fields
+and attaches runtime-resolved geometry to the existing Event authoring root.
+Continuous-surface camera controls edit the Scene through the generated camera
+resolver; Map traversal data is unaffected. These experimental appearances do
+not convert the shipping roster or change battle animation ownership.
+
+The experimental arena uses ordinary `ARENA_START` Event commands and
+`ARENA_INPUT` Scene hooks. `engine/arena_host.lua` owns simulation time,
+readiness, enemy movement, telegraphs and terminal cleanup. It calls the shared
+single-action mutation in `engine/action_execution.lua`; Battle delegates to
+that same module while retaining rounds, phase hooks and outcome scheduling.
+Item application and cover evaluation are shared as well. The arena context
+supplies existing Battlers and targeting groups, not a second damage model.
+
+`engine/world_event_actor.lua` owns transient XYZ roots through the same
+continuous-surface collision semantic and package authority. It publishes
+idle/moving state to the existing Event animation owner. Rendering reads world
+roots and the simulation clock; command/targeting pauses freeze locomotion and
+readiness but leave presentation time running. Target range and a fixed
+telegraph zone use a circular distance check. Authored immediate outcome commands execute
+after encounter bindings are removed, with Scene/window facts consumed by the
+same Scene owner as ordinary hooks. Arena tuning formulas use the shared
+Formula compiler/evaluator; positive finite values are checked at activation. Interactive dialogue belongs in the routed
+destination Scene rather than an immediate outcome list. Active encounters explicitly reject
+save/Map-transfer requests; exploration saves remain valid. Command and targeting panels use the existing windowskin and slide timers.
+The HUD observes
+published facts through ordinary Game Variables, also exposed to window formulas
+through the canonical formula context. This slice supports one enemy and one
+basic Attack; no round-timed skill progression or roster conversion is added.
+
+`engine/action_timeline.lua` advances ordered runtime phases, splitting elapsed
+time at each boundary and exiting each phase once. Arena confirmation enters
+authored anticipation and recovery phases; the anticipation exit calls the shared
+executor once. Costs remain owned by that executor at contact, not by the UI or
+timeline. Confirmation/cancel cannot interrupt a committed action. Player
+movement, AT and enemy advancement hold during player execution; command/target
+selection freezes simulation clocks. Enemy windup locks a destination, strike
+uses the existing world-actor collision path, and recovery prevents another
+attack. A miss does not apply effects. Lethal contact retains encounter bindings
+through recovery and authored aftermath before outcome commands and cleanup.
+These pause/arbitration rules are an explicit experimental contract, not a claim
+of reference-game parity. Timing values are Project-authored formulas on
+`ARENA_START`, with registry/editor/validator coverage. Resolved contact facts
+drive brief tracers, flashes and projected damage labels with velocity/gravity;
+they never replay mutation.
+
+The continuous arena's compiled character presentation can sample phase clips
+with one-shot endpoint clamping. The runtime action phase supplies progress;
+rendering never advances or completes an action. Contact audio projects an
+optional Project-owned sound path published with the resolved contact, once per
+fact and from update rather than draw. `ARENA_START` exposes optional player,
+enemy and miss cue paths; missing authored assets fail validation. The gauntlet's
+FK clip recipes compile through the existing chara-compiler GLB export boundary.
+These fixture poses and synthesized cues are experimental, not reference parity.
 
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 

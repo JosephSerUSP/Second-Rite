@@ -1,5 +1,6 @@
 local viewport_3d = {}
 local worldCamera = require("presentation.world_camera")
+local traversalView = require("presentation.traversal_view")
 local worldView = require("engine.generated.world-view")
 local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
@@ -124,8 +125,8 @@ end
 -- path each instead of branching per feature.
 local FOG_DEFAULTS = { color = { 0, 0, 0 }, startDist = 0.0, distance = 8.0, sharpness = 1.0, minFactor = 0.12, panorama = nil }
 
-local function isLiveBakedTown(session)
-    local env = session and session.townTraversal and session.townTraversal.environment
+local function isLiveBakedEnvironment(session)
+    local env = traversalView.environment(session)
     if not env then return false end
     if env.bakedLighting ~= nil then return env.bakedLighting == true end
     return not env.preRendered
@@ -133,7 +134,7 @@ end
 
 local function getFogConfig(session, mapData)
     local fog = mapData and mapData.fog
-    local liveBaked = isLiveBakedTown(session)
+    local liveBaked = isLiveBakedEnvironment(session)
     local defaultMinFactor = liveBaked and 1.0 or FOG_DEFAULTS.minFactor
 
     if not fog then
@@ -926,6 +927,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
     end
 
     local rawModel = getField("model")
+    local rawCharacter = getField("actorAppearance")
     local rawSprite = getField("sprite")
     local rawFocus = getField("interactionFocus")
 
@@ -951,7 +953,9 @@ function viewport_3d.resolveEventPresentation(ev, session)
     local finalModel = nil
     local finalSprite = nil
 
-    if modelPath then
+    if type(rawCharacter) == "table" then
+        visual = "character"
+    elseif modelPath then
         visual = "model"
         finalModel = modelPath
     elseif spritePath then
@@ -961,6 +965,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
 
     return {
         model = finalModel,
+        actorAppearance = type(rawCharacter) == "table" and rawCharacter or nil,
         sprite = finalSprite,
         interactionFocus = interactionFocus,
         visual = visual,
@@ -988,6 +993,8 @@ end
 
 function viewport_3d.collectEventModelPlacements(session)
     local placements = {}
+    local traversalPresentation = traversalView.resolve(session)
+    local boundedLane = traversalPresentation and traversalPresentation.boundedLane
     local mapData = session and session.currentMapData
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
@@ -995,7 +1002,7 @@ function viewport_3d.collectEventModelPlacements(session)
                 local pres = viewport_3d.resolveEventPresentation(rawEv, session)
                 if pres.visual == "model" and pres.model then
                     local x, y, z = viewport_3d.eventWorldPosition(rawEv)
-                    if session.townTraversal then
+                    if boundedLane then
                         z = require("engine.bounded_lane").eventGroundAt(session, rawEv, y) or z
                     end
                     table.insert(placements, {
@@ -1078,18 +1085,13 @@ end
 local PLAYER_IDLE_SPRITE = "assets/character/player.png"
 local PLAYER_WALK_SPRITE = "assets/character/walker.png"
 
-local function playerSpritePath(state, pose)
-    if pose or (state and (state.walking or state.moving)) then return PLAYER_WALK_SPRITE end
-    return PLAYER_IDLE_SPRITE
+local function modelDirectionalLight(nx, ny, nz)
+    return math.max(0.35, 0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
 end
 
-local function townPlayerPose(session)
-    local state = session.townTraversal
-    local x, y, z = require("engine.bounded_lane").actorRoot(session)
-    local pose = require("presentation.door_transition").actorPose()
-    return {x = x + (pose and pose.x or 0), y = y + (pose and pose.y or 0), z = z,
-        frame = pose and pose.frame or state.walkFrameIndex or 0,
-        facing = state.facing or 1, moving = pose}
+local function playerSpritePath(actor)
+    if actor.moving then return PLAYER_WALK_SPRITE end
+    return PLAYER_IDLE_SPRITE
 end
 
 local function drawTownPrerenderSprite(image, x, footY, width, height,
@@ -1324,7 +1326,7 @@ end
 
 
 local function drawTownPrerender(session, inspection)
-    local state = session.townTraversal
+    local state = traversalView.resolve(session).boundedLane
     local preRendered = state and state.environment and state.environment.preRendered
     if not preRendered then return false end
 
@@ -1351,7 +1353,7 @@ local function drawTownPrerender(session, inspection)
     local sceneIndex = centerBlend < 0.5 and centerFirst or centerSecond
     local sliceY = preRendered.slicePositions[sceneIndex]
     local projection = preRendered.playerProjection
-    local authoredTownCamera = session.townTraversal.camera or {}
+    local authoredTownCamera = state.camera or {}
     local townCenterX, townHorizonY = viewport_3d.authoredCompositionCenter(authoredTownCamera)
     local townCamera = worldCamera.resolve(session, {
         profile = "town_sideview",
@@ -1500,8 +1502,8 @@ local function drawTownPrerender(session, inspection)
         end
     end
 
-    local playerPose = townPlayerPose(session)
-    local playerImage = getEventSprite({ sprite = playerSpritePath(state, playerPose.moving) }, session)
+    local playerPose = traversalView.actor(session)
+    local playerImage = getEventSprite({ sprite = playerSpritePath(playerPose) }, session)
     if playerImage then
         local baseX, baseY, baseDepth = toScreen(depthX, actorY, playerPose.z)
         local poseX, poseY, poseDepth = toScreen(playerPose.x, playerPose.y, playerPose.z)
@@ -2245,12 +2247,13 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
+    local traversalPresentation = traversalView.resolve(session)
+    local boundedLane = traversalPresentation and traversalPresentation.boundedLane
 
     -- Authoring-owned town scenes can opt into a layered 2D bake. Keep this
     -- before the 3D shader/mesh path so the dense source model is never
     -- loaded or submitted for these maps.
-    if session.townTraversal and session.townTraversal.environment
-            and session.townTraversal.environment.preRendered then
+    if boundedLane and boundedLane.environment and boundedLane.environment.preRendered then
         return drawTownPrerender(session, inspection)
     end
 
@@ -2296,11 +2299,11 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
-    -- The Map Scene still owns composition. A bounded provider supplies only
+    -- The Map Scene still owns composition. A traversal provider supplies only
     -- its selected camera record and package-backed environment to this shared
     -- WorldCamera/viewport seam.
-    if session.townTraversal and session.townTraversal.camera then
-        authoredCamera = session.townTraversal.camera
+    if traversalPresentation and traversalPresentation.camera then
+        authoredCamera = traversalPresentation.camera
         if authoredCamera.projectionFrame then
             canonicalCenterX, canonicalHorizonY = viewport_3d.authoredCompositionCenter(authoredCamera)
         end
@@ -2492,7 +2495,7 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
                 texture = texture,
                 vertices = {},
                 category = category,
-                presentationPass = category == "billboard" and "live" or "environment",
+                presentationPass = (category == "billboard" or category == "actor") and "live" or "environment",
             }
             textureGroups[category] = grp
         end
@@ -2969,8 +2972,7 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
                 -- independently of the placement's role or cache identity.
                 local light = bakedLighting
                     and { 1, 1, 1, 1 } or colorAt(wx, wy, wz, false)
-                local directional = bakedLighting and 1 or math.max(0.35,
-                    0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
+                local directional = bakedLighting and 1 or modelDirectionalLight(nx, ny, nz)
                 vertices[#vertices + 1] = {
                     wx, wy, vertex[4], vertex[5],
                     modelGroup.color[1], modelGroup.color[2], modelGroup.color[3], modelGroup.color[4],
@@ -3191,12 +3193,12 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
         placement.x, placement.y, "x"))
 end
 
-    if session.townTraversal and session.townTraversal.environment then
-        local environment = session.townTraversal.environment
+    if traversalPresentation and traversalPresentation.environment then
+        local environment = traversalPresentation.environment
         queuePlacedModels(ensurePlacedModel(
             { model = environment.renderMesh, bakedLighting = environment.bakedLighting,
                 provenance = { kind = "environment", manifestPath = environment.manifestPath } },
-            "town-environment:" .. environment.manifestPath,
+            "environment:" .. environment.manifestPath,
             0, 0, "x"))
     end
 
@@ -3316,7 +3318,7 @@ end
             image:getWidth(), image:getHeight(),
             frameWidth, frameHeight, frameIndex, facing)
         local function spriteColor(wx, wy, z)
-            if session.townTraversal then return { 1, 1, 1, 1 } end
+            if traversalPresentation and traversalPresentation.unlitActors then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
         end
         local bottomLeft, bottomRight, topRight, topLeft =
@@ -3328,11 +3330,77 @@ end
             { spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z + height), spriteColor(centerX, centerY, z + height) },
             nil, "billboard")
     end
+    local animatedActor = require("presentation.animated_actor")
+    local characterClock = love.timer.getTime()
+    local function queueCharacter(animated)
+        local pose = animated.pose
+        for _, source in ipairs(animated.groups) do
+            local target = group(require("presentation.mesh").texture(source.texturePath), "actor")
+            if #target.vertices == 0 then
+                target.depth = viewport_3d.cameraSpaceDepth(pose.x, pose.y, pose.z + animated.height * 0.5,
+                    cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
+                target.sequence = #surfaces + 1
+                surfaces[#surfaces+1] = target
+            end
+            for _, v in ipairs(source.vertices) do
+                local illumination = colorAt(v[1], v[2], v[3], false)
+                local directional = modelDirectionalLight(v[6], v[7], v[8])
+                target.vertices[#target.vertices+1] = {v[1], v[2], v[4], v[5],
+                    v[9], v[10], v[11], v[12], illumination[1]*directional,
+                    illumination[2]*directional, illumination[3]*directional, 1, v[3]}
+            end
+            target.model = true
+        end
+    end
+    local encounter=session.arenaEncounter
+    if encounter and worldPass ~= "environment" then
+        local function ring(zone,color)
+            local target=group(getWhiteWallTexture(),"billboard")
+            target.depth=viewport_3d.cameraSpaceDepth(zone.x,zone.y,zone.z,cameraX,cameraY,cameraZ,dirX,dirY,pitchVal)
+            if #target.vertices==0 then target.sequence=#surfaces+1;surfaces[#surfaces+1]=target end
+            local function point(angle,radius)
+                return {x=zone.x+math.cos(angle)*radius,y=zone.y+math.sin(angle)*radius,z=zone.z+0.025}
+            end
+            for index=0,47 do
+                local first,last=index*math.pi/24,(index+1)*math.pi/24
+                addNearClippedQuad(target,point(first,zone.radius),point(last,zone.radius),
+                    point(last,zone.radius-0.06),point(first,zone.radius-0.06),{0,0,1,1},{color,color,color,color})
+            end
+        end
+        if encounter.telegraph then ring(encounter.telegraph,{1,0.15,0.03,1}) end
+        local hit=encounter.impact
+        if hit and not hit.miss and encounter.elapsed-hit.time<0.14 then
+            ring({x=hit.x,y=hit.y,z=hit.z,radius=0.35},{1,0.9,0.5,1})
+            if hit.side=="player" then
+                local target=group(getWhiteWallTexture(),"billboard")
+                if #target.vertices==0 then target.sequence=#surfaces+1;surfaces[#surfaces+1]=target end
+                local color={0.65,0.9,1,1}
+                addNearClippedQuad(target,
+                    {x=hit.fromX,y=hit.fromY,z=hit.fromZ+1.25},
+                    {x=hit.x,y=hit.y,z=hit.z+1.25},
+                    {x=hit.x,y=hit.y,z=hit.z+1.5},
+                    {x=hit.fromX,y=hit.fromY,z=hit.fromZ+1.5},
+                    {0,0,1,1},{color,color,color,color})
+            end
+        end
+        if encounter.mode=="execution" and encounter.action and encounter.action.index==1 then
+            local x,y,z=require("engine.traversal_host").actorRoot(session)
+            ring({x=x,y=y,z=z,radius=0.45},{0.4,0.85,1,1})
+        end
+        if encounter.mode=="targeting" then
+            local x,y,z=require("engine.traversal_host").actorRoot(session)
+            ring({x=x,y=y,z=z,radius=encounter.spec.range},{0.05,0.8,1,1})
+        end
+    end
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-                if presentation.visual == "model" and presentation.model
+                if presentation.visual == "character" then
+                    if worldPass ~= "environment" then
+                        queueCharacter(animatedActor.resolveEvent(session,rawEv,presentation,characterClock))
+                    end
+                elseif presentation.visual == "model" and presentation.model
                 and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1,
                         instanceId = viewport_3d.eventModelInstanceId(rawEv),
@@ -3345,7 +3413,7 @@ end
                     -- A world-positioned model belongs on the traversal floor,
                     -- which can be sloped.  The old placed-model path retained
                     -- only x/y and silently rendered every model at z = 0.
-                    if session.townTraversal then
+                    if boundedLane then
                         local floorZ = require("engine.bounded_lane").eventGroundAt(session, rawEv, worldY)
                         if floorZ ~= nil then worldZ = floorZ end
                     end
@@ -3376,13 +3444,19 @@ end
         end
     end
 
-    if session.townTraversal then
-        local state = session.townTraversal
-        local pose = townPlayerPose(session)
-        local playerImage = getEventSprite({ sprite = playerSpritePath(state, pose.moving) }, session)
-        if playerImage then
-            addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
-                pose.frame, pose.facing)
+    if traversalPresentation and traversalPresentation.actor
+            and (not animatedActor.spec(session) or worldPass ~= "environment") then
+        local pose = traversalPresentation.actor
+        local animated = animatedActor.resolve(session,
+            traversalPresentation, characterClock)
+        if animated then
+            queueCharacter(animated)
+        else
+            local playerImage = getEventSprite({ sprite = playerSpritePath(pose) }, session)
+            if playerImage then
+                addBillboard(playerImage, pose.x, pose.y, pose.z, 1.75, 24, 48,
+                    pose.frame, pose.facing)
+            end
         end
     end
 
@@ -3584,6 +3658,11 @@ end
     -- state, so it is cleared outside the push/pop boundary rather than
     -- trusted to the attribute stack.
     love.graphics.setWireframe(false)
+    if worldPass ~= "environment" then
+        require("presentation.arena_feedback").drawLabel(session.arenaEncounter,function(x,y,z)
+            return worldView.projectPerspective(camera,targetWidth,targetHeight,x,y,z)
+        end,rasterScale)
+    end
     if not passOptions.preserveDepth then
         love.graphics.clear(false, false, 1)
     end
@@ -3619,6 +3698,6 @@ function viewport_3d.draw(session, authoredCamera, inspection)
 end
 
 viewport_3d.getFogConfig = getFogConfig
-viewport_3d.isLiveBakedTown = isLiveBakedTown
+viewport_3d.isLiveBakedEnvironment = isLiveBakedEnvironment
 
 return viewport_3d

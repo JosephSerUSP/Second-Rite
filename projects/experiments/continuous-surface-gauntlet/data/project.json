@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Continuous Surface Gauntlet",
+  "identity": "continuous-surface-gauntlet",
+  "productName": "Continuous Surface Gauntlet",
+  "executableName": "Continuous Surface Gauntlet",
+  "buildSlug": "continuous-surface-gauntlet",
+  "windowTitle": "Continuous Surface Gauntlet",
+  "productVersion": "0.1.0"
+}

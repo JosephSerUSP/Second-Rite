@@ -1,0 +1,219 @@
+{
+  "contractVersion": 1,
+  "environmentId": "archive_antechamber",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -4.0,
+    -3.0,
+    -0.0,
+    4.0,
+    3.0,
+    3.2
+  ],
+  "stats": {
+    "triangleCount": 66,
+    "vertexCount": 48,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 296487,
+    "renderMeshSizeBytes": 6216,
+    "packageSizeBytes": 304112
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        -2.6,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "far_door": {
+      "id": "far_door",
+      "position": [
+        3.35,
+        -2.15,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "arrival_from_service": {
+      "id": "arrival_from_service",
+      "position": [
+        2.45,
+        -2.15,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "console": {
+      "id": "console",
+      "position": [
+        1.85,
+        1.85,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "archive_antechamber.blend",
+    "walkSurfaceAuthority": "Blender collections TH_WALKABLE/TH_OBSTACLES",
+    "bake": {
+      "backend": "cycles",
+      "device": "CPU",
+      "samples": 32,
+      "selectedToActive": true,
+      "quality": {
+        "name": "export",
+        "engine": "CYCLES",
+        "samples": 32,
+        "supersample": 1,
+        "denoise": false,
+        "atlas_denoise": "oidn-fast",
+        "atlas_texel_align": true,
+        "max_bounces": 4,
+        "diffuse_bounces": 2,
+        "glossy_bounces": 2,
+        "seed": 3201
+      },
+      "hardware": {
+        "device": "CPU",
+        "computeBackend": "CPU",
+        "devices": []
+      },
+      "batchedSourceObjects": 5,
+      "atlasDenoise": {
+        "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
+        "seconds": 0.5014302999989013,
+        "filteredCharts": 12,
+        "preservedSmallCharts": 20,
+        "filteredTexels": 218160,
+        "alphaUnchanged": true
+      },
+      "texelAlignment": {
+        "method": "UV boundaries inward to pixel corners; preserve chart on collapse, flip or new shared texels",
+        "alignedCharts": 32,
+        "preservedUnsafeCharts": 0,
+        "existingSharedTexelPairs": 0,
+        "newSharedTexelPairs": 0,
+        "atlasSize": 512
+      }
+    },
+    "exportSeconds": 3.4315878999987035,
+    "sourceSha256": "4a09602e8403d602cf613756e1f2632e0af0b61cc04cdbbb4624e01c0da5626c",
+    "productsSha256": {
+      "environment.obj": "e4c0b89eef38cc56af5cebd21ca9ee5cc366d245afc27747c5fec4e2523b6ba4",
+      "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
+      "environment.png": "01a32cbfaa4df65d9220332e90def92f2972d677181a645ceaaf5ff1e2bd6721",
+      "collision.obj": "d9708176f863c69c330b715b8fc7f888f601685cb174ca3fb305fc894760f160"
+    }
+  },
+  "walkSurface": {
+    "groundZ": 0.0,
+    "regions": [
+      {
+        "points": [
+          [
+            -3.6500000953674316,
+            -2.6500000953674316
+          ],
+          [
+            3.6500000953674316,
+            -2.6500000953674316
+          ],
+          [
+            3.6500000953674316,
+            2.6500000953674316
+          ],
+          [
+            1.399999976158142,
+            2.6500000953674316
+          ],
+          [
+            1.399999976158142,
+            2.1500000953674316
+          ],
+          [
+            -1.7999999523162842,
+            2.1500000953674316
+          ],
+          [
+            -1.7999999523162842,
+            2.6500000953674316
+          ],
+          [
+            -3.6500000953674316,
+            2.6500000953674316
+          ]
+        ]
+      }
+    ],
+    "obstacles": [
+      {
+        "points": [
+          [
+            -0.6499999761581421,
+            -0.699999988079071
+          ],
+          [
+            0.6499999761581421,
+            -0.699999988079071
+          ],
+          [
+            0.6499999761581421,
+            0.699999988079071
+          ],
+          [
+            -0.6499999761581421,
+            0.699999988079071
+          ]
+        ]
+      }
+    ]
+  }
+}

@@ -216,6 +216,7 @@ function modalHarness(payload) {
         EventSelfStateAuthoring: { createInstanceId: () => 'new', ensureInstanceId: e => e.instanceId },
         updateEventGraphicPreview: noOp, setEventColorFields: noOp,
         updateEventPageModeUI: noOp, renderEventPageTabs: noOp, toggleEventLogicType: noOp,
+        setPresentationFormUI: noOp, commitEventPageFields: noOp,
         eventModalSnapshotHelper: { capture: noOp }, closeEventModal: noOp,
         renderGridCells: noOp, setDirty: noOp };
     vm.createContext(ctx);
@@ -283,7 +284,7 @@ test('runtime models retain an authored height and ground horizontal arrows on i
     assert.match(runtime, /wx, wy, wz = originX \+ lx, originY \+ ly, originZ \+ lz/);
     assert.match(runtime, /worldZ = worldZ \+ 0\.22 \* modelScale/,
         'a horizontal arrow must lift by its source radius instead of clipping through the floor');
-    assert.match(runtime, /groundAt\(session, worldY\)/,
+    assert.match(runtime, /if boundedLane then[\s\S]*eventGroundAt\(session, rawEv, worldY\)/,
         'town event models must resolve against the authoritative lane floor');
     assert.match(plateStudio, /const groundedZ = View\.groundHeight\(lane\.groundProfile, groundZ, Number\(position\[1\]\)\)/,
         'the plate Event box must use the same lane floor as the runtime model, not a legacy authored Z');

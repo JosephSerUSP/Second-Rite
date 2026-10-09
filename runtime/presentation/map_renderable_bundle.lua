@@ -6,6 +6,7 @@
 -- uses, preserves semantic provenance, and packages the result into plain Lua
 -- tables suitable for JSON transport or external-format serializers.
 local viewport_3d = require("presentation.viewport_3d")
+local traversalView = require("presentation.traversal_view")
 local model_resource = require("presentation.model_resource")
 local mesh = require("presentation.mesh")
 local geometry = require("engine.geometry")
@@ -729,7 +730,7 @@ function bundle.collect(session, profileName, options)
 
     -- Consume the package already resolved by exploration. OBJ import and
     -- placement remain the runtime's authority, including transport axes.
-    local environment = session.townTraversal and session.townTraversal.environment
+    local environment = traversalView.environment(session)
     if environment then
         addPlacedModel(surfaces, registry, "environment_render",
             { kind = "environment", path = environment.renderMesh,
@@ -750,6 +751,39 @@ function bundle.collect(session, profileName, options)
                 { kind = "event", id = id },
                 { model = placement.model, modelScale = placement.modelScale, instanceId = placement.instanceId },
                 placement.x, placement.y, "x", nil, nil, nil, placement.z)
+        end
+    end
+
+    local function addCharacter(character,source,name)
+        for i,group in ipairs(character.groups) do
+            local material=registerAssetMaterial(registry,group.texturePath,nil,{1,1,1,1})
+            local provenance={}
+            for k,v in pairs(source) do provenance[k]=v end
+            provenance.surface="character"
+            provenance.character=character.character
+            provenance.materialSlot=group.material
+            provenance.clip=character.clip
+            provenance.time=character.time
+            provenance.rootPosition={character.pose.x,character.pose.y,character.pose.z}
+            local surface=newSurface(surfaces,name.."_"..i,provenance,material)
+            for _,v in ipairs(group.vertices) do pushVertex(surface,v) end
+        end
+    end
+    if not options or options.includeEventCharacters ~= false then
+        local animated=require("presentation.animated_actor")
+        for _,event in ipairs(mapData.events or {}) do
+            if not event.wallEvent then
+                local presentation=viewport_3d.resolveEventPresentation(event,session)
+                local character=animated.resolveEvent(session,event,presentation,options and options.actorClock or 0)
+                if character then addCharacter(character,{kind="event",id=event.id},"event_"..event.id) end
+            end
+        end
+    end
+    if options and options.includeActor then
+        local actor = require("presentation.animated_actor").resolve(session,
+            traversalView.resolve(session), options.actorClock or 0)
+        if actor then
+            addCharacter(actor,{kind="actor"},"actor")
         end
     end
 

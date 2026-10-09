@@ -48,6 +48,7 @@ end
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("engine.data.json")
     local instanceTransport = require("presentation.renderable_instance_transport")
+    local traversalView = require("presentation.traversal_view")
     local useInstances = instanceTransport.requested()
     local request = readRequest(requestPath)
     local requestedId = request.map.id
@@ -83,9 +84,15 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- Studio already owns live Event boxes/models from the authored
             -- Map snapshot. Keep the runtime bundle static so a dragged Event
             -- has one visible representation and never waits for recompilation.
+            --
+            -- Provider-backed Maps enter presentation through the same neutral
+            -- traversal view as live rendering and collection.
+            local traversalPresentation = traversalView.resolve(vSession)
             local result, collectErr = renderables.collect(vSession, "authoring", {
                 includeCollision = true,
                 includeEventModels = false,
+                includeActor = true,
+                actorClock = 0,
             })
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
@@ -100,10 +107,15 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.light = resolvedMap and resolvedMap.runtimeLight or nil
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
-            if vSession.townTraversal then
+            local authoredCamera = request.map.traversal and request.map.traversal.camera
+            if request.map.traversal and request.map.traversal.provider == "continuous_surface" then
+                local scene = loader.getScene("map")
+                authoredCamera = scene and scene.worldPresentation and scene.worldPresentation.camera
+            end
+            if traversalPresentation and authoredCamera then
                 result.spatialCamera = require("presentation.world_camera").resolve(vSession, {
-                    authoredCamera = request.map.traversal.camera,
-                    profile = request.map.traversal.camera.profile,
+                    authoredCamera = authoredCamera,
+                    profile = authoredCamera.profile,
                 })
             end
             return result

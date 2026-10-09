@@ -1,0 +1,300 @@
+name: continuous surface gauntlet
+
+on:
+  pull_request:
+    paths:
+      - 'runtime/main.lua'
+      - 'runtime/engine/exploration.lua'
+      - 'runtime/engine/environment_package.lua'
+      - 'runtime/engine/savegame.lua'
+      - 'runtime/engine/continuous_surface.lua'
+      - 'runtime/engine/continuous_surface_provider.lua'
+      - 'runtime/engine/traversal_host.lua'
+      - 'runtime/engine/player_controller.lua'
+      - 'runtime/engine/action_execution.lua'
+      - 'runtime/engine/arena_host.lua'
+      - 'runtime/engine/action_timeline.lua'
+      - 'runtime/presentation/arena_feedback.lua'
+      - 'tests/test_action_timeline.lua'
+      - 'tests/test_contact_audio.lua'
+      - 'runtime/presentation/contact_audio.lua'
+      - 'runtime/engine/world_event_actor.lua'
+      - 'rtp/revisions/1.0/data/engine.json'
+      - 'runtime/presentation/continuous_surface_world.lua'
+      - 'runtime/presentation/traversal_view.lua'
+      - 'runtime/presentation/character_animation.lua'
+      - 'runtime/presentation/animated_actor.lua'
+      - 'tools/characters/**'
+      - 'tests/test_character_animation.lua'
+      - 'runtime/presentation/viewport_3d.lua'
+      - 'runtime/presentation/map_renderable_bundle.lua'
+      - 'runtime/presentation/world_pass_compositor.lua'
+      - 'tests/test_traversal_view.lua'
+      - 'runtime/presentation/world_renderer.lua'
+      - 'projects/experiments/continuous-surface-gauntlet/**'
+      - 'tools/spikes/continuous-surface/**'
+      - 'tools/blender/semantics/**'
+      - 'tools/blender/tests/test_environment_walk_surface.py'
+      - '.github/workflows/continuous-surface-gauntlet.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  standalone-project:
+    name: standalone Project (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Compile walk-surface semantic contract without Blender
+        shell: pwsh
+        run: |
+          python tools/blender/tests/test_environment_walk_surface.py
+          if ($LASTEXITCODE -ne 0) { throw "walk-surface compiler contract failed (exit $LASTEXITCODE)" }
+          python tools/characters/test_compile_character.py
+          if ($LASTEXITCODE -ne 0) { throw "character compiler contract failed" }
+          python tools/characters/compile_character.py projects/experiments/continuous-surface-gauntlet/assets/authoring/characters/surveyor.glb --out projects/experiments/continuous-surface-gauntlet/assets/characters/surveyor --check
+          if ($LASTEXITCODE -ne 0) { throw "compiled character disagrees with GLB" }
+          python projects/experiments/continuous-surface-gauntlet/tools/build_combat_cues.py --check
+          if ($LASTEXITCODE -ne 0) { throw "combat cues are stale" }
+          python tools/spikes/continuous-surface/build-fixture-sprites.py --check
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet raster fixtures disagree with source" }
+          python tools/blender/environment_sources.py --check --root projects/experiments/continuous-surface-gauntlet
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet environment source authority invalid" }
+          python projects/experiments/continuous-surface-gauntlet/tools/check_lighting.py
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet lighting bake is stale" }
+
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
+
+      - name: Assert Project-owned data and assets do not reference Second Gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'projects/experiments/continuous-surface-gauntlet'
+          $owned = @((Join-Path $root 'data'), (Join-Path $root 'assets'))
+          $hits = Get-ChildItem $owned -Recurse -File |
+            Select-String -SimpleMatch 'hichaukitoden-game'
+          if ($hits) {
+            $hits | ForEach-Object { Write-Host $_ }
+            throw 'standalone gauntlet Project data/assets reference Second Gate'
+          }
+
+      - name: Assert environment packages own walk geometry
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'projects/experiments/continuous-surface-gauntlet'
+          foreach ($mapId in @(1, 2)) {
+            $map = Get-Content (Join-Path $root "data/maps/$mapId.json") -Raw | ConvertFrom-Json
+            $surface = $map.traversal.surface
+            foreach ($field in @('regions', 'obstacles', 'groundZ')) {
+              if ($surface.PSObject.Properties.Name -contains $field) {
+                throw "Map $mapId duplicates package spatial authority in traversal.surface.$field"
+              }
+            }
+          }
+          foreach ($relative in @(
+            'assets/environments/archive_antechamber/environment.json',
+            'assets/environments/service_annex/environment.json'
+          )) {
+            $manifest = Get-Content (Join-Path $root $relative) -Raw | ConvertFrom-Json
+            if (-not $manifest.walkSurface -or -not $manifest.walkSurface.regions -or $manifest.walkSurface.regions.Count -lt 1) {
+              throw "$relative does not own a non-empty walkSurface"
+            }
+          }
+
+      - name: Stage only the experiment Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP 'continuous-surface-gauntlet-stage'
+          node tools/ci/stage-project-gates.js `
+            --project projects/experiments/continuous-surface-gauntlet `
+            --output $stage
+          if ($LASTEXITCODE -ne 0) { throw "Project staging failed (exit $LASTEXITCODE)" }
+          "GAUNTLET_STAGE=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          if (-not (Test-Path (Join-Path $stage 'data/project.json'))) {
+            throw 'staged Project is missing data/project.json'
+          }
+          if (-not (Test-Path (Join-Path $stage 'assets/environments/archive_antechamber/environment.json'))) {
+            throw 'staged Project is missing Archive environment package'
+          }
+          if (-not (Test-Path (Join-Path $stage 'assets/environments/service_annex/environment.json'))) {
+            throw 'staged Project is missing Service Annex environment package'
+          }
+
+      - name: Validate the staged Project
+        shell: pwsh
+        run: |
+          & $env:LOVEC $env:GAUNTLET_STAGE validate
+          if ($LASTEXITCODE -ne 0) { throw "gauntlet validate failed (exit $LASTEXITCODE)" }
+
+      - name: Authored transfer and traversal save/load round-trip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $main = Join-Path $env:GAUNTLET_STAGE 'main.lua'
+          @'
+          local loader = require("engine.data.loader")
+          local session = require("engine.session")
+          local exploration = require("engine.exploration")
+          local traversal = require("engine.traversal_host")
+          local interpreter = require("engine.interpreter")
+          local savegame = require("engine.savegame")
+          local json = require("engine.data.json")
+
+          local function near(a, b)
+              return math.abs((a or 0) - (b or 0)) < 1e-9
+          end
+
+          local function eventById(game, id)
+              for _, event in ipairs((game.currentMapData and game.currentMapData.events) or {}) do
+                  if event.id == id then return event end
+              end
+              error("missing Event " .. tostring(id), 0)
+          end
+
+          local function runEventProgram(game, id)
+              local event = eventById(game, id)
+              interpreter.runImmediate(event.commands, {
+                  session = game,
+                  loader = loader,
+                  party = game.party or {},
+                  event = event,
+                  eventId = event.id,
+              })
+          end
+
+          local function assertPackageAuthority(game, expectedFragment)
+              local state = game.continuousTraversal
+              assert(state and state.environment and state.environment.walkSurface,
+                  "provider did not consume package-owned walkSurface")
+              assert((state.environment.manifestPath or ""):find(expectedFragment, 1, true),
+                  "wrong environment package for Map " .. tostring(game.currentMapData.id))
+              local tuning = game.currentMapData.traversal.surface or {}
+              assert(tuning.regions == nil and tuning.obstacles == nil and tuning.groundZ == nil,
+                  "Map traversal data regained spatial geometry authority")
+          end
+
+          local function assertAtAnchor(game, state, anchorId)
+              assert(state and state.spawnAnchor == anchorId,
+                  "expected arrival anchor " .. anchorId .. ", got " .. tostring(state and state.spawnAnchor))
+              local anchor = game.continuousTraversal.environment.anchors[anchorId]
+              assert(anchor and anchor.position, "environment is missing anchor " .. anchorId)
+              assert(near(state.x, anchor.position[1]) and near(state.y, anchor.position[2])
+                      and near(state.z, anchor.position[3]),
+                  "provider did not enter at anchor " .. anchorId)
+          end
+
+          function love.load()
+              loader.init()
+              require("tests.test_traversal_view")
+              local map1 = loader.getMapIndex(1)
+              local map2 = loader.getMapIndex(2)
+              assert(map1 and map2, "compiled gauntlet must expose Maps 1 and 2")
+
+              local game = session.GameSession.new(loader)
+              exploration.loadMap(game, map1)
+              assert(traversal.isActive(game), "gauntlet traversal provider is not active")
+              assertPackageAuthority(game, "archive_antechamber/environment.json")
+
+              local initial = traversal.serialize(game)
+              assertAtAnchor(game, initial, "spawn_player")
+
+              -- This is the authored Event Program, not a direct provider call.
+              runEventProgram(game, 102)
+              assert(game.currentMapData.id == 2, "Archive Service Door did not LOAD_MAP 2")
+              assertPackageAuthority(game, "service_annex/environment.json")
+              local serviceArrival = traversal.serialize(game)
+              assertAtAnchor(game, serviceArrival, "arrival_from_archive")
+              local serviceDefault = game.continuousTraversal.environment.anchors.service_spawn.position
+              assert(not (near(serviceArrival.x, serviceDefault[1]) and near(serviceArrival.y, serviceDefault[2])),
+                  "named arrival did not override Service Annex default spawn")
+
+              runEventProgram(game, 201)
+              assert(game.currentMapData.id == 1, "Service Archive Door did not LOAD_MAP 1")
+              assertPackageAuthority(game, "archive_antechamber/environment.json")
+              local archiveArrival = traversal.serialize(game)
+              assertAtAnchor(game, archiveArrival, "arrival_from_service")
+              local archiveDefault = game.continuousTraversal.environment.anchors.spawn_player.position
+              assert(not (near(archiveArrival.x, archiveDefault[1]) and near(archiveArrival.y, archiveDefault[2])),
+                  "named arrival did not override Archive default spawn")
+
+              traversal.update(game, 0.25, { left = true })
+              local before = traversal.serialize(game)
+              assert(before and before.provider == "continuous_surface", "provider did not serialize")
+
+              local body = json.encode(savegame.serialize(game, loader, "map"))
+              local restored, scene = savegame.deserialize(json.decode(body), loader)
+              local after = traversal.serialize(restored)
+
+              assert(scene == "map", "saved scene did not restore")
+              assert(after and after.provider == before.provider, "provider identity did not restore")
+              assert(after.spawnAnchor == before.spawnAnchor, "arrival anchor identity did not restore")
+              assert(near(after.x, before.x) and near(after.y, before.y) and near(after.z, before.z),
+                  "world position did not round-trip")
+              assert(near(after.facingX, before.facingX) and near(after.facingY, before.facingY),
+                  "world facing did not round-trip")
+              assert(near(after.walkDistance, before.walkDistance), "walk distance did not round-trip")
+
+              print("CONTINUOUS_TRANSFER_SAVE_OK")
+              if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+              love.event.quit(0)
+              os.exit(0)
+          end
+          function love.errorhandler(message)
+              print(message)
+              if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+              os.exit(1)
+          end
+          '@ | Set-Content -Path $main -Encoding utf8
+
+          & $env:LOVEC $env:GAUNTLET_STAGE
+          if ($LASTEXITCODE -ne 0) { throw "continuous transfer/save contract failed (exit $LASTEXITCODE)" }
+
+      - name: Native room rendering and missing-environment negative control
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item tools/spikes/continuous-surface/project-render-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          Copy-Item tools/spikes/continuous-surface/project-character-proof.lua (Join-Path $env:GAUNTLET_STAGE 'character-proof.lua')
+          Push-Location $env:GAUNTLET_STAGE
+          try {
+            & $env:LOVEC .
+            if ($LASTEXITCODE -ne 0) { throw "native continuous presentation proof failed (exit $LASTEXITCODE)" }
+          } finally { Pop-Location }
+
+      - name: Arena native behavior and rendered aftermath
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item tools/spikes/continuous-surface/project-arena-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          & $env:LOVEC $env:GAUNTLET_STAGE
+          if ($LASTEXITCODE -ne 0) { throw "arena native proof failed (exit $LASTEXITCODE)" }
+
+      - name: Real player door, investigation, combat, report and save loop
+        shell: pwsh
+        run: |
+          Copy-Item runtime/main.lua (Join-Path $env:GAUNTLET_STAGE 'player-main.lua')
+          Copy-Item tools/spikes/continuous-surface/project-playthrough-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          & $env:LOVEC $env:GAUNTLET_STAGE
+          if ($LASTEXITCODE -ne 0) { throw "player controls/NPC proof failed (exit $LASTEXITCODE)" }
+
+      - name: Continuous traversal semantic and host assertions
+        shell: pwsh
+        run: |
+          & $env:LOVEC tools/spikes/continuous-surface --test-only
+          if ($LASTEXITCODE -ne 0) { throw "continuous-surface spike failed (exit $LASTEXITCODE)" }

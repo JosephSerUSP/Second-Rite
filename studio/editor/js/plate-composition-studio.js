@@ -86,6 +86,10 @@
             content.replaceChildren();
             const map = currentMap(), packagePath = map?.traversal?.environmentPackage;
             if (!packagePath) { content.append(note('No environment package on this Map.')); return; }
+            if (map.traversal.provider !== 'bounded_lane' || !map.traversal.camera) {
+                content.append(note('This room uses a Scene-owned camera. Plate calibration applies to bounded-lane plate packages.'));
+                return;
+            }
             content.append(note(`Map ${map.id}: camera is Map data; plate calibration is ${packagePath}.`));
             if (!manifest || loadedPath !== packagePath) {
                 content.append(note('Loading package calibration…'));
@@ -93,6 +97,10 @@
                 return;
             }
             const camera = map.traversal.camera;
+            if (!manifest.preRendered) {
+                content.append(note('This environment package has no plates.'));
+                return;
+            }
             const cameraHead = document.createElement('strong'); cameraHead.style.fontSize = '10px';
             cameraHead.textContent = 'Map camera — Save Changes'; content.append(cameraHead);
             content.append(field('Target Y', camera.target.y, value => mutateCamera(map, ['target', 'y'], value), 'runtime aim'));

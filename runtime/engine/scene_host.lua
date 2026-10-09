@@ -213,6 +213,63 @@ local function applyWindowEvent(state, ev)
     end
 end
 
+-- All execution hosts route resolved Scene/window events through this owner.
+function scene_host.consumeEvents(events,ctx,state,oldEvents)
+    state=state or sceneStack[#sceneStack]
+    assert(state,"resolved Scene events require an active Scene")
+    local transitions = {}
+    if events then
+        for _, ev in ipairs(events) do
+            if ev.type == "wait" then
+                state.waitTimer = ev.duration
+            elseif ev.type == "scene_change" then
+                table.insert(transitions, ev)
+            elseif ev.type == "open_window" or ev.type == "close_window"
+                or ev.type == "set_list" or ev.type == "set_text"
+                or ev.type == "set_cursor" or ev.type == "focus_window" then
+                applyWindowEvent(state, ev)
+            elseif ev.type == "run_common_event" then
+                -- An item asked for a common event (effects.lua cannot start
+                -- one: CALL_COMMON_EVENT is interactive). Deferred with the
+                -- scene transitions rather than run here, so the graph starts
+                -- after this hook finishes and its own scene change lands on a
+                -- settled stack instead of mid-hook.
+                table.insert(transitions, ev)
+            end
+        end
+    end
+
+    -- If there was an old events list, append the new events to it
+    -- so that the caller (like the golden harness) can still see them.
+    if oldEvents then
+        for _, ev in ipairs(events) do
+            table.insert(oldEvents, ev)
+        end
+        ctx.events = oldEvents
+    end
+
+    for _, ev in ipairs(transitions) do
+        if ev.type == "run_common_event" then
+            interpreter.startCommonEvent(ev.id)
+        elseif ev.kind == "pop" then
+            scene_host.pop(ctx)
+        elseif ev.kind == "push" then
+            if type(ev.scene) ~= "string" or ev.scene == "" then
+                error("SCENE_EVENT kind 'push' requires a scene")
+            end
+            scene_host.push(ev.scene, ctx, ev.sceneState)
+        elseif ev.kind == "goto" then
+            if type(ev.scene) ~= "string" or ev.scene == "" then
+                error("SCENE_EVENT kind 'goto' requires a scene")
+            end
+            scene_host.goto_scene(ev.scene, ctx, ev.sceneState)
+        else
+            error("Unknown SCENE_EVENT kind '" .. tostring(ev.kind) .. "'")
+        end
+    end
+
+end
+
 function scene_host.runHook(hookName, ctx)
     if #sceneStack == 0 then return false end
     local state = sceneStack[#sceneStack]
@@ -266,56 +323,7 @@ function scene_host.runHook(hookName, ctx)
     -- Consume SCENE_EVENT (scene_change) and update the stack
     -- Wait to process these until after the loop so we don't recurse deeply
     -- or mutate sceneStack while iterating.
-    local transitions = {}
-    if events then
-        for _, ev in ipairs(events) do
-            if ev.type == "wait" then
-                state.waitTimer = ev.duration
-            elseif ev.type == "scene_change" then
-                table.insert(transitions, ev)
-            elseif ev.type == "open_window" or ev.type == "close_window"
-                or ev.type == "set_list" or ev.type == "set_text"
-                or ev.type == "set_cursor" or ev.type == "focus_window" then
-                applyWindowEvent(state, ev)
-            elseif ev.type == "run_common_event" then
-                -- An item asked for a common event (effects.lua cannot start
-                -- one: CALL_COMMON_EVENT is interactive). Deferred with the
-                -- scene transitions rather than run here, so the graph starts
-                -- after this hook finishes and its own scene change lands on a
-                -- settled stack instead of mid-hook.
-                table.insert(transitions, ev)
-            end
-        end
-    end
-
-    -- If there was an old events list, append the new events to it
-    -- so that the caller (like the golden harness) can still see them.
-    if oldEvents then
-        for _, ev in ipairs(events) do
-            table.insert(oldEvents, ev)
-        end
-        ctx.events = oldEvents
-    end
-
-    for _, ev in ipairs(transitions) do
-        if ev.type == "run_common_event" then
-            interpreter.startCommonEvent(ev.id)
-        elseif ev.kind == "pop" then
-            scene_host.pop(ctx)
-        elseif ev.kind == "push" then
-            if type(ev.scene) ~= "string" or ev.scene == "" then
-                error("SCENE_EVENT kind 'push' requires a scene")
-            end
-            scene_host.push(ev.scene, ctx, ev.sceneState)
-        elseif ev.kind == "goto" then
-            if type(ev.scene) ~= "string" or ev.scene == "" then
-                error("SCENE_EVENT kind 'goto' requires a scene")
-            end
-            scene_host.goto_scene(ev.scene, ctx, ev.sceneState)
-        else
-            error("Unknown SCENE_EVENT kind '" .. tostring(ev.kind) .. "'")
-        end
-    end
+    scene_host.consumeEvents(events,ctx,state,oldEvents)
 
     local fallback = ctx.hookFallback
     ctx.hookHandled = oldHookHandled

@@ -63,3 +63,11 @@ assert.strictEqual(Object.prototype.hasOwnProperty.call(commonEv, 'interactionFo
 assert.strictEqual(Object.prototype.hasOwnProperty.call(commonEv, 'animationController'), false, 'Common event controller set to none deletes key');
 
 console.log('[PASS] All editor event presentation serialization tests passed successfully.');
+
+const appearance={character:'assets/characters/attendant/character.json',height:1.75};
+EventPresentation.serializeEventPresentation({appearanceMode:'override',appearanceValue:appearance},mapEv);
+assert.deepEqual(JSON.parse(JSON.stringify(mapEv.actorAppearance)),appearance);
+EventPresentation.serializeEventPresentation({appearanceMode:'suppress'},mapEv);
+assert.equal(mapEv.actorAppearance,false);
+EventPresentation.serializeEventPresentation({appearanceMode:'inherit'},mapEv);
+assert.equal(Object.hasOwn(mapEv,'actorAppearance'),false);

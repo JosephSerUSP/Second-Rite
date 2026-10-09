@@ -1,0 +1,19 @@
+{
+  "attack": {
+    "id": "attack",
+    "name": "Attack",
+    "target": "enemy",
+    "scope": "battle",
+    "element": null,
+    "icon": 0,
+    "description": "[Enemy] A basic physical attack.",
+    "speed": 0,
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1,
+        "power": "atk"
+      }
+    ]
+  }
+}

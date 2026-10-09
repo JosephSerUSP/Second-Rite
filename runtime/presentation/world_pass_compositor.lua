@@ -6,6 +6,7 @@
 -- against that depth. This keeps architectural edges smooth while the
 -- pass-ownership boundary stays deliberately hard.
 local surface = require("presentation.surface")
+local traversalView = require("presentation.traversal_view")
 
 local compositor = {}
 local targets = nil
@@ -28,7 +29,7 @@ function compositor.isEligible(session)
     if not session then return false end
     if session.roomBakePass or session.roomBakeSquareCamera then return false end
     if session.profile3dVariant and session.profile3dVariant ~= "current" then return false end
-    local environment = session.townTraversal and session.townTraversal.environment
+    local environment = traversalView.environment(session)
     if environment and environment.preRendered then return false end
     return compositor.resolveScale(session) > 1
 end

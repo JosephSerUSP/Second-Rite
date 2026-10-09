@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 import { createThreeEditorViewport as createBaseViewport } from '/js/three-editor-viewport-base.js';
-import '/js/world-presentation.js';
-import '/js/world-presentation-studio.js';
 import '/js/plate-composition-studio.js';
 import { createCompositionViewport } from '/js/three-composition-viewport.js';
 import '/js/scene-timing-authoring.js';
@@ -179,7 +177,7 @@ export function createThreeEditorViewport(container, options = {}) {
         base.setMode(mode);
         const camera = mode === 'top' ? orthographic : perspective;
         const controls = mode === 'top' ? orthographicControls : perspectiveControls;
-        const runtimeCoordinates = resolved === spatialCamera;
+        const runtimeCoordinates = resolved === spatialCamera || resolved.coordinateSpace === 'runtime';
         const position = runtimeCoordinates
             ? globalThis.ThestraViewportContract.runtimePositionToThestra([resolved.x, resolved.y, resolved.z])
             : [resolved.x, resolved.z, resolved.y];

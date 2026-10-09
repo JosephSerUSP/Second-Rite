@@ -1,0 +1,46 @@
+{
+  "1": {
+    "name": "Service Sentinel encounter",
+    "commands": [
+      {
+        "cmd": "ARENA_START",
+        "eventId": 203,
+        "enemyUnitId": "sentinel",
+        "playerSlot": 1,
+        "skillId": "attack",
+        "readySeconds": 2.5,
+        "enemyPeriod": 3,
+        "windupSeconds": 0.7,
+        "range": 2.6,
+        "attackRadius": 1.1,
+        "enemySpeed": 0.9,
+        "onVictory": [
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "sentinelDefeated",
+            "value": "true"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "map"
+          }
+        ],
+        "onDefeat": [
+          {
+            "cmd": "RECOVER_PARTY"
+          }
+        ],
+        "stopDistance": 0.7,
+        "playerWindupSeconds": 0.24,
+        "playerRecoverySeconds": 0.42,
+        "strikeSeconds": 0.55,
+        "enemyRecoverySeconds": 0.85,
+        "terminalSeconds": 1.1,
+        "playerContactSound": "assets/audio/pulse.wav",
+        "enemyContactSound": "assets/audio/impact.wav",
+        "missSound": "assets/audio/sweep.wav"
+      }
+    ]
+  }
+}

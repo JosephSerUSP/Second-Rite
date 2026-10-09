@@ -239,6 +239,39 @@ local bogus = { id = "bogus", config = { dock = { variant = "no_such_variant" } 
 local ok = pcall(dock.draw, { v = {} }, bogus, ctx)
 check(not ok, "an undeclared dock variant raises instead of silently drawing nothing")
 
+-- Closing content must evaluate against the Scene that authored it, even
+-- after the host has moved to a new Scene with unrelated state.
+local savedStatic = registry.staticShell
+local savedDraw = windowRenderer.drawWindowFromData
+registry.staticShell = true
+local drawn = {}
+windowRenderer.drawWindowFromData = function(scene, state, context, opts)
+    drawn[#drawn+1] = {scene=scene,state=state,context=context,opts=opts}
+end
+registry.variants.test_outgoing = {
+    shells={{x=0,y=18,w=32,h=12}},
+    windows={{id="outgoing_only",rect={x=0,y=18,w=32,h=12},content={}}},
+}
+local outgoingScene={id="outgoing",config={dock={variant="test_outgoing"}}}
+local outgoingState={v={dialogueCursorIdx=2}}
+dock.reset()
+dock.draw(outgoingState,outgoingScene,ctx)
+dock.__finishTransition()
+dock.draw(outgoingState,outgoingScene,ctx)
+drawn={}
+dock.draw({v={}},sceneById("status"),ctx)
+check(#drawn==1 and drawn[1].state==outgoingState and drawn[1].scene==outgoingScene,
+    "closing dock content retains its outgoing Scene state and definition")
+check(drawn[1] and drawn[1].opts.windows[1].visible=="false",
+    "outgoing context retention still closes departing windows")
+dock.draw(outgoingState,outgoingScene,ctx)
+check(dock.__transition() and dock.__transition().targetVariant=="test_outgoing",
+    "reopening the outgoing variant interrupts its pending collapse")
+windowRenderer.drawWindowFromData=savedDraw
+registry.staticShell=savedStatic
+registry.variants.test_outgoing=nil
+dock.reset()
+
 -- Headless captures cannot wait for love.timer-backed open animations. The
 -- exporter seam must materialize declarative windows and mark both them and
 -- runtime winState windows to render at their resting geometry on next draw.

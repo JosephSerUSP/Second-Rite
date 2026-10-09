@@ -976,6 +976,9 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function addEventVisual(group, event, fallback) {
         const plan = Contract.eventVisualPlan(event.asset);
+        // The runtime Map bundle supplies the actual posed character. Its mesh
+        // attaches to this Event's live authoring root in setRenderableBundle.
+        if (plan.kind === 'character') return {visual:null,fallback};
         if (plan.kind === 'fallback') return { visual: null, fallback };
         const visual = new THREE.Group();
         visual.name = `Effective event ${plan.kind}: ${plan.path}`;
@@ -1083,7 +1086,9 @@ export function createThreeEditorViewport(container, options = {}) {
         } else group.position.set(event.world.x, 0, event.world.z);
         semanticContent.add(group);
 
-        const spriteMetrics = event.asset && event.asset.sprite ? eventSpriteMetrics(event) : null;
+        const spriteMetrics = event.asset?.actorAppearance
+            ? {height:event.asset.actorAppearance.height,width:event.asset.actorAppearance.height*0.5}
+            : event.asset && event.asset.sprite ? eventSpriteMetrics(event) : null;
         const { cube, edges } = spriteMetrics
             ? createEventBox(spriteMetrics.width, spriteMetrics.height, Math.min(0.92, spriteMetrics.width))
             : createEventBox();
@@ -1403,6 +1408,15 @@ export function createThreeEditorViewport(container, options = {}) {
         const nextIdentity = mapIdentity(model);
         const shouldFrame = priorMapIdentity !== nextIdentity;
 
+        const retainedCharacters=[];
+        for (const group of semanticObjects.values()) {
+            for (const child of group.children.slice()) {
+                if (child.userData.thestraEventCharacter) {
+                    child.removeFromParent();
+                    retainedCharacters.push(child);
+                }
+            }
+        }
         moveGizmo.detach();
         clearGroup(semanticContent);
         semanticSelectable.length = 0;
@@ -1423,7 +1437,10 @@ export function createThreeEditorViewport(container, options = {}) {
         }
         priorMapIdentity = nextIdentity;
         markLiveLightingDirty();
-        if (!sceneModel) return;
+        if (!sceneModel) {
+            retainedCharacters.forEach(disposeObject);
+            return;
+        }
 
         const wallGeometry = new THREE.BoxGeometry(1, 1, 1);
         const floorGeometry = new THREE.PlaneGeometry(1, 1);
@@ -1448,6 +1465,13 @@ export function createThreeEditorViewport(container, options = {}) {
         });
         addGrid(sceneModel);
         (sceneModel.events || []).forEach(addEvent);
+        for (const mesh of retainedCharacters) {
+            const source=mesh.userData.thestraSource;
+            const event=sceneModel.events.find(value=>String(value.id)===String(source.id));
+            const root=semanticObjects.get(`event:${source.id}`);
+            if (!shouldFrame && root && event?.asset?.actorAppearance?.character === source.character) root.add(mesh);
+            else disposeObject(mesh);
+        }
         (sceneModel.lights || []).forEach(addLight);
         ((sceneModel.annotations && sceneModel.annotations.overrides) || []).forEach(addOverride);
         addSpawn(sceneModel.annotations && sceneModel.annotations.spawn);
@@ -1460,6 +1484,14 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function setRenderableBundle(bundle, options = {}) {
         importedCamera = bundle && bundle.spatialCamera || null;
+        for (const group of semanticObjects.values()) {
+            for (const child of group.children.slice()) {
+                if (child.userData.thestraEventCharacter) {
+                    child.removeFromParent();
+                    disposeObject(child);
+                }
+            }
+        }
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
         renderableGeometries.length = 0;
@@ -1527,7 +1559,21 @@ export function createThreeEditorViewport(container, options = {}) {
             mesh.userData.thestraSource = source || null;
             mesh.userData.thestraMaterialId = materialId || null;
             mesh.userData.thestraTransportOrder = order;
-            renderableContent.add(mesh);
+            if (source?.kind === 'event' && source.surface === 'character') {
+                const root=semanticObjects.get(`event:${source.id}`);
+                if (!root) throw new Error(`Compiled character has no Event root: ${source.id}`);
+                const event=sceneModel.events.find(value=>String(value.id)===String(source.id));
+                if (event?.asset?.actorAppearance?.character !== source.character) {
+                    disposeObject(mesh);
+                    return;
+                }
+                // Geometry is already posed in runtime world coordinates. Only
+                // the authoring root translation is undone; dragging that root
+                // moves this exact mesh without another skin implementation.
+                mesh.position.fromArray(Contract.runtimePositionToThestra(source.rootPosition,bundle.coordinateSystem)).negate();
+                mesh.userData.thestraEventCharacter=true;
+                root.add(mesh);
+            } else renderableContent.add(mesh);
             renderableGeometries.push(mesh.geometry);
             trackByCell(renderableMeshesByCell, sourceCellKey(source), mesh);
             const semantic = semanticFromSource(source);

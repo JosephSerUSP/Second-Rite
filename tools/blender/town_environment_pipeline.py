@@ -1,10 +1,12 @@
 """Blender-authored baked environment pipeline for Second Gate town slices.
 
-Contract V0 collections:
+Contract V1 collections:
 - TH_SOURCE: Authoritative detailed source geometry, materials, and lighting.
 - TH_RENDER: Lightweight coarse render/depth mesh (with unwrapped UVs for atlas baking).
 - TH_COLLISION: Simplified collision volumes.
 - TH_ANCHORS: Spatial markers/empties with orientation.
+- TH_WALKABLE: Optional explicit planar walk-region faces.
+- TH_OBSTACLES: Optional explicit planar blocking faces on TH_WALKABLE's ground plane.
 - TH_PREVIEW_ACTORS: Preview actors (MUST be excluded from bake, mesh, collision, anchors).
 - TH_PREVIEW_ONLY: Visual guides/reference geometry.
 - TH_CAMERA_PREVIEW: Preview camera(s).
@@ -14,7 +16,7 @@ Produces a self-contained runtime package usable without Blender:
 - environment.mtl
 - environment.png
 - collision.obj (optional)
-- environment.json
+- environment.json, including walkSurface when TH_WALKABLE is authored
 """
 
 from __future__ import annotations
@@ -60,6 +62,11 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     packages were made with; ``"eevee"`` is a camera-projection bake (`eevee_bake.EeveeBake`, passed as
     ``eevee``). Cycles device selection is explicit; GPU callers configure their
     device in the current Blender process without saving global preferences.
+
+    If ``TH_WALKABLE`` exists, the same export also compiles its explicit
+    planar semantic geometry (plus optional ``TH_OBSTACLES``) into the package's
+    ``walkSurface``. A lone ``TH_OBSTACLES`` collection is invalid: blockers
+    cannot own a locomotion plane without a walkable authority.
     """
     import time
     started = time.perf_counter()
@@ -82,16 +89,23 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     col_source = collections["TH_SOURCE"]
     col_anchors = collections["TH_ANCHORS"]
     col_collision = collections.get("TH_COLLISION")
+    col_walkable = collections.get("TH_WALKABLE")
+    col_obstacles = collections.get("TH_OBSTACLES")
     col_preview_actors = collections.get("TH_PREVIEW_ACTORS")
     col_preview_only = collections.get("TH_PREVIEW_ONLY")
     col_camera = collections.get("TH_CAMERA_PREVIEW")
+
+    if col_obstacles is not None and col_walkable is None:
+        raise RuntimeError("V1 contract violation: TH_OBSTACLES requires TH_WALKABLE")
 
     render_mesh_objects = [obj for obj in col_render.all_objects if obj and obj.type == 'MESH']
     if not render_mesh_objects:
         raise RuntimeError("TH_RENDER contains no mesh objects")
 
-    # 2. Exclude preview and non-render collections from bake
-    for col in (col_preview_actors, col_preview_only, col_collision, col_anchors, col_camera):
+    # 2. Exclude preview, collision, semantic and non-render collections from bake.
+    # TH_WALKABLE/TH_OBSTACLES are gameplay-authoring facts, not beauty source.
+    for col in (col_preview_actors, col_preview_only, col_collision, col_walkable,
+                col_obstacles, col_anchors, col_camera):
         if col:
             col.hide_render = True
             for obj in list(col.all_objects):
@@ -110,6 +124,21 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     for obj in list(col_render.all_objects):
         if obj:
             obj.hide_render = False
+
+    # Compile semantic geometry before any beauty operation can mutate scene
+    # membership/selection. This record is plain data and can safely wait until
+    # manifest assembly near the end of the export.
+    walk_surface = None
+    walk_surface_semantics = None
+    if col_walkable is not None:
+        from semantics import environment_walk_surface as walk_surface_semantics
+        walk_surface = walk_surface_semantics.compile_blender_walk_surface()
+        print(
+            "[pipeline] Compiled walk surface: "
+            f"{len(walk_surface['regions'])} regions, "
+            f"{len(walk_surface['obstacles'])} obstacles, "
+            f"groundZ={walk_surface['groundZ']:g}"
+        )
 
     # 3. Setup Bake Target Image & Material on TH_RENDER
     target_obj = render_mesh_objects[0]
@@ -419,6 +448,9 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "sourceBlend": str(blend_path.name),
         }
     }
+    if walk_surface is not None:
+        assert walk_surface_semantics is not None
+        walk_surface_semantics.apply_manifest(manifest, walk_surface)
     if eevee_report is not None:
         manifest["provenance"]["bake"] = {"backend": "eevee", **eevee_report["settings"]}
     else:

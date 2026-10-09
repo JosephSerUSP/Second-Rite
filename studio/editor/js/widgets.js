@@ -1945,6 +1945,15 @@
                 });
 
                 // Default 3D Model (.obj path)
+                const characterPanel = document.createElement('div');
+                formPanel.appendChild(characterPanel);
+                const renderCharacter = () => {
+                    characterPanel.replaceChildren();
+                    const schema = compiledCharacterFormSchema(eventData, true);
+                    schema.rerender = renderCharacter;
+                    buildEntityForm(characterPanel, eventData, schema);
+                };
+                renderCharacter();
                 createFormField(formPanel, 'Default 3D Model (.obj)', eventData.model || '', (path) => {
                     path = path.trim();
                     EventPresentation.serializeCommonEventPresentation({
@@ -2860,8 +2869,7 @@
 
             if (onChange && !readOnly) {
                 input.addEventListener('input', () => {
-                    onChange(input.value);
-                    onDirty(true);
+                    if (onChange(input.value) !== false) onDirty(true);
                 });
             }
 

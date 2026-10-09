@@ -328,18 +328,29 @@ function formula.makeContext(opts, session)
     return ctx
 end
 
-local function evaluateExpression(exprString, ctx)
-    if not exprString or exprString == "" then return 0, "empty formula" end
-    if type(exprString) == "number" then return exprString, nil end
-    ctx = ctx or {}
-
+local function compileExpression(exprString,ctx)
     -- Fresh env per call: helpers first, context on top. No _G access —
     -- unknown names read as nil and fail the expression rather than escape.
     local env = {}
     for k, fn in pairs(HELPERS) do env[k] = fn end
     for k, val in pairs(ctx) do env[k] = val end
 
-    local chunk, err = load("return " .. exprString, "formula:" .. exprString, "t", env)
+    return load("return " .. exprString, "formula:" .. exprString, "t", env)
+end
+
+function formula.validateSyntax(expr)
+    if type(expr)=="number" then return true end
+    if type(expr)~="string" or expr=="" then return false,"empty formula" end
+    local chunk,err=compileExpression(expr,{})
+    return chunk~=nil,err
+end
+
+local function evaluateExpression(exprString, ctx)
+    if not exprString or exprString == "" then return 0, "empty formula" end
+    if type(exprString) == "number" then return exprString, nil end
+    ctx = ctx or {}
+
+    local chunk,err=compileExpression(exprString,ctx)
     if not chunk then
         warnOnce(exprString, err)
         return 0, err

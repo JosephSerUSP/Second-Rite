@@ -64,7 +64,7 @@
   "windows": [
     {
       "id": "arena_hud",
-      "visible": "variables.arena ~= nil",
+      "visible": "variables.arena ~= nil and variables.arena.active == true",
       "rect": {
         "x": "1 - surface.originX",
         "y": 1,
@@ -149,6 +149,24 @@
         {
           "type": "text",
           "text": "> Sentinel  {variables.arena.enemyHp}/{variables.arena.enemyMaxHp}\n{variables.arena.message == 'out_of_range' and 'Outside range - cancel to move' or 'Confirm: attack / Cancel: back'}"
+        }
+      ]
+    },
+    {
+      "id": "chapter_objective",
+      "visible": "variables.arena == nil or variables.arena.active ~= true",
+      "rect": {
+        "x": "1 - surface.originX",
+        "y": 1,
+        "w": "surface.width - 2",
+        "h": 4
+      },
+      "style": "panel",
+      "chrome": "overlay",
+      "content": [
+        {
+          "type": "text",
+          "text": "{variables.chapterComplete == true and 'Assignment complete. The annex is open.' or variables.sentinelDefeated == true and 'Access restored. Return to the archive attendant.' or variables.sentinelInspected == true and 'Inspect the Sentinel to retry.' or 'Use the blue service door. Inspect the dormant Sentinel.'}\nArrows: move   Enter: interact   F5: save / F6: load"
         }
       ]
     }

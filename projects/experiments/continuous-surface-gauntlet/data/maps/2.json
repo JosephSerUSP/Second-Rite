@@ -54,6 +54,15 @@
       },
       "commands": [
         {
+          "cmd": "TEXT",
+          "text": "The Sentinel is dormant, its warning light pulsing. As you inspect it, the service door locks and the machine wakes. Evade the red circle. When AT fills, Enter opens Attack, Enter selects the target, then Enter fires. Escape backs out."
+        },
+        {
+          "cmd": "SET_GAME_VARIABLE",
+          "name": "sentinelInspected",
+          "value": "true"
+        },
+        {
           "cmd": "CALL_COMMON_EVENT",
           "commonEventId": 1
         }
@@ -65,29 +74,9 @@
           "commands": [
             {
               "cmd": "TEXT",
-              "text": "The service floor is quiet again."
+              "text": "The Sentinel is quiet. Access is restored. Return through the blue door and report to the attendant."
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": 202,
-      "instanceId": "gauntlet-service-ledger",
-      "name": "Maintenance Ledger",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        2.15,
-        1.45,
-        0
-      ],
-      "interactionRadius": 0.95,
-      "trigger": "interact",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "A maintenance ledger records two doors and no reason to prefer either one."
         }
       ]
     }

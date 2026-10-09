@@ -109,6 +109,26 @@ local function run()
             capture(game,prefix .. "-blocked")
         end
     end
+    -- Traverse authored routes in bounded steps through the actual movement
+    -- semantic. A direct Event call alone cannot prove the door is reachable.
+    for mapId, route in ipairs({{{-2,-2.15},{3.35,-2.15}},
+                               {{-2.45,1.85},{-2.45,-2.2},{1.6,-2.2},{-2.45,-2.2},{-2.45,1.85},{-3.35,1.85}}}) do
+        local game = require("engine.cli_tools").makeHarnessSession(loader)
+        exploration.loadMap(game,loader.getMapIndex(mapId))
+        local root=game.continuousTraversal
+        for _,point in ipairs(route) do
+            for _=1,400 do
+                local dx,dy=point[1]-root.x,point[2]-root.y
+                local distance=math.sqrt(dx*dx+dy*dy)
+                if distance<1e-5 then break end
+                local scale=math.min(.04,distance)/distance
+                require("engine.continuous_surface").moveBy(root,dx*scale,dy*scale)
+            end
+            assert(math.abs(root.x-point[1])<1e-5 and math.abs(root.y-point[2])<1e-5,
+                "chapter route blocked on Map "..mapId)
+        end
+    end
+    print("CHAPTER WALK ROUTES OK")
     -- An actor/grid remnant must not satisfy native environment proof.
     do
         local game = require("engine.cli_tools").makeHarnessSession(loader)

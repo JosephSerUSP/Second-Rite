@@ -281,7 +281,7 @@ jobs:
           & $env:LOVEC $env:GAUNTLET_STAGE
           if ($LASTEXITCODE -ne 0) { throw "arena native proof failed (exit $LASTEXITCODE)" }
 
-      - name: Real player controls and NPC dialogue round-trip
+      - name: Real player door, investigation, combat, report and save loop
         shell: pwsh
         run: |
           Copy-Item runtime/main.lua (Join-Path $env:GAUNTLET_STAGE 'player-main.lua')

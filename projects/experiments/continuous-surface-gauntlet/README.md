@@ -72,7 +72,12 @@ Stage this Project through the ordinary Thestra Project exporter, then run the s
 
 Player controls use the authored Scene camera basis: Left/Right move across the screen and Up/Down move into/toward the foreground. Enter interacts or confirms; Esc cancels arena selection. NPC dialogue uses the ordinary dialogue dock and retains the Map camera behind it. Confirm completes the text reveal, then closes the line. The real-main-host playthrough proof covers directional movement, visible dialogue state and return to exploration.
 
-Talk to the Archive Attendant and advance the instructions with Enter to travel directly into the Sentinel encounter. The attendant and Sentinel use the same authored Common Event.
+The attendant gives directions without moving the player. Walk through the blue
+service door, inspect the visible dormant Sentinel, then dismiss its warning to
+begin combat in the annex. Victory restores exploration; return through the door
+and report to the attendant to complete the assignment. The objective panel tracks
+these stages. F5 quicksaves and F6 quickloads on the Map; encounter saves remain
+blocked. The invisible maintenance-ledger interaction has been removed.
 
 Attack confirmation now commits to anticipation, contact and recovery. Movement
 and further command input hold until recovery finishes; contact resolves once

@@ -29,17 +29,8 @@
       "commands": [
         {
           "cmd": "TEXT",
-          "speaker": "Archive Attendant",
-          "text": "The service annex is blocked by a Sentinel. I will take you there. Use the arrow keys to evade its red attack circle. When AT fills, press Enter to choose Attack, Enter to target, then Enter to fire. Escape backs out so you can move again."
-        },
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 2,
-          "arrival": "arrival_from_archive"
-        },
-        {
-          "cmd": "CALL_COMMON_EVENT",
-          "commonEventId": 1
+          "text": "The service door is the blue door at the back left. Inspect the dormant Sentinel in the annex and restore access. Return to me when the floor is clear.",
+          "speaker": "Archive Attendant"
         }
       ],
       "facing": "W",
@@ -52,9 +43,24 @@
           "condition": "variables.sentinelDefeated == true",
           "commands": [
             {
+              "cmd": "SET_GAME_VARIABLE",
+              "name": "chapterComplete",
+              "value": "true"
+            },
+            {
               "cmd": "TEXT",
-              "speaker": "Archive Attendant",
-              "text": "You cleared the service annex. The Sentinel is down."
+              "text": "The annex is clear and access is restored. Assignment complete. F5 saves your progress; F6 reloads it. You can revisit the annex through the service door.",
+              "speaker": "Archive Attendant"
+            }
+          ]
+        },
+        {
+          "condition": "variables.chapterComplete == true",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Assignment complete. The annex remains open. F5 saves; F6 reloads.",
+              "speaker": "Archive Attendant"
             }
           ]
         }

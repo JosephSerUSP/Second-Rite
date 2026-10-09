@@ -4,7 +4,7 @@
   "kind": "menu",
   "draw": "windows",
   "backdrop": "map",
-  "config": {},
+  "config": { "dock": { "variant": "dialogue" } },
   "hooks": { "on_enter": [] },
   "windows": []
 }

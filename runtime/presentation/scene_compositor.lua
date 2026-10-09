@@ -76,7 +76,12 @@ local function drawRenderBackdrop(sceneData, ctx, state)
     local session = ctx.session
     if not (session and session.currentMapData and session.mapGrid) then return false end
     if session.locationArt then return false end
-    require("presentation.vertex_shading_resolver").draw(session)
+    if session.continuousTraversal then
+        local mapScene = assert(ctx.loader.getScene("map"), "Map backdrop requires a Map Scene")
+        require("presentation.world_renderer").draw(mapScene.world, ctx, mapScene.worldPresentation)
+    else
+        require("presentation.vertex_shading_resolver").draw(session)
+    end
     drawBackdropFade(sceneData, state, true)
     return true
 end

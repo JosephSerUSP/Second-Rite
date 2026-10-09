@@ -163,6 +163,9 @@ function provider.update(session, dt, held)
     held = held or {}
     local inputX = (held.right and 1 or 0) - (held.left and 1 or 0)
     local inputY = (held.down and 1 or 0) - (held.up and 1 or 0)
+    if held.worldX ~= nil then
+        inputX, inputY = held.worldX, held.worldY
+    end
     local moved = semantic.update(state, dt, inputX, inputY)
     if inputX ~= 0 then state.facing = inputX < 0 and -1 or 1 end
     state.walkFrameIndex = math.floor((state.walkDistance or 0) / 0.42) % 6

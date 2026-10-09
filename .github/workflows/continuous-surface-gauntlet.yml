@@ -274,6 +274,14 @@ jobs:
           & $env:LOVEC $env:GAUNTLET_STAGE
           if ($LASTEXITCODE -ne 0) { throw "arena native proof failed (exit $LASTEXITCODE)" }
 
+      - name: Real player controls and NPC dialogue round-trip
+        shell: pwsh
+        run: |
+          Copy-Item runtime/main.lua (Join-Path $env:GAUNTLET_STAGE 'player-main.lua')
+          Copy-Item tools/spikes/continuous-surface/project-playthrough-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          & $env:LOVEC $env:GAUNTLET_STAGE
+          if ($LASTEXITCODE -ne 0) { throw "player controls/NPC proof failed (exit $LASTEXITCODE)" }
+
       - name: Continuous traversal semantic and host assertions
         shell: pwsh
         run: |

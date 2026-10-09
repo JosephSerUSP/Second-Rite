@@ -4,6 +4,13 @@ local traversal_host = require("engine.traversal_host")
 
 local controller = {}
 
+-- Screen directions use the same resolved basis as the authored world camera.
+-- The traversal provider still receives only a neutral world-space vector.
+function controller.worldMovement(camera, horizontal, vertical)
+    return horizontal * camera.rightX + vertical * camera.dirX,
+        horizontal * camera.rightY + vertical * camera.dirY
+end
+
 -- Held state belongs to the logical player membrane, never to a keyboard
 -- adapter. A physical key and an external player policy therefore accumulate
 -- the exact same repeat timing after both have resolved to a canonical button.
@@ -91,12 +98,22 @@ function controller.update(dt, ctx, options)
             local root=ctx.session.continuousTraversal
             if root then root.moving=false end
         else
-            traversal_host.update(ctx.session, dt, {
+            local movement = {
                 up = down("UP"),
                 down = down("DOWN"),
                 left = down("LEFT"),
                 right = down("RIGHT"),
-            })
+            }
+            if ctx.session.continuousTraversal then
+                local scene = scene_host.getCurrentSceneData(ctx)
+                local authored = assert(scene.worldPresentation.camera,
+                    "continuous movement requires an authored Scene camera")
+                local camera = require("engine.generated.world-view").resolveTownCamera(authored)
+                movement.worldX, movement.worldY = controller.worldMovement(camera,
+                    (movement.right and 1 or 0) - (movement.left and 1 or 0),
+                    (movement.up and 1 or 0) - (movement.down and 1 or 0))
+            end
+            traversal_host.update(ctx.session, dt, movement)
         end
     end
 

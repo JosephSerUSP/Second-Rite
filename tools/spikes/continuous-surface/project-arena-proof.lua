@@ -20,10 +20,11 @@ local function run()
     local event
     for _,ev in ipairs(game.currentMapData.events) do if ev.id==203 then event=ev end end
     local original=json.encode(event)
-    local invalid={};for key,value in pairs(event.commands[1]) do invalid[key]=value end
+    local encounterCommands=json.decode(assert(love.filesystem.read("data/commonEvents.json")))["1"].commands
+    local invalid={};for key,value in pairs(encounterCommands[1]) do invalid[key]=value end
     invalid.range=0
     assert(not pcall(host.validate,invalid,loader,game.currentMapData),"invalid range accepted")
-    invalid.range=event.commands[1].range;invalid.enemyUnitId="missing"
+    invalid.range=encounterCommands[1].range;invalid.enemyUnitId="missing"
     assert(not pcall(host.validate,invalid,loader,game.currentMapData),"missing enemy accepted")
     local captures={}
     local skillCost=require("engine.skill_cost")
@@ -47,8 +48,8 @@ local function run()
     local function tick(dt) controller.update(dt,ctx) end
     local function confirm() scene.buttonpressed("A",ctx) end
     local function cancel() scene.buttonpressed("B",ctx) end
-    interpreter.runImmediate(event.commands,{session=game,loader=loader,event=event})
-    local formulaSpec={};for key,value in pairs(event.commands[1]) do formulaSpec[key]=value end
+    interpreter.runImmediate(encounterCommands,{session=game,loader=loader,event=event})
+    local formulaSpec={};for key,value in pairs(encounterCommands[1]) do formulaSpec[key]=value end
     formulaSpec.range="2 + 0.6"
     local resolved=host.resolveSpec(formulaSpec,function(value)
         local result,err=require("engine.formula").eval(value,{});assert(not err,err);return result
@@ -108,7 +109,7 @@ local function run()
     assert(pcall(require("engine.savegame").serialize,game,loader,"map"),"post-terminal save rejected")
     -- Negative terminal control: enemy attacks reach defeat and authored recovery.
     require("engine.game_variables").set(game,"sentinelDefeated",false)
-    interpreter.runImmediate(event.commands,{session=game,loader=loader,event=event})
+    interpreter.runImmediate(encounterCommands,{session=game,loader=loader,event=event})
     state=game.arenaEncounter
     while game.arenaEncounter do
         state.telegraph={x=game.continuousTraversal.x,y=game.continuousTraversal.y,z=0,radius=state.spec.attackRadius,remaining=0.01}

@@ -1,1 +1,38 @@
-[]
+{
+  "1": {
+    "name": "Service Sentinel encounter",
+    "commands": [
+      {
+        "cmd": "ARENA_START",
+        "eventId": 203,
+        "enemyUnitId": "sentinel",
+        "playerSlot": 1,
+        "skillId": "attack",
+        "readySeconds": 2.5,
+        "enemyPeriod": 3,
+        "windupSeconds": 1.25,
+        "range": 2.6,
+        "attackRadius": 1.1,
+        "enemySpeed": 0.65,
+        "onVictory": [
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "sentinelDefeated",
+            "value": "true"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "map"
+          }
+        ],
+        "onDefeat": [
+          {
+            "cmd": "RECOVER_PARTY"
+          }
+        ],
+        "stopDistance": 0.7
+      }
+    ]
+  }
+}

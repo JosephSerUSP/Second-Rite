@@ -4,8 +4,14 @@
   "category": "experiment",
   "depth": 0,
   "safe": true,
-  "layout": ["."],
-  "spawn": { "x": 0, "y": 0, "dir": "N" },
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
   "events": [
     {
       "id": 101,
@@ -13,21 +19,46 @@
       "name": "Archive Attendant",
       "x": 0,
       "y": 0,
-      "worldPosition": [1.85, 1.85, 0.0],
-      "interactionRadius": 1.0,
+      "worldPosition": [
+        1.85,
+        1.85,
+        0
+      ],
+      "interactionRadius": 1,
       "trigger": "interact",
       "commands": [
         {
           "cmd": "TEXT",
           "speaker": "Archive Attendant",
-          "text": "The room is still here. That is the first useful fact."
+          "text": "The service annex is blocked by a Sentinel. I will take you there. Use the arrow keys to evade its red attack circle. When AT fills, press Enter to choose Attack, Enter to target, then Enter to fire. Escape backs out so you can move again."
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 2,
+          "arrival": "arrival_from_archive"
+        },
+        {
+          "cmd": "CALL_COMMON_EVENT",
+          "commonEventId": 1
         }
       ],
       "facing": "W",
       "actorAppearance": {
         "character": "assets/characters/attendant/character.json",
         "height": 1.75
-      }
+      },
+      "pages": [
+        {
+          "condition": "variables.sentinelDefeated == true",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "speaker": "Archive Attendant",
+              "text": "You cleared the service annex. The Sentinel is down."
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 102,
@@ -35,11 +66,19 @@
       "name": "Service Door",
       "x": 0,
       "y": 0,
-      "worldPosition": [3.35, -2.15, 0.0],
+      "worldPosition": [
+        3.35,
+        -2.15,
+        0
+      ],
       "interactionRadius": 1.15,
       "trigger": "interact",
       "commands": [
-        { "cmd": "LOAD_MAP", "mapId": 2, "arrival": "arrival_from_archive" }
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 2,
+          "arrival": "arrival_from_archive"
+        }
       ]
     }
   ],

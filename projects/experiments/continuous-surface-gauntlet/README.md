@@ -50,3 +50,5 @@ No Parasite Eve names, maps, dialogue, characters or art are used. The reference
 Stage this Project through the ordinary Thestra Project exporter, then run the staged directory with LÖVE. It should never require `projects/hichaukitoden-game` to exist.
 
 Player controls use the authored Scene camera basis: Left/Right move across the screen and Up/Down move into/toward the foreground. Enter interacts or confirms; Esc cancels arena selection. NPC dialogue uses the ordinary dialogue dock and retains the Map camera behind it. Confirm completes the text reveal, then closes the line. The real-main-host playthrough proof covers directional movement, visible dialogue state and return to exploration.
+
+Talk to the Archive Attendant and advance the instructions with Enter to travel directly into the Sentinel encounter. The attendant and Sentinel use the same authored Common Event.

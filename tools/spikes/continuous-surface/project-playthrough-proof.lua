@@ -41,7 +41,7 @@ love.update = function(dt)
     elseif step == 3 and elapsed > 3 then
         assert(scenes.getCurrent()=="dialogue","NPC did not enter Dialogue")
         local state=scenes.getCurrentState()
-        assert(state.v.dialogueText=="The room is still here. That is the first useful fact.","NPC text not synchronized")
+        assert(state.v.dialogueText:find("The service annex is blocked",1,true),"NPC text not synchronized")
         assert(scenes.getCurrentSceneData({session=activeSession,loader=activeSession.loader}).config.dock.variant=="dialogue")
         assert(activeSession.loader.engine.dock.variants.dialogue.windows[1],"Dialogue dock has no window definitions")
         love.graphics.captureScreenshot("npc-dialogue-proof.png")
@@ -56,7 +56,10 @@ love.update = function(dt)
         step=6
     elseif step == 6 and elapsed > 4.5 then
         assert(scenes.getCurrent()=="map","NPC dialogue did not return to exploration")
-        print("PLAYTHROUGH CONTROLS AND NPC OK")
+        assert(activeSession.arenaEncounter,"Attendant did not start combat")
+        assert(activeSession.arenaEncounter.event.id==203,"Wrong combat Event")
+        love.graphics.captureScreenshot("npc-combat-proof.png")
+        print("PLAYTHROUGH CONTROLS AND NPC TO COMBAT OK")
         love.event.quit(0)
     end
 end

@@ -37,7 +37,7 @@ local function run()
         end end
         assert(visible > width * height * 0.1, "empty world capture " .. label .. " pixels=" .. visible)
         local stats = view.getLastFrameStats()
-        assert(stats.dynamicByCategory.actor == 1, "native renderer lost animated character " .. label)
+        assert(stats.dynamicByCategory.actor == 2, "native renderer lost player or Event character " .. label)
         captures[#captures+1] = {label = label, image = love.data.encode("string","base64",image:encode("png")),
             visiblePixels = visible, stats = view.getLastFrameStats(), actor = host.serialize(game)}
         local hash = love.data.hash("sha256", image:getString())
@@ -51,6 +51,7 @@ local function run()
         for mapId=1,2 do
             local game = require("engine.cli_tools").makeHarnessSession(loader)
             exploration.loadMap(game, loader.getMapIndex(mapId))
+            require("character-proof")(game)
 
             do
                 local previous = getmetatable(game).__index

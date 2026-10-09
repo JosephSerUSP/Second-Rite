@@ -22,7 +22,7 @@ The current spatial slice proves the Lane A / Lane B substrate from #1402:
 
 Archive Antechamber and Service Annex have distinct beauty and collision meshes and distinct package-owned `walkSurface` records. They share the Project's neutral texture atlas. Both rooms leave their camera-facing wall open for the Scene's fixed camera; walkability remains independent of beauty and collision geometry.
 
-The player uses the compiler-built surveyor described in `assets/authoring/characters/README.md`. Maps select its appearance independently of traversal geometry. The archive attendant retains the neutral 24x48 raster fixture; `tools/spikes/continuous-surface/build-fixture-sprites.py` also maintains the unused sprite player fixtures and the opaque neutral environment atlas.
+The player uses the compiler-built surveyor described in `assets/authoring/characters/README.md`. Maps select its appearance independently of traversal geometry. The archive attendant and dormant service-floor sentinel use distinct compiled appearances through ordinary Event fields. The sentinel has dialogue only; its encounter is inactive. `tools/spikes/continuous-surface/build-fixture-sprites.py` maintains the unused sprite player fixtures and the opaque neutral environment atlas.
 
 ## Blender authoring contract
 

@@ -21,6 +21,27 @@
       ]
     },
     {
+      "id": 203,
+      "instanceId": "gauntlet-service-sentinel",
+      "name": "Dormant Sentinel",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [1.6, -1.4, 0.0],
+      "interactionRadius": 1.0,
+      "facing": "W",
+      "trigger": "interact",
+      "actorAppearance": {
+        "character": "assets/characters/sentinel/character.json",
+        "height": 1.9
+      },
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A dormant sentinel watches the service floor. Its encounter is not active."
+        }
+      ]
+    },
+    {
       "id": 202,
       "instanceId": "gauntlet-service-ledger",
       "name": "Maintenance Ledger",

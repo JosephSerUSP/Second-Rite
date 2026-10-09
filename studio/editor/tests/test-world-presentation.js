@@ -124,10 +124,31 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     const payload = { scenes: [
         { id: 'menu', draw: 'windows' },
         { id: 'map-a', draw: 'world', world: 'map' },
+        { id: 'room', draw: 'world', world: 'continuous_surface' },
         { id: 'other-world', draw: 'world', world: 'battlefield' },
         { id: 'map-b', draw: 'world', world: 'map' }
     ] };
-    assert.deepStrictEqual(WorldPresentation.mapWorldScenes(payload).map(scene => scene.id), ['map-a', 'map-b']);
+    assert.deepStrictEqual(WorldPresentation.mapWorldScenes(payload).map(scene => scene.id), ['map-a', 'room', 'map-b']);
+})();
+
+(function testFixedSceneCameraUsesGeneratedOpticsAndOnlyMutatesTheScene() {
+    const scene=JSON.parse(fs.readFileSync(path.join(ROOT,'projects/experiments/continuous-surface-gauntlet/data/scenes/map.json')));
+    const schema=WorldPresentation.fixedCameraSchema(scene);
+    const map=JSON.parse(fs.readFileSync(path.join(ROOT,'projects/experiments/continuous-surface-gauntlet/data/maps/1.json')));
+    const before=JSON.stringify(map);
+    const yaw=schema.fields.find(field=>field.inputId==='scene-camera-yawDegrees');
+    yaw.set(scene,30);
+    const generated=require('../js/generated/world-view.js').resolveTownCamera(scene.worldPresentation.camera);
+    const resolved=WorldPresentation.resolveCamera(scene.worldPresentation.camera,{});
+    assert.deepEqual({...resolved,provenance:undefined,coordinateSpace:undefined},
+        {...generated,provenance:undefined,coordinateSpace:undefined});
+    assert.equal(resolved.coordinateSpace,'runtime');
+    assert.equal(JSON.stringify(map),before);
+    const distance=schema.fields.find(field=>field.inputId==='scene-camera-distance');
+    const sceneBefore=JSON.stringify(scene);
+    assert.throws(()=>distance.set(scene,0),/positive/);
+    assert.equal(JSON.stringify(scene),sceneBefore,'invalid control edits preserve the last valid camera');
+    assert.deepEqual(WorldPresentation.validateCamera(scene.worldPresentation.camera),[]);
 })();
 
 (function testRuntimeAndStudioAdaptersStayLockedTo617Semantics() {

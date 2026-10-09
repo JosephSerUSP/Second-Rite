@@ -17,6 +17,18 @@ on:
       - 'studio/editor/js/environment-walk-surface-overlay.js'
       - 'studio/editor/js/environment-walk-surface-studio.js'
       - 'studio/editor/js/map-inspection-request.js'
+      - 'studio/editor/js/world-presentation.js'
+      - 'studio/editor/js/world-presentation-studio.js'
+      - 'studio/editor/js/plate-composition-studio.js'
+      - 'studio/editor/js/entity-forms.js'
+      - 'studio/editor/js/events.js'
+      - 'studio/editor/js/event_presentation.js'
+      - 'studio/editor/js/thestra-editor-scene.js'
+      - 'studio/editor/js/thestra-viewport-contract.js'
+      - 'studio/editor/js/three-editor-viewport-base.js'
+      - 'studio/editor/js/three-editor-viewport.js'
+      - 'studio/editor/js/widgets.js'
+      - 'studio/editor/index.html'
       - 'studio/editor/tests/test-environment-walk-surface-overlay.js'
       - 'studio/editor/capture-continuous-surface-proof.js'
       - 'projects/experiments/continuous-surface-gauntlet/**'
@@ -91,7 +103,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          node --test studio/editor/tests/test-environment-walk-surface-overlay.js studio/editor/tests/test-map-inspection-request.js
+          node --test studio/editor/tests/test-environment-walk-surface-overlay.js studio/editor/tests/test-map-inspection-request.js studio/editor/tests/test-world-presentation.js studio/editor/tests/test-event-presentation.js studio/editor/tests/test-world-event-authoring.js
           if ($LASTEXITCODE -ne 0) { throw "Studio walk-surface contracts failed (exit $LASTEXITCODE)" }
 
       - name: Capture real Studio proof frames
@@ -107,6 +119,9 @@ jobs:
             '02-archive-top-walk-surface.png',
             '03-service-annex-top-walk-surface.png',
             '04-service-annex-walk-vs-collision.png',
+            '05-archive-runtime-camera.png',
+            '06-attendant-character-controls.png',
+            '07-scene-camera-controls.png',
             'proof.json'
           )
           foreach ($file in $expected) {

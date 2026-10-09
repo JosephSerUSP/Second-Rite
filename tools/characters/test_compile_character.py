@@ -12,9 +12,17 @@ SOURCE = ROOT / 'projects/experiments/continuous-surface-gauntlet/assets/authori
 
 class CharacterCompiler(unittest.TestCase):
     def test_adopted_provenance_matches_recipe_and_glb(self):
-        record=json.loads(SOURCE.with_suffix('.build.json').read_text())
-        self.assertEqual(record['glbSha256'], hashlib.sha256(SOURCE.read_bytes()).hexdigest())
-        self.assertEqual(record['specSha256'], hashlib.sha256(SOURCE.with_suffix('.spec.json').read_bytes()).hexdigest())
+        for name in ['surveyor','attendant','sentinel']:
+            source=SOURCE.with_name(name+'.glb')
+            with self.subTest(character=name):
+                record=json.loads(source.with_suffix('.build.json').read_text())
+                self.assertEqual(record['glbSha256'], hashlib.sha256(source.read_bytes()).hexdigest())
+                self.assertEqual(record['specSha256'], hashlib.sha256(source.with_suffix('.spec.json').read_bytes()).hexdigest())
+                asset,images=compile_glb(source)
+                runtime=source.parents[2]/'characters'/name
+                expected=(json.dumps(asset,separators=(',', ':'),allow_nan=False)+'\n').encode()
+                self.assertEqual(expected,(runtime/'character.json').read_bytes())
+                for texture,data in images.items(): self.assertEqual(data,(runtime/texture).read_bytes())
 
     def test_preserves_authored_uvs_weights_clips(self):
         asset, images = compile_glb(SOURCE)

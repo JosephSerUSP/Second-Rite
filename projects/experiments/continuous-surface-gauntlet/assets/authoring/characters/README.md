@@ -44,5 +44,16 @@ so blocked input returns to idle. Heading and foot position come from the
 existing neutral traversal pose, including the single door-pose decoration.
 No gameplay state is reconstructed or changed by posing.
 
-This is one experimental player appearance. NPC animation authoring, additional
-actions, blends and a shipping creature-roster conversion are outside this slice.
+The attendant and sentinel have separate recipes and portable GLBs using the
+same compiler library and animation source. Rebuild either with `--character
+attendant` or `--character sentinel`; each build record pins its source hashes.
+
+Floor Events select `actorAppearance` (character, height) through the shared
+Event form. Pages and Common Events use ordinary inheritance; `false` suppresses
+an inherited appearance. The existing Event actor owner supplies facing and
+idle/walk or held-pose state. Rendering does not allocate or move actor state.
+One-shot playback fails explicitly until its completion semantics are supported.
+Studio attaches the resolved mesh to the Event authoring root, so moving that
+root moves the actual character while refreshed runtime geometry is pending.
+Additional actions, blends and a shipping creature-roster conversion remain
+outside this slice.

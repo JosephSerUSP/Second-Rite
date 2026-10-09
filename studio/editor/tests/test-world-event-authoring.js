@@ -216,6 +216,7 @@ function modalHarness(payload) {
         EventSelfStateAuthoring: { createInstanceId: () => 'new', ensureInstanceId: e => e.instanceId },
         updateEventGraphicPreview: noOp, setEventColorFields: noOp,
         updateEventPageModeUI: noOp, renderEventPageTabs: noOp, toggleEventLogicType: noOp,
+        setPresentationFormUI: noOp, commitEventPageFields: noOp,
         eventModalSnapshotHelper: { capture: noOp }, closeEventModal: noOp,
         renderGridCells: noOp, setDirty: noOp };
     vm.createContext(ctx);

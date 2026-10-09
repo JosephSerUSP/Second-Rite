@@ -40,6 +40,7 @@
 
     function serializeEventPresentation(formState, target) {
         target = target || {};
+        writePresentationField(target, 'actorAppearance', formState.appearanceMode, formState.appearanceValue, false);
         writePresentationField(target, 'model', formState.modelMode, formState.modelValue, false);
         writePresentationField(target, 'interactionFocus', formState.focusMode, formState.focusValue, false);
         writePresentationField(target, 'animationController', formState.controllerMode, formState.controllerValue, false);

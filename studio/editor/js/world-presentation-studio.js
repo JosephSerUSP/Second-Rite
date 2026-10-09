@@ -40,7 +40,8 @@
     }
 
     function installWorldPresentationPanel(container, scene) {
-        if (!scene || scene.draw !== 'world' || scene.world !== 'map') return;
+        if (!scene || scene.draw !== 'world'
+                || !['map', 'continuous_surface'].includes(scene.world)) return;
 
         const fieldset = document.createElement('fieldset');
         fieldset.dataset.thestraWorldPresentation = 'true';
@@ -174,6 +175,17 @@
             renderMeasurement(measureOutput);
 
             const camera = cameraObject();
+            if (scene.world === 'continuous_surface') {
+                body.appendChild(smallNote('Fixed camera is authored on this Scene. Save Changes saves the Scene; the Map owns room geometry and Events.'));
+                if (!camera) {
+                    showError(new Error('Continuous rooms require an authored Scene camera.'));
+                    return;
+                }
+                const schema = WorldPresentation.fixedCameraSchema(scene);
+                schema.onChange = () => markSceneChanged(scene);
+                buildEntityForm(body, scene, schema);
+                return;
+            }
             const cameraEnabled = document.createElement('input');
             cameraEnabled.type = 'checkbox';
             cameraEnabled.checked = !!camera;
@@ -343,7 +355,7 @@
         });
         if (scene) runtimeControls.sceneSelect.value = String(scene.id);
         runtimeControls.sceneSelect.style.display = worldScenes().length > 1 ? '' : 'none';
-        if (!scene) runtimeControls.info.textContent = 'No Scene with draw: world / world: map.';
+        if (!scene) runtimeControls.info.textContent = 'No Map world Scene.';
         else if (!runtime) runtimeControls.info.textContent = `Runtime source: Scene ${scene.id}; free camera is editor-only.`;
     }
 
@@ -368,11 +380,13 @@
             if (runtimeControls) runtimeControls.info.textContent = 'Select Event boxes · drag gizmo · background drag pans · wheel zooms';
             return true;
         }
-        const resolved = spatialCamera || WorldPresentation.resolveCamera(authoredCamera, focus);
+        const sceneCamera = scene.world === 'continuous_surface';
+        const resolved = sceneCamera ? WorldPresentation.resolveCamera(authoredCamera, focus)
+            : spatialCamera || WorldPresentation.resolveCamera(authoredCamera, focus);
         viewport.applyRuntimeCamera(resolved);
         fillRuntimeViewport();
         if (runtimeControls) {
-            runtimeControls.info.textContent = spatialCamera
+            runtimeControls.info.textContent = spatialCamera && !sceneCamera
                 ? `Map traversal · ${resolved.profile} · drag shifts camera · wheel zooms`
                 : `Scene ${scene.id} · ${resolved.provenance} · ${resolved.profile} · focus: ${focus.source}`;
         }

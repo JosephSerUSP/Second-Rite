@@ -927,6 +927,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
     end
 
     local rawModel = getField("model")
+    local rawCharacter = getField("actorAppearance")
     local rawSprite = getField("sprite")
     local rawFocus = getField("interactionFocus")
 
@@ -952,7 +953,9 @@ function viewport_3d.resolveEventPresentation(ev, session)
     local finalModel = nil
     local finalSprite = nil
 
-    if modelPath then
+    if type(rawCharacter) == "table" then
+        visual = "character"
+    elseif modelPath then
         visual = "model"
         finalModel = modelPath
     elseif spritePath then
@@ -962,6 +965,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
 
     return {
         model = finalModel,
+        actorAppearance = type(rawCharacter) == "table" and rawCharacter or nil,
         sprite = finalSprite,
         interactionFocus = interactionFocus,
         visual = visual,
@@ -3326,11 +3330,37 @@ end
             { spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z + height), spriteColor(centerX, centerY, z + height) },
             nil, "billboard")
     end
+    local animatedActor = require("presentation.animated_actor")
+    local characterClock = love.timer.getTime()
+    local function queueCharacter(animated)
+        local pose = animated.pose
+        for _, source in ipairs(animated.groups) do
+            local target = group(require("presentation.mesh").texture(source.texturePath), "actor")
+            if #target.vertices == 0 then
+                target.depth = viewport_3d.cameraSpaceDepth(pose.x, pose.y, pose.z + animated.height * 0.5,
+                    cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
+                target.sequence = #surfaces + 1
+                surfaces[#surfaces+1] = target
+            end
+            for _, v in ipairs(source.vertices) do
+                local illumination = colorAt(v[1], v[2], v[3], false)
+                local directional = modelDirectionalLight(v[6], v[7], v[8])
+                target.vertices[#target.vertices+1] = {v[1], v[2], v[4], v[5],
+                    v[9], v[10], v[11], v[12], illumination[1]*directional,
+                    illumination[2]*directional, illumination[3]*directional, 1, v[3]}
+            end
+            target.model = true
+        end
+    end
     if mapData and mapData.events then
         for _, rawEv in ipairs(mapData.events) do
             if not rawEv.wallEvent then
                 local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
-                if presentation.visual == "model" and presentation.model
+                if presentation.visual == "character" then
+                    if worldPass ~= "environment" then
+                        queueCharacter(animatedActor.resolveEvent(session,rawEv,presentation,characterClock))
+                    end
+                elseif presentation.visual == "model" and presentation.model
                 and (not transitionMarkers.isArrow(presentation.model) or transitionMarkers.isVisible()) then
                     local modelSpec = { model = presentation.model, modelScale = tonumber(rawEv.modelScale) or 1,
                         instanceId = viewport_3d.eventModelInstanceId(rawEv),
@@ -3374,30 +3404,13 @@ end
         end
     end
 
-    local animatedActor = require("presentation.animated_actor")
     if traversalPresentation and traversalPresentation.actor
             and (not animatedActor.spec(session) or worldPass ~= "environment") then
         local pose = traversalPresentation.actor
         local animated = animatedActor.resolve(session,
-            traversalPresentation, love.timer.getTime())
+            traversalPresentation, characterClock)
         if animated then
-            for _, source in ipairs(animated.groups) do
-                local target = group(require("presentation.mesh").texture(source.texturePath), "actor")
-                if #target.vertices == 0 then
-                    target.depth = viewport_3d.cameraSpaceDepth(pose.x, pose.y, pose.z + animated.height * 0.5,
-                        cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
-                    target.sequence = #surfaces + 1
-                    surfaces[#surfaces+1] = target
-                end
-                for _, v in ipairs(source.vertices) do
-                    local illumination = colorAt(v[1], v[2], v[3], false)
-                    local directional = modelDirectionalLight(v[6], v[7], v[8])
-                    target.vertices[#target.vertices+1] = {v[1], v[2], v[4], v[5],
-                        v[9], v[10], v[11], v[12], illumination[1]*directional,
-                        illumination[2]*directional, illumination[3]*directional, 1, v[3]}
-                end
-                target.model = true
-            end
+            queueCharacter(animated)
         else
             local playerImage = getEventSprite({ sprite = playerSpritePath(pose) }, session)
             if playerImage then

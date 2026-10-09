@@ -1,0 +1,311 @@
+{
+  "compiler": {
+    "repository": "JosephSerUSP/chara-compiler",
+    "revision": "8d84dc185c48cd4746c4324cdaf62bd2f2d5e092"
+  },
+  "specSha256": "2f1227f5b8591bb209dff4c04eb32cb6c4c14c1a7677a08964e4a4c0eef6364b",
+  "librarySha256": {
+    "library/animagrid/family_animagrid_psx_v1.json": "e9f27dc228163cc23500feee0ee3753de66ebff10a1d860e3eb059209590b7e4",
+    "library/animagrid/index.json": "0f7dd64b726a42bab9e123dfb9c0c4c653cafa5149c91b2c1486b75d36451186",
+    "library/animagrid/parts/chest.a@1.json": "b6329f726deb646fc5b33ede596b39e1e45921df6fc260339afe7ce6c3755885",
+    "library/animagrid/parts/chest.b@1.json": "d99712fc15e81c3d43e221315aa933c4671be1214b60cfee9637a698f5225039",
+    "library/animagrid/parts/chest.ribbon@1.json": "66b387551b3556eb52a566dcda429b01c22b27e74c47ea8536207df5117a834c",
+    "library/animagrid/parts/chest.ribbon_c@1.json": "d24d2575a4c38a466fa19791e4f84d811825283a58b5b4426107c4d3874cb60e",
+    "library/animagrid/parts/chest.wider@1.json": "5f91a4b23a09bef5c3301e545fd2a9cb3af75c99a3b52afb5c44eea43bc9cad6",
+    "library/animagrid/parts/foot.a.L@1.json": "64f369a48bff6f7902b954c54f3a2ecb8a5fbad04102e15a19ead79c8ddc32c0",
+    "library/animagrid/parts/foot.a.R@1.json": "d306b131d0487843592dec8af7a465b51597150a1bd39c8e5ee3753e0ed08b65",
+    "library/animagrid/parts/forearm.a.L@1.json": "7b09cafa5eced0b47671d1fd33beaff8f70c5078d3ee758483c2c934d1953c7c",
+    "library/animagrid/parts/forearm.a.R@1.json": "4ad760e5d15596fafc891e3199953e12ba867bce79523e68472082a230ae1694",
+    "library/animagrid/parts/forearm.b.L@1.json": "722d13b46ebc80539cbb7341afb445a0aab8a26b00a999a9338f5cc5c25e2182",
+    "library/animagrid/parts/forearm.b.R@1.json": "745d6d02439839d67323c82f82f257828b1419cc1cdeef2eda1377f20c88459c",
+    "library/animagrid/parts/hair.bob@1.json": "d3ce76a9e12c60f16942223a1237f87fd43dad4543617fefc8382ca32d36fe1d",
+    "library/animagrid/parts/hair.leon@1.json": "3d92d3a9936c19a7d54763efd82c8e27c2b5adaf441bd842c0817ecc3702e8ec",
+    "library/animagrid/parts/hair.long@1.json": "e91d81395522cfe0d580c847de5ec859d7fe7608c09cdad6082a5ae020246de5",
+    "library/animagrid/parts/hair.long_b@1.json": "b2a84fa3c928fefec71a21fad5fab99d495214ba5f45af580335445e768477a6",
+    "library/animagrid/parts/hair.platina@1.json": "f67d2059aaa884fa7d35dd9092d70496ada989e8c86e958043087bb25dd22046",
+    "library/animagrid/parts/hair.ponytail@1.json": "043f07ef825c6783413cb8fa4cced355feb2e0ff2dacf125d2a39bfb87999de8",
+    "library/animagrid/parts/hair.ponytail_b@1.json": "36b68cc581d3294c050c63958540f6f13c5cba41a3c5cf8560db5c28f86d45a6",
+    "library/animagrid/parts/hair.ponytail_c@1.json": "d81fcd4c1a044946bf6dd323625726a59859d7e788261707d82f8e40a7981c9b",
+    "library/animagrid/parts/hair.short@1.json": "c25610f491288a0c5c80db5d421a9755bc82c95423b2834e1ed9633a219ad834",
+    "library/animagrid/parts/hair.twintails@1.json": "5a03f6b5bf5a0a8411264676c8bb92168971283e98e2e7c2cd47962e0c355da2",
+    "library/animagrid/parts/hair.twintails_b@1.json": "f3919fc68d2477c83b0bbd7dd630af66642de22a26236c632aaa137f90180a33",
+    "library/animagrid/parts/hair.twintails_c@1.json": "f88fa48b260c9dec10a700c6a905611be73e59113cfd3a7ba947b588a14ec680",
+    "library/animagrid/parts/hand.a.L@1.json": "0c1f4329f345f131a84a69d49e2ad1e810b668fc70e8e4e2253fd7879104d476",
+    "library/animagrid/parts/hand.a.R@1.json": "19c7968bc50eff6261d52560e77bca13814183e0134d705e4f1c21df0b4572ce",
+    "library/animagrid/parts/head.basic@1.json": "7f204c01dccfac73eb72a61f674bc39ce9d10eb95e51c5efa25a021c6cbfe62b",
+    "library/animagrid/parts/head.glasses@1.json": "246114e2994244f3799a21b25adccd104c2186c72d31e74551c78f4a77b7c465",
+    "library/animagrid/parts/head.horned@1.json": "1b8efe33446b95ad65f1eeb674d2315b4122c6f62cac101818f1dfa818c6793e",
+    "library/animagrid/parts/head.longhair@1.json": "8f8fadd9c79a19d15fe1a30aef73e0eb7e54cde01fbae37ea62bb950673e7302",
+    "library/animagrid/parts/head.shorthair_b@1.json": "93d499424ba3c0f28f8283590558b905000d80af75402faa99dedd2a3633b0b8",
+    "library/animagrid/parts/hips.a@1.json": "0679c915a7e0e352dd6d98c4449a9841f9f107403eaaf4852fd247cf10fca93d",
+    "library/animagrid/parts/hips.dress@1.json": "d9b565d6a66f37b845aed39d7d8b597e39311c0dd787bb0333774256b9f6261c",
+    "library/animagrid/parts/hips.narrow@1.json": "711e6ae383f78e0634993ef71515bb7a43d5d3d7a2a1bb67f1e2691368dfbfd0",
+    "library/animagrid/parts/shin.a.L@1.json": "ff8a91fd035938ab6474b02a118a99b7e3e75052c1ca355b25f07876b1ee43e3",
+    "library/animagrid/parts/shin.a.R@1.json": "aabd1dd2dcb608faf5f3ca89446628df3f6c5063853a753297bbab3dfe031460",
+    "library/animagrid/parts/shin.b.L@1.json": "546a003777753037a696c4591001f0f7bc97155b2f85e3725342ad905345ea09",
+    "library/animagrid/parts/shin.b.R@1.json": "e9a225f208ac76bd003b58e9e86a8f5100165c2c249e2db9357ac2aba501a5f2",
+    "library/animagrid/parts/shin.dress.L@1.json": "1187d29298f0335340b5f350ddbab2d06ac7434e78d259fbbe85ad0ea3265a33",
+    "library/animagrid/parts/shin.dress.R@1.json": "a02ced81d6682482f8644b2fd5f931abf95b71d743dde3e4decc08828935dc40",
+    "library/animagrid/parts/thigh.a.L@1.json": "3e5b629b38864d459252ad18a9760ea6f52e2aa25e9832c9419113b3b44ac31b",
+    "library/animagrid/parts/thigh.a.R@1.json": "0b922acf6ff30933b055abc4ae660275ec9c0f6f715652acc48f9e66f300ba81",
+    "library/animagrid/parts/thigh.dress.L@1.json": "d9dceb3ecae04ab950df47dac8bab1791bb8ba14ccb76a73a1f21d55a3cf498a",
+    "library/animagrid/parts/thigh.dress.R@1.json": "eab05b68e23497919f78f27177842e43ca4ab96b5563265b98ff8f20e980600a",
+    "library/animagrid/parts/thigh.male.L@1.json": "d298b33bf0171a64bc991b70410adc5dadf40f649020321c1dc73171da9a5c11",
+    "library/animagrid/parts/thigh.male.R@1.json": "428b693fcbba0752cece627bf6a6e968b7e32919bb314593bf08719b76d1a863",
+    "library/animagrid/parts/upperarm.a.L@1.json": "ab0ea9f1bf63891ae6c90ffce4a29088edbec5cd2025c2e36137bea87c809a59",
+    "library/animagrid/parts/upperarm.a.R@1.json": "e96afe9b01e0b79a38f762a0ce5db5e53931ef9c71203bde33fba8eeba70bba6",
+    "library/animagrid/parts/upperarm.b.L@1.json": "eb9267dba9a39c867993ca147cc09ebff9b046e4a87b2e6f298cc7b2d65433ed",
+    "library/animagrid/parts/upperarm.b.R@1.json": "7868a3a91c583a7408e27af75f055c3898599cb70e0f4f4199188fd68b8b6a5b",
+    "library/animagrid/parts/upperarm.c.L@1.json": "543ca753a890a769ad1118c2b90bb5a3a99de554c2d3d609e2c576bb2a447fe2",
+    "library/animagrid/parts/upperarm.c.R@1.json": "32db09bc8647d3394d81c0540bd5ab06316aec1eda94dfba08caafc30068db71",
+    "library/animagrid/textures/CharTex_aiGen19.png": "c0e769e50811aa2195418c4acbc79fe8bab8ca43a5800a3fe8309ce425917cc2",
+    "library/animagrid/textures/dev/chest.a@1.png": "e0382af9b826b6908e8d10d5ad5101e3b2b8e440096b12815653b1a234b73aa2",
+    "library/animagrid/textures/dev/chest.b@1.png": "e0382af9b826b6908e8d10d5ad5101e3b2b8e440096b12815653b1a234b73aa2",
+    "library/animagrid/textures/dev/chest.ribbon@1.png": "4c91a70cac6f34bf1841a7687b01ceba0bfbf3568a7d683264ca8d88172b3eec",
+    "library/animagrid/textures/dev/chest.ribbon_c@1.png": "cebd0b2885d2aef1b4d3f26d1b7ba451c574009dcae182492d65af011eb9c34a",
+    "library/animagrid/textures/dev/chest.wider@1.png": "72631ab0b9ad195f07cd3e4daef06cd0471bd1cda89e464ee1132e3b163b3d01",
+    "library/animagrid/textures/dev/foot.a.L@1.png": "5c010d3708b6d9a497005ad39dacc103c12c24c1acd485cf80bd4be410dfc5d7",
+    "library/animagrid/textures/dev/foot.a.R@1.png": "981b358b480c5a004cb4a112132e3babe957f877eb7084d207ba6d49dfea9f2d",
+    "library/animagrid/textures/dev/forearm.a.L@1.png": "8b360636ad9296ddc3c96dd0c4b02908f9f4ba19205d64ee0f620f374fd31e45",
+    "library/animagrid/textures/dev/forearm.a.R@1.png": "65edfe80404ae13d09c6b561a515409a2b0493bffeecc6bbdecd45cd4fe7de24",
+    "library/animagrid/textures/dev/forearm.b.L@1.png": "8b360636ad9296ddc3c96dd0c4b02908f9f4ba19205d64ee0f620f374fd31e45",
+    "library/animagrid/textures/dev/forearm.b.R@1.png": "65edfe80404ae13d09c6b561a515409a2b0493bffeecc6bbdecd45cd4fe7de24",
+    "library/animagrid/textures/dev/hair.bob@1.png": "c902b5e7b8ab40df303891504904221efcd1154b935e343bd4fc7a1055960078",
+    "library/animagrid/textures/dev/hair.leon@1.png": "3e33db9fb461281be6b5fb01b1c9be980c385b9bc05a0a629ad7e21c5ced3ec6",
+    "library/animagrid/textures/dev/hair.long@1.png": "c7d7f9b7bafebd8af79de7a6fff357d6b259bc3439efb4709ff516cc93bd36a1",
+    "library/animagrid/textures/dev/hair.long_b@1.png": "3bec4a61827c546405b53f46b419ae7a6349cf8ae678b19fed9138c9e916a039",
+    "library/animagrid/textures/dev/hair.platina@1.png": "39c3a91aa3cbc3588511b6e9dac984f31e88c2dce15d9caad2e515658b94e7d8",
+    "library/animagrid/textures/dev/hair.short@1.png": "2a50bb491be1be6e7c4f3d12a9f3707a8edb70cfeb8656e8513dc300f433c888",
+    "library/animagrid/textures/dev/hand.a.L@1.png": "a76fefa1f18574ff0e9c77538d5ef42503b156221fc7a510e7f72e0f2b797075",
+    "library/animagrid/textures/dev/hand.a.R@1.png": "1a4849677e83eee910e0ff8c0e338b5cb6efd24a444630f360770e2584fb28a5",
+    "library/animagrid/textures/dev/head.basic@1.png": "0438d033e53c633956727584cf54d9b5ef016f041cacc674efa7b19aca42481b",
+    "library/animagrid/textures/dev/head.glasses@1.png": "eda2abd75ca556363ffff61ca6f1735226d06ae215ac8c941a8f087725a9efde",
+    "library/animagrid/textures/dev/head.horned@1.png": "0438d033e53c633956727584cf54d9b5ef016f041cacc674efa7b19aca42481b",
+    "library/animagrid/textures/dev/head.longhair@1.png": "be192a339c48672e4265ad18891ab5e042db379ce197c449830f2aa4e700da78",
+    "library/animagrid/textures/dev/head.shorthair_b@1.png": "0438d033e53c633956727584cf54d9b5ef016f041cacc674efa7b19aca42481b",
+    "library/animagrid/textures/dev/hips.a@1.png": "257ad084f1b358bf29e8a5548f4134e6e0b7cdef106a4104ec2aded9b5986b01",
+    "library/animagrid/textures/dev/hips.dress@1.png": "fc3e631c9d7e0052fb9706766334bcb468172f5134161a48579d8c82d14d9c45",
+    "library/animagrid/textures/dev/hips.narrow@1.png": "fc3e631c9d7e0052fb9706766334bcb468172f5134161a48579d8c82d14d9c45",
+    "library/animagrid/textures/dev/shin.a.L@1.png": "0b19b7c9c22f4fb5ee7a35416e3a21c5291fe510d7ae41ce0c6946603c0f0d5c",
+    "library/animagrid/textures/dev/shin.a.R@1.png": "38bb770512b69fd797eaa497dc580cded159fb273a95427c41fb688733df0122",
+    "library/animagrid/textures/dev/shin.b.L@1.png": "d3a0eda3a0d1a7527fcbcfd170ee7ac395e945b1211e5ace4042606aa86e5f81",
+    "library/animagrid/textures/dev/shin.b.R@1.png": "7e655d075d8f83fb88207e2c731865a23aae4d84e5e69e3b89113298c15ae0d5",
+    "library/animagrid/textures/dev/shin.dress.L@1.png": "90ede90aea1cf77241eb64fcb60179ad938a039ca0afa9147f0ff04f484cf568",
+    "library/animagrid/textures/dev/shin.dress.R@1.png": "244523800019adf6d3a65fc955fc473befa278973467a83328e6dd84ec838e76",
+    "library/animagrid/textures/dev/thigh.a.L@1.png": "131311860572e06a055597f5773ee9f4919a00895da916f797b0f3185d6a55d0",
+    "library/animagrid/textures/dev/thigh.a.R@1.png": "d04ff69f425a8ad57589b1c50dd721e93556b80b116d7beb2b17c91ca7f4bfcd",
+    "library/animagrid/textures/dev/thigh.dress.L@1.png": "2cd4fc16ddaca09ab4862ade287fa15ea531ba3b17eab44b8e9a9664615975e9",
+    "library/animagrid/textures/dev/thigh.dress.R@1.png": "abf362adbbdef08637e8382a54e96a30f3232631bb39c3836d3556588aa4dab2",
+    "library/animagrid/textures/dev/thigh.male.L@1.png": "dc55a5231a69f35b173980ebd45c7ffef7eb8aa8d68a3eac4829bb46ca16680f",
+    "library/animagrid/textures/dev/thigh.male.R@1.png": "d07ca447f9dcd606a15b6b8b496b8681fc36227b256009496941c9a797d98048",
+    "library/animagrid/textures/dev/upperarm.a.L@1.png": "e13cdb35fa724831bb01a9873fcf08bb396350898e8c87560d3d1bb9c90317b8",
+    "library/animagrid/textures/dev/upperarm.a.R@1.png": "160fcc933c643e7ea5a6d98c11edeac930c451a5b5a86ced30f37dd8d38f759d",
+    "library/animagrid/textures/dev/upperarm.b.L@1.png": "e13cdb35fa724831bb01a9873fcf08bb396350898e8c87560d3d1bb9c90317b8",
+    "library/animagrid/textures/dev/upperarm.b.R@1.png": "160fcc933c643e7ea5a6d98c11edeac930c451a5b5a86ced30f37dd8d38f759d",
+    "library/animagrid/textures/dev/upperarm.c.L@1.png": "e13cdb35fa724831bb01a9873fcf08bb396350898e8c87560d3d1bb9c90317b8",
+    "library/animagrid/textures/dev/upperarm.c.R@1.png": "160fcc933c643e7ea5a6d98c11edeac930c451a5b5a86ced30f37dd8d38f759d"
+  },
+  "animationSource": {
+    "path": "G:\\Meu Drive\\DOCUMENTS\\idea\\Sairen no Hiiro\\Rio\\Rio.blend",
+    "sha256": "0c07fb3a607b0091f0a7eaa82c5004bf97ea521d693e112c73dcc22b30044b54",
+    "clips": [
+      "Idle",
+      "Walk"
+    ],
+    "mapping": "mixamo"
+  },
+  "glbSha256": "107beff5e124d1f1875256c4790a356042bd3afd64459bcd505f2795aa4be221",
+  "buildReport": {
+    "spec": "gauntlet_sentinel",
+    "profile": "full",
+    "binding": "skinned",
+    "bones": [
+      "hips",
+      "spine",
+      "spine1",
+      "spine2",
+      "neck",
+      "head",
+      "shoulder.L",
+      "upperarm.L",
+      "forearm.L",
+      "hand.L",
+      "shoulder.R",
+      "upperarm.R",
+      "forearm.R",
+      "hand.R",
+      "thigh.L",
+      "shin.L",
+      "foot.L",
+      "toe.L",
+      "thigh.R",
+      "shin.R",
+      "foot.R",
+      "toe.R"
+    ],
+    "controls": [
+      "CTRL_ik_arm.L",
+      "CTRL_pole_arm.L",
+      "CTRL_ik_leg.L",
+      "CTRL_pole_leg.L",
+      "CTRL_ik_arm.R",
+      "CTRL_pole_arm.R",
+      "CTRL_ik_leg.R",
+      "CTRL_pole_leg.R"
+    ],
+    "ik_drift": 1.9e-05,
+    "tris": 684,
+    "parts": [
+      {
+        "slot": "head",
+        "part": "head.basic@1",
+        "bone": "head",
+        "tris": 126,
+        "uv_area": 0.19171
+      },
+      {
+        "slot": "hair",
+        "part": "hair.leon@1",
+        "bone": "head",
+        "tris": 90,
+        "uv_area": 0.09469
+      },
+      {
+        "slot": "chest",
+        "part": "chest.a@1",
+        "bone": "spine2",
+        "tris": 48,
+        "uv_area": 0.07876
+      },
+      {
+        "slot": "hips",
+        "part": "hips.narrow@1",
+        "bone": "hips",
+        "tris": 24,
+        "uv_area": 0.03461
+      },
+      {
+        "slot": "upperarm.L",
+        "part": "upperarm.b@1",
+        "bone": "upperarm.L",
+        "tris": 36,
+        "uv_area": 0.02725
+      },
+      {
+        "slot": "forearm.L",
+        "part": "forearm.b@1",
+        "bone": "forearm.L",
+        "tris": 36,
+        "uv_area": 0.03027
+      },
+      {
+        "slot": "hand.L",
+        "part": "hand.a@1",
+        "bone": "hand.L",
+        "tris": 20,
+        "uv_area": 0.0246
+      },
+      {
+        "slot": "upperarm.R",
+        "part": "upperarm.b@1",
+        "bone": "upperarm.R",
+        "tris": 36,
+        "uv_area": 0.02814
+      },
+      {
+        "slot": "forearm.R",
+        "part": "forearm.b@1",
+        "bone": "forearm.R",
+        "tris": 36,
+        "uv_area": 0.03125
+      },
+      {
+        "slot": "hand.R",
+        "part": "hand.a@1",
+        "bone": "hand.R",
+        "tris": 20,
+        "uv_area": 0.02539
+      },
+      {
+        "slot": "thigh.L",
+        "part": "thigh.male@1",
+        "bone": "thigh.L",
+        "tris": 24,
+        "uv_area": 0.02979
+      },
+      {
+        "slot": "shin.L",
+        "part": "shin.a@1",
+        "bone": "shin.L",
+        "tris": 38,
+        "uv_area": 0.04623
+      },
+      {
+        "slot": "foot.L",
+        "part": "foot.a@1",
+        "bone": "foot.L",
+        "tris": 44,
+        "uv_area": 0.01288
+      },
+      {
+        "slot": "thigh.R",
+        "part": "thigh.male@1",
+        "bone": "thigh.R",
+        "tris": 24,
+        "uv_area": 0.02982
+      },
+      {
+        "slot": "shin.R",
+        "part": "shin.a@1",
+        "bone": "shin.R",
+        "tris": 38,
+        "uv_area": 0.04541
+      },
+      {
+        "slot": "foot.R",
+        "part": "foot.a@1",
+        "bone": "foot.R",
+        "tris": 44,
+        "uv_area": 0.0134
+      }
+    ],
+    "body": {
+      "height": 1.0,
+      "head_scale": 1.0,
+      "torso_length": 1.0,
+      "shoulder_width": 1.0,
+      "hip_width": 1.0,
+      "arm_length": 1.0,
+      "leg_length": 1.0,
+      "limb_thickness": 1.0,
+      "hand_scale": 1.0,
+      "foot_scale": 1.0
+    },
+    "height_m": 1.8182,
+    "texture_mode": "source",
+    "atlas": {},
+    "faces": 444,
+    "flat_faces": 2,
+    "problems": [],
+    "warnings": [],
+    "ok": true
+  },
+  "steps": [
+    {
+      "command": "build",
+      "output": "gauntlet_sentinel: 684 tris, 22 bones (full, skinned) -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\actor.blend"
+    },
+    {
+      "command": "retarget",
+      "output": "Idle: frames [1, 180], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\idle.blend"
+    },
+    {
+      "command": "retarget",
+      "output": "Walk: frames [1, 28], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\animated.blend"
+    },
+    {
+      "command": "export",
+      "output": "C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\sentinel.glb: 22 joints (semantic), animations ['Idle', 'Walk'], 1 primitives, 1 image(s)"
+    }
+  ]
+}

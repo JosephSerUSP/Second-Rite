@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('node:fs');
+const assert = require('node:assert/strict');
 const net = require('node:net');
 const path = require('node:path');
 const { _electron: electron } = require('playwright');
@@ -177,6 +178,7 @@ async function main() {
             const win = BrowserWindow.getAllWindows().find(candidate =>
                 !candidate.webContents.getURL().includes('surface='));
             if (win) win.setSize(1440, 900);
+            return true;
         });
         await page.waitForTimeout(250);
         await page.waitForFunction(() => !!window.ThestraRuntimeCameraViewport?.getWalkSurfaceInfo,
@@ -221,12 +223,105 @@ async function main() {
         await page.waitForTimeout(300);
         await capture(page, '04-service-annex-walk-vs-collision.png');
 
+        // Inspect actual Three meshes at the renderer boundary, without adding
+        // a test-only production API or evaluating a second skin implementation.
+        await page.evaluate(async () => {
+            const THREE=await import('three');
+            const add=THREE.Object3D.prototype.add;
+            window.__eventCharacterMeshes=[];
+            THREE.Object3D.prototype.add=function(...objects) {
+                for (const object of objects) {
+                    if (object.userData.thestraEventCharacter) window.__eventCharacterMeshes.push(object);
+                }
+                return add.apply(this,objects);
+            };
+        });
+        await selectMap(page,0,'archive_antechamber','Archive Antechamber');
+        const cameraBefore=await page.evaluate(()=>JSON.stringify(window.ThestraRuntimeCameraViewport.captureCameraState()));
+        await page.getByRole('button',{name:'Runtime Camera',exact:true}).click();
+        await page.waitForTimeout(350);
+        const cameraProof=await page.evaluate(() => {
+            const scene=dbPayload.scenes.find(value=>value.id==='map');
+            const resolved=ThestraWorldPresentation.resolveCamera(scene.worldPresentation.camera,{});
+            const actual=ThestraRuntimeCameraViewport.captureCameraState().perspective;
+            return {expected:ThestraViewportContract.runtimePositionToThestra([resolved.x,resolved.y,resolved.z]),
+                actual:actual.position,selectedScene:document.querySelector('[data-toolbar-owner="world-presentation"]')?.textContent,
+                toolbar:document.getElementById('thestra-map-view-toolbar').textContent};
+        });
+        cameraProof.actual.forEach((value,index)=>assert.ok(Math.abs(value-cameraProof.expected[index])<1e-7));
+        assert.doesNotMatch(cameraProof.toolbar,/No Map world Scene|Cannot read properties/);
+        await capture(page,'05-archive-runtime-camera.png');
+        await page.getByRole('button',{name:'Free Authoring',exact:true}).click();
+        assert.equal(await page.evaluate(()=>JSON.stringify(ThestraRuntimeCameraViewport.captureCameraState())),cameraBefore,
+            'Runtime Camera must restore the exact free authoring camera');
+
+        const movementProof=await page.evaluate(async () => {
+            const THREE=await import('three');
+            const event=dbPayload.maps[0].events.find(value=>value.id===101);
+            const original=event.worldPosition.slice();
+            const mesh=window.__eventCharacterMeshes.findLast(value=>value.parent);
+            if (!mesh) throw Error('Actual compiled Event mesh missing from Studio');
+            const vertex=()=>{
+                mesh.updateWorldMatrix(true,false);
+                return new THREE.Vector3().fromBufferAttribute(mesh.geometry.getAttribute('position'),0)
+                    .applyMatrix4(mesh.matrixWorld).toArray();
+            };
+            const before=vertex();
+            SecondRiteEditorCommands.moveWorldEvent(dbPayload,0,101,[original[0]+0.4,original[1]+0.3,original[2]]);
+            await ThestraRuntimeCameraViewport.setSceneModel(ThestraEditorScene.buildScene(dbPayload,dbPayload.maps[0]));
+            const moved=vertex();
+            if (!mesh.parent) throw Error('Semantic refresh dropped the retained character');
+            SecondRiteEditorCommands.moveWorldEvent(dbPayload,0,101,original);
+            await ThestraRuntimeCameraViewport.setSceneModel(ThestraEditorScene.buildScene(dbPayload,dbPayload.maps[0]));
+            return {before,moved,restored:vertex(),source:mesh.userData.thestraSource};
+        });
+        [0.4,0,0.3].forEach((delta,index)=>assert.ok(Math.abs(movementProof.moved[index]-movementProof.before[index]-delta)<1e-7));
+        movementProof.restored.forEach((value,index)=>assert.ok(Math.abs(value-movementProof.before[index])<1e-7));
+
+        const originalEvent=await page.evaluate(()=>JSON.stringify(dbPayload.maps[0].events.find(value=>value.id===101)));
+        await page.evaluate(()=>openEventModal(0,0,101));
+        await page.locator('#field-event-character-height').fill('1.8');
+        await capture(page,'06-attendant-character-controls.png');
+        await page.evaluate(()=>applyEventProperties());
+        assert.equal(await page.evaluate(()=>dbPayload.maps[0].events.find(value=>value.id===101).actorAppearance.height),1.8);
+        await page.evaluate(()=>openEventModal(0,0,101));
+        await page.locator('#field-event-character-height').fill('2');
+        await page.evaluate(()=>closeEventModal(true));
+        assert.equal(await page.evaluate(()=>dbPayload.maps[0].events.find(value=>value.id===101).actorAppearance.height),1.8,
+            'closing the modal must not commit its working appearance');
+        await page.evaluate(original => {
+            const event=dbPayload.maps[0].events.find(value=>value.id===101);
+            for (const key of Object.keys(event)) delete event[key];
+            Object.assign(event,JSON.parse(original));
+        },originalEvent);
+
+        const sceneBefore=await page.evaluate(()=>JSON.stringify(dbPayload.scenes.find(value=>value.id==='map')));
+        const mapsBefore=await page.evaluate(()=>JSON.stringify(dbPayload.maps));
+        await page.evaluate(()=>openEngineModal());
+        const enginePage=await waitFor('native Engine surface', async()=>app.windows().find(value=>new URL(value.url()).searchParams.get('surface')==='engine'));
+        await enginePage.waitForFunction(()=>typeof dbPayload !== 'undefined' && Array.isArray(dbPayload.scenes));
+        await enginePage.evaluate(()=>{activeSceneId='map';setEngineTab('flows');});
+        await enginePage.locator('#field-scene-camera-yawDegrees').fill('15');
+        await enginePage.locator('#field-scene-camera-distance').fill('0');
+        assert.equal(await enginePage.evaluate(()=>dbPayload.scenes.find(value=>value.id==='map').worldPresentation.camera.distance),11.5);
+        assert.equal(await enginePage.locator('#field-scene-camera-distance').evaluate(input=>input.checkValidity()),false);
+        await enginePage.locator('#field-scene-camera-distance').fill('12');
+        await capture(enginePage,'07-scene-camera-controls.png');
+        assert.equal(await enginePage.evaluate(()=>JSON.stringify(dbPayload.maps)),mapsBefore,'camera controls mutated Map data');
+        await enginePage.evaluate(original=>{
+            const scene=dbPayload.scenes.find(value=>value.id==='map');
+            for (const key of Object.keys(scene)) delete scene[key];
+            Object.assign(scene,JSON.parse(original));closeEngineModal(true);
+        },sceneBefore);
+
         const summary = await authoritySnapshot(page);
         summary.collisionVisible = await page.evaluate(() =>
             window.ThestraRuntimeCameraViewport?.getCollisionVisible?.());
         const fatalDiagnostics = diagnostics.filter(relevantDiagnostic);
         fs.writeFileSync(path.join(OUTPUT_ROOT, 'proof.json'), JSON.stringify({
             summary,
+            cameraProof,
+            movementProof,
             diagnostics,
             fatalDiagnostics,
         }, null, 2) + '\n');

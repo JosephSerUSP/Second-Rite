@@ -754,17 +754,36 @@ function bundle.collect(session, profileName, options)
         end
     end
 
+    local function addCharacter(character,source,name)
+        for i,group in ipairs(character.groups) do
+            local material=registerAssetMaterial(registry,group.texturePath,nil,{1,1,1,1})
+            local provenance={}
+            for k,v in pairs(source) do provenance[k]=v end
+            provenance.surface="character"
+            provenance.character=character.character
+            provenance.materialSlot=group.material
+            provenance.clip=character.clip
+            provenance.time=character.time
+            provenance.rootPosition={character.pose.x,character.pose.y,character.pose.z}
+            local surface=newSurface(surfaces,name.."_"..i,provenance,material)
+            for _,v in ipairs(group.vertices) do pushVertex(surface,v) end
+        end
+    end
+    if not options or options.includeEventCharacters ~= false then
+        local animated=require("presentation.animated_actor")
+        for _,event in ipairs(mapData.events or {}) do
+            if not event.wallEvent then
+                local presentation=viewport_3d.resolveEventPresentation(event,session)
+                local character=animated.resolveEvent(session,event,presentation,options and options.actorClock or 0)
+                if character then addCharacter(character,{kind="event",id=event.id},"event_"..event.id) end
+            end
+        end
+    end
     if options and options.includeActor then
         local actor = require("presentation.animated_actor").resolve(session,
             traversalView.resolve(session), options.actorClock or 0)
         if actor then
-            for i, group in ipairs(actor.groups) do
-                local material = registerAssetMaterial(registry, group.texturePath, nil, {1,1,1,1})
-                local surface = newSurface(surfaces, "actor_"..i,
-                    {kind="actor", surface="character", character=actor.character,
-                        materialSlot=group.material, clip=actor.clip, time=actor.time}, material)
-                for _, v in ipairs(group.vertices) do pushVertex(surface, v) end
-            end
+            addCharacter(actor,{kind="actor"},"actor")
         end
     end
 

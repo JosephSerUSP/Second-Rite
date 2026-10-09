@@ -255,6 +255,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           Copy-Item tools/spikes/continuous-surface/project-render-proof.lua (Join-Path $env:GAUNTLET_STAGE 'main.lua')
+          Copy-Item tools/spikes/continuous-surface/project-character-proof.lua (Join-Path $env:GAUNTLET_STAGE 'character-proof.lua')
           Push-Location $env:GAUNTLET_STAGE
           try {
             & $env:LOVEC .

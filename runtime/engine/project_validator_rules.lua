@@ -247,7 +247,15 @@ function validator.run(loader)
     for host, phases in pairs(loader.flows or {}) do
         validateCommandTree(phases, "flow '" .. tostring(host) .. "'")
     end
+    local function validateCharacterResource(record, owner)
+        local spec = record.actorAppearance
+        if spec ~= nil and spec ~= false then
+            local ok, err = pcall(require("presentation.animated_actor").validateSpec, spec, true)
+            check(ok, owner.." actorAppearance: "..tostring(err))
+        end
+    end
     for id, commonEvent in pairs(loader.commonEvents or {}) do
+        validateCharacterResource(commonEvent, "common event '"..tostring(id).."'")
         validateCommandTree(commonEvent.commands or commonEvent,
             "common event '" .. tostring(id) .. "'")
     end
@@ -256,13 +264,28 @@ function validator.run(loader)
             local ok, err = pcall(require("presentation.animated_actor").validateSpec, map.traversal.actorAppearance)
             check(ok, "map '"..tostring(map.id).."' actorAppearance: "..tostring(err))
         end
+        local function validateCharacterPlacement(record, owner)
+            local spec = record.actorAppearance
+            local common = record.scriptId and loader.commonEvents[tostring(record.scriptId)]
+            if spec == nil and common then spec = common.actorAppearance end
+            if spec ~= nil and spec ~= false then
+                check(not record.wallEvent and type(record.worldPosition)=="table",
+                    owner.." compiled character requires a floor Event with worldPosition")
+            end
+        end
         for eventIndex, event in ipairs(map.events or {}) do
-            validateCommandTree(event.commands or event.script,
-                "map '" .. tostring(map.id or "?") .. "' event[" .. eventIndex .. "]")
+            local owner="map '"..tostring(map.id).."' event["..eventIndex.."]"
+            validateCharacterResource(event, owner)
+            validateCharacterPlacement(event, owner)
+            validateCommandTree(event.commands or event.script, owner)
             for pageIndex, page in ipairs(event.pages or {}) do
-                validateCommandTree(page.commands or page.script,
-                    "map '" .. tostring(map.id or "?") .. "' event[" .. eventIndex
-                    .. "] page[" .. pageIndex .. "]")
+                local pageOwner = owner.." page["..pageIndex.."]"
+                validateCharacterResource(page, pageOwner)
+                local effective = {}
+                for key, value in pairs(event) do effective[key] = value end
+                for key, value in pairs(page) do effective[key] = value end
+                validateCharacterPlacement(effective, pageOwner)
+                validateCommandTree(page.commands or page.script, pageOwner)
             end
         end
     end

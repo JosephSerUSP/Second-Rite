@@ -26,14 +26,15 @@ def main():
     p.add_argument('--animation-source', type=Path,
                    default=Path('G:/Meu Drive/DOCUMENTS/idea/Sairen no Hiiro/Rio/Rio.blend'))
     p.add_argument('--out', type=Path, default=ROOT / 'out/continuous-character/rebuild')
+    p.add_argument('--character', choices=['surveyor', 'attendant', 'sentinel'], default='surveyor')
     args = p.parse_args()
     compiler, source, out = args.compiler.resolve(), args.animation_source.resolve(), args.out.resolve()
     if not (compiler / 'chara/cli.py').is_file() or not source.is_file():
         raise ValueError('compiler checkout and authored animation source must exist')
     revision = subprocess.check_output(['git', '-C', str(compiler), 'rev-parse', 'HEAD'], text=True).strip()
     out.mkdir(parents=True, exist_ok=True)
-    spec = PROJECT / 'assets/authoring/characters/surveyor.spec.json'
-    built, idle, animated, glb = [out / f for f in ('actor.blend', 'idle.blend', 'animated.blend', 'surveyor.glb')]
+    spec = PROJECT / f'assets/authoring/characters/{args.character}.spec.json'
+    built, idle, animated, glb = [out / f for f in ('actor.blend', 'idle.blend', 'animated.blend', f'{args.character}.glb')]
     commands = [
         ['build', str(spec), '--lib', str(compiler / 'library/animagrid'), '--out', str(built)],
         ['retarget', str(built), str(source), 'Idle', '--map', 'mixamo', '--out', str(idle)],

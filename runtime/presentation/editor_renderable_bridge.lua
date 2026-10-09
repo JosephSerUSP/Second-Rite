@@ -108,6 +108,10 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
             local authoredCamera = request.map.traversal and request.map.traversal.camera
+            if request.map.traversal and request.map.traversal.provider == "continuous_surface" then
+                local scene = loader.getScene("map")
+                authoredCamera = scene and scene.worldPresentation and scene.worldPresentation.camera
+            end
             if traversalPresentation and authoredCamera then
                 result.spatialCamera = require("presentation.world_camera").resolve(vSession, {
                     authoredCamera = authoredCamera,

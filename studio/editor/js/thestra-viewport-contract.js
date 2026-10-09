@@ -104,6 +104,7 @@
     }
 
     function eventVisualPlan(asset) {
+        if (asset && asset.actorAppearance) return {kind:'character',path:asset.actorAppearance.character};
         if (asset && typeof asset.model === 'string' && asset.model) return { kind: 'model', path: asset.model };
         if (asset && typeof asset.sprite === 'string' && asset.sprite) return { kind: 'sprite', path: asset.sprite };
         return { kind: 'fallback', path: null };

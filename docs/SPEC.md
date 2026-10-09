@@ -2598,8 +2598,8 @@ not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
 
-The standalone continuous-surface gauntlet now consumes one deform-skinned
-player built by the external `chara-compiler`. A compiled skin resource retains
+The standalone continuous-surface gauntlet consumes a deform-skinned
+player and two floor Event appearances built by the external `chara-compiler`. A compiled skin resource retains
 its deform hierarchy, inverse binds, weights, UV0/material-slot identity and TRS
 clips. `presentation/character_animation.lua` is the single CPU posing consumer;
 its triangle groups use the existing world shader/depth/streaming mesh path and
@@ -2607,8 +2607,14 @@ shared Model Instance placement. Studio receives those resolved triangles throug
 the existing renderable bridge, with a fixed idle authoring sample. Maps select
 the resource through `traversal.actorAppearance` (character, height, stride),
 G1 validates it, and traversal supplies heading/travel facts without taking
-ownership of presentation. This experimental player does not convert the
-shipping roster or change battle animation ownership.
+ownership of presentation. Floor Events select `actorAppearance` (character,
+height), including page/Common Event inheritance and explicit `false` suppression.
+Their existing Event actor owner supplies facing, idle/walk and held-pose facts;
+one-shot playback currently fails explicitly. Studio uses schema-built fields
+and attaches runtime-resolved geometry to the existing Event authoring root.
+Continuous-surface camera controls edit the Scene through the generated camera
+resolver; Map traversal data is unaffected. These experimental appearances do
+not convert the shipping roster or change battle animation ownership.
 
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 

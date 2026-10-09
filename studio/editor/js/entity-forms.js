@@ -1,5 +1,36 @@
 
         // --- SCHEMA-DRIVEN ENTITY FORMS ---
+        function compiledCharacterFormSchema(target, commonEvent = false) {
+            return {
+                resolve: () => target,
+                fields: [
+                    { kind: 'select', label: 'Compiled character', rerender: true,
+                        get: data => data.actorAppearance === false ? 'suppress'
+                            : data.actorAppearance ? 'override' : 'inherit',
+                        options: [{value:'inherit',label:commonEvent ? 'None' : 'Inherit'},
+                            ...(!commonEvent ? [{value:'suppress',label:'Suppress'}] : []),
+                            {value:'override',label:'Use character bundle'}],
+                        set(data,value) {
+                            if (value === 'inherit') delete data.actorAppearance;
+                            else if (value === 'suppress') data.actorAppearance = false;
+                            else data.actorAppearance = data.actorAppearance || {character:'',height:1.75};
+                        } },
+                    { kind:'text', label:'Character bundle', inputId:'event-character-bundle',
+                        when:data => !!data.actorAppearance,
+                        get:data => data.actorAppearance.character,
+                        set:(data,value) => { data.actorAppearance.character=value; } },
+                    { kind:'number', label:'Character height', inputId:'event-character-height', step:'0.01',
+                        when:data => !!data.actorAppearance,
+                        get:data => data.actorAppearance.height,
+                        parse(value) {
+                            const height=Number(value);
+                            if (!Number.isFinite(height) || height <= 0) throw new Error('Character height must be positive');
+                            return height;
+                        },
+                        set:(data,value) => { data.actorAppearance.height=value; } }
+                ]
+            };
+        }
         // Declarative form definitions for the Database tabs. Each schema is
         // a list of field specs interpreted by buildEntityForm; adding a
         // field to a tab (or a whole new simple tab) means adding a spec
@@ -690,7 +721,15 @@
 
                 } else if (spec.kind === 'number') {
                     const input = createFormField(container, spec.label, readValue(spec) !== undefined ? readValue(spec) : (spec.fallback || 0),
-                        val => writeValue(spec, spec.parse ? spec.parse(val) : (parseInt(val) || spec.fallback || 0)),
+                        val => {
+                            try {
+                                writeValue(spec, spec.parse ? spec.parse(val) : (parseInt(val) || spec.fallback || 0));
+                                input.setCustomValidity('');
+                            } catch (error) {
+                                input.setCustomValidity(error.message);
+                                return false;
+                            }
+                        },
                         'number', !!spec.readOnly, spec.inputId, true, markDirty);
                     if (spec.step !== undefined) input.step = spec.step;
 

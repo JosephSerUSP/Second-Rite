@@ -23,11 +23,11 @@
           "text": "The room is still here. That is the first useful fact."
         }
       ],
-      "sprite": "assets/character/player.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
+      "facing": "W",
+      "actorAppearance": {
+        "character": "assets/characters/attendant/character.json",
+        "height": 1.75
+      }
     },
     {
       "id": 102,

@@ -25,18 +25,26 @@ function actor.spec(session)
     local map=session and session.currentMapData
     return map and map.traversal and map.traversal.actorAppearance or nil
 end
-function actor.validateSpec(spec)
+function actor.validateSpec(spec, eventAppearance)
     assert(type(spec)=="table", "actorAppearance must be an object")
     for key in pairs(spec) do
         assert(key=="character" or key=="height" or key=="stride", "unknown actorAppearance field: "..key)
     end
     for _,key in ipairs({"height","stride"}) do
         local n=spec[key]
-        assert(type(n)=="number" and n==n and n>0 and n<math.huge,"actorAppearance."..key.." must be positive finite")
+        if key ~= "stride" or not eventAppearance or n ~= nil then
+            assert(type(n)=="number" and n==n and n>0 and n<math.huge,"actorAppearance."..key.." must be positive finite")
+        end
     end
     local prepared=actor.load(spec.character)
     assert(prepared.asset.clips.idle and prepared.asset.clips.walk,"actorAppearance requires idle and walk clips")
     return prepared
+end
+local function sample(spec,prepared,pose,clip,time)
+    local duration=assert(prepared.asset.clips[clip],"character is missing semantic clip: "..tostring(clip)).duration
+    local groups=animation.sample(prepared,clip,time,pose,spec.height)
+    for _,g in ipairs(groups) do g.texturePath=prepared.base.."/"..g.texture end
+    return {groups=groups,clip=clip,time=time%duration,character=spec.character,height=spec.height,pose=pose}
 end
 function actor.resolve(session,view,clock)
     local spec=actor.spec(session)
@@ -48,9 +56,25 @@ function actor.resolve(session,view,clock)
     local duration=prepared.asset.clips[clip].duration
     local time=pose.moving and (pose.walkDistance or 0)/spec.stride*duration or clock
     if pose.animationPhase then time=pose.animationPhase*duration end
-    local groups=animation.sample(prepared,clip,time,pose,spec.height)
-    for _,g in ipairs(groups) do g.texturePath=prepared.base.."/"..g.texture end
-    return {groups=groups,clip=clip,time=time%duration,character=spec.character,height=spec.height}
+    return sample(spec,prepared,pose,clip,time)
+end
+-- Event roots are authored world positions; semantic clip/facing remain owned
+-- by the existing Event actor. Resolving a visual never allocates actor state.
+function actor.resolveEvent(session,event,presentation,clock)
+    if presentation.visual ~= "character" then return nil end
+    local spec=presentation.actorAppearance
+    local prepared=actor.validateSpec(spec,true)
+    local state=require("engine.event_actor").snapshot(session,presentation.page)
+    assert(not state.overrideKind or state.overrideKind == "pose",
+        "compiled Event characters currently support locomotion and held poses; one-shot playback is not authored")
+    local x,y,z=require("presentation.viewport_3d").eventWorldPosition(event)
+    if session.currentMapData.traversal and session.currentMapData.traversal.provider == "bounded_lane" then
+        z=require("engine.bounded_lane").eventGroundAt(session,event,y) or z
+    end
+    local directions={N={0,-1},E={1,0},S={0,1},W={-1,0}}
+    local facing=assert(directions[state.facing],"unknown Event facing")
+    local pose={x=x,y=y,z=z,facingX=facing[1],facingY=facing[2]}
+    return sample(spec,prepared,pose,state.clip,state.overrideKind == "pose" and 0 or clock)
 end
 function actor.clearCache() cache={} end
 return actor

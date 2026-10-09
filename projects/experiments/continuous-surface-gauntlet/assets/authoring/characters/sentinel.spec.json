@@ -1,0 +1,74 @@
+{
+  "schema_version": "0",
+  "identity": {
+    "id": "gauntlet_sentinel",
+    "description": "Original gauntlet sentinel assembled from authored AnimaGrid library parts"
+  },
+  "representation": {
+    "style_profile": "psx_field_v0",
+    "skeleton": "humanoid_core_v0",
+    "skeleton_profile": "full",
+    "binding": "skinned"
+  },
+  "parts": {
+    "head": {
+      "part": "head.basic@1"
+    },
+    "hair": {
+      "part": "hair.leon@1"
+    },
+    "chest": {
+      "part": "chest.a@1"
+    },
+    "hips": {
+      "part": "hips.narrow@1"
+    },
+    "upperarm.L": {
+      "part": "upperarm.b@1"
+    },
+    "forearm.L": {
+      "part": "forearm.b@1"
+    },
+    "hand.L": {
+      "part": "hand.a@1"
+    },
+    "upperarm.R": {
+      "part": "upperarm.b@1"
+    },
+    "forearm.R": {
+      "part": "forearm.b@1"
+    },
+    "hand.R": {
+      "part": "hand.a@1"
+    },
+    "thigh.L": {
+      "part": "thigh.male@1"
+    },
+    "shin.L": {
+      "part": "shin.a@1"
+    },
+    "foot.L": {
+      "part": "foot.a@1"
+    },
+    "thigh.R": {
+      "part": "thigh.male@1"
+    },
+    "shin.R": {
+      "part": "shin.a@1"
+    },
+    "foot.R": {
+      "part": "foot.a@1"
+    }
+  },
+  "compile": {
+    "atlas_size": 128,
+    "max_tris": 900
+  },
+  "provenance": {
+    "family": "animagrid",
+    "preset": "gauntlet_sentinel",
+    "source_file": "D:/Github/AnimaGrid/Project2/img/MZ3D/Characters2.blend",
+    "source_object": "Char_Generator.001",
+    "derived_from": "animagrid_girl_skinned"
+  }
+}

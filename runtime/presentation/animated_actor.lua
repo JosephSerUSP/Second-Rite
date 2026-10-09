@@ -40,11 +40,31 @@ function actor.validateSpec(spec, eventAppearance)
     assert(prepared.asset.clips.idle and prepared.asset.clips.walk,"actorAppearance requires idle and walk clips")
     return prepared
 end
-local function sample(spec,prepared,pose,clip,time)
+local function sample(spec,prepared,pose,clip,time,playback)
     local duration=assert(prepared.asset.clips[clip],"character is missing semantic clip: "..tostring(clip)).duration
-    local groups=animation.sample(prepared,clip,time,pose,spec.height)
+    local groups=animation.sample(prepared,clip,time,pose,spec.height,playback)
     for _,g in ipairs(groups) do g.texturePath=prepared.base.."/"..g.texture end
-    return {groups=groups,clip=clip,time=time%duration,character=spec.character,height=spec.height,pose=pose}
+    return {groups=groups,clip=clip,time=playback=="once" and math.min(time,duration) or time%duration,character=spec.character,height=spec.height,pose=pose}
+end
+-- Phase selection reads the runtime owner; these clips never complete actions.
+local function combatSample(session,side,spec,prepared,pose)
+    local state=session.arenaEncounter
+    if not state then return end
+    local impact=state.impact
+    local age=impact and state.elapsed-impact.time or math.huge
+    local recipient=impact and ((impact.side=="player" and side=="enemy") or (impact.side=="enemy" and side=="player"))
+    if recipient and not impact.miss then
+        local duration=assert(prepared.asset.clips.hit,"combat character requires hit clip").duration
+        if age<duration then return sample(spec,prepared,pose,"hit",age,"once") end
+    end
+    local action
+    if side=="player" then action=state.action else action=state.enemyAction end
+    local phase=action and require("engine.action_timeline").phase(action)
+    if phase then
+        local clip=phase.id=="windup" and "anticipation" or phase.id
+        local duration=assert(prepared.asset.clips[clip],"combat character requires "..clip).duration
+        return sample(spec,prepared,pose,clip,action.time/phase.duration*duration,"once")
+    end
 end
 function actor.resolve(session,view,clock)
     local spec=actor.spec(session)
@@ -57,7 +77,7 @@ function actor.resolve(session,view,clock)
     clock=session.arenaEncounter and session.arenaEncounter.elapsed or clock
     local time=pose.moving and (pose.walkDistance or 0)/spec.stride*duration or clock
     if pose.animationPhase then time=pose.animationPhase*duration end
-    return require("presentation.arena_feedback").decorate(session,"player",sample(spec,prepared,pose,clip,time))
+    return require("presentation.arena_feedback").decorate(session,"player",combatSample(session,"player",spec,prepared,pose) or sample(spec,prepared,pose,clip,time))
 end
 -- Event roots are authored world positions; semantic clip/facing remain owned
 -- by the existing Event actor. Resolving a visual never allocates actor state.
@@ -81,7 +101,7 @@ function actor.resolveEvent(session,event,presentation,clock)
     local pose={x=x,y=y,z=z,facingX=worldHeading and root.facingX or facing[1],facingY=worldHeading and root.facingY or facing[2]}
     local animated=sample(spec,prepared,pose,state.clip,state.overrideKind == "pose" and 0 or clock)
     if session.arenaEncounter and session.arenaEncounter.event.id==event.id then
-        return require("presentation.arena_feedback").decorate(session,"enemy",animated)
+        return require("presentation.arena_feedback").decorate(session,"enemy",combatSample(session,"enemy",spec,prepared,pose) or animated)
     end
     return animated
 end

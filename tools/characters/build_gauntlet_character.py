@@ -41,10 +41,17 @@ def main():
         ['retarget', str(idle), str(source), 'Walk', '--map', 'mixamo', '--out', str(animated)],
         ['export', str(animated), '--names', 'semantic', '--out', str(glb)],
     ]
+    recipe = spec.with_name(args.character + '.clips.json')
+    if recipe.exists():
+        combat = out / 'combat.blend'
+        commands.insert(-1, ['author-clips', str(ROOT / 'tools/characters/author_character_clips.py'),
+                            '--blend', str(animated), '--', '--recipe', str(recipe), '--out', str(combat)])
+        commands[-1][1] = str(combat)
     source_before = sha(source)
     steps = []
     for command in commands:
-        result = subprocess.run([sys.executable, '-m', 'chara.cli', *command], cwd=compiler,
+        invocation = [sys.executable, str(ROOT / 'tools/blender/run.py'), *command[1:]] if command[0] == 'author-clips' else [sys.executable, '-m', 'chara.cli', *command]
+        result = subprocess.run(invocation, cwd=ROOT if command[0] == 'author-clips' else compiler,
                                 capture_output=True, text=True)
         print(result.stdout, end=''); print(result.stderr, end='', file=sys.stderr)
         result.check_returncode()
@@ -64,6 +71,8 @@ def main():
               'animationSource': {'path': str(source), 'sha256': source_before, 'clips': ['Idle', 'Walk'], 'mapping': 'mixamo'},
               'glbSha256': sha(glb), 'buildReport': json.loads(built.with_suffix('.report.json').read_text()),
               'steps': steps}
+    if recipe.exists():
+        record['authoredClips'] = {'recipe': recipe.name, 'sha256': sha(recipe), 'compiler': 'tools/characters/author_character_clips.py'}
     (out / 'build.json').write_bytes((json.dumps(record, indent=2) + '\n').encode())
     print(f'CHARACTER BUILD OK: {glb}\nRuntime bundle: {runtime}')
 

@@ -16,6 +16,8 @@ on:
       - 'runtime/engine/action_timeline.lua'
       - 'runtime/presentation/arena_feedback.lua'
       - 'tests/test_action_timeline.lua'
+      - 'tests/test_contact_audio.lua'
+      - 'runtime/presentation/contact_audio.lua'
       - 'runtime/engine/world_event_actor.lua'
       - 'rtp/revisions/1.0/data/engine.json'
       - 'runtime/presentation/continuous_surface_world.lua'
@@ -62,6 +64,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "character compiler contract failed" }
           python tools/characters/compile_character.py projects/experiments/continuous-surface-gauntlet/assets/authoring/characters/surveyor.glb --out projects/experiments/continuous-surface-gauntlet/assets/characters/surveyor --check
           if ($LASTEXITCODE -ne 0) { throw "compiled character disagrees with GLB" }
+          python projects/experiments/continuous-surface-gauntlet/tools/build_combat_cues.py --check
+          if ($LASTEXITCODE -ne 0) { throw "combat cues are stale" }
           python tools/spikes/continuous-surface/build-fixture-sprites.py --check
           if ($LASTEXITCODE -ne 0) { throw "gauntlet raster fixtures disagree with source" }
           python tools/blender/environment_sources.py --check --root projects/experiments/continuous-surface-gauntlet

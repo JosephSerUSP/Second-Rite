@@ -1,6 +1,7 @@
 local function run()
     local loader=require("engine.data.loader");loader.init()
     require("tests.test_action_timeline")
+    require("tests.test_contact_audio")
     local presentationTime=1.25
     love.timer.getTime=function() return presentationTime end
     local host=require("engine.arena_host")
@@ -85,7 +86,9 @@ local function run()
     local playerHp=state.player.hp
     tick(state.spec.windupSeconds)
     assert(state.telegraph.x==lockX and state.telegraph.y==lockY,"windup retargeted after dodge")
-    tick(state.spec.strikeSeconds/2);capture("03b-enemy-strike")
+    tick(state.spec.strikeSeconds/2)
+    assert(actor.resolveEvent(game,event,appearance,1).clip=="strike","enemy strike clip missing")
+    capture("03b-enemy-strike")
     tick(state.spec.strikeSeconds/2)
     assert(state.impact and state.impact.miss and state.player.hp==playerHp,"dodged lunge delivered damage")
     assert(require("engine.action_timeline").phase(state.enemyAction).id=="recovery","enemy has no recovery window")

@@ -725,6 +725,7 @@ function love.load(arg)
             "test_baked_environment_package",
             "test_traversal_view",
             "test_character_animation",
+        "test_contact_audio",
             "test_action_timeline",
             "test_bounded_lane",
             "test_bounded_lane_levels",
@@ -1354,6 +1355,8 @@ function love.update(dt)
         initial = conf("ui", "autoRepeatInitial", 0.3),
         interval = conf("ui", "autoRepeatInterval", 0.06),
     })
+    local encounter=activeSession and activeSession.arenaEncounter
+    require("presentation.contact_audio").present(encounter and encounter.impact)
 end
 
 -- F2 (overhaul-6): every scene draws the SAME declarative "party" window

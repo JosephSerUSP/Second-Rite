@@ -1,7 +1,7 @@
 {
   "compiler": {
     "repository": "JosephSerUSP/chara-compiler",
-    "revision": "8d84dc185c48cd4746c4324cdaf62bd2f2d5e092"
+    "revision": "12eb3144980b98af3a9edcbe72c32f60f7dc78bc"
   },
   "specSha256": "2f1227f5b8591bb209dff4c04eb32cb6c4c14c1a7677a08964e4a4c0eef6364b",
   "librarySha256": {
@@ -114,7 +114,7 @@
     ],
     "mapping": "mixamo"
   },
-  "glbSha256": "107beff5e124d1f1875256c4790a356042bd3afd64459bcd505f2795aa4be221",
+  "glbSha256": "d8a72574964ad8d4e43dfcff24365ddc3425fcfd28688f8e76eee11a3c2fcd92",
   "buildReport": {
     "spec": "gauntlet_sentinel",
     "profile": "full",
@@ -293,19 +293,28 @@
   "steps": [
     {
       "command": "build",
-      "output": "gauntlet_sentinel: 684 tris, 22 bones (full, skinned) -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\actor.blend"
+      "output": "gauntlet_sentinel: 684 tris, 22 bones (full, skinned) -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\sentinel-rebuild-verify\\actor.blend"
     },
     {
       "command": "retarget",
-      "output": "Idle: frames [1, 180], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\idle.blend"
+      "output": "Idle: frames [1, 180], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\sentinel-rebuild-verify\\idle.blend"
     },
     {
       "command": "retarget",
-      "output": "Walk: frames [1, 28], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\animated.blend"
+      "output": "Walk: frames [1, 28], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\sentinel-rebuild-verify\\animated.blend"
+    },
+    {
+      "command": "author-clips",
+      "output": "00:02.484  blend            | Read blend: \"C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\sentinel-rebuild-verify\\animated.blend\"\nInfo: Saved as \"combat.blend\"\nAUTHORED CLIPS OK anticipation,strike,recovery,hit\nBlender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)\n\nBlender quit"
     },
     {
       "command": "export",
-      "output": "C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-events\\sentinel-build\\sentinel.glb: 22 joints (semantic), animations ['Idle', 'Walk'], 1 primitives, 1 image(s)"
+      "output": "C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\sentinel-rebuild-verify\\sentinel.glb: 22 joints (semantic), animations ['anticipation', 'hit', 'Idle', 'recovery', 'strike', 'Walk'], 1 primitives, 1 image(s)"
     }
-  ]
+  ],
+  "authoredClips": {
+    "recipe": "sentinel.clips.json",
+    "sha256": "2029d75065397e407e305c6f5d54d862343c9666e8082156e1f5f2b90f3cd4e2",
+    "compiler": "tools/characters/author_character_clips.py"
+  }
 }

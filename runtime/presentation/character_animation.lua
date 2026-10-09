@@ -131,12 +131,12 @@ local function interpolate(c,time)
     end
     return out
 end
-local function palettes(asset,clipName,time)
+local function palettes(asset,clipName,time,playback)
     local overrides={}
     if clipName then
         local clip=assert(asset.clips[clipName],"unknown character clip: "..tostring(clipName))
         assert(finite(time),"character sample time must be finite")
-        time=time%clip.duration
+        time=playback=="once" and math.max(0,math.min(time,clip.duration)) or time%clip.duration
         for _,c in ipairs(clip.channels) do
             overrides[c.node]=overrides[c.node] or {}
             overrides[c.node][c.path]=interpolate(c,time)
@@ -185,10 +185,11 @@ function animation.prepare(asset)
     assert(maxY-minY>1e-6,"character height is empty")
     return {asset=asset,root={(minX+maxX)/2,minY,(minZ+maxZ)/2},height=maxY-minY}
 end
-function animation.sample(prepared,clipName,time,pose,height)
+function animation.sample(prepared,clipName,time,pose,height,playback)
+    assert(playback==nil or playback=="once", "unknown character playback mode")
     array({pose.x,pose.y,pose.z},3)
     assert(finite(height) and height>0,"character world height must be positive")
-    local matrices=palettes(prepared.asset,clipName,time)
+    local matrices=palettes(prepared.asset,clipName,time,playback)
     local fx,fy=pose.facingX or 0,pose.facingY or 1
     local length=math.sqrt(fx*fx+fy*fy)
     assert(length>0 and finite(length),"character facing must be nonzero")

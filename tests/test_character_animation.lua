@@ -20,6 +20,10 @@ local a=animation.sample(prepared,"idle",0,pose,1)[1].vertices[1]
 local b=animation.sample(prepared,"walk",.5,pose,1)[1].vertices[1]
 check(near(a[1],10.5) and near(a[2],20.5) and near(a[3],3),"bind pose and Z-up grounding")
 check(near(b[1],10) and near(b[2],20.5) and near(b[3],3.5),"slerp and two-joint blending")
+local endPose=animation.sample(prepared,"walk",1,pose,1,"once")[1].vertices[1]
+local held=animation.sample(prepared,"walk",5,pose,1,"once")[1].vertices[1]
+check(near(endPose[1],held[1]) and near(endPose[3],held[3]),"one-shot clamps beyond end without looping")
+check(not near(endPose[1],a[1]),"one-shot endpoint differs from start")
 local loop=animation.sample(prepared,"walk",1.5,pose,1)[1].vertices[1]
 check(near(loop[1],b[1]) and near(loop[3],b[3]),"clip loops by duration")
 check(asset.primitives[1].vertices[1][1]==1 and pose.x==10,"posing never mutates asset or gameplay")

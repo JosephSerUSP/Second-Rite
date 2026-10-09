@@ -1,0 +1,194 @@
+{
+  "basis": "additive local XYZ degrees over first compiler Idle pose",
+  "clips": {
+    "anticipation": [
+      {
+        "frame": 1,
+        "rotations": {}
+      },
+      {
+        "frame": 20,
+        "rotations": {
+          "upperarm.R": [
+            35,
+            0,
+            -25
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -60
+          ],
+          "spine2": [
+            -12,
+            0,
+            -15
+          ]
+        }
+      },
+      {
+        "frame": 31,
+        "rotations": {
+          "upperarm.R": [
+            35,
+            0,
+            -25
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -60
+          ],
+          "spine2": [
+            -12,
+            0,
+            -15
+          ]
+        }
+      }
+    ],
+    "strike": [
+      {
+        "frame": 1,
+        "rotations": {
+          "upperarm.R": [
+            35,
+            0,
+            -25
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -60
+          ],
+          "spine2": [
+            -12,
+            0,
+            -15
+          ]
+        }
+      },
+      {
+        "frame": 16,
+        "rotations": {
+          "upperarm.R": [
+            -60,
+            0,
+            -65
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -15
+          ],
+          "spine2": [
+            15,
+            0,
+            20
+          ]
+        }
+      },
+      {
+        "frame": 31,
+        "rotations": {
+          "upperarm.R": [
+            -60,
+            0,
+            -65
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -15
+          ],
+          "spine2": [
+            15,
+            0,
+            20
+          ]
+        }
+      }
+    ],
+    "recovery": [
+      {
+        "frame": 1,
+        "rotations": {
+          "upperarm.R": [
+            -60,
+            0,
+            -65
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -15
+          ],
+          "spine2": [
+            15,
+            0,
+            20
+          ]
+        }
+      },
+      {
+        "frame": 12,
+        "rotations": {
+          "upperarm.R": [
+            35,
+            0,
+            -25
+          ],
+          "forearm.R": [
+            0,
+            0,
+            -60
+          ],
+          "spine2": [
+            -12,
+            0,
+            -15
+          ]
+        }
+      },
+      {
+        "frame": 31,
+        "rotations": {}
+      }
+    ],
+    "hit": [
+      {
+        "frame": 1,
+        "rotations": {}
+      },
+      {
+        "frame": 3,
+        "rotations": {
+          "spine2": [
+            -20,
+            0,
+            8
+          ],
+          "head": [
+            12,
+            0,
+            0
+          ],
+          "upperarm.L": [
+            -15,
+            0,
+            10
+          ],
+          "upperarm.R": [
+            -15,
+            0,
+            -10
+          ]
+        }
+      },
+      {
+        "frame": 9,
+        "rotations": {}
+      }
+    ]
+  }
+}

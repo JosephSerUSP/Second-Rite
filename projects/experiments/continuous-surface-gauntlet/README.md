@@ -85,8 +85,9 @@ through the shared executor. Enemy advancement also holds during player
 execution. The Sentinel locks a destination during its red windup, lunges through
 ordinary collision, then recovers. Lethal contact holds a short fade/aftermath
 before exploration resumes. These are experimental arbitration rules and timing
-values, not measured reference-game parity. Current attack feedback is a tracer,
-flash and damage label; compiled skeletal attack clips are still absent.
+values, not measured reference-game parity. Attack feedback now includes compiled skeletal anticipation/recovery, enemy
+strike and hit-reaction clips, plus a tracer, flash, damage label and short
+original synthesized contact/miss cues. These remain experimental fixture art.
 
 Baked room textures use perspective-correct interpolation (`affineTextures: false`)
 so shadows remain registered to their geometry; repository-wide follow-up is #1488.

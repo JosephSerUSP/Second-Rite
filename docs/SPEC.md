@@ -2654,8 +2654,16 @@ These pause/arbitration rules are an explicit experimental contract, not a claim
 of reference-game parity. Timing values are Project-authored formulas on
 `ARENA_START`, with registry/editor/validator coverage. Resolved contact facts
 drive brief tracers, flashes and projected damage labels with velocity/gravity;
-they never replay mutation. The current compiled characters have locomotion
-clips only, so these effects do not establish skeletal attack-animation support.
+they never replay mutation.
+
+The continuous arena's compiled character presentation can sample phase clips
+with one-shot endpoint clamping. The runtime action phase supplies progress;
+rendering never advances or completes an action. Contact audio projects an
+optional Project-owned sound path published with the resolved contact, once per
+fact and from update rather than draw. `ARENA_START` exposes optional player,
+enemy and miss cue paths; missing authored assets fail validation. The gauntlet's
+FK clip recipes compile through the existing chara-compiler GLB export boundary.
+These fixture poses and synthesized cues are experimental, not reference parity.
 
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 

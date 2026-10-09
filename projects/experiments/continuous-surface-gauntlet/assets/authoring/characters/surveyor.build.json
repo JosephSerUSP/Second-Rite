@@ -1,7 +1,7 @@
 {
   "compiler": {
     "repository": "JosephSerUSP/chara-compiler",
-    "revision": "8d84dc185c48cd4746c4324cdaf62bd2f2d5e092"
+    "revision": "12eb3144980b98af3a9edcbe72c32f60f7dc78bc"
   },
   "specSha256": "674c6864cf5d4e7cd696d00c97c0b5961a22258650f1be5c96f599c67956fd42",
   "librarySha256": {
@@ -114,7 +114,7 @@
     ],
     "mapping": "mixamo"
   },
-  "glbSha256": "e6aa3f4e191f3de48f412039faf1ae14f9eabc7c26862e81b52314170fb33fdf",
+  "glbSha256": "d7b29c4d83dde3dbfb88b291fbb145961dbc49180f5d4c4887911ef001281454",
   "buildReport": {
     "spec": "animagrid_girl_01_skinned",
     "profile": "full",
@@ -293,19 +293,28 @@
   "steps": [
     {
       "command": "build",
-      "output": "animagrid_girl_01_skinned: 696 tris, 22 bones (full, skinned) -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-character\\rebuild-lf\\actor.blend"
+      "output": "animagrid_girl_01_skinned: 696 tris, 22 bones (full, skinned) -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\rebuild-verify\\actor.blend"
     },
     {
       "command": "retarget",
-      "output": "Idle: frames [1, 180], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-character\\rebuild-lf\\idle.blend"
+      "output": "Idle: frames [1, 180], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\rebuild-verify\\idle.blend"
     },
     {
       "command": "retarget",
-      "output": "Walk: frames [1, 28], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-character\\rebuild-lf\\animated.blend"
+      "output": "Walk: frames [1, 28], 22 bones mapped, unmapped [], mean error -0.0 deg -> C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\rebuild-verify\\animated.blend"
+    },
+    {
+      "command": "author-clips",
+      "output": "00:03.063  blend            | Read blend: \"C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\rebuild-verify\\animated.blend\"\nInfo: Saved as \"combat.blend\"\nAUTHORED CLIPS OK anticipation,strike,recovery,hit\nBlender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:37:04)\n\nBlender quit"
     },
     {
       "command": "export",
-      "output": "C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\continuous-character\\rebuild-lf\\surveyor.glb: 22 joints (semantic), animations ['Idle', 'Walk'], 1 primitives, 1 image(s)"
+      "output": "C:\\Users\\josep\\.codex\\worktrees\\continuous-surface-presentation\\Hichaukitoden\\out\\combat-clips\\rebuild-verify\\surveyor.glb: 22 joints (semantic), animations ['anticipation', 'hit', 'Idle', 'recovery', 'strike', 'Walk'], 1 primitives, 1 image(s)"
     }
-  ]
+  ],
+  "authoredClips": {
+    "recipe": "surveyor.clips.json",
+    "sha256": "5056a55aed744b485eb56dad97f0553c7670e44bd3ec3a73dbdc95eb8b20e97a",
+    "compiler": "tools/characters/author_character_clips.py"
+  }
 }

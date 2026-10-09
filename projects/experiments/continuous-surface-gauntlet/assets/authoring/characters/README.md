@@ -55,5 +55,22 @@ idle/walk or held-pose state. Rendering does not allocate or move actor state.
 One-shot playback fails explicitly until its completion semantics are supported.
 Studio attaches the resolved mesh to the Event authoring root, so moving that
 root moves the actual character while refreshed runtime geometry is pending.
-Additional actions, blends and a shipping creature-roster conversion remain
+Blends and a shipping creature-roster conversion remain
 outside this slice.
+
+## Combat clips
+
+Surveyor and Sentinel have Project-owned `.clips.json` recipes: local additive FK
+rotations over the first compiled Idle pose. `author_character_clips.py` applies
+these to a generated compiler intermediate; chara-compiler then exports the same
+portable GLB contract. The ordinary rebuild script includes this step when the
+character has a recipe. Private source rigs and the compiler checkout stay
+unchanged. These are original experimental fixture poses, not retargeted attacks
+from Rio or measured reference-game animations.
+
+The arena renderer samples anticipation, strike and recovery from the runtime
+owner's phase fraction. Hit reactions read resolved contact age. These samples
+clamp at their endpoint; they never loop or decide when an action completes.
+Ordinary locomotion and held Event pose behavior remain separate. The existing
+Event one-shot command remains unsupported; this pass adds phase-driven arena
+presentation, not a second Event animation executor.

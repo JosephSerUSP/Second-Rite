@@ -36,7 +36,10 @@
         "playerRecoverySeconds": 0.42,
         "strikeSeconds": 0.55,
         "enemyRecoverySeconds": 0.85,
-        "terminalSeconds": 1.1
+        "terminalSeconds": 1.1,
+        "playerContactSound": "assets/audio/pulse.wav",
+        "enemyContactSound": "assets/audio/impact.wav",
+        "missSound": "assets/audio/sweep.wav"
       }
     ]
   }

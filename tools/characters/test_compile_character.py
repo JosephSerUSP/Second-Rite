@@ -18,6 +18,8 @@ class CharacterCompiler(unittest.TestCase):
                 record=json.loads(source.with_suffix('.build.json').read_text())
                 self.assertEqual(record['glbSha256'], hashlib.sha256(source.read_bytes()).hexdigest())
                 self.assertEqual(record['specSha256'], hashlib.sha256(source.with_suffix('.spec.json').read_bytes()).hexdigest())
+                if 'authoredClips' in record:
+                    self.assertEqual(record['authoredClips']['sha256'], hashlib.sha256(source.with_suffix('.clips.json').read_bytes()).hexdigest())
                 asset,images=compile_glb(source)
                 runtime=source.parents[2]/'characters'/name
                 expected=(json.dumps(asset,separators=(',', ':'),allow_nan=False)+'\n').encode()
@@ -27,7 +29,7 @@ class CharacterCompiler(unittest.TestCase):
     def test_preserves_authored_uvs_weights_clips(self):
         asset, images = compile_glb(SOURCE)
         self.assertEqual(len(asset['joints']), 22)
-        self.assertEqual(set(asset['clips']), {'idle', 'walk'})
+        self.assertEqual(set(asset['clips']), {'idle', 'walk', 'anticipation', 'strike', 'recovery', 'hit'})
         self.assertEqual(sum(len(p['indices']) // 3 for p in asset['primitives']), 696)
         self.assertEqual(len(images), 1)
         self.assertTrue(all(c['times'][0] == 0 for a in asset['clips'].values() for c in a['channels']))

@@ -21,6 +21,13 @@ function arena.validateSpec(spec,loader,authored)
             assert(type(n)=="number" and n==n and n>0 and n<math.huge,"arena "..key.." must be positive finite")
         end
     end
+    for _,key in ipairs({"playerContactSound","enemyContactSound","missSound"}) do
+        local path=spec[key]
+        if path~=nil then
+            assert(type(path)=="string" and path:match("^assets/") and not path:find("..",1,true)
+                and love.filesystem.getInfo(path,"file"), "arena sound asset missing: "..tostring(path))
+        end
+    end
     local skill=assert(loader.getSkill(spec.skillId),"arena skill does not exist")
     local target=require("engine.targeting").expand(skill.target)
     assert(target.side=="enemy" and target.shape=="single" and target.mode=="choose","arena requires a chosen single-enemy skill")
@@ -121,8 +128,10 @@ local function resolve(session,state,side)
             amount=ev.value
         end
     end
+    local sound
+    if player then sound=state.spec.playerContactSound else sound=state.spec.enemyContactSound end
     state.impact={time=state.elapsed,side=side,amount=amount,x=target.x,y=target.y,z=target.z,
-        fromX=origin.x,fromY=origin.y,fromZ=origin.z}
+        fromX=origin.x,fromY=origin.y,fromZ=origin.z,sound=sound}
     if player then state.actionCount=state.actionCount+1 else state.enemyActionCount=state.enemyActionCount+1 end
     checkEnd(session,state)
 end
@@ -203,7 +212,7 @@ function arena.update(session,dt)
                         and arena.inRange(x,y,state.root.x,state.root.y,zone.radius) then
                     resolve(session,state,"enemy")
                 else
-                    state.impact={time=state.elapsed,side="enemy",amount=0,miss=true,x=state.root.x,y=state.root.y,z=z}
+                    state.impact={time=state.elapsed,side="enemy",amount=0,miss=true,sound=state.spec.missSound,x=state.root.x,y=state.root.y,z=z}
                 end
                 state.telegraph=nil
             end

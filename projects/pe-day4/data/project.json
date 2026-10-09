@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "Hospital Slice Starter",
+  "identity": "hospital-slice",
+  "productName": "Hospital Slice Starter",
+  "executableName": "Hospital Slice Starter",
+  "buildSlug": "hospital-slice",
+  "windowTitle": "Hospital Slice Starter",
+  "productVersion": "0.1.0"
+}

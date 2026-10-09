@@ -1,0 +1,113 @@
+{
+  "dock": {
+    "footprint": {
+      "x": 0,
+      "y": 18,
+      "w": 32,
+      "h": 12
+    },
+    "staticShell": true,
+    "transition": {
+      "clearDuration": 0.1,
+      "morphDuration": 0.16
+    },
+    "variants": {
+      "dialogue": {
+        "primary": "dialogue_choices",
+        "shells": [
+          {
+            "x": 0,
+            "y": 18,
+            "w": 9.5,
+            "h": 12
+          },
+          {
+            "x": 9.5,
+            "y": 18,
+            "w": 22.5,
+            "h": 12
+          }
+        ],
+        "windows": [
+          {
+            "id": "dialogue_portrait",
+            "rect": {
+              "x": 0,
+              "y": 18,
+              "w": 9.5,
+              "h": 12
+            },
+            "style": "frame",
+            "visible": "sceneState.dialoguePortrait ~= nil and sceneState.dialoguePortrait ~= ''",
+            "content": [
+              {
+                "type": "image",
+                "portraitField": "sceneState.dialoguePortrait",
+                "portraitX": 1,
+                "portraitY": 1,
+                "portraitW": 7.5,
+                "portraitH": 10,
+                "portraitOverflow": 0.5,
+                "portraitFrame": "sceneState.dialogueExpression",
+                "portraitName": "sceneState.dialogueSpeaker"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "dialogue_message",
+            "rect": {
+              "x": 9.5,
+              "y": 18,
+              "w": 22.5,
+              "h": 12
+            },
+            "style": "frame",
+            "shiftWith": "dialogue_portrait",
+            "shiftWhenHidden": {
+              "x": 0,
+              "w": 32
+            },
+            "visible": "sceneState.dialogueMode == 'text' or sceneState.dialogueMode == 'choice'",
+            "align": "left",
+            "waitInput": "sceneState.dialogueMode == 'text' and sceneState.dialogueWaiting == true",
+            "content": [
+              {
+                "type": "text",
+                "text": "{sceneState.dialogueText}",
+                "reveal": "sceneState.dialogueRevealElapsed"
+              }
+            ],
+            "chrome": "none"
+          },
+          {
+            "id": "dialogue_choices",
+            "rect": {
+              "x": 9.5,
+              "y": 18,
+              "w": 22.5,
+              "h": 12
+            },
+            "style": "list",
+            "chrome": "none",
+            "shiftWith": "dialogue_portrait",
+            "shiftWhenHidden": {
+              "x": 0,
+              "w": 32
+            },
+            "fitRows": "bottom",
+            "visible": "sceneState.dialogueMode == 'choice'",
+            "content": [
+              {
+                "type": "list",
+                "listId": "sceneState:dialogueOptions",
+                "format": "{name}",
+                "cursor": "sceneState.dialogueCursorIdx"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "id": "title",
+  "name": "Hospital Slice Starter",
+  "kind": "menu",
+  "draw": "windows",
+  "config": {},
+  "windows": [
+    {
+      "id": "project_title",
+      "rect": {
+        "x": 3,
+        "y": 5,
+        "w": 26,
+        "h": 7
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "Hospital Slice Starter\nOriginal proxy rooms/character\nTraversal only - combat not calibrated"
+        }
+      ]
+    },
+    {
+      "id": "title_menu",
+      "rect": {
+        "x": 5,
+        "y": 15,
+        "w": 22,
+        "h": 5
+      },
+      "style": "list",
+      "visibleRows": 2,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:title.options",
+          "cursor": "sceneState.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": 1
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 1 and 2 or 1"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 1 and 2 or 1"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 1",
+        "then": [
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "EQUIP_ITEM",
+            "slot": 1,
+            "target": 1,
+            "itemIndex": 2
+          },
+          {
+            "cmd": "EQUIP_ITEM",
+            "slot": 2,
+            "target": 1,
+            "itemIndex": 2
+          },
+          {
+            "cmd": "SET_GAME_VARIABLE",
+            "name": "bonusPoints",
+            "value": 0
+          },
+          {
+            "cmd": "LOAD_MAP",
+            "mapId": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "map"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 2",
+        "then": [
+          {
+            "cmd": "QUIT_GAME"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -34,6 +34,7 @@ def validate_facts(data, errors):
     fact_ids = set(ids)
     for fact in facts:
         fid = fact.get("id", "<missing>"); status = fact.get("status"); refs = fact.get("sources")
+        if "value" not in fact: fail(errors, f"{fid}: missing value")
         if status not in VALID_STATUSES: fail(errors, f"{fid}: invalid status {status!r}"); continue
         if not isinstance(refs, list): fail(errors, f"{fid}: sources must be an array"); refs = []
         missing = [sid for sid in refs if sid not in sources]
@@ -52,6 +53,9 @@ def validate_facts(data, errors):
 def validate_route(route, fact_ids, errors):
     vocab = set(route.get("stateVocabulary") or []); nodes = route.get("nodes") or []; edges = route.get("edges") or []
     node_ids = [n.get("id") for n in nodes]; node_set = set(node_ids)
+    for group in route.get('exclusiveStateGroups') or []:
+        if len(group) < 2 or len(group) != len(set(group)) or any(state not in vocab for state in group):
+            fail(errors, 'route: invalid mutually exclusive state group')
     if None in node_ids or len(node_ids) != len(node_set): fail(errors, "route: node ids must be present and unique")
     if route.get("start") not in node_set: fail(errors, "route: invalid start node")
     terminal = route.get("terminal")
@@ -65,6 +69,8 @@ def validate_route(route, fact_ids, errors):
         if entry.get("fact") is not None and entry["fact"] not in fact_ids: fail(errors, f"{owner}: unknown fact {entry['fact']!r}")
     interactions = {}; outgoing = {}
     for node in nodes:
+        for state in node.get("entryRequirements") or []:
+            if state not in vocab: fail(errors, f"node {node.get('id')}: undeclared entry requirement {state!r}")
         seen = set()
         for it in node.get("interactions") or []:
             if not it.get("id") or it["id"] in seen: fail(errors, f"node {node.get('id')}: invalid interaction id"); continue
@@ -72,20 +78,49 @@ def validate_route(route, fact_ids, errors):
     for edge in edges:
         if edge.get("from") not in node_set or edge.get("to") not in node_set: fail(errors, f"edge {edge.get('id')}: invalid endpoint"); continue
         check(f"edge {edge.get('id')}", edge); outgoing.setdefault(edge["from"], []).append((edge["to"], edge))
+        if edge.get("oneShot") and not edge.get("grants"): fail(errors, f"edge {edge['id']}: oneShot needs a persistent grant marker")
         if edge.get("bidirectional"): outgoing.setdefault(edge["to"], []).append((edge["from"], edge))
     def mutate(flags, entry):
         out=set(flags)
         for state in entry.get("clears") or []: out.discard(state)
         out.update(entry.get("grants") or []); return frozenset(out)
+    requirements = route.get("criticalRequirements") or {}
+    targets = route.get("requirementTargets") or {}
+    for name, needed in requirements.items():
+        if name not in targets: fail(errors, f"critical requirement {name}: missing target")
+        for state in needed:
+            if state not in vocab: fail(errors, f"critical requirement {name}: undeclared state {state!r}")
+    for name, target in targets.items():
+        if name not in requirements: fail(errors, f"requirement target {name}: no requirements")
+        if len(target) != 1 or (target.get('state') not in vocab and target.get('node') not in node_set):
+            fail(errors, f"requirement target {name}: invalid state/node target")
+    node_defs = {node['id']: node for node in nodes}
     start=(route.get("start"), frozenset()); q=deque([start]); seen={start}; reached=False
     while q:
         node, flags=q.popleft()
-        if terminal in flags: reached=True; break
+        needed = node_defs.get(node, {}).get('entryRequirements') or []
+        if not all(state in flags for state in needed):
+            fail(errors, f"route: {node} reachable without entry requirements {needed}")
+            break
+        if any(sum(state in flags for state in group) > 1 for group in route.get('exclusiveStateGroups', [])):
+            fail(errors, 'route: mutually exclusive states are simultaneously reachable')
+            break
+        invalid = False
+        for name, target in targets.items():
+            if target.get('state') in flags or target.get('node') == node:
+                needed = requirements.get(name, [])
+                if not all(state in flags for state in needed):
+                    fail(errors, f"route: {name} reachable without critical requirements {needed}")
+                    invalid = True
+                    break
+        if invalid: break
+        if terminal in flags: reached=True; continue
         for it in interactions.get(node, []):
             if all(r in flags for r in it.get("requiresAll") or []):
                 nxt=(node, mutate(flags,it))
                 if nxt not in seen: seen.add(nxt); q.append(nxt)
         for dst, edge in outgoing.get(node, []):
+            if edge.get('oneShot') and edge.get('grants') and edge['grants'][0] in flags: continue
             if all(r in flags for r in edge.get("requiresAll") or []):
                 nxt=(dst, mutate(flags,edge))
                 if nxt not in seen: seen.add(nxt); q.append(nxt)
@@ -95,11 +130,20 @@ def validate_route(route, fact_ids, errors):
 def validate_snapshot(snapshot, fact_ids, source_ids, errors):
     for path, tagged in walk_tagged_values(snapshot):
         if tagged.get("status") is not None and tagged["status"] not in VALID_STATUSES: fail(errors, f"{path}: invalid status")
+        if tagged.get('status') == 'unknown' and tagged.get('value') is not None: fail(errors, f"{path}: unknown value must remain null")
         for fid in tagged.get("factLinks") or []:
             if fid not in fact_ids: fail(errors, f"{path}: unknown fact {fid!r}")
         for sid in tagged.get("sourceIds") or []:
             if sid not in source_ids: fail(errors, f"{path}: unknown source {sid!r}")
     if snapshot.get("entry",{}).get("scene") != "hospital_entrance": fail(errors, "snapshot: entry must match route start")
+    level = snapshot.get('actor', {}).get('level')
+    if type(level) is not int or level < 1: fail(errors, 'snapshot: level must be a positive integer')
+    item_ids = set()
+    for item in snapshot.get('inventory') or []:
+        item_id = item.get('id')
+        if not isinstance(item_id, str) or not item_id or item_id in item_ids: fail(errors, 'snapshot: invalid/duplicate item id')
+        item_ids.add(item_id)
+        if type(item.get('quantity')) is not int or item['quantity'] < 1: fail(errors, f'snapshot: invalid quantity for {item_id}')
 
 def validate_generalization(data, errors):
     ids=[]
@@ -110,9 +154,23 @@ def validate_generalization(data, errors):
         if cap.get("secondGateAnalogue") is None and "project-local" not in cap.get("engineChangePolicy",""): fail(errors, f"generalization {cid}: no Second Gate analogue; keep it project-local")
     if None in ids or len(ids)!=len(set(ids)): fail(errors, "generalization: ids must be present and unique")
 
+def validate_capture_plan(data, fact_ids, source_ids, errors):
+    ids = set()
+    for entry in data.get('scenarios') or []:
+        eid = entry.get('id')
+        if not eid or eid in ids: fail(errors, 'capture plan: invalid/duplicate scenario id')
+        ids.add(eid)
+        if entry.get('status') != 'unmeasured': fail(errors, f'capture {eid}: promote observations into facts with evidence before changing this protocol')
+        if not entry.get('observe'): fail(errors, f'capture {eid}: no observations specified')
+        for fid in entry.get('factLinks') or []:
+            if fid not in fact_ids: fail(errors, f'capture {eid}: unknown fact {fid}')
+        for sid in entry.get('sources') or []:
+            if sid not in source_ids: fail(errors, f'capture {eid}: unknown source {sid}')
+
 def main():
     errors=[]; facts=load("facts.json"); route=load("route.json"); snap=load("canonical-start.json"); gen=load("generalization.json")
     fact_ids, source_ids=validate_facts(facts,errors); nodes,vocab=validate_route(route,fact_ids,errors); validate_snapshot(snap,fact_ids,source_ids,errors); validate_generalization(gen,errors)
+    validate_capture_plan(load('capture-plan.json'), fact_ids, source_ids, errors)
     if errors:
         for error in errors: print("ERROR:", error)
         raise SystemExit(1)

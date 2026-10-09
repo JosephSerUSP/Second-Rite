@@ -1,0 +1,73 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true,
+    "autoRepeatInitial": 0.3,
+    "autoRepeatInterval": 0.06
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 0,
+    "goldMax": 0,
+    "bonusItems": [
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "handgun_ammo",
+      "mayoke",
+      "m9_2",
+      "n_jacket"
+    ],
+    "party": {
+      "fixedMembers": [
+        {
+          "id": "aya",
+          "name": "Traversal actor",
+          "level": 18,
+          "slot": 1
+        }
+      ]
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  },
+  "dungeon": {
+    "psxRendering": {
+      "affineTextures": false
+    }
+  }
+}

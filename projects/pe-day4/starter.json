@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "purpose": "M0/M1 traversal starter. No mechanical-combat acceptance; geometry and character are original neutral proxies.",
+  "actor": {
+    "appearance": {
+      "character": "assets/characters/surveyor/character.json",
+      "height": 1.75,
+      "stride": 2.52
+    },
+    "status": "prototype",
+    "rationale": "Original compiler fixture; not an Aya reconstruction. Neutral gauntlet stats support traversal only. PE HP/PE/AT/growth/skills remain unresolved.",
+    "baseParams": {
+      "maxHp": 60,
+      "atk": 12,
+      "def": 5,
+      "mat": 1,
+      "mdf": 1,
+      "mpd": 1,
+      "mxa": 1,
+      "mxp": 1
+    }
+  },
+  "equipment": {
+    "status": "prototype",
+    "rationale": "Identity and equipped slots only. Empty traits deliberately supply no weapon/armor calibration; magazine and tune-up are not implemented."
+  },
+  "maps": [
+    {
+      "node": "hospital_entrance",
+      "mapId": 1,
+      "environment": "archive_antechamber",
+      "door": "far_door",
+      "arrival": "arrival_from_service",
+      "spawn": "spawn_player"
+    },
+    {
+      "node": "lobby",
+      "mapId": 2,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn"
+    },
+    {
+      "node": "elevators_1f",
+      "mapId": 3,
+      "environment": "archive_antechamber",
+      "door": "far_door",
+      "arrival": "arrival_from_service",
+      "spawn": "spawn_player"
+    },
+    {
+      "node": "basement_a",
+      "mapId": 4,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn"
+    }
+  ],
+  "edgeIds": [
+    "entrance_to_lobby",
+    "lobby_to_elevators",
+    "crash_to_basement"
+  ],
+  "boundaryText": "Starter boundary: the basement fuse/key loop is the next build. The elevator is offline. No combat is active.",
+  "geometry": {
+    "status": "prototype",
+    "rationale": "Vendored original lit gauntlet kit, with existing beauty/collision/walk authority. Four route areas reuse two proxy rooms; layouts/camera positions are not source-measured."
+  },
+  "stateBindings": {
+    "elevator_crashed": {
+      "variable": "elevator_crashed",
+      "value": true
+    },
+    "power_off": {
+      "variable": "powerState",
+      "value": "off"
+    },
+    "power_on": {
+      "variable": "powerState",
+      "value": "on"
+    }
+  }
+}

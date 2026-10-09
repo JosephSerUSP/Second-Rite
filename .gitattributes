@@ -78,3 +78,6 @@ projects/hichaukitoden-game/assets/environments/st_maria_town/passage_house_cour
 # Review controls retain exact exported manifests and measured package hashes.
 projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/review/assembly-repair/** -text
 projects/hichaukitoden-game/assets/authoring/candidates/passage_house_courtyard/review/camera-aware/** -text
+
+# Compiled Hospital character is checked byte-for-byte against its GLB.
+projects/pe-day4/assets/characters/*/character.json text eol=lf

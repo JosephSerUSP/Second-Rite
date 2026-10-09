@@ -1,9 +1,12 @@
 """Fail when a source or baked product changes without a fresh reviewed export."""
+import argparse
 import hashlib
 import json
 from pathlib import Path
 
-project = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--project", type=Path, default=Path(__file__).resolve().parents[1])
+project = parser.parse_args().project.resolve()
 system = json.loads((project / "data/system.json").read_text())
 assert system["dungeon"]["psxRendering"]["affineTextures"] is False, "Baked rooms require perspective-correct UVs"
 

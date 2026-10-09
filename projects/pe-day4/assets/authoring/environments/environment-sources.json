@@ -1,0 +1,12 @@
+{
+  "sources": {
+    "archive_antechamber.blend": {
+      "status": "adopted",
+      "basis": "Original neutral OBJ fixture adopted into an editable Blender document with explicit spatial collections and authored warm key, cool fill, and ambient lighting. Native review: out/continuous-lighting."
+    },
+    "service_annex.blend": {
+      "status": "adopted",
+      "basis": "Original neutral OBJ fixture adopted into an editable Blender document with explicit spatial collections and authored warm key, cool fill, and ambient lighting. Native review: out/continuous-lighting. Hospital starter derivative: arrival_from_archive moved inside the readable threshold; native review out/hospital-start/arrival-basement.png."
+    }
+  }
+}

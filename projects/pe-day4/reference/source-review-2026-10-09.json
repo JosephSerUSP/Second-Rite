@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-09",
+  "purpose": "Bounded source review for kickoff. This does not assert that every earlier fact/manual citation was reverified.",
+  "reviews": [
+    {"source":"gamefaqs-young-gamer-day4","locator":"Hospital: Basement B/C/D, Ward, Research Lab, Rooftops","observations":["The card is acquired in the inner autopsy area; the panel is reached from C before entering D.","The basement route separates collecting fuses, wire repair and installation before power restoration.","The enemy table reports Bacterium/Flyman/Ratman HP as 88/110/120.","The guide describes a post-escape gondola Spider fight; the slice's stated gondola terminal boundary must remain explicit."]},
+    {"source":"almars-day4","locator":"Basement traversal through rooftop escape","observations":["Independently supports the mandatory fuse/key/power/ward/nitrogen/research/elevator route.","Does not supply the complete five-family enemy roster table; removed as roster corroboration."]},
+    {"source":"nomaki-nmc","locator":"DAY 4 table","observations":["Lists the Hospital enemy families and a Spider variant in the gondola.","Reports Bacterium/Flyman/Ratman HP as 93/118/126, conflicting with Young-Gamer."]},
+    {"source":"nomaki-day4","locator":"Hospital opening and boss table","observations":["Reports a 35-second post-conversation escape window; this remains single-source.","Phase-2 HP is reported separately, reinforcing the need to resolve phase-versus-total accounting before implementation."]}
+  ]
+}

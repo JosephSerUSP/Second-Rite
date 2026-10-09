@@ -57,3 +57,9 @@ late-Day-3 save would make mechanical acceptance irreproducible.
 
 The snapshot therefore normalizes player-dependent history while retaining
 guaranteed story/boss grants where useful. Every normalization is explicit.
+The kickoff source review is recorded in `source-review-2026-10-09.json`. It
+corrects the C-to-D Blue Cardkey gate and records conflicting enemy HP reports.
+`capture-plan.json` defines the pending measurement protocol; it supplies no
+timing values. The traversal starter consumes snapshot identities through a
+generator, with explicitly prototype resource/equipment parameters. That does
+not promote any unknown or single-source value into mechanical acceptance.

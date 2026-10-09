@@ -1,0 +1,42 @@
+name: hospital slice starter
+
+on:
+  pull_request:
+    paths:
+      - 'projects/pe-day4/**'
+      - 'projects/experiments/continuous-surface-gauntlet/tools/check_lighting.py'
+      - 'projects/experiments/continuous-surface-gauntlet/tools/light_environments.py'
+      - 'tools/characters/**'
+      - 'tools/blender/**'
+      - 'tools/export/**'
+      - 'tools/ci/stage-project-gates.js'
+      - 'runtime/**'
+      - 'rtp/**'
+      - '.github/workflows/hospital-slice.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  starter:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/install-love
+      - uses: ./.github/actions/install-mesa
+      - name: Prepare and prove the standalone traversal starter
+        shell: pwsh
+        run: |
+          python projects/pe-day4/tools/prepare_starter.py --output out/hospital-ci --lovec "$env:LOVEC"
+          if ($LASTEXITCODE -ne 0) { throw 'Hospital starter preparation failed' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hospital-starter-evidence
+          path: out/hospital-ci

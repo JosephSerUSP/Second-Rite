@@ -1,0 +1,95 @@
+{
+  "id": 3,
+  "title": "1F Elevators (proxy)",
+  "category": "experiment",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 301,
+      "instanceId": "elevators_1f-route-door",
+      "name": "Blue route door",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        3.35,
+        -2.15,
+        0.0
+      ],
+      "interactionRadius": 1.15,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "1F Lobby",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 2,
+                  "arrival": "arrival_from_archive"
+                }
+              ]
+            },
+            {
+              "label": "Basement elevator landing",
+              "commands": [
+                {
+                  "cmd": "IF",
+                  "condition": "not (variables.elevator_crashed == true)",
+                  "then": [
+                    {
+                      "cmd": "SET_GAME_VARIABLE",
+                      "name": "elevator_crashed",
+                      "value": "true"
+                    },
+                    {
+                      "cmd": "SET_GAME_VARIABLE",
+                      "name": "powerState",
+                      "value": "\"off\""
+                    },
+                    {
+                      "cmd": "LOAD_MAP",
+                      "mapId": 4,
+                      "arrival": "arrival_from_archive"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "This route is unavailable in the current power/key state."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "traversal": {
+    "provider": "continuous_surface",
+    "actorAppearance": {
+      "character": "assets/characters/surveyor/character.json",
+      "height": 1.75,
+      "stride": 2.52
+    },
+    "environmentPackage": "assets/environments/archive_antechamber/environment.json",
+    "spawnAnchor": "spawn_player",
+    "interactionRadius": 1.15,
+    "surface": {
+      "speed": 2.65,
+      "maxStep": 0.08
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "game": {
+    "title": "Hospital Slice Starter"
+  },
+  "project": {
+    "title": "Hospital Slice Starter"
+  },
+  "title": {
+    "options": [
+      "Enter Hospital Starter",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "The boundary blocks the way."
+  }
+}

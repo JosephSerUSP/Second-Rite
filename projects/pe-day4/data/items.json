@@ -1,0 +1,34 @@
+[
+  {
+    "id": "handgun_ammo",
+    "name": "Handgun Ammo",
+    "type": "key",
+    "cost": 0,
+    "description": "Snapshot inventory identity; no use behavior in this traversal starter."
+  },
+  {
+    "id": "mayoke",
+    "name": "Mayoke",
+    "type": "key",
+    "cost": 0,
+    "description": "Snapshot inventory identity; no use behavior in this traversal starter."
+  },
+  {
+    "id": "m9_2",
+    "name": "M9 2",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "cost": 0,
+    "traits": [],
+    "description": "Snapshot equipment identity only; prototype parameters. No mechanical acceptance."
+  },
+  {
+    "id": "n_jacket",
+    "name": "N Jacket",
+    "type": "equipment",
+    "equipType": "Armor",
+    "cost": 0,
+    "traits": [],
+    "description": "Snapshot equipment identity only; prototype parameters. No mechanical acceptance."
+  }
+]

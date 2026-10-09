@@ -22,4 +22,7 @@ for binding in compile_starter.load('starter.json')['maps']:
     assert (project / traversal['actorAppearance']['character']).is_file()
     anchor = package['anchors'][binding['door']]['position']
     assert data['events'][0]['worldPosition'] == anchor, 'route door has drifted from its visible anchor'
+
+    if len(data['events']) > 1:
+        assert data['events'][1]['worldPosition'] == package['anchors'][binding['interaction']]['position'], 'interaction subject drift'
 print('HOSPITAL STARTER BOUNDARY OK')

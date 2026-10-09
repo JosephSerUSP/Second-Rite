@@ -44,9 +44,9 @@
               "label": "Basement elevator landing",
               "commands": [
                 {
-                  "cmd": "IF",
+                  "cmd": "CONDITIONAL_BRANCH",
                   "condition": "not (variables.elevator_crashed == true)",
-                  "then": [
+                  "commands": [
                     {
                       "cmd": "SET_GAME_VARIABLE",
                       "name": "elevator_crashed",
@@ -63,16 +63,60 @@
                       "arrival": "arrival_from_archive"
                     }
                   ],
-                  "else": [
+                  "elseCommands": [
                     {
-                      "cmd": "TEXT",
-                      "text": "This route is unavailable in the current power/key state."
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "variables.powerState == \"on\"",
+                      "commands": [
+                        {
+                          "cmd": "SET_GAME_VARIABLE",
+                          "name": "ward_route_open",
+                          "value": "true"
+                        },
+                        {
+                          "cmd": "LOAD_MAP",
+                          "mapId": 4,
+                          "arrival": "arrival_from_archive"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "This route is unavailable in the current power/key state."
+                        }
+                      ]
                     }
                   ]
                 }
               ]
+            },
+            {
+              "label": "Ward route / unit boundary",
+              "commands": [
+                {
+                  "cmd": "CONDITIONAL_BRANCH",
+                  "condition": "variables.ward_route_open == true",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "Basement unit complete. Power is restored and the ward route is open. Wards are the next build; combat remains uncalibrated."
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "Restore basement power and return in the elevator first."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
             }
-          ]
+          ],
+          "cancelOption": 4
         }
       ]
     }

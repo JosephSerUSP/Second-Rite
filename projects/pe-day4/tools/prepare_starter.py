@@ -55,18 +55,18 @@ def main():
     shutil.copyfile(stage / 'main.lua', stage / 'player-main.lua')
     shutil.copyfile(tools / 'starter-proof.lua', stage / 'main.lua')
     try:
-        log = run('native-input', [str(args.lovec), str(stage), 'surface=wide'], timeout=90)
+        log = run('native-input', [str(args.lovec), str(stage), 'surface=wide'], timeout=240)
         text = log.read_text(encoding='utf8', errors='replace')
-        assert 'HOSPITAL STARTER INPUT TRANSFER AND SAVE OK' in text, 'native completion marker missing'
+        assert 'HOSPITAL BASEMENT INPUT LOOP AND SAVE OK' in text, 'native completion marker missing'
         assert '[formula] error' not in text, 'formula diagnostic in actual player host'
         frames = set()
         for line in text.splitlines():
             if line.startswith('HOSPITAL FRAME '):
                 _, _, label, data = line.split(' ', 3)
-                assert label in {'entrance', 'basement'}, 'unexpected frame label'
+                assert label in {'entrance', 'basement', 'powered'}, 'unexpected frame label'
                 (output / (label + '.png')).write_bytes(base64.b64decode(data, validate=True))
                 frames.add(label)
-        assert frames == {'entrance', 'basement'}, 'native captures incomplete'
+        assert frames == {'entrance', 'basement', 'powered'}, 'native captures incomplete'
         # A severed authored transfer must fail actual input, not merely the
         # Python reference graph. Corrupt only the disposable stage and restore.
         map_path = stage / 'data/maps.json'
@@ -80,11 +80,25 @@ def main():
                 return sum(sever(child) for child in value.values())
             if isinstance(value, list): return sum(sever(child) for child in value)
             return 0
-        assert sever(data) == 1, 'negative control did not locate the basement transfer'
+        assert sever(next(entry for entry in data if entry['id'] == 3)) > 0, 'negative control did not locate the basement transfer'
         try:
             map_path.write_text(json.dumps(data), encoding='utf8')
             negative = run('native-severed-transfer', [str(args.lovec), str(stage), 'surface=wide'], timeout=90, expected=1)
             assert 'elevator did not reach basement' in negative.read_text(encoding='utf8', errors='replace'), 'negative control failed for an unrelated reason'
+        finally:
+            map_path.write_bytes(original)
+        # Remove only the disposable fusebox guard. The same input trace must
+        # reject premature restoration, rather than forgiving broken event data.
+        original = map_path.read_bytes()
+        data = json.loads(original)
+        fusebox = next(entry for entry in data if entry['id'] == 11)
+        options = fusebox['events'][1]['commands'][0]['options']
+        toggle = next(option for option in options if option['label'] == 'Toggle power')
+        toggle['commands'] = [{'cmd':'SET_GAME_VARIABLE','name':'powerState','value':'"on"'}]
+        try:
+            map_path.write_text(json.dumps(data), encoding='utf8')
+            negative = run('native-bypassed-fusebox', [str(args.lovec), str(stage), 'surface=wide'], timeout=180, expected=1)
+            assert 'power restored without all repairs/installations' in negative.read_text(encoding='utf8', errors='replace'), 'power control failed for an unrelated reason'
         finally:
             map_path.write_bytes(original)
     finally:

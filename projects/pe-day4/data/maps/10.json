@@ -1,6 +1,6 @@
 {
-  "id": 4,
-  "title": "Basement elevator landing (proxy)",
+  "id": 10,
+  "title": "Basement blue-card corridor (proxy)",
   "category": "experiment",
   "depth": 0,
   "safe": true,
@@ -14,8 +14,8 @@
   },
   "events": [
     {
-      "id": 401,
-      "instanceId": "basement_a-route-door",
+      "id": 1001,
+      "instanceId": "basement_c-route-door",
       "name": "Blue route door",
       "x": 0,
       "y": 0,
@@ -41,21 +41,16 @@
               ]
             },
             {
-              "label": "1F Elevators",
+              "label": "Basement fusebox area",
               "commands": [
                 {
                   "cmd": "CONDITIONAL_BRANCH",
-                  "condition": "variables.powerState == \"on\"",
+                  "condition": "hasItem:blue_cardkey",
                   "commands": [
                     {
-                      "cmd": "SET_GAME_VARIABLE",
-                      "name": "ward_route_open",
-                      "value": "true"
-                    },
-                    {
                       "cmd": "LOAD_MAP",
-                      "mapId": 3,
-                      "arrival": "arrival_from_service"
+                      "mapId": 11,
+                      "arrival": "arrival_from_archive"
                     }
                   ],
                   "elseCommands": [

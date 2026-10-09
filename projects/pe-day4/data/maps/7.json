@@ -1,0 +1,95 @@
+{
+  "id": 7,
+  "title": "Basement morgue (proxy)",
+  "category": "experiment",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 701,
+      "instanceId": "morgue-route-door",
+      "name": "Blue route door",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        -3.35,
+        1.85,
+        0.0
+      ],
+      "interactionRadius": 1.15,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 5,
+          "arrival": "arrival_from_archive"
+        }
+      ]
+    },
+    {
+      "id": 702,
+      "instanceId": "morgue-workstation",
+      "name": "Orange interaction workstation",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.25,
+        0.25,
+        0.0
+      ],
+      "interactionRadius": 1.0,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "not (variables.collected_take_autopsy_key == true)",
+          "commands": [
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "autopsy_key",
+              "count": 1
+            },
+            {
+              "cmd": "SET_GAME_VARIABLE",
+              "name": "collected_take_autopsy_key",
+              "value": "true"
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Take autopsy key complete."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "Already completed, or a required item/repair is missing."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "traversal": {
+    "provider": "continuous_surface",
+    "actorAppearance": {
+      "character": "assets/characters/surveyor/character.json",
+      "height": 1.75,
+      "stride": 2.52
+    },
+    "environmentPackage": "assets/environments/service_annex/environment.json",
+    "spawnAnchor": "service_spawn",
+    "interactionRadius": 1.15,
+    "surface": {
+      "speed": 2.65,
+      "maxStep": 0.08
+    }
+  }
+}

@@ -55,18 +55,101 @@
       "environment": "service_annex",
       "door": "service_return_door",
       "arrival": "arrival_from_archive",
-      "spawn": "service_spawn"
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "basement_b",
+      "mapId": 5,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "storage_room",
+      "mapId": 6,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "morgue",
+      "mapId": 7,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "autopsy_room",
+      "mapId": 8,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "autopsy_inner",
+      "mapId": 9,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "basement_c",
+      "mapId": 10,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "basement_d",
+      "mapId": 11,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
+    },
+    {
+      "node": "office",
+      "mapId": 12,
+      "environment": "service_annex",
+      "door": "service_return_door",
+      "arrival": "arrival_from_archive",
+      "spawn": "service_spawn",
+      "interaction": "interaction_station"
     }
   ],
   "edgeIds": [
     "entrance_to_lobby",
     "lobby_to_elevators",
-    "crash_to_basement"
+    "crash_to_basement",
+    "basement_a_to_b",
+    "basement_b_storage",
+    "basement_b_morgue",
+    "basement_b_autopsy",
+    "autopsy_to_inner",
+    "basement_b_to_c",
+    "basement_c_to_d",
+    "basement_d_office",
+    "powered_return_to_a",
+    "powered_elevator_to_1f"
   ],
-  "boundaryText": "Starter boundary: the basement fuse/key loop is the next build. The elevator is offline. No combat is active.",
+  "boundaryText": "Basement unit complete. Power is restored and the ward route is open. Wards are the next build; combat remains uncalibrated.",
   "geometry": {
     "status": "prototype",
-    "rationale": "Vendored original lit gauntlet kit, with existing beauty/collision/walk authority. Four route areas reuse two proxy rooms; layouts/camera positions are not source-measured."
+    "rationale": "Original lit proxy kit reused across twelve route areas; source-authored orange workstation and door anchors separate interaction from travel. Not source-measured Hospital architecture."
   },
   "stateBindings": {
     "elevator_crashed": {
@@ -80,6 +163,47 @@
     "power_on": {
       "variable": "powerState",
       "value": "on"
+    },
+    "fuse_1": {
+      "item": "fuse_1"
+    },
+    "fuse_2": {
+      "item": "fuse_2"
+    },
+    "fuse_3": {
+      "item": "fuse_3"
+    },
+    "autopsy_key": {
+      "item": "autopsy_key"
+    },
+    "blue_cardkey": {
+      "item": "blue_cardkey"
+    },
+    "wires_repaired": {
+      "variable": "wires_repaired",
+      "value": true
+    },
+    "fuse_1_installed": {
+      "variable": "fuse_1_installed",
+      "value": true
+    },
+    "fuse_2_installed": {
+      "variable": "fuse_2_installed",
+      "value": true
+    },
+    "fuse_3_installed": {
+      "variable": "fuse_3_installed",
+      "value": true
+    },
+    "ward_route_open": {
+      "variable": "ward_route_open",
+      "value": true
     }
+  },
+  "interactionPolicy": {
+    "pickup": "One persistent collected marker per pickup prevents duplication after revisit/save/load. Inventory owns possession.",
+    "fuses": "Prototype retention: installed fuses remain carried key-item identities and cannot be installed twice. Consumption/retirement awaits source confirmation.",
+    "keys": "Keys remain carried. No silent retirement.",
+    "subjects": "Orange-topped fixture is the interaction station. Blue door selects physical route destinations; all geometry is explicitly proxy."
   }
 }

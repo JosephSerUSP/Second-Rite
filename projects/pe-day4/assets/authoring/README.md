@@ -36,3 +36,8 @@ and derived runtime JSON are included. It is a temporary traversal silhouette,
 not an Aya likeness. Hospital character production must use the same compiler
 boundary and retain source/recipe hashes. The private locomotion source remains
 outside the repository and is not required to validate the adopted product.
+
+The basement prototype directly edits the adopted service-room source to mark
+the central workstation top and add its interaction_station anchor. Door and
+workstation Events read separate source-owned anchors. Geometry remains an
+original repeated kit, not a reconstruction of Hospital layouts.

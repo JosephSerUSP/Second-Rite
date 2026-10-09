@@ -43,9 +43,8 @@ function conditions.evalPrefixed(condStr, session, battler)
 
     local itemStr = condStr:match("^hasItem:(.+)")
     if itemStr then
-        -- Item ids are numeric; the pattern always yields a string, so convert
-        -- it back before checking the (numeric-keyed) inventory table.
-        return true, session:hasItem(tonumber(itemStr), 1)
+        -- Projects may author numeric or string ids; retain the loader identity.
+        return true, session:hasItem(tonumber(itemStr) or itemStr, 1)
     end
 
     local questId, questStatus = condStr:match("^questStatus:([%w_]+):([%w_]+)")

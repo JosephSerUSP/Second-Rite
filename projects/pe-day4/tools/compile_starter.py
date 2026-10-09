@@ -44,16 +44,26 @@ def compile_data():
         return json.dumps(value)
     def state_command(flag, clear=False):
         owner = spec['stateBindings'][flag]
+        if 'item' in owner:
+            return {'cmd': 'CHANGE_ITEM', 'item': owner['item'], 'count': -1 if clear else 1}
         return {'cmd': 'SET_GAME_VARIABLE', 'name': owner['variable'], 'value': literal(None if clear else owner['value'])}
     def state_condition(flag):
         owner = spec['stateBindings'][flag]
+        if 'item' in owner: return 'hasItem:' + owner['item']
         return f"variables.{owner['variable']} == {literal(owner['value'])}"
+    def guarded(conditions, commands, refusal, otherwise=None):
+        for condition in reversed(conditions):
+            commands = [{'cmd':'CONDITIONAL_BRANCH','condition':condition,'commands':commands,'elseCommands':otherwise if otherwise is not None else [{'cmd':'TEXT','text':refusal}]}]
+        return commands
+    def choice(options):
+        return [{'cmd':'CHOICE','options':options + [{'label':'Leave','commands':[]}], 'cancelOption':len(options)+1}]
     for node, binding in bindings.items():
         package = f"assets/environments/{binding['environment']}/environment.json"
         environment = load(package)
         anchors = environment['anchors']
         assert binding['arrival'] in anchors and binding['spawn'] in anchors
         options = []
+        alternatives = {}
         for edge, destination in outgoing[node]:
             commands = [state_command(flag, clear=True) for flag in edge.get('clears', [])]
             commands += [state_command(flag) for flag in edge.get('grants', [])]
@@ -62,11 +72,15 @@ def compile_data():
             if edge.get('oneShot'):
                 assert edge.get('grants'), 'one-shot edge needs a persistent marker'
                 conditions.append("not (" + state_condition(edge['grants'][0]) + ")")
-            if conditions:
-                commands = [{'cmd': 'IF', 'condition': ' and '.join(conditions), 'then': commands,
-                             'else': [{'cmd': 'TEXT', 'text': 'This route is unavailable in the current power/key state.'}]}]
-            options.append({'label': nodes[destination]['area'], 'commands': commands})
-        program = options[0]['commands'] if len(options) == 1 else [{'cmd': 'CHOICE', 'options': options}] if options else [{'cmd': 'TEXT', 'text': spec['boundaryText']}]
+            alternatives.setdefault(destination, []).append((conditions, commands))
+        for destination, paths in alternatives.items():
+            program = [{'cmd':'TEXT','text':'This route is unavailable in the current power/key state.'}]
+            for conditions, commands in reversed(paths):
+                program = guarded(conditions, commands, '', otherwise=program)
+            options.append({'label':nodes[destination]['area'],'commands':program})
+        if node == 'elevators_1f':
+            options.append({'label':'Ward route / unit boundary','commands':guarded([state_condition('ward_route_open')],[{'cmd':'TEXT','text':spec['boundaryText']}],'Restore basement power and return in the elevator first.')})
+        program = options[0]['commands'] if len(options) == 1 else choice(options) if options else [{'cmd': 'TEXT', 'text': spec['boundaryText']}]
         result[f"data/maps/{binding['mapId']}.json"] = {
             'id': binding['mapId'], 'title': nodes[node]['area'] + ' (proxy)', 'category': 'experiment', 'depth': 0,
             'safe': True, 'layout': ['.'], 'spawn': {'x': 0, 'y': 0, 'dir': 'N'},
@@ -78,6 +92,26 @@ def compile_data():
                           'environmentPackage': package, 'spawnAnchor': binding['spawn'], 'interactionRadius': 1.15,
                           'surface': {'speed': 2.65, 'maxStep': 0.08}},
         }
+        interactions = nodes[node].get('interactions', [])
+        if interactions:
+            assert binding.get('interaction') in anchors, 'interaction subject needs a package-owned anchor'
+            actions = []
+            for interaction in interactions:
+                iid = interaction['id']
+                marker = 'collected_' + iid if iid.startswith('take_') else interaction['grants'][0]
+                conditions = [state_condition(flag) for flag in interaction.get('requiresAll', [])]
+                # Success is one-shot for pickups, repairs and installation alike.
+                conditions.append('not (' + ('variables.' + marker + ' == true' if iid.startswith('take_') else state_condition(interaction['grants'][0])) + ')')
+                commands = [state_command(flag, clear=True) for flag in interaction.get('clears', [])]
+                commands += [state_command(flag) for flag in interaction.get('grants', [])]
+                if iid.startswith('take_'):
+                    commands.append({'cmd':'SET_GAME_VARIABLE','name':marker,'value':'true'})
+                commands.append({'cmd':'TEXT','text':iid.replace('_',' ').capitalize() + ' complete.'})
+                actions.append({'label':iid.replace('_',' ').capitalize(),'commands':guarded(conditions,commands,'Already completed, or a required item/repair is missing.')})
+            result[f"data/maps/{binding['mapId']}.json"]['events'].append({
+                'id':binding['mapId']*100+2,'instanceId':node+'-workstation','name':'Orange interaction workstation',
+                'x':0,'y':0,'worldPosition':anchors[binding['interaction']]['position'],'interactionRadius':1.0,
+                'trigger':'interact','commands':actions[0]['commands'] if len(actions)==1 else choice(actions)})
     actor_id = snapshot['actor']['id']
     result['data/units/index.json'] = {'files': [actor_id + '.json']}
     result[f'data/units/{actor_id}.json'] = {'id': actor_id, 'name': 'Traversal actor', 'level': snapshot['actor']['level'],
@@ -86,6 +120,9 @@ def compile_data():
     assert len({i['id'] for i in inventory}) == len(inventory)
     items = [{'id': entry['id'], 'name': entry['id'].replace('_', ' ').title(), 'type': 'key', 'cost': 0,
               'description': 'Snapshot inventory identity; no use behavior in this traversal starter.'} for entry in inventory]
+    for flag, owner in spec['stateBindings'].items():
+        if 'item' in owner:
+            items.append({'id':owner['item'],'name':flag.replace('_',' ').title(),'type':'key','cost':0,'description':'Hospital route item; retained after installation/use under explicit prototype policy.'})
     bonus = [entry['id'] for entry in inventory for _ in range(entry['quantity'])]
     equip_commands = []
     for field, slot, kind in [('weapon', 1, 'Weapon'), ('armor', 2, 'Armor')]:

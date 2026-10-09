@@ -5,9 +5,9 @@ The design boundary is [St. Francis, Day 4](docs/vertical-slice.md), tracked by
 [build brief](docs/build-brief.md), then the reference contract. Delivery status
 belongs in the milestone issues and verification reports.
 
-This directory is an ordinary standalone Thestra Project. Its bounded starter
+This directory is an ordinary standalone Thestra Project. Its basement prototype
 uses original, lit proxy rooms and a compiler character to exercise entry,
-elevator routing and persistent basement lock-in. Those fixtures are not
+elevator routing and the persistent fuse/key/wire/power return loop. Those fixtures are not
 reconstructions of Hospital geometry or Aya. The title and HUD label them.
 
 `reference/canonical-start.json` owns snapshot identities. `reference/route.json`
@@ -22,7 +22,7 @@ python projects/pe-day4/tools/prepare_starter.py
 ```
 
 That one command checks the sources/data, stages, validates, runs the actual-host
-proof, retains captures/logs/timings, and restores the playable main. Individual
+proof, retains captures/logs/timings and two native negative controls, and restores the playable main. Individual
 commands are also available:
 
 ```text
@@ -42,8 +42,10 @@ The `hospital slice starter` workflow performs these checks and retains the log.
 
 Arrow keys move; Enter interacts/confirms; Down selects the basement in the
 elevator menu. F5/F6 save/load. The blue door is the route interaction in each
-proxy area. The basement door explains the current boundary. This starter does
-not grant completion, restore power or run combat.
+proxy area. The bright central workstation supplies room interactions. Collect all three
+fuses, install them, repair the wires and toggle power; return through the
+elevator to reach the ward boundary. Fuses/keys remain carried under an explicit
+prototype retention policy. Wards and combat are the next units.
 
 Snapshot level, inventory quantities and equipment slots load through existing
 new-game and Event commands. HP/PE, gun parameters, loaded rounds, progression

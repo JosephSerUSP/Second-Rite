@@ -73,7 +73,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Hospital traversal starter - proxy rooms\n{variables.powerState == 'off' and 'Basement lock-in. Next build: the fuse/key loop.' or 'Use the visible blue door to continue.'}\nArrows: move   Enter: interact   F5/F6: save/load"
+          "text": "{session.mapTitle}\n{variables.powerState == 'on' and 'Power restored. Return to the 1F elevator.' or 'Collect 3 fuses, repair wires and restore power.'}\nBlue door: routes   Bright bench: interact   Arrows/Enter   F5/F6: save/load"
         }
       ]
     }

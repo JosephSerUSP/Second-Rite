@@ -21,9 +21,9 @@
       512,
       512
     ],
-    "pngSizeBytes": 348681,
+    "pngSizeBytes": 352708,
     "renderMeshSizeBytes": 8128,
-    "packageSizeBytes": 358650
+    "packageSizeBytes": 362677
   },
   "anchors": {
     "service_spawn": {
@@ -79,6 +79,24 @@
         1.0,
         0.0
       ]
+    },
+    "interaction_station": {
+      "id": "interaction_station",
+      "position": [
+        0.25,
+        0.25,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
     }
   },
   "provenance": {
@@ -111,7 +129,7 @@
       "batchedSourceObjects": 5,
       "atlasDenoise": {
         "method": "OIDN RT FAST CPU; isolated UV charts; beauty only",
-        "seconds": 0.4068658000032883,
+        "seconds": 0.5197931999864522,
         "filteredCharts": 19,
         "preservedSmallCharts": 22,
         "filteredTexels": 225372,
@@ -126,12 +144,12 @@
         "atlasSize": 512
       }
     },
-    "exportSeconds": 4.570455499997479,
-    "sourceSha256": "c6b9e9f5850cfc0fa9455eca2409ccf0ca68c960ce9ea6a3f29d686ffd880a18",
+    "exportSeconds": 5.3473864999978105,
+    "sourceSha256": "1871afce4e5b1af44700310a84f53ce2455d5a16daa3fa8ce2812b1399ab19ea",
     "productsSha256": {
       "environment.obj": "eb63119a0718a4bee7a833899824008c5feb4eb4d618541862e4c5ba6600345a",
       "environment.mtl": "ad2fe73be61b6c9953657297b89ed07000ce4298fa6cd673f7a67ff0510c5d50",
-      "environment.png": "5a427eb48b8f40217dd558d8a9034a8cca08b3e2cd850935991289077ffac8b3",
+      "environment.png": "168a16d4167193f172b918210d4739af0ce56b94f7627d7920df9f156b8de89c",
       "collision.obj": "ec078b0798ab92a05cdeaf8a9b125469eee09cccec7121cf65842e67fa795980"
     }
   },

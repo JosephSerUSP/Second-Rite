@@ -3368,6 +3368,25 @@ end
             end
         end
         if encounter.telegraph then ring(encounter.telegraph,{1,0.15,0.03,1}) end
+        local hit=encounter.impact
+        if hit and not hit.miss and encounter.elapsed-hit.time<0.14 then
+            ring({x=hit.x,y=hit.y,z=hit.z,radius=0.35},{1,0.9,0.5,1})
+            if hit.side=="player" then
+                local target=group(getWhiteWallTexture(),"billboard")
+                if #target.vertices==0 then target.sequence=#surfaces+1;surfaces[#surfaces+1]=target end
+                local color={0.65,0.9,1,1}
+                addNearClippedQuad(target,
+                    {x=hit.fromX,y=hit.fromY,z=hit.fromZ+1.25},
+                    {x=hit.x,y=hit.y,z=hit.z+1.25},
+                    {x=hit.x,y=hit.y,z=hit.z+1.5},
+                    {x=hit.fromX,y=hit.fromY,z=hit.fromZ+1.5},
+                    {0,0,1,1},{color,color,color,color})
+            end
+        end
+        if encounter.mode=="execution" and encounter.action and encounter.action.index==1 then
+            local x,y,z=require("engine.traversal_host").actorRoot(session)
+            ring({x=x,y=y,z=z,radius=0.45},{0.4,0.85,1,1})
+        end
         if encounter.mode=="targeting" then
             local x,y,z=require("engine.traversal_host").actorRoot(session)
             ring({x=x,y=y,z=z,radius=encounter.spec.range},{0.05,0.8,1,1})
@@ -3639,6 +3658,11 @@ end
     -- state, so it is cleared outside the push/pop boundary rather than
     -- trusted to the attribute stack.
     love.graphics.setWireframe(false)
+    if worldPass ~= "environment" then
+        require("presentation.arena_feedback").drawLabel(session.arenaEncounter,function(x,y,z)
+            return worldView.projectPerspective(camera,targetWidth,targetHeight,x,y,z)
+        end,rasterScale)
+    end
     if not passOptions.preserveDepth then
         love.graphics.clear(false, false, 1)
     end

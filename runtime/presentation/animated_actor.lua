@@ -57,7 +57,7 @@ function actor.resolve(session,view,clock)
     clock=session.arenaEncounter and session.arenaEncounter.elapsed or clock
     local time=pose.moving and (pose.walkDistance or 0)/spec.stride*duration or clock
     if pose.animationPhase then time=pose.animationPhase*duration end
-    return sample(spec,prepared,pose,clip,time)
+    return require("presentation.arena_feedback").decorate(session,"player",sample(spec,prepared,pose,clip,time))
 end
 -- Event roots are authored world positions; semantic clip/facing remain owned
 -- by the existing Event actor. Resolving a visual never allocates actor state.
@@ -71,7 +71,7 @@ function actor.resolveEvent(session,event,presentation,clock)
     local x,y,z=require("presentation.viewport_3d").eventWorldPosition(event)
     local root=require("engine.world_event_actor").snapshot(session,event)
     if root then x,y,z=root.x,root.y,root.z end
-    clock=session.arenaEncounter and session.arenaEncounter.elapsed or clock
+    clock=session.arenaEncounter and session.arenaEncounter.enemyClock or clock
     if session.currentMapData.traversal and session.currentMapData.traversal.provider == "bounded_lane" then
         z=require("engine.bounded_lane").eventGroundAt(session,event,y) or z
     end
@@ -79,7 +79,11 @@ function actor.resolveEvent(session,event,presentation,clock)
     local facing=assert(directions[state.facing],"unknown Event facing")
     local worldHeading=root and (root.walkDistance or 0)>0
     local pose={x=x,y=y,z=z,facingX=worldHeading and root.facingX or facing[1],facingY=worldHeading and root.facingY or facing[2]}
-    return sample(spec,prepared,pose,state.clip,state.overrideKind == "pose" and 0 or clock)
+    local animated=sample(spec,prepared,pose,state.clip,state.overrideKind == "pose" and 0 or clock)
+    if session.arenaEncounter and session.arenaEncounter.event.id==event.id then
+        return require("presentation.arena_feedback").decorate(session,"enemy",animated)
+    end
+    return animated
 end
 function actor.clearCache() cache={} end
 return actor

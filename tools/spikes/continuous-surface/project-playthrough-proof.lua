@@ -60,6 +60,26 @@ love.update = function(dt)
         assert(activeSession.arenaEncounter.event.id==203,"Wrong combat Event")
         love.graphics.captureScreenshot("npc-combat-proof.png")
         print("PLAYTHROUGH CONTROLS AND NPC TO COMBAT OK")
+        local enemy=activeSession.arenaEncounter.root
+        require("engine.continuous_surface").moveBy(activeSession.continuousTraversal,
+            enemy.x-activeSession.continuousTraversal.x-1.8,enemy.y-activeSession.continuousTraversal.y+1.7)
+        step=7
+    elseif step == 7 and elapsed > 8 then
+        love.keypressed("return");love.keyreleased("return");step=8
+    elseif step == 8 and elapsed > 8.3 then
+        assert(activeSession.arenaEncounter.mode=="command","real input did not open Command")
+        love.keypressed("return");love.keyreleased("return");step=9
+    elseif step == 9 and elapsed > 8.6 then
+        assert(activeSession.arenaEncounter.mode=="targeting","real input did not open Targeting")
+        love.keypressed("return");love.keyreleased("return")
+        assert(activeSession.arenaEncounter.mode=="execution" and activeSession.arenaEncounter.actionCount==0,"real input skipped anticipation")
+        love.graphics.captureScreenshot("player-anticipation-proof.png");step=10
+    elseif step == 10 and elapsed > 8.95 then
+        assert(activeSession.arenaEncounter.actionCount==1 and activeSession.arenaEncounter.mode=="execution","real input did not reach contact/recovery")
+        love.graphics.captureScreenshot("player-contact-proof.png");step=11
+    elseif step == 11 and elapsed > 9.5 then
+        assert(activeSession.arenaEncounter.mode=="simulation","real action did not return control")
+        print("PLAYTHROUGH PLAYER ACTION LIFECYCLE OK")
         love.event.quit(0)
     end
 end

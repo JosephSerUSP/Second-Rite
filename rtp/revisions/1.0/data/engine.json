@@ -2807,6 +2807,26 @@
           "type": "formula"
         },
         {
+          "key": "playerWindupSeconds",
+          "type": "formula"
+        },
+        {
+          "key": "playerRecoverySeconds",
+          "type": "formula"
+        },
+        {
+          "key": "strikeSeconds",
+          "type": "formula"
+        },
+        {
+          "key": "enemyRecoverySeconds",
+          "type": "formula"
+        },
+        {
+          "key": "terminalSeconds",
+          "type": "formula"
+        },
+        {
           "key": "onVictory",
           "type": "commands"
         },
@@ -2820,7 +2840,7 @@
         "common"
       ],
       "interactive": false,
-      "description": "Starts a continuous-surface encounter using the shared action executor. The host runs its outcome command list after cleanup. Active encounters cannot be saved."
+      "description": "Starts a continuous-surface encounter with authored anticipation, contact, recovery and aftermath timing. The shared action executor commits contact once. Commands/targeting pause simulation; player execution holds movement and enemy advancement. Outcomes run after aftermath cleanup. Active encounters cannot be saved."
     },
     {
       "id": "ARENA_INPUT",

@@ -10,10 +10,10 @@
         "skillId": "attack",
         "readySeconds": 2.5,
         "enemyPeriod": 3,
-        "windupSeconds": 1.25,
+        "windupSeconds": 0.7,
         "range": 2.6,
         "attackRadius": 1.1,
-        "enemySpeed": 0.65,
+        "enemySpeed": 0.9,
         "onVictory": [
           {
             "cmd": "SET_GAME_VARIABLE",
@@ -31,7 +31,12 @@
             "cmd": "RECOVER_PARTY"
           }
         ],
-        "stopDistance": 0.7
+        "stopDistance": 0.7,
+        "playerWindupSeconds": 0.24,
+        "playerRecoverySeconds": 0.42,
+        "strikeSeconds": 0.55,
+        "enemyRecoverySeconds": 0.85,
+        "terminalSeconds": 1.1
       }
     ]
   }

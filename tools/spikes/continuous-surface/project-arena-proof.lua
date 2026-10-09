@@ -1,5 +1,6 @@
 local function run()
     local loader=require("engine.data.loader");loader.init()
+    require("tests.test_action_timeline")
     local presentationTime=1.25
     love.timer.getTime=function() return presentationTime end
     local host=require("engine.arena_host")
@@ -80,12 +81,35 @@ local function run()
     -- Move through the shared walk/collision semantic to a distant valid point.
     local semantic=require("engine.continuous_surface")
     semantic.moveBy(game.continuousTraversal,-3-game.continuousTraversal.x,1.3-game.continuousTraversal.y)
+    local lockX,lockY=state.telegraph.x,state.telegraph.y
+    local playerHp=state.player.hp
+    tick(state.spec.windupSeconds)
+    assert(state.telegraph.x==lockX and state.telegraph.y==lockY,"windup retargeted after dodge")
+    tick(state.spec.strikeSeconds/2);capture("03b-enemy-strike")
+    tick(state.spec.strikeSeconds/2)
+    assert(state.impact and state.impact.miss and state.player.hp==playerHp,"dodged lunge delivered damage")
+    assert(require("engine.action_timeline").phase(state.enemyAction).id=="recovery","enemy has no recovery window")
+    capture("03c-enemy-recovery")
+    tick(state.spec.enemyRecoverySeconds)
+    assert(not state.enemyAction,"enemy recovery did not finish")
     state.at=1;confirm();confirm();local hp=state.enemy.hp;confirm()
     assert(state.message=="out_of_range" and state.enemy.hp==hp and state.actionCount==0,"range rejection mutated battle")
     capture("06-range-rejected");cancel();cancel()
-    semantic.moveBy(game.continuousTraversal,state.root.x-game.continuousTraversal.x,state.root.y-game.continuousTraversal.y+0.5)
+    semantic.moveBy(game.continuousTraversal,state.root.x-game.continuousTraversal.x-1.8,state.root.y-game.continuousTraversal.y+0.5)
     state.at=1;confirm();confirm();confirm()
-    assert(state.actionCount==1 and state.enemy.hp<hp,"attack did not resolve once")
+    assert(state.mode=="execution" and state.actionCount==0 and state.enemy.hp==hp and costCalls==0,"confirmation resolved before contact")
+    local root=game.continuousTraversal
+    local x0,y0,enemyClock=root.x,root.y,state.enemyClock
+    confirm();cancel();controller.press("RIGHT",ctx);tick(state.spec.playerWindupSeconds/2);controller.release("RIGHT")
+    assert(root.x==x0 and root.y==y0 and state.enemyClock==enemyClock,"commitment leaked movement or enemy time")
+    assert(state.actionCount==0 and state.enemy.hp==hp,"anticipation delivered early")
+    capture("07a-anticipation")
+    tick(state.spec.playerWindupSeconds/2)
+    assert(state.actionCount==1 and state.enemy.hp<hp and state.mode=="execution","contact did not resolve once")
+    capture("07-contact")
+    local committedHp=state.enemy.hp
+    confirm();cancel();tick(state.spec.playerRecoverySeconds/2)
+    assert(state.enemy.hp==committedHp and costCalls==1 and state.mode=="execution","recovery replayed or canceled contact")
     local actions=0;for _,ev in ipairs(state.events) do if ev.type=="action" then actions=actions+1 end end
     assert(actions==1 and costCalls==1,"action or cost execution duplicated")
     local damageCount=0
@@ -96,9 +120,25 @@ local function run()
     end
     assert(damageCount==1,"damage applied or published more than once")
     capture("07-hit")
+    tick(state.spec.playerRecoverySeconds/2)
+    assert(state.mode=="simulation","recovery did not release control")
     -- Continue legitimate actions to victory; no direct HP mutation for this path.
     while game.arenaEncounter do
-        state.at=1;confirm();confirm();confirm()
+        if state.mode=="simulation" then
+            state.at=1;confirm();confirm();confirm()
+            tick(state.spec.playerWindupSeconds)
+            if state.pendingResult then
+                assert(game.arenaEncounter and require("engine.world_event_actor").snapshot(game,event),"lethal contact cleaned up before aftermath")
+                capture("07b-lethal-contact")
+            end
+            tick(state.spec.playerRecoverySeconds)
+        elseif state.mode=="aftermath" then
+            local count=state.actionCount
+            confirm();cancel();tick(state.spec.terminalSeconds/2)
+            assert(game.arenaEncounter and state.actionCount==count,"aftermath accepted input or ended early")
+            capture("07c-aftermath")
+            tick(state.spec.terminalSeconds/2)
+        else error("unexpected victory mode "..state.mode) end
         assert(state.actionCount<30,"victory did not terminate")
     end
     assert(game.arenaResult.result=="victory" and not state.telegraph)
@@ -111,10 +151,11 @@ local function run()
     require("engine.game_variables").set(game,"sentinelDefeated",false)
     interpreter.runImmediate(encounterCommands,{session=game,loader=loader,event=event})
     state=game.arenaEncounter
+    semantic.moveBy(game.continuousTraversal,state.root.x-game.continuousTraversal.x,state.root.y-game.continuousTraversal.y+0.4)
+    local steps=0
     while game.arenaEncounter do
-        state.telegraph={x=game.continuousTraversal.x,y=game.continuousTraversal.y,z=0,radius=state.spec.attackRadius,remaining=0.01}
-        tick(0.02)
-        assert(state.enemyActionCount<40,"defeat did not terminate")
+        tick(0.1);steps=steps+1
+        assert(steps<3000 and state.enemyActionCount<40,"defeat did not terminate")
     end
     assert(game.arenaResult.result=="defeat" and game.party[1].hp>0,"loss cleanup/recovery missing")
     capture("10-defeat-recovered")

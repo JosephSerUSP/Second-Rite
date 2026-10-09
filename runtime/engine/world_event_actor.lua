@@ -24,4 +24,13 @@ function owner.remove(session,event)
     if session.worldEventActors then session.worldEventActors[key(session,event)]=nil end
     require("engine.event_actor").setLocomotion(session,event,"idle")
 end
+function owner.moveToward(session,event,dt,x,y,speed)
+    local root=assert(owner.snapshot(session,event),"world Event actor missing")
+    assert(speed>0 and speed<=root._compiled.speed,"world actor speed exceeds movement contract")
+    local dx,dy=x-root.x,y-root.y
+    local distance=math.sqrt(dx*dx+dy*dy)
+    if distance==0 then return owner.move(session,event,dt,0,0) end
+    local magnitude=math.min(speed,distance/math.max(dt,1e-12))/root._compiled.speed
+    return owner.move(session,event,dt,dx/distance*magnitude,dy/distance*magnitude)
+end
 return owner

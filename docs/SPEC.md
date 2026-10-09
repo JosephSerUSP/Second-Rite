@@ -2640,6 +2640,23 @@ published facts through ordinary Game Variables, also exposed to window formulas
 through the canonical formula context. This slice supports one enemy and one
 basic Attack; no round-timed skill progression or roster conversion is added.
 
+`engine/action_timeline.lua` advances ordered runtime phases, splitting elapsed
+time at each boundary and exiting each phase once. Arena confirmation enters
+authored anticipation and recovery phases; the anticipation exit calls the shared
+executor once. Costs remain owned by that executor at contact, not by the UI or
+timeline. Confirmation/cancel cannot interrupt a committed action. Player
+movement, AT and enemy advancement hold during player execution; command/target
+selection freezes simulation clocks. Enemy windup locks a destination, strike
+uses the existing world-actor collision path, and recovery prevents another
+attack. A miss does not apply effects. Lethal contact retains encounter bindings
+through recovery and authored aftermath before outcome commands and cleanup.
+These pause/arbitration rules are an explicit experimental contract, not a claim
+of reference-game parity. Timing values are Project-authored formulas on
+`ARENA_START`, with registry/editor/validator coverage. Resolved contact facts
+drive brief tracers, flashes and projected damage labels with velocity/gravity;
+they never replay mutation. The current compiled characters have locomotion
+clips only, so these effects do not establish skeletal attack-animation support.
+
 ### 6.5 Sky anchoring across render surfaces (09.08.2026)
 
 Sky art is authored against the canonical 256x240 composition and has no

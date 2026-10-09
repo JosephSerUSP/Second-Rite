@@ -73,3 +73,12 @@ Stage this Project through the ordinary Thestra Project exporter, then run the s
 Player controls use the authored Scene camera basis: Left/Right move across the screen and Up/Down move into/toward the foreground. Enter interacts or confirms; Esc cancels arena selection. NPC dialogue uses the ordinary dialogue dock and retains the Map camera behind it. Confirm completes the text reveal, then closes the line. The real-main-host playthrough proof covers directional movement, visible dialogue state and return to exploration.
 
 Talk to the Archive Attendant and advance the instructions with Enter to travel directly into the Sentinel encounter. The attendant and Sentinel use the same authored Common Event.
+
+Attack confirmation now commits to anticipation, contact and recovery. Movement
+and further command input hold until recovery finishes; contact resolves once
+through the shared executor. Enemy advancement also holds during player
+execution. The Sentinel locks a destination during its red windup, lunges through
+ordinary collision, then recovers. Lethal contact holds a short fade/aftermath
+before exploration resumes. These are experimental arbitration rules and timing
+values, not measured reference-game parity. Current attack feedback is a tracer,
+flash and damage label; compiled skeletal attack clips are still absent.

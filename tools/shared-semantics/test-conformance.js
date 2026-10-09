@@ -207,5 +207,15 @@ const measurements = {
     }, 100000),
 };
 
+// The optical axis lands at the authored screen center even on an unclipped
+// surface. This is the shader's screen-Y convention, not a round-trip through
+// the same projection function.
+const offCenter = WorldView.resolveTownCamera({distance: 10, yawDegrees: 0, pitchDegrees: 0});
+offCenter.viewportCenterX = 213; offCenter.viewportCenterY = 70;
+offCenter.baseViewportWidth = 256; offCenter.baseViewportHeight = 144;
+const opticalAxis = WorldView.projectPerspective(offCenter, 426, 240, offCenter.x+5, offCenter.y, offCenter.z);
+close(opticalAxis.x, 213, 'off-center optical axis X');
+close(opticalAxis.y, 70, 'off-center optical axis Y follows shader');
+
 console.log('SHARED SEMANTICS NODE CONFORMANCE OK');
 console.log('MEASURE_SHARED_NODE ' + JSON.stringify(measurements));

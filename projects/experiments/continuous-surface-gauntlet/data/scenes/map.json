@@ -76,7 +76,7 @@
       "content": [
         {
           "type": "text",
-          "text": "HP {variables.arena.hp}/{variables.arena.maxHp}   Sentinel {variables.arena.enemyHp}/{variables.arena.enemyMaxHp}\n{variables.arena.result == 'victory' and 'Victory - exploration resumed' or variables.arena.result == 'defeat' and 'Recovered - encounter ended' or variables.arena.mode == 'simulation' and 'Move to evade. Confirm when AT is full.' or variables.arena.mode == 'command' and 'Attack: Confirm to choose / Cancel to move' or 'Target Sentinel: Confirm / Cancel'}\n{variables.arena.message == 'out_of_range' and 'Target is outside the blue range ring.' or variables.arena.message == 'unavailable' and 'Attack unavailable.' or ''}"
+          "text": "HP {variables.arena.hp}/{variables.arena.maxHp}   Sentinel {variables.arena.enemyHp}/{variables.arena.enemyMaxHp}\n{variables.arena.mode == 'aftermath' and (variables.arena.result == 'victory' and 'Victory - encounter ending' or 'Defeat - recovering...') or variables.arena.result == 'victory' and 'Victory - exploration resumed' or variables.arena.result == 'defeat' and 'Recovered - encounter ended' or variables.arena.mode == 'execution' and 'Committed - contact then recovery' or variables.arena.mode == 'aftermath' and 'Encounter ending...' or variables.arena.mode == 'simulation' and 'Move to evade. Confirm when AT is full.' or variables.arena.mode == 'command' and 'Attack: Confirm to choose / Cancel to move' or 'Target Sentinel: Confirm / Cancel'}\n{variables.arena.message == 'out_of_range' and 'Target is outside the blue range ring.' or variables.arena.message == 'unavailable' and 'Attack unavailable.' or ''}"
         },
         {
           "type": "gauge",

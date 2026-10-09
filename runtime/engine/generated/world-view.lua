@@ -421,7 +421,7 @@ do
         local pitchedVertical = vertical * cosPitch + depth * sinPitch
         local safeDepth = math.max(pitchedDepth, 0.001)
         local ndcX = camera.viewportCenterX * 2 / targetWidth - 1 + horizontal / (camera.fovHalfX * safeDepth) * camera.projectionScaleX * (camera.baseViewportWidth / targetWidth)
-        local ndcY = camera.viewportCenterY * 2 / targetHeight - 1 + pitchedVertical / (camera.fovHalfY * safeDepth) * camera.projectionScaleY * (camera.baseViewportHeight / targetHeight)
+        local ndcY = 1 - camera.viewportCenterY * 2 / targetHeight + pitchedVertical / (camera.fovHalfY * safeDepth) * camera.projectionScaleY * (camera.baseViewportHeight / targetHeight)
         return {x = (ndcX + 1) * targetWidth * 0.5, y = (1 - ndcY) * targetHeight * 0.5, depth = safeDepth}
     end
     function ThestraWorldViewSemantics.groundHeight(profile, fallbackZ, laneY)

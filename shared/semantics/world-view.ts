@@ -300,7 +300,7 @@ namespace ThestraWorldViewSemantics {
         const ndcX = camera.viewportCenterX * 2 / targetWidth - 1
             + horizontal / (camera.fovHalfX * safeDepth) * camera.projectionScaleX
                 * (camera.baseViewportWidth / targetWidth);
-        const ndcY = camera.viewportCenterY * 2 / targetHeight - 1
+        const ndcY = 1 - camera.viewportCenterY * 2 / targetHeight
             + pitchedVertical / (camera.fovHalfY * safeDepth) * camera.projectionScaleY
                 * (camera.baseViewportHeight / targetHeight);
         return { x: (ndcX + 1) * targetWidth * 0.5, y: (1 - ndcY) * targetHeight * 0.5, depth: safeDepth };

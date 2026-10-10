@@ -2248,9 +2248,9 @@ export function createThreeEditorViewport(container, options = {}) {
                 return;
             }
         }
-        if (!sceneModel || event.button !== 0) return;
+        if (!sceneModel) return;
         if (moveGizmo.dragging || moveGizmo.axis) return;
-        if (walkProfileEditing) {
+        if (walkProfileEditing && event.button === 0) {
             const profileSelection = pickWalkProfile(event);
             if (event.shiftKey && profileSelection && options.onToggleSelection) {
                 options.onToggleSelection(profileSelection);
@@ -2262,6 +2262,7 @@ export function createThreeEditorViewport(container, options = {}) {
             }
             return;
         }
+        if (event.button !== 0) return;
         const layer = interactionLayer();
         const kinds = {
             map: event.shiftKey ? ['spawn', 'cell'] : ['environment', 'cell'],

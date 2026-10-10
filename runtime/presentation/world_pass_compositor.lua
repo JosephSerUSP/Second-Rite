@@ -24,12 +24,25 @@ function compositor.resolveScale(session)
     return math.max(2, math.min(4, value))
 end
 
+-- Two presentation styles share this renderer, and the map's traversal decides
+-- which one it is; there is no authored flag:
+--   * first-person grid maps are realtime PS1 3D: native raster, affine texture
+--     warp and dither, never supersampled;
+--   * bounded-lane maps are live 3D pretending to be a pre-rendered backdrop:
+--     supersampled environment colour and perspective-correct textures.
+-- Literal layered_2d packages are real pre-renders and bypass both.
+function compositor.isFakePrerendered(session)
+    local traversal = session and session.townTraversal
+    if not traversal then return false end
+    local environment = traversal.environment
+    return not (environment and environment.preRendered)
+end
+
 function compositor.isEligible(session)
     if not session then return false end
     if session.roomBakePass or session.roomBakeSquareCamera then return false end
     if session.profile3dVariant and session.profile3dVariant ~= "current" then return false end
-    local environment = session.townTraversal and session.townTraversal.environment
-    if environment and environment.preRendered then return false end
+    if not compositor.isFakePrerendered(session) then return false end
     return compositor.resolveScale(session) > 1
 end
 

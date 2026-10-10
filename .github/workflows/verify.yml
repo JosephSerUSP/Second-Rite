@@ -295,11 +295,12 @@ jobs:
         run: |
           $ErrorActionPreference = "Continue"
           $__sw = [System.Diagnostics.Stopwatch]::StartNew()
-          & $env:LOVEC $env:THESTRA_GATE_ROOT validate
+          & $env:LOVEC $env:THESTRA_GATE_ROOT validate | Tee-Object -Variable __out
           $__code = $LASTEXITCODE
           $__sw.Stop()
           node tools/ci/time-step.js --record --label "G1 validate" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "G1 failed (exit $__code)" }
+          if (-not ($__out -match "^VALIDATE OK")) { throw "G1 exited 0 without a 'VALIDATE OK' verdict" }
 
       - name: unit - behavior suites
         shell: pwsh
@@ -317,11 +318,12 @@ jobs:
         run: |
           $ErrorActionPreference = "Continue"
           $__sw = [System.Diagnostics.Stopwatch]::StartNew()
-          & $env:LOVEC $env:THESTRA_GATE_ROOT savetest
+          & $env:LOVEC $env:THESTRA_GATE_ROOT savetest | Tee-Object -Variable __out
           $__code = $LASTEXITCODE
           $__sw.Stop()
           node tools/ci/time-step.js --record --label "save round trip" --ms $__sw.ElapsedMilliseconds --exit $__code
           if ($__code -ne 0) { throw "save gate failed (exit $__code)" }
+          if (-not ($__out -match "^SAVETEST OK")) { throw "save gate exited 0 without a 'SAVETEST OK' verdict" }
 
       - name: G2 - battle golden traces
         id: g2

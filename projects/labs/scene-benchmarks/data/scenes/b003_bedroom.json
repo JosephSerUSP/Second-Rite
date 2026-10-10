@@ -1,0 +1,212 @@
+{
+  "id": "b003_bedroom",
+  "terminal": {
+    "none": "narrative spatial puzzle, no win condition just exploration"
+  },
+  "name": "B003 — Rearranging a Bedroom",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Empty Room"
+        }
+      ]
+    },
+    {
+      "id": "room_state",
+      "rect": {
+        "x": 1,
+        "y": 4,
+        "w": 18,
+        "h": 10
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "y": 0,
+          "text": "On the desk:"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{sceneState.desk_text}"
+        },
+        {
+          "type": "text",
+          "y": 4,
+          "text": "On the bed:"
+        },
+        {
+          "type": "text",
+          "y": 5,
+          "text": "{sceneState.bed_text}"
+        }
+      ]
+    },
+    {
+      "id": "action_menu",
+      "rect": {
+        "x": 20,
+        "y": 4,
+        "w": 11,
+        "h": 10
+      },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b003.options",
+          "cursor": "sceneState.idx"
+        }
+      ]
+    },
+    {
+      "id": "narrative_box",
+      "rect": {
+        "x": 1,
+        "y": 14,
+        "w": 30,
+        "h": 6
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sceneState.narrative_1}"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{sceneState.narrative_2}"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "{sceneState.narrative_3}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "book_loc",
+            "value": "'desk'"
+          },
+          {
+            "name": "clock_loc",
+            "value": "'bed'"
+          },
+          {
+            "name": "idx",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "update_view"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 1 and 4 or sceneState.idx - 1"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 4 and 1 or sceneState.idx + 1"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "book_loc",
+            "value": "'desk'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 2",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "book_loc",
+            "value": "'bed'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 3",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "clock_loc",
+            "value": "'desk'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "clock_loc",
+            "value": "'bed'"
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "update_view"
+      }
+    ]
+  },
+  "scripts": {
+    "update_view": "\nlocal sceneState = ctx.sceneState\n\nlocal desk_items = {}\nlocal bed_items = {}\n\nif sceneState.book_loc == 'desk' then table.insert(desk_items, \"Old Journal\") end\nif sceneState.clock_loc == 'desk' then table.insert(desk_items, \"Broken Clock\") end\nif sceneState.book_loc == 'bed' then table.insert(bed_items, \"Old Journal\") end\nif sceneState.clock_loc == 'bed' then table.insert(bed_items, \"Broken Clock\") end\n\nsceneState.desk_text = #desk_items > 0 and table.concat(desk_items, \", \") or \"(empty)\"\nsceneState.bed_text = #bed_items > 0 and table.concat(bed_items, \", \") or \"(empty)\"\n\nif sceneState.book_loc == 'desk' and sceneState.clock_loc == 'desk' then\n    sceneState.narrative_1 = \"The desk is cluttered now. They used to\"\n    sceneState.narrative_2 = \"stay up late, watching the time pass while\"\n    sceneState.narrative_3 = \"writing. The bed looks so empty.\"\nelseif sceneState.book_loc == 'bed' and sceneState.clock_loc == 'bed' then\n    sceneState.narrative_1 = \"Everything on the bed. They must have been\"\n    sceneState.narrative_2 = \"too tired to get up, trying to read\"\n    sceneState.narrative_3 = \"but watching the clock instead.\"\nelseif sceneState.book_loc == 'desk' and sceneState.clock_loc == 'bed' then\n    sceneState.narrative_1 = \"The journal on the desk, the clock on the bed.\"\n    sceneState.narrative_2 = \"A normal arrangement. It looks almost like\"\n    sceneState.narrative_3 = \"someone is about to come back.\"\nelse\n    sceneState.narrative_1 = \"The clock on the desk, the journal on the bed.\"\n    sceneState.narrative_2 = \"Time marches on, even when you're sleeping.\"\n    sceneState.narrative_3 = \"Or trying to.\"\nend\n"
+  },
+  "goldenScript": [
+    {"key": "down"},
+    {"key": "return"},
+    {"key": "down"},
+    {"key": "return"},
+    {"key": "down"},
+    {"key": "return"},
+    {"key": "up"},
+    {"key": "return"},
+    {"key": "escape"}
+  ]
+}

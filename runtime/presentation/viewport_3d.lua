@@ -2449,7 +2449,10 @@ local function drawWorldSpace(session, authoredCamera, inspection, passOptions)
     playerLight.active = playerLight.enabled and (not playerLight.onlyInDungeons or not (mapData and mapData.safe)) and playerLight.radius > 0
     local psxCfg = session.loader and session.loader.system and session.loader.system.dungeon
         and session.loader.system.dungeon.psxRendering or {}
+    -- Affine warp is a realtime-PS1 artifact; the fake pre-rendered lane path
+    -- must not show it (see world_pass_compositor.isFakePrerendered).
     local affineTextures = psxCfg.affineTextures ~= false
+        and not require("presentation.world_pass_compositor").isFakePrerendered(session)
     local vertexSnapPixels = math.max(0, tonumber(psxCfg.vertexSnapPixels) or 0) * rasterScale
     -- #148: the CPU near-plane clip is off by default -- the GPU does it.
     --

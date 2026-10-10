@@ -1,0 +1,5 @@
+Ah! I see. The author put `sceneState.redraw = redraw` because they wanted to share the function between the `init` and `move` scripts!
+Since the engine doesn't allow functions in `sceneState`, we can't do that.
+Let's see what `redraw` does. It converts the grid into a string `sceneState.boardText`.
+We can just copy the `redraw` function into the `move` script!
+Let me modify the fix_sokoban script to properly do that.

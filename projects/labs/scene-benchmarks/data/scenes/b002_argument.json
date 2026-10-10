@@ -3,7 +3,7 @@
   "terminal": {
     "none": "conversation specimen, not a scored loop (#920 names this as the legitimate case)"
   },
-  "name": "B002 — Argument as Combat",
+  "name": "B002 \u2014 Argument as Combat",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -178,8 +178,12 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx == 1 and 4 or sceneState.idx - 1"
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "sceneState.idx == 1 and 4 or sceneState.idx - 1"
+              }
+            ]
           }
         ]
       }
@@ -191,8 +195,12 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "idx",
-            "value": "sceneState.idx == 4 and 1 or sceneState.idx + 1"
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "sceneState.idx == 4 and 1 or sceneState.idx + 1"
+              }
+            ]
           }
         ]
       }
@@ -214,18 +222,20 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "name": "player_patience",
-                "value": "sceneState.player_patience - 10"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "position",
-                "value": "sceneState.position + 2"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_1",
-                "value": "'You pressed logic.'"
+                "assignments": [
+                  {
+                    "name": "player_patience",
+                    "value": "sceneState.player_patience - 10"
+                  },
+                  {
+                    "name": "position",
+                    "value": "sceneState.position + 2"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You pressed logic.'"
+                  }
+                ]
               }
             ]
           },
@@ -239,25 +249,31 @@
                 "then": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "name": "trust",
-                    "value": "sceneState.trust - 20"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "opp_patience",
-                    "value": "sceneState.opp_patience - 30"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "feedback_1",
-                    "value": "'You appealed to trust.'"
+                    "assignments": [
+                      {
+                        "name": "trust",
+                        "value": "sceneState.trust - 20"
+                      },
+                      {
+                        "name": "opp_patience",
+                        "value": "sceneState.opp_patience - 30"
+                      },
+                      {
+                        "name": "feedback_1",
+                        "value": "'You appealed to trust.'"
+                      }
+                    ]
                   }
                 ],
                 "else": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "name": "feedback_1",
-                    "value": "'Not enough trust!'"
+                    "assignments": [
+                      {
+                        "name": "feedback_1",
+                        "value": "'Not enough trust!'"
+                      }
+                    ]
                   }
                 ]
               }
@@ -269,18 +285,20 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "name": "embarrassment",
-                "value": "sceneState.embarrassment + 15"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "trust",
-                "value": "sceneState.trust + 10"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_1",
-                "value": "'You conceded a point.'"
+                "assignments": [
+                  {
+                    "name": "embarrassment",
+                    "value": "sceneState.embarrassment + 15"
+                  },
+                  {
+                    "name": "trust",
+                    "value": "sceneState.trust + 10"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You conceded a point.'"
+                  }
+                ]
               }
             ]
           },
@@ -290,20 +308,27 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "name": "embarrassment",
-                "value": "sceneState.embarrassment > 20 and sceneState.embarrassment - 20 or 0"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_1",
-                "value": "'You deflected.'"
+                "assignments": [
+                  {
+                    "name": "embarrassment",
+                    "value": "sceneState.embarrassment > 20 and sceneState.embarrassment - 20 or 0"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You deflected.'"
+                  }
+                ]
               }
             ]
           },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "feedback_2",
-            "value": "'The King reacts...'"
+            "assignments": [
+              {
+                "name": "feedback_2",
+                "value": "'The King reacts...'"
+              }
+            ]
           },
           {
             "cmd": "IF",
@@ -311,13 +336,16 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "name": "opp_patience",
-                "value": "sceneState.opp_patience - 20"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_2",
-                "value": "'Your position weakens him.'"
+                "assignments": [
+                  {
+                    "name": "opp_patience",
+                    "value": "sceneState.opp_patience - 20"
+                  },
+                  {
+                    "name": "feedback_2",
+                    "value": "'Your position weakens him.'"
+                  }
+                ]
               }
             ]
           },
@@ -327,18 +355,20 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "name": "state",
-                "value": "'win'"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_1",
-                "value": "'You won the argument!'"
-              },
-              {
-                "cmd": "SET_SCENE_STATE",
-                "name": "feedback_2",
-                "value": "'The King yields.'"
+                "assignments": [
+                  {
+                    "name": "state",
+                    "value": "'win'"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You won the argument!'"
+                  },
+                  {
+                    "name": "feedback_2",
+                    "value": "'The King yields.'"
+                  }
+                ]
               }
             ],
             "else": [
@@ -348,18 +378,20 @@
                 "then": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "name": "state",
-                    "value": "'lose'"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "feedback_1",
-                    "value": "'You lost your patience.'"
-                  },
-                  {
-                    "cmd": "SET_SCENE_STATE",
-                    "name": "feedback_2",
-                    "value": "'The argument is over.'"
+                    "assignments": [
+                      {
+                        "name": "state",
+                        "value": "'lose'"
+                      },
+                      {
+                        "name": "feedback_1",
+                        "value": "'You lost your patience.'"
+                      },
+                      {
+                        "name": "feedback_2",
+                        "value": "'The argument is over.'"
+                      }
+                    ]
                   }
                 ],
                 "else": [
@@ -369,18 +401,20 @@
                     "then": [
                       {
                         "cmd": "SET_SCENE_STATE",
-                        "name": "state",
-                        "value": "'lose'"
-                      },
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "feedback_1",
-                        "value": "'You are too embarrassed.'"
-                      },
-                      {
-                        "cmd": "SET_SCENE_STATE",
-                        "name": "feedback_2",
-                        "value": "'You retreat.'"
+                        "assignments": [
+                          {
+                            "name": "state",
+                            "value": "'lose'"
+                          },
+                          {
+                            "name": "feedback_1",
+                            "value": "'You are too embarrassed.'"
+                          },
+                          {
+                            "name": "feedback_2",
+                            "value": "'You retreat.'"
+                          }
+                        ]
                       }
                     ]
                   }

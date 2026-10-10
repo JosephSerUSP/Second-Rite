@@ -1,0 +1,34 @@
+# Blender 5.2.2 LTS MTL File: 'venom_knife.blend'
+# www.blender.org
+
+newmtl venom_knife_blade
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd venom_knife_blade.png
+
+pass sphere add 0.3 assets/models/matcaps/steel.png
+newmtl venom_knife_fittings
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Kd 0.300000 0.310000 0.350000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.3 assets/models/matcaps/steel.png
+newmtl venom_knife_grip
+Ns 48.400013
+Ka 1.000000 1.000000 1.000000
+Kd 0.120000 0.200000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

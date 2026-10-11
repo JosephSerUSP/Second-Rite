@@ -34,9 +34,23 @@ check(compositor.resolveScale(sessionWithScale(9)) == 4,
 check(compositor.resolveScale(sessionWithScale(1)) == 1,
     "1x uses the ordinary world path")
 
-local eligible = sessionWithScale(3)
+local function laneSession(value)
+    local session = sessionWithScale(value)
+    session.townTraversal = { provider = "bounded_lane", environment = {} }
+    return session
+end
+
+local firstPerson = sessionWithScale(3)
+check(not compositor.isFakePrerendered(firstPerson),
+    "a first-person grid map is realtime PS1, not fake pre-rendered")
+check(not compositor.isEligible(firstPerson),
+    "first-person maps never supersample, whatever the project scale")
+
+local eligible = laneSession(3)
+check(compositor.isFakePrerendered(eligible),
+    "a live bounded-lane map is the fake pre-rendered style")
 check(compositor.isEligible(eligible),
-    "ordinary live-3D session accepts selective AA")
+    "fake pre-rendered lane maps accept selective AA")
 eligible.roomBakePass = "depth"
 check(not compositor.isEligible(eligible),
     "room bake diagnostics bypass selective AA")
@@ -45,6 +59,8 @@ local prerendered = sessionWithScale(3)
 prerendered.townTraversal = { environment = { preRendered = { mode = "layered_2d" } } }
 check(not compositor.isEligible(prerendered),
     "literal layered prerender stays on its existing renderer")
+check(not compositor.isFakePrerendered(prerendered),
+    "literal layered prerender is a real pre-render, not the fake style")
 
 check(viewport.surfacePresentationPass({ category = "billboard" }) == "live",
     "ordinary billboards default to the live pass")
@@ -65,7 +81,7 @@ do
     local ok, err = pcall(function()
         love.graphics.setCanvas({ canvas, depth = true, stencil = true })
         love.graphics.clear(0, 0, 0, 1, true, true)
-        compositor.draw(sessionWithScale(3), nil, nil,
+        compositor.draw(laneSession(3), nil, nil,
             function(_, _, _, options)
                 options = options or {}
                 local scale = options.rasterScale or 1

@@ -60,43 +60,21 @@
     "on_enter": [
       {
         "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
+        "assignments": [
+          { "name": "_guard", "value": 0 }
+        ]
       },
       {
         "cmd": "SET_SCENE_STATE",
-        "name": "win",
-        "value": false
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "px",
-        "value": 4
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "py",
-        "value": 4
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c1x",
-        "value": 3
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c1y",
-        "value": 3
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c2x",
-        "value": 5
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c2y",
-        "value": 4
+        "assignments": [
+          { "name": "win", "value": false },
+          { "name": "px", "value": 4 },
+          { "name": "py", "value": 4 },
+          { "name": "c1x", "value": 3 },
+          { "name": "c1y", "value": 3 },
+          { "name": "c2x", "value": 5 },
+          { "name": "c2y", "value": 4 }
+        ]
       },
       {
         "cmd": "SCRIPT",
@@ -104,148 +82,773 @@
       }
     ],
     "on_up": [
-      {
-        "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
-      },
+      { "cmd": "SET_LOCAL", "assignments": [{ "name": "_guard", "value": 0 }] },
       {
         "cmd": "IF",
         "condition": "not sceneState.win",
         "then": [
+          { "cmd": "SET_SCENE_STATE", "assignments": [{ "name": "dx", "value": 0 }, { "name": "dy", "value": -1 }] },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dx",
-            "value": 0
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "sceneState.px + sceneState.dx"
+              },
+              {
+                "name": "ny",
+                "value": "sceneState.py + sceneState.dy"
+              }
+            ]
           },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dy",
-            "value": -1
+            "assignments": [
+              {
+                "name": "nCellWall",
+                "value": "(sceneState.nx <= 0 or sceneState.nx >= 7 or sceneState.ny <= 0 or sceneState.ny >= 7 or (sceneState.nx == 2 and sceneState.ny == 2) or (sceneState.nx == 3 and sceneState.ny == 2) or (sceneState.nx == 4 and sceneState.ny == 2) or (sceneState.nx == 5 and sceneState.ny == 3) or (sceneState.nx == 1 and sceneState.ny == 4) or (sceneState.nx == 2 and sceneState.ny == 4) or (sceneState.nx == 3 and sceneState.ny == 5) or (sceneState.nx == 5 and sceneState.ny == 6) or (sceneState.nx == 6 and sceneState.ny == 6))"
+              },
+              {
+                "name": "nCellCrate1",
+                "value": "sceneState.nx == sceneState.c1x and sceneState.ny == sceneState.c1y"
+              },
+              {
+                "name": "nCellCrate2",
+                "value": "sceneState.nx == sceneState.c2x and sceneState.ny == sceneState.c2y"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "not sceneState.nCellWall",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.nCellCrate1",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnx",
+                        "value": "sceneState.nx + sceneState.dx"
+                      },
+                      {
+                        "name": "nny",
+                        "value": "sceneState.ny + sceneState.dy"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnCellWall",
+                        "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c2x and sceneState.nny == sceneState.c2y)",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "sceneState.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "sceneState.nny"
+                          },
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.nCellCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnx",
+                            "value": "sceneState.nx + sceneState.dx"
+                          },
+                          {
+                            "name": "nny",
+                            "value": "sceneState.ny + sceneState.dy"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnCellWall",
+                            "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c1x and sceneState.nny == sceneState.c1y)",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "c2x",
+                                "value": "sceneState.nnx"
+                              },
+                              {
+                                "name": "c2y",
+                                "value": "sceneState.nny"
+                              },
+                              {
+                                "name": "px",
+                                "value": "sceneState.nx"
+                              },
+                              {
+                                "name": "py",
+                                "value": "sceneState.ny"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "win",
+                "value": "((sceneState.c1x == 3 and sceneState.c1y == 1) or (sceneState.c1x == 2 and sceneState.c1y == 5)) and ((sceneState.c2x == 3 and sceneState.c2y == 1) or (sceneState.c2x == 2 and sceneState.c2y == 5))"
+              }
+            ]
           },
           {
             "cmd": "SCRIPT",
-            "ref": "move"
+            "ref": "render"
           }
         ]
       }
     ],
     "on_down": [
-      {
-        "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
-      },
+      { "cmd": "SET_LOCAL", "assignments": [{ "name": "_guard", "value": 0 }] },
       {
         "cmd": "IF",
         "condition": "not sceneState.win",
         "then": [
+          { "cmd": "SET_SCENE_STATE", "assignments": [{ "name": "dx", "value": 0 }, { "name": "dy", "value": 1 }] },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dx",
-            "value": 0
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "sceneState.px + sceneState.dx"
+              },
+              {
+                "name": "ny",
+                "value": "sceneState.py + sceneState.dy"
+              }
+            ]
           },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dy",
-            "value": 1
+            "assignments": [
+              {
+                "name": "nCellWall",
+                "value": "(sceneState.nx <= 0 or sceneState.nx >= 7 or sceneState.ny <= 0 or sceneState.ny >= 7 or (sceneState.nx == 2 and sceneState.ny == 2) or (sceneState.nx == 3 and sceneState.ny == 2) or (sceneState.nx == 4 and sceneState.ny == 2) or (sceneState.nx == 5 and sceneState.ny == 3) or (sceneState.nx == 1 and sceneState.ny == 4) or (sceneState.nx == 2 and sceneState.ny == 4) or (sceneState.nx == 3 and sceneState.ny == 5) or (sceneState.nx == 5 and sceneState.ny == 6) or (sceneState.nx == 6 and sceneState.ny == 6))"
+              },
+              {
+                "name": "nCellCrate1",
+                "value": "sceneState.nx == sceneState.c1x and sceneState.ny == sceneState.c1y"
+              },
+              {
+                "name": "nCellCrate2",
+                "value": "sceneState.nx == sceneState.c2x and sceneState.ny == sceneState.c2y"
+              }
+            ]
           },
           {
-            "cmd": "SCRIPT",
-            "ref": "move"
-          }
+            "cmd": "IF",
+            "condition": "not sceneState.nCellWall",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.nCellCrate1",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnx",
+                        "value": "sceneState.nx + sceneState.dx"
+                      },
+                      {
+                        "name": "nny",
+                        "value": "sceneState.ny + sceneState.dy"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnCellWall",
+                        "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c2x and sceneState.nny == sceneState.c2y)",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "sceneState.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "sceneState.nny"
+                          },
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.nCellCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnx",
+                            "value": "sceneState.nx + sceneState.dx"
+                          },
+                          {
+                            "name": "nny",
+                            "value": "sceneState.ny + sceneState.dy"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnCellWall",
+                            "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c1x and sceneState.nny == sceneState.c1y)",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "c2x",
+                                "value": "sceneState.nnx"
+                              },
+                              {
+                                "name": "c2y",
+                                "value": "sceneState.nny"
+                              },
+                              {
+                                "name": "px",
+                                "value": "sceneState.nx"
+                              },
+                              {
+                                "name": "py",
+                                "value": "sceneState.ny"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "win",
+                "value": "((sceneState.c1x == 3 and sceneState.c1y == 1) or (sceneState.c1x == 2 and sceneState.c1y == 5)) and ((sceneState.c2x == 3 and sceneState.c2y == 1) or (sceneState.c2x == 2 and sceneState.c2y == 5))"
+              }
+            ]
+          },
+          { "cmd": "SCRIPT", "ref": "render" }
         ]
       }
     ],
     "on_left": [
-      {
-        "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
-      },
+      { "cmd": "SET_LOCAL", "assignments": [{ "name": "_guard", "value": 0 }] },
       {
         "cmd": "IF",
         "condition": "not sceneState.win",
         "then": [
+          { "cmd": "SET_SCENE_STATE", "assignments": [{ "name": "dx", "value": -1 }, { "name": "dy", "value": 0 }] },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dx",
-            "value": -1
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "sceneState.px + sceneState.dx"
+              },
+              {
+                "name": "ny",
+                "value": "sceneState.py + sceneState.dy"
+              }
+            ]
           },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dy",
-            "value": 0
+            "assignments": [
+              {
+                "name": "nCellWall",
+                "value": "(sceneState.nx <= 0 or sceneState.nx >= 7 or sceneState.ny <= 0 or sceneState.ny >= 7 or (sceneState.nx == 2 and sceneState.ny == 2) or (sceneState.nx == 3 and sceneState.ny == 2) or (sceneState.nx == 4 and sceneState.ny == 2) or (sceneState.nx == 5 and sceneState.ny == 3) or (sceneState.nx == 1 and sceneState.ny == 4) or (sceneState.nx == 2 and sceneState.ny == 4) or (sceneState.nx == 3 and sceneState.ny == 5) or (sceneState.nx == 5 and sceneState.ny == 6) or (sceneState.nx == 6 and sceneState.ny == 6))"
+              },
+              {
+                "name": "nCellCrate1",
+                "value": "sceneState.nx == sceneState.c1x and sceneState.ny == sceneState.c1y"
+              },
+              {
+                "name": "nCellCrate2",
+                "value": "sceneState.nx == sceneState.c2x and sceneState.ny == sceneState.c2y"
+              }
+            ]
           },
           {
-            "cmd": "SCRIPT",
-            "ref": "move"
-          }
+            "cmd": "IF",
+            "condition": "not sceneState.nCellWall",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.nCellCrate1",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnx",
+                        "value": "sceneState.nx + sceneState.dx"
+                      },
+                      {
+                        "name": "nny",
+                        "value": "sceneState.ny + sceneState.dy"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnCellWall",
+                        "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c2x and sceneState.nny == sceneState.c2y)",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "sceneState.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "sceneState.nny"
+                          },
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.nCellCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnx",
+                            "value": "sceneState.nx + sceneState.dx"
+                          },
+                          {
+                            "name": "nny",
+                            "value": "sceneState.ny + sceneState.dy"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnCellWall",
+                            "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c1x and sceneState.nny == sceneState.c1y)",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "c2x",
+                                "value": "sceneState.nnx"
+                              },
+                              {
+                                "name": "c2y",
+                                "value": "sceneState.nny"
+                              },
+                              {
+                                "name": "px",
+                                "value": "sceneState.nx"
+                              },
+                              {
+                                "name": "py",
+                                "value": "sceneState.ny"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "win",
+                "value": "((sceneState.c1x == 3 and sceneState.c1y == 1) or (sceneState.c1x == 2 and sceneState.c1y == 5)) and ((sceneState.c2x == 3 and sceneState.c2y == 1) or (sceneState.c2x == 2 and sceneState.c2y == 5))"
+              }
+            ]
+          },
+          { "cmd": "SCRIPT", "ref": "render" }
         ]
       }
     ],
     "on_right": [
-      {
-        "cmd": "SET_LOCAL",
-        "name": "_guard",
-        "value": 0
-      },
+      { "cmd": "SET_LOCAL", "assignments": [{ "name": "_guard", "value": 0 }] },
       {
         "cmd": "IF",
         "condition": "not sceneState.win",
         "then": [
+          { "cmd": "SET_SCENE_STATE", "assignments": [{ "name": "dx", "value": 1 }, { "name": "dy", "value": 0 }] },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dx",
-            "value": 1
+            "assignments": [
+              {
+                "name": "nx",
+                "value": "sceneState.px + sceneState.dx"
+              },
+              {
+                "name": "ny",
+                "value": "sceneState.py + sceneState.dy"
+              }
+            ]
           },
           {
             "cmd": "SET_SCENE_STATE",
-            "name": "dy",
-            "value": 0
+            "assignments": [
+              {
+                "name": "nCellWall",
+                "value": "(sceneState.nx <= 0 or sceneState.nx >= 7 or sceneState.ny <= 0 or sceneState.ny >= 7 or (sceneState.nx == 2 and sceneState.ny == 2) or (sceneState.nx == 3 and sceneState.ny == 2) or (sceneState.nx == 4 and sceneState.ny == 2) or (sceneState.nx == 5 and sceneState.ny == 3) or (sceneState.nx == 1 and sceneState.ny == 4) or (sceneState.nx == 2 and sceneState.ny == 4) or (sceneState.nx == 3 and sceneState.ny == 5) or (sceneState.nx == 5 and sceneState.ny == 6) or (sceneState.nx == 6 and sceneState.ny == 6))"
+              },
+              {
+                "name": "nCellCrate1",
+                "value": "sceneState.nx == sceneState.c1x and sceneState.ny == sceneState.c1y"
+              },
+              {
+                "name": "nCellCrate2",
+                "value": "sceneState.nx == sceneState.c2x and sceneState.ny == sceneState.c2y"
+              }
+            ]
           },
           {
-            "cmd": "SCRIPT",
-            "ref": "move"
-          }
+            "cmd": "IF",
+            "condition": "not sceneState.nCellWall",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.nCellCrate1",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnx",
+                        "value": "sceneState.nx + sceneState.dx"
+                      },
+                      {
+                        "name": "nny",
+                        "value": "sceneState.ny + sceneState.dy"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      {
+                        "name": "nnCellWall",
+                        "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                      }
+                    ]
+                  },
+                  {
+                    "cmd": "IF",
+                    "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c2x and sceneState.nny == sceneState.c2y)",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "c1x",
+                            "value": "sceneState.nnx"
+                          },
+                          {
+                            "name": "c1y",
+                            "value": "sceneState.nny"
+                          },
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "sceneState.nCellCrate2",
+                    "then": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnx",
+                            "value": "sceneState.nx + sceneState.dx"
+                          },
+                          {
+                            "name": "nny",
+                            "value": "sceneState.ny + sceneState.dy"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "nnCellWall",
+                            "value": "(sceneState.nnx <= 0 or sceneState.nnx >= 7 or sceneState.nny <= 0 or sceneState.nny >= 7 or (sceneState.nnx == 2 and sceneState.nny == 2) or (sceneState.nnx == 3 and sceneState.nny == 2) or (sceneState.nnx == 4 and sceneState.nny == 2) or (sceneState.nnx == 5 and sceneState.nny == 3) or (sceneState.nnx == 1 and sceneState.nny == 4) or (sceneState.nnx == 2 and sceneState.nny == 4) or (sceneState.nnx == 3 and sceneState.nny == 5) or (sceneState.nnx == 5 and sceneState.nny == 6) or (sceneState.nnx == 6 and sceneState.nny == 6))"
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "IF",
+                        "condition": "not sceneState.nnCellWall and not (sceneState.nnx == sceneState.c1x and sceneState.nny == sceneState.c1y)",
+                        "then": [
+                          {
+                            "cmd": "SET_SCENE_STATE",
+                            "assignments": [
+                              {
+                                "name": "c2x",
+                                "value": "sceneState.nnx"
+                              },
+                              {
+                                "name": "c2y",
+                                "value": "sceneState.nny"
+                              },
+                              {
+                                "name": "px",
+                                "value": "sceneState.nx"
+                              },
+                              {
+                                "name": "py",
+                                "value": "sceneState.ny"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "else": [
+                      {
+                        "cmd": "SET_SCENE_STATE",
+                        "assignments": [
+                          {
+                            "name": "px",
+                            "value": "sceneState.nx"
+                          },
+                          {
+                            "name": "py",
+                            "value": "sceneState.ny"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "win",
+                "value": "((sceneState.c1x == 3 and sceneState.c1y == 1) or (sceneState.c1x == 2 and sceneState.c1y == 5)) and ((sceneState.c2x == 3 and sceneState.c2y == 1) or (sceneState.c2x == 2 and sceneState.c2y == 5))"
+              }
+            ]
+          },
+          { "cmd": "SCRIPT", "ref": "render" }
         ]
       }
     ],
     "on_select": [
       {
         "cmd": "SET_SCENE_STATE",
-        "name": "win",
-        "value": false
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "px",
-        "value": 4
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "py",
-        "value": 4
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c1x",
-        "value": 3
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c1y",
-        "value": 3
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c2x",
-        "value": 5
-      },
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "c2y",
-        "value": 4
+        "assignments": [
+          {
+            "name": "win",
+            "value": false
+          },
+          {
+            "name": "px",
+            "value": 4
+          },
+          {
+            "name": "py",
+            "value": 4
+          },
+          {
+            "name": "c1x",
+            "value": 3
+          },
+          {
+            "name": "c1y",
+            "value": 3
+          },
+          {
+            "name": "c2x",
+            "value": 5
+          },
+          {
+            "name": "c2y",
+            "value": 4
+          }
+        ]
       },
       {
         "cmd": "SCRIPT",
@@ -260,27 +863,14 @@
     ]
   },
   "scripts": {
-    "move": "\nlocal sceneState = ctx.sceneState\nlocal nx = sceneState.px + sceneState.dx\nlocal ny = sceneState.py + sceneState.dy\n\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\n\nlocal nCellWall = isWall(nx, ny)\nlocal nCellCrate1 = (nx == sceneState.c1x and ny == sceneState.c1y)\nlocal nCellCrate2 = (nx == sceneState.c2x and ny == sceneState.c2y)\n\nif not nCellWall then\n    if nCellCrate1 then\n        local nnx = nx + sceneState.dx\n        local nny = ny + sceneState.dy\n        if not isWall(nnx, nny) and not (nnx == sceneState.c2x and nny == sceneState.c2y) then\n            sceneState.c1x = nnx\n            sceneState.c1y = nny\n            sceneState.px = nx\n            sceneState.py = ny\n        end\n    elseif nCellCrate2 then\n        local nnx = nx + sceneState.dx\n        local nny = ny + sceneState.dy\n        if not isWall(nnx, nny) and not (nnx == sceneState.c1x and nny == sceneState.c1y) then\n            sceneState.c2x = nnx\n            sceneState.c2y = nny\n            sceneState.px = nx\n            sceneState.py = ny\n        end\n    else\n        sceneState.px = nx\n        sceneState.py = ny\n    end\nend\n\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\n\nlocal c1OnGoal = (sceneState.c1x == g1x and sceneState.c1y == g1y) or (sceneState.c1x == g2x and sceneState.c1y == g2y)\nlocal c2OnGoal = (sceneState.c2x == g1x and sceneState.c2y == g1y) or (sceneState.c2x == g2x and sceneState.c2y == g2y)\nsceneState.win = c1OnGoal and c2OnGoal\n\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == sceneState.px and y == sceneState.py then\n            row = row .. \"@\"\n        elseif x == sceneState.c1x and y == sceneState.c1y then\n            row = row .. \"O\"\n        elseif x == sceneState.c2x and y == sceneState.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nsceneState.boardText = table.concat(lines, \"\\n\")\n",
     "render": "\nlocal sceneState = ctx.sceneState\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == sceneState.px and y == sceneState.py then\n            row = row .. \"@\"\n        elseif x == sceneState.c1x and y == sceneState.c1y then\n            row = row .. \"O\"\n        elseif x == sceneState.c2x and y == sceneState.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nsceneState.boardText = table.concat(lines, \"\\n\")\n"
   },
   "goldenScript": [
-    {
-      "key": "down"
-    },
-    {
-      "key": "up"
-    },
-    {
-      "key": "left"
-    },
-    {
-      "key": "right"
-    },
-    {
-      "key": "return"
-    },
-    {
-      "key": "escape"
-    }
+    { "key": "down" },
+    { "key": "up" },
+    { "key": "left" },
+    { "key": "right" },
+    { "key": "return" },
+    { "key": "escape" }
   ]
 }

@@ -25,8 +25,14 @@ try {
     $env:THESTRA_REPOSITORY_ROOT = $repoRoot
     Push-Location $resolvedGameRoot
     try {
-        & $Lovec $resolvedGameRoot unittest
+        & $Lovec $resolvedGameRoot unittest | Tee-Object -Variable unitOutput
         $exitCode = $LASTEXITCODE
+        # Assert the positive verdict, never the absence of failure: a renamed
+        # CLI token boots the game, which can exit 0 having run no suite.
+        if ($exitCode -eq 0 -and -not ($unitOutput -match "^ALL UNIT TESTS OK")) {
+            Write-Host "unit gate: exit 0 but no 'ALL UNIT TESTS OK' line; no suite verdict was observed"
+            $exitCode = 1
+        }
     }
     finally {
         Pop-Location

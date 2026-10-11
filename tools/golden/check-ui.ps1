@@ -53,6 +53,12 @@ try {
         $sceneLogs[$currentScene] = $currentLog
     }
 
+    # Fail closed, as G2 does: a game that prints no UI block (a crash, a
+    # renamed CLI token) would otherwise compare zero scenes and pass.
+    if ($sceneLogs.Count -eq 0) {
+        throw "No golden UI scenes produced any output"
+    }
+
     $allMatch = $true
     foreach ($key in $sceneLogs.Keys) {
         $refPath = "tools/golden/scene_$key.log"
@@ -93,6 +99,15 @@ try {
             $allMatch = $false
         }
         Remove-Item $tempLog.FullName
+    }
+
+    # A reference whose scene stopped being emitted is a lost check, not a pass.
+    foreach ($refFile in Get-ChildItem "tools/golden/scene_*.log") {
+        $key = $refFile.BaseName -replace "^scene_", ""
+        if (-not $sceneLogs.ContainsKey($key)) {
+            Write-Host "WARNING: $($refFile.Name) has no matching scene in the selected Project"
+            $allMatch = $false
+        }
     }
 
     if (-not $allMatch) {

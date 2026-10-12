@@ -19,6 +19,7 @@
       "B007  Tactics Microboard",
       "C002  Splitting Pong",
       "C003  Breakout With Moving Bricks",
+      "B003  Rearranging a Bedroom",
       "Exit"
     ]
   },
@@ -41,5 +42,13 @@
   },
   "game": {
     "title": "Thestra Scene Benchmarks"
+  },
+  "b003": {
+    "options": [
+      "Move book to desk",
+      "Move book to bed",
+      "Move clock to desk",
+      "Move clock to bed"
+    ]
   }
 }

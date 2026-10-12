@@ -1,0 +1,178 @@
+{
+  "id": "b004_rain",
+  "terminal": {
+    "reached": "sceneState.state == 'ended'",
+    "script": [
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "key": "return"
+      }
+    ]
+  },
+  "name": "B004 \u2014 Rain / Distance / Embarrassment",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 4,
+        "y": 2,
+        "w": 24,
+        "h": 4
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "B004 \u2014 Rain / Distance"
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": {
+        "x": 6,
+        "y": 7,
+        "w": 20,
+        "h": 10
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 1,
+          "width": 18,
+          "label": "Distance",
+          "value": "sceneState.distance",
+          "max": "100",
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            0.2,
+            0.5,
+            0.8
+          ]
+        },
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 4,
+          "width": 18,
+          "label": "Embarrassment",
+          "value": "sceneState.embarrassment",
+          "max": "100",
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            0.8,
+            0.2,
+            0.5
+          ]
+        },
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 7,
+          "width": 18,
+          "label": "Rain",
+          "value": "sceneState.rain",
+          "max": "100",
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            0.2,
+            0.7,
+            0.9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": {
+        "x": 4,
+        "y": 18,
+        "w": 24,
+        "h": 4
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "UP = Closer   DOWN = Further"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "ENTER to conclude   B to escape"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "update"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "next_dist",
+        "value": -1
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "next_dist",
+        "value": 1
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "state",
+        "value": "'ended'"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "scripts": {
+    "init": "local s = ctx.sceneState; s.distance = 50; s.embarrassment = 0; s.rain = 0; s.state = 'playing'; s.timer = 0;",
+    "update": "local s = ctx.sceneState; if s.state ~= 'playing' then return end; local dt = ctx.time and ctx.time.dt or 0.0166666666666667; s.timer = s.timer + dt; if s.timer > 1.0 then s.rain = s.rain + math.random(0, 5); if s.rain > 100 then s.rain = 100 end; s.timer = 0; end; local m = s.next_dist or 0; s.next_dist = 0; s.distance = s.distance + m * 5; if s.distance < 0 then s.distance = 0 elseif s.distance > 100 then s.distance = 100 end; if s.distance < 30 then s.embarrassment = s.embarrassment + 5 * dt; elseif s.distance > 70 and s.rain > 50 then s.embarrassment = s.embarrassment + (s.rain * 0.1) * dt; else s.embarrassment = s.embarrassment - 2 * dt; end; if s.embarrassment < 0 then s.embarrassment = 0 elseif s.embarrassment >= 100 then s.embarrassment = 100; s.state = 'ended' end;"
+  }
+}

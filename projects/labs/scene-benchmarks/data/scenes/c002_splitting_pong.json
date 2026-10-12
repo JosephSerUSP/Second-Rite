@@ -820,10 +820,101 @@
     ],
     "on_select": [
       {
-
-        "cmd": "COMMENT",
-
-        "text": "Legacy scene hook init_state remains quarantined under #919."
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 13
+          },
+          {
+            "name": "paddle1Y",
+            "value": 6
+          },
+          {
+            "name": "paddle2Y",
+            "value": 6
+          },
+          {
+            "name": "paddleH",
+            "value": 3
+          },
+          {
+            "name": "ball1X",
+            "value": 10
+          },
+          {
+            "name": "ball1Y",
+            "value": 6
+          },
+          {
+            "name": "ball1VX",
+            "value": 10
+          },
+          {
+            "name": "ball1VY",
+            "value": 6
+          },
+          {
+            "name": "ball2Active",
+            "value": 0
+          },
+          {
+            "name": "ball2X",
+            "value": 10
+          },
+          {
+            "name": "ball2Y",
+            "value": 6
+          },
+          {
+            "name": "ball2VX",
+            "value": 10
+          },
+          {
+            "name": "ball2VY",
+            "value": 6
+          },
+          {
+            "name": "ball3Active",
+            "value": 0
+          },
+          {
+            "name": "ball3X",
+            "value": 10
+          },
+          {
+            "name": "ball3Y",
+            "value": 6
+          },
+          {
+            "name": "ball3VX",
+            "value": 10
+          },
+          {
+            "name": "ball3VY",
+            "value": 6
+          },
+          {
+            "name": "score1",
+            "value": "sceneState.score1 or 0"
+          },
+          {
+            "name": "score2",
+            "value": "sceneState.score2 or 0"
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "hits",
+            "value": 0
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -833,5 +924,22 @@
       }
     ]
   },
-  "scripts": {}
+  "scripts": {},
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
+  ]
 }

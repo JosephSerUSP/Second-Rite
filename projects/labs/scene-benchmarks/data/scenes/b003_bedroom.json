@@ -1,0 +1,82 @@
+{
+  "id": "b003_bedroom",
+  "terminal": {
+    "none": "experimental benchmark scene"
+  },
+  "name": "B003 — Rearranging a Bedroom",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "status",
+      "rect": { "x": 2, "y": 2, "w": 28, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "BEDROOM ARRANGEMENT:" },
+        { "type": "text", "y": 2, "text": "1. Desk:  {sceneState.desk}" },
+        { "type": "text", "y": 3, "text": "2. Bed:   {sceneState.bed}" },
+        { "type": "text", "y": 4, "text": "3. Shelf: {sceneState.shelf}" },
+        { "type": "text", "y": 6, "text": "{sceneState.narrative_1}" },
+        { "type": "text", "y": 7, "text": "{sceneState.narrative_2}" },
+        { "type": "text", "y": 8, "text": "{sceneState.narrative_3}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows change  Enter swap  B back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          { "name": "desk", "value": "'Journal'" },
+          { "name": "bed", "value": "'Lamp'" },
+          { "name": "shelf", "value": "'Toy'" },
+          { "name": "selected", "value": "1" },
+          { "name": "narrative_1", "value": "''" },
+          { "name": "narrative_2", "value": "''" },
+          { "name": "narrative_3", "value": "''" }
+        ]
+      },
+      { "cmd": "SCRIPT", "ref": "update_narrative" }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "selected",
+        "value": "sceneState.selected == 1 and 3 or sceneState.selected - 1"
+      },
+      { "cmd": "SCRIPT", "ref": "update_narrative" }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "selected",
+        "value": "sceneState.selected == 3 and 1 or sceneState.selected + 1"
+      },
+      { "cmd": "SCRIPT", "ref": "update_narrative" }
+    ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "swap_item" },
+      { "cmd": "SCRIPT", "ref": "update_narrative" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "scripts": {
+    "update_narrative": "\nlocal s = ctx.sceneState\ns.narrative_1 = ''\ns.narrative_2 = ''\ns.narrative_3 = ''\nif s.desk == 'Journal' and s.bed == 'Lamp' and s.shelf == 'Toy' then\n    s.narrative_1 = 'Everything is exactly as he left it.'\n    s.narrative_2 = 'It feels frozen in time.'\nelseif s.desk == 'Toy' then\n    s.narrative_1 = 'The toy sits on the desk now.'\n    s.narrative_2 = 'He always wanted it close while studying.'\nelseif s.bed == 'Journal' then\n    s.narrative_1 = 'The journal lies on the bed.'\n    s.narrative_2 = 'You resist the urge to open it.'\nelse\n    s.narrative_1 = 'The room feels different.'\n    s.narrative_2 = 'Like someone else lives here now.'\nend\nif s.selected == 1 then\n    s.narrative_3 = '> Desk selected'\nelseif s.selected == 2 then\n    s.narrative_3 = '> Bed selected'\nelseif s.selected == 3 then\n    s.narrative_3 = '> Shelf selected'\nend\n",
+    "swap_item": "\nlocal s = ctx.sceneState\nlocal items = {s.desk, s.bed, s.shelf}\nlocal sel = s.selected\nlocal next_idx = sel % 3 + 1\nlocal temp = items[sel]\nitems[sel] = items[next_idx]\nitems[next_idx] = temp\ns.desk = items[1]\ns.bed = items[2]\ns.shelf = items[3]\n"
+  },
+  "goldenScript": [
+    { "key": "down" },
+    { "key": "return" },
+    { "key": "escape" }
+  ]
+}

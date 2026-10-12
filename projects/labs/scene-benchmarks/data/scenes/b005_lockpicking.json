@@ -3,69 +3,11 @@
   "terminal": {
     "reached": "sceneState.state == 'won' or sceneState.state == 'failed'",
     "script": [
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "wait": 0.2
-      },
-      {
-        "key": "return"
-      }
+      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
+      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
+      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
+      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
+      { "key": "return" }
     ]
   },
   "name": "B005 — Lockpicking",
@@ -79,80 +21,151 @@
   "windows": [
     {
       "id": "title",
-      "rect": {
-        "x": 4,
-        "y": 2,
-        "w": 24,
-        "h": 4
-      },
+      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
       "style": "frame",
-      "content": [
-        {
-          "type": "text",
-          "text": "B005 — Lockpicking"
-        }
-      ]
+      "content": [ { "type": "text", "text": "B005 — Lockpicking" } ]
     },
     {
       "id": "board",
-      "rect": {
-        "x": 2,
-        "y": 7,
-        "w": 28,
-        "h": 8
-      },
+      "rect": { "x": 2, "y": 7, "w": 28, "h": 8 },
       "style": "frame",
       "content": [
-        {
-          "type": "text",
-          "text": "{sceneState.display_text}"
-        },
-        {
-          "type": "text",
-          "y": 2,
-          "text": "Pins Picked: {sceneState.pins_picked} / {sceneState.total_pins}"
-        },
-        {
-          "type": "text",
-          "y": 4,
-          "text": "{sceneState.status_text}"
-        }
+        { "type": "text", "text": "{sceneState.display_text}" },
+        { "type": "text", "y": 2, "text": "Pins Picked: {sceneState.pins_picked} / {sceneState.total_pins}" },
+        { "type": "text", "y": 4, "text": "{sceneState.status_text}" }
       ]
     },
     {
       "id": "help",
-      "rect": {
-        "x": 4,
-        "y": 17,
-        "w": 24,
-        "h": 3
-      },
+      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
       "style": "frame",
-      "content": [
-        {
-          "type": "text",
-          "text": "A (Enter) pick   B (Escape) back"
-        }
-      ]
+      "content": [ { "type": "text", "text": "A (Enter) pick   B (Escape) back" } ]
     }
   ],
   "hooks": {
     "on_enter": [
       {
-        "cmd": "SCRIPT",
-        "ref": "init"
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          { "name": "state", "value": "'picking'" },
+          { "name": "pins_picked", "value": "0" },
+          { "name": "total_pins", "value": "3" },
+          { "name": "cursor_pos", "value": "0" },
+          { "name": "cursor_dir", "value": "1" },
+          { "name": "cursor_speed", "value": "30" },
+          { "name": "sweet_spot_start", "value": "20" },
+          { "name": "sweet_spot_width", "value": "15" },
+          { "name": "display_text", "value": "''" },
+          { "name": "status_text", "value": "'Press ENTER in the sweet spot!'" }
+        ]
       }
     ],
     "on_frame": [
       {
-        "cmd": "SCRIPT",
-        "ref": "update"
+        "cmd": "IF",
+        "condition": "sceneState.state == 'picking'",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "cursor_pos",
+            "value": "sceneState.cursor_pos + (sceneState.cursor_speed * sceneState.cursor_dir * (ctx.time and ctx.time.dt or (1/60)))"
+          },
+          {
+            "cmd": "IF",
+            "condition": "sceneState.cursor_pos > 100",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  { "name": "cursor_pos", "value": "100" },
+                  { "name": "cursor_dir", "value": "-1" }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "sceneState.cursor_pos < 0",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      { "name": "cursor_pos", "value": "0" },
+                      { "name": "cursor_dir", "value": "1" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "render"
+          }
+        ]
       }
     ],
     "on_select": [
       {
-        "cmd": "SCRIPT",
-        "ref": "pick"
+        "cmd": "IF",
+        "condition": "sceneState.state ~= 'picking'",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              { "name": "state", "value": "'picking'" },
+              { "name": "pins_picked", "value": "0" },
+              { "name": "cursor_speed", "value": "30" },
+              { "name": "sweet_spot_start", "value": "20" },
+              { "name": "status_text", "value": "'Press ENTER in the sweet spot!'" }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.cursor_pos >= sceneState.sweet_spot_start and sceneState.cursor_pos <= sceneState.sweet_spot_start + sceneState.sweet_spot_width",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "pins_picked",
+                "value": "sceneState.pins_picked + 1"
+              },
+              {
+                "cmd": "IF",
+                "condition": "sceneState.pins_picked >= sceneState.total_pins",
+                "then": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      { "name": "state", "value": "'won'" },
+                      { "name": "status_text", "value": "'LOCK PICKED! Press ENTER to replay.'" }
+                    ]
+                  }
+                ],
+                "else": [
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "assignments": [
+                      { "name": "status_text", "value": "'Pin set!'" },
+                      { "name": "cursor_speed", "value": "sceneState.cursor_speed + 15" },
+                      { "name": "sweet_spot_start", "value": "math.random(10, 70)" }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  { "name": "state", "value": "'failed'" },
+                  { "name": "status_text", "value": "'FAILED! Pick broke. Press ENTER to retry.'" }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ],
     "on_cancel": [
@@ -163,8 +176,6 @@
     ]
   },
   "scripts": {
-    "init": "local sceneState = ctx.sceneState\nsceneState.state = 'picking'\nsceneState.pins_picked = 0\nsceneState.total_pins = 3\nsceneState.cursor_pos = 0\nsceneState.cursor_dir = 1\nsceneState.cursor_speed = 30\nsceneState.sweet_spot_start = 20\nsceneState.sweet_spot_width = 15\nsceneState.display_text = ''\nsceneState.status_text = 'Press ENTER in the sweet spot!'",
-    "update": "local sceneState = ctx.sceneState\nif sceneState.state ~= 'picking' then return end\nlocal dt = sceneState.time.dt\nsceneState.cursor_pos = sceneState.cursor_pos + (sceneState.cursor_speed * sceneState.cursor_dir * dt)\nif sceneState.cursor_pos > 100 then\n    sceneState.cursor_pos = 100\n    sceneState.cursor_dir = -1\nelseif sceneState.cursor_pos < 0 then\n    sceneState.cursor_pos = 0\n    sceneState.cursor_dir = 1\nend\nlocal text = '['\nfor i = 1, 20 do\n    local p_start = (i - 1) * 5\n    local p_end = i * 5\n    local isSweet = (p_end >= sceneState.sweet_spot_start and p_start <= sceneState.sweet_spot_start + sceneState.sweet_spot_width)\n    local isNeedle = (sceneState.cursor_pos >= p_start and sceneState.cursor_pos < p_end)\n    if i == 20 and sceneState.cursor_pos >= 100 then isNeedle = true end\n    if isNeedle and isSweet then text = text .. '+'\n    elseif isNeedle then text = text .. '|'\n    elseif isSweet then text = text .. '='\n    else text = text .. '-' end\nend\ntext = text .. ']'\nsceneState.display_text = text",
-    "pick": "local sceneState = ctx.sceneState\nif sceneState.state ~= 'picking' then\n    sceneState.state = 'picking'\n    sceneState.pins_picked = 0\n    sceneState.cursor_speed = 30\n    sceneState.sweet_spot_start = 20\n    sceneState.status_text = 'Press ENTER in the sweet spot!'\n    return\nend\nif sceneState.cursor_pos >= sceneState.sweet_spot_start and sceneState.cursor_pos <= sceneState.sweet_spot_start + sceneState.sweet_spot_width then\n    sceneState.pins_picked = sceneState.pins_picked + 1\n    if sceneState.pins_picked >= sceneState.total_pins then\n        sceneState.state = 'won'\n        sceneState.status_text = 'LOCK PICKED! Press ENTER to replay.'\n    else\n        sceneState.status_text = 'Pin set!'\n        sceneState.cursor_speed = sceneState.cursor_speed + 15\n        sceneState.sweet_spot_start = math.random(10, 70)\n    end\nelse\n    sceneState.state = 'failed'\n    sceneState.status_text = 'FAILED! Pick broke. Press ENTER to retry.'\nend"
+    "render": "local sceneState = ctx.sceneState\nlocal text = '['\nfor i = 1, 20 do\n    local p_start = (i - 1) * 5\n    local p_end = i * 5\n    local isSweet = (p_end >= sceneState.sweet_spot_start and p_start <= sceneState.sweet_spot_start + sceneState.sweet_spot_width)\n    local isNeedle = (sceneState.cursor_pos >= p_start and sceneState.cursor_pos < p_end)\n    if i == 20 and sceneState.cursor_pos >= 100 then isNeedle = true end\n    if isNeedle and isSweet then text = text .. '+'\n    elseif isNeedle then text = text .. '|'\n    elseif isSweet then text = text .. '='\n    else text = text .. '-' end\nend\ntext = text .. ']'\nsceneState.display_text = text"
   }
 }

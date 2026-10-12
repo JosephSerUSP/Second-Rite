@@ -3,14 +3,72 @@
   "terminal": {
     "reached": "sceneState.state == 'won' or sceneState.state == 'failed'",
     "script": [
-      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
-      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
-      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
-      { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 }, { "wait": 0.2 },
-      { "key": "return" }
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "key": "return"
+      }
     ]
   },
-  "name": "B005 — Lockpicking",
+  "name": "B005 \u2014 Lockpicking",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -21,43 +79,114 @@
   "windows": [
     {
       "id": "title",
-      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
+      "rect": {
+        "x": 4,
+        "y": 2,
+        "w": 24,
+        "h": 4
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "B005 — Lockpicking" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "B005 \u2014 Lockpicking"
+        }
+      ]
     },
     {
       "id": "board",
-      "rect": { "x": 2, "y": 7, "w": 28, "h": 8 },
+      "rect": {
+        "x": 2,
+        "y": 7,
+        "w": 28,
+        "h": 8
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{sceneState.display_text}" },
-        { "type": "text", "y": 2, "text": "Pins Picked: {sceneState.pins_picked} / {sceneState.total_pins}" },
-        { "type": "text", "y": 4, "text": "{sceneState.status_text}" }
+        {
+          "type": "text",
+          "text": "{sceneState.display_text}"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "Pins Picked: {sceneState.pins_picked} / {sceneState.total_pins}"
+        },
+        {
+          "type": "text",
+          "y": 4,
+          "text": "{sceneState.status_text}"
+        }
       ]
     },
     {
       "id": "help",
-      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
+      "rect": {
+        "x": 4,
+        "y": 17,
+        "w": 24,
+        "h": 3
+      },
       "style": "frame",
-      "content": [ { "type": "text", "text": "A (Enter) pick   B (Escape) back" } ]
+      "content": [
+        {
+          "type": "text",
+          "text": "A (Enter) pick   B (Escape) back"
+        }
+      ]
     }
   ],
   "hooks": {
     "on_enter": [
       {
         "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          { "name": "state", "value": "'picking'" },
-          { "name": "pins_picked", "value": "0" },
-          { "name": "total_pins", "value": "3" },
-          { "name": "cursor_pos", "value": "0" },
-          { "name": "cursor_dir", "value": "1" },
-          { "name": "cursor_speed", "value": "30" },
-          { "name": "sweet_spot_start", "value": "20" },
-          { "name": "sweet_spot_width", "value": "15" },
-          { "name": "display_text", "value": "''" },
-          { "name": "status_text", "value": "'Press ENTER in the sweet spot!'" }
-        ]
+        "name": "state",
+        "value": "'picking'"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "pins_picked",
+        "value": "0"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "total_pins",
+        "value": "3"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "cursor_pos",
+        "value": "0"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "cursor_dir",
+        "value": "1"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "cursor_speed",
+        "value": "30"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "sweet_spot_start",
+        "value": "20"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "sweet_spot_width",
+        "value": "15"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "display_text",
+        "value": "''"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "status_text",
+        "value": "'Press ENTER in the sweet spot!'"
       }
     ],
     "on_frame": [
@@ -68,7 +197,7 @@
           {
             "cmd": "SET_SCENE_STATE",
             "name": "cursor_pos",
-            "value": "sceneState.cursor_pos + (sceneState.cursor_speed * sceneState.cursor_dir * (ctx.time and ctx.time.dt or (1/60)))"
+            "value": "sceneState.cursor_pos + (sceneState.cursor_speed * sceneState.cursor_dir * (sceneState.time and sceneState.time.dt or (1/60)))"
           },
           {
             "cmd": "IF",
@@ -76,10 +205,13 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  { "name": "cursor_pos", "value": "100" },
-                  { "name": "cursor_dir", "value": "-1" }
-                ]
+                "name": "cursor_pos",
+                "value": "100"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "cursor_dir",
+                "value": "-1"
               }
             ],
             "else": [
@@ -89,10 +221,13 @@
                 "then": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      { "name": "cursor_pos", "value": "0" },
-                      { "name": "cursor_dir", "value": "1" }
-                    ]
+                    "name": "cursor_pos",
+                    "value": "0"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "cursor_dir",
+                    "value": "1"
                   }
                 ]
               }
@@ -112,13 +247,28 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              { "name": "state", "value": "'picking'" },
-              { "name": "pins_picked", "value": "0" },
-              { "name": "cursor_speed", "value": "30" },
-              { "name": "sweet_spot_start", "value": "20" },
-              { "name": "status_text", "value": "'Press ENTER in the sweet spot!'" }
-            ]
+            "name": "state",
+            "value": "'picking'"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "pins_picked",
+            "value": "0"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "cursor_speed",
+            "value": "30"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "sweet_spot_start",
+            "value": "20"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "status_text",
+            "value": "'Press ENTER in the sweet spot!'"
           }
         ],
         "else": [
@@ -137,20 +287,30 @@
                 "then": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      { "name": "state", "value": "'won'" },
-                      { "name": "status_text", "value": "'LOCK PICKED! Press ENTER to replay.'" }
-                    ]
+                    "name": "state",
+                    "value": "'won'"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "status_text",
+                    "value": "'LOCK PICKED! Press ENTER to replay.'"
                   }
                 ],
                 "else": [
                   {
                     "cmd": "SET_SCENE_STATE",
-                    "assignments": [
-                      { "name": "status_text", "value": "'Pin set!'" },
-                      { "name": "cursor_speed", "value": "sceneState.cursor_speed + 15" },
-                      { "name": "sweet_spot_start", "value": "math.random(10, 70)" }
-                    ]
+                    "name": "status_text",
+                    "value": "'Pin set!'"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "cursor_speed",
+                    "value": "sceneState.cursor_speed + 15"
+                  },
+                  {
+                    "cmd": "SET_SCENE_STATE",
+                    "name": "sweet_spot_start",
+                    "value": "math.random(10, 70)"
                   }
                 ]
               }
@@ -158,10 +318,13 @@
             "else": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  { "name": "state", "value": "'failed'" },
-                  { "name": "status_text", "value": "'FAILED! Pick broke. Press ENTER to retry.'" }
-                ]
+                "name": "state",
+                "value": "'failed'"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "status_text",
+                "value": "'FAILED! Pick broke. Press ENTER to retry.'"
               }
             ]
           }

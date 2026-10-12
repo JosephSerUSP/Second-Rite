@@ -1,0 +1,14 @@
+{
+  "candidateId": "intermediate-1800",
+  "startMp": 1800,
+  "saveIdentity": {
+    "schemaVersion": 1,
+    "name": "Second Rite Horizon 1800",
+    "identity": "SecondRiteHorizon1800",
+    "productName": "Second Rite Horizon 1800",
+    "executableName": "Second Rite Horizon 1800",
+    "buildSlug": "Second-Rite-Horizon-1800",
+    "windowTitle": "Second Rite Horizon 1800",
+    "productVersion": "0.0.0-dev"
+  }
+}

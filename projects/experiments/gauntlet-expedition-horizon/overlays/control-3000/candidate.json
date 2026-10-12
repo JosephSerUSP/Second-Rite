@@ -1,0 +1,14 @@
+{
+  "candidateId": "control-3000",
+  "startMp": 3000,
+  "saveIdentity": {
+    "schemaVersion": 1,
+    "name": "Second Rite Horizon 3000",
+    "identity": "SecondRiteHorizon3000",
+    "productName": "Second Rite Horizon 3000",
+    "executableName": "Second Rite Horizon 3000",
+    "buildSlug": "Second-Rite-Horizon-3000",
+    "windowTitle": "Second Rite Horizon 3000",
+    "productVersion": "0.0.0-dev"
+  }
+}

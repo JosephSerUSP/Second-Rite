@@ -1,0 +1,23 @@
+# Blender 5.2.2 LTS MTL File: 'protect_ring.blend'
+# www.blender.org
+
+newmtl protect_ring_metal
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.620000 0.460000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl protect_ring_stone
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.200000 0.300000 0.650000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

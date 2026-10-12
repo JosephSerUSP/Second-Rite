@@ -1,0 +1,34 @@
+# Blender 5.2.2 LTS MTL File: 'knight_sword.blend'
+# www.blender.org
+
+newmtl knight_sword_blade
+Ns 19.599997
+Ka 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd knight_sword_blade.png
+
+pass sphere add 0.3 assets/models/matcaps/steel.png
+newmtl knight_sword_fittings
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.620000 0.460000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.5 assets/models/matcaps/gold.png
+newmtl knight_sword_grip
+Ns 48.400013
+Ka 1.000000 1.000000 1.000000
+Kd 0.120000 0.140000 0.340000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2

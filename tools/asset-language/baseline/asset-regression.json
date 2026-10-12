@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "sourceCommit": "66315b361eb0965da844adf4507d9deb7fca3e3c",
+  "sourceCommit": "8b6714e025f25d8783cddfc0d2c7c86a4064ae55",
   "contractVersion": 1,
   "itemModelReferences": [
     {
@@ -1680,22 +1680,22 @@
     },
     {
       "path": "assets/models/items/adamant_blade.obj",
-      "vertexCount": 86,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 136,
+      "vertexCount": 502,
+      "uvCount": 64,
+      "normalCount": 186,
+      "faceCount": 984,
       "materialUseCount": 5,
-      "mtllib": "item_batch_53_62.mtl",
+      "mtllib": "adamant_blade.mtl",
       "bounds": {
         "min": [
-          -0.625,
-          -1.8538,
-          -0.207846
+          -0.56,
+          -1.22,
+          -0.22
         ],
         "max": [
-          0.625,
-          1.8538,
-          0.207846
+          0.56,
+          3.15,
+          0.22
         ]
       }
     },
@@ -2394,22 +2394,22 @@
     },
     {
       "path": "assets/models/items/compass.obj",
-      "vertexCount": 16,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 24,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 473,
+      "uvCount": 25,
+      "normalCount": 249,
+      "faceCount": 880,
+      "materialUseCount": 9,
+      "mtllib": "compass.mtl",
       "bounds": {
         "min": [
-          -0.36,
-          -0.205,
-          -0.240263
+          -2.690089,
+          -1.0,
+          -0.355
         ],
         "max": [
-          0.36,
-          0.205,
-          0.240263
+          1.0,
+          1.795,
+          1.095981
         ]
       }
     },
@@ -2457,22 +2457,22 @@
     },
     {
       "path": "assets/models/items/coral_sword.obj",
-      "vertexCount": 42,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 68,
-      "materialUseCount": 4,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 512,
+      "uvCount": 56,
+      "normalCount": 176,
+      "faceCount": 1004,
+      "materialUseCount": 5,
+      "mtllib": "coral_sword.mtl",
       "bounds": {
         "min": [
-          -0.39,
-          -1.725,
-          -0.14
+          -0.42,
+          -1.2,
+          -0.15
         ],
         "max": [
-          0.39,
-          1.725,
-          0.14
+          0.751252,
+          2.85,
+          0.15
         ]
       }
     },
@@ -2583,22 +2583,22 @@
     },
     {
       "path": "assets/models/items/daifuku.obj",
-      "vertexCount": 16,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 24,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 3663,
+      "uvCount": 57,
+      "normalCount": 6616,
+      "faceCount": 7290,
+      "materialUseCount": 9,
+      "mtllib": "daifuku.mtl",
       "bounds": {
         "min": [
-          -0.375,
-          -0.295,
-          -0.29
+          -1.55,
+          -0.02,
+          -0.938367
         ],
         "max": [
-          0.375,
-          0.295,
-          0.29
+          1.55,
+          1.52,
+          0.88
         ]
       }
     },
@@ -2793,22 +2793,22 @@
     },
     {
       "path": "assets/models/items/emerald_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 154,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 78,
+      "faceCount": 300,
+      "materialUseCount": 3,
+      "mtllib": "emerald_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.68,
+          -0.68,
+          -0.336
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.68,
+          1.1128,
+          0.336
         ]
       }
     },
@@ -2940,22 +2940,22 @@
     },
     {
       "path": "assets/models/items/executioner.obj",
-      "vertexCount": 42,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 68,
-      "materialUseCount": 4,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 578,
+      "uvCount": 64,
+      "normalCount": 247,
+      "faceCount": 1128,
+      "materialUseCount": 7,
+      "mtllib": "executioner.mtl",
       "bounds": {
         "min": [
-          -0.4,
-          -2.15,
-          -0.14
+          -0.755,
+          -1.34,
+          -0.235
         ],
         "max": [
-          0.4,
-          2.15,
-          0.14
+          0.755,
+          3.3,
+          0.235
         ]
       }
     },
@@ -2982,22 +2982,22 @@
     },
     {
       "path": "assets/models/items/feijoada.obj",
-      "vertexCount": 16,
+      "vertexCount": 3997,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 24,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 4874,
+      "faceCount": 6692,
+      "materialUseCount": 14,
+      "mtllib": "feijoada.mtl",
       "bounds": {
         "min": [
-          -0.375,
-          -0.295,
-          -0.29
+          -1.355,
+          0.0,
+          -1.05
         ],
         "max": [
-          0.375,
-          0.295,
-          0.29
+          1.355,
+          2.908474,
+          1.05
         ]
       }
     },
@@ -3045,22 +3045,22 @@
     },
     {
       "path": "assets/models/items/flame_saber.obj",
-      "vertexCount": 71,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 110,
-      "materialUseCount": 6,
-      "mtllib": "item_batch_63_72.mtl",
+      "vertexCount": 504,
+      "uvCount": 56,
+      "normalCount": 168,
+      "faceCount": 988,
+      "materialUseCount": 5,
+      "mtllib": "flame_saber.mtl",
       "bounds": {
         "min": [
-          -0.41,
-          -1.74,
-          -0.177308
+          -0.64,
+          -1.22,
+          -0.22
         ],
         "max": [
-          0.41,
-          1.74,
-          0.177308
+          0.64,
+          2.95,
+          0.22
         ]
       }
     },
@@ -3150,22 +3150,22 @@
     },
     {
       "path": "assets/models/items/glass_blade.obj",
-      "vertexCount": 50,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 80,
+      "vertexCount": 512,
+      "uvCount": 56,
+      "normalCount": 176,
+      "faceCount": 1004,
       "materialUseCount": 5,
-      "mtllib": "item_batch_63_72.mtl",
+      "mtllib": "glass_blade.mtl",
       "bounds": {
         "min": [
-          -0.43,
-          -1.815,
-          -0.16
+          -0.64,
+          -1.2,
+          -0.15
         ],
         "max": [
-          0.43,
-          1.815,
-          0.16
+          0.64,
+          3.0,
+          0.15
         ]
       }
     },
@@ -3297,22 +3297,22 @@
     },
     {
       "path": "assets/models/items/hazel_wand.obj",
-      "vertexCount": 100,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 168,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_53_62.mtl",
+      "vertexCount": 2218,
+      "uvCount": 1928,
+      "normalCount": 1909,
+      "faceCount": 3364,
+      "materialUseCount": 22,
+      "mtllib": "hazel_wand.mtl",
       "bounds": {
         "min": [
-          -0.323904,
-          -1.43118,
-          -0.147224
+          -0.929576,
+          -0.009985,
+          -0.186198
         ],
         "max": [
-          0.323904,
-          1.43118,
-          0.147224
+          0.948789,
+          3.84,
+          0.226987
         ]
       }
     },
@@ -3528,22 +3528,22 @@
     },
     {
       "path": "assets/models/items/iron_knife.obj",
-      "vertexCount": 42,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 68,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_53_62.mtl",
+      "vertexCount": 496,
+      "uvCount": 56,
+      "normalCount": 169,
+      "faceCount": 972,
+      "materialUseCount": 5,
+      "mtllib": "iron_knife.mtl",
       "bounds": {
         "min": [
-          -0.24,
-          -1.04,
-          -0.16
+          -0.56,
+          -1.2,
+          -0.15
         ],
         "max": [
-          0.24,
-          1.04,
-          0.16
+          0.56,
+          1.95,
+          0.15
         ]
       }
     },
@@ -3591,22 +3591,22 @@
     },
     {
       "path": "assets/models/items/knight_sword.obj",
-      "vertexCount": 82,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 132,
-      "materialUseCount": 4,
-      "mtllib": "item_batch_53_62.mtl",
+      "vertexCount": 532,
+      "uvCount": 72,
+      "normalCount": 202,
+      "faceCount": 1044,
+      "materialUseCount": 5,
+      "mtllib": "knight_sword.mtl",
       "bounds": {
         "min": [
-          -0.691979,
-          -1.79,
-          -0.16
+          -0.76,
+          -1.18,
+          -0.24
         ],
         "max": [
-          0.691979,
-          1.79,
-          0.16
+          0.76,
+          3.45,
+          0.24
         ]
       }
     },
@@ -3654,22 +3654,22 @@
     },
     {
       "path": "assets/models/items/mage_robe.obj",
-      "vertexCount": 38,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 60,
-      "materialUseCount": 3,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 1465,
+      "uvCount": 631,
+      "normalCount": 2083,
+      "faceCount": 2880,
+      "materialUseCount": 11,
+      "mtllib": "mage_robe.mtl",
       "bounds": {
         "min": [
-          -0.77,
-          -0.77,
-          -0.305
+          -1.825679,
+          -1.78,
+          -0.94
         ],
         "max": [
-          0.77,
-          0.77,
-          0.305
+          1.825679,
+          1.78,
+          0.951227
         ]
       }
     },
@@ -3780,43 +3780,43 @@
     },
     {
       "path": "assets/models/items/medicine_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 128,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 1,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 46,
+      "faceCount": 248,
+      "materialUseCount": 3,
+      "mtllib": "medicine_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.74,
+          -0.74,
+          -0.103923
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.74,
+          1.32,
+          0.14
         ]
       }
     },
     {
       "path": "assets/models/items/mega_potion.obj",
-      "vertexCount": 76,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 136,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_149_158.mtl",
+      "vertexCount": 2248,
+      "uvCount": 4,
+      "normalCount": 3494,
+      "faceCount": 4448,
+      "materialUseCount": 8,
+      "mtllib": "mega_potion.mtl",
       "bounds": {
         "min": [
-          -0.62,
-          -1.13,
-          -0.62
+          -0.699893,
+          0.02,
+          -0.68926
         ],
         "max": [
-          0.62,
-          1.13,
-          0.62
+          0.699893,
+          2.44,
+          0.637682
         ]
       }
     },
@@ -4242,43 +4242,43 @@
     },
     {
       "path": "assets/models/items/onyx_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 216,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 125,
+      "faceCount": 404,
+      "materialUseCount": 4,
+      "mtllib": "onyx_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.715,
+          -0.715,
+          -0.439388
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.715,
+          1.124,
+          0.439388
         ]
       }
     },
     {
       "path": "assets/models/items/pao_de_queijo.obj",
-      "vertexCount": 16,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 24,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 3868,
+      "uvCount": 297,
+      "normalCount": 7450,
+      "faceCount": 7684,
+      "materialUseCount": 17,
+      "mtllib": "pao_de_queijo.mtl",
       "bounds": {
         "min": [
-          -0.375,
-          -0.295,
-          -0.29
+          -1.365859,
+          0.0,
+          -1.365859
         ],
         "max": [
-          0.375,
-          0.295,
-          0.29
+          1.365859,
+          2.285431,
+          1.365859
         ]
       }
     },
@@ -4305,43 +4305,43 @@
     },
     {
       "path": "assets/models/items/peace_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 198,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 1,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 189,
+      "faceCount": 384,
+      "materialUseCount": 5,
+      "mtllib": "peace_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.675,
+          -0.675,
+          -0.122308
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.675,
+          1.155479,
+          0.122308
         ]
       }
     },
     {
       "path": "assets/models/items/pearl_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 254,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 1,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 191,
+      "faceCount": 488,
+      "materialUseCount": 6,
+      "mtllib": "pearl_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.715,
+          -0.715,
+          -0.383358
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.715,
+          1.572,
+          0.383358
         ]
       }
     },
@@ -4452,22 +4452,22 @@
     },
     {
       "path": "assets/models/items/plate_armor.obj",
-      "vertexCount": 38,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 60,
-      "materialUseCount": 3,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 2825,
+      "uvCount": 844,
+      "normalCount": 3598,
+      "faceCount": 5596,
+      "materialUseCount": 16,
+      "mtllib": "plate_armor.mtl",
       "bounds": {
         "min": [
-          -0.77,
-          -0.77,
-          -0.305
+          -1.174318,
+          -1.66,
+          -0.67
         ],
         "max": [
-          0.77,
-          0.77,
-          0.305
+          1.174318,
+          1.2,
+          0.837334
         ]
       }
     },
@@ -4515,22 +4515,22 @@
     },
     {
       "path": "assets/models/items/protect_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 140,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 1,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 54,
+      "faceCount": 268,
+      "materialUseCount": 4,
+      "mtllib": "protect_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.74,
+          -0.74,
+          -0.103923
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.74,
+          1.432,
+          0.189
         ]
       }
     },
@@ -4767,22 +4767,22 @@
     },
     {
       "path": "assets/models/items/ruby_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 188,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 113,
+      "faceCount": 352,
+      "materialUseCount": 7,
+      "mtllib": "ruby_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.715,
+          -0.715,
+          -0.336
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.715,
+          1.278,
+          0.336
         ]
       }
     },
@@ -4872,22 +4872,22 @@
     },
     {
       "path": "assets/models/items/sapphire_ring.obj",
-      "vertexCount": 26,
+      "vertexCount": 154,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 44,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 78,
+      "faceCount": 300,
+      "materialUseCount": 3,
+      "mtllib": "sapphire_ring.mtl",
       "bounds": {
         "min": [
-          -0.42,
-          -0.165,
-          -0.42
+          -0.76,
+          -0.76,
+          -0.35
         ],
         "max": [
-          0.42,
-          0.165,
-          0.42
+          0.76,
+          1.6168,
+          0.35
         ]
       }
     },
@@ -5355,43 +5355,43 @@
     },
     {
       "path": "assets/models/items/star_pendant.obj",
-      "vertexCount": 16,
+      "vertexCount": 1900,
       "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 24,
-      "materialUseCount": 2,
-      "mtllib": "item_complete_library.mtl",
+      "normalCount": 3444,
+      "faceCount": 3788,
+      "materialUseCount": 5,
+      "mtllib": "star_pendant.mtl",
       "bounds": {
         "min": [
-          -0.36,
-          -0.205,
-          -0.240263
+          -0.88081,
+          -0.631033,
+          -0.2
         ],
         "max": [
-          0.36,
-          0.205,
-          0.240263
+          0.811433,
+          2.051427,
+          0.32
         ]
       }
     },
     {
       "path": "assets/models/items/steel_sword.obj",
-      "vertexCount": 42,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 68,
-      "materialUseCount": 3,
-      "mtllib": "item_batch_53_62.mtl",
+      "vertexCount": 524,
+      "uvCount": 72,
+      "normalCount": 204,
+      "faceCount": 1028,
+      "materialUseCount": 5,
+      "mtllib": "steel_sword.mtl",
       "bounds": {
         "min": [
-          -0.39,
-          -1.64,
-          -0.16
+          -0.56,
+          -1.2,
+          -0.15
         ],
         "max": [
-          0.39,
-          1.64,
-          0.16
+          0.56,
+          3.05,
+          0.15
         ]
       }
     },
@@ -5628,22 +5628,22 @@
     },
     {
       "path": "assets/models/items/venom_knife.obj",
-      "vertexCount": 42,
-      "uvCount": 0,
-      "normalCount": 0,
-      "faceCount": 68,
-      "materialUseCount": 4,
-      "mtllib": "item_complete_library.mtl",
+      "vertexCount": 496,
+      "uvCount": 56,
+      "normalCount": 168,
+      "faceCount": 972,
+      "materialUseCount": 5,
+      "mtllib": "venom_knife.mtl",
       "bounds": {
         "min": [
-          -0.39,
-          -1.275,
-          -0.14
+          -0.56,
+          -1.2,
+          -0.15
         ],
         "max": [
-          0.39,
-          1.275,
-          0.14
+          0.56,
+          2.35,
+          0.15
         ]
       }
     },

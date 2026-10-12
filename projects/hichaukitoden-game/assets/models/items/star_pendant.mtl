@@ -1,0 +1,35 @@
+# Blender 5.2.2 LTS MTL File: 'star_pendant.blend'
+# www.blender.org
+
+newmtl pendant_amber
+Ns 202.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.950000 0.520000 0.060000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+
+pass sphere add 0.7 assets/models/matcaps/glass.png
+newmtl pendant_gold
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.640000 0.480000 0.180000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+pass sphere add 0.55 assets/models/matcaps/gold.png
+newmtl pendant_gold_shade
+Ns 270.399994
+Ka 0.750000 0.750000 0.750000
+Kd 0.420000 0.300000 0.100000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+pass sphere add 0.55 assets/models/matcaps/gold.png

@@ -6,7 +6,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 
 **Run with** says how to start a file. `run.py` means it runs inside the pinned Blender: `python tools/blender/run.py tools/blender/<script> [--blend FILE] -- <args>` (never a hand-typed `blender --python` command, which exits 0 when the script raises). `python` and `node` mean an ordinary host command; `import` means the file is only imported or spawned by other tools.
 
-## Supported authoring and verification entry points (29)
+## Supported authoring and verification entry points (31)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -26,6 +26,8 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [inspect_environment_parts.py](inspect_environment_parts.py) | `run.py` | Inspect named source furnishings individually without saving the document. |
 | [inspect_environment_surfaces.py](inspect_environment_surfaces.py) | `run.py` | Read-only source/package geometry and atlas inspection from independent cameras. |
 | [install_room_3d.py](install_room_3d.py) | `python` | Install a baked room export as a runtime town environment package. |
+| [item_preview.py](item_preview.py) | `run.py` | Quick Blender workbench render of an item source from four angles, for debugging live modifiers, cutters and Geometry Nodes without the OBJ compile or the LOVE round trip. |
+| [item_textures.py](item_textures.py) | `python` | Check (or sync) that authored item textures match their promoted copies and that every map_Kd and overlay-pass path in an item MTL resolves, since the compile check covers only OBJ and MTL bytes. |
 | [make_town_camera.py](make_town_camera.py) | `python` | Derive the Second Gate town side-view camera calibration record. |
 | [offline_blender.py](offline_blender.py) | `run.py` | Run a Blender Python tool with Python network connections denied in this process. |
 | [pack_environment_source.py](pack_environment_source.py) | `run.py` | Save a new self-contained source revision from a working source document. |
@@ -40,7 +42,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [validate_item_obj_runtime.py](validate_item_obj_runtime.py) | `python` | Validate item OBJ products against the runtime's non-degenerate-face contract. |
 | [vendor_assets.py](vendor_assets.py) | `python` | Acquire named assets deliberately, or verify the committed selection entirely offline. |
 
-## Implementation modules and Blender workers (34)
+## Implementation modules and Blender workers (35)
 
 | Script | Run with | Purpose |
 |---|---|---|
@@ -60,6 +62,7 @@ Run `python tools/blender/script_index.py --check`; after classifying a new top-
 | [furnishing_geometry.py](furnishing_geometry.py) | `import` | Evaluated geometry measurements shared by catalogue and scaffold placement. |
 | [ground_cover.py](ground_cover.py) | `import` | Ground cover as a Geometry Nodes modifier (the #1257 pilot). |
 | [import_map_bundle.py](import_map_bundle.py) | `run.py` | Blender-side importer for Thestra's authoritative renderable-bundle JSON. |
+| [item_kit.py](item_kit.py) | `import` | Scaffold helpers for authoring a NEW item .blend source inside Blender: export root and metadata, semantic/textured materials, revolve, superelliptic and polygon lofts, live-modifier and Geometry Nodes helpers, refuse-to-overwrite save. |
 | [item_mtl_runtime.py](item_mtl_runtime.py) | `import` | Finalize Blender-exported item MTL files with Second Rite runtime passes. |
 | [light_fixtures.py](light_fixtures.py) | `import` | Let a lamp shine out of a fixture smaller than itself: the housing stops shadowing its light. |
 | [map_bundle_scene.py](map_bundle_scene.py) | `import` | Pure planning helpers for Thestra renderable-bundle -> Blender scene import. |

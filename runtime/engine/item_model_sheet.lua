@@ -11,7 +11,10 @@ local item_model_sheet = {}
 
 local item_model_view = require("presentation.item_model_view")
 
-local CELL = 96
+-- ITEM_SHEET_CELL enlarges the cells for close inspection (texture and detail
+-- work is invisible at the in-game 96px); the default keeps the sheet
+-- byte-comparable with earlier review boards.
+local CELL = tonumber(os.getenv("ITEM_SHEET_CELL") or "") or 96
 local LABEL_HEIGHT = 12
 local COLUMNS = 14
 

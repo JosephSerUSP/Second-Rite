@@ -1,0 +1,135 @@
+{
+  "id": "b003_rearranging",
+  "name": "B003 Rearranging a Bedroom",
+  "kind": "custom",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "room_display",
+      "rect": { "x": 2, "y": 2, "w": 18, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "v.bed and 'Bed' or ''", "x": "v.bed_x * 4", "y": "v.bed_y * 2", "formula": true },
+        { "type": "text", "text": "v.desk and 'Desk' or ''", "x": "v.desk_x * 4", "y": "v.desk_y * 2", "formula": true },
+        { "type": "text", "text": "v.chair and 'Chair' or ''", "x": "v.chair_x * 4", "y": "v.chair_y * 2", "formula": true },
+        { "type": "text", "text": "v.lamp and 'Lamp' or ''", "x": "v.lamp_x * 4", "y": "v.lamp_y * 2", "formula": true }
+      ]
+    },
+    {
+      "id": "controls_panel",
+      "rect": { "x": 22, "y": 2, "w": 8, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Item:" },
+        { "type": "text", "text": "v.selected == 1 and '> Bed' or '  Bed'", "y": 2, "formula": true },
+        { "type": "text", "text": "v.selected == 2 and '> Desk' or '  Desk'", "y": 3, "formula": true },
+        { "type": "text", "text": "v.selected == 3 and '> Chair' or '  Chair'", "y": 4, "formula": true },
+        { "type": "text", "text": "v.selected == 4 and '> Lamp' or '  Lamp'", "y": 5, "formula": true },
+        { "type": "text", "text": "Mode:", "y": 7 },
+        { "type": "text", "text": "v.mode == 0 and 'SELECT' or 'MOVE'", "y": 8, "formula": true }
+      ]
+    },
+    {
+      "id": "narrative_panel",
+      "rect": { "x": 2, "y": 15, "w": 28, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "v.narrative", "formula": true }
+      ]
+    },
+    {
+      "id": "help_panel",
+      "rect": { "x": 2, "y": 22, "w": 28, "h": 2 },
+      "style": "invisible",
+      "content": [
+        { "type": "text", "text": "Z: Select/Place   Arrows: Move   X: Exit" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          { "name": "bed", "value": 1 }, { "name": "desk", "value": 1 }, { "name": "chair", "value": 1 }, { "name": "lamp", "value": 1 },
+          { "name": "bed_x", "value": 1 }, { "name": "bed_y", "value": 1 },
+          { "name": "desk_x", "value": 3 }, { "name": "desk_y", "value": 1 },
+          { "name": "chair_x", "value": 3 }, { "name": "chair_y", "value": 2 },
+          { "name": "lamp_x", "value": 4 }, { "name": "lamp_y", "value": 1 },
+          { "name": "selected", "value": 1 }, { "name": "mode", "value": 0 },
+          { "name": "narrative", "value": "'You enter the room. It feels cold.'" }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF", "condition": "v.mode == 0",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "selected", "value": "v.selected > 1 and v.selected - 1 or 4" } ],
+        "else": [
+          { "cmd": "IF", "condition": "v.selected == 1 and v.bed_y > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "bed_y", "value": "v.bed_y - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 2 and v.desk_y > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "desk_y", "value": "v.desk_y - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 3 and v.chair_y > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "chair_y", "value": "v.chair_y - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 4 and v.lamp_y > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "lamp_y", "value": "v.lamp_y - 1" } ] },
+          { "cmd": "SCRIPT", "code": "require('engine.hooks').call_hook('on_update_narrative', {})" }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF", "condition": "v.mode == 0",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "selected", "value": "v.selected < 4 and v.selected + 1 or 1" } ],
+        "else": [
+          { "cmd": "IF", "condition": "v.selected == 1 and v.bed_y < 4", "then": [ { "cmd": "SET_SCENE_STATE", "name": "bed_y", "value": "v.bed_y + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 2 and v.desk_y < 4", "then": [ { "cmd": "SET_SCENE_STATE", "name": "desk_y", "value": "v.desk_y + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 3 and v.chair_y < 4", "then": [ { "cmd": "SET_SCENE_STATE", "name": "chair_y", "value": "v.chair_y + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 4 and v.lamp_y < 4", "then": [ { "cmd": "SET_SCENE_STATE", "name": "lamp_y", "value": "v.lamp_y + 1" } ] },
+          { "cmd": "SCRIPT", "code": "require('engine.hooks').call_hook('on_update_narrative', {})" }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF", "condition": "v.mode == 1",
+        "then": [
+          { "cmd": "IF", "condition": "v.selected == 1 and v.bed_x > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "bed_x", "value": "v.bed_x - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 2 and v.desk_x > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "desk_x", "value": "v.desk_x - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 3 and v.chair_x > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "chair_x", "value": "v.chair_x - 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 4 and v.lamp_x > 0", "then": [ { "cmd": "SET_SCENE_STATE", "name": "lamp_x", "value": "v.lamp_x - 1" } ] },
+          { "cmd": "SCRIPT", "code": "require('engine.hooks').call_hook('on_update_narrative', {})" }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF", "condition": "v.mode == 1",
+        "then": [
+          { "cmd": "IF", "condition": "v.selected == 1 and v.bed_x < 3", "then": [ { "cmd": "SET_SCENE_STATE", "name": "bed_x", "value": "v.bed_x + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 2 and v.desk_x < 3", "then": [ { "cmd": "SET_SCENE_STATE", "name": "desk_x", "value": "v.desk_x + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 3 and v.chair_x < 3", "then": [ { "cmd": "SET_SCENE_STATE", "name": "chair_x", "value": "v.chair_x + 1" } ] },
+          { "cmd": "IF", "condition": "v.selected == 4 and v.lamp_x < 3", "then": [ { "cmd": "SET_SCENE_STATE", "name": "lamp_x", "value": "v.lamp_x + 1" } ] },
+          { "cmd": "SCRIPT", "code": "require('engine.hooks').call_hook('on_update_narrative', {})" }
+        ]
+      }
+    ],
+    "on_select": [
+      { "cmd": "SET_SCENE_STATE", "name": "mode", "value": "v.mode == 0 and 1 or 0" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ],
+    "on_update_narrative": [
+      { "cmd": "SET_SCENE_STATE", "name": "narrative", "value": "''" },
+      {
+        "cmd": "IF", "condition": "v.desk_x == 0 and v.desk_y == 4 and v.chair_x == 0 and v.chair_y == 3",
+        "then": [ { "cmd": "SET_SCENE_STATE", "name": "narrative", "value": "'The desk by the window, the chair ready. He used to study here.'" } ],
+        "else": [
+          {
+            "cmd": "IF", "condition": "v.lamp_x == v.bed_x and v.lamp_y == v.bed_y",
+            "then": [ { "cmd": "SET_SCENE_STATE", "name": "narrative", "value": "'The lamp sits on the bed. A fire hazard, she would have said.'" } ],
+            "else": [ { "cmd": "SET_SCENE_STATE", "name": "narrative", "value": "'Just furniture in a room now.'" } ]
+          }
+        ]
+      }
+    ]
+  }
+}

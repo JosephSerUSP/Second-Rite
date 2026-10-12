@@ -150,20 +150,6 @@
       },
       {
         "cmd": "IF",
-        "condition": "locals._guard == 0 and sceneState.idx == 16",
-        "then": [
-          {
-            "cmd": "SET_LOCAL",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "QUIT_GAME"
-          }
-        ]
-      },
-      {
-        "cmd": "IF",
         "condition": "locals._guard == 0 and sceneState.idx == 5",
         "then": [
           {
@@ -406,6 +392,40 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "c003_moving_breakout"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.idx == 16",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "b003_rearranging"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.idx == 17",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
           }
         ]
       },

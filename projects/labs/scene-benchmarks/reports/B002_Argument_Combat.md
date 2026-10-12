@@ -14,10 +14,10 @@ B002 — Argument as Combat
 - None. The turn resolver is authored entirely with standard `IF` and `SET_VAR` Event commands.
 
 ### Missing Reusable Semantics
-- No missing runtime semantic blocked the experiment. The main cost is authoring verbosity: four tactic branches plus shared pressure/outcome checks require a fairly deep command tree.
+- No missing runtime semantic blocked the experiment. The turn resolver was originally authored with a deep command tree due to verbosity, but using the `assignments` array in `SET_SCENE_STATE` significantly compacted the logic. No new commands are necessary.
 
 ### Awkward But Expressible
-- Multi-variable turn resolution is verbose in the JSON command tree, especially when preserving ordered outcome precedence, but it is fully expressible without native scripting.
+- Multi-variable turn resolution is slightly verbose in the JSON command tree, especially when preserving ordered outcome precedence, but it is fully expressible without native scripting and can be compacted using `assignments` arrays.
 - Clamping Embarrassment on Deflect uses the same formula-expression surface already used elsewhere in the Scene (`v.embarrassment > 20 and v.embarrassment - 20 or 0`) rather than a new command or backend helper.
 
 ### Tooling / Discoverability Gaps

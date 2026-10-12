@@ -3,7 +3,7 @@
   "terminal": {
     "reached": "sceneState.win == true"
   },
-  "name": "A004 — Sokoban",
+  "name": "A004 \u2014 Sokoban",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -19,7 +19,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{sceneState.win and 'A004 — YOU WIN!' or 'A004 — Push crates to goals'}"
+          "text": "{sceneState.win and 'A004 \u2014 YOU WIN!' or 'A004 \u2014 Push crates to goals'}"
         }
       ]
     },

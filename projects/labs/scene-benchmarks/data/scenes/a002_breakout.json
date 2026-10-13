@@ -97,73 +97,12 @@
     "on_enter": [
       {
         "cmd": "SET_LOCAL",
-        "assignments": [
-          {
-            "name": "_guard",
-            "value": 0
-          }
-        ]
+        "name": "_guard",
+        "value": 0
       },
       {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "fieldW",
-            "value": 26
-          },
-          {
-            "name": "fieldH",
-            "value": 14
-          },
-          {
-            "name": "padW",
-            "value": 5
-          },
-          {
-            "name": "padX",
-            "value": 10
-          },
-          {
-            "name": "padY",
-            "value": 13
-          },
-          {
-            "name": "ballX",
-            "value": 12
-          },
-          {
-            "name": "ballY",
-            "value": 13.5
-          },
-          {
-            "name": "ballVX",
-            "value": 8
-          },
-          {
-            "name": "ballVY",
-            "value": 10
-          },
-          {
-            "name": "score",
-            "value": 0
-          },
-          {
-            "name": "moveInput",
-            "value": 0
-          },
-          {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
-            "name": "gameOver",
-            "value": "false"
-          },
-          {
-            "name": "gameWon",
-            "value": "false"
-          }
-        ]
+        "cmd": "SCRIPT",
+        "code": "require('engine.hooks').call_hook('init_state', {})"
       },
       {
         "cmd": "SCRIPT",
@@ -172,69 +111,84 @@
     ],
     "on_select": [
       {
-        "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "fieldW",
-            "value": 26
-          },
-          {
-            "name": "fieldH",
-            "value": 14
-          },
-          {
-            "name": "padW",
-            "value": 5
-          },
-          {
-            "name": "padX",
-            "value": 10
-          },
-          {
-            "name": "padY",
-            "value": 13
-          },
-          {
-            "name": "ballX",
-            "value": 12
-          },
-          {
-            "name": "ballY",
-            "value": 13.5
-          },
-          {
-            "name": "ballVX",
-            "value": 8
-          },
-          {
-            "name": "ballVY",
-            "value": 10
-          },
-          {
-            "name": "score",
-            "value": 0
-          },
-          {
-            "name": "moveInput",
-            "value": 0
-          },
-          {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
-            "name": "gameOver",
-            "value": "false"
-          },
-          {
-            "name": "gameWon",
-            "value": "false"
-          }
-        ]
+        "cmd": "SCRIPT",
+        "code": "require('engine.hooks').call_hook('init_state', {})"
       },
       {
         "cmd": "SCRIPT",
         "ref": "setup_bricks"
+      }
+    ],
+    "init_state": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "fieldW",
+        "value": 26
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "fieldH",
+        "value": 14
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padW",
+        "value": 5
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padX",
+        "value": 10
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padY",
+        "value": 13
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballX",
+        "value": 12
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballY",
+        "value": 13.5
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballVX",
+        "value": 8
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballVY",
+        "value": 10
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "score",
+        "value": 0
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "moveInput",
+        "value": 0
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "renderedField",
+        "value": "''"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "gameOver",
+        "value": "false"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "gameWon",
+        "value": "false"
       }
     ],
     "on_frame": [
@@ -244,24 +198,23 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "padX",
-                "value": "clamp(sceneState.padX + sceneState.moveInput * 18.0 * sceneState.time.dt, 0, sceneState.fieldW - sceneState.padW)"
-              },
-              {
-                "name": "moveInput",
-                "value": 0
-              },
-              {
-                "name": "ballX",
-                "value": "sceneState.ballX + sceneState.ballVX * sceneState.time.dt"
-              },
-              {
-                "name": "ballY",
-                "value": "sceneState.ballY + sceneState.ballVY * sceneState.time.dt"
-              }
-            ]
+            "name": "padX",
+            "value": "clamp(sceneState.padX + sceneState.moveInput * 18.0 * sceneState.time.dt, 0, sceneState.fieldW - sceneState.padW)"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "moveInput",
+            "value": 0
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "ballX",
+            "value": "sceneState.ballX + sceneState.ballVX * sceneState.time.dt"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "ballY",
+            "value": "sceneState.ballY + sceneState.ballVY * sceneState.time.dt"
           },
           {
             "cmd": "IF",
@@ -269,16 +222,13 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "ballX",
-                    "value": "clamp(sceneState.ballX, 0, sceneState.fieldW - 1)"
-                  },
-                  {
-                    "name": "ballVX",
-                    "value": "-sceneState.ballVX"
-                  }
-                ]
+                "name": "ballX",
+                "value": "clamp(sceneState.ballX, 0, sceneState.fieldW - 1)"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "ballVX",
+                "value": "-sceneState.ballVX"
               }
             ]
           },
@@ -288,16 +238,13 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "ballY",
-                    "value": 0
-                  },
-                  {
-                    "name": "ballVY",
-                    "value": "-sceneState.ballVY"
-                  }
-                ]
+                "name": "ballY",
+                "value": 0
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "ballVY",
+                "value": "-sceneState.ballVY"
               }
             ]
           },
@@ -318,20 +265,18 @@
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
-                "assignments": [
-                  {
-                    "name": "ballY",
-                    "value": "sceneState.padY - 0.5"
-                  },
-                  {
-                    "name": "ballVY",
-                    "value": "-sceneState.ballVY"
-                  },
-                  {
-                    "name": "ballVX",
-                    "value": "sceneState.ballVX + ((sceneState.ballX - (sceneState.padX + sceneState.padW / 2)) / (sceneState.padW / 2)) * 6.0"
-                  }
-                ]
+                "name": "ballY",
+                "value": "sceneState.padY - 0.5"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "ballVY",
+                "value": "-sceneState.ballVY"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "ballVX",
+                "value": "sceneState.ballVX + ((sceneState.ballX - (sceneState.padX + sceneState.padW / 2)) / (sceneState.padW / 2)) * 6.0"
               }
             ]
           },

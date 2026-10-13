@@ -101,8 +101,74 @@
         "value": 0
       },
       {
-        "cmd": "SCRIPT",
-        "code": "require('engine.hooks').call_hook('init_state', {})"
+        "cmd": "SET_SCENE_STATE",
+        "name": "fieldW",
+        "value": 26
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "fieldH",
+        "value": 14
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padW",
+        "value": 5
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padX",
+        "value": 10
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "padY",
+        "value": 13
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballX",
+        "value": 12
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballY",
+        "value": 13.5
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballVX",
+        "value": 8
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "ballVY",
+        "value": 10
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "score",
+        "value": 0
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "moveInput",
+        "value": 0
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "renderedField",
+        "value": "''"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "gameOver",
+        "value": "false"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "gameWon",
+        "value": "false"
       },
       {
         "cmd": "SCRIPT",
@@ -110,16 +176,6 @@
       }
     ],
     "on_select": [
-      {
-        "cmd": "SCRIPT",
-        "code": "require('engine.hooks').call_hook('init_state', {})"
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "setup_bricks"
-      }
-    ],
-    "init_state": [
       {
         "cmd": "SET_SCENE_STATE",
         "name": "fieldW",
@@ -189,6 +245,10 @@
         "cmd": "SET_SCENE_STATE",
         "name": "gameWon",
         "value": "false"
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "setup_bricks"
       }
     ],
     "on_frame": [

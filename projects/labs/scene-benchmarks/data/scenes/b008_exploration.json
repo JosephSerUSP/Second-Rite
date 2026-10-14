@@ -1,0 +1,53 @@
+{
+  "id": "b008_exploration",
+  "name": "B008 — Riviera-Style Exploration",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "description",
+      "rect": { "x": 2, "y": 2, "w": 28, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{sceneState.desc}" }
+      ]
+    },
+    {
+      "id": "choices",
+      "rect": { "x": 2, "y": 9, "w": 28, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{sceneState.options_text}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 2, "y": 22, "w": 28, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows move  Enter select" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_up": [
+      { "cmd": "SET_SCENE_STATE", "name": "dy", "value": -1 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_down": [
+      { "cmd": "SET_SCENE_STATE", "name": "dy", "value": 1 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "action" }
+    ]
+  },
+  "scripts": {
+    "init": "\nlocal sceneState = ctx.sceneState\nsceneState.desc = \"You are in a dusty study. A heavy oak desk sits in the center. A bookshelf lines the wall. A locked door leads north.\"\n\n-- Global progression state\nsceneState.has_key = false\nsceneState.door_open = false\nsceneState.desk_searched = false\nsceneState.books_read = false\n\n-- List of all potential interactions\nsceneState.interactions = {\n    {id=\"search_desk\", label=\"Search the desk\", req_state=nil, block_state=\"desk_searched\"},\n    {id=\"read_books\", label=\"Examine the bookshelf\", req_state=nil, block_state=\"books_read\"},\n    {id=\"unlock_door\", label=\"Unlock the north door\", req_state=\"has_key\", block_state=\"door_open\"},\n    {id=\"leave\", label=\"Go through the north door\", req_state=\"door_open\", block_state=nil}\n}\n\nsceneState.cursor = 1\nsceneState.visible_options = {}\n\nlocal function updateOptions()\n    sceneState.visible_options = {}\n    for _, opt in ipairs(sceneState.interactions) do\n        local req_met = (opt.req_state == nil) or (sceneState[opt.req_state] == true)\n        local not_blocked = (opt.block_state == nil) or (sceneState[opt.block_state] == false)\n        if req_met and not_blocked then\n            table.insert(sceneState.visible_options, opt)\n        end\n    end\n    \n    if sceneState.cursor > #sceneState.visible_options then\n        sceneState.cursor = math.max(1, #sceneState.visible_options)\n    end\n    \n    local lines = {}\n    for i, opt in ipairs(sceneState.visible_options) do\n        if i == sceneState.cursor then\n            table.insert(lines, \"> \" .. opt.label)\n        else\n            table.insert(lines, \"  \" .. opt.label)\n        end\n    end\n    sceneState.options_text = table.concat(lines, \"\\n\")\nend\nsceneState.updateOptions = updateOptions\nupdateOptions()\n",
+    "move_cursor": "\nlocal sceneState = ctx.sceneState\nlocal new_cursor = sceneState.cursor + sceneState.dy\nif new_cursor >= 1 and new_cursor <= #sceneState.visible_options then\n    sceneState.cursor = new_cursor\n    sceneState.updateOptions()\nend\n",
+    "action": "\nlocal sceneState = ctx.sceneState\nlocal selected = sceneState.visible_options[sceneState.cursor]\nif not selected then return end\n\nif selected.id == \"search_desk\" then\n    sceneState.desk_searched = true\n    sceneState.has_key = true\n    sceneState.desc = \"You rummage through the desk drawers. Hidden under some papers, you find a small brass key!\"\nelseif selected.id == \"read_books\" then\n    sceneState.books_read = true\n    sceneState.desc = \"You pull a few books from the shelf. Most are dry histories of the local region. Nothing useful stands out.\"\nelseif selected.id == \"unlock_door\" then\n    sceneState.door_open = true\n    sceneState.desc = \"The brass key fits perfectly into the heavy iron lock. The door clicks open.\"\nelseif selected.id == \"leave\" then\n    sceneState.desc = \"You step through the door and leave the dusty study behind... (Demo Complete)\"\nend\n\nsceneState.updateOptions()\n"
+  }
+}

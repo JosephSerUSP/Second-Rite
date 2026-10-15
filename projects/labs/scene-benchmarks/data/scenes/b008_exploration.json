@@ -1,0 +1,202 @@
+{
+  "id": "b008_exploration",
+  "terminal": {
+    "reached": "sceneState.state == 'left'"
+  },
+  "name": "B008 \u2014 Riviera-Style Exploration Screen",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "room_desc",
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 6
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are in a dusty study."
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "{sceneState.status_text}"
+        }
+      ]
+    },
+    {
+      "id": "actions",
+      "rect": {
+        "x": 1,
+        "y": 8,
+        "w": 15,
+        "h": 9
+      },
+      "style": "list",
+      "visibleRows": 6,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b008_exploration.options",
+          "cursor": "sceneState.choiceIdx",
+          "filter": "sceneState.optionsVisible"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "state",
+        "value": "'exploring'"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "choiceIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "status_text",
+        "value": "'What will you investigate?'"
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "has_key",
+        "value": false
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "door_unlocked",
+        "value": false
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "desk_checked",
+        "value": false
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "update_options"
+      },
+      {
+        "cmd": "SET_LOCAL",
+        "name": "_guard",
+        "value": 0
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "move_cursor_up"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "move_cursor_down"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "handle_selection"
+          },
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "scripts": {
+    "update_options": "local sceneState = ctx.sceneState\nlocal opts = {}\n-- Desk\nif not sceneState.desk_checked then table.insert(opts, 1) end\n-- Bookshelf\ntable.insert(opts, 2)\n-- Window\ntable.insert(opts, 3)\n-- Key\nif sceneState.desk_checked and not sceneState.has_key then table.insert(opts, 4) end\n-- Unlock Door\nif sceneState.has_key and not sceneState.door_unlocked then table.insert(opts, 5) end\n-- Leave\nif sceneState.door_unlocked then table.insert(opts, 6) end\nsceneState.optionsVisible = opts",
+    "move_cursor_up": "local sceneState = ctx.sceneState\nlocal count = #sceneState.optionsVisible\nif count > 0 then\n    sceneState.choiceIdx = sceneState.choiceIdx - 1\n    if sceneState.choiceIdx < 1 then sceneState.choiceIdx = count end\nend",
+    "move_cursor_down": "local sceneState = ctx.sceneState\nlocal count = #sceneState.optionsVisible\nif count > 0 then\n    sceneState.choiceIdx = sceneState.choiceIdx + 1\n    if sceneState.choiceIdx > count then sceneState.choiceIdx = 1 end\nend",
+    "handle_selection": "local sceneState = ctx.sceneState\nlocal sel = sceneState.optionsVisible[sceneState.choiceIdx]\nif sel == 1 then\n    sceneState.status_text = 'You check the desk. There is a rusty key inside.'\n    sceneState.desk_checked = true\nelseif sel == 2 then\n    sceneState.status_text = 'The books are about ancient architecture.'\nelseif sel == 3 then\n    sceneState.status_text = 'It is raining outside.'\nelseif sel == 4 then\n    sceneState.status_text = 'You take the rusty key.'\n    sceneState.has_key = true\nelseif sel == 5 then\n    sceneState.status_text = 'You unlock the heavy oak door.'\n    sceneState.door_unlocked = true\nelseif sel == 6 then\n    sceneState.status_text = 'You leave the room.'\n    sceneState.state = 'left'\nend\nsceneState.choiceIdx = 1\nlocal opts = {}\nif not sceneState.desk_checked then table.insert(opts, 1) end\ntable.insert(opts, 2)\ntable.insert(opts, 3)\nif sceneState.desk_checked and not sceneState.has_key then table.insert(opts, 4) end\nif sceneState.has_key and not sceneState.door_unlocked then table.insert(opts, 5) end\nif sceneState.door_unlocked then table.insert(opts, 6) end\nsceneState.optionsVisible = opts"
+  },
+  "goldenScript": [
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    }
+  ]
+}

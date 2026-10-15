@@ -1,0 +1,201 @@
+Branch Hygiene Report
+origin/main SHA: 5798bcb4232458dff202fa5f5d168e85c893db24
+
+### SAFE / LANDED
+None
+
+### UNIQUE UNMERGED WORK — DO NOT DELETE
+- ccr-51bdc0b6-pdl6ij
+
+### OPEN PR / NEEDS INTEGRATION
+- a003-snake-benchmark-reconstruction-14153559288162723131
+- a003-snake-declarative-5019367437912212295
+- a004-sokoban-native-semantics-9222318592044629968
+- agent-d002-sokoban-863332901235813623
+- agent/736-default-compact-renderable-transport
+- agent/809-exclusive-editor-sessions
+- agent/a001-pong-benchmark-v2-12985304425547605801
+- agent/a001-pong-refactor-16147584299839780505
+- agent/a002-breakout-benchmark-6325440469042192166
+- agent/a002-breakout-reconstruction-17139910816940324821-4564770484441771186
+- agent/a003-snake-benchmark-update-3536125862173885194
+- agent/a004-sokoban-v3-1138920556417039851
+- agent/b007-316782883258119854
+- agent/benchmark-c001-904305920367732494
+- agent/c002-splitting-pong-reauthor-7345550954729157369
+- agent/canonical-benchmark-a001-v2-5377939509456549225
+- agent/creative-probe-b006-363188230451675845
+- agent/creative-probe-b009-rewrite-7797902168489379296
+- agent/d001-sokoban-1475327674354064152
+- agent/pe-day1-baton-visuals
+- agent/pe-day1-m0
+- agent/pe-day1-m1-ledger
+- agent/pe-day1-m1-scene
+- agent/rework-consumables-2026-10-05
+- audit-branch-hygiene-423-2785569111014780924
+- b008-riviera-exploration-15665589088582868543
+- benchmarks/a003-snake-v2-12344268779240013267
+- chatgpt/item-model-rework-20261005
+- claude/g5-recapture-2026-10-11
+- claude/stale-item-models-3d
+- codex/1270-grass-candidate
+- codex/486-sparse-goal-project-generator
+- codex/hospital-slice-start
+- codex/issue-1116-plate-camera-calibration
+- codex/issue-696-expedition-horizon
+- codex/st-maria-exterior-pilot
+- codex/stale-item-models-accessories
+- codex/stale-item-models-arcane
+- codex/stale-item-models-baked-revision
+- codex/stale-item-models-batches3-4
+- codex/stale-item-models-complex-weapons
+- codex/stale-item-models-continuous-surfaces
+- codex/stale-item-models-food-studies
+- codex/stale-item-models-hybrid-study
+- codex/stale-item-models-incense-shoulders
+- codex/stale-item-models-multiview
+- codex/stale-item-models-painted-reliefs
+- codex/stale-item-models-shadow-volumes
+- codex/stale-item-models-shared-atlas
+- codex/stale-item-models-staff-family
+- codex/stale-item-models-view-projection
+- codex/stale-item-models-wearables
+- codex/town-integration-reconciliation
+- compat/love12
+- creative-lab-b010-falling-blocks-10226638726572733572
+- creative-lab-d003-v3-11008868735159808782
+- doc-b006-probe-report-14801297470008169463
+- doc-status-audit-9118608714389429460
+- exp/continuous-surface-gauntlet
+- exp/full-campaign-third-bell
+- exp/gauntlet-unidentified-gear-2026-08-17
+- experiment/mobile-full-width-dock
+- feat-c001-four-paddle-pong-8531667414743418808
+- feature/a004-sokoban-v3-2870260722033559115
+- fresh/metro-stratum-mover
+- jules-11189184416925568925-81082563
+- jules-16400986466081293664-4a68f034
+- jules-1793786967854254642-d0fc1063
+- jules-7179637769692536321-99a54f8f
+- jules-805474261978602793-1eeffaac
+- jules-995078498298930380-81aef50f
+- jules-audit-assets-2411857032600788656
+- jules-b004-rain-distance-18003432723894722115
+- jules-b008-exploration-8586864972791794679
+- jules-branch-hygiene-audit-8027818696879499476
+- jules-c002-splitting-pong-4743305650247049313
+- jules-creative-c003-9453382448307583068
+- jules-creative-lab-a002-breakout-v3-5719762262709294468
+- jules-creative-lab-b003-10153410930919151747
+- jules-creative-lab-b004-13473245723744647039
+- jules-creative-lab-c003-6617073193921910494
+- jules-creative-probe-b005-11695406592616765931
+- jules-d003-breakout-rpg-metaphor-7981224910421541402
+- jules-doc-audit-5191274721847551605
+- jules-hygiene-report-fix-6437542770243560888
+- jules-scene-benchmarks-a004-v3-4257614676977363903
+- jules-scene-benchmarks-lockpicking-6534545358842257217
+- jules-snake-benchmark-v2-15186398768745930812
+- jules/b003-bedroom-13204880315182987593
+- jules/b003-rearranging-bedroom-8646220242865425274
+- jules/b008-exploration-probe-16327557251176804816
+- jules/c001-pong-306759128390725301
+- jules/canonical-benchmark-a001-pong-v2-7586638885384560879
+- jules/canonical-benchmark-a002-v3-8530429785167232203
+- jules/doc-status-audit-18371009012276133187
+- jules/reconstruct-a003-snake-16823652820832625121
+- lab-b002-compact-state-9044889549645991651
+- lab/c001-four-paddle-pong-2437339057996193463
+- reimplement_draft_pr_1101
+- update-a002-benchmark-12475678842847589957
+(Behind main count: 90, Inactive drafts: 37)
+
+### STALE STATUS / RECONCILIATION CANDIDATE
+- agent/486-sparse-goal-project-generator (Tip: Assert generated proof grammar independence, 2026-08-17)
+- agent/501-g6-camera-scenarios (Tip: chore: remove temporary #501 patch script, 2026-08-14)
+- agent/521-native-database-surface-local-test (Tip: TEMP probe, 2026-08-15)
+- agent/550-level-reached-flow (Tip: Progression: prove LEVEL_REACHED event context and ordering, 2026-08-15)
+- agent/character-render-lab (Tip: Fix Blender 5 action slot creation, 2026-08-15)
+- agent/complete-salvaged-item-blend-authority (Tip: Remove one-shot final item materializer, 2026-08-15)
+- agent/issue-291-geometry-profiles (Tip: ci: fix issue 291 baseline isolation, 2026-08-11)
+- agent/issue-291-visibility-profiles (Tip: chore: remove issue 291 verification helper, 2026-08-11)
+- agent/tileset-resolved-surface-inspector (Tip: Expose Tileset Studio snapshot to resolved inspector, 2026-08-12)
+- archive/754-live-runtime-exploration-pre766 (Tip: docs(#754): align report with proven production worker, 2026-08-18)
+- archive/love12-shadow-2026-08-14 (Tip: review: capture LÖVE 12 candidate, 2026-08-10)
+- claude/magical-fermi-8gixsw (Tip: chore: remove stray root gen_tileset.py carrying a hardcoded API key, 2026-09-26)
+- codex/issue-1131-studio-undo-redo (Tip: Test Walk Profile history normalization, 2026-09-13)
+- exp/tileset-atlas-workbench (Tip: test: pin issue 547 workbench safety boundaries, 2026-08-17)
+- exp/tileset-live-specimen (Tip: docs: record issue 547 live specimen experiment, 2026-08-17)
+- exp/tileset-map-context (Tip: exp(#547): disposable Map-contextual tileset authoring prototype, 2026-08-17)
+- exp/world-camera-visual-spike-lightfixed-scratch (Tip: Add orthographic and anamorphic world projection, 2026-08-15)
+- rescue/drpg-npc-gauntlet-source (Tip: rescue: DRPG NPC adversarial pipeline source and 20 ensemble rounds, 2026-08-19)
+- rescue/expose_fixed_scene_timing (Tip: rescue: uncommitted expose_fixed_scene_timing work, 2026-08-19)
+- rescue/npc-sprite-gauntlet-source (Tip: rescue: NPC sprite adversarial gauntlet pipeline and evaluation results, 2026-08-19)
+- rescue/second-gate-npc-gauntlet-experiment (Tip: rescue: second-gate NPC gauntlet experiment source, 2026-08-19)
+- rescue/tileset_architecture_synthesis_proposal (Tip: rescue: uncommitted tileset_architecture_synthesis_proposal work, 2026-08-19)
+
+### OWNER DECISION REQUIRED
+- agent/161a-prepared-map-lru
+- agent/a002-breakout-reconstruction-17139910816940324821
+- agent/c001-four-paddle-1060546875070362137
+- agent/fix-708-end-game
+- agent/pe-day4-hospital-pivot
+- agent/pong-scene-template-pressure-test
+- asset-integrity-audit-17480391346301083692
+- audit-asset-reference-integrity-12565781414072353592
+- audit-trait-registry-308-4963293718259087089
+- authored_town_environment_gauntlet
+- authored_town_scene_gauntlet
+- bench/751-native-first-useful-paint
+- benchmark-a002-9083740433482265861
+- benchmark-a002-v3-9865145411679886608
+- benchmark-a004-12467422946663685521
+- benchmark/a004-sokoban-v3-2725773725157649735
+- benchmarks/a001-pong-v2-4233522694690210502
+- blender_image_assisted_town_gauntlet
+- codex/161a-negative-invalidation-control
+- codex/161a-prepared-map-lru-refresh
+- codex/871-blender-render-profiles
+- codex/archive-g6-relative-investigation
+- codex/cleanroom-town-gauntlet
+- codex/cleanroom-town-gauntlet-findings-20260820
+- codex/finish-blender-authoring
+- codex/gate2-kitbash
+- codex/map-properties-explicit
+- codex/next-second-gate-town
+- codex/npc-gauntlet-lab
+- codex/npc-gauntlet-living-town-draft
+- codex/second-gate-ashwater-town
+- codex/second-gate-human-assets-20260821
+- codex/second-gate-human-assets-20260821-fresh
+- codex/second-gate-image-assisted-town-gauntlet
+- codex/second-gate-lantern-cleft-draft-pr
+- codex/second-gate-side-view-town-gauntlet-20260821
+- codex/second-gate-town-experimental-20260821
+- codex/second-gate-town-gauntlet-20260820
+- codex/second-gate-town-playable-v2
+- codex/stew-item-model-refinement
+- daily-asset-audit-15270941709656693831
+- daily-asset-audit-6584869211747296808
+- daily-branch-hygiene-report-2809590768412992693
+- docs-status-audit-5903447249272047656
+- exp/872-ai-surface-projection
+- exp/shared-semantics-spike
+- exp/tileset-format-resources
+- exp/town-cleanroom-gauntlet
+- exp/town-gauntlet-workbench
+- exp/town-material-gauntlet
+- fresh-metro-mover-1101-audit
+- integration/st-maria-playable-main
+- issue-410-corpus-migration
+- jules-8063755817743594818-0dde2cd1
+- jules-asset-audit-9288836379244561496
+- jules-hygiene-report-10074039968229670576
+- jules-report-pr-313-7033640399862645222
+- jules/branch-hygiene-2026-08-12-18177356593608998692
+- next_town_material_gauntlet
+- prep/town-gauntlet-camera-authority
+- sao_paulo_stratum_implementation
+- sterile_town_gauntlet_init
+- tools/871-blender-render-profiles
+- tools/877-view-weighted-atlas

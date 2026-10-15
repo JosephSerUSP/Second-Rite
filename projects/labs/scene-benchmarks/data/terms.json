@@ -19,6 +19,7 @@
       "B007  Tactics Microboard",
       "C002  Splitting Pong",
       "C003  Breakout With Moving Bricks",
+      "B008  Riviera Exploration",
       "Exit"
     ]
   },
@@ -41,5 +42,15 @@
   },
   "game": {
     "title": "Thestra Scene Benchmarks"
+  },
+  "b008_exploration": {
+    "options": [
+      "Examine Desk",
+      "Inspect Bookshelf",
+      "Look at Window",
+      "Take Key",
+      "Unlock Door",
+      "Leave Room"
+    ]
   }
 }

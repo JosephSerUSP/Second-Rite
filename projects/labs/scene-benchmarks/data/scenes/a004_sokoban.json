@@ -126,6 +126,10 @@
           {
             "cmd": "SCRIPT",
             "ref": "move"
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "render"
           }
         ]
       }
@@ -153,6 +157,10 @@
           {
             "cmd": "SCRIPT",
             "ref": "move"
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "render"
           }
         ]
       }
@@ -180,6 +188,10 @@
           {
             "cmd": "SCRIPT",
             "ref": "move"
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "render"
           }
         ]
       }
@@ -207,6 +219,10 @@
           {
             "cmd": "SCRIPT",
             "ref": "move"
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "render"
           }
         ]
       }
@@ -260,8 +276,8 @@
     ]
   },
   "scripts": {
-    "move": "\nlocal sceneState = ctx.sceneState\nlocal nx = sceneState.px + sceneState.dx\nlocal ny = sceneState.py + sceneState.dy\n\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\n\nlocal nCellWall = isWall(nx, ny)\nlocal nCellCrate1 = (nx == sceneState.c1x and ny == sceneState.c1y)\nlocal nCellCrate2 = (nx == sceneState.c2x and ny == sceneState.c2y)\n\nif not nCellWall then\n    if nCellCrate1 then\n        local nnx = nx + sceneState.dx\n        local nny = ny + sceneState.dy\n        if not isWall(nnx, nny) and not (nnx == sceneState.c2x and nny == sceneState.c2y) then\n            sceneState.c1x = nnx\n            sceneState.c1y = nny\n            sceneState.px = nx\n            sceneState.py = ny\n        end\n    elseif nCellCrate2 then\n        local nnx = nx + sceneState.dx\n        local nny = ny + sceneState.dy\n        if not isWall(nnx, nny) and not (nnx == sceneState.c1x and nny == sceneState.c1y) then\n            sceneState.c2x = nnx\n            sceneState.c2y = nny\n            sceneState.px = nx\n            sceneState.py = ny\n        end\n    else\n        sceneState.px = nx\n        sceneState.py = ny\n    end\nend\n\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\n\nlocal c1OnGoal = (sceneState.c1x == g1x and sceneState.c1y == g1y) or (sceneState.c1x == g2x and sceneState.c1y == g2y)\nlocal c2OnGoal = (sceneState.c2x == g1x and sceneState.c2y == g1y) or (sceneState.c2x == g2x and sceneState.c2y == g2y)\nsceneState.win = c1OnGoal and c2OnGoal\n\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == sceneState.px and y == sceneState.py then\n            row = row .. \"@\"\n        elseif x == sceneState.c1x and y == sceneState.c1y then\n            row = row .. \"O\"\n        elseif x == sceneState.c2x and y == sceneState.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nsceneState.boardText = table.concat(lines, \"\\n\")\n",
-    "render": "\nlocal sceneState = ctx.sceneState\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == sceneState.px and y == sceneState.py then\n            row = row .. \"@\"\n        elseif x == sceneState.c1x and y == sceneState.c1y then\n            row = row .. \"O\"\n        elseif x == sceneState.c2x and y == sceneState.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nsceneState.boardText = table.concat(lines, \"\\n\")\n"
+    "move": "\nlocal s = ctx.sceneState\nlocal nx = s.px + s.dx\nlocal ny = s.py + s.dy\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal function getCrate(x, y)\n    if x == s.c1x and y == s.c1y then return 1 end\n    if x == s.c2x and y == s.c2y then return 2 end\n    return nil\nend\nif not isWall(nx, ny) then\n    local c = getCrate(nx, ny)\n    if c then\n        local nnx = nx + s.dx\n        local nny = ny + s.dy\n        if not isWall(nnx, nny) and not getCrate(nnx, nny) then\n            if c == 1 then\n                s.c1x = nnx\n                s.c1y = nny\n            else\n                s.c2x = nnx\n                s.c2y = nny\n            end\n            s.px = nx\n            s.py = ny\n        end\n    else\n        s.px = nx\n        s.py = ny\n    end\nend\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal on1 = (s.c1x == g1x and s.c1y == g1y) or (s.c1x == g2x and s.c1y == g2y)\nlocal on2 = (s.c2x == g1x and s.c2y == g1y) or (s.c2x == g2x and s.c2y == g2y)\ns.win = on1 and on2\n",
+    "render": "\nlocal s = ctx.sceneState\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal lines = {}\nfor y = 0, 7 do\n    local r = \"\"\n    for x = 0, 7 do\n        if x == s.px and y == s.py then r = r .. \"@\"\n        elseif (x == s.c1x and y == s.c1y) or (x == s.c2x and y == s.c2y) then r = r .. \"O\"\n        elseif isWall(x, y) then r = r .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then r = r .. \".\"\n        else r = r .. \" \" end\n    end\n    table.insert(lines, r)\nend\ns.boardText = table.concat(lines, \"\\n\")\n"
   },
   "goldenScript": [
     {

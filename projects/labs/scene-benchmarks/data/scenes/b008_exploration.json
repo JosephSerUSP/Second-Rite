@@ -68,17 +68,17 @@
       {
         "cmd": "SET_SCENE_STATE",
         "name": "has_key",
-        "value": "false"
+        "value": false
       },
       {
         "cmd": "SET_SCENE_STATE",
         "name": "door_unlocked",
-        "value": "false"
+        "value": false
       },
       {
         "cmd": "SET_SCENE_STATE",
         "name": "desk_checked",
-        "value": "false"
+        "value": false
       },
       {
         "cmd": "SCRIPT",

@@ -140,6 +140,63 @@
   "goldenScript": [
     {
       "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "down"
+    },
+    {
+      "wait": 0.2
+    },
+    {
+      "key": "return"
+    },
+    {
+      "wait": 0.2
     }
   ]
 }

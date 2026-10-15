@@ -3,7 +3,7 @@
   "terminal": {
     "none": "portrait/message staging probe, not a loop with an outcome"
   },
-  "name": "B006 — Dialogue Portrait Stage",
+  "name": "B006 \u2014 Dialogue Portrait Stage",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -52,34 +52,26 @@
     "on_enter": [
       {
         "cmd": "SET_SCENE_STATE",
-        "assignments": [
-          {
-            "name": "step",
-            "value": 1
-          },
-          {
-            "name": "choiceIdx",
-            "value": 1
-          },
-          {
-            "name": "showChoices",
-            "value": 0
-          }
-        ]
+        "name": "step",
+        "value": 1
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "choiceIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "showChoices",
+        "value": 0
       },
       {
         "cmd": "SET_LOCAL",
-        "assignments": [
-          {
-            "name": "_guard",
-            "value": 0
-          }
-        ]
+        "name": "_guard",
+        "value": 0
       },
       {
-
         "cmd": "COMMENT",
-
         "text": "Legacy scene hook update_step remains quarantined under #919."
       }
     ],
@@ -260,9 +252,7 @@
             "value": "sceneState.step + 1"
           },
           {
-
             "cmd": "COMMENT",
-
             "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]
@@ -282,9 +272,7 @@
             "value": "4"
           },
           {
-
             "cmd": "COMMENT",
-
             "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]

@@ -1,0 +1,17 @@
+{
+  "townsperson": {
+    "id": "townsperson",
+    "initial": "idle",
+    "states": {
+      "idle": { "animation": "idle", "loop": true },
+      "move": { "animation": "walk", "loop": true },
+      "interact": { "animation": "talk", "loop": false }
+    },
+    "transitions": [
+      { "from": "idle", "to": "move", "when": "event.moving" },
+      { "from": "move", "to": "idle", "when": "not event.moving" },
+      { "from": "*", "to": "interact", "when": "signal.interact" },
+      { "from": "interact", "to": "idle", "when": "animation.finished" }
+    ]
+  }
+}

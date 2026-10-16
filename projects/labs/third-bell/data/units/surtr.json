@@ -1,0 +1,92 @@
+{
+  "id": "surtr",
+  "name": "Surtr",
+  "names": [
+    "Brontes",
+    "Oto",
+    "Ymir",
+    "Goliath",
+    "Rocha",
+    "Bento",
+    "Colosso",
+    "Daisuke"
+  ],
+  "flavor": "A fire giant awakened by a molten relic. It turns the Hill Gigas's aggression into apocalyptic force.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "giant",
+  "elements": [
+    "Red",
+    "Red",
+    "Black"
+  ],
+  "skills": [
+    "eruption"
+  ],
+  "passives": [
+    "burningHeart"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 130,
+    "atk": 40,
+    "def": 31,
+    "mat": 29,
+    "mdf": 20,
+    "mpd": 8,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 117,
+      "atk": 34,
+      "def": 28,
+      "mat": 30,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 136,
+      "atk": 40,
+      "def": 32,
+      "mat": 35,
+      "mdf": 24
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 137,
+      "atk": 41,
+      "def": 34,
+      "mat": 36,
+      "mdf": 25
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Surtr",
+  "bigBattler": "Surtr",
+  "defaultGrowthSeed": 204429241
+}

@@ -1,0 +1,120 @@
+{
+  "id": "quest_log",
+  "name": "Quest Log",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "windows": [
+    {
+      "id": "quest_help",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "style": "frame",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{(v.questCount or 0) > 0 and 'UP/DOWN: select quest   ESC: back' or 'No active quests.   ESC: back'}"
+        }
+      ]
+    },
+    {
+      "id": "quest_list",
+      "rect": {
+        "x": 0.5,
+        "y": 4.5,
+        "w": 14,
+        "h": 13
+      },
+      "style": "list",
+      "title": null,
+      "emptyText": "No quests yet.",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:questRows",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "quest_detail",
+      "rect": {
+        "x": 15,
+        "y": 4.5,
+        "w": 16.5,
+        "h": 13
+      },
+      "style": "panel",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{sel('quest_list').summary}\n\nObjectives:\n{sel('quest_list').objectives}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": 1
+      },
+      {
+        "cmd": "LIST_ACTIVE_QUESTS"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx < (v.questCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {
+    "dock": {
+      "variant": "party_status",
+      "cursor": "0"
+    }
+  }
+}

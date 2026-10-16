@@ -1,0 +1,94 @@
+{
+  "id": "proteus",
+  "name": "Proteus",
+  "names": [
+    "Nami",
+    "Nerissa",
+    "Maré",
+    "Azul",
+    "Rill",
+    "Yara",
+    "Luar",
+    "Mizu"
+  ],
+  "flavor": "An androgynous water sage whose fluid body can hold the front line. It exchanges simple frost for healing and protection.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "proteus",
+  "elements": [
+    "Blue",
+    "Blue",
+    "Green"
+  ],
+  "skills": [
+    "iceShard",
+    "tidalGuard",
+    "riptide"
+  ],
+  "passives": [
+    "fluidForm"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 58,
+    "atk": 11,
+    "def": 14,
+    "mat": 24,
+    "mdf": 19,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 75,
+      "atk": 22,
+      "def": 25,
+      "mat": 33,
+      "mdf": 25
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 87,
+      "atk": 26,
+      "def": 30,
+      "mat": 38,
+      "mdf": 29
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 89,
+      "atk": 27,
+      "def": 31,
+      "mat": 39,
+      "mdf": 31
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Proteus",
+  "bigBattler": "Proteus",
+  "defaultGrowthSeed": 1429432501
+}

@@ -1,0 +1,62 @@
+{
+  "level_reached": [
+    {
+      "cmd": "SET_VAR",
+      "name": "reachedLevel",
+      "value": "event.level"
+    },
+    {
+      "cmd": "APPLY_GROWTH",
+      "target": "target",
+      "level": "event.level"
+    }
+  ],
+  "level_gain_resolved": [
+    {
+      "cmd": "SET_VAR",
+      "name": "levelsGained",
+      "value": "event.levelsGained"
+    },
+    {
+      "cmd": "RESTORE_HP",
+      "target": "target"
+    },
+    {
+      "cmd": "IF",
+      "condition": "target.id == \"kappa\" and target.originForm ~= \"\" and event.level >= target.originAtLevel + 3",
+      "then": [
+        {
+          "cmd": "TRANSFORM_ACTOR",
+          "target": "target",
+          "actor": "revert"
+        }
+      ]
+    },
+    {
+      "cmd": "IF",
+      "condition": "target.id == \"egg\" and event.level >= 10",
+      "then": [
+        {
+          "cmd": "TRANSFORM_ACTOR",
+          "target": "target",
+          "actor": "hatch"
+        }
+      ]
+    },
+    {
+      "cmd": "IF",
+      "condition": "target.id == \"homunculus\" and event.level >= 10",
+      "then": [
+        {
+          "cmd": "TRANSFORM_ACTOR",
+          "target": "target",
+          "actor": "metamorph"
+        }
+      ]
+    },
+    {
+      "cmd": "RESTORE_HP",
+      "target": "target"
+    }
+  ]
+}

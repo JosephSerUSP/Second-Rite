@@ -1,0 +1,92 @@
+{
+  "id": "cerberus",
+  "name": "Cerberus",
+  "names": [
+    "Fang",
+    "Hachi",
+    "Brasa",
+    "Três",
+    "Nero",
+    "Dante",
+    "Cão",
+    "Guardião"
+  ],
+  "flavor": "A dark gray hound wrapped in a radiant blue flame mane, its serpentine tail sweeping the stone. Recruited long before most summoners can comfortably afford it, its immense power comes with a hungry MP burden.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "cerberus",
+  "elements": [
+    "Black",
+    "White"
+  ],
+  "skills": [
+    "ember",
+    "shadowClaw"
+  ],
+  "passives": [
+    "oldStrength"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 25,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 100,
+    "atk": 30,
+    "def": 22,
+    "mat": 18,
+    "mdf": 15,
+    "mpd": 6,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 54,
+      "atk": 18,
+      "def": 12,
+      "mat": 11,
+      "mdf": 10
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 62,
+      "atk": 21,
+      "def": 15,
+      "mat": 12,
+      "mdf": 12
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 64,
+      "atk": 21,
+      "def": 16,
+      "mat": 14,
+      "mdf": 13
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Cerberus",
+  "bigBattler": "Cerberus",
+  "defaultGrowthSeed": 1190082119
+}

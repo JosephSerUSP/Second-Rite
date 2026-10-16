@@ -1,0 +1,94 @@
+{
+  "id": "grotesque",
+  "name": "Grotesque",
+  "names": [
+    "Hugo",
+    "Pedra",
+    "Vigia",
+    "Goya",
+    "Sino",
+    "Chuva",
+    "Paris",
+    "Gárgula"
+  ],
+  "flavor": "A Gargoyle whose protective sorcery has grown stranger and stronger. It anchors the party through provocation and magical shelter.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "Demon",
+  "elements": [
+    "Black",
+    "White",
+    "White"
+  ],
+  "skills": [
+    "provoke",
+    "aegisCry",
+    "stoneFist"
+  ],
+  "passives": [
+    "watchfulStone"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 75,
+    "atk": 18,
+    "def": 25,
+    "mat": 23,
+    "mdf": 27,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 100,
+      "atk": 23,
+      "def": 34,
+      "mat": 30,
+      "mdf": 36
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 117,
+      "atk": 26,
+      "def": 40,
+      "mat": 35,
+      "mdf": 43
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 118,
+      "atk": 28,
+      "def": 41,
+      "mat": 37,
+      "mdf": 44
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Grotesque",
+  "bigBattler": "Grotesque",
+  "defaultGrowthSeed": 1992887315
+}

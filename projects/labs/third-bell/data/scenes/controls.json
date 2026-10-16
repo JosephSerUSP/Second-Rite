@@ -1,0 +1,169 @@
+{
+  "id": "controls",
+  "name": "Controls",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "controls_help",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "style": "frame",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{v._capturingKey == true and ('Press a key for ' .. tostring(v.selButton) .. '...   ESC: cancel') or 'UP/DOWN: select   ENTER: rebind   ESC: back'}"
+        }
+      ]
+    },
+    {
+      "id": "controls_list",
+      "rect": {
+        "x": 4,
+        "y": 5,
+        "w": 24,
+        "h": 12
+      },
+      "style": "list",
+      "visibleRows": 12,
+      "title": "Controls",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:bindingRows",
+          "cursor": "v.idx"
+        }
+      ]
+    }
+  ],
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "_capturingKey",
+            "value": "false"
+          },
+          {
+            "name": "selButton",
+            "value": "''"
+          }
+        ]
+      },
+      {
+        "cmd": "LIST_INPUT_BINDINGS"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx < (v.bindingCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v._capturingKey ~= true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "selButton",
+                "value": "(((v.bindingRows or {})[v.idx or 1]) or {}).button or ''"
+              },
+              {
+                "name": "_capturingKey",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_raw_key": [
+      {
+        "cmd": "IF",
+        "condition": "v.rawKey == 'escape'",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_capturingKey",
+            "value": "false"
+          }
+        ],
+        "else": [
+          {
+            "cmd": "SET_INPUT_BINDING",
+            "button": "v.selButton or ''",
+            "key": "v.rawKey or ''"
+          },
+          {
+            "cmd": "LIST_INPUT_BINDINGS"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "_capturingKey",
+            "value": "false"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {
+    "dock": {
+      "variant": "party_status",
+      "cursor": "0"
+    }
+  }
+}

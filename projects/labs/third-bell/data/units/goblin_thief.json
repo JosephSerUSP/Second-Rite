@@ -1,0 +1,98 @@
+{
+  "id": "goblin_thief",
+  "name": "Gbl. Thief",
+  "names": [
+    "Pip",
+    "Grift",
+    "Neco",
+    "Tico",
+    "Sly",
+    "Coin",
+    "Prego",
+    "Jiji"
+  ],
+  "flavor": "A quick-fingered goblin who knows when a fight has gone sour. Cheap to maintain, it excels at scouting and escape.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "gblThief",
+  "elements": [
+    "Green",
+    "Black"
+  ],
+  "skills": [
+    "windBlade",
+    "miasma"
+  ],
+  "passives": [
+    "seeTraps",
+    "fleeChanceBonus"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "goblin_prince"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 45,
+    "atk": 16,
+    "def": 12,
+    "mat": 8,
+    "mdf": 10,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 60,
+      "atk": 22,
+      "def": 15,
+      "mat": 12,
+      "mdf": 13
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 70,
+      "atk": 26,
+      "def": 17,
+      "mat": 14,
+      "mdf": 15
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 70,
+      "atk": 28,
+      "def": 18,
+      "mat": 14,
+      "mdf": 17
+    }
+  ],
+  "favoriteFoods": [
+    176,
+    179,
+    186
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "GblThief",
+  "bigBattler": "GblThief",
+  "defaultGrowthSeed": 802805196
+}

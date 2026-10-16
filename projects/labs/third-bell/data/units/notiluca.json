@@ -1,0 +1,93 @@
+{
+  "id": "notiluca",
+  "name": "Notiluca",
+  "names": [
+    "Luma",
+    "Seda",
+    "Vesper",
+    "Farol",
+    "Opala",
+    "Lux",
+    "Noct",
+    "Lua"
+  ],
+  "flavor": "A giant moth whose wings pulse like a midnight lantern. Its mesmerizing light turns an enemy formation against itself.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "notiluca",
+  "elements": [
+    "Green",
+    "White",
+    "White"
+  ],
+  "skills": [
+    "sleepDust",
+    "mesmerizingLight"
+  ],
+  "passives": [
+    "mesmerizing"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 48,
+    "atk": 9,
+    "def": 18,
+    "mat": 21,
+    "mdf": 23,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 60,
+      "atk": 9,
+      "def": 18,
+      "mat": 32,
+      "mdf": 30
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 70,
+      "atk": 11,
+      "def": 21,
+      "mat": 37,
+      "mdf": 35
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 72,
+      "atk": 13,
+      "def": 21,
+      "mat": 38,
+      "mdf": 37
+    }
+  ],
+  "favoriteFoods": [
+    179,
+    180,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Notiluca",
+  "bigBattler": "Notiluca",
+  "defaultGrowthSeed": 295853082
+}

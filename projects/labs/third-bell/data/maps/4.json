@@ -1,0 +1,485 @@
+{
+  "id": 4,
+  "title": "Floor 3: Rusted Choir",
+  "width": 27,
+  "height": 27,
+  "generationProfile": "deep",
+  "intro": "Broken bells sway above a dry pit.",
+  "depth": 3,
+  "music": "emotional1_bitSad",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:c7c89c71-5c04-446d-a07e-f18efeea97cb",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:2ebc6287-5b33-4990-b36d-e72642051892",
+      "scriptId": 7,
+      "x": 6,
+      "y": 6,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:f3f7b654-098a-42e9-aedf-4bbc794fa9c6",
+      "scriptId": 13,
+      "x": 15,
+      "y": 11,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:53141765-a092-48cc-b5a6-04dc74b33b6a",
+      "scriptId": 4,
+      "x": 5,
+      "y": 15,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:100e59a5-c412-4b37-b2a9-401408ffe322",
+      "name": "Borrowed Room",
+      "label": "Borrowed Room",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.55,
+        0.35,
+        0.75
+      ],
+      "commands": [
+        {
+          "image": "campaign_borrowed_room.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "condition": "flag:found_borrowed_room",
+          "commands": [
+            {
+              "text": "The copied room waits behind the arch. Something has folded back the blanket.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Beyond a plain stone arch is your room in St. Maria: the narrow bed, the damp stain, the stubborn drawer.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "Your travelling case stands beside the bed. You remember leaving it upstairs.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Inspect the room.",
+                  "commands": [
+                    {
+                      "text": "It contains a change of clothes in your size, still warm. On the washstand sits your room's chipped bowl.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:found_cerberus",
+                      "commands": [
+                        {
+                          "text": "Coiled beside the bed is a heavy iron collar link, matching Cerberus's heavy chain.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:found_salt_table",
+                      "commands": [
+                        {
+                          "text": "A faint ring of wet salt marks the corner of the small nightstand.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:laura_lunch_delivered",
+                      "commands": [
+                        {
+                          "text": "A cloth napkin, folded into a precise square, rests on the wooden ledge.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "flag": "found_borrowed_room",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Back away.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:13e540dd-a8ae-4986-8170-2b48d8b964f5",
+      "name": "Red Dragon Boss",
+      "label": "Red Dragon Guardian",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.95,
+        0.25,
+        0.15
+      ],
+      "commands": [
+        {
+          "condition": "flag:defeated_red_dragon",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Scorched scales and embers lie cooling near the archway."
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A towering Red Dragon guards the descent, heat wafting from its crimson scales."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Saban bristles in fear as the dragon's fiery gaze falls upon your party!"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Engage the Red Dragon!",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "boss_red_dragon",
+                      "onVictory": [
+                        {
+                          "cmd": "SET_FLAG",
+                          "flag": "defeated_red_dragon",
+                          "value": true
+                        },
+                        {
+                          "cmd": "CHANGE_ITEM",
+                          "item": 205,
+                          "count": 1
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "With a final roaring collapse, the Red Dragon falls! You obtain an enormous First Scale. The archway to the deeper vault is now clear."
+                        },
+                        {
+                          "cmd": "ERASE_EVENT"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Fall back and prepare.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You pull Saban back out of the dragon's reach."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "name": "The Rusted Choir",
+      "label": "Five Rusted Bells",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.85,
+        0.7,
+        0.25
+      ],
+      "commands": [
+        {
+          "cmd": "ENTER_LOCATION",
+          "image": "campaign_rusted_choir.png"
+        },
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:choir_struck_three",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Five bells hang over the dry pit. Four are rusted through. The fifth is clean, and it is the one that knows your name."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "Five bells hang over the dry pit on a rail, in order of size, the way they would be hung for a procession."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "They are not fixed. Somebody hung them here to be struck, and then arranged that nobody would want to."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The Choir is a bargain and it does not hide it: each bell pays better and costs more. You may stop between any two."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Strike the first bell.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The first bell is thin with rust. You strike it and the note is small and completely ordinary."
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "choir_struck_one",
+                      "value": true
+                    },
+                    {
+                      "cmd": "FOR_EACH",
+                      "scope": "living_allies",
+                      "as": "ally",
+                      "do": [
+                        {
+                          "cmd": "GRANT_XP",
+                          "target": "ally",
+                          "amount": "60"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Every creature with you goes very still and then relaxes, the way an animal does when a room stops being dangerous."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Something in the pit below rolls over."
+                    },
+                    {
+                      "cmd": "CHOICE",
+                      "options": [
+                        {
+                          "label": "Strike the second bell.",
+                          "commands": [
+                            {
+                              "cmd": "TEXT",
+                              "text": "The second bell is packed with wet salt and old wax. Striking it is like hitting a mattress."
+                            },
+                            {
+                              "cmd": "SET_FLAG",
+                              "flag": "choir_struck_two",
+                              "value": true
+                            },
+                            {
+                              "cmd": "GAIN_GOLD",
+                              "amount": "180"
+                            },
+                            {
+                              "cmd": "TEXT",
+                              "text": "Coins come out. Not treasure -- change. Small denominations, St. Maria mint, the kind people carry."
+                            },
+                            {
+                              "cmd": "FOR_EACH",
+                              "scope": "living_allies",
+                              "as": "ally",
+                              "do": [
+                                {
+                                  "cmd": "DAMAGE",
+                                  "target": "ally",
+                                  "amount": "8 + session.floor * 2",
+                                  "pierce": true,
+                                  "minHp": 1
+                                }
+                              ]
+                            },
+                            {
+                              "cmd": "TEXT",
+                              "text": "The floor of the Choir tilts a few degrees toward the pit, and every one of you feels it in the teeth."
+                            },
+                            {
+                              "cmd": "CHOICE",
+                              "options": [
+                                {
+                                  "label": "Strike the third bell.",
+                                  "commands": [
+                                    {
+                                      "cmd": "TEXT",
+                                      "text": "The third bell has no rust on it at all."
+                                    },
+                                    {
+                                      "cmd": "TEXT",
+                                      "text": "You strike it. It does not ring -- it answers, in a voice with a St. Maria accent, and what it says is your own name with the vowels worn off."
+                                    },
+                                    {
+                                      "cmd": "SET_FLAG",
+                                      "flag": "choir_struck_three",
+                                      "value": true
+                                    },
+                                    {
+                                      "cmd": "CHANGE_ITEM",
+                                      "item": "195",
+                                      "count": 1
+                                    },
+                                    {
+                                      "cmd": "TEXT",
+                                      "text": "Something falls out of the bell's mouth into your palm: an Ether Seed, warm, and heavier than a seed."
+                                    },
+                                    {
+                                      "cmd": "CHANGE_MP",
+                                      "amount": "-25"
+                                    },
+                                    {
+                                      "cmd": "TEXT",
+                                      "text": "The Choir takes its fee out of the summoning. Twenty-five MP that you were going to walk home on."
+                                    },
+                                    {
+                                      "cmd": "BATTLE",
+                                      "onVictory": [
+                                        {
+                                          "cmd": "TEXT",
+                                          "text": "The other four bells stay quiet for the rest of your visit. That is somehow worse."
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Two is enough.",
+                                  "commands": [
+                                    {
+                                      "cmd": "TEXT",
+                                      "text": "You walk out with your change. The bells sway for a while after you have gone."
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Leave while it is still ordinary.",
+                          "commands": [
+                            {
+                              "cmd": "TEXT",
+                              "text": "You take the ordinary note with you and let the other four alone."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Walk under them without touching anything.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You cross the Choir with your hands at your sides. Nothing happens, which the floor seems to find disappointing."
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "choir_declined",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": 7,
+      "instanceId": "event:third_bell-the-rusted-choir"
+    }
+  ],
+  "encounters": [
+    {
+      "actor": "golem",
+      "weight": 6,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "demon",
+      "weight": 4,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "angel",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "cerberus",
+      "weight": 2,
+      "levelMin": 8,
+      "levelMax": 10
+    },
+    {
+      "actor": "giant",
+      "weight": 3,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "unicorn",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    }
+  ],
+  "recruits": [
+    "golem",
+    "demon",
+    "angel",
+    "larva",
+    "flauros",
+    "undine",
+    "cerberus",
+    "giant",
+    "unicorn",
+    "gargoyle"
+  ]
+}

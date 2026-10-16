@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "luna",
+    "provider": "OpenAI (Luna)",
+    "requested": "gpt-5",
+    "model_reported": "gpt-5-2025-08-07",
+    "status": "responded",
+    "chars": 5444
+  },
+  {
+    "slug": "openrouter-a",
+    "provider": "OpenRouter Free",
+    "requested": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "model_reported": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "status": "responded",
+    "chars": 10490
+  },
+  {
+    "slug": "openrouter-b",
+    "provider": "OpenRouter Free",
+    "requested": "nvidia/nemotron-3-super-120b-a12b:free",
+    "model_reported": "nvidia/nemotron-3-super-120b-a12b:free",
+    "status": "responded",
+    "chars": 5146
+  }
+]

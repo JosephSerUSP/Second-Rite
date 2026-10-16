@@ -1,0 +1,93 @@
+{
+  "id": "alraune",
+  "name": "Alraune",
+  "names": [
+    "Raiz",
+    "Mandie",
+    "Basil",
+    "Dália",
+    "Nabo",
+    "Taro",
+    "Rue",
+    "Salsa"
+  ],
+  "flavor": "A flowering plant spirit steeped in restorative sap. Its cooking and support magic can sustain an entire expedition.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "alraune",
+  "elements": [
+    "Green",
+    "Green",
+    "White"
+  ],
+  "skills": [
+    "rootMend",
+    "gardensGrace"
+  ],
+  "passives": [
+    "abundance"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 70,
+    "atk": 12,
+    "def": 22,
+    "mat": 21,
+    "mdf": 23,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 82,
+      "atk": 15,
+      "def": 24,
+      "mat": 31,
+      "mdf": 29
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 96,
+      "atk": 17,
+      "def": 28,
+      "mat": 36,
+      "mdf": 33
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 97,
+      "atk": 18,
+      "def": 28,
+      "mat": 37,
+      "mdf": 35
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    182,
+    190
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Alraune",
+  "bigBattler": "Alraune",
+  "defaultGrowthSeed": 683130005
+}

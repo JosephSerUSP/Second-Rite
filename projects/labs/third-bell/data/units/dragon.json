@@ -1,0 +1,113 @@
+{
+  "id": "dragon",
+  "name": "Dragon",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A young dragon whose element has not yet settled. The player may choose which affinity will shape its first promotion.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Red",
+    "Green",
+    "Blue",
+    "White",
+    "Black"
+  ],
+  "skills": [
+    "attack"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "red_dragon"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "blue_dragon"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "green_dragon"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "white_dragon"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "black_dragon"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 85,
+    "atk": 24,
+    "def": 24,
+    "mat": 24,
+    "mdf": 24,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 82,
+      "atk": 24,
+      "def": 24,
+      "mat": 24,
+      "mdf": 24
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 96,
+      "atk": 28,
+      "def": 28,
+      "mat": 28,
+      "mdf": 28
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 97,
+      "atk": 29,
+      "def": 29,
+      "mat": 29,
+      "mdf": 29
+    }
+  ],
+  "favoriteFoods": [
+    173,
+    177,
+    184
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Dragon",
+  "bigBattler": "Dragon",
+  "defaultGrowthSeed": 56502700
+}

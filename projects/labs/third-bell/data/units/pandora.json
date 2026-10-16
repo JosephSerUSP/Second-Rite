@@ -1,0 +1,93 @@
+{
+  "id": "pandora",
+  "name": "Pandora",
+  "names": [
+    "Chester",
+    "Caixa",
+    "Trinco",
+    "Penny",
+    "Jack",
+    "Boca",
+    "Dobra",
+    "Tesouro"
+  ],
+  "flavor": "A Mimic opened by the Black Hinge into something stranger. It is somewhat stronger and frailer, with exceptional command of items.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "mimic",
+  "elements": [
+    "Black",
+    "White",
+    "Red"
+  ],
+  "skills": [
+    "itemToss",
+    "miasma"
+  ],
+  "passives": [
+    "openedBox"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 72,
+    "atk": 22,
+    "def": 24,
+    "mat": 18,
+    "mdf": 24,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 83,
+      "atk": 23,
+      "def": 24,
+      "mat": 20,
+      "mdf": 24
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 97,
+      "atk": 27,
+      "def": 28,
+      "mat": 23,
+      "mdf": 28
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 98,
+      "atk": 28,
+      "def": 29,
+      "mat": 24,
+      "mdf": 29
+    }
+  ],
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Pandora",
+  "bigBattler": "Pandora",
+  "defaultGrowthSeed": 84754050
+}

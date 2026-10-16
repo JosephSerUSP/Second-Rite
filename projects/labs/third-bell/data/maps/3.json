@@ -1,0 +1,738 @@
+{
+  "id": 3,
+  "title": "Floor 2: Chasm Crossing",
+  "width": 23,
+  "height": 23,
+  "generationProfile": "broad",
+  "intro": "Wind howls across a broken bridge.",
+  "depth": 2,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:b3b20b92-efcb-40ad-aa19-cbf3da600a20",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:bbcc66c1-8998-4231-a77c-77eec9ba2eeb",
+      "scriptId": 7,
+      "x": 5,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:3e6d471d-a1fe-4c51-a73b-da2fdcd93a28",
+      "scriptId": 13,
+      "x": 14,
+      "y": 14,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:77272ee0-3e47-4dcf-b10b-a3fdf4bb277c",
+      "scriptId": 4,
+      "x": 3,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:114d9d2d-2824-48bb-b4e7-f824753369ff",
+      "scriptId": 12,
+      "x": 16,
+      "y": 5,
+      "spawn": "Random",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png"
+    },
+    {
+      "id": 6,
+      "instanceId": "event:edead9ee-37c0-4bd4-b957-39d017b58b5b",
+      "x": 8,
+      "y": 5,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC15.png",
+      "trigger": "interact",
+      "name": "Wandering Merchant",
+      "label": "Wandering Merchant",
+      "commands": [
+        {
+          "name": "wandering_merchant_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "condition": "flag:dungeon_merchant_met",
+          "commands": [
+            {
+              "text": "A friendly face in the dark. Care for supplies? It gets expensive the deeper you go. That’s the point.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Show me what you have",
+                  "commands": [
+                    {
+                      "shopId": 6,
+                      "cmd": "OPEN_SHOP"
+                    },
+                    {
+                      "label": "wandering_merchant_hub",
+                      "cmd": "JUMP_TO_LABEL"
+                    }
+                  ]
+                },
+                {
+                  "label": "Any advice?",
+                  "commands": [
+                    {
+                      "text": "Advice? Keep one summon slot empty. The dungeon loves to tempt you when you’re at your limit. And never ‘push one more room’ when your MP is low. That’s how you become a story.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Back",
+                          "commands": [
+                            {
+                              "label": "wandering_merchant_hub",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Close",
+                          "commands": []
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "No thanks",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Oh— a living one. Don’t startle me like that. Here. I sell necessities. Not hope. Hope’s extra.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Show me what you have",
+                  "commands": [
+                    {
+                      "flag": "dungeon_merchant_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    },
+                    {
+                      "shopId": 6,
+                      "cmd": "OPEN_SHOP"
+                    },
+                    {
+                      "label": "wandering_merchant_hub",
+                      "cmd": "JUMP_TO_LABEL"
+                    }
+                  ]
+                },
+                {
+                  "label": "Any advice?",
+                  "commands": [
+                    {
+                      "flag": "dungeon_merchant_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    },
+                    {
+                      "text": "Advice? Keep one summon slot empty. The dungeon loves to tempt you when you’re at your limit. And never ‘push one more room’ when your MP is low. That’s how you become a story.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Back",
+                          "commands": [
+                            {
+                              "label": "wandering_merchant_hub",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Close",
+                          "commands": []
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "No thanks",
+                  "commands": [
+                    {
+                      "flag": "dungeon_merchant_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "instanceId": "event:b3753e1a-e59b-4ee9-99d3-adcbef4f178e",
+      "x": 12,
+      "y": 12,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC16.png",
+      "trigger": "interact",
+      "name": "Daphne",
+      "label": "Daphne",
+      "commands": [
+        {
+          "name": "daphne_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "condition": "flag:daphne_first_met",
+          "commands": [
+            {
+              "text": "…Don’t waste steps. Don’t waste summons. Don’t waste yourself.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Ask about the dungeon",
+                  "commands": [
+                    {
+                      "text": "It doesn’t want you dead. It wants you *convinced*. There’s a difference. Dead things don’t pray. Convinced things do.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Back",
+                          "commands": [
+                            {
+                              "label": "daphne_hub",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "Ask about the town",
+                  "commands": [
+                    {
+                      "text": "A town is just a room with too many mirrors. Everyone here is looking for the angle that makes them forgivable.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Back",
+                          "commands": [
+                            {
+                              "label": "daphne_hub",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "…You’re late.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Who are you?",
+                  "commands": [
+                    {
+                      "flag": "daphne_first_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    },
+                    {
+                      "text": "Daphne. I’m the part of the dungeon that learned to speak politely.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "That’s not an answer.",
+                          "commands": [
+                            {
+                              "text": "It is. You’re just not used to answers that don’t comfort you.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "…",
+                                  "commands": [
+                                    {
+                                      "text": "…Don’t waste steps. Don’t waste summons. Don’t waste yourself.",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "Ask about the dungeon",
+                                          "commands": [
+                                            {
+                                              "text": "It doesn’t want you dead. It wants you *convinced*. There’s a difference. Dead things don’t pray. Convinced things do.",
+                                              "cmd": "TEXT"
+                                            },
+                                            {
+                                              "options": [
+                                                {
+                                                  "label": "Back",
+                                                  "commands": [
+                                                    {
+                                                      "label": "daphne_hub",
+                                                      "cmd": "JUMP_TO_LABEL"
+                                                    }
+                                                  ]
+                                                }
+                                              ],
+                                              "cmd": "CHOICE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Ask about the town",
+                                          "commands": [
+                                            {
+                                              "text": "A town is just a room with too many mirrors. Everyone here is looking for the angle that makes them forgivable.",
+                                              "cmd": "TEXT"
+                                            },
+                                            {
+                                              "options": [
+                                                {
+                                                  "label": "Back",
+                                                  "commands": [
+                                                    {
+                                                      "label": "daphne_hub",
+                                                      "cmd": "JUMP_TO_LABEL"
+                                                    }
+                                                  ]
+                                                }
+                                              ],
+                                              "cmd": "CHOICE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Leave",
+                                          "commands": []
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave",
+                                  "commands": []
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Leave",
+                          "commands": []
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "Late for what?",
+                  "commands": [
+                    {
+                      "flag": "daphne_first_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    },
+                    {
+                      "text": "For the version of you that doesn’t come back.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "…",
+                          "commands": [
+                            {
+                              "text": "…Don’t waste steps. Don’t waste summons. Don’t waste yourself.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "Ask about the dungeon",
+                                  "commands": [
+                                    {
+                                      "text": "It doesn’t want you dead. It wants you *convinced*. There’s a difference. Dead things don’t pray. Convinced things do.",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "Back",
+                                          "commands": [
+                                            {
+                                              "label": "daphne_hub",
+                                              "cmd": "JUMP_TO_LABEL"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Ask about the town",
+                                  "commands": [
+                                    {
+                                      "text": "A town is just a room with too many mirrors. Everyone here is looking for the angle that makes them forgivable.",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "Back",
+                                          "commands": [
+                                            {
+                                              "label": "daphne_hub",
+                                              "cmd": "JUMP_TO_LABEL"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave",
+                                  "commands": []
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Leave",
+                          "commands": []
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave",
+                  "commands": [
+                    {
+                      "flag": "daphne_first_met",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "instanceId": "event:5e7ab52d-f43b-4736-a750-aa40e1feb22b",
+      "name": "Table Set for One",
+      "label": "Table Set for One",
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC10.png",
+      "trigger": "interact",
+      "minimapColor": [
+        0.85,
+        0.72,
+        0.35
+      ],
+      "commands": [
+        {
+          "image": "campaign_salt_table.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "condition": "flag:found_salt_table",
+          "commands": [
+            {
+              "text": "The table is bare. A perfect ring of salt remains where the plate stood.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A small table has been laid for one. The bread is warm. The plate bears St. Maria's old blue border.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Gather Bell Salt",
+                  "commands": [
+                    {
+                      "text": "The crust collapses without a sound. You gather the Bell Salt into an emergency pouch.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 206,
+                      "count": 1
+                    },
+                    {
+                      "flag": "found_salt_table",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Take Sealed Reliquary",
+                  "commands": [
+                    {
+                      "text": "You take the heavy chapel reliquary resting beside the salt table.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 207,
+                      "count": 1
+                    },
+                    {
+                      "flag": "carried_reliquary",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    },
+                    {
+                      "flag": "found_salt_table",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it undisturbed",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "instanceId": "event:63a2253e-e5f2-4b16-b5db-ceecc1cec23d",
+      "name": "Contract Seam",
+      "label": "Contract Seam",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.9,
+        0.5,
+        0.2
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_cerberus",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The quiet seam retains a trace of faint blue warmth on the stone. The contract here has already been sealed."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "image": "campaign_cerberus_seam.png",
+              "text": "A worn cord collar lies near the stone archway."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Beyond it in the shadow stands a majestic dark gray hound wrapped in a radiant blue flame mane, its serpentine tail sweeping the stone."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The eyes of the beast soften with familiar recognition of your coat and scent."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Cerberus's manifestation drain is 6 — the heaviest you have encountered. Every step with him will cost six times as much traversal MP. Current route home: 230 MP. With Cerberus: 1,610 MP. The power is real; so is the safe distance it will take from you."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Offer contract to Cerberus",
+                  "commands": [
+                    {
+                      "cmd": "OPEN_RECRUIT",
+                      "actorId": "cerberus",
+                      "level": 1
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "found_cerberus",
+                      "value": true
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "first_recruit_complete",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The blue flame flares gently. Cerberus steps forward and seals the dual Black and White contract into your parchment."
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave it space for now",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The blue-flamed hound watches you quietly as you step back."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    3,
+    5,
+    24
+  ],
+  "encounters": [
+    {
+      "actor": "skeleton",
+      "weight": 8,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "imp",
+      "weight": 5,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "wisp",
+      "weight": 4,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "ooze",
+      "weight": 3,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "undine",
+      "weight": 4,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "mimic",
+      "weight": 2,
+      "levelMin": 5,
+      "levelMax": 6
+    },
+    {
+      "actor": "gargoyle",
+      "weight": 3,
+      "levelMin": 4,
+      "levelMax": 6
+    }
+  ],
+  "recruits": [
+    "skeleton",
+    "imp",
+    "ooze",
+    "golem",
+    "candle",
+    "flauros",
+    "undine",
+    "homunculus",
+    "mimic",
+    "unicorn",
+    "gargoyle"
+  ],
+  "category": "dungeon",
+  "generation": "Fixed",
+  "bgm": "",
+  "encounterTroop": "wandering_x2"
+}

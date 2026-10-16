@@ -1,0 +1,25 @@
+{
+  "files": [
+    "1.json",
+    "title.json",
+    "cinematic.json",
+    "save_menu.json",
+    "datalog.json",
+    "quest_log.json",
+    "map.json",
+    "items.json",
+    "status.json",
+    "recruit.json",
+    "battle.json",
+    "shop.json",
+    "game_over.json",
+    "reserve.json",
+    "dialogue.json",
+    "ritual.json",
+    "developer_menu.json",
+    "developer_geometry_export.json",
+    "developer_3d.json",
+    "options.json",
+    "controls.json"
+  ]
+}

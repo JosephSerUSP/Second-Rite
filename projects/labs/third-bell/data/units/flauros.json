@@ -1,0 +1,100 @@
+{
+  "id": "flauros",
+  "name": "Flauros",
+  "names": [
+    "Flauros",
+    "Raja",
+    "Brasa",
+    "Leo",
+    "Mane",
+    "Cinza",
+    "Rugido",
+    "Neko"
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "level": 3,
+  "role": "Attacker",
+  "smallBattler": "Demon",
+  "passives": [
+    "initiative",
+    "chaosPact"
+  ],
+  "elements": [
+    "Red",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "infernalPact"
+  ],
+  "flavor": "A savage leopard demon. It smells of brimstone and burnt hair.",
+  "expGrowth": 6,
+  "gold": 35,
+  "drops": [
+    {
+      "itemId": 39,
+      "chance": 0.3
+    }
+  ],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [
+    {
+      "itemId": 39,
+      "chance": 0.7,
+      "count": 1
+    }
+  ],
+  "baseParams": {
+    "maxHp": 65,
+    "atk": 19,
+    "def": 13,
+    "mat": 8,
+    "mdf": 10,
+    "mpd": 1,
+    "mxa": 5,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 31,
+      "atk": 39,
+      "def": 23,
+      "mat": 16,
+      "mdf": 18
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 47,
+      "atk": 58,
+      "def": 34,
+      "mat": 25,
+      "mdf": 26
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 51,
+      "atk": 65,
+      "def": 39,
+      "mat": 27,
+      "mdf": 29
+    }
+  ],
+  "portrait": "flauros",
+  "bigBattler": "flauros",
+  "defaultGrowthSeed": 1042155578
+}

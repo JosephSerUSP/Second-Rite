@@ -1,0 +1,30 @@
+name: PR 1400 Geometry Nodes object reference probe
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/blender/pr1400_gn_object_ref_probe.py
+      - .github/workflows/pr1400-gn-object-ref-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/rework-consumables-2026-10-05'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/rework-consumables-2026-10-05
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+      - name: Install pinned Blender
+        uses: ./.github/actions/install-blender
+      - name: Confirm shared-node-tree reference boundary
+        run: xvfb-run -a "$BLENDER_EXECUTABLE" --background --factory-startup --disable-autoexec --python-exit-code 1 --python tools/blender/pr1400_gn_object_ref_probe.py

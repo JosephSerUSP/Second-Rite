@@ -267,6 +267,20 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'free 3D picking must respect explicit Walk Profile component modes');
     assert.match(compositionSource, /walkProfileComponentMode/,
         'plate picking must respect the same Walk Profile component modes');
+    assert.match(studioSource, /Plate Calibration/,
+        'plate maps expose a dedicated camera/calibration authoring surface');
+    assert.match(studioSource, /WorldCamera principal point and plate player anchor are independent/,
+        'Studio must explain why the two horizontal centers are not normalized');
+    assert.match(studioSource, /Anchor center X/);
+    assert.match(studioSource, /Foot line Y/);
+    assert.match(studioSource, /Pixels \/ world Y/,
+        'pixelsPerRuntimeY is inspected even though it is not a generic edit knob');
+    assert.match(studioSource, /Read-only: this scale is coupled to the authored plate render/,
+        'plate optical scale stays read-only until regenerated plate evidence owns the change');
+    assert.match(compositionSource, /\/api\/environment-package\/calibration/,
+        'plate-anchor writes use the separate environment-package authority');
+    assert.match(viewportSource, /setTownCameraField/,
+        'Map-owned camera optics use the Map authoring path rather than the environment writer');
 })();
 
 (function testAuthorabilityMarkerIsReadyFor618ToIngest() {

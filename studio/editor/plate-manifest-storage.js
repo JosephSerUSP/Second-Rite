@@ -18,7 +18,9 @@ function manifestPath(projectRoot, requested) {
         throw new Error('Plate manifest must be an environment.json below assets/environments.');
     }
     const normalized = requested.replace(/\\/g, '/');
-    if (normalized.split('/').includes('..')) throw new Error('Plate manifest path leaves assets/environments.');
+    if (normalized.split('/').some(part => !part || part === '.' || part === '..')) {
+        throw new Error('Plate manifest path must be normalized below assets/environments.');
+    }
     const root = path.resolve(projectRoot);
     const file = path.resolve(root, normalized);
     if (!file.startsWith(root + path.sep)) throw new Error('Plate manifest path leaves the Project.');
@@ -72,6 +74,16 @@ function read(projectRoot, requested) {
     return { path: target.normalized, manifest: JSON.parse(text), version: version(text) };
 }
 
+function writeManifestText(file, text) {
+    const temporary = `${file}.plate-composition-${process.pid}-${Date.now()}.tmp`;
+    try {
+        fs.writeFileSync(temporary, text, 'utf8');
+        fs.renameSync(temporary, file);
+    } finally {
+        if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+    }
+}
+
 function write(projectRoot, requested, proposed, expectedVersion) {
     const loaded = read(projectRoot, requested);
     if (typeof expectedVersion !== 'string' || expectedVersion !== loaded.version) {
@@ -82,14 +94,130 @@ function write(projectRoot, requested, proposed, expectedVersion) {
     const next = applyCalibration(loaded.manifest, proposed);
     const text = JSON.stringify(next, null, 2) + '\n';
     const target = manifestPath(projectRoot, requested);
-    const temporary = `${target.file}.plate-composition-${process.pid}-${Date.now()}.tmp`;
-    try {
-        fs.writeFileSync(temporary, text, 'utf8');
-        fs.renameSync(temporary, target.file);
-    } finally {
-        if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
-    }
+    writeManifestText(target.file, text);
     return { path: target.normalized, manifest: next, version: version(text) };
 }
 
-module.exports = { applyCalibration, calibration, manifestPath, read, write };
+// The focused Plate Calibration panel and the full Plate Composition
+// inspector share this persistence authority, path checks and version token.
+function readPackage(projectRoot, requested) {
+    const loaded = read(projectRoot, requested);
+    if (loaded.manifest.contractVersion !== 1) throw new Error('Environment package must use contractVersion 1.');
+    return {path: loaded.path, file: manifestPath(projectRoot, requested).file,
+        version: loaded.version, value: loaded.manifest};
+}
+
+function calibrationNumber(value, label) {
+    finite(value, label);
+    return value;
+}
+
+function objectRangeForKey(raw, key) {
+    let keyIndex = -1, depth = 0;
+    for (let index = 0; index < raw.length; index++) {
+        const char = raw[index];
+        if (char === '{' || char === '[') depth += 1;
+        else if (char === '}' || char === ']') depth -= 1;
+        else if (char === '"') {
+            const start = index;
+            for (index += 1; index < raw.length; index++) {
+                if (raw[index] === '\\') index += 1;
+                else if (raw[index] === '"') break;
+            }
+            if (depth === 1 && JSON.parse(raw.slice(start, index + 1)) === key
+                    && /^\s*:/.test(raw.slice(index + 1))) {
+                keyIndex = start;
+                break;
+            }
+        }
+    }
+    if (keyIndex < 0) throw new Error('Environment package is missing ' + key + '.');
+    const colon = raw.indexOf(':', keyIndex);
+    const start = raw.indexOf('{', colon);
+    if (colon < 0 || start < 0) throw new Error('Environment package ' + key + ' is not an object.');
+    depth = 0;
+    let string = false, escape = false;
+    for (let index = start; index < raw.length; index++) {
+        const char = raw[index];
+        if (string) {
+            if (escape) escape = false;
+            else if (char === '\\') escape = true;
+            else if (char === '"') string = false;
+            continue;
+        }
+        if (char === '"') { string = true; continue; }
+        if (char === '{') depth += 1;
+        else if (char === '}') {
+            depth -= 1;
+            if (depth === 0) return { start, end: index + 1 };
+        }
+    }
+    throw new Error('Environment package ' + key + ' object is unterminated.');
+}
+
+function patchPlayerProjectionRaw(raw, patch) {
+    const preRendered = objectRangeForKey(raw, 'preRendered');
+    const localRange = objectRangeForKey(raw.slice(preRendered.start, preRendered.end), 'playerProjection');
+    const range = { start: preRendered.start + localRange.start, end: preRendered.start + localRange.end };
+    let body = raw.slice(range.start, range.end);
+    for (const [field, value] of Object.entries(patch)) {
+        const pattern = new RegExp('(\\"' + field + '\\"\\s*:\\s*)' +
+            '-?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?');
+        if (!pattern.test(body)) {
+            throw new Error('Environment package playerProjection.' + field + ' is missing or non-numeric.');
+        }
+        body = body.replace(pattern, (_, prefix) => prefix + JSON.stringify(value));
+    }
+    return raw.slice(0, range.start) + body + raw.slice(range.end);
+}
+function writeCalibration(projectRoot, value, patch, expectedVersion) {
+    const current = readPackage(projectRoot, value);
+    if (typeof expectedVersion !== 'string' || expectedVersion !== current.version) {
+        const error = new Error('Environment package changed on disk after Studio loaded it.');
+        error.code = 'STALE_ENVIRONMENT_PACKAGE';
+        error.currentVersion = current.version;
+        throw error;
+    }
+    if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+        throw new Error('Environment calibration patch must be an object.');
+    }
+    calibration(current.value);
+    const allowed = new Set(['centerX', 'screenY']);
+    const keys = Object.keys(patch);
+    if (!keys.length) throw new Error('Environment calibration patch is empty.');
+    for (const key of keys) {
+        if (!allowed.has(key)) {
+            throw new Error(`Environment calibration field '${key}' is not authorable here.`);
+        }
+    }
+
+    const projection = current.value.preRendered.playerProjection;
+    const normalizedPatch = {};
+    let changed = false;
+    for (const key of keys) {
+        const nextValue = calibrationNumber(patch[key], `playerProjection.${key}`);
+        normalizedPatch[key] = nextValue;
+        if (projection[key] !== nextValue) changed = true;
+    }
+
+    if (!changed) {
+        return { path: current.path, version: current.version, value: current.value, changed: false };
+    }
+    const nextRaw = patchPlayerProjectionRaw(fs.readFileSync(current.file, 'utf8'), normalizedPatch);
+    const nextValue = JSON.parse(nextRaw);
+    calibration(nextValue);
+    for (const [field, value] of Object.entries(normalizedPatch)) {
+        if (nextValue.preRendered.playerProjection[field] !== value) {
+            throw new Error('Calibration patch did not resolve the authored playerProjection.' + field);
+        }
+    }
+    writeManifestText(current.file, nextRaw);
+    return {
+        path: current.path,
+        version: version(nextRaw),
+        value: nextValue,
+        changed: true
+    };
+}
+
+module.exports = { applyCalibration, calibration, manifestPath, read, write, readPackage, writeCalibration };

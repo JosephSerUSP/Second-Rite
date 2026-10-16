@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const authoredStorage = require('./authored-storage');
 const plateManifestStorage = require('./plate-manifest-storage');
+const environmentAuthoring = require('./environment-package-authoring');
 const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint');
@@ -281,6 +282,53 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
+    } else if (req.method === 'GET' && pathname === '/api/environment-package') {
+        try {
+            const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
+            const requested = parsedUrl.searchParams.get('path');
+            const loaded = environmentAuthoring.read(PROJECT_ROOT, requested);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                path: loaded.path,
+                version: loaded.version,
+                value: loaded.value
+            }));
+        } catch (error) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: error.message }));
+        }
+    } else if (req.method === 'POST' && pathname === '/api/environment-package/calibration') {
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const payload = JSON.parse(body || '{}');
+                const result = environmentAuthoring.writeCalibration(
+                    PROJECT_ROOT, payload.path, payload.patch, payload.expectedVersion);
+                if (result.changed) notifyRunningGame();
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    path: result.path,
+                    version: result.version,
+                    changed: result.changed,
+                    value: result.value
+                }));
+            } catch (error) {
+                if (error && error.code === 'STALE_ENVIRONMENT_PACKAGE') {
+                    res.writeHead(409, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        stale: true,
+                        version: error.currentVersion,
+                        message: error.message
+                    }));
+                    return;
+                }
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
     } else if (req.method === 'GET' && req.url === '/api/effects') {
         // Effekseer effects, for the animation editor's effect dropdown.
         // Separate from /api/assets because that one is image-only and does not

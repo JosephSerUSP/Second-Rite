@@ -2833,7 +2833,7 @@
             }
         }
 
-        function createFormField(container, labelText, value, onChange, type = 'text', readOnly = false, keyId = null, useBlockLayout = true, onDirty = setDirty) {
+        function createFormField(container, labelText, value, onChange, type = 'text', readOnly = false, keyId = null, useBlockLayout = true, onDirty = setDirty, inputEvent = 'input') {
             const group = document.createElement('div');
             group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
 
@@ -2859,7 +2859,7 @@
             }
 
             if (onChange && !readOnly) {
-                input.addEventListener('input', () => {
+                input.addEventListener(inputEvent, () => {
                     onChange(input.value);
                     onDirty(true);
                 });

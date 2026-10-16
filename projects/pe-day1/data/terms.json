@@ -1,0 +1,14 @@
+{
+  "project": {
+    "title": "Parasite Eve - Day 1"
+  },
+  "title": {
+    "options": [
+      "Begin",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "A wall blocks the way."
+  }
+}

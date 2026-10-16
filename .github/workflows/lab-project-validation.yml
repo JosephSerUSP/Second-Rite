@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "projects/labs/**"
+      - "projects/pe-day1/**"
       - "conf.lua"
       - "tools/labs/**"
       - "docs/agentic/PLAYABLE-GAME-EVIDENCE.md"
@@ -31,8 +32,12 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t names < <(
-            find projects/labs -mindepth 1 -maxdepth 1 -type d \
-              -exec test -d '{}/data' ';' -printf '%f\n' | sort
+            {
+              find projects/labs -mindepth 1 -maxdepth 1 -type d \
+                -exec test -d '{}/data' ';' -printf '%f\n'
+              # Standalone vertical-slice Projects outside labs/ (#1423).
+              if [ -d projects/pe-day1/data ]; then echo pe-day1; fi
+            } | sort
           )
           if [ "${#names[@]}" -eq 0 ]; then
             echo "No projects/labs/* Project roots found" >&2
@@ -108,7 +113,9 @@ jobs:
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $false
           $repoRoot = (Get-Location).Path
-          $project = Get-Item (Join-Path $repoRoot ("projects\labs\" + $env:THESTRA_LAB_PROJECT_NAME))
+          $projectPath = Join-Path $repoRoot ("projects\labs\" + $env:THESTRA_LAB_PROJECT_NAME)
+          if (-not (Test-Path $projectPath)) { $projectPath = Join-Path $repoRoot ("projects\" + $env:THESTRA_LAB_PROJECT_NAME) }
+          $project = Get-Item $projectPath
           if (-not (Test-Path (Join-Path $project.FullName "data"))) {
             throw "matrix entry is not a lab Project root: $($project.FullName)"
           }

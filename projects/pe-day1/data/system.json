@@ -1,0 +1,25 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true,
+    "renderSurfaceProfile": "wide"
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 3,
+    "y": 2,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 0,
+    "goldMax": 0,
+    "party": {
+      "fixedMembers": []
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

@@ -1,6 +1,6 @@
 # A003 — Snake Benchmark Report
 
-**Date:** 2026-08-26
+**Date:** 2026-10-18
 **Benchmark:** A003 — Snake
 **Version:** 1
 
@@ -14,7 +14,7 @@ Launch `npm run lab:benchmarks`, choose **A003 — Snake**, then use arrow keys 
 
 ## Current Implementation Shape
 
-The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. SCRIPT still handles collection and grid operations.
+The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and multiple `SET_SCENE_STATE` commands. SCRIPT still handles collection and grid operations.
 
 ## Metrics
 
@@ -33,17 +33,16 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## Changes Since Previous Attempt
 
-- The fixed mode update hook was retained to satisfy engine and studio inspection parity tests, but delta-time (`v.time.dt`) tracking via `SET_VAR` was successfully proven to work gracefully inside `on_frame` instead of `WAIT` blocks.
-- `tickTimer` was renamed to `timer`.
-- 66% of raw SCRIPT logic remains cleanly factored into standard declarative hooks (same as last attempt).
+- Reimplemented freshly without `assignments` array. Memory dictated that multi-assignments are unsupported by `SET_SCENE_STATE`, so individual variables are updated by separate nodes.
+- Delta-time tracking and raw SCRIPT hooks for collections were retained.
 
 ## Improved
 
-- Using a custom `timer` accumulator against `v.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking updates.
+- None.
 
 ## Regressed
 
-- Nothing regressed in this update.
+- Multi-assignments were removed according to engine rules, forcing multiple `SET_SCENE_STATE` commands for vectors.
 
 ## Still Awkward
 
@@ -52,11 +51,11 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## New Architectural Evidence
 
-The updated A003 Snake demonstrates that continuous logical input and frame delta-time can now be cleanly represented purely via current state semantics like `v.time.dt` and `IF` with `SET_VAR` multi-assignments. However, it continues to reinforce the evidence found in D002 and A004: growing ordered collections and grid queries require generic iteration and list manipulation primitives.
+The updated A003 Snake demonstrates that `SET_SCENE_STATE` must be used multiple times to update several variables in one hook due to the lack of an assignments array. It continues to reinforce the evidence found in D002 and A004: growing ordered collections and grid queries require generic iteration and list manipulation primitives.
 
 ## Verdict
 
-**Playable benchmark; improved authorability.** A003 successfully leverages new state variables and multi-assignments to reduce raw SCRIPT by 66%, proving continuous inputs and delta-time are gracefully handled by current semantics. However, the requirement for generic collections persists.
+**Playable benchmark; slightly regressed authorability.** A003 requires slightly more verbose node chains to handle variable updates because the `assignments` array is no longer permitted by Thestra conventions. The requirement for generic collections persists.
 
 ## Owner Playtest
 

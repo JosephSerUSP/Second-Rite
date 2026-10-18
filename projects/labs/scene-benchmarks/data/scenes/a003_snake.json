@@ -226,16 +226,13 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "dirX",
-                "value": "0"
-              },
-              {
-                "name": "dirY",
-                "value": "-1"
-              }
-            ]
+            "name": "dirX",
+            "value": "0"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dirY",
+            "value": "-1"
           }
         ]
       }
@@ -247,16 +244,13 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "dirX",
-                "value": "0"
-              },
-              {
-                "name": "dirY",
-                "value": "1"
-              }
-            ]
+            "name": "dirX",
+            "value": "0"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dirY",
+            "value": "1"
           }
         ]
       }
@@ -268,16 +262,13 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "dirX",
-                "value": "-1"
-              },
-              {
-                "name": "dirY",
-                "value": "0"
-              }
-            ]
+            "name": "dirX",
+            "value": "-1"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dirY",
+            "value": "0"
           }
         ]
       }
@@ -289,16 +280,13 @@
         "then": [
           {
             "cmd": "SET_SCENE_STATE",
-            "assignments": [
-              {
-                "name": "dirX",
-                "value": "1"
-              },
-              {
-                "name": "dirY",
-                "value": "0"
-              }
-            ]
+            "name": "dirX",
+            "value": "1"
+          },
+          {
+            "cmd": "SET_SCENE_STATE",
+            "name": "dirY",
+            "value": "0"
           }
         ]
       }

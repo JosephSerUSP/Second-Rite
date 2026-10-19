@@ -115,12 +115,8 @@
     "on_enter": [
       {
         "cmd": "SET_LOCAL",
-        "assignments": [
-          {
-            "name": "_guard",
-            "value": 0
-          }
-        ]
+        "name": "_guard",
+        "value": 0
       },
       {
         "cmd": "SET_SCENE_STATE",

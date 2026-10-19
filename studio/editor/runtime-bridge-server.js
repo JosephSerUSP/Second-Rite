@@ -25,7 +25,7 @@ const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
 // the failure must name the limit instead of blaming the engine (#736).
 const RENDERABLE_MAX_BUFFER = 64 * 1024 * 1024;
 const INSPECTION_MAX_BUFFER = 16 * 1024 * 1024;
-const BRIDGE_TIMEOUT_MS = 60000;
+const BRIDGE_TIMEOUT_MS = 120000;
 
 function resolvePreviewExe(loveExe = LOVE_EXE) {
     const lovec = loveExe.replace(/love\.exe$/i, 'lovec.exe');

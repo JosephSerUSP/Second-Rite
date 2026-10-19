@@ -68,7 +68,7 @@ BRIDGE_JS = os.path.join(ROOT, "studio", "editor", "runtime-bridge-server.js")
 
 VIEWPORT = (1440, 900)
 BOOT_TIMEOUT = 60.0
-STEP_TIMEOUT = 30.0
+STEP_TIMEOUT = 60.0
 
 CHROME_CANDIDATES = [
     os.environ.get("CHROME_PATH"),

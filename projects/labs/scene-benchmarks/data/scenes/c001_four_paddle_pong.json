@@ -1,0 +1,484 @@
+{
+  "id": "c001_four_paddle_pong",
+  "terminal": {
+    "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
+  },
+  "name": "C001 \u2014 Four-Paddle Pong",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 5,
+        "y": 1,
+        "w": 22,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "C001 \u2014 Four-Paddle Pong   Score: {sceneState.score1} - {sceneState.score2} - {sceneState.score3} - {sceneState.score4}"
+        }
+      ]
+    },
+    {
+      "id": "board_outline",
+      "rect": {
+        "x": 5,
+        "y": 5,
+        "w": 22,
+        "h": 22
+      },
+      "style": "frame",
+      "content": []
+    },
+    {
+      "id": "paddle1",
+      "rect": {
+        "x": "5 + 1",
+        "y": "5 + 1 + sceneState.paddle1Y",
+        "w": 1,
+        "h": "sceneState.paddleH"
+      },
+      "style": "panel",
+      "content": []
+    },
+    {
+      "id": "paddle2",
+      "rect": {
+        "x": "5 + sceneState.gridW",
+        "y": "5 + 1 + sceneState.paddle2Y",
+        "w": 1,
+        "h": "sceneState.paddleH"
+      },
+      "style": "panel",
+      "content": []
+    },
+    {
+      "id": "paddle3",
+      "rect": {
+        "x": "5 + 1 + sceneState.paddle3X",
+        "y": "5 + 1",
+        "w": "sceneState.paddleW",
+        "h": 1
+      },
+      "style": "panel",
+      "content": []
+    },
+    {
+      "id": "paddle4",
+      "rect": {
+        "x": "5 + 1 + sceneState.paddle4X",
+        "y": "5 + sceneState.gridH",
+        "w": "sceneState.paddleW",
+        "h": 1
+      },
+      "style": "panel",
+      "content": []
+    },
+    {
+      "id": "ball",
+      "rect": {
+        "x": "5 + 1 + sceneState.ballX",
+        "y": "5 + 1 + sceneState.ballY",
+        "w": 1,
+        "h": 1
+      },
+      "style": "panel",
+      "content": []
+    },
+    {
+      "id": "help",
+      "rect": {
+        "x": 4,
+        "y": 28,
+        "w": 24,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "[UP]/[DOWN] Left, [LEFT]/[RIGHT] Bottom"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_LOCAL",
+        "assignments": [
+          {
+            "name": "_guard",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 20
+          },
+          {
+            "name": "paddle1Y",
+            "value": 8
+          },
+          {
+            "name": "paddle2Y",
+            "value": 8
+          },
+          {
+            "name": "paddle3X",
+            "value": 8
+          },
+          {
+            "name": "paddle4X",
+            "value": 8
+          },
+          {
+            "name": "paddleH",
+            "value": 4
+          },
+          {
+            "name": "paddleW",
+            "value": 4
+          },
+          {
+            "name": "ballX",
+            "value": 10
+          },
+          {
+            "name": "ballY",
+            "value": 10
+          },
+          {
+            "name": "ballVX",
+            "value": 10
+          },
+          {
+            "name": "ballVY",
+            "value": 6
+          },
+          {
+            "name": "score1",
+            "value": "sceneState.score1 or 0"
+          },
+          {
+            "name": "score2",
+            "value": "sceneState.score2 or 0"
+          },
+          {
+            "name": "score3",
+            "value": "sceneState.score3 or 0"
+          },
+          {
+            "name": "score4",
+            "value": "sceneState.score4 or 0"
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "paddle1Y",
+            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle1Y + sceneState.inputY * 15.0 * sceneState.time.dt))"
+          },
+          {
+            "name": "paddle4X",
+            "value": "max(0, min(sceneState.gridW - sceneState.paddleW, sceneState.paddle4X + sceneState.inputX * 15.0 * sceneState.time.dt))"
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "center2",
+            "value": "sceneState.paddle2Y + sceneState.paddleH / 2"
+          },
+          {
+            "name": "paddle2Y",
+            "value": "sceneState.center2 < sceneState.ballY - 0.5 and sceneState.paddle2Y + 8.0 * sceneState.time.dt or (sceneState.center2 > sceneState.ballY + 0.5 and sceneState.paddle2Y - 8.0 * sceneState.time.dt or sceneState.paddle2Y)"
+          },
+          {
+            "name": "paddle2Y",
+            "value": "max(0, min(sceneState.gridH - sceneState.paddleH, sceneState.paddle2Y))"
+          },
+          {
+            "name": "center3",
+            "value": "sceneState.paddle3X + sceneState.paddleW / 2"
+          },
+          {
+            "name": "paddle3X",
+            "value": "sceneState.center3 < sceneState.ballX - 0.5 and sceneState.paddle3X + 8.0 * sceneState.time.dt or (sceneState.center3 > sceneState.ballX + 0.5 and sceneState.paddle3X - 8.0 * sceneState.time.dt or sceneState.paddle3X)"
+          },
+          {
+            "name": "paddle3X",
+            "value": "max(0, min(sceneState.gridW - sceneState.paddleW, sceneState.paddle3X))"
+          },
+          {
+            "name": "ballX",
+            "value": "sceneState.ballX + sceneState.ballVX * sceneState.time.dt"
+          },
+          {
+            "name": "ballY",
+            "value": "sceneState.ballY + sceneState.ballVY * sceneState.time.dt"
+          },
+          {
+            "name": "hitPaddle1",
+            "value": "sceneState.ballX <= 1 and sceneState.ballX >= 0 and sceneState.ballVX < 0 and sceneState.ballY >= sceneState.paddle1Y and sceneState.ballY <= sceneState.paddle1Y + sceneState.paddleH"
+          },
+          {
+            "name": "hitPaddle2",
+            "value": "sceneState.ballX >= sceneState.gridW - 2 and sceneState.ballX <= sceneState.gridW - 1 and sceneState.ballVX > 0 and sceneState.ballY >= sceneState.paddle2Y and sceneState.ballY <= sceneState.paddle2Y + sceneState.paddleH"
+          },
+          {
+            "name": "hitPaddle3",
+            "value": "sceneState.ballY <= 1 and sceneState.ballY >= 0 and sceneState.ballVY < 0 and sceneState.ballX >= sceneState.paddle3X and sceneState.ballX <= sceneState.paddle3X + sceneState.paddleW"
+          },
+          {
+            "name": "hitPaddle4",
+            "value": "sceneState.ballY >= sceneState.gridH - 2 and sceneState.ballY <= sceneState.gridH - 1 and sceneState.ballVY > 0 and sceneState.ballX >= sceneState.paddle4X and sceneState.ballX <= sceneState.paddle4X + sceneState.paddleW"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.hitPaddle1 or sceneState.hitPaddle2 or sceneState.hitPaddle3 or sceneState.hitPaddle4",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "ballVX",
+                "value": "(sceneState.hitPaddle1 or sceneState.hitPaddle2) and -sceneState.ballVX * 1.1 or sceneState.ballVX"
+              },
+              {
+                "name": "ballVY",
+                "value": "(sceneState.hitPaddle3 or sceneState.hitPaddle4) and -sceneState.ballVY * 1.1 or sceneState.ballVY"
+              },
+              {
+                "name": "ballX",
+                "value": "sceneState.hitPaddle1 and 1 or (sceneState.hitPaddle2 and sceneState.gridW - 2 or sceneState.ballX)"
+              },
+              {
+                "name": "ballY",
+                "value": "sceneState.hitPaddle3 and 1 or (sceneState.hitPaddle4 and sceneState.gridH - 2 or sceneState.ballY)"
+              },
+              {
+                "name": "ballVY",
+                "value": "sceneState.hitPaddle1 and sceneState.ballVY + (sceneState.ballY - (sceneState.paddle1Y + sceneState.paddleH/2)) * 2 or (sceneState.hitPaddle2 and sceneState.ballVY + (sceneState.ballY - (sceneState.paddle2Y + sceneState.paddleH/2)) * 2 or sceneState.ballVY)"
+              },
+              {
+                "name": "ballVX",
+                "value": "sceneState.hitPaddle3 and sceneState.ballVX + (sceneState.ballX - (sceneState.paddle3X + sceneState.paddleW/2)) * 2 or (sceneState.hitPaddle4 and sceneState.ballVX + (sceneState.ballX - (sceneState.paddle4X + sceneState.paddleW/2)) * 2 or sceneState.ballVX)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.ballX < 0 or sceneState.ballX >= sceneState.gridW or sceneState.ballY < 0 or sceneState.ballY >= sceneState.gridH",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "score2",
+                "value": "sceneState.ballX < 0 and sceneState.score2 + 1 or sceneState.score2"
+              },
+              {
+                "name": "score1",
+                "value": "sceneState.ballX >= sceneState.gridW and sceneState.score1 + 1 or sceneState.score1"
+              },
+              {
+                "name": "score4",
+                "value": "sceneState.ballY < 0 and sceneState.score4 + 1 or sceneState.score4"
+              },
+              {
+                "name": "score3",
+                "value": "sceneState.ballY >= sceneState.gridH and sceneState.score3 + 1 or sceneState.score3"
+              },
+              {
+                "name": "ballX",
+                "value": "sceneState.gridW / 2"
+              },
+              {
+                "name": "ballY",
+                "value": "sceneState.gridH / 2"
+              },
+              {
+                "name": "ballVX",
+                "value": "sceneState.ballX < 0 and 10 or (sceneState.ballX >= sceneState.gridW and -10 or (sceneState.ballVX > 0 and 10 or -10))"
+              },
+              {
+                "name": "ballVY",
+                "value": "sceneState.ballY < 0 and 10 or (sceneState.ballY >= sceneState.gridH and -10 or (sceneState.ballVY > 0 and 10 or -10))"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputY",
+        "value": -1
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputY",
+        "value": 1
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 20
+          },
+          {
+            "name": "paddle1Y",
+            "value": 8
+          },
+          {
+            "name": "paddle2Y",
+            "value": 8
+          },
+          {
+            "name": "paddle3X",
+            "value": 8
+          },
+          {
+            "name": "paddle4X",
+            "value": 8
+          },
+          {
+            "name": "paddleH",
+            "value": 4
+          },
+          {
+            "name": "paddleW",
+            "value": 4
+          },
+          {
+            "name": "ballX",
+            "value": 10
+          },
+          {
+            "name": "ballY",
+            "value": 10
+          },
+          {
+            "name": "ballVX",
+            "value": 10
+          },
+          {
+            "name": "ballVY",
+            "value": 6
+          },
+          {
+            "name": "score1",
+            "value": "sceneState.score1 or 0"
+          },
+          {
+            "name": "score2",
+            "value": "sceneState.score2 or 0"
+          },
+          {
+            "name": "score3",
+            "value": "sceneState.score3 or 0"
+          },
+          {
+            "name": "score4",
+            "value": "sceneState.score4 or 0"
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputX",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputX",
+        "value": 1
+      }
+    ]
+  },
+  "scripts": {},
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    }
+  ]
+}

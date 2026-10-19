@@ -99,14 +99,14 @@
       {
         "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "sceneState.idx == 1 and 16 or sceneState.idx - 1"
+        "value": "sceneState.idx == 1 and 17 or sceneState.idx - 1"
       }
     ],
     "on_down": [
       {
         "cmd": "SET_SCENE_STATE",
         "name": "idx",
-        "value": "sceneState.idx == 16 and 1 or sceneState.idx + 1"
+        "value": "sceneState.idx == 17 and 1 or sceneState.idx + 1"
       }
     ],
     "on_select": [
@@ -150,7 +150,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "locals._guard == 0 and sceneState.idx == 16",
+        "condition": "locals._guard == 0 and sceneState.idx == 17",
         "then": [
           {
             "cmd": "SET_LOCAL",
@@ -406,6 +406,25 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "c003_moving_breakout"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "locals._guard == 0 and sceneState.idx == 16",
+        "then": [
+          {
+            "cmd": "SET_LOCAL",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "c001_four_paddle_pong"
           }
         ]
       },

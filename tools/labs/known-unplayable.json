@@ -40,6 +40,11 @@
       "issue": 914,
       "reason": "crashes on any win or loss: SCRIPT indexes nil ctx.interpreter behind the v.lost/v.win guard",
       "expect": "not-reached"
+    },
+    "a004_sokoban_v3": {
+      "issue": 917,
+      "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",
+      "expect": "not-reached"
     }
   }
 }

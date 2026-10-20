@@ -64,6 +64,14 @@
           {
             "name": "showChoices",
             "value": 0
+          },
+          {
+            "name": "speakerName",
+            "value": "''"
+          },
+          {
+            "name": "dialogueText",
+            "value": "''"
           }
         ]
       },
@@ -77,9 +85,7 @@
         ]
       },
       {
-
         "cmd": "COMMENT",
-
         "text": "Legacy scene hook update_step remains quarantined under #919."
       }
     ],
@@ -260,9 +266,7 @@
             "value": "sceneState.step + 1"
           },
           {
-
             "cmd": "COMMENT",
-
             "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]
@@ -282,9 +286,7 @@
             "value": "4"
           },
           {
-
             "cmd": "COMMENT",
-
             "text": "Legacy scene hook update_step remains quarantined under #919."
           }
         ]

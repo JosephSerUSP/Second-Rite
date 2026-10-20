@@ -119,9 +119,37 @@
         ]
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "trigger",
-        "event": "reset_round"
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "paddleLeftY",
+            "value": 6
+          },
+          {
+            "name": "paddleRightY",
+            "value": 6
+          },
+          {
+            "name": "ballX",
+            "value": 10
+          },
+          {
+            "name": "ballY",
+            "value": 6
+          },
+          {
+            "name": "ballVX",
+            "value": "sceneState.scoreLeft > sceneState.scoreRight and 10 or -10"
+          },
+          {
+            "name": "ballVY",
+            "value": 6
+          },
+          {
+            "name": "inputY",
+            "value": 0
+          }
+        ]
       }
     ],
     "on_frame": [
@@ -276,9 +304,37 @@
             "value": "sceneState.scoreRight + 1"
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "trigger",
-            "event": "reset_round"
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "paddleLeftY",
+                "value": 6
+              },
+              {
+                "name": "paddleRightY",
+                "value": 6
+              },
+              {
+                "name": "ballX",
+                "value": 10
+              },
+              {
+                "name": "ballY",
+                "value": 6
+              },
+              {
+                "name": "ballVX",
+                "value": "sceneState.scoreLeft > sceneState.scoreRight and 10 or -10"
+              },
+              {
+                "name": "ballVY",
+                "value": 6
+              },
+              {
+                "name": "inputY",
+                "value": 0
+              }
+            ]
           }
         ]
       },
@@ -292,9 +348,37 @@
             "value": "sceneState.scoreLeft + 1"
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "trigger",
-            "event": "reset_round"
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "paddleLeftY",
+                "value": 6
+              },
+              {
+                "name": "paddleRightY",
+                "value": 6
+              },
+              {
+                "name": "ballX",
+                "value": 10
+              },
+              {
+                "name": "ballY",
+                "value": 6
+              },
+              {
+                "name": "ballVX",
+                "value": "sceneState.scoreLeft > sceneState.scoreRight and 10 or -10"
+              },
+              {
+                "name": "ballVY",
+                "value": 6
+              },
+              {
+                "name": "inputY",
+                "value": 0
+              }
+            ]
           }
         ]
       }
@@ -328,19 +412,6 @@
         ]
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "trigger",
-        "event": "reset_round"
-      }
-    ],
-    "on_cancel": [
-      {
-        "cmd": "SCENE_EVENT",
-        "kind": "pop"
-      }
-    ],
-    "reset_round": [
-      {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
           {
@@ -372,6 +443,12 @@
             "value": 0
           }
         ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
       }
     ]
   },

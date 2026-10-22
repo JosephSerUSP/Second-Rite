@@ -130,6 +130,9 @@ runs:
         # that fails. This removes the failing operation from the common path
         # rather than tuning how long it may hang, and matches what the
         # Windows path does: fetch one pinned artifact, refresh no index.
+        sudo sed -i 's/azure.archive.ubuntu.com/archive.ubuntu.com/g' /etc/apt/sources.list || true
+        sudo sed -i 's/azure.archive.ubuntu.com/archive.ubuntu.com/g' /etc/apt/sources.list.d/ubuntu.sources || true
+
         if ! sudo apt-get "${APT_OPTS[@]}" install -y love xvfb; then
           echo "install against cached metadata failed; refreshing the index" >&2
           sudo apt-get "${APT_OPTS[@]}" update

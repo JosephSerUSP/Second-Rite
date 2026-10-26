@@ -1,6 +1,6 @@
 # A003 — Snake Benchmark Report
 
-**Date:** 2026-08-26
+**Date:** 2026-10-26
 **Benchmark:** A003 — Snake
 **Version:** 1
 
@@ -10,11 +10,11 @@ ready for owner playtest
 
 ## Play
 
-Launch `npm run lab:benchmarks`, choose **A003 — Snake**, then use arrow keys to steer. Enter restarts the specimen; B / Escape returns to the launcher.
+Launch `npm run lab:benchmarks`, choose **A003  Snake**, then use arrow keys to steer. Enter restarts the specimen; B / Escape returns to the launcher.
 
 ## Current Implementation Shape
 
-The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. SCRIPT still handles collection and grid operations.
+The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `sceneState.time.dt` directly inside an `IF` structure using `SET_SCENE_STATE` instead of a blocking `WAIT` inside a `SCRIPT`. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_SCENE_STATE` multi-assignments. SCRIPT still handles collection and grid operations.
 
 ## Metrics
 
@@ -33,13 +33,14 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## Changes Since Previous Attempt
 
-- The fixed mode update hook was retained to satisfy engine and studio inspection parity tests, but delta-time (`v.time.dt`) tracking via `SET_VAR` was successfully proven to work gracefully inside `on_frame` instead of `WAIT` blocks.
-- `tickTimer` was renamed to `timer`.
-- 66% of raw SCRIPT logic remains cleanly factored into standard declarative hooks (same as last attempt).
+- Reconstructed freshly.
+- Similar structure as previous report (2026-08-26), proving that continuous logical input and frame delta-time can be cleanly represented purely via current state semantics like `sceneState.time.dt` and `IF` with `SET_SCENE_STATE` multi-assignments.
+- SCRIPT bodies remained at two (init and update).
 
 ## Improved
 
-- Using a custom `timer` accumulator against `v.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking updates.
+- Using a custom `timer` accumulator against `sceneState.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking updates.
+- `SET_SCENE_STATE` correctly handles assigning multiple variables at once using the `assignments` array.
 
 ## Regressed
 
@@ -52,11 +53,11 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## New Architectural Evidence
 
-The updated A003 Snake demonstrates that continuous logical input and frame delta-time can now be cleanly represented purely via current state semantics like `v.time.dt` and `IF` with `SET_VAR` multi-assignments. However, it continues to reinforce the evidence found in D002 and A004: growing ordered collections and grid queries require generic iteration and list manipulation primitives.
+The updated A003 Snake demonstrates that continuous logical input and frame delta-time can now be cleanly represented purely via current state semantics like `sceneState.time.dt` and `IF` with `SET_SCENE_STATE` multi-assignments. However, it continues to reinforce the evidence found in D002 and A004: growing ordered collections and grid queries require generic iteration and list manipulation primitives.
 
 ## Verdict
 
-**Playable benchmark; improved authorability.** A003 successfully leverages new state variables and multi-assignments to reduce raw SCRIPT by 66%, proving continuous inputs and delta-time are gracefully handled by current semantics. However, the requirement for generic collections persists.
+**Playable benchmark; improved authorability.** A003 successfully leverages state variables and multi-assignments to reduce raw SCRIPT usage for timing and input, proving continuous inputs and delta-time are gracefully handled by current semantics. However, the requirement for generic collections persists.
 
 ## Owner Playtest
 

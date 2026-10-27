@@ -109,7 +109,7 @@ for text, why in [
     check("NEGATIVE CONTROL: %s is not terminal" % why,
           page.terminal_failure(PREDICATE) is None, repr(text))
 
-check("the terminal list stays narrow", TERMINAL_STATUS_PREFIXES == ("Preview unavailable:",),
+check("the terminal list stays narrow", TERMINAL_STATUS_PREFIXES == ("Preview unavailable:", "3D unavailable"),
       repr(TERMINAL_STATUS_PREFIXES))
 
 # --- stall_detail ------------------------------------------------------------

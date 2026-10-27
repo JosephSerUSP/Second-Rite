@@ -612,6 +612,7 @@ WATCHED_ELEMENT_ID = re.compile(r"getElementById\(\s*['\"]([^'\"]+)['\"]\s*\)")
 # another step waits for.
 TERMINAL_STATUS_PREFIXES = (
     "Preview unavailable:",
+    "3D unavailable",
 )
 
 

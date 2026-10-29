@@ -14,82 +14,52 @@
   "windows": [
     {
       "id": "header",
-      "rect": {
-        "x": 1,
-        "y": 1,
-        "w": 28,
-        "h": 3
-      },
+      "rect": { "x": 0, "y": 0, "w": 30, "h": 3 },
       "style": "frame",
       "content": [
-        {
-          "type": "text",
-          "text": "Breakout   Score: {sceneState.score}"
-        }
+        { "type": "text", "text": "BREAKOUT - Score: {sceneState.score}" }
       ]
     },
     {
-      "id": "playfield",
-      "rect": {
-        "x": 1,
-        "y": 5,
-        "w": 28,
-        "h": 16
-      },
+      "id": "field",
+      "rect": { "x": 0, "y": 4, "w": 30, "h": 15 },
       "style": "frame",
       "content": [
-        {
-          "type": "text",
-          "text": "{sceneState.renderedField}"
-        }
+        { "type": "text", "text": "{sceneState.gridString}" }
       ]
     },
     {
-      "id": "controls",
+      "id": "paddle",
       "rect": {
-        "x": 1,
-        "y": 22,
-        "w": 28,
-        "h": 3
-      },
-      "style": "frame",
-      "content": [
-        {
-          "type": "text",
-          "text": "LEFT/RIGHT: Move   Enter: Restart   B: Exit"
-        }
-      ]
-    },
-    {
-      "id": "paddle_win",
-      "rect": {
-        "x": "1 + 1 + sceneState.padX",
-        "y": "5 + 1 + sceneState.padY",
-        "w": "sceneState.padW",
+        "x": "sceneState.paddleX + 1",
+        "y": "sceneState.paddleY + 4 + 1",
+        "w": "sceneState.paddleW",
         "h": 1
       },
       "style": "panel",
       "content": [
-        {
-          "type": "text",
-          "text": "====="
-        }
+        { "type": "text", "text": "=====" }
       ]
     },
     {
-      "id": "ball_win",
+      "id": "ball",
       "rect": {
-        "x": "1 + 1 + sceneState.ballX",
-        "y": "5 + 1 + sceneState.ballY",
+        "x": "sceneState.ballX + 1",
+        "y": "sceneState.ballY + 4 + 1",
         "w": 1,
         "h": 1
       },
       "style": "panel",
       "content": [
-        {
-          "type": "text",
-          "text": "O"
-        }
+        { "type": "text", "text": "O" }
+      ]
+    },
+    {
+      "id": "footer",
+      "rect": { "x": 0, "y": 20, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "LEFT/RIGHT move | ENTER restart | B exit" }
       ]
     }
   ],
@@ -98,143 +68,74 @@
       {
         "cmd": "SET_LOCAL",
         "assignments": [
-          {
-            "name": "_guard",
-            "value": 0
-          }
+          { "name": "_guard", "value": 0 }
         ]
       },
       {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
-          {
-            "name": "fieldW",
-            "value": 26
-          },
-          {
-            "name": "fieldH",
-            "value": 14
-          },
-          {
-            "name": "padW",
-            "value": 5
-          },
-          {
-            "name": "padX",
-            "value": 10
-          },
-          {
-            "name": "padY",
-            "value": 13
-          },
-          {
-            "name": "ballX",
-            "value": 12
-          },
-          {
-            "name": "ballY",
-            "value": 13.5
-          },
-          {
-            "name": "ballVX",
-            "value": 8
-          },
-          {
-            "name": "ballVY",
-            "value": 10
-          },
-          {
-            "name": "score",
-            "value": 0
-          },
-          {
-            "name": "moveInput",
-            "value": 0
-          },
-          {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
-            "name": "gameOver",
-            "value": "false"
-          },
-          {
-            "name": "gameWon",
-            "value": "false"
-          }
+          { "name": "score", "value": 0 },
+          { "name": "gameOver", "value": "false" },
+          { "name": "gameWon", "value": "false" },
+          { "name": "paddleX", "value": 12 },
+          { "name": "paddleY", "value": 12 },
+          { "name": "paddleW", "value": 5 },
+          { "name": "paddleSpeed", "value": 20 },
+          { "name": "inputDir", "value": 0 },
+          { "name": "ballX", "value": 14 },
+          { "name": "ballY", "value": 11 },
+          { "name": "ballVX", "value": 8 },
+          { "name": "ballVY", "value": -10 },
+          { "name": "gridString", "value": "''" }
         ]
       },
       {
         "cmd": "SCRIPT",
-        "ref": "setup_bricks"
+        "ref": "init_bricks"
       }
     ],
     "on_select": [
       {
         "cmd": "SET_SCENE_STATE",
         "assignments": [
-          {
-            "name": "fieldW",
-            "value": 26
-          },
-          {
-            "name": "fieldH",
-            "value": 14
-          },
-          {
-            "name": "padW",
-            "value": 5
-          },
-          {
-            "name": "padX",
-            "value": 10
-          },
-          {
-            "name": "padY",
-            "value": 13
-          },
-          {
-            "name": "ballX",
-            "value": 12
-          },
-          {
-            "name": "ballY",
-            "value": 13.5
-          },
-          {
-            "name": "ballVX",
-            "value": 8
-          },
-          {
-            "name": "ballVY",
-            "value": 10
-          },
-          {
-            "name": "score",
-            "value": 0
-          },
-          {
-            "name": "moveInput",
-            "value": 0
-          },
-          {
-            "name": "renderedField",
-            "value": "''"
-          },
-          {
-            "name": "gameOver",
-            "value": "false"
-          },
-          {
-            "name": "gameWon",
-            "value": "false"
-          }
+          { "name": "score", "value": 0 },
+          { "name": "gameOver", "value": "false" },
+          { "name": "gameWon", "value": "false" },
+          { "name": "paddleX", "value": 12 },
+          { "name": "paddleY", "value": 12 },
+          { "name": "paddleW", "value": 5 },
+          { "name": "paddleSpeed", "value": 20 },
+          { "name": "inputDir", "value": 0 },
+          { "name": "ballX", "value": 14 },
+          { "name": "ballY", "value": 11 },
+          { "name": "ballVX", "value": 8 },
+          { "name": "ballVY", "value": -10 },
+          { "name": "gridString", "value": "''" }
         ]
       },
       {
         "cmd": "SCRIPT",
-        "ref": "setup_bricks"
+        "ref": "init_bricks"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputDir",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "inputDir",
+        "value": 1
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
       }
     ],
     "on_frame": [
@@ -246,11 +147,11 @@
             "cmd": "SET_SCENE_STATE",
             "assignments": [
               {
-                "name": "padX",
-                "value": "clamp(sceneState.padX + sceneState.moveInput * 18.0 * sceneState.time.dt, 0, sceneState.fieldW - sceneState.padW)"
+                "name": "paddleX",
+                "value": "clamp(sceneState.paddleX + sceneState.inputDir * sceneState.paddleSpeed * sceneState.time.dt, 0, 28 - sceneState.paddleW)"
               },
               {
-                "name": "moveInput",
+                "name": "inputDir",
                 "value": 0
               },
               {
@@ -265,14 +166,14 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.ballX <= 0 or sceneState.ballX >= sceneState.fieldW - 1",
+            "condition": "sceneState.ballX <= 0 or sceneState.ballX >= 27",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
                   {
                     "name": "ballX",
-                    "value": "clamp(sceneState.ballX, 0, sceneState.fieldW - 1)"
+                    "value": "clamp(sceneState.ballX, 0, 27)"
                   },
                   {
                     "name": "ballVX",
@@ -303,7 +204,7 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.ballY >= sceneState.fieldH",
+            "condition": "sceneState.ballY >= 13",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
@@ -314,14 +215,14 @@
           },
           {
             "cmd": "IF",
-            "condition": "sceneState.ballY >= sceneState.padY - 0.5 and sceneState.ballY <= sceneState.padY + 0.5 and sceneState.ballVY > 0 and sceneState.ballX >= sceneState.padX - 0.5 and sceneState.ballX <= sceneState.padX + sceneState.padW - 0.5",
+            "condition": "sceneState.ballY >= sceneState.paddleY - 0.5 and sceneState.ballY <= sceneState.paddleY + 0.5 and sceneState.ballVY > 0 and sceneState.ballX >= sceneState.paddleX - 0.5 and sceneState.ballX <= sceneState.paddleX + sceneState.paddleW",
             "then": [
               {
                 "cmd": "SET_SCENE_STATE",
                 "assignments": [
                   {
                     "name": "ballY",
-                    "value": "sceneState.padY - 0.5"
+                    "value": "sceneState.paddleY - 0.5"
                   },
                   {
                     "name": "ballVY",
@@ -329,7 +230,7 @@
                   },
                   {
                     "name": "ballVX",
-                    "value": "sceneState.ballVX + ((sceneState.ballX - (sceneState.padX + sceneState.padW / 2)) / (sceneState.padW / 2)) * 6.0"
+                    "value": "sceneState.ballVX + ((sceneState.ballX - (sceneState.paddleX + sceneState.paddleW / 2)) / (sceneState.paddleW / 2)) * 5.0"
                   }
                 ]
               }
@@ -337,35 +238,15 @@
           },
           {
             "cmd": "SCRIPT",
-            "ref": "process_bricks"
+            "ref": "update_bricks"
           }
         ]
-      }
-    ],
-    "on_left": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "moveInput",
-        "value": -1
-      }
-    ],
-    "on_right": [
-      {
-        "cmd": "SET_SCENE_STATE",
-        "name": "moveInput",
-        "value": 1
-      }
-    ],
-    "on_cancel": [
-      {
-        "cmd": "SCENE_EVENT",
-        "kind": "pop"
       }
     ]
   },
   "scripts": {
-    "setup_bricks": "\nlocal sceneState = ctx.sceneState\nsceneState.bricks = {}\nfor y = 1, 4 do\n    for x = 2, sceneState.fieldW - 3 do\n        table.insert(sceneState.bricks, {x=x, y=y, intact=true})\n    end\nend\n",
-    "process_bricks": "\nlocal sceneState = ctx.sceneState\nlocal bx, by = math.floor(sceneState.ballX + 0.5), math.floor(sceneState.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(sceneState.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            sceneState.score = sceneState.score + 10\n            sceneState.ballVY = -sceneState.ballVY\n            break\n        end\n    end\nend\nif count == 0 then sceneState.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, sceneState.fieldH - 1 do\n    for x = 0, sceneState.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(sceneState.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif sceneState.gameOver then out = out .. \"GAME OVER\\n\" end\nif sceneState.gameWon then out = out .. \"YOU WIN!\\n\" end\nsceneState.renderedField = out\n"
+    "init_bricks": "\nlocal s = ctx.sceneState\ns.bricks = {}\nfor row = 1, 4 do\n  for col = 2, 25 do\n    table.insert(s.bricks, {x = col, y = row, active = true})\n  end\nend\n",
+    "update_bricks": "\nlocal s = ctx.sceneState\nlocal bx = math.floor(s.ballX + 0.5)\nlocal by = math.floor(s.ballY + 0.5)\n\nlocal activeBricks = 0\nfor _, b in ipairs(s.bricks) do\n  if b.active then\n    activeBricks = activeBricks + 1\n    if b.x == bx and b.y == by then\n      b.active = false\n      s.score = s.score + 10\n      s.ballVY = -s.ballVY\n      break\n    end\n  end\nend\n\nif activeBricks == 0 then\n  s.gameWon = true\nend\n\nlocal out = \"\"\nfor y = 0, 12 do\n  for x = 0, 27 do\n    local char = \" \"\n    for _, b in ipairs(s.bricks) do\n      if b.active and b.x == x and b.y == y then\n        char = \"#\"\n        break\n      end\n    end\n    out = out .. char\n  end\n  out = out .. \"\\n\"\nend\n\nif s.gameOver then\n  out = out .. \"\\nGAME OVER\"\nelseif s.gameWon then\n  out = out .. \"\\nYOU WIN!\"\nend\ns.gridString = out\n"
   },
   "goldenScript": [
     "wait 1",

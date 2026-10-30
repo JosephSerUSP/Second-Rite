@@ -507,7 +507,8 @@ def configure_runtime_authority_readiness(core):
     globals_ = core["run_capture_set"].__globals__
     workspace_ready = globals_["WORKSPACE_READY_JS"]
     ordinary_timeout = globals_["STEP_TIMEOUT"]
-    producer_timeout = runtime_authority_ready_timeout(ROOT)
+    target_root = Path(globals_.get("ROOT", ROOT))
+    producer_timeout = runtime_authority_ready_timeout(target_root)
     HarnessStall = globals_["HarnessStall"]
     stall_detail = globals_["stall_detail"]
     Chrome = globals_["Chrome"]

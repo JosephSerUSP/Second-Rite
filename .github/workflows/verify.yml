@@ -139,7 +139,7 @@ jobs:
 
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725).
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
       - name: Lua syntax smoke + negative control
         shell: pwsh
@@ -165,7 +165,7 @@ jobs:
 
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725).
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
         with:
           # this job invokes `lovec` bare (tools/golden/check*.ps1)
@@ -452,7 +452,7 @@ jobs:
           persist-credentials: false
 
       - name: Install LOVE
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
 
       - name: Install Mesa software OpenGL

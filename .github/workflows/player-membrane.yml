@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725).
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
       - uses: actions/setup-node@v4
         with:

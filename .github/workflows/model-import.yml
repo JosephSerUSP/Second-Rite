@@ -94,7 +94,7 @@ jobs:
         run: npm ci
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725).
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
       - name: Install Mesa software OpenGL
         uses: ./.github/actions/install-mesa

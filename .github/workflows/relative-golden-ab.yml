@@ -126,7 +126,7 @@ jobs:
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725). Both
         # capture jobs need `lovec` bare on PATH.
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
         with:
           add-to-path: "true"
@@ -210,7 +210,7 @@ jobs:
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725). Both
         # capture jobs need `lovec` bare on PATH.
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
         with:
           add-to-path: "true"

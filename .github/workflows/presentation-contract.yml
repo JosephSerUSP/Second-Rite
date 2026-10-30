@@ -90,7 +90,7 @@ jobs:
       - name: Install pinned tooling
         run: npm ci
       - name: Install LOVE
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
       # A hosted runner has no GPU, and LÖVE opens a window before main.lua
       # dispatches a CLI mode -- without software OpenGL it sits there until
@@ -148,7 +148,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
       - name: Install LOVE
-        timeout-minutes: 3
+        timeout-minutes: 15
         uses: ./.github/actions/install-love
       - name: Install Mesa software OpenGL
         uses: ./.github/actions/install-mesa

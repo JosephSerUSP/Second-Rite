@@ -121,7 +121,7 @@ jobs:
 
       - name: Install Python dependencies
         shell: pwsh
-        run: python -m pip install --disable-pip-version-check pillow websocket-client
+        run: python -m pip install --disable-pip-version-check pillow
 
       - name: Install LOVE
         # Version, URL and digest live in the action, not here (#725). Both

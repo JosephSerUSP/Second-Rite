@@ -16,7 +16,7 @@
     //
     // tests/test-map-inspection-request.js fails if this stops exceeding
     // BRIDGE_TIMEOUT_MS, so the two cannot drift apart silently.
-    const BRIDGE_GRACE_MS = 30000;
+    const BRIDGE_GRACE_MS = 15000;
     const DEFAULT_TIMEOUT_MS = 60000 + BRIDGE_GRACE_MS;
 
     function createInspectionRequester(options) {

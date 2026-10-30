@@ -91,8 +91,11 @@ def test_runtime_authority_contract(editor):
         bridge = target / "studio" / "editor" / "runtime-bridge-server.js"
         bridge.parent.mkdir(parents=True)
         bridge.write_text("const BRIDGE_TIMEOUT_MS = 12345;\n", encoding="utf-8")
+        client = (target / "studio" / "editor" / "js")
+        client.mkdir(parents=True, exist_ok=True)
+        (client / "map-inspection-request.js").write_text("const BRIDGE_GRACE_MS = 15000;\n", encoding="utf-8")
         derived = editor.runtime_authority_ready_timeout(target)
-        assert abs(derived - 17.345) < 0.0001, derived
+        assert abs(derived - 32.345) < 0.0001, derived
 
         workspace_ready = "status.dataset.workspaceReady === '1'"
         runtime_step = sorted(editor.WORKSPACE_RUNTIME_STEPS)[0]

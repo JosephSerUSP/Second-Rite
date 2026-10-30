@@ -44,6 +44,7 @@ REQUIRED_THREE = (
 )
 
 BRIDGE_TIMEOUT_PATTERN = re.compile(r"\bconst\s+BRIDGE_TIMEOUT_MS\s*=\s*(\d+)\s*;")
+BRIDGE_GRACE_PATTERN = re.compile(r"\bconst\s+BRIDGE_GRACE_MS\s*=\s*(\d+)\s*;")
 RUNTIME_AUTHORITY_SETTLE_HEADROOM = 5.0
 
 
@@ -67,17 +68,29 @@ def studio_editor_dir(root):
 def runtime_authority_ready_timeout(root=DEFAULT_ROOT):
     """Derive the observation bound from the target bridge's executable contract."""
     bridge = studio_editor_dir(root) / "runtime-bridge-server.js"
+    client = studio_editor_dir(root) / "js" / "map-inspection-request.js"
     try:
         source = bridge.read_text(encoding="utf-8")
     except OSError as exc:
         raise RuntimeError("cannot read G6 runtime-authority timeout contract: %s" % bridge) from exc
+    try:
+        client_source = client.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RuntimeError("cannot read G6 client timeout contract: %s" % client) from exc
+
     match = BRIDGE_TIMEOUT_PATTERN.search(source)
     if not match:
         raise RuntimeError("G6 runtime bridge no longer exposes BRIDGE_TIMEOUT_MS: %s" % bridge)
     timeout_ms = int(match.group(1))
     if timeout_ms <= 0:
         raise RuntimeError("G6 runtime bridge has invalid BRIDGE_TIMEOUT_MS=%s" % timeout_ms)
-    return timeout_ms / 1000.0 + RUNTIME_AUTHORITY_SETTLE_HEADROOM
+
+    grace_match = BRIDGE_GRACE_PATTERN.search(client_source)
+    if not grace_match:
+        raise RuntimeError("G6 client no longer exposes BRIDGE_GRACE_MS: %s" % client)
+    grace_ms = int(grace_match.group(1))
+
+    return (timeout_ms + grace_ms) / 1000.0 + RUNTIME_AUTHORITY_SETTLE_HEADROOM
 
 
 # Compatibility/default fixture value. The live canonical harness derives this

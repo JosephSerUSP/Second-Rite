@@ -92,7 +92,7 @@ def test_runtime_authority_contract(editor):
         bridge.parent.mkdir(parents=True)
         bridge.write_text("const BRIDGE_TIMEOUT_MS = 12345;\n", encoding="utf-8")
         derived = editor.runtime_authority_ready_timeout(target)
-        assert abs(derived - 17.345) < 0.0001, derived
+        assert abs(derived - 32.345) < 0.0001, derived
 
         workspace_ready = "status.dataset.workspaceReady === '1'"
         runtime_step = sorted(editor.WORKSPACE_RUNTIME_STEPS)[0]

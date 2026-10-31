@@ -1,0 +1,265 @@
+{
+  "id": "b008_riviera",
+  "terminal": {
+    "none": "exploration scene probe, not a loop with an outcome"
+  },
+  "name": "B008 \u2014 Riviera-Style Exploration Screen",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "The Dusty Study"
+        }
+      ]
+    },
+    {
+      "id": "feedback_box",
+      "rect": {
+        "x": 1,
+        "y": 4,
+        "w": 30,
+        "h": 8
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "y": 0,
+          "text": "{sceneState.feedback_0}"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{sceneState.feedback_1}"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "{sceneState.feedback_2}"
+        },
+        {
+          "type": "text",
+          "y": 3,
+          "text": "{sceneState.feedback_3}"
+        }
+      ]
+    },
+    {
+      "id": "interaction_menu",
+      "rect": {
+        "x": 1,
+        "y": 12,
+        "w": 30,
+        "h": 8
+      },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        {
+          "type": "list",
+          "listId": "{sceneState.menuId}",
+          "cursor": "sceneState.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "chestOpen",
+            "value": 0
+          },
+          {
+            "name": "menuId",
+            "value": "'term:b008.options'"
+          },
+          {
+            "name": "feedback_0",
+            "value": "'A quiet room with a few points'"
+          },
+          {
+            "name": "feedback_1",
+            "value": "'of interest.'"
+          },
+          {
+            "name": "feedback_2",
+            "value": "''"
+          },
+          {
+            "name": "feedback_3",
+            "value": "''"
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 1 and 4 or sceneState.idx - 1"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx == 4 and 1 or sceneState.idx + 1"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 1",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "feedback_0",
+                "value": "'The desk is covered in old'"
+              },
+              {
+                "name": "feedback_1",
+                "value": "'papers, but nothing useful.'"
+              },
+              {
+                "name": "feedback_2",
+                "value": "''"
+              },
+              {
+                "name": "feedback_3",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 2 and sceneState.chestOpen == 0",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "chestOpen",
+                "value": 1
+              },
+              {
+                "name": "menuId",
+                "value": "'term:b008.post_chest'"
+              },
+              {
+                "name": "feedback_0",
+                "value": "'You found an ancient coin!'"
+              },
+              {
+                "name": "feedback_1",
+                "value": "'The chest is now empty.'"
+              },
+              {
+                "name": "feedback_2",
+                "value": "''"
+              },
+              {
+                "name": "feedback_3",
+                "value": "''"
+              }
+            ]
+          }
+        ],
+        "else": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.idx == 2 and sceneState.chestOpen == 1",
+            "then": [
+              {
+                "cmd": "SET_SCENE_STATE",
+                "assignments": [
+                  {
+                    "name": "feedback_0",
+                    "value": "'It is completely empty now.'"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "''"
+                  },
+                  {
+                    "name": "feedback_2",
+                    "value": "''"
+                  },
+                  {
+                    "name": "feedback_3",
+                    "value": "''"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 3",
+        "then": [
+          {
+            "cmd": "SET_SCENE_STATE",
+            "assignments": [
+              {
+                "name": "feedback_0",
+                "value": "'Dusty tomes about Thestra.'"
+              },
+              {
+                "name": "feedback_1",
+                "value": "'Some mention authorability.'"
+              },
+              {
+                "name": "feedback_2",
+                "value": "''"
+              },
+              {
+                "name": "feedback_3",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 4",
+        "then": [
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {}
+}

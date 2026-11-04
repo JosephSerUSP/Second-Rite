@@ -44,7 +44,7 @@ REQUIRED_THREE = (
 )
 
 BRIDGE_TIMEOUT_PATTERN = re.compile(r"\bconst\s+BRIDGE_TIMEOUT_MS\s*=\s*(\d+)\s*;")
-RUNTIME_AUTHORITY_SETTLE_HEADROOM = 5.0
+RUNTIME_AUTHORITY_SETTLE_HEADROOM = 20.0
 
 
 def studio_editor_dir(root):

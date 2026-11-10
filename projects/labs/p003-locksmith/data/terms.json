@@ -1,0 +1,14 @@
+{
+  "project": {
+    "title": "P003 The Locksmith"
+  },
+  "title": {
+    "options": [
+      "Begin",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "A wall blocks the way."
+  }
+}

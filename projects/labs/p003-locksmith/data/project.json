@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "P003 The Locksmith",
+  "identity": "P003-The-Locksmith",
+  "productName": "P003 The Locksmith",
+  "executableName": "P003 The Locksmith",
+  "buildSlug": "P003-The-Locksmith",
+  "windowTitle": "P003 The Locksmith",
+  "productVersion": "0.0.0-dev"
+}

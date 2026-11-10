@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Rusty Key",
+    "type": "quest",
+    "cost": 0,
+    "icon": 218,
+    "description": "An old rusty key."
+  },
+  {
+    "id": 2,
+    "name": "Master Key",
+    "type": "quest",
+    "cost": 0,
+    "icon": 178,
+    "description": "A shiny master key."
+  }
+]

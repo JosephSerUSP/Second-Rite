@@ -1,0 +1,195 @@
+{
+  "id": 1,
+  "title": "First Map",
+  "category": "town",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "#######",
+    "#.....#",
+    "#.....#",
+    "#.....#",
+    "#######"
+  ],
+  "spawn": {
+    "x": 3,
+    "y": 2,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 1,
+      "x": 1,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": {
+            "flags": {
+              "has_rusty_key": true
+            }
+          },
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The chest is empty."
+            }
+          ]
+        },
+        {
+          "conditions": {},
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You found a Rusty Key."
+            },
+            {
+              "cmd": "CHANGE_ITEMS",
+              "itemId": 1,
+              "operation": "add",
+              "amount": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "name": "has_rusty_key",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "x": 5,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": {
+            "flags": {
+              "door_unlocked": true
+            }
+          },
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You leave the room."
+            },
+            {
+              "cmd": "QUIT_GAME"
+            }
+          ]
+        },
+        {
+          "conditions": {},
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The door is locked."
+            },
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "item:2",
+              "then": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You unlocked the door with the Master Key! Secret Ending!"
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "name": "door_unlocked",
+                  "value": true
+                },
+                {
+                  "cmd": "QUIT_GAME"
+                }
+              ],
+              "else": [
+                {
+                  "cmd": "CONDITIONAL_BRANCH",
+                  "condition": "item:1",
+                  "then": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You unlocked the door with the Rusty Key!"
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "name": "door_unlocked",
+                      "value": true
+                    }
+                  ],
+                  "else": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You need a Rusty Key or a Master Key."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "x": 3,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": {
+            "flags": {
+              "npc_talked": true
+            }
+          },
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "I have nothing more to say."
+            }
+          ]
+        },
+        {
+          "conditions": {},
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Do you want the Master Key?"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                "Yes",
+                "No"
+              ],
+              "onChoice": [
+                [
+                  {
+                    "cmd": "TEXT",
+                    "text": "Here you go."
+                  },
+                  {
+                    "cmd": "CHANGE_ITEMS",
+                    "itemId": 2,
+                    "operation": "add",
+                    "amount": 1
+                  },
+                  {
+                    "cmd": "SET_FLAG",
+                    "name": "npc_talked",
+                    "value": true
+                  }
+                ],
+                [
+                  {
+                    "cmd": "TEXT",
+                    "text": "Suit yourself."
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "project": {
+    "title": "B008 Riviera"
+  },
+  "title": {
+    "options": [
+      "Begin",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "A wall blocks the way."
+  },
+  "exploration": {
+    "options": [
+      "Inspect Fountain",
+      "Inspect Chest"
+    ]
+  }
+}

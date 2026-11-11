@@ -1,0 +1,111 @@
+{
+  "id": "map",
+  "name": "Riviera Exploration",
+  "kind": "map",
+  "draw": "windows",
+  "world": "map",
+  "config": {},
+  "windows": [
+    {
+      "id": "exploration_menu",
+      "rect": {
+        "x": 5,
+        "y": 5,
+        "w": 20,
+        "h": 10
+      },
+      "style": "list",
+      "visibleRows": 2,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:exploration.options",
+          "cursor": "sceneState.idx"
+        }
+      ]
+    },
+    {
+      "id": "description_box",
+      "rect": {
+        "x": 5,
+        "y": 16,
+        "w": 20,
+        "h": 5
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{expr:sceneState.idx == 1 and \"A mysterious fountain bubbling with clear water.\" or \"An old, dusty chest resting in the corner.\"}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "chest_opened",
+        "value": false
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx > 1 and sceneState.idx - 1 or 2"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_SCENE_STATE",
+        "name": "idx",
+        "value": "sceneState.idx < 2 and sceneState.idx + 1 or 1"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 1",
+        "then": [
+          {
+            "cmd": "MESSAGE",
+            "text": "You drink from the fountain. It is refreshing."
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "sceneState.idx == 2",
+        "then": [
+          {
+            "cmd": "IF",
+            "condition": "sceneState.chest_opened == false",
+            "then": [
+              {
+                "cmd": "MESSAGE",
+                "text": "You open the chest and find a potion!"
+              },
+              {
+                "cmd": "SET_SCENE_STATE",
+                "name": "chest_opened",
+                "value": true
+              }
+            ],
+            "else": [
+              {
+                "cmd": "MESSAGE",
+                "text": "The chest is empty. You already took the potion."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

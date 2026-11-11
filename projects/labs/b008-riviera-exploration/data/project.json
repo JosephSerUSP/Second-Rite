@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "name": "B008 Riviera",
+  "identity": "B008-Riviera",
+  "productName": "B008 Riviera",
+  "executableName": "B008 Riviera",
+  "buildSlug": "B008-Riviera",
+  "windowTitle": "B008 Riviera",
+  "productVersion": "0.0.0-dev"
+}

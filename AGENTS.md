@@ -1,3 +1,5 @@
+> **Dormant since 2026-11-13.** Read [`DORMANT.md`](DORMANT.md) first: the state the project was left in, what automation was switched off, where parked work lives, and how to resume.
+
 # Agent orientation — Second Rite
 
 A LÖVE2D (Lua) first-person dungeon RPG with a summoner/creature economy, plus a

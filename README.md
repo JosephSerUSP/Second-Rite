@@ -1,3 +1,5 @@
+> **Dormant since 2026-11-13.** See [`DORMANT.md`](DORMANT.md) for the shutdown state and how to resume.
+
 # Repository orientation
 
 This repository is the **Thestra installation**: reusable LÖVE/Lua runtime and presentation code, Thestra Studio, RTP/authoring infrastructure, tests, gates, and development evidence. The runnable authored game is the ordinary Project at [`projects/hichaukitoden-game/`](projects/hichaukitoden-game/); its player-facing title is **Second Gate**.

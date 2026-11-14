@@ -15,7 +15,7 @@ the *workflow* around it was shut down.
   investigating first (see AGENTS.md and the `second-rite-golden-gates` skill).
 - **Pull requests:** none open. 35 empty Jules report PRs were closed and their branches
   deleted. 115 PRs with real work were closed **unmerged** with the label
-  [`parked`](https://github.com/JosephSerUSP/Hichaukitoden/pulls?q=label%3Aparked); every
+  [`parked`](https://github.com/JosephSerUSP/Second-Rite/pulls?q=label%3Aparked); every
   branch was kept. None was verified for merge (G5 red). Biggest stacks: stale item
   models (`codex/stale-item-models-*`), Parasite Eve Day 1 lab (`agent/pe-day1-*`), the
   Hospital slice (`codex/hospital-slice-start`), and Jules scene/creative benchmarks
